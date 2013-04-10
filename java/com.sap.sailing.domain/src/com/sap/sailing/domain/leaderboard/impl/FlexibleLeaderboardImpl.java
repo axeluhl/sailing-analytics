@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -38,7 +39,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements FlexibleLeaderboard {
     private static Logger logger = Logger.getLogger(FlexibleLeaderboardImpl.class.getName());
 
-    protected static final Fleet defaultFleet = new FleetImpl("Default");
+    protected static final Fleet defaultFleet = new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME);
     private static final long serialVersionUID = -5708971849158747846L;
     private final List<FlexibleRaceColumn> races;
     private final ScoringScheme scoringScheme;

@@ -131,3 +131,7 @@ body, table td, select, button {
 .gwt-DialogBox {
 	z-index: 20;
 }
+
+.bold {
+	font-family: "OpenSansCondensedBold", sans-serif;
+}

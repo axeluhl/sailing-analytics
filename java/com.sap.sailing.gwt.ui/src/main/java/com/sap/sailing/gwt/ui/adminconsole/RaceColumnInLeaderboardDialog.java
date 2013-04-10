@@ -138,7 +138,7 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInL
         super.show();
         if (isRegattaLeaderboard) {
             explicitFactorBox.setFocus(true);
-            explicitFactorBox.setSelectionRange(0, explicitFactorBox.getText().length());
+            explicitFactorBox.selectAll();
         } else {
             raceNameBox.setFocus(true);
         }

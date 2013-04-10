@@ -1,6 +1,7 @@
 package com.sap.sailing.monitoring;
 
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.mail.Message.RecipientType;
@@ -23,36 +24,35 @@ import com.sap.sailing.monitoring.sysinfo.SystemInformationImpl;
 /**
  * This monitor tries to restart registered services
  * on failure. It also sends out email to fixed recipients including system information.
- * 
+ *
  * @author Simon Pamies (info@pamies.de)
  * @since Nov 26, 2012
  */
 public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
     Logger log = Logger.getLogger(OSGiRestartingPortMonitor.class.getName());
-    
+
     SystemInformation info = null;
-    
+
     public OSGiRestartingPortMonitor(Properties properties) {
         super(properties);
-        
+
         String[] props_bundles = properties.getProperty("monitor.bundles").split(",");
-        
+
         for (int i=0; i<endpoints.length;i++) {
             endpoints[i].setBundleName(props_bundles[i].trim());
         }
-        
-        this.info = SystemInformationImpl.getInstance();
 
+        this.info = SystemInformationImpl.getInstance();
         log.info("Started and initialized OSGi monitor. State of SIGAR sysstats library: " + (info == null ? "INACTIVE" : "ACTIVE") + " java.library.path: " + System.getProperty("java.library.path"));
     }
 
     @Override
-    public void handleFailure(Endpoint endpoint) {   
+    public void handleFailure(Endpoint endpoint) {
         boolean sysinfo_available = true;
         if (this.info == null) {
             sysinfo_available = false;
         }
-        
+
         Bundle bundle = getBundleByName(endpoint.getBundleName());
         if (bundle == null) {
             log.severe("Couldn't find bundle "+endpoint.getBundleName()+". Cannot restart. Please check monitoring.properties file");
@@ -61,7 +61,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
                         "Couldn't find bundle "+endpoint.getBundleName()+". Cannot restart. Please check monitoring.properties file");
             } catch (Exception e) {
                 e.printStackTrace();
-                log.throwing(getClass().getName(), "handleFailure", e);
+                log.log(Level.SEVERE, "handleFailure", e);
             }
         } else {
             String info_before_restart = "";
@@ -85,7 +85,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
             }
             final String subject = "Bundle " + endpoint.getBundleName() + " restarted";
             log.info(subject);
-            
+
             /* only send mail if service has not failed before and mailing is enabled */
             if (!endpoint.hasFailed() /* before */ && this.properties.getProperty("mail.enabled", "true").equalsIgnoreCase("true")) {
                 log.info("Sending mail to " + this.properties.getProperty("mail.to") + " saying that bundle "
@@ -94,7 +94,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
                     String content = "The Bundle " + endpoint.getBundleName() + " has been restarted - check on "
                             + endpoint + " didn't respond!\n"
                             + "This Mail won't be sent again if service continues to fail.";
-                    
+
                     if (sysinfo_available) {
                         content += "\n\nSystem Information BEFORE restart:\n" + info_before_restart;
                         content += "\n\nSystem information AFTER restart:\n" + info.toString();
@@ -112,10 +112,10 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
 
     private void sendMail(Endpoint endpoint, final String subject, String content) throws MessagingException, AddressException,
             NoSuchProviderException {
-        Session session = Session.getDefaultInstance(this.properties, new SMTPAuthenticator());
+        Session session = Session.getInstance(this.properties, new SMTPAuthenticator());
         MimeMessage msg = new MimeMessage(session);
         msg.setFrom(new InternetAddress("root@sapsailing.com"));
-        msg.setSubject(subject);        
+        msg.setSubject(subject);
         msg.setContent(content, "text/plain");
         for (String mailAddress : this.properties.getProperty("mail.to").split(",")) {
             msg.addRecipient(RecipientType.TO, new InternetAddress(mailAddress.trim()));
@@ -125,7 +125,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
         ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
         ts.close();
     }
-    
+
     @Override
     public void handleConnection(Endpoint endpoint) {
     }
@@ -135,10 +135,10 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
             if (bundle.getSymbolicName().equalsIgnoreCase(name))
                 return bundle;
         }
-        
+
         return null;
     }
-    
+
     private class SMTPAuthenticator extends javax.mail.Authenticator {
         public PasswordAuthentication getPasswordAuthentication() {
            String username = properties.getProperty("mail.smtp.user");

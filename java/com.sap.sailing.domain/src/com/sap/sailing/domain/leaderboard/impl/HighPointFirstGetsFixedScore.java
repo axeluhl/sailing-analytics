@@ -2,7 +2,6 @@ package com.sap.sailing.domain.leaderboard.impl;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.common.MaxPointsReason;
 
 
 /**
@@ -35,10 +34,5 @@ public abstract class HighPointFirstGetsFixedScore extends HighPoint {
             }
         }
         return result;
-    }
-
-    @Override
-    public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason, Integer numberOfCompetitorsInRace, int numberOfCompetitorsInLeaderboard) {
-        return 0.0;
     }
 }

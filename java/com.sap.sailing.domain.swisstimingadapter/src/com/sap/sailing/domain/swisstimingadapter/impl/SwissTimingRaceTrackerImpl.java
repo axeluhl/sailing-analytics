@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -47,6 +47,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -65,7 +66,12 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private final Regatta regatta;
     private final WindStore windStore;
 
+    /**
+     * Starts out as <code>null</code> and is set when the race definition has been created. When this happens, this object is
+     * {@link Object#notifyAll() notified}.
+     */
     private RaceDefinition race;
+    
     private Course course;
     private StartList startList;
     private DynamicTrackedRace trackedRace;
@@ -73,6 +79,13 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     private boolean loggedIgnore;
     private final long delayToLiveInMillis;
+    
+    /**
+     * For TMD messages received when there was no start time set, this message queue stores those TMD messages. When a start
+     * time is received, it will be sent to the queue which in turn will re-apply all not yet applied TMD messages again to this
+     * tracker by calling {@link #receivedTimingData(String, String, List)}.
+     */
+    private final TMDMessageQueue tmdMessageQueue;
     
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, RaceLogStore raceLogStore, WindStore windStore,
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
@@ -87,6 +100,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         super();
+        this.tmdMessageQueue = new TMDMessageQueue(this);
         this.regatta = regatta;
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader, canSendRequests);
         this.domainFactory = domainFactory;
@@ -111,6 +125,10 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     @Override
     public void stop() throws MalformedURLException, IOException, InterruptedException {
+        if (isTrackedRaceStillReachable()) {
+            TrackedRaceStatus newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
+            trackedRace.setStatus(newStatus);
+        }
         connector.removeSailMasterListener(raceID, this);
     }
 
@@ -130,12 +148,37 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
             @Override
             public Set<RaceDefinition> getRaces() {
+                synchronized (this) {
+                    while (race == null) {
+                        try {
+                            this.wait();
+                        } catch (InterruptedException e) {
+                            logger.log(Level.SEVERE, "Interrupted wait", e);
+                        }
+                    }
+                }
                 return Collections.singleton(race);
             }
 
             @Override
             public Set<RaceDefinition> getRaces(long timeoutInMilliseconds) {
-                return Collections.singleton(race);
+                long start = System.currentTimeMillis();
+                synchronized (this) {
+                    RaceDefinition result = race;
+                    boolean interrupted = false;
+                    while ((System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && result == null) {
+                        try {
+                            long timeToWait = timeoutInMilliseconds - (System.currentTimeMillis() - start);
+                            if (timeToWait > 0) {
+                                this.wait(timeToWait);
+                            }
+                            result = race;
+                        } catch (InterruptedException e) {
+                            interrupted = true;
+                        }
+                    }
+                    return result == null ? null : Collections.singleton(result);
+                }
             }
 
             @Override
@@ -174,6 +217,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             if (this.raceID.equals(raceID)) {
                 if (startTime != null) {
                     trackedRace.setStartTimeReceived(startTime);
+                    tmdMessageQueue.validStartTimeReceived();
                 }
                 for (Fix fix : fixes) {
                     GPSFixMoving gpsFix = domainFactory.createGPSFix(timePoint, fix);
@@ -236,11 +280,23 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
                 Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
                         markIndexRankAndTimeSinceStartInMilliseconds.getA());
-                MillisecondsTimePoint timePoint = trackedRace.getStartOfRace() == null ? null : new MillisecondsTimePoint(
-                        trackedRace.getStartOfRace().asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
-                MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
-                        domainFactory.getCompetitorByBoatIDAndBoatClass(boatID, boatClass));
-                markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
+                // update mark passing only if we have a start time; guessed start times don't make sense and
+                // for the start line would lead subsequent calls to getStartOfRace() return that guessed start time
+                // which then cannot be identified as "guessed" anymore...
+                if (trackedRace.getStartOfRace() != null) {
+                    final TimePoint startTime = trackedRace.getStartOfRace();
+                    MillisecondsTimePoint timePoint = new MillisecondsTimePoint(
+                            startTime.asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
+                    MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
+                            domainFactory.getCompetitorByBoatIDAndBoatClass(boatID, boatClass));
+                    markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
+                } else {
+                    // 
+                    logger.warning("Received mark passing with time relative to start of race "+trackedRace.getRace().getName()+
+                            " before having received a race start time."
+                            + " Queueing message for re-application when a start time has been received.");
+                    tmdMessageQueue.enqueue(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+                }
             }
             trackedRace.updateMarkPassings(competitor, markPassingsByMarkIndex.values());
         } else {
@@ -282,11 +338,11 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         StartList oldStartList = this.startList;
         this.startList = startList;
         if (oldStartList == null && course != null) {
-            createRaceDefinition(raceID);
+            createRaceDefinition(raceID, course);
         }
     }
 
-    private void createRaceDefinition(String raceID) {
+    private void createRaceDefinition(String raceID, Course course) {
         assert this.raceID.equals(raceID);
         assert startList != null;
         assert course != null;
@@ -320,15 +376,16 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     @Override
     public void receivedCourseConfiguration(String raceID, Course course) {
         Course oldCourse = this.course;
-        this.course = course;
         if (trackedRace == null) {
             if (oldCourse == null && startList != null) {
-                createRaceDefinition(raceID);
+                createRaceDefinition(raceID, course);
+                this.course = course;
             }
         } else {
             if (isTrackedRaceStillReachable()) {
                 try {
                     domainFactory.updateCourseWaypoints(trackedRace.getRace().getCourse(), course.getMarks());
+                    this.course = course;
                 } catch (PatchFailedException e) {
                     logger.info("Internal error trying to update course: " + e.getMessage());
                     logger.throwing(SwissTimingRaceTrackerImpl.class.getName(), "receivedCourseConfiguration", e);
@@ -347,5 +404,13 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     @Override
     public void receivedAvailableRaces(Iterable<Race> races) {
         // don't care
+    }
+    
+    protected DynamicTrackedRace getTrackedRace() {
+        return trackedRace;
+    }
+
+    public DomainFactory getDomainFactory() {
+        return domainFactory;
     }
 }

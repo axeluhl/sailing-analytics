@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
@@ -66,7 +67,7 @@ public class LeaderboardDiscardingRulesTest {
         FlexibleLeaderboard leaderboard = (FlexibleLeaderboard) racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboard);
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
-        Fleet fleet = new FleetImpl("Default");
+        Fleet fleet = new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME);
 
         Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
         final TrackedRace race1 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 123, /* started */ true, boatClass);
@@ -106,7 +107,7 @@ public class LeaderboardDiscardingRulesTest {
         FlexibleLeaderboard leaderboard = (FlexibleLeaderboard) racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboard);
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("ESS40", /* typicallyStartsUpwind */ true);
-        Fleet fleet = new FleetImpl("Default");
+        Fleet fleet = new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME);
 
         Competitor rasmus = AbstractLeaderboardTest.createCompetitor("Rasmus");
         final TrackedRace race1 = new MockedTrackedRaceWithFixedRank(rasmus, /* rank */ 2, /* started */ true, boatClass); // score 2.0
@@ -151,7 +152,7 @@ public class LeaderboardDiscardingRulesTest {
         FlexibleLeaderboard leaderboard = (FlexibleLeaderboard) racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboard);
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
-        Fleet fleet = new FleetImpl("Default");
+        Fleet fleet = new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME);
 
         Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
         final TrackedRace race1 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 123, /* started */ true, boatClass);

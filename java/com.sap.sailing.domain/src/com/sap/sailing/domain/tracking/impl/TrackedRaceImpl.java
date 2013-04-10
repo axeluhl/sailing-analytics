@@ -1604,7 +1604,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         getRace().getCourse().lockForRead(); // ensure the course doesn't change, particularly lose the leg we're interested in, while we're running
         try {
             for (Competitor competitor : getRace().getCompetitors()) {
-                TrackedLegOfCompetitor leg = getTrackedLeg(competitor, timePoint);
+                TrackedLegOfCompetitor leg;
+                try {
+                    leg = getTrackedLeg(competitor, timePoint);
+                } catch (IllegalArgumentException iae) {
+                    logger.warning("Caught "+iae+" during wind estimation; ignoring seemingly broken leg");
+                    logger.log(Level.SEVERE, "clusterBearingsByLegType", iae);
+                    // supposedly, we got a "Waypoint X isn't start of any leg in Y" exception; leg not found
+                    leg = null;
+                }
                 // if bearings was set to null this indicates there was an exception; no need for further calculations, return null
                 if (bearings != null && leg != null) {
                     TrackedLeg trackedLeg = getTrackedLeg(leg.getLeg());
@@ -1756,7 +1764,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     protected void triggerManeuverCacheRecalculationForAllCompetitors() {
-        for (Competitor competitor : getRace().getCompetitors()) {
+        final List<Competitor> shuffledCompetitors = new ArrayList<>();
+        for (Competitor competitor : (getRace().getCompetitors())) {
+            shuffledCompetitors.add(competitor);
+        }
+        Collections.shuffle(shuffledCompetitors);
+        for (Competitor competitor : shuffledCompetitors) {
             triggerManeuverCacheRecalculation(competitor);
         }
     }
@@ -1768,6 +1781,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     private Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuvers(Competitor competitor) throws NoWindException {
+        logger.fine("computeManeuvers("+competitor.getName()+") called in tracked race "+this);
+        long startedAt = System.currentTimeMillis();
         // compute the maneuvers for competitor
         Triple<TimePoint, TimePoint, List<Maneuver>> result = null;
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
@@ -1806,6 +1821,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 result = new Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom, extendedTo, extendedResultForCache);
             } // else competitor has no fixes to consider; remove any maneuver cache entry
         } // else competitor hasn't started yet; remove any maneuver cache entry
+        logger.fine("computeManeuvers("+competitor.getName()+") called in tracked race "+this+
+                " took "+(System.currentTimeMillis()-startedAt)+"ms");
         return result;
     }
 

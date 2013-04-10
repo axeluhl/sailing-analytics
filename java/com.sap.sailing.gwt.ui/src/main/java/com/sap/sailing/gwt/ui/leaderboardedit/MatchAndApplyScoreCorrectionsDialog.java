@@ -251,12 +251,16 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                     if (officialSailID != null && raceNameOrNumber != null) {
                         ScoreCorrectionEntryDTO officialCorrectionEntry = regattaScoreCorrection
                                 .getScoreCorrectionsByRaceNameOrNumber().get(raceNameOrNumber).get(officialSailID);
-                        result.addMaxPointsReasonUpdate(competitor, raceColumn,
-                                officialCorrectionEntry.getMaxPointsReason());
-                        if (officialCorrectionEntry.getScore() != null) {
-                            double officialTotalPoints = officialCorrectionEntry.getScore().doubleValue();
-                            double officialNetPoints = officialTotalPoints / raceColumn.getEffectiveFactor();
-                            result.addScoreUpdate(competitor, raceColumn, officialNetPoints);
+                        // the competitor may not have an official result for this race, for example, if in case of split fleets
+                        // the competitor raced in a different fleet
+                        if (officialCorrectionEntry != null) {
+                            result.addMaxPointsReasonUpdate(competitor, raceColumn,
+                                    officialCorrectionEntry.getMaxPointsReason());
+                            if (officialCorrectionEntry.getScore() != null) {
+                                double officialTotalPoints = officialCorrectionEntry.getScore().doubleValue();
+                                double officialNetPoints = officialTotalPoints / raceColumn.getEffectiveFactor();
+                                result.addScoreUpdate(competitor, raceColumn, officialNetPoints);
+                            }
                         }
                     }
                 }
@@ -308,36 +312,42 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                     ScoreCorrectionEntryDTO officialCorrectionEntry =
                         regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber()
                         .get(raceNameOrNumber).get(officialSailID);
-                    final Double officialTotalPoints = officialCorrectionEntry.isDiscarded() ? new Double(0) : officialCorrectionEntry.getScore();
-                    final Double officialNetPoints = officialCorrectionEntry.getScore() == null ? null :
+                    final Double officialTotalPoints = officialCorrectionEntry == null ? null :
+                        officialCorrectionEntry.isDiscarded() ? new Double(0) : officialCorrectionEntry.getScore();
+                    final Double officialNetPoints = officialCorrectionEntry == null ? null :
+                        officialCorrectionEntry.getScore() == null ? null :
                         officialCorrectionEntry.getScore() / raceColumn.getEffectiveFactor();
+                    final MaxPointsReason officialMaxPointsReason = officialCorrectionEntry == null ? null :
+                        officialCorrectionEntry.getMaxPointsReason();
                     SafeHtmlBuilder sb = new SafeHtmlBuilder();
-                    boolean entriesDiffer =
-                            ((officialNetPoints == null && entry.netPoints != null) || (officialNetPoints != null && entry.netPoints != null && !new Double(entry.netPoints).equals(officialNetPoints))) ||
-                            ((officialTotalPoints == null && entry.totalPoints != null) || (officialTotalPoints != null &&  entry.totalPoints != null && !new Double(entry.totalPoints).equals(officialTotalPoints))) ||
-                            ((officialCorrectionEntry.getMaxPointsReason() == null && entry.reasonForMaxPoints != MaxPointsReason.NONE) ||
-                                    officialCorrectionEntry.getMaxPointsReason() != null && officialCorrectionEntry.getMaxPointsReason() != entry.reasonForMaxPoints);
+                    // entries not considered "different' in case we haven't got an entry for the competitor/race at all;
+                    // those non-existing "entries" will be ignored by getResults anyhow
+                    boolean entriesDiffer = officialCorrectionEntry != null &&
+                           (((officialNetPoints == null && entry.netPoints != null) || (officialNetPoints != null && (entry.netPoints == null || !new Double(entry.netPoints).equals(officialNetPoints)))) ||
+                            ((officialTotalPoints == null && entry.totalPoints != null) || (officialTotalPoints != null && (entry.totalPoints == null || !new Double(entry.totalPoints).equals(officialTotalPoints)))) ||
+                            ((officialMaxPointsReason == null && entry.reasonForMaxPoints != MaxPointsReason.NONE) ||
+                                    officialMaxPointsReason != null && officialMaxPointsReason != entry.reasonForMaxPoints));
                     if (entriesDiffer) {
                         sb.appendHtmlConstant("<span style=\"color: #0000FF;\"><b>");
                     }
                     if (officialNetPoints == null) {
-                        sb.append(0);
+                        sb.appendEscaped("null");
                     } else {
                         sb.append(officialNetPoints);
                     }
                     sb.appendEscaped("/");
                     if (officialTotalPoints == null) {
-                        sb.append(0);
+                        sb.appendEscaped("null");
                     } else {
                         sb.append(officialTotalPoints);
                     }
                     sb.appendEscaped("/");
-                    if (officialCorrectionEntry.getMaxPointsReason() != null) {
-                        sb.appendEscaped(officialCorrectionEntry.getMaxPointsReason().name());
+                    if (officialMaxPointsReason != null) {
+                        sb.appendEscaped(officialMaxPointsReason.name());
                     } else {
                         sb.appendEscaped(MaxPointsReason.NONE.name());
                     }
-                    if (officialCorrectionEntry.isDiscarded()) {
+                    if (officialCorrectionEntry != null && officialCorrectionEntry.isDiscarded()) {
                         sb.appendEscaped("/discarded");
                     }
                     if (entriesDiffer) {

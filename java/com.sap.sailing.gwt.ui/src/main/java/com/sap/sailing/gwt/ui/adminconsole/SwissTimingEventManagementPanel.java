@@ -34,11 +34,14 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 
@@ -138,21 +141,37 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             }
         });
 
-
         TextColumn<SwissTimingRaceRecordDTO> raceNameColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.ID;
             }
         };
+
+        TextColumn<SwissTimingRaceRecordDTO> raceDescriptionColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                return object.description;
+            }
+        };
         
+        TextColumn<SwissTimingRaceRecordDTO> boatClassColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                String result = object.boatClass != null ? object.boatClass : "";
+                if(object.discipline != null) {
+                    result += " (" + object.discipline + ")";
+                }
+                return result;
+            }
+        };
+
         TextColumn<SwissTimingRaceRecordDTO> raceStartTrackingColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.raceStartTime==null?"":dateFormatter.render(object.raceStartTime) + " " + timeFormatter.render(object.raceStartTime);
             }
         };
-
 
         HorizontalPanel racesSplitPanel = new HorizontalPanel();
         mainPanel.add(racesSplitPanel);
@@ -179,6 +198,15 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         filterPanel.setSpacing(5);
         racesPanel.add(filterPanel);
         
+        // Regatta
+        HorizontalPanel regattaPanel = new HorizontalPanel();
+        regattaPanel.setSpacing(5);
+        Label regattaForTrackingLabel = new Label(stringMessages.regattaUsedForTheTrackedRace());
+        regattaForTrackingLabel.setWordWrap(false);
+        regattaPanel.add(regattaForTrackingLabel);
+        regattaPanel.add(getAvailableRegattasListBox());
+        racesPanel.add(regattaPanel);
+
         Label lblFilterEvents = new Label(stringConstants.filterRacesByName() + ":");
         filterPanel.add(lblFilterEvents);
         filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -205,6 +233,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<SwissTimingRaceRecordDTO>(/* pageSize */ 10000, tableRes);
         raceTable.addColumn(raceNameColumn, stringConstants.name());
+        raceTable.addColumn(raceDescriptionColumn, stringConstants.description());
+        raceTable.addColumn(boatClassColumn, stringConstants.boatClass());
         raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTimeColumn());
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(new MultiSelectionModel<SwissTimingRaceRecordDTO>() {});
@@ -345,8 +375,13 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 selectedRaces.add(race);
             }
         }
+        RegattaDTO selectedRegatta = getSelectedRegatta();
+        RegattaIdentifier regattaIdentifier = null;
+        if (selectedRegatta != null) {
+            regattaIdentifier = new RegattaName(selectedRegatta.name);
+        }
         sailingService.trackWithSwissTiming(
-                /* regattaToAddTo */null, // TODO allow user to select a pre-defined regatta
+                /* regattaToAddTo */ regattaIdentifier,
                 selectedRaces, hostname, port, /* canSendRequests */false, trackWind, correctWindByDeclination,
                 new AsyncCallback<Void>() {
                     @Override

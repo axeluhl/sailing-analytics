@@ -55,7 +55,7 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
         }
     }
     
-    protected RacingEventService getService() {
+    public RacingEventService getService() {
         return racingEventServiceTracker.getService();
     }
 
@@ -87,7 +87,11 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
         return null;
     }
 
-    protected TimePoint getTimePoint(HttpServletRequest req, String nameOfISOTimeParam, String nameOfMillisTime,
+    protected TimePoint readTimePointParam(HttpServletRequest req, String nameOfISOTimeParam, String nameOfMillisTime) throws InvalidDateException {
+        return readTimePointParam(req, nameOfISOTimeParam, nameOfMillisTime, null);
+    }
+    
+    protected TimePoint readTimePointParam(HttpServletRequest req, String nameOfISOTimeParam, String nameOfMillisTime,
             TimePoint defaultValue) throws InvalidDateException {
         String time = req.getParameter(nameOfISOTimeParam);
         TimePoint timePoint;

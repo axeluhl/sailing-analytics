@@ -8,13 +8,19 @@ Like businesses, sailors need the latest information to make strategic decisions
 
 ### Table of Contents
 
-* [[How to work with this wiki|wiki/howto]]
+* [[Information about this Wiki and HowTo|wiki/howto]]
 * [[General Project Information|wiki/general-information]]
 * [[OnBoarding Information|wiki/onboarding]]
 * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
+  * [[Production Environment|wiki/production-environment]]
+  * [[Development Environment|wiki/development-environment]]
 * [[Server Replication|wiki/server-replication]]
 * [[Configure Races on Server|wiki/configure-races-on-server]]
+* [[Cook Book|wiki/cook-book]]
 * [[Planning|wiki/planning]]
+* Event Specifica
+  * [[General Planning|wiki/general-event-planning]]
+  * [[Extreme Sailing Series|wiki/extreme-sailing-series]]
 
 ### Internal services (not related to wiki but useful)
 

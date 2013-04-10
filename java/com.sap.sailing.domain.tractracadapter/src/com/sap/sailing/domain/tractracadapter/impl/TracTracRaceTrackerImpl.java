@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -261,18 +262,21 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private void pollAndParseClientParamsPHP(final URL paramURL, final Simulator simulator) {
         Set<RaceDefinition> raceDefinitions = getRaces();
         if (raceDefinitions != null && !raceDefinitions.isEmpty()) {
-            logger.info("fetching paramURL "+paramURL+" to check for updates for race(s) "+getRaces());
+            logger.fine("Fetching paramURL "+paramURL+" to check for updates for race(s) "+getRaces());
             final ClientParamsPHP clientParams;
             try {
                 clientParams = new ClientParamsPHP(new InputStreamReader(paramURL.openStream()));
-                List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPoints = new ArrayList<>();
+                List<com.sap.sailing.domain.base.ControlPoint> newCourseControlPoints = new ArrayList<>();
+                List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide = new ArrayList<>();
                 final List<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRaceDefaultRoute().getControlPoints();
                 Map<Integer, NauticalSide> passingSideData = parsePassingSideData(clientParams.getRaceDefaultRoute(), newTracTracControlPoints);
                 int i = 1;
                 for (TracTracControlPoint newTracTracControlPoint : newTracTracControlPoints) {
                     NauticalSide nauticalSide = passingSideData.containsKey(i) ? passingSideData.get(i) : null;
-                    newCourseControlPoints.add(new Pair<com.sap.sailing.domain.base.ControlPoint, 
-                            NauticalSide>(domainFactory.getOrCreateControlPoint(newTracTracControlPoint), nauticalSide));
+                    final com.sap.sailing.domain.base.ControlPoint newControlPoint = domainFactory.getOrCreateControlPoint(newTracTracControlPoint);
+                    newCourseControlPoints.add(newControlPoint);
+                    newCourseControlPointsWithPassingSide.add(new Pair<com.sap.sailing.domain.base.ControlPoint, 
+                            NauticalSide>(newControlPoint, nauticalSide));
                     i++;
                 }
                 List<com.sap.sailing.domain.base.ControlPoint> currentCourseControlPoints = new ArrayList<>();
@@ -283,10 +287,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 if (!newCourseControlPoints.equals(currentCourseControlPoints)) {
                     logger.info("Detected course change based on clientparams.php contents for races "+getRaces());
                     try {
-                        course.update(newCourseControlPoints, domainFactory.getBaseDomainFactory());
+                        course.update(newCourseControlPointsWithPassingSide, domainFactory.getBaseDomainFactory());
                     } catch (PatchFailedException pfe) {
                         logger.severe("Failed to apply course update "+newTracTracControlPoints+" to course "+course);
-                        logger.throwing(TracTracRaceTrackerImpl.class.getName(), "scheduleClientParamsPHPPoller.run", pfe);
+                        logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", pfe);
                     }
                 }
                 updateStartStopTimesAndLiveDelay(clientParams, simulator);
@@ -311,7 +315,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 }
             } catch (IOException e) {
                 logger.info("Exception "+e.getMessage()+" while trying to read clientparams.php for races "+getRaces());
-                logger.throwing(TracTracRaceTracker.class.getName(), "scheduleClientParamsPHPPoller.run", e);
+                logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", e);
             }
         }
     }

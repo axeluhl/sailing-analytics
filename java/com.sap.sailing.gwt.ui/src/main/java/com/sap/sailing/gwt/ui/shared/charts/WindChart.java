@@ -527,7 +527,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                     if (timeOfEarliestRequestInMillis == null || date.getTime() < timeOfEarliestRequestInMillis) {
                         loadData(timeRangeWithZoomProvider.getFromTime(), date, /* append */ true);
                     } else if (date.getTime() > timeOfLatestRequestInMillis) {
-                        loadData(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
+                        loadData(new Date(timeOfLatestRequestInMillis), date, /* append */true);
                     }                    
                 }
                 break;
