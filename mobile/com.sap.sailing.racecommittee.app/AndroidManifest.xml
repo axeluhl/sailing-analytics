@@ -54,6 +54,7 @@
             <intent-filter>
                 <action android:name="com.sap.sailing.racecommittee.app.action.registerRace" />
                 <action android:name="com.sap.sailing.racecommittee.app.action.alarmAction" />
+                <action android:name="com.sap.sailing.racecommittee.app.action.automaticRaceEnd" />
             </intent-filter>
         </service>
         <service

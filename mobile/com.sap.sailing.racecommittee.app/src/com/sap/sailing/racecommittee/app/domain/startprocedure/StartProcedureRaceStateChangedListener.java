@@ -11,6 +11,8 @@ public interface StartProcedureRaceStateChangedListener {
 
     void onRaceFinishing(TimePoint now);
     
+    void onRaceFinishing(TimePoint now, TimePoint automaticRaceEnd);
+    
     void onRaceFinished(TimePoint now);
     
     void onIndividualRecall(TimePoint eventTime);

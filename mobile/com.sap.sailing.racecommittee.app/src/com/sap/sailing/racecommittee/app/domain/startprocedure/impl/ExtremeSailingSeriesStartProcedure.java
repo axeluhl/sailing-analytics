@@ -12,9 +12,12 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureRaceStateChangedListener;
@@ -30,6 +33,8 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     private final static long startPhaseESSOneDownInterval = 0;
     
     private final static long individualRecallRemovalInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
+    
+    private final static double essAutomaticRaceFinishMultiplyer = 0.75;
     
     private List<Long> startProcedureEventIntervals;
     private PassAwareRaceLog raceLog;
@@ -176,11 +181,21 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
                 raceLog.getCurrentPassId(), Flags.BLUE, Flags.NONE, /*isDisplayed*/true);
         raceLog.add(event);
         
-        //TODO compute and set ESS time limit
+        StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
+        long raceDuration = eventTime.asMillis()-startTimeFinder.getStartTime().asMillis();
+        
+        TimePoint automaticRaceEnd = eventTime.plus((long) (raceDuration*essAutomaticRaceFinishMultiplyer));
         
         if (raceStateChangedListener != null) {
-            raceStateChangedListener.onRaceFinishing(eventTime);
+            raceStateChangedListener.onRaceFinishing(eventTime, automaticRaceEnd);
         }
+    }
+    
+    @Override
+    public void dispatchAutomaticRaceEndEvent(TimePoint automaticRaceEnd) {
+        RaceStatusAnalyzer analyzer = new RaceStatusAnalyzer(raceLog);
+        if(analyzer.getStatus().equals(RaceLogRaceStatus.FINISHING))
+            setFinished(automaticRaceEnd);
     }
 
     @Override

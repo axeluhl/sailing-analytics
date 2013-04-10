@@ -169,6 +169,8 @@ public class RaceStateService extends Service {
             return;
         } else if (getString(R.string.intentActionIndividualRecallRemoval).equals(action)) {
             race.getState().getStartProcedure().dispatchFiredIndividualRecallRemovalEvent(race.getState().getIndividualRecallDisplayedTime(), eventTime);
+        } else if (getString(R.string.intentActionAutomaticRaceEnd).equals(action)) {
+            race.getState().getStartProcedure().dispatchAutomaticRaceEndEvent(eventTime);
         }
     }
 
@@ -294,6 +296,11 @@ public class RaceStateService extends Service {
 
     public void handleIndividualRecallRemoved(ManagedRace race) {
         clearAlarms(race.getId());
+    }
+
+    public void handleAutomaticRaceEnd(ManagedRace race, TimePoint automaticRaceEnd) {
+        String action = getString(R.string.intentActionAutomaticRaceEnd);
+        scheduleEventTime(action, race, automaticRaceEnd);
     }
 
 }
