@@ -61,6 +61,4 @@ public abstract class RaceFragment extends Fragment implements TickListener {
         return args;
     }
 
-    public abstract void notifyTick();
-
 }

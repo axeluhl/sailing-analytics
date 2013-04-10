@@ -8,7 +8,9 @@ import java.util.Date;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.common.TimePoint;
@@ -48,6 +50,17 @@ public class FinishedRaceFragment extends RaceFragment {
         finishTimeView.setText(getFinishTimeText());
         timeLimitView.setText(getTimeLimitText());
         protestStartTimeView.setText(getProtestStartTimeText());
+        
+        Button positioningButton = (Button) getView().findViewById(R.id.buttonPositioning);
+        positioningButton.setOnClickListener(new OnClickListener() {
+            
+            @Override
+            public void onClick(View v) {
+                PositioningFragment fragment = new PositioningFragment();
+                fragment.setArguments(PositioningFragment.createArguments(getRace()));
+                fragment.show(getFragmentManager(), null);
+            }
+        });
     }
 
     private CharSequence getProtestStartTimeText() {

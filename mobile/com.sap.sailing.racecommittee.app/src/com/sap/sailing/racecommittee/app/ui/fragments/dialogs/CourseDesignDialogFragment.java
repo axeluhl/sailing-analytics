@@ -442,4 +442,9 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         }
     }
 
+    @Override
+    public void notifyTick() {
+        
+    }
+
 }

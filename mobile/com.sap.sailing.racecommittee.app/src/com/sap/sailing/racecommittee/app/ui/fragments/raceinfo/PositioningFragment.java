@@ -24,11 +24,10 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorPositioningListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorsAdapter;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
-public class PositioningFragment extends RaceFragment {
+public class PositioningFragment extends RaceDialogFragment {
 
-    
     private DragSortListView positioningListView;
     private ListView competitorListView;
     private DragSortController dragSortController;
@@ -225,8 +224,6 @@ public class PositioningFragment extends RaceFragment {
         positioningAdapter.notifyDataSetChanged();
     }
 
-    
-    
     @Override
     public void notifyTick() {
         
