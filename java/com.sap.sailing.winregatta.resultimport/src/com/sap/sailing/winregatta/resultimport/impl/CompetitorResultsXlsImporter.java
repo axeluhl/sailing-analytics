@@ -25,49 +25,49 @@ public class CompetitorResultsXlsImporter {
     public static final String IMPORT_TEMPLATE_505 = "ImportTemplate_505er.xml";
 
     private static final String RESOURCES_PATH = "/exceltemplates";
-	
-	public CompetitorResultsXlsImporter() {
-	}
 
-    public RegattaResults getRegattaResults(InputStream excelFileInputStream, String importTemplateName, String excelSheetName)
-    		throws IOException, InvalidFormatException, SAXException {
-    	InputStream templateFileInputStream = getClass().getResourceAsStream(RESOURCES_PATH + "/" + importTemplateName);
-    	
-    	final List<CompetitorRow> results = new ArrayList<CompetitorRow>();
-		final RegattaInfo regattaInfo = new RegattaInfo();
-		HashMap<String, Object> beans = new HashMap<String, Object>();
-		beans.put("competitors", results);
-		beans.put("regattaInfo", regattaInfo);
+    public CompetitorResultsXlsImporter() {
+    }
 
-		readXlsSheetGeneric(excelFileInputStream, excelSheetName, new BufferedInputStream(
-				templateFileInputStream), excelSheetName, beans, CompetitorRowImpl.class);
+    public RegattaResults getRegattaResults(InputStream excelFileInputStream, String importTemplateName,
+            String excelSheetName) throws IOException, InvalidFormatException, SAXException {
+        InputStream templateFileInputStream = getClass().getResourceAsStream(RESOURCES_PATH + "/" + importTemplateName);
+
+        final List<CompetitorRow> results = new ArrayList<CompetitorRow>();
+        final RegattaInfo regattaInfo = new RegattaInfo();
+        HashMap<String, Object> beans = new HashMap<String, Object>();
+        beans.put("competitors", results);
+        beans.put("regattaInfo", regattaInfo);
+
+        readXlsSheetGeneric(excelFileInputStream, excelSheetName, new BufferedInputStream(templateFileInputStream),
+                excelSheetName, beans, CompetitorRowImpl.class);
 
         return new RegattaResults() {
             @Override
-            public  Map<String, String> getMetadata() {
+            public Map<String, String> getMetadata() {
                 return regattaInfo.toMap();
             }
+
             @Override
             public List<CompetitorRow> getCompetitorResults() {
                 return results;
             }
         };
-	}
+    }
 
-	@SuppressWarnings("unchecked")
-	private void readXlsSheetGeneric(InputStream xlsIs, String sheetName,
-			InputStream readerXlsConfig, String readerName,
-			Map<String, Object> beans, Class<?> sheetMappingRootClass)
-			throws IOException, SAXException, InvalidFormatException {
-		ReaderConfig.getInstance().setSkipErrors(true);
-		XLSReader mainReader = ReaderBuilder.buildFromXML(readerXlsConfig);
-		Object sheetReader = mainReader.getSheetReaders().get(readerName);
-		mainReader.getSheetReaders().put(sheetName, sheetReader);
-		InputStream inputXLS = new BufferedInputStream(xlsIs);
-		XLSReadStatus readStatus = mainReader.read(inputXLS, beans);
-		xlsIs.close();
-		if (!readStatus.isStatusOK()) {
-			throw new IllegalStateException("Reading xls was not successful according to readStatus: " + readStatus);
-		}
-	}
+    @SuppressWarnings("unchecked")
+    private void readXlsSheetGeneric(InputStream xlsIs, String sheetName, InputStream readerXlsConfig,
+            String readerName, Map<String, Object> beans, Class<?> sheetMappingRootClass) throws IOException,
+            SAXException, InvalidFormatException {
+        ReaderConfig.getInstance().setSkipErrors(true);
+        XLSReader mainReader = ReaderBuilder.buildFromXML(readerXlsConfig);
+        Object sheetReader = mainReader.getSheetReaders().get(readerName);
+        mainReader.getSheetReaders().put(sheetName, sheetReader);
+        InputStream inputXLS = new BufferedInputStream(xlsIs);
+        XLSReadStatus readStatus = mainReader.read(inputXLS, beans);
+        xlsIs.close();
+        if (!readStatus.isStatusOK()) {
+            throw new IllegalStateException("Reading xls was not successful according to readStatus: " + readStatus);
+        }
+    }
 }

@@ -260,7 +260,7 @@ public class CompetitorRowImpl implements CompetitorRow
 	}
 
 	@Override
-	public Double getTotalPointsBeforeDiscarding() {
+	public Double getNetPointsBeforeDiscarding() {
 		return null;
 	}
 

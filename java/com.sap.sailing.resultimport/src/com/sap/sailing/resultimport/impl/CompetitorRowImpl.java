@@ -8,17 +8,17 @@ public class CompetitorRowImpl implements CompetitorRow {
     private final String sailID;
     private final Iterable<String> names;
     private final Double scoreAfterDiscarding;
-    private final Double totalPointsBeforeDiscarding;
+    private final Double netPointsBeforeDiscarding;
     private final Iterable<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded;
     
     public CompetitorRowImpl(Integer totalRank, String sailID, Iterable<String> names, Double scoreAfterDiscarding,
-            Double totalPointsBeforeDiscarding, Iterable<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded) {
+            Double netPointsBeforeDiscarding, Iterable<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded) {
         super();
         this.totalRank = totalRank;
         this.sailID = sailID;
         this.names = names;
         this.scoreAfterDiscarding = scoreAfterDiscarding;
-        this.totalPointsBeforeDiscarding = totalPointsBeforeDiscarding;
+        this.netPointsBeforeDiscarding = netPointsBeforeDiscarding;
         this.rankAndMaxPointsReasonAndPointsAndDiscarded = rankAndMaxPointsReasonAndPointsAndDiscarded;
     }
 
@@ -43,8 +43,8 @@ public class CompetitorRowImpl implements CompetitorRow {
     }
 
     @Override
-    public Double getTotalPointsBeforeDiscarding() {
-        return totalPointsBeforeDiscarding;
+    public Double getNetPointsBeforeDiscarding() {
+        return netPointsBeforeDiscarding;
     }
 
     @Override
