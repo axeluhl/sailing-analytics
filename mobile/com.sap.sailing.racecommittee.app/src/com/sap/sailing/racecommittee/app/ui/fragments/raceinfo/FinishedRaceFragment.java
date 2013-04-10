@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
@@ -20,13 +21,13 @@ public class FinishedRaceFragment extends RaceFragment {
     TextView startTimeView;
     TextView firstBoatFinishedView;
     TextView finishTimeView;
+    TextView timeLimitView;
     TextView protestStartTimeView;
 
     // / TODO: some time limit time is missing?! Dunno why it exists...
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.race_finished_view, container, false);
     }
 
@@ -38,37 +39,60 @@ public class FinishedRaceFragment extends RaceFragment {
         startTimeView = (TextView) getView().findViewById(R.id.textFinishedRaceStarted);
         firstBoatFinishedView = (TextView) getView().findViewById(R.id.textFirstBoatFinished);
         finishTimeView = (TextView) getView().findViewById(R.id.textFinishedRaceEnded);
+        timeLimitView = (TextView) getView().findViewById(R.id.textTimeLimit);
         protestStartTimeView = (TextView) getView().findViewById(R.id.textProtestStartTime);
 
-        String raceFinishedText = String.format(String.valueOf(getText(R.string.race_finished_template)), getRace()
-                .getName());
+        headerView.setText(getHeaderText());
+        startTimeView.setText(getStartTimeText());
+        firstBoatFinishedView.setText(getFirstBoatFinishedTimeText());
+        finishTimeView.setText(getFinishTimeText());
+        timeLimitView.setText(getTimeLimitText());
+        protestStartTimeView.setText(getProtestStartTimeText());
+    }
 
-        headerView.setText(raceFinishedText);
+    private CharSequence getProtestStartTimeText() {
+        // TODO Currently no protest time...
+        return getString(R.string.empty);
+    }
 
-        Date startTime = getRace().getState().getStartTime().asDate();
-        if (startTime != null) {
-            startTimeView.setText(getString(R.string.race_finished_start_time) + " " + getFormattedTime(startTime));
+    private CharSequence getTimeLimitText() {
+        TimePoint timeLimit = null;
+        if (timeLimit != null) {
+            return String.format("%s %s", getString(R.string.race_time_limit),
+                    getFormattedTime(timeLimit.asDate()));
         }
+        return getString(R.string.empty);
+    }
 
-        Date firstBoatFinishedViewTime = new Date();// / TODO: get real first boat finished time
-        if (firstBoatFinishedViewTime != null) {
-            /*firstBoatFinishedView.setText(getString(R.string.race_first_boat_finished) + " "
-                    + getFormattedTime(firstBoatFinishedViewTime));*/
-            firstBoatFinishedView.setText("-");
-        }
-
-        Date finishTime = getRace().getState().getFinishedTime().asDate();
+    private CharSequence getFinishTimeText() {
+        TimePoint finishTime = getRace().getState().getFinishedTime();
         if (finishTime != null) {
-            finishTimeView.setText(getString(R.string.race_finished_end_time) + " " + getFormattedTime(finishTime));
+            return String.format("%s %s", getString(R.string.race_finished_end_time),
+                    getFormattedTime(finishTime.asDate()));
         }
+        return getString(R.string.empty);
+    }
 
-        Date protestStartTime = new Date(); // / TODO: get real protest start time
-        if (protestStartTime != null) {
-            String raceProtestStartTimeText = String.format(String.valueOf(getText(R.string.protest_start_time)),
-                    getFormattedTime(protestStartTime));
-            protestStartTimeView.setText(raceProtestStartTimeText);
-            protestStartTimeView.setVisibility(View.GONE);      // TODO: show it
+    private CharSequence getFirstBoatFinishedTimeText() {
+        TimePoint firstBoatTime = getRace().getState().getFinishingStartTime();
+        if (firstBoatTime != null) {
+            return String.format("%s %s", getString(R.string.race_first_boat_finished),
+                    getFormattedTime(firstBoatTime.asDate()));
         }
+        return getString(R.string.empty);
+    }
+
+    private CharSequence getStartTimeText() {
+        TimePoint startTime = getRace().getState().getStartTime();
+        if (startTime != null) {
+            return String.format("%s %s", getString(R.string.race_finished_start_time),
+                    getFormattedTime(startTime.asDate()));
+        }
+        return getString(R.string.empty);
+    }
+
+    private String getHeaderText() {
+        return String.format(String.valueOf(getText(R.string.race_finished_template)), getRace().getName());
     }
 
     private String getFormattedTime(Date time) {
@@ -82,7 +106,6 @@ public class FinishedRaceFragment extends RaceFragment {
 
     @Override
     public void notifyTick() {
-        // TODO Auto-generated method stub
         
     }
 
