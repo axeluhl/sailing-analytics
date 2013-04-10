@@ -68,8 +68,17 @@ public class FinishedRaceFragment extends RaceFragment {
         return getString(R.string.empty);
     }
 
+    private TimePoint getTimeLimit() {
+        TimePoint startTime = getRace().getState().getStartTime();
+        TimePoint firstBoatTime = getRace().getState().getFinishingStartTime();
+        if (startTime == null || firstBoatTime == null) {
+            return null;
+        }
+        return firstBoatTime.plus((long)((firstBoatTime.asMillis() - startTime.asMillis()) * 0.75));
+    }
+
     private CharSequence getTimeLimitText() {
-        TimePoint timeLimit = null;
+        TimePoint timeLimit = getTimeLimit();
         if (timeLimit != null) {
             return String.format("%s %s", getString(R.string.race_time_limit),
                     getFormattedTime(timeLimit.asDate()));
