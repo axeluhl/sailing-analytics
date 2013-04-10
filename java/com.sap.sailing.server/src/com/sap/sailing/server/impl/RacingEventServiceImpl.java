@@ -200,6 +200,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private long delayToLiveInMillis;
 
     private final RaceLogReplicator raceLogReplicator;
+    
+    private final RaceLogScoringReplicator raceLogScoringReplicator;
 
     public RacingEventServiceImpl() {
         this(MongoFactory.INSTANCE.getDefaultDomainObjectFactory(), MongoFactory.INSTANCE.getDefaultMongoObjectFactory());
@@ -238,6 +240,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         persistentRegattasForRaceIDs = new ConcurrentHashMap<String, Regatta>();
         delayToLiveInMillis = TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS;
         this.raceLogReplicator = new RaceLogReplicator(this);
+        this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
 
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
@@ -280,6 +283,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             regatta.addRaceColumnListener(raceLogReplicator);
+            regatta.addRaceColumnListener(raceLogScoringReplicator);
         }
     }
 
@@ -300,6 +304,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             // RaceColumns of RegattaLeaderboards are tracked via its Regatta!
             if (leaderboard instanceof FlexibleLeaderboard) {
                 leaderboard.addRaceColumnListener(raceLogReplicator);
+                leaderboard.addRaceColumnListener(raceLogScoringReplicator);
             }
         }
     }
@@ -525,6 +530,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public void removeLeaderboard(String leaderboardName) {
         Leaderboard leaderboard = removeLeaderboardFromLeaderboardsByName(leaderboardName);
         leaderboard.removeRaceColumnListener(raceLogReplicator);
+        leaderboard.removeRaceColumnListener(raceLogScoringReplicator);
         mongoObjectFactory.removeLeaderboard(leaderboardName);
         syncGroupsAfterLeaderboardRemove(leaderboardName, true);
     }
@@ -798,6 +804,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             regatta.addRaceColumnListener(raceLogReplicator);
+            regatta.addRaceColumnListener(raceLogScoringReplicator);
 
             Serializable courseAreaId = null;
             if (regatta.getDefaultCourseArea() != null) {
@@ -839,6 +846,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             regatta.addRaceColumnListener(raceLogReplicator);
+            regatta.addRaceColumnListener(raceLogScoringReplicator);
 
             replicate(new AddDefaultRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(),
                     regatta.getId()));
@@ -1069,6 +1077,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 regattaTrackingCache.remove(regatta);
                 regatta.removeRegattaListener(this);
                 regatta.removeRaceColumnListener(raceLogReplicator);
+                regatta.removeRaceColumnListener(raceLogScoringReplicator);
             }
             for (RaceDefinition race : regatta.getAllRaces()) {
                 stopTrackingWind(regatta, race);
@@ -1160,6 +1169,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         regattasByName.remove(regatta.getName());
         regatta.removeRegattaListener(this);
         regatta.removeRaceColumnListener(raceLogReplicator);
+        regatta.removeRaceColumnListener(raceLogScoringReplicator);
     }
 
     @Override
@@ -1216,6 +1226,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             regattasByName.remove(regatta.getName());
             regatta.removeRegattaListener(this);
             regatta.removeRaceColumnListener(raceLogReplicator);
+            regatta.removeRaceColumnListener(raceLogScoringReplicator);
         }
     }
 
