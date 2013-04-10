@@ -763,6 +763,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         
         FinishPositioningListFinder positioningListFinder = new FinishPositioningListFinder(raceLog);
         List<Pair<Competitor, MaxPointsReason>> positioningList = positioningListFinder.getFinishPositioningList();
+        if (positioningList == null) {
+            return;
+        }
         for (Pair<Competitor, MaxPointsReason> positionedCompetitor : positioningList) {
             if (positionedCompetitor.getB().equals(MaxPointsReason.NONE)) {
                 try {
