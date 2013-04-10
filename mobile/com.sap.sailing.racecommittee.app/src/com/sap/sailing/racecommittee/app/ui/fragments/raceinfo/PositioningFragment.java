@@ -8,8 +8,10 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
@@ -44,8 +46,15 @@ public class PositioningFragment extends RaceDialogFragment {
     private boolean sortEnabled = true;
     private boolean dragEnabled = true;
     
+    private boolean isDialog() {
+        return getDialog() != null;
+    }
+    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        if (isDialog()) {
+            getDialog().setTitle("Change positioning");
+        }
         return inflater.inflate(R.layout.race_positioning_view, container, false);
     }
     
@@ -53,11 +62,26 @@ public class PositioningFragment extends RaceDialogFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         
+        if (isDialog()) {
+            Button okButton = (Button) getView().findViewById(R.id.buttonPositionOk);
+            okButton.setVisibility(Button.VISIBLE);
+            okButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getRace().getState().setFinishPositioningConfirmed();
+                    dismiss();
+                }
+            });
+        }
+        
         competitors = new ArrayList<Competitor>();
         Util.addAll(getRace().getCompetitors(), competitors);
         competitorsAdapter = new CompetitorsAdapter(getActivity(), R.layout.welter_grid_competitor_cell, competitors);
         
         positionedCompetitors = initializeFinishPositioningList();
+        for (Pair<Competitor, MaxPointsReason> positionedCompetitor : positionedCompetitors) {
+            competitors.remove(positionedCompetitor.getA());
+        }
         deletePositionedCompetitorsFromUnpositionedList();
         positioningAdapter = new CompetitorPositioningListAdapter(getActivity(), R.layout.welter_positioning_item, positionedCompetitors);
         
