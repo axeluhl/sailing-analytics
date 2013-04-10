@@ -40,4 +40,9 @@ public class RaceStateListener implements RaceStateChangedListener {
     public void onIndividualRecallRemoval() {
         service.handleIndividualRecallRemoved(race);
     }
+
+    @Override
+    public void onAutomaticRaceEnd(TimePoint automaticRaceEnd) {
+        service.handleAutomaticRaceEnd(race, automaticRaceEnd);
+    }
 }

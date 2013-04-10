@@ -233,4 +233,10 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         }
     }
 
+    @Override
+    public void onAutomaticRaceEnd(TimePoint automaticRaceEnd) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

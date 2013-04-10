@@ -31,6 +31,8 @@ public interface StartProcedure {
     
     void setFinishing(TimePoint eventTime);
     
+    void dispatchAutomaticRaceEndEvent(TimePoint eventTime);
+    
     void setFinished(TimePoint eventTime);
     
     void setPostponed(TimePoint eventTime, Flags lowerFlag);

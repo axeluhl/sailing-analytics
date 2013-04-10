@@ -235,6 +235,12 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         notifyDataChanged();
     }
 
+    @Override
+    public void onAutomaticRaceEnd(TimePoint automaticRaceEnd) {
+        notifyDataChanged();
+        
+    }
+
     /*
      * 
      * public void notifyDataChanged() { List<RaceListDataType> list = adapter.getItems(); for (int i = 0; i <

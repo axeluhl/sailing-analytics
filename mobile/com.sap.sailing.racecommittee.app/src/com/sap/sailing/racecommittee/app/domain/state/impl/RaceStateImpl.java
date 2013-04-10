@@ -182,6 +182,19 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHING);
         this.raceLog.add(statusEvent);
     }
+    
+    @Override
+    public void onRaceFinishing(TimePoint eventTime, TimePoint automaticRaceEnd) {
+        onRaceFinishing(eventTime);
+        notifyListenersAboutAutomaticRaceEnd(automaticRaceEnd);
+    }
+
+    private void notifyListenersAboutAutomaticRaceEnd(TimePoint automaticRaceEnd) {
+        for (RaceStateChangedListener listener : stateChangedListeners) {
+            listener.onAutomaticRaceEnd(automaticRaceEnd);
+        }
+    
+    }
 
     @Override
     public void onRaceFinished(TimePoint eventTime) {

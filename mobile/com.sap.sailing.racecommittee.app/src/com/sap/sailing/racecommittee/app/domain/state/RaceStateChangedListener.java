@@ -12,4 +12,6 @@ public interface RaceStateChangedListener {
     void onIndividualRecallDisplayed(TimePoint individualRecallRemovalFireTimePoint);
 
     void onIndividualRecallRemoval();
+
+    void onAutomaticRaceEnd(TimePoint automaticRaceEnd);
 }
