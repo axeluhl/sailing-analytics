@@ -10,7 +10,7 @@ import com.sap.sailing.util.SerializableComparator;
 public abstract class AbstractTimePoint implements TimePoint {
     private static final long serialVersionUID = 8825508619301420378L;
 
-    private static SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    public static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
     public static Comparator<TimePoint> TIMEPOINT_COMPARATOR = new SerializableComparator<TimePoint>() {
         private static final long serialVersionUID = 7644726881387366025L;
@@ -69,7 +69,7 @@ public abstract class AbstractTimePoint implements TimePoint {
 
     @Override
     public String toString() {
-        return dateFormatter.format(asDate());
+        return TIMEPOINT_FORMATTER.format(asDate());
     }
 
     /**
