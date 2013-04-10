@@ -75,7 +75,7 @@ public class EssStartPhaseFragment extends RaceFragment implements EssStartPhase
             }
         });
 
-        Button resetTimeButton = (Button) getView().findViewById(R.id.resetTimeButton);
+        resetTimeButton = (Button) getView().findViewById(R.id.resetTimeButton);
         resetTimeButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 infoListener.onResetTime();
