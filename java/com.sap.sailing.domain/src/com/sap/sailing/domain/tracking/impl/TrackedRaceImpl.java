@@ -86,12 +86,12 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.util.SmartFutureCache;
+import com.sap.sailing.util.SmartFutureCache.AbstractCacheUpdater;
+import com.sap.sailing.util.SmartFutureCache.EmptyUpdateInterval;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
-import com.sap.sailing.util.impl.SmartFutureCache;
-import com.sap.sailing.util.impl.SmartFutureCache.AbstractCacheUpdater;
-import com.sap.sailing.util.impl.SmartFutureCache.EmptyUpdateInterval;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final long serialVersionUID = -4825546964220003507L;
