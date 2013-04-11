@@ -1099,36 +1099,31 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private RaceInfoDTO convertToRaceInfoDTO(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO, RaceLog raceLog) {
         RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
-        
-        PassAwareRaceLogImpl passAwareRaceLog = new PassAwareRaceLogImpl(raceLog);
-        StartTimeFinder startTimeFinder = new StartTimeFinder(passAwareRaceLog);
-        if(startTimeFinder.getStartTime()!=null){
-            raceInfoDTO.startTime = startTimeFinder.getStartTime().asDate();
+        if (raceLog != null) {
+            PassAwareRaceLogImpl passAwareRaceLog = new PassAwareRaceLogImpl(raceLog);
+            StartTimeFinder startTimeFinder = new StartTimeFinder(passAwareRaceLog);
+            if (startTimeFinder.getStartTime() != null) {
+                raceInfoDTO.startTime = startTimeFinder.getStartTime().asDate();
+            }
+            RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(passAwareRaceLog);
+            raceInfoDTO.lastStatus = raceStatusAnalyzer.getStatus();
+            for(RaceLogEvent event : passAwareRaceLog.getFixes()){
+                if(event instanceof RaceLogFlagEvent){
+                    raceInfoDTO.lastFlag = ((RaceLogFlagEvent) event).getUpperFlag();
+                    raceInfoDTO.displayed = ((RaceLogFlagEvent) event).isDisplayed();
+                }
+            }
+            LastPublishedCourseDesignFinder courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
+            raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(courseDesignFinder.getLastCourseDesign());
         }
-        
         raceInfoDTO.raceName = raceColumnDTO.name;
         raceInfoDTO.fleet = fleetDTO.name;
         raceInfoDTO.raceIdentifier = raceColumnDTO.getRaceIdentifier(fleetDTO);
-        
-        RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(passAwareRaceLog); 
-        raceInfoDTO.lastStatus = raceStatusAnalyzer.getStatus();
-        
-        LastPublishedCourseDesignFinder courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
-        raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(courseDesignFinder.getLastCourseDesign());
-        
-        for(RaceLogEvent event : passAwareRaceLog.getFixes()){
-            if(event instanceof RaceLogFlagEvent){
-                raceInfoDTO.lastFlag = ((RaceLogFlagEvent) event).getUpperFlag();
-                raceInfoDTO.displayed = ((RaceLogFlagEvent) event).isDisplayed();
-            }
-        }
-        
         return raceInfoDTO;
     }
 
     private RaceCourseDTO convertCourseDesignToRaceCourseDTO(CourseBase lastCourseDesign) {
         RaceCourseDTO result = new RaceCourseDTO(Collections.<WaypointDTO> emptyList());
-        
         if (lastCourseDesign != null) {
             List<WaypointDTO> waypointDTOs = new ArrayList<WaypointDTO>();
             for (Waypoint waypoint : lastCourseDesign.getWaypoints()) {
