@@ -113,24 +113,26 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         FinishPositioningListFinder positioningListFinder = new FinishPositioningListFinder(raceLog);
         
         List<Pair<Competitor, MaxPointsReason>> positioningList = positioningListFinder.getFinishPositioningList();
-        for (Pair<Competitor, MaxPointsReason> positionedCompetitor : positioningList) {
-            if (positionedCompetitor.getB().equals(MaxPointsReason.NONE)) {
-                try {
-                    int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positioningList, positionedCompetitor);
-                    
-                    Double scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(raceColumn, positionedCompetitor.getA(), rankByRaceCommittee, numberOfCompetitorsInRace);
-                    Double trackedNetPoints = leaderboard.getNetPoints(positionedCompetitor.getA(), raceColumn, timePoint);
-                    if (trackedNetPoints == null || !trackedNetPoints.equals(scoreByRaceCommittee)) {
-                        applyScoreCorrectionOperation(leaderboard, raceColumn, positionedCompetitor.getA(), scoreByRaceCommittee, timePoint);
+        if (positioningList != null) {
+            for (Pair<Competitor, MaxPointsReason> positionedCompetitor : positioningList) {
+                if (positionedCompetitor.getB().equals(MaxPointsReason.NONE)) {
+                    try {
+                        int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positioningList, positionedCompetitor);
+
+                        Double scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(raceColumn, positionedCompetitor.getA(), rankByRaceCommittee, numberOfCompetitorsInRace);
+                        Double trackedNetPoints = leaderboard.getNetPoints(positionedCompetitor.getA(), raceColumn, timePoint);
+                        if (trackedNetPoints == null || !trackedNetPoints.equals(scoreByRaceCommittee)) {
+                            applyScoreCorrectionOperation(leaderboard, raceColumn, positionedCompetitor.getA(), scoreByRaceCommittee, timePoint);
+                        }
+                    } catch (NoWindException ex) {
+                        ex.printStackTrace();
                     }
-                } catch (NoWindException ex) {
-                    ex.printStackTrace();
-                }
-            } else {
-                MaxPointsReason trackedMaxPointsReason = leaderboard.getMaxPointsReason(positionedCompetitor.getA(), raceColumn, timePoint);
-                MaxPointsReason maxPointsReasonByRaceCommittee = positionedCompetitor.getB();
-                if (!maxPointsReasonByRaceCommittee.equals(trackedMaxPointsReason)) {
-                    applyMaxPointsReasonOperation(leaderboard, raceColumn, positionedCompetitor.getA(), maxPointsReasonByRaceCommittee, timePoint);
+                } else {
+                    MaxPointsReason trackedMaxPointsReason = leaderboard.getMaxPointsReason(positionedCompetitor.getA(), raceColumn, timePoint);
+                    MaxPointsReason maxPointsReasonByRaceCommittee = positionedCompetitor.getB();
+                    if (!maxPointsReasonByRaceCommittee.equals(trackedMaxPointsReason)) {
+                        applyMaxPointsReasonOperation(leaderboard, raceColumn, positionedCompetitor.getA(), maxPointsReasonByRaceCommittee, timePoint);
+                    }
                 }
             }
         }
