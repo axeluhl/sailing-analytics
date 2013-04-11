@@ -136,6 +136,7 @@
 	<string name="course_design_dialog_title">Set up a course design</string>
 	<string name="pick_a_rounding_direction">Pick a rounding direction</string>
 	<string name="change_course_element">Change waypoint</string>
+	<string name="select_penalty_reason">Select penalty reason</string>
 	<string-array name="rounding_directions">
 	    <item>Port</item>
 	    <item>Starboard</item>

@@ -174,7 +174,7 @@ public class PositioningFragment extends RaceDialogFragment {
     private void createMaxPointsReasonSelectionDialog(final Pair<Competitor, MaxPointsReason> item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         final CharSequence[] maxPointsReasons = getAllMaxPointsReasons();
-        builder.setTitle(R.string.change_course_element)
+        builder.setTitle(R.string.select_penalty_reason)
         .setItems(maxPointsReasons, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int position) {
                 setMaxPointsReasonForItem(item, maxPointsReasons[position]);
