@@ -447,39 +447,50 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             //            LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON and LEADERBOARD_CORRECTED_SCORE fields each
             DBObject dbScoreCorrectionForRace = (DBObject) dbScoreCorrection.get(escapedRaceColumnName);
             final RaceColumn raceColumn = correctionsToUpdate.getLeaderboard().getRaceColumnByName(MongoUtils.unescapeDollarAndDot(escapedRaceColumnName));
-            if (dbScoreCorrectionForRace instanceof BasicDBList) {
-                for (Object o : (BasicDBList) dbScoreCorrectionForRace) {
-                    DBObject dbScoreCorrectionForCompetitorInRace = (DBObject) o;
-                    Serializable competitorId = (Serializable) dbScoreCorrectionForCompetitorInRace.get(FieldNames.COMPETITOR_ID.name());
-                    if (dbScoreCorrectionForCompetitorInRace
-                            .containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())) {
-                        correctionsToUpdate.setMaxPointsReasonByID(competitorId,
-                                raceColumn, MaxPointsReason.valueOf((String) dbScoreCorrectionForCompetitorInRace
-                                        .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())));
+            if (raceColumn != null) {
+                if (dbScoreCorrectionForRace instanceof BasicDBList) {
+                    for (Object o : (BasicDBList) dbScoreCorrectionForRace) {
+                        DBObject dbScoreCorrectionForCompetitorInRace = (DBObject) o;
+                        Serializable competitorId = (Serializable) dbScoreCorrectionForCompetitorInRace
+                                .get(FieldNames.COMPETITOR_ID.name());
+                        if (dbScoreCorrectionForCompetitorInRace
+                                .containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())) {
+                            correctionsToUpdate.setMaxPointsReasonByID(competitorId, raceColumn, MaxPointsReason
+                                    .valueOf((String) dbScoreCorrectionForCompetitorInRace
+                                            .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())));
+                        }
+                        if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE
+                                .name())) {
+                            final Double leaderboardCorrectedScore = ((Number) dbScoreCorrectionForCompetitorInRace
+                                    .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())).doubleValue();
+                            correctionsToUpdate.correctScoreByID(competitorId, raceColumn,
+                                    (Double) leaderboardCorrectedScore);
+                        }
                     }
-                    if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())) {
-                        final Double leaderboardCorrectedScore = ((Number) dbScoreCorrectionForCompetitorInRace
-                                .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())).doubleValue();
-                        correctionsToUpdate.correctScoreByID(competitorId, raceColumn, (Double) leaderboardCorrectedScore);
+                } else {
+                    needsMigration = true;
+                    for (String competitorName : dbScoreCorrectionForRace.keySet()) {
+                        DBObject dbScoreCorrectionForCompetitorInRace = (DBObject) dbScoreCorrectionForRace
+                                .get(competitorName);
+                        if (dbScoreCorrectionForCompetitorInRace
+                                .containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())) {
+                            correctionsToUpdate.setMaxPointsReasonByName(MongoUtils
+                                    .unescapeDollarAndDot(competitorName), raceColumn, MaxPointsReason
+                                    .valueOf((String) dbScoreCorrectionForCompetitorInRace
+                                            .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())));
+                        }
+                        if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE
+                                .name())) {
+                            final Double leaderboardCorrectedScore = ((Number) dbScoreCorrectionForCompetitorInRace
+                                    .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())).doubleValue();
+                            correctionsToUpdate.correctScoreByName(MongoUtils.unescapeDollarAndDot(competitorName),
+                                    raceColumn, (Double) leaderboardCorrectedScore);
+                        }
                     }
                 }
             } else {
-                needsMigration = true;
-                for (String competitorName : dbScoreCorrectionForRace.keySet()) {
-                    DBObject dbScoreCorrectionForCompetitorInRace = (DBObject) dbScoreCorrectionForRace.get(competitorName);
-                    if (dbScoreCorrectionForCompetitorInRace
-                            .containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())) {
-                        correctionsToUpdate.setMaxPointsReasonByName(MongoUtils.unescapeDollarAndDot(competitorName),
-                                raceColumn, MaxPointsReason.valueOf((String) dbScoreCorrectionForCompetitorInRace
-                                        .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())));
-                    }
-                    if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())) {
-                        final Double leaderboardCorrectedScore = ((Number) dbScoreCorrectionForCompetitorInRace
-                                .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())).doubleValue();
-                        correctionsToUpdate.correctScoreByName(MongoUtils.unescapeDollarAndDot(competitorName),
-                                raceColumn, (Double) leaderboardCorrectedScore);
-                    }
-                }
+                logger.warning("Couldn't find race column " + MongoUtils.unescapeDollarAndDot(escapedRaceColumnName)
+                        + " in leaderboard " + correctionsToUpdate.getLeaderboard().getName());
             }
         }
         DBObject competitorDisplayNames = (DBObject) dbLeaderboard.get(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name());
