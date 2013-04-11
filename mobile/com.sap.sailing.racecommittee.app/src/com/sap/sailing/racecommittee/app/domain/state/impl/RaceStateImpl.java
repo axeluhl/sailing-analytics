@@ -125,7 +125,8 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
             
         RaceLogRaceStatus status = getStatus();
         if (status != RaceLogRaceStatus.UNSCHEDULED) {
-            onRaceAborted(eventTime.minus(1));
+            //substract minus 2, because a PassChangeEvent (minus 2) AND a RaceStatusEvent (minus 1) will be written to log 
+            onRaceAborted(eventTime.minus(2));
         }
 
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(eventTime, UUID.randomUUID(), 
