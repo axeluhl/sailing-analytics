@@ -34,7 +34,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
-public class AbstractJsonExportTest {
+public abstract class AbstractJsonExportTest {
     protected RacingEventService racingEventService;
     protected MongoDBService service;    
 
