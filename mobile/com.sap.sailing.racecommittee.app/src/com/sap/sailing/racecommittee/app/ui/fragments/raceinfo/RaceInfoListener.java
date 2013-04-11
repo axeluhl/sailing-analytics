@@ -4,4 +4,6 @@ public interface RaceInfoListener {
 
 	void onResetTime();
 	
+	void onChangeCourseDesign();
+	
 }

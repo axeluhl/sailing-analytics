@@ -53,8 +53,9 @@ public class UnicodeCharactersInCompetitorNamesTest {
                                 + TracTracConnectionConstants.PORT_TUNNEL_STORED)
                                 : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":"
                                         + TracTracConnectionConstants.PORT_STORED),
+                        new URI("http://tracms.traclive.dk/update_course"),
                         /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l,
-                        /* simulateWithStartTimeNow */ false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE,
+                        /* simulateWithStartTimeNow */ false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, "tracTest", "tracTest",
                         new DummyTrackedRegattaRegistry());
 
         Iterable<Competitor> competitors = fourtyninerYellow_2.getRacesHandle().getRaces().iterator().next()

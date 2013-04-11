@@ -1,27 +1,29 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
+import java.io.Serializable;
+
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.CompetitorJsonSerializer;
 
-/**
- * Currently unused involved boats deserializer.
- */
 public class CompetitorDeserializer implements JsonDeserializer<Competitor> {
 
-    @SuppressWarnings("unused")
-    private SharedDomainFactory factory;
-
+    protected SharedDomainFactory factory;
+    
     public CompetitorDeserializer(SharedDomainFactory factory) {
         this.factory = factory;
     }
 
     @Override
     public Competitor deserialize(JSONObject object) throws JsonDeserializationException {
-        return null;
+        Serializable competitorId = (Serializable) object.get(CompetitorJsonSerializer.FIELD_ID);
+        String name = (String) object.get(CompetitorJsonSerializer.FIELD_NAME);
+        Competitor competitor = factory.getOrCreateCompetitor(competitorId, name, null, null);
+        return competitor;
     }
 
 }
