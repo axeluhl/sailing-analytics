@@ -40,7 +40,7 @@
         android:orientation="horizontal" >
 
         <LinearLayout
-            android:id="@+id/InnerRelativeLayout"
+            android:id="@+id/innerFragmentHolder"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.618"
@@ -49,6 +49,7 @@
 
             <!-- DISPLAY SECTION -->
 
+			<!-- 
             <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -108,7 +109,7 @@
                     android:verticalSpacing="5dp"
                     android:layout_gravity="left"
                      />
-            </LinearLayout>
+            </LinearLayout> -->
 
             <!-- END DISPLAY SECTION -->
 

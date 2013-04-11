@@ -99,4 +99,9 @@ public class AbortModeSelectionDialog extends RaceDialogFragment {
         }
         this.dismiss();
     }
+
+    @Override
+    public void notifyTick() {
+        
+    }
 }

@@ -40,6 +40,8 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     private HashMap<Serializable, ManagedRace> managedRacesById;
     private RaceListAdapter adapter;
     private ArrayList<RaceListDataType> raceDataTypeList;
+    
+    private String magicFilterString = "";
 
     public ManagedRaceListFragment() {
         this.selectedRaceId = null;
@@ -56,7 +58,6 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         adapter = new RaceListAdapter(getActivity(), R.layout.welter_two_row_no_image, raceDataTypeList, this);
         getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         setListAdapter(adapter);
-        adapter.getFilter().filter("");
     }
 
     @Override
@@ -95,10 +96,8 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         // initialize view
         initListElements(false);
 
-        if (adapter != null) {
-            adapter.getFilter().filter("");
-            adapter.notifyDataSetChanged();
-        }
+        adapter.getFilter().filter("");
+        notifyDataChanged();
     }
 
     @Override
@@ -205,14 +204,19 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
                 }
             }
         }
-        if (adapter != null) {
-            adapter.getFilter().filter("");
-            adapter.notifyDataSetChanged();
-        }
+        refilterList();
     }
 
     public void onJuryFlagClicked(BoatClassSeriesDataFleet clicked) {
-        // / TODO: implement.
+        magicFilterString = magicFilterString.equals("") ? "nofilter" : ""; 
+        refilterList();
+    }
+
+    private void refilterList() {
+        if (adapter != null) {
+            adapter.getFilter().filter(magicFilterString);
+            adapter.notifyDataSetChanged();
+        }
     }
 
     @Override

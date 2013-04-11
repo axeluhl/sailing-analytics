@@ -105,7 +105,10 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     }
 
     protected void switchToInfoFragment() {
-        switchToInfoFragment(infoFragmentChooser.choose(getRace()));
+        RaceFragment newInfoFragment = infoFragmentChooser.choose(getRace());
+        if (infoFragment == null || !newInfoFragment.getClass().equals(infoFragment.getClass())) {
+            switchToInfoFragment(newInfoFragment);            
+        }
     }
 
     protected void switchToInfoFragment(RaceFragment choosenFragment) {

@@ -63,4 +63,9 @@ public class AbortTypeSelectionDialog extends RaceDialogFragment {
         fragment.show(fragmentManager, dialogName);
         this.dismiss();
     }
+
+    @Override
+    public void notifyTick() {
+        
+    }
 }

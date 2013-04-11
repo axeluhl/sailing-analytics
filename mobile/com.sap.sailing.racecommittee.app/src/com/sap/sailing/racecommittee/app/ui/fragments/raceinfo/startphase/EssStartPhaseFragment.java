@@ -12,9 +12,13 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.EssStartPhaseEventListener;
@@ -81,6 +85,32 @@ public class EssStartPhaseFragment extends RaceFragment implements EssStartPhase
                 infoListener.onResetTime();
             }
         });
+        
+        setupUi();
+    }
+
+    private void setupUi() {
+        RaceLog log = getRace().getState().getRaceLog();
+        log.lockForRead();
+        try {
+            RaceLogEvent lastEvent = log.getLastFixAtOrBefore(MillisecondsTimePoint.now());
+            if (lastEvent instanceof RaceLogFlagEvent) {
+                RaceLogFlagEvent flagEvent = (RaceLogFlagEvent) lastEvent;
+                Flags flag = flagEvent.getUpperFlag();
+                
+                if (!flagEvent.isDisplayed() && flag.equals(Flags.AP)) {
+                    onAPDown();
+                } else if (flagEvent.isDisplayed() && flag.equals(Flags.ESSTHREE)) {
+                    onEssThreeUp();
+                } else if (flagEvent.isDisplayed() && flag.equals(Flags.ESSTWO)) {
+                    onEssTwoUp(); 
+                } else if (flagEvent.isDisplayed() && flag.equals(Flags.ESSONE)) {
+                    onEssOneUp();
+                }
+            }
+        } finally {
+            log.unlockAfterRead();
+        }
     }
     
     @Override

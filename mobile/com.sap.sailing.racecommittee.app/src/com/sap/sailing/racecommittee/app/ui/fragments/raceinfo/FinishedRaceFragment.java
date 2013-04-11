@@ -8,7 +8,9 @@ import java.util.Date;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.common.TimePoint;
@@ -48,6 +50,17 @@ public class FinishedRaceFragment extends RaceFragment {
         finishTimeView.setText(getFinishTimeText());
         timeLimitView.setText(getTimeLimitText());
         protestStartTimeView.setText(getProtestStartTimeText());
+        
+        Button positioningButton = (Button) getView().findViewById(R.id.buttonPositioning);
+        positioningButton.setOnClickListener(new OnClickListener() {
+            
+            @Override
+            public void onClick(View v) {
+                PositioningFragment fragment = new PositioningFragment();
+                fragment.setArguments(PositioningFragment.createArguments(getRace()));
+                fragment.show(getFragmentManager(), null);
+            }
+        });
     }
 
     private CharSequence getProtestStartTimeText() {
@@ -55,8 +68,17 @@ public class FinishedRaceFragment extends RaceFragment {
         return getString(R.string.empty);
     }
 
+    private TimePoint getTimeLimit() {
+        TimePoint startTime = getRace().getState().getStartTime();
+        TimePoint firstBoatTime = getRace().getState().getFinishingStartTime();
+        if (startTime == null || firstBoatTime == null) {
+            return null;
+        }
+        return firstBoatTime.plus((long)((firstBoatTime.asMillis() - startTime.asMillis()) * 0.75));
+    }
+
     private CharSequence getTimeLimitText() {
-        TimePoint timeLimit = null;
+        TimePoint timeLimit = getTimeLimit();
         if (timeLimit != null) {
             return String.format("%s %s", getString(R.string.race_time_limit),
                     getFormattedTime(timeLimit.asDate()));
