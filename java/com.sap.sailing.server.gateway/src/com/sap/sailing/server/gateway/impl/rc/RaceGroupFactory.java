@@ -68,14 +68,17 @@ public class RaceGroupFactory {
     private Collection<RaceRow> getRows(Series series, List<RaceColumn> raceColumns) {
         Collection<RaceRow> rows = new ArrayList<>();
         for (Fleet fleet : series.getFleets()) {
-            rows.add(new RaceRowImpl(fleet, getCells(fleet, raceColumns)));
+            // We are taking the fleet name because there might be several "default fleet"
+            // objects when TrackedRaces are linked onto this Leaderboard
+            rows.add(new RaceRowImpl(fleet, getCells(fleet.getName(), raceColumns)));
         }
         return rows;
     }
 
-    private Collection<RaceCell> getCells(Fleet fleet, List<RaceColumn> raceColumns) {
+    private Collection<RaceCell> getCells(String fleetName, List<RaceColumn> raceColumns) {
         Collection<RaceCell> cells = new ArrayList<>();
         for (RaceColumn raceColumn : raceColumns) {
+            Fleet fleet = raceColumn.getFleetByName(fleetName);
             Collection<Competitor> competitors = new ArrayList<Competitor>();
             if (raceColumn.getRaceDefinition(fleet) != null) {
                 Util.addAll(raceColumn.getRaceDefinition(fleet).getCompetitors(), competitors);
