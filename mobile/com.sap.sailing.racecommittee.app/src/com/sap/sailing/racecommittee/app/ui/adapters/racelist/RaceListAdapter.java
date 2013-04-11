@@ -40,8 +40,8 @@ public class RaceListAdapter extends ArrayAdapter<RaceListDataType> {
     private List<RaceListDataType> items;
     private List<RaceListDataType> originalItems;
 
-    public RaceListAdapter(Context context, int textViewResourceId, 
-            List<RaceListDataType> objects, JuryFlagClickedListener juryListener) {
+    public RaceListAdapter(Context context, int textViewResourceId, List<RaceListDataType> objects,
+            JuryFlagClickedListener juryListener) {
         super(context, textViewResourceId, objects);
         this.items = objects;
         this.originalItems = new ArrayList<RaceListDataType>();
@@ -52,24 +52,23 @@ public class RaceListAdapter extends ArrayAdapter<RaceListDataType> {
 
     @Override
     public int getCount() {
-        synchronized(mLock) {
-            return items!=null ? items.size() : 0;  
+        synchronized (mLock) {
+            return items != null ? items.size() : 0;
         }
     }
 
     @Override
     public RaceListDataType getItem(int position) {
         RaceListDataType element = null;
-        synchronized(mLock) {
-            element = items!=null ? items.get(position) : null;
+        synchronized (mLock) {
+            element = items != null ? items.get(position) : null;
         }
         return element;
     }
 
     @Override
     public int getItemViewType(int position) {
-        return (getItem(position) instanceof RaceListDataTypeTitle ? VIEW_BOAT_GROUP
-                : VIEW_RACE);
+        return (getItem(position) instanceof RaceListDataTypeTitle ? VIEW_BOAT_GROUP : VIEW_RACE);
     }
 
     @Override
@@ -81,7 +80,6 @@ public class RaceListAdapter extends ArrayAdapter<RaceListDataType> {
     public boolean isEnabled(int position) {
         return (getItem(position) instanceof RaceListDataTypeElement);
     }
-
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -154,8 +152,15 @@ public class RaceListAdapter extends ArrayAdapter<RaceListDataType> {
         protected FilterResults performFiltering(CharSequence constraint) {
             // Initiate our results object
             FilterResults results = new FilterResults();
-            List<RaceListDataType> dataTypeList = new ArrayList<RaceListDataType>();
 
+            results.values = originalItems;
+            results.count = originalItems.size();
+
+            if (constraint.length() > 0) {
+                return results;
+            }
+
+            List<RaceListDataType> dataTypeList = new ArrayList<RaceListDataType>();
             if (originalItems.isEmpty()) {
                 originalItems = new ArrayList<RaceListDataType>(items.size());
                 for (RaceListDataType type : items) {
@@ -164,63 +169,62 @@ public class RaceListAdapter extends ArrayAdapter<RaceListDataType> {
             }
 
             if (originalItems.isEmpty()) {
-                results.values = items;
-                results.count = items.size();
-            } else {
-                Map<RaceListDataTypeTitle, List<RaceListDataTypeElement>> elementMap
-                = new TreeMap<RaceListDataTypeTitle, List<RaceListDataTypeElement>>(new RaceListDataTypeTitleComparator());
-                RaceListDataTypeTitle currentTitle = null;
-
-                for (RaceListDataType element : originalItems) {
-                    if (element instanceof RaceListDataTypeTitle) {
-                        currentTitle = (RaceListDataTypeTitle) element;
-                        elementMap.put(currentTitle, new ArrayList<RaceListDataTypeElement>());
-                    } else if (element instanceof RaceListDataTypeElement) {
-                        RaceListDataTypeElement listElement = (RaceListDataTypeElement) element;
-                        if (elementMap.containsKey(currentTitle)) {
-                            elementMap.get(currentTitle).add(listElement);
-                        }
-                    }
-                }
-
-                for (RaceListDataTypeTitle title : elementMap.keySet()) {
-                    dataTypeList.add(title);
-                    List<RaceListDataTypeElement> elementList = elementMap.get(title);
-                    Collections.sort(elementList, new RaceListDataTypeElementComparator());
-                    RaceListDataTypeElement lastFinishedRace = null;
-                    int numberOfUnscheduledRaces = 0;
-
-                    for (RaceListDataTypeElement dataElement : elementList) {
-                        if (dataElement.getRace().getStatus().equals(RaceLogRaceStatus.FINISHED)) {
-                            lastFinishedRace = dataElement;
-                        }
-                    }
-
-                    for (RaceListDataTypeElement dataElement : elementList) {
-                        if (dataElement.getRace().getStatus().equals(RaceLogRaceStatus.UNSCHEDULED)) {
-                            numberOfUnscheduledRaces++;
-                            if (numberOfUnscheduledRaces > 1)
-                                continue;
-                        } else if (dataElement.getRace().getStatus().equals(RaceLogRaceStatus.FINISHED)) {
-                            if (!dataElement.equals(lastFinishedRace)) {
-                                continue;
-                            }
-                        }
-                        dataTypeList.add(dataElement);
-
-                    }
-                }
-
-                results.values = dataTypeList;
-                results.count = dataTypeList.size();
+                return results;
             }
-            return results;	
+            Map<RaceListDataTypeTitle, List<RaceListDataTypeElement>> elementMap = new TreeMap<RaceListDataTypeTitle, List<RaceListDataTypeElement>>(
+                    new RaceListDataTypeTitleComparator());
+            RaceListDataTypeTitle currentTitle = null;
+
+            for (RaceListDataType element : originalItems) {
+                if (element instanceof RaceListDataTypeTitle) {
+                    currentTitle = (RaceListDataTypeTitle) element;
+                    elementMap.put(currentTitle, new ArrayList<RaceListDataTypeElement>());
+                } else if (element instanceof RaceListDataTypeElement) {
+                    RaceListDataTypeElement listElement = (RaceListDataTypeElement) element;
+                    if (elementMap.containsKey(currentTitle)) {
+                        elementMap.get(currentTitle).add(listElement);
+                    }
+                }
+            }
+
+            for (RaceListDataTypeTitle title : elementMap.keySet()) {
+                dataTypeList.add(title);
+                List<RaceListDataTypeElement> elementList = elementMap.get(title);
+                Collections.sort(elementList, new RaceListDataTypeElementComparator());
+                RaceListDataTypeElement lastFinishedRace = null;
+                int numberOfUnscheduledRaces = 0;
+
+                for (RaceListDataTypeElement dataElement : elementList) {
+                    if (dataElement.getRace().getStatus().equals(RaceLogRaceStatus.FINISHED)) {
+                        lastFinishedRace = dataElement;
+                    }
+                }
+
+                for (RaceListDataTypeElement dataElement : elementList) {
+                    if (dataElement.getRace().getStatus().equals(RaceLogRaceStatus.UNSCHEDULED)) {
+                        numberOfUnscheduledRaces++;
+                        if (numberOfUnscheduledRaces > 1)
+                            continue;
+                    } else if (dataElement.getRace().getStatus().equals(RaceLogRaceStatus.FINISHED)) {
+                        if (!dataElement.equals(lastFinishedRace)) {
+                            continue;
+                        }
+                    }
+                    dataTypeList.add(dataElement);
+
+                }
+            }
+
+            results.values = dataTypeList;
+            results.count = dataTypeList.size();
+
+            return results;
         }
 
         @SuppressWarnings("unchecked")
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
-            synchronized(mLock) {
+            synchronized (mLock) {
                 items = (List<RaceListDataType>) results.values;
                 notifyDataSetChanged();
             }
