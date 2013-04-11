@@ -1225,7 +1225,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI, 
             String courseDesignUpdateURI, boolean trackWind, final boolean correctWindByDeclination, final boolean simulateWithStartTimeNow, 
             String tracTracUsername, String tracTracPassword) throws Exception {
-        logger.info("tracWithTracTrac for regatta "+regattaToAddTo+" for race records "+rrs+" with liveURI "+liveURI+" and storedUDI "+storedURI);
+        logger.info("tracWithTracTrac for regatta "+regattaToAddTo+" for race records "+rrs+" with liveURI "+liveURI+" and storedURI "+storedURI);
         for (TracTracRaceRecordDTO rr : rrs) {
             if (liveURI == null || liveURI.trim().length() == 0) {
                 liveURI = rr.liveURI;
