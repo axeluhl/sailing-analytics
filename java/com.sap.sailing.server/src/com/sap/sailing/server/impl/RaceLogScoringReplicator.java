@@ -48,7 +48,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
 
     @Override
     public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
-        return false;
+        return true;
     }
 
     @Override
@@ -94,7 +94,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
 
     @Override
     public boolean isTransient() {
-        return false;
+        return true;
     }
     
     /**
