@@ -1,0 +1,19 @@
+package com.sap.sailing.gwt.ui.client;
+
+import com.sap.sailing.domain.common.impl.Util.Pair;
+
+public abstract class AbstractFilter<FilterObjectType, ValueType> implements Filter<FilterObjectType, ValueType> {
+    protected ValueType filterValue;
+    protected FilterOperators filterOperator;
+    
+    @Override
+    public Pair<FilterOperators, ValueType> getConfiguration() {
+        return new Pair<FilterOperators, ValueType>(filterOperator, filterValue);
+    }
+
+    @Override
+    public void setConfiguration(Pair<FilterOperators, ValueType> filterValueAndOperator) {
+        filterOperator = filterValueAndOperator.getA();
+        filterValue = filterValueAndOperator.getB();
+    }
+}

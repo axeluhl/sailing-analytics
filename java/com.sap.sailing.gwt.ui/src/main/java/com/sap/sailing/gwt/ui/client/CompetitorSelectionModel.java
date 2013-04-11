@@ -20,9 +20,16 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     private final ColorMap<CompetitorDTO> competitorsColorMap;
     
+    private FilterSet<CompetitorDTO> competitorsFilterSet; 
+
     public CompetitorSelectionModel(boolean hasMultiSelection) {
+        this(hasMultiSelection, null);
+    }
+
+    public CompetitorSelectionModel(boolean hasMultiSelection, FilterSet<CompetitorDTO> competitorsFilterSet) {
         super();
         this.hasMultiSelection = hasMultiSelection;
+        this.competitorsFilterSet = competitorsFilterSet;
         this.allCompetitors = new HashSet<CompetitorDTO>();
         this.selectedCompetitors = new LinkedHashSet<CompetitorDTO>();
         this.listeners = new HashSet<CompetitorSelectionChangeListener>();
@@ -196,5 +203,14 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         
         return null;
     }
+
+    public FilterSet<CompetitorDTO> getCompetitorsFilterSet() {
+        return competitorsFilterSet;
+    }
+
+    public void setCompetitorsFilterSet(FilterSet<CompetitorDTO> competitorsFilterSet) {
+        this.competitorsFilterSet = competitorsFilterSet;
+    }
+
 
 }
