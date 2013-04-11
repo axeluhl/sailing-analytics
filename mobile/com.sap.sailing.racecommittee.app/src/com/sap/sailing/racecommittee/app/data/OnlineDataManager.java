@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.Collection;
 
 import android.content.Context;
@@ -162,10 +163,14 @@ public class OnlineDataManager extends DataManager {
         
         ManagedRaceIdentifier identifier = managedRace.getIdentifier();
         
+        String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName());
+        String raceColumnName = URLEncoder.encode(identifier.getRaceName());
+        String fleetName = URLEncoder.encode(identifier.getFleet().getName());
+        
         try {
             new DataLoader<Collection<Mark>>(context, URI.create(AppConstants.getServerBaseURL(context)
-                    + "/sailingserver/rc/marks?leaderboard=" + identifier.getRaceGroup().getName() + "&raceColumn=" + identifier.getRaceName() 
-                    + "&fleet=" + identifier.getFleet().getName()), parser, handler)
+                    + "/sailingserver/rc/marks?leaderboard=" + raceGroupName + "&raceColumn=" + raceColumnName 
+                    + "&fleet=" + fleetName), parser, handler)
                     .forceLoad();
         } catch (MalformedURLException e) {
             e.printStackTrace();
