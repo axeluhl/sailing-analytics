@@ -18,7 +18,6 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
     private List<FleetDTO> fleets;
     private Map<FleetDTO, RegattaAndRaceIdentifier> trackedRaceIdentifiersPerFleet;
     private Map<FleetDTO, RaceDTO> racesPerFleet;
-    private Map<FleetDTO, RaceInfoDTO> raceInfoPerFleet;
     private Boolean isValidInTotalScore;
     private Double explicitFactor;
     private double effectiveFactor;
@@ -45,17 +44,8 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
         racesPerFleet = new HashMap<FleetDTO, RaceDTO>();
         fleets = new ArrayList<FleetDTO>();
         whenLastTrackedRaceWasLiveByFleet = new HashMap<FleetDTO, Date>();
-        raceInfoPerFleet = new HashMap<FleetDTO, RaceInfoDTO>();
     }
     
-    public Map<FleetDTO, RaceInfoDTO> getRaceInfoPerFleet() {
-        return raceInfoPerFleet;
-    }
-
-    public void setRaceInfoPerFleet(Map<FleetDTO, RaceInfoDTO> raceLogsPerFleet) {
-        this.raceInfoPerFleet = raceLogsPerFleet;
-    }
-
     public boolean isValidInTotalScore() {
         return isValidInTotalScore;
     }
@@ -68,11 +58,6 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
         return explicitFactor;
     }
     
-    public RaceInfoDTO getRaceInfo(FleetDTO fleet){
-        //TODO handle non-existence
-        return raceInfoPerFleet.get(fleet);
-    }
-
     public void setExplicitFactor(Double explicitFactor) {
         this.explicitFactor = explicitFactor;
     }
