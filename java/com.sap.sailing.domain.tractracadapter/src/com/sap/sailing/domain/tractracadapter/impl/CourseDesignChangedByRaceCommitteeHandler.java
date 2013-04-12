@@ -38,7 +38,7 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
     private final URI courseDesignUpdateURI;
     private final String tracTracUsername;
     private final String tracTracPassword;
-    private final Serializable regattaId;
+    private final Serializable tracTracEventId;
     private final Serializable raceId;
     
     private final static String HttpPostRequestMethod = "POST";
@@ -49,11 +49,11 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
     private final static String CourseUpdateUrlTemplate = "%s?eventid=%s&raceid=%s&username=%s&password=%s";
     private final static String ResponseCodeForFailure = "FAILURE";
     
-    public CourseDesignChangedByRaceCommitteeHandler(URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, Serializable regattaId, Serializable raceId) {
+    public CourseDesignChangedByRaceCommitteeHandler(URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, Serializable tracTracEventId, Serializable raceId) {
         this.courseDesignUpdateURI = courseDesignUpdateURI;
         this.tracTracUsername = tracTracUsername;
         this.tracTracPassword = tracTracPassword;
-        this.regattaId = regattaId;
+        this.tracTracEventId = tracTracEventId;
         this.raceId = raceId;
         this.courseSerializer = new CourseJsonSerializer(
                 new CourseBaseJsonSerializer(
@@ -116,7 +116,7 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
     private URL buildCourseUpdateURL() throws MalformedURLException, UnsupportedEncodingException {
         String url = String.format(CourseUpdateUrlTemplate, 
                 this.courseDesignUpdateURI.toString(), 
-                URLEncoder.encode(this.regattaId.toString(), EncodingUtf8), 
+                URLEncoder.encode(this.tracTracEventId.toString(), EncodingUtf8), 
                 URLEncoder.encode(this.raceId.toString(), EncodingUtf8),
                 URLEncoder.encode(tracTracUsername, EncodingUtf8),
                 URLEncoder.encode(tracTracPassword, EncodingUtf8));
