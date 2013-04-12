@@ -191,7 +191,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * reaching legs are computed as the along-track distance. For upwind/downwind legs it's taken to be the
      * along-wind projection. With this distance measure, the competitors speed and bearing before the maneuver,
      * as defined by <code>timePointBeforeManeuver</code> is extrapolated until <code>timePointAfterManeuver</code>,
-     * and the resulting extrapolated position's "windward distance" is computed to the competitor's actual position
+     * and the resulting extrapolated position's "windward distance" is compared to the competitor's actual position
      * at that time. This distance is returned as the result of this method. 
      */
     Distance getManeuverLoss(TimePoint timePointBeforeManeuver, TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) throws NoWindException;

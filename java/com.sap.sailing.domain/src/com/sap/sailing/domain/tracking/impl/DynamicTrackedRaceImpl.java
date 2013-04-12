@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -649,6 +650,17 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public boolean raceIsKnownToStartUpwind() {
         return raceIsKnownToStartUpwind;
+    }
+
+    @Override
+    public void onCourseDesignChangedByRaceCommittee(CourseBase newCourseDesign) {
+        try {
+            if (courseDesignChangedListener != null) {
+                courseDesignChangedListener.courseDesignChanged(newCourseDesign);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

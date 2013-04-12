@@ -18,9 +18,9 @@
 		    android:layout_width="32dp"
 		    android:layout_height="32dp" 
 		    android:gravity="center_horizontal|center_vertical"
-		    android:contentDescription="@string/buoyImage"/>
+		    android:contentDescription="@string/markImage"/>
         <TextView
-            android:id="@+id/Welter.Cell.OneRowThreeColumns.columnOne.txtLeftBuoy"
+            android:id="@+id/Welter.Cell.OneRowThreeColumns.columnOne.txtLeftMark"
             android:layout_width="100dp"
             android:layout_height="match_parent"
             android:padding="5dp"
@@ -47,9 +47,9 @@
 		    android:layout_width="32dp"
 		    android:layout_height="32dp"
 		    android:gravity="center_horizontal|center_vertical" 
-		    android:contentDescription="@string/buoyImage"/>
+		    android:contentDescription="@string/markImage"/>
         <TextView
-        android:id="@+id/Welter.Cell.OneRowThreeColumns.columnThree.txtRightBuoy"
+        android:id="@+id/Welter.Cell.OneRowThreeColumns.columnThree.txtRightMark"
         android:layout_width="100dp"
         android:layout_height="match_parent"
         android:padding="5dp"
