@@ -23,6 +23,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
+import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrectionMetadata;
 
 public class RaceLogScoringReplicator implements RaceColumnListener {
     
@@ -107,6 +108,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         
         int numberOfCompetitorsInLeaderboard = Util.size(leaderboard.getCompetitors());
         int numberOfCompetitorsInRace;
+        boolean scoreHasBeenCorrected = false;
         
         numberOfCompetitorsInRace = getNumberOfCompetitorsInRace(raceColumn, fleet, numberOfCompetitorsInLeaderboard);
         
@@ -123,6 +125,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
                         Double trackedNetPoints = leaderboard.getNetPoints(positionedCompetitor.getA(), raceColumn, timePoint);
                         if (trackedNetPoints == null || !trackedNetPoints.equals(scoreByRaceCommittee)) {
                             applyScoreCorrectionOperation(leaderboard, raceColumn, positionedCompetitor.getA(), scoreByRaceCommittee, timePoint);
+                            scoreHasBeenCorrected = true;
                         }
                     } catch (NoWindException ex) {
                         ex.printStackTrace();
@@ -132,8 +135,13 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
                     MaxPointsReason maxPointsReasonByRaceCommittee = positionedCompetitor.getB();
                     if (!maxPointsReasonByRaceCommittee.equals(trackedMaxPointsReason)) {
                         applyMaxPointsReasonOperation(leaderboard, raceColumn, positionedCompetitor.getA(), maxPointsReasonByRaceCommittee, timePoint);
+                        scoreHasBeenCorrected = true;
                     }
                 }
+            }
+            
+            if (scoreHasBeenCorrected) {
+                applyMetadataUpdate(leaderboard, timePoint, "Update triggered by racecommittee app.");
             }
         }
     }
@@ -145,6 +153,11 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     
     private void applyMaxPointsReasonOperation(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, MaxPointsReason reason, TimePoint timePoint) {
         RacingEventServiceOperation<?> operation = new UpdateLeaderboardMaxPointsReason(leaderboard.getName(), raceColumn.getName(), competitor.getId().toString(), reason, timePoint);
+        service.apply(operation);
+    }
+    
+    private void applyMetadataUpdate(Leaderboard leaderboard, TimePoint timePointOfLastCorrectionValidity, String comment) {
+        RacingEventServiceOperation<?> operation = new UpdateLeaderboardScoreCorrectionMetadata(leaderboard.getName(), timePointOfLastCorrectionValidity, comment);
         service.apply(operation);
     }
 
