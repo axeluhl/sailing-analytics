@@ -372,8 +372,26 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
             break;
         case Preliminary:
         case Final:
-            if (leaderboard.getScoreCorrection() != null) {
+            if (leaderboard.getScoreCorrection() != null && leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity() != null) {
                 result = leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity();
+                
+                // As we don't have implemented bug 1246 (Define a clear result state for races and leaderboards) so far
+                // we need to make sure that the timpoint for the final state is not determined in the middle of a running race,
+                // because this would deliver not only final results but also some "mixed-in" live results.
+                // Therefore we move the timepoint to the latest known end of race before the score correction timepoint.
+                // This won't work for fleet races when a race can finish during another race is running.
+                TimePoint lastestEndOfRaceBeforeScoreCorrection = null;
+                for(TrackedRace trackedRace: leaderboard.getTrackedRaces()) {
+                    TimePoint endOfRace = trackedRace.getEndOfRace();
+                    if(endOfRace != null && endOfRace.before(result)) {
+                        if(lastestEndOfRaceBeforeScoreCorrection == null || endOfRace.after(lastestEndOfRaceBeforeScoreCorrection)) {
+                            lastestEndOfRaceBeforeScoreCorrection = endOfRace; 
+                        }
+                    }
+                }
+                if(lastestEndOfRaceBeforeScoreCorrection != null) {
+                    result = lastestEndOfRaceBeforeScoreCorrection;
+                }
             }
             break;
         }
