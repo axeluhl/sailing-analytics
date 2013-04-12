@@ -19,6 +19,16 @@ public class LockUtil {
     private static final Map<Thread, Map<Lock, Integer>> lockCounts = new ConcurrentHashMap<Thread, Map<Lock,Integer>>();
     
     /**
+     * Remembers which lock counts have been propagated from the A thread of the key pair to the B thread of the key pair.
+     * This is important to remember because after calling {@link #propagateLockSet(Thread, Thread)} the <code>from</code> thread
+     * may still acquire new locks before the <code>to</code> thread calls {@link #unpropagateLockSetFrom(Thread)}, and therefore
+     * the lock set held by the <code>from</code> thread can grow. (Note that it cannot shrink because the guarantee expressed by
+     * propagating locks is that after the propagation the <code>from</code> thread does not release any locks until the locks
+     * are again unpropagated.
+     */
+    private static final Map<Util.Pair<Thread, Thread>, Map<Lock, Integer>> propagated = new ConcurrentHashMap<Util.Pair<Thread,Thread>, Map<Lock,Integer>>();
+    
+    /**
      * Bug <a href="http://bugs.sun.com/view_bug.do?bug_id=6822370">http://bugs.sun.com/view_bug.do?bug_id=6822370</a> seems
      * dangerous, particularly if it happens in a <code>LiveLeaderboardUpdater</code> thread. Even though the bug is reported to
      * have been fixed in JDK 7(b79) we should be careful. This method tries to acquire a lock, allowing for five seconds to pass.
@@ -70,12 +80,23 @@ public class LockUtil {
     }
     
     public static void lockForRead(NamedReentrantReadWriteLock lock) {
-        if (isInCurrentThreadsLockSet(lock.readLock())) {
-            incrementLockCountForCurrentThread(lock.readLock());
-        } else {
+        if (!ifIsInCurrentThreadsLockSetThenIncrementLockCount(lock.readLock())) {
             lock(lock.readLock(), lock.getReadLockName(), lock);
-            addToCurrentThreadsLockSet(lock.readLock());
+            incrementLockCountForCurrentThread(lock.readLock());
         }
+    }
+    
+    private static boolean ifIsInCurrentThreadsLockSetThenIncrementLockCount(Lock lock) {
+        final boolean result;
+        synchronized (getCurrentThreadsLockCounts()) {
+            if (isInCurrentThreadsLockSet(lock)) {
+                result = true;
+                incrementLockCountForCurrentThread(lock);
+            } else {
+                result = false;
+            }
+        }
+        return result;
     }
     
     private static Map<Lock, Integer> getCurrentThreadsLockCounts() {
@@ -84,64 +105,84 @@ public class LockUtil {
     }
 
     private static Map<Lock, Integer> getLockCounts(final Thread thread) {
+        // don't synchronize all the frequent read accesses
         Map<Lock, Integer> result = lockCounts.get(thread);
         if (result == null) {
-            result = new HashMap<Lock, Integer>();
-            lockCounts.put(thread, result);
+            // but if we need to create a new entry, ensure that this doesn't happen concurrently
+            synchronized (lockCounts) {
+                result = lockCounts.get(thread);
+                if (result == null) {
+                    result = new HashMap<Lock, Integer>();
+                    lockCounts.put(thread, result);
+                }
+            }
         }
         return result;
     }
     private static void incrementLockCountForCurrentThread(Lock lock) {
         Map<Lock, Integer> map = getCurrentThreadsLockCounts();
-        assert map.containsKey(lock);
-        map.put(lock, map.get(lock) + 1);
+        synchronized (map) {
+            final int newValue;
+            if (map.containsKey(lock)) {
+                newValue = map.get(lock) + 1;
+            } else {
+                newValue = 1;
+            }
+            map.put(lock, newValue);
+        }
     }
     
     private static void decrementLockCountForCurrentThread(Lock lock) {
         Map<Lock, Integer> map = getCurrentThreadsLockCounts();
-        assert map.containsKey(lock);
-        map.put(lock, map.get(lock)-1);
+        synchronized (map) {
+            assert map.containsKey(lock);
+            final int newValue = map.get(lock) - 1;
+            if (newValue == 0) {
+                map.remove(lock);
+            } else {
+                map.put(lock, newValue);
+            }
+        }
     }
 
     private static boolean isInCurrentThreadsLockSet(Lock lock) {
         return getCurrentThreadsLockCounts().containsKey(lock);
     }
 
-    private static void addToCurrentThreadsLockSet(Lock lock) {
-        getCurrentThreadsLockCounts().put(lock, 1);
-    }
-    
-    private static void removeFromCurrentThreadsLockSet(Lock lock) {
-        getCurrentThreadsLockCounts().remove(lock);
-    }
-
     public static void unlockAfterRead(NamedReentrantReadWriteLock lock) {
         assert isInCurrentThreadsLockSet(lock.readLock());
-        if (getCurrentThreadsLockCounts().get(lock.readLock()) == 1) {
+        if (getCurrentThreadsLockCountSynchronzied(lock.readLock()) == 1) {
             lock.readLock().unlock();
-            removeFromCurrentThreadsLockSet(lock.readLock());
+            decrementLockCountForCurrentThread(lock.readLock());
         } else {
             decrementLockCountForCurrentThread(lock.readLock());
         }
     }
     
     public static void lockForWrite(NamedReentrantReadWriteLock lock) {
-        if (isInCurrentThreadsLockSet(lock.writeLock())) {
-            incrementLockCountForCurrentThread(lock.writeLock());
-        } else {
+        if (!ifIsInCurrentThreadsLockSetThenIncrementLockCount(lock.writeLock())) {
             lock(lock.writeLock(), lock.getWriteLockName(), lock);
-            addToCurrentThreadsLockSet(lock.writeLock());
+            incrementLockCountForCurrentThread(lock.writeLock());
             synchronized (lastTimeWriteLockWasObtained) {
                 lastTimeWriteLockWasObtained.put(lock, MillisecondsTimePoint.now());
             }
         }
     }
     
+    private static int getCurrentThreadsLockCountSynchronzied(Lock lock) {
+        Map<Lock, Integer> currentThreadLockCounts = getCurrentThreadsLockCounts();
+        final int result;
+        synchronized (currentThreadLockCounts) {
+            result = currentThreadLockCounts.get(lock);
+        }
+        return result;
+    }
+    
     public static void unlockAfterWrite(NamedReentrantReadWriteLock lock) {
         assert isInCurrentThreadsLockSet(lock.writeLock());
-        if (getCurrentThreadsLockCounts().get(lock.writeLock()) == 1) {
+        if (getCurrentThreadsLockCountSynchronzied(lock.writeLock()) == 1) {
             lock.writeLock().unlock();
-            removeFromCurrentThreadsLockSet(lock.writeLock());
+            decrementLockCountForCurrentThread(lock.writeLock());
             final TimePoint timePointWriteLockWasObtained;
             synchronized (lastTimeWriteLockWasObtained) {
                 timePointWriteLockWasObtained = lastTimeWriteLockWasObtained.get(lock);
@@ -177,30 +218,62 @@ public class LockUtil {
     }
 
     /**
-     * ATTENTION: Calling this method makes a very strong assertion! It asserts that the calling thread
-     * will call {@link #unpropagateLockSetFrom(Thread)} for the same <code>thread</code> passed to this
-     * call before <code>thread</code> releases any of the locks it currently holds. The effect of making
-     * this call is that the calling thread, when trying to acquire a lock already held by <code>thread</code>,
-     * will not actually acquire that lock again. This, in particular, has the effect that a read lock
-     * already held by <code>thread</code> will not have to be acquired again, which in turn avoids a
-     * read-read deadlock on a fair lock in case another thread is attempting to acquire the corresponding
-     * write lock before the current thread tries to re-acquire the read lock.<p>
+     * ATTENTION: Calling this method makes a very strong assertion! It asserts that the calling thread will call
+     * {@link #unpropagateLockSetFrom(Thread)} for the same <code>from</code> thread passed to this call before
+     * <code>from</code> releases any of the locks it currently holds. The effect of making this call is that the
+     * calling thread, when trying to acquire a lock already held by <code>from</code>, will not actually acquire that
+     * lock again. This, in particular, has the effect that a read lock already held by <code>from</code> will not
+     * have to be acquired again, which in turn avoids a read-read deadlock on a <em>fair</em> lock in case another
+     * thread is attempting to acquire the corresponding write lock before the current thread tries to re-acquire the
+     * read lock.
+     * <p>
      * 
-     * Always use this in a <code>try/finally</code> combination where in the <code>finally</code> you call
+     * Always use this in a <code>try/finally</code> combination where in the <code>finally</code> block you call
      * {@link #unpropagateLockSetFrom(Thread)}.
      */
-    public static void propagateLockSetFrom(Thread thread) {
-        Map<Lock, Integer> otherMap = lockCounts.get(thread);
-        if (otherMap != null) {
-            Map<Lock, Integer> currentMap = getCurrentThreadsLockCounts();
-            for (Map.Entry<Lock, Integer> otherEntry : otherMap.entrySet()) {
-                if (currentMap.containsKey(otherEntry.getKey())) {
-                    currentMap.put(otherEntry.getKey(), currentMap.get(otherEntry.getKey()) + otherEntry.getValue());
-                } else {
-                    currentMap.put(otherEntry.getKey(), otherEntry.getValue());
+    public static void propagateLockSetFrom(Thread from) {
+        Thread to = Thread.currentThread();
+        propagateLockSet(from, to);
+    }
+
+    private static void propagateLockSet(Thread from, Thread to) {
+        Map<Lock, Integer> fromMap = lockCounts.get(from);
+        if (fromMap != null) {
+            // first synchronize fromMap, then toMap; this way, no deadlock can occur as long as propagation works in the same direction
+            synchronized (fromMap) {
+                Map<Lock, Integer> propagatedLockCounts = new HashMap<Lock, Integer>(fromMap);
+                propagated.put(new Util.Pair<Thread, Thread>(from, to), propagatedLockCounts);
+                Map<Lock, Integer> toMap = getLockCounts(to);
+                synchronized (toMap) {
+                    for (Map.Entry<Lock, Integer> otherEntry : fromMap.entrySet()) {
+                        if (toMap.containsKey(otherEntry.getKey())) {
+                            toMap.put(otherEntry.getKey(), toMap.get(otherEntry.getKey()) + otherEntry.getValue());
+                        } else {
+                            toMap.put(otherEntry.getKey(), otherEntry.getValue());
+                        }
+                    }
                 }
             }
         }
+    }
+    
+    /**
+     * ATTENTION: Calling this method makes a very strong assertion! It asserts that the calling thread will not call
+     * {@link #unpropagateLockSetTo(Thread)} for the same <code>to</code> thread passed to this call before the calling
+     * thread releases any of the locks it currently holds. The effect of making this call is that the <code>to</code>
+     * thread, when trying to acquire a lock already held by the calling thread, will not actually acquire that lock
+     * again. This, in particular, has the effect that a read lock already held by the calling thread will not have to
+     * be acquired again by <code>to</code>, which in turn avoids a read-read deadlock on a <em>fair</em> lock in case
+     * another thread is attempting to acquire the corresponding write lock before <code>to</code> tries to re-acquire
+     * the read lock.
+     * <p>
+     * 
+     * Always use this in a <code>try/finally</code> combination where in the <code>finally</code> block you call
+     * {@link #unpropagateLockSetTo(Thread)}.
+     */
+    public static void propagateLockSetTo(Thread to) {
+        Thread from = Thread.currentThread();
+        propagateLockSet(from, to);
     }
 
     /**
@@ -209,14 +282,34 @@ public class LockUtil {
      * at the time {@link #propagateLockSetFrom(Thread)} was called by the current thread with <code>thread</code> as
      * the argument.
      */
-    public static void unpropagateLockSetFrom(Thread thread) {
-        Map<Lock, Integer> otherMap = lockCounts.get(thread);
-        if (otherMap != null) {
-            Map<Lock, Integer> currentMap = getCurrentThreadsLockCounts();
-            for (Map.Entry<Lock, Integer> otherEntry : otherMap.entrySet()) {
-                assert currentMap.containsKey(otherEntry.getKey());
-                currentMap.put(otherEntry.getKey(), currentMap.get(otherEntry.getKey()) - otherEntry.getValue());
+    public static void unpropagateLockSetFrom(Thread from) {
+        Thread to = Thread.currentThread();
+        unpropagateLockSet(from, to);
+    }
+
+    private static void unpropagateLockSet(Thread from, Thread to) {
+        Map<Lock, Integer> fromMap = propagated.get(new Util.Pair<Thread, Thread>(from, to));
+        if (fromMap != null) {
+            synchronized (fromMap) {
+                Map<Lock, Integer> toMap = getLockCounts(to);
+                synchronized (toMap) {
+                    for (Map.Entry<Lock, Integer> otherEntry : fromMap.entrySet()) {
+                        assert toMap.containsKey(otherEntry.getKey());
+                        toMap.put(otherEntry.getKey(), toMap.get(otherEntry.getKey()) - otherEntry.getValue());
+                    }
+                }
             }
         }
+    }
+    
+    /**
+     * A thread that previously propagated the lock set to another thread by using {@link #propagateLockSetTo(Thread)}
+     * ends the propagation with this call. After this call, the current thread is free to release any locks it held
+     * at the time {@link #propagateLockSetTo(Thread)} was called by the current thread with <code>to</code> as
+     * the argument.
+     */
+    public static void unpropagateLockSetTo(Thread to) {
+        Thread from = Thread.currentThread();
+        unpropagateLockSet(from, to);
     }
 }
