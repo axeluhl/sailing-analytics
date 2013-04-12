@@ -228,27 +228,4 @@ public class SmartFutureCacheTest {
         System.out.println("Tasks re-used: "+sfc.getSmartFutureCacheTaskReuseCounter());
         assertEquals(updatesTriggeredFor.size(), updateWasCalled.size());
     }
-    
-    /**
-     * When the thread reading a value from the cache holds a fair read lock, and another thread is trying to obtain the
-     * corresponding write lock, and the cache updating method tries to acquire the read lock as well, lock propagation
-     * used to work only if the reader caused the synchronous triggering of the computing method. For asynchronous triggers,
-     * a read-read deadlock could occur because no lock propagation was supported from the reading to the computing thread.
-     * This test belongs to bug 1344 (http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=1344).<p>
-     * 
-     * There are two variants to be tested. Either the computing thread runs into the lock before the reader gets to call
-     * {@link SmartFutureCache#get(Object, boolean)} and times out trying to obtain the read lock while the reader propagates
-     * its locks so the computing thread gets it based on the propagation in the second try; or the computing thread hasn't
-     * tried to obtain the lock yet. In this case, the propagation from the reading thread happens first, and the first
-     * computing thread's attempt to obtain the read lock will succeed.<p>
-     * 
-     * Doing white-box testing, further variants include whether or not the reading thread synchronously triggers the computing
-     * thread (e.g., with the cache in suspended mode and the reading thread demanding the latest results). If it does, the computing
-     * thread will itself propagate the locks from the reading thread to the computing thread. A test should verify that this doesn't
-     * conflict with how the lock propagation is triggered pro-actively by the reading thread.
-     */
-    @Test
-    public void testReadReadDeadlockBetweenGetterAndTrigger() {
-        
-    }
 }
