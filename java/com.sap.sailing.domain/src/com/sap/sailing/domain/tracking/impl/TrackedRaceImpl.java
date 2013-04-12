@@ -1498,7 +1498,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         synchronized (locksForMarkPassings) {
             NamedReentrantReadWriteLock lock = locksForMarkPassings.get(markPassings);
             if (lock == null) {
-                lock = new NamedReentrantReadWriteLock("mark passings lock for "+markPassings, /* fair */ false);
+                lock = new NamedReentrantReadWriteLock("mark passings lock for tracked race "+getRace().getName(), /* fair */ false);
                 locksForMarkPassings.put(markPassings, lock);
             }
             return lock;
