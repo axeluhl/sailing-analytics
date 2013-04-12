@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.List;
+import java.util.UUID;
 
 
 import com.maptrack.client.io.TypeController;
@@ -189,7 +190,7 @@ public interface DomainFactory {
      */
     DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta, Race race,
             Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword);
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword);
 
     /**
      * The record may be for a single mark or a gate. If for a gate, the

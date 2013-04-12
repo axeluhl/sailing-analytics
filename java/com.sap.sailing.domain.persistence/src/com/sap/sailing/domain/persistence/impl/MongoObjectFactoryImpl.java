@@ -573,7 +573,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent) {
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));       
-        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFinishPositioningListChangedEvent(finishPositioningConfirmedEvent));
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFinishPositioningConfirmedEvent(finishPositioningConfirmedEvent));
         return result;
     }
 
@@ -666,7 +666,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    private Object storeRaceLogFinishPositioningListChangedEvent(RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent) {
+    private Object storeRaceLogFinishPositioningConfirmedEvent(RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(finishPositioningConfirmedEvent, result);
 

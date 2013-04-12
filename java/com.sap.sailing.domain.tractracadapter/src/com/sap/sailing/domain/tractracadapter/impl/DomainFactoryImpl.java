@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
@@ -452,7 +453,7 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta,
             Race race, Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) {
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword) {
         synchronized (raceCache) {
             RaceDefinition raceDefinition = raceCache.get(race);
             if (raceDefinition == null) {
@@ -467,9 +468,9 @@ public class DomainFactoryImpl implements DomainFactory {
                             delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
                     logger.info("Added race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta());
                     
-                    CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler(courseDesignUpdateURI, 
+                    CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler(courseDesignUpdateURI,
                             tracTracUsername, tracTracPassword,
-                            trackedRegatta.getRegatta().getId(), raceDefinition.getId());
+                            tracTracEventUuid, raceDefinition.getId());
                     trackedRace.setCourseDesignChangedListener(courseDesignHandler);
                     
                     synchronized (raceCache) {
