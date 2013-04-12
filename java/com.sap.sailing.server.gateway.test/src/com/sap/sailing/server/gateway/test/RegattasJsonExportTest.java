@@ -28,23 +28,18 @@ public class RegattasJsonExportTest extends AbstractJsonExportTest {
     @Before
     public void setUp() {
         super.setUp();
-        
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();
         List<String> raceColumnNames = new ArrayList<String>();
-
         fleets.add(new FleetImpl("Fleet1"));
         fleets.add(new FleetImpl("Fleet2"));
-
-        raceColumnNames.add("R1");
-        raceColumnNames.add("R2");
-        
         Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, fleets,
                 raceColumnNames, /* trackedRegattaRegistry */null);
         series.add(testSeries);
-
         racingEventService.createRegatta(regattaName, boatClassName, UUID.randomUUID(), series, /*persistent*/ true,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+        testSeries.addRaceColumn("R1", /* trackedRegattaRegistry */ null);
+        testSeries.addRaceColumn("R2", /* trackedRegattaRegistry */ null);
     }
 
     @Test
