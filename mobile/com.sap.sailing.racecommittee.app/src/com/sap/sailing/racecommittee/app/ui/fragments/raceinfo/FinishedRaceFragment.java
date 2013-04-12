@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
 public class FinishedRaceFragment extends RaceFragment {
@@ -129,6 +130,12 @@ public class FinishedRaceFragment extends RaceFragment {
     @Override
     public void notifyTick() {
         
+    }
+    
+    @Override
+    public void onStart() {
+        super.onStart();
+        ExLog.w(FinishedRaceFragment.class.getName(), String.format("Fragment %s is now shown", FinishedRaceFragment.class.getName()));
     }
 
 }

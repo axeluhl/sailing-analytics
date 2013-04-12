@@ -84,6 +84,12 @@ public class SetStartTimeRaceFragment extends RaceFragment {
 
         refreshTimePickerTime();
     }
+    
+    @Override
+    public void onStart() {
+        super.onStart();
+        ExLog.w(SetStartTimeRaceFragment.class.getName(), String.format("Fragment %s is now shown", SetStartTimeRaceFragment.class.getName()));
+    }
 
     public void notifyTick() {
         refreshDifferenceTime();

@@ -145,6 +145,12 @@ public class FinishingRaceFragment extends RaceFragment {
         AlertDialog alert = builder.create();
         alert.show();
     }
+    
+    @Override
+    public void onStart() {
+        super.onStart();
+        ExLog.w(FinishingRaceFragment.class.getName(), String.format("Fragment %s is now shown", FinishingRaceFragment.class.getName()));
+    }
 
     public void notifyTick() {
         if (getRace().getState().getStartTime() == null)
