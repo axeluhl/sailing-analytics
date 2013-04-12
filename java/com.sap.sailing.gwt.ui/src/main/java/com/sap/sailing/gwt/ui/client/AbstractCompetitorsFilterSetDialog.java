@@ -160,8 +160,15 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
     private ListBox createFilterSelectionListBox(Filter<CompetitorDTO,?> filter) {
         Iterable<FilterOperators> supportedOperators = filter.getSupportedOperators();
         ListBox operatorsListBox = this.createListBox(false);
+        int i = 0;
         for(FilterOperators op: supportedOperators) {
             operatorsListBox.addItem(op.name());
+            if(filter.getConfiguration().getA() != null && filter.getConfiguration().getA().equals(op)) {
+                operatorsListBox.setSelectedIndex(i);
+            } else if (filter.getDefaultOperator() != null && filter.getDefaultOperator().equals(op)) {
+                operatorsListBox.setSelectedIndex(i);
+            }
+            i++;
         }
         filterOperatorSelectionListBoxes.add(operatorsListBox);
         return operatorsListBox;
