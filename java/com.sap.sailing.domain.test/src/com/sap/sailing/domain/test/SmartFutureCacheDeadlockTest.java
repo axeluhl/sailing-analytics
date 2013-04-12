@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.Before;
@@ -39,6 +40,8 @@ import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
  * @author Axel Uhl (D043530)
  */
 public class SmartFutureCacheDeadlockTest {
+    private static final Logger logger = Logger.getLogger(SmartFutureCacheDeadlockTest.class.getName());
+    
     private static final String RESULT = "result";
     private static final String CACHE_KEY = "cacheKey";
     private NamedReentrantReadWriteLock lock;
@@ -57,11 +60,14 @@ public class SmartFutureCacheDeadlockTest {
                     @Override
                     public String computeCacheUpdate(String key, EmptyUpdateInterval updateInterval) throws Exception {
                         computingThread = Thread.currentThread();
+                        logger.info("Trying to obtain read lock for "+lock.getName()+" in thread "+computingThread.getName());
                         LockUtil.lockForRead(lock);
                         try {
+                            logger.info("Successfully obtained read lock for "+lock.getName()+" in thread "+computingThread.getName());
                             return RESULT;
                         } finally {
                             LockUtil.unlockAfterRead(lock);
+                            logger.info("Unlocked read lock for "+lock.getName()+" in thread "+computingThread.getName());
                         }
                     }
                 }, "SmartFutureCacheTest.testSuspendAndResume");
@@ -96,9 +102,16 @@ public class SmartFutureCacheDeadlockTest {
     
     @Test
     public void testReadReadDeadlockBetweenGetterAndTrigger() throws InterruptedException {
+        sfc.suspend();
+        sfc.triggerUpdate(CACHE_KEY, /* update interval */ null); // queues the update, but get(CACHE_KEY, true) will now trigger recalculation synchronously
         reader.performAndWait(Command.LOCK_FOR_READ);
-//        writer.perform(Command.LOCK_FOR_WRITE);
-        reader.performAndWait(Command.UNLOCK_AFTER_READ);
+        writer.perform(Command.LOCK_FOR_WRITE);
+        // in suspended mode, the following will trigger a re-calculation immediately,
+        // and the locks from the readerThread will be propagated to the computing thread
+        reader.performAndWait(Command.GET_LATEST_FROM_CACHE);
+        assertNotNull(computingThread);
+        reader.performAndWait(Command.UNLOCK_AFTER_READ); // this shall unblock the writer
+        writer.performAndWait(Command.UNLOCK_AFTER_WRITE);
     }
     
     @After
@@ -119,6 +132,7 @@ public class SmartFutureCacheDeadlockTest {
         GET_FROM_CACHE, GET_LATEST_FROM_CACHE }
 
     private static class LockingScript implements Runnable {
+        private static final Logger logger = Logger.getLogger(LockingScript.class.getName());
         private boolean running;
         private final SmartFutureCache<String, String, EmptyUpdateInterval> sfc;
         private final NamedReentrantReadWriteLock lock;
@@ -164,6 +178,7 @@ public class SmartFutureCacheDeadlockTest {
             Command command;
             try {
                 while ((command=commandQueue.take()) != Command.EXIT) {
+                    logger.info("Took command "+command.name()+" in thread "+Thread.currentThread().getName());
                     switch (command) {
                     case LOCK_FOR_READ:
                         LockUtil.lockForRead(lock);
@@ -189,6 +204,7 @@ public class SmartFutureCacheDeadlockTest {
                         sfc.triggerUpdate(CACHE_KEY, /* updateInterval */ null);
                         break;
                     }
+                    logger.info("Done processing command "+command.name()+" in thread "+Thread.currentThread().getName());
                     synchronized (this) {
                         notifyAll(); // unblock wait in performAndWait
                     }
