@@ -10,6 +10,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -17,7 +18,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
 public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog<FilterSet<CompetitorDTO>> {
     private final FilterSet<CompetitorDTO> competitorsFilterSet;
@@ -49,6 +49,23 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         @Override
         public String getErrorMessage(FilterSet<CompetitorDTO> competitorsFilterSet) {
             String errorMessage = null;
+
+            int filterCount = competitorsFilterSet.getFilters().size();
+            boolean nameNotEmpty = competitorsFilterSet.getName() != null && competitorsFilterSet.getName().length() > 0;
+            if (!nameNotEmpty) {
+                errorMessage = stringMessages.pleaseEnterAName();
+            } else if(filterCount < 1) {
+                errorMessage = "Please define at least one filter.";
+            } else {
+                for(Filter<CompetitorDTO, ?> filter: competitorsFilterSet.getFilters()) {
+                    Object filterValue = filter.getConfiguration().getB();
+                    if(filterValue == null) {
+                        errorMessage = stringMessages.pleaseEnterAValue();
+                        break;
+                    }
+                }
+            }
+
             return errorMessage;
         }
     }
@@ -107,6 +124,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
                     createFilterDeleteButton(selectedFilter);
                 }
                 updateCompetitorsFiltersGrid(mainPanel);
+                validate();
             }
         });       
        
@@ -150,14 +168,27 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
     }
 
     private Widget createFilterValueWidget(Filter<CompetitorDTO,?> filter) {
-        String defaultValue = null;
-        if(filter.getConfiguration().getB() != null) {
-            defaultValue = filter.getConfiguration().getB().toString(); 
+        Widget filterValueWidget = null;
+        if(filter.getValueType().equals(String.class)) {
+            String initialValue = null;
+            if(filter.getConfiguration().getB() != null) {
+                initialValue = (String) filter.getConfiguration().getB(); 
+            }
+            TextBox textBox = createTextBox(initialValue); 
+            textBox.setVisibleLength(20);
+            textBox.setFocus(true);
+            filterValueWidget = textBox;
+        } else if(filter.getValueType().equals(Integer.class)) {
+            Integer initialValue = null;
+            if(filter.getConfiguration().getB() != null) {
+                initialValue = (Integer) filter.getConfiguration().getB(); 
+            }
+            IntegerBox integerBox = createIntegerBox(initialValue, 20); 
+            integerBox.setFocus(true);
+            filterValueWidget = integerBox;
         }
-        TextBox textBox = createTextBox(defaultValue); 
-        textBox.setVisibleLength(20);
-        filterValueFields.add(textBox);
-        return textBox; 
+        filterValueFields.add(filterValueWidget);        
+        return filterValueWidget; 
     }
 
     private Widget createFilterDeleteButton(Filter<CompetitorDTO,?> filter) {
@@ -209,12 +240,14 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             ListBox operatorSelectionListbox = filterOperatorSelectionListBoxes.get(i);
             FilterOperators op = FilterOperators.valueOf(operatorSelectionListbox.getItemText(operatorSelectionListbox.getSelectedIndex()));
             if(filter.getValueType().equals(Integer.class)) {
+                IntegerBox integerBox = (IntegerBox) filterValueFields.get(i);
                 Filter<CompetitorDTO,Integer> newFilter = (Filter<CompetitorDTO, Integer>) filter.copy();
-                newFilter.setConfiguration(new Pair<FilterOperators, Integer>(op, 3));
+                newFilter.setConfiguration(new Pair<FilterOperators, Integer>(op, integerBox.getValue()));
                 result.addFilter(newFilter);
             } else if(filter.getValueType().equals(String.class)) {
+                TextBox textBox = (TextBox) filterValueFields.get(i);
                 Filter<CompetitorDTO,String> newFilter = (Filter<CompetitorDTO, String>) filter.copy();
-                newFilter.setConfiguration(new Pair<FilterOperators, String>(op, "Hallo"));
+                newFilter.setConfiguration(new Pair<FilterOperators, String>(op, textBox.getText()));
                 result.addFilter(newFilter);
             }
         }

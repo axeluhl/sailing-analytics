@@ -10,14 +10,21 @@ public class CompetitorNationalityFilter extends AbstractFilter<CompetitorDTO, S
     
     static {
         supportedOperators = new ArrayList<FilterOperators>();
-        supportedOperators.add(FilterOperators.GreaterThan);
-        supportedOperators.add(FilterOperators.LessThan);
+        supportedOperators.add(FilterOperators.Equals);
+        supportedOperators.add(FilterOperators.NotEqualTo);
+        supportedOperators.add(FilterOperators.Contains);
+        supportedOperators.add(FilterOperators.NotContains);
     }
     
     public CompetitorNationalityFilter() {
-        filterValue = null;
+        super();
     }
 
+    @Override
+    public FilterOperators getDefaultOperator() {
+        return FilterOperators.Equals;
+    }
+    
     public Class<String> getValueType() {
         return String.class;
     }

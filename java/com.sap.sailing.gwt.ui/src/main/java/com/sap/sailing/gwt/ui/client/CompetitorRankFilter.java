@@ -14,7 +14,9 @@ public class CompetitorRankFilter extends AbstractFilter<CompetitorDTO, Integer>
     static {
         supportedOperators = new ArrayList<FilterOperators>();
         supportedOperators.add(FilterOperators.GreaterThan);
+        supportedOperators.add(FilterOperators.GreaterThanEquals);
         supportedOperators.add(FilterOperators.LessThan);
+        supportedOperators.add(FilterOperators.LessThanEquals);
     }
     
     public Class<Integer> getValueType() {
@@ -22,9 +24,15 @@ public class CompetitorRankFilter extends AbstractFilter<CompetitorDTO, Integer>
     }
 
     public CompetitorRankFilter() {
-        filterValue = -1;
+        super();
     }
 
+
+    @Override
+    public FilterOperators getDefaultOperator() {
+        return FilterOperators.GreaterThanEquals;
+    }
+    
     @Override
     public Collection<CompetitorDTO> filter(Collection<CompetitorDTO> competitors) {
         Set<CompetitorDTO> result = new LinkedHashSet<CompetitorDTO>();

@@ -5,6 +5,8 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 public interface Filter<FilterObjectType, ValueType> {
     Iterable<FilterOperators> getSupportedOperators();
 
+    FilterOperators getDefaultOperator();
+
     Class<ValueType> getValueType();
     
     Pair<FilterOperators, ValueType> getConfiguration();
