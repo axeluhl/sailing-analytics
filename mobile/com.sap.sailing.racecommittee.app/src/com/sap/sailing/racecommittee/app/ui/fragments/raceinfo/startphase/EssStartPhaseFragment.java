@@ -118,7 +118,9 @@ public class EssStartPhaseFragment extends RaceFragment implements EssStartPhase
         super.onStart();
         
         getRace().getState().getStartProcedure().setEssStartPhaseEventListener(this);
+        ExLog.w(EssStartPhaseFragment.class.getName(), String.format("Fragment %s is now shown", EssStartPhaseFragment.class.getName()));
     }
+    
     
     @Override
     public void onStop() {

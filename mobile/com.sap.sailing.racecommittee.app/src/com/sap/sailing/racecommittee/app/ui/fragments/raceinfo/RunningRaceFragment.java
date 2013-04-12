@@ -119,6 +119,12 @@ public class RunningRaceFragment extends RaceFragment implements IndividualRecal
         alert.show();
     }
     
+    @Override
+    public void onStart() {
+        super.onStart();
+        ExLog.w(RunningRaceFragment.class.getName(), String.format("Fragment %s is now shown", RunningRaceFragment.class.getName()));
+    }
+    
     public void notifyTick() {
         if (getRace().getState().getStartTime() == null)
             return;

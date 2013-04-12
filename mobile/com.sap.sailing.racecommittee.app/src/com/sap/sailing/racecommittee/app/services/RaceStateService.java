@@ -164,7 +164,9 @@ public class RaceStateService extends Service {
         TimePoint eventTime = new MillisecondsTimePoint(intent.getExtras().getLong(AppConstants.RACING_EVENT_TIME));
         
         if (getString(R.string.intentActionAlarmAction).equals(action)) {
-            race.getState().getStartProcedure().dispatchFiredEventTimePoint(race.getState().getStartTime(), eventTime);
+            if (race.getState().getStartTime() != null) {
+                race.getState().getStartProcedure().dispatchFiredEventTimePoint(race.getState().getStartTime(), eventTime);
+            }
             managedIntents.get(race.getId()).remove(intent);
             return;
         } else if (getString(R.string.intentActionIndividualRecallRemoval).equals(action)) {
