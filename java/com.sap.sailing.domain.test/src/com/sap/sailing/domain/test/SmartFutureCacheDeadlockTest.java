@@ -102,6 +102,7 @@ public class SmartFutureCacheDeadlockTest {
     
     @Test
     public void testReadReadDeadlockBetweenGetterAndTriggerInSynchronousScenario() throws InterruptedException {
+        long start = System.currentTimeMillis();
         sfc.suspend();
         sfc.triggerUpdate(CACHE_KEY, /* update interval */ null); // queues the update, but get(CACHE_KEY, true) will now trigger recalculation synchronously
         reader.performAndWait(Command.LOCK_FOR_READ);
@@ -112,6 +113,8 @@ public class SmartFutureCacheDeadlockTest {
         assertNotNull(computingThread);
         reader.performAndWait(Command.UNLOCK_AFTER_READ); // this shall unblock the writer
         writer.performAndWait(Command.UNLOCK_AFTER_WRITE);
+        assertTrue(System.currentTimeMillis()-start < 5000); // must not take longer than 5s, otherwise a locking conflict must have occurred;
+        // see also LockUtil.NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK
     }
     
     @Test

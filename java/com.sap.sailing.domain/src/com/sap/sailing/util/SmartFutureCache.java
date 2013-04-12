@@ -215,6 +215,10 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
 
         private final Thread callerThread;
 
+        private Thread executingThread;
+
+        private Thread gettingThread;
+
         public FutureTaskWithCancelBlocking(final K key, final U updateInterval,
                 final boolean callerWaitsSynchronouslyForResult, final Thread callerThread) {
             this(new SettableCallable<V>(), key, updateInterval, callerWaitsSynchronouslyForResult, callerThread);
@@ -251,14 +255,49 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         }
         
         @Override
+        public V get() throws InterruptedException, ExecutionException {
+            final Thread propagatedToExecutingThread;
+            synchronized (this) {
+                gettingThread = Thread.currentThread();
+                propagatedToExecutingThread = executingThread;
+                if (propagatedToExecutingThread != null) {
+                    logger.finest("propagating lock set from "+gettingThread.getName()+" to "+propagatedToExecutingThread.getName());
+                    LockUtil.propagateLockSetTo(propagatedToExecutingThread);
+                }
+            }
+            try {
+                return super.get();
+            } finally {
+                synchronized (this) {
+                    if (propagatedToExecutingThread != null) {
+                        logger.finest("unpropagating lock set from "+gettingThread.getName()+" to "+propagatedToExecutingThread.getName());
+                        LockUtil.unpropagateLockSetTo(propagatedToExecutingThread);
+                    }
+                    gettingThread = null;
+                }
+            }
+        }
+
+        @Override
         public V call() {
             try {
                 final U updateInterval;
+                final Thread locksPropagatedFromGettingThread;
                 synchronized (this) {
                     updateInterval = getUpdateInterval();
+                    locksPropagatedFromGettingThread = gettingThread;
+                    executingThread = Thread.currentThread();
+                    if (locksPropagatedFromGettingThread != null) {
+                        // get() was called and hasn't returned yet; propagate locks from getting thread
+                        LockUtil.propagateLockSetFrom(locksPropagatedFromGettingThread);
+                        logger.finest("propagating lock set from "+locksPropagatedFromGettingThread.getName()+" to "+executingThread.getName());
+                    }
                     runningAndReadUpdateInterval = true;
                 }
-                if (callerWaitsSynchronouslyForResult) {
+                // make sure we don't propagate from the same thread twice in case gettingThread == callerThread
+                if (callerWaitsSynchronouslyForResult && callerThread != locksPropagatedFromGettingThread) {
+                    logger.finest("propagating lock set from "+locksPropagatedFromGettingThread.getName()+" to "+executingThread.getName()+
+                            " due to synchronous execution");
                     LockUtil.propagateLockSetFrom(callerThread);
                 }
                 try {
@@ -275,13 +314,22 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                         ongoingRecalculations.remove(key);
                     }
                 } finally {
-                    if (callerWaitsSynchronouslyForResult) {
+                    synchronized (this) {
+                        if (locksPropagatedFromGettingThread != null) {
+                            logger.finest("unpropagating lock set from "+locksPropagatedFromGettingThread.getName()+" to "+executingThread.getName());
+                            LockUtil.unpropagateLockSetFrom(locksPropagatedFromGettingThread);
+                        }
+                        executingThread = null;
+                    }
+                    if (callerWaitsSynchronouslyForResult && callerThread != locksPropagatedFromGettingThread) {
+                        logger.finest("unpropagating lock set from "+locksPropagatedFromGettingThread.getName()+" to "+executingThread.getName()+
+                                " due to synchronous execution");
                         LockUtil.unpropagateLockSetFrom(callerThread);
                     }
                 }
             } catch (Exception e) {
                 // cache won't be updated
-                logger.log(Level.SEVERE, "triggerUpdate", e);
+                logger.log(Level.SEVERE, "SmartFutureCache.FutureTaskWithCancelBlocking.call", e);
                 throw new RuntimeException(e);
             }
         }
