@@ -3078,7 +3078,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (event != null) {
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
                 for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
-                    if (leaderboard.getDefaultCourseArea() == courseArea) {
+                    if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea().equals(courseArea)) {
                         String regattaName = getRegattaNameFromLeaderboard(leaderboard);
                         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                             for (Fleet fleet : raceColumn.getFleets()) {
