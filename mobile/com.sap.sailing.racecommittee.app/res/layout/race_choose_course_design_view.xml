@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:dslv="http://schemas.android.com/apk**/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:baselineAligned="false"
@@ -21,7 +22,7 @@
         <TextView
     	        android:text="@string/make_new_course"
     	        android:id="@+id/textMakeNewCourse"
-    	        android:layout_width="300dp"
+    	        android:layout_width="350dp"
     	        android:layout_height="wrap_content"
             	android:layout_weight="1"
             	android:textSize="14pt"
@@ -37,40 +38,56 @@
             	android:textStyle="bold"
             	android:gravity="center_vertical|center_horizontal"/>
     </LinearLayout>
-    <LinearLayout 
+
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="500dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical|center_horizontal">    
-        	<ListView 
-    	        android:id="@+id/listViewPreviousCourse"
-    	        android:layout_width="300dp"
-    	        android:layout_height="fill_parent"
-    	        android:layout_marginRight="20dp"
-    	        android:gravity="center_horizontal|center_vertical"/>	    
-    	    <ListView 
-    	        android:id="@+id/listViewNewCourse"
-    	        android:layout_width="300dp"
-    	        android:layout_height="fill_parent"
-    	        android:layout_marginRight="20dp"
-    	        android:gravity="center_horizontal|center_vertical"/>
-    	    <GridView 
-    	        android:id="@+id/gridViewAssets"
-    	        android:layout_width="400dp" 
-				android:layout_height="fill_parent"
-				android:columnWidth="100dp"
-				android:numColumns="auto_fit"
-				android:verticalSpacing="10dp"
-				android:horizontalSpacing="10dp"
-				android:stretchMode="columnWidth"
-				android:gravity="center"/>
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="horizontal" >
+
+        <ListView
+            android:id="@+id/listViewPreviousCourse"
+            android:layout_width="300dp"
+            android:layout_height="fill_parent"
+            android:layout_marginRight="20dp"
+            android:gravity="center_horizontal|center_vertical" />
+
+        <com.mobeta.android.dslv.DragSortListView
+            android:id="@+id/listViewNewCourse"
+            android:layout_width="350dp"
+            android:layout_height="fill_parent"
+            android:layout_gravity="left"
+            android:layout_marginRight="20dp"
+            android:gravity="center_horizontal|center_vertical"
+            android:verticalSpacing="5dp"
+            dslv:collapsed_height="2dp"
+            dslv:drag_enabled="true"
+            dslv:drag_scroll_start="0.33"
+            dslv:float_alpha="0.6"
+            dslv:max_drag_scroll_speed="0.5"
+            dslv:slide_shuffle_speed="0.3"
+            dslv:track_drag_sort="false"
+            dslv:use_default_controller="false" />
+
+        <GridView
+            android:id="@+id/gridViewAssets"
+            android:layout_width="400dp"
+            android:layout_height="fill_parent"
+            android:columnWidth="100dp"
+            android:gravity="center"
+            android:horizontalSpacing="10dp"
+            android:numColumns="auto_fit"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="10dp" />
+
     </LinearLayout>
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" 
         android:paddingTop="20dp"
-        android:paddingBottom="10dp">
+        android:paddingBottom="10dp"
+        android:paddingLeft="20dp">
 
         <Button
             android:id="@+id/publishCourseDesignButton"

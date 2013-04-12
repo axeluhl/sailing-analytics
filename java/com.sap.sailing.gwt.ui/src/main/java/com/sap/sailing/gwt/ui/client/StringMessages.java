@@ -514,6 +514,8 @@ public interface StringMessages extends Messages {
     String totalDistanceTraveledTooltip();
     String totalAverageSpeedOverGround();
     String totalAverageSpeedOverGroundTooltip();
+    String noStarttimeAnnouncedYet();
+    String lastFlag();
     String filterRegattasByName();
     String noRegattasYet();
     String cannotAddRacesToRegattaLeaderboardButOnlyToRegatta();
@@ -524,4 +526,12 @@ public interface StringMessages extends Messages {
     String timePointMustBeAfterStartOfTracking();
     String timePointMustBeBeforeEndOfTracking();
     String regattaUsedForTheTrackedRace();
+    String courseDesignUpdateUrl();
+    String passingSide();
+    String refreshNow();
+    String stopUpdating();
+    String startUpdating();
+    String currentTime();
+    String tractracUsername();
+    String tractracPassword();
 }

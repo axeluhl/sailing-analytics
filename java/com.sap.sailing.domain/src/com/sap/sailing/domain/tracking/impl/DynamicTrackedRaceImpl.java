@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -573,7 +574,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         TimePoint startOfTracking = getStartOfTracking();
         TimePoint endOfRace = getEndOfRace();
         TimePoint endOfTracking = getEndOfTracking();
-        // record wind fix only if it's still within reasonable time after the race has ended or the race hasn't ended yet
         if ((startOfTracking == null || !startOfTracking.after(wind.getTimePoint()) ||
                 (startOfRace != null && !startOfRace.after(wind.getTimePoint())))
             &&
@@ -650,6 +650,17 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public boolean raceIsKnownToStartUpwind() {
         return raceIsKnownToStartUpwind;
+    }
+
+    @Override
+    public void onCourseDesignChangedByRaceCommittee(CourseBase newCourseDesign) {
+        try {
+            if (courseDesignChangedListener != null) {
+                courseDesignChangedListener.courseDesignChanged(newCourseDesign);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.racelog;
 
+import com.sap.sailing.domain.common.racelog.Flags;
+
 public interface RaceLogFlagEvent extends RaceLogEvent {
 
     Flags getUpperFlag();

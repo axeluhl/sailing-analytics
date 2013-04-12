@@ -3,4 +3,5 @@
 <module>
   <source path='common'/>
   <source path='common/impl'/>
+  <source path='common/racelog'/>
 </module>

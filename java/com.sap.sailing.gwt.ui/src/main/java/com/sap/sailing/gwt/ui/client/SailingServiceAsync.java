@@ -40,10 +40,10 @@ import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RaceEventLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
@@ -90,8 +90,8 @@ public interface SailingServiceAsync {
      *            {@link TracTracRaceRecordDTO#storedURI} from the <code>rr</code> race record.
      */
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo,
-            Iterable<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
-            boolean simulateWithStartTimeNow, AsyncCallback<Void> callback);
+            Iterable<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
+            boolean simulateWithStartTimeNow, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs,
             String hostname, int port, boolean canSendRequests, boolean trackWind, boolean correctWindByDeclination,
@@ -103,7 +103,7 @@ public interface SailingServiceAsync {
 
     void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationDTO>> callback);
 
-    void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
+    void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI,  String tracTracUsername, String tracTracPassword,
             AsyncCallback<Void> callback);
 
     void stopTrackingEvent(RegattaIdentifier eventIdentifier, AsyncCallback<Void> callback);
@@ -422,8 +422,6 @@ public interface SailingServiceAsync {
 
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed, AsyncCallback<Void> asyncCallback);
 
-    void getRaceEventLog(AsyncCallback<RaceEventLogDTO> callback);
-
     void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor,
             AsyncCallback<Void> callback);
 
@@ -453,5 +451,10 @@ public interface SailingServiceAsync {
     void getPolarSheetsGenerationResults(String id, AsyncCallback<PolarSheetsData> asyncCallback);
 
     void getPolarSheetData(String polarSheetId, int angle, int windSpeed, AsyncCallback<PolarSheetsHistogramData> wrapperCallback);
+    
+    void getRegattaOverviewEntriesForEvent(String eventIdAsString, AsyncCallback<List<RegattaOverviewEntryDTO>> asyncCallback);
+    
+    void getEventByIdAsString(String eventIdAsString, AsyncCallback<EventDTO> asyncCallback);
+    
 }
 

@@ -39,10 +39,10 @@ import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RaceEventLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
@@ -72,7 +72,7 @@ public interface SailingService extends RemoteService {
     Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL) throws Exception;
 
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI,
-            String storedURI, boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow) throws Exception;
+            String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow, String tracTracUsername, String tracTracPassword) throws Exception;
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname, int port,
             boolean canSendRequests, boolean trackWind, boolean correctWindByDeclination) throws Exception;
@@ -80,7 +80,7 @@ public interface SailingService extends RemoteService {
     void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaces,
             boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow);
 
-    void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) throws Exception;
+    void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception;
 
     void stopTrackingEvent(RegattaIdentifier eventIdentifier) throws Exception;
 
@@ -296,9 +296,11 @@ public interface SailingService extends RemoteService {
     
     PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle, int windSpeed);
     
-    RaceEventLogDTO getRaceEventLog();
-    
     EventDTO getEventById(Serializable id);
     
     CourseAreaDTO createCourseArea(String eventIdAsString, String courseAreaName);
+    
+    List<RegattaOverviewEntryDTO> getRegattaOverviewEntriesForEvent(String eventIdAsString);
+    
+    EventDTO getEventByIdAsString(String eventIdAsString);
 }
