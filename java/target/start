@@ -1,4 +1,4 @@
 scriptdir=`dirname "$0"`
 LIB_DIR=`pwd`/native-libraries
 echo scriptdir is $scriptdir and LIB_DIR is $LIB_DIR
-"$JAVA_HOME/bin/java" -XX:+UseMembar -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx8192m -jar plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar -console -configuration ./ -clean
+nohup "$JAVA_HOME/bin/java" -XX:+UseMembar -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx8192m -jar plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar -console 14886 -configuration ./ -clean &
