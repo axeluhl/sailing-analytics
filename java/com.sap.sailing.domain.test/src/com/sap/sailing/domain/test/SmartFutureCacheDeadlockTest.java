@@ -101,7 +101,7 @@ public class SmartFutureCacheDeadlockTest {
     }
     
     @Test
-    public void testReadReadDeadlockBetweenGetterAndTrigger() throws InterruptedException {
+    public void testReadReadDeadlockBetweenGetterAndTriggerInSynchronousScenario() throws InterruptedException {
         sfc.suspend();
         sfc.triggerUpdate(CACHE_KEY, /* update interval */ null); // queues the update, but get(CACHE_KEY, true) will now trigger recalculation synchronously
         reader.performAndWait(Command.LOCK_FOR_READ);
@@ -112,6 +112,23 @@ public class SmartFutureCacheDeadlockTest {
         assertNotNull(computingThread);
         reader.performAndWait(Command.UNLOCK_AFTER_READ); // this shall unblock the writer
         writer.performAndWait(Command.UNLOCK_AFTER_WRITE);
+    }
+    
+    @Test
+    public void testReadReadDeadlockBetweenGetterAndTriggerInAsynchronousScenario() throws InterruptedException {
+        long start = System.currentTimeMillis();
+        reader.performAndWait(Command.LOCK_FOR_READ);
+        writer.perform(Command.LOCK_FOR_WRITE);
+        writer.waitUntilWaitingForLock();
+        sfc.triggerUpdate(CACHE_KEY, /* update interval */ null); // starts the update which 
+        // in suspended mode, the following will trigger a re-calculation immediately,
+        // and the locks from the readerThread will be propagated to the computing thread
+        reader.performAndWait(Command.GET_LATEST_FROM_CACHE);
+        assertNotNull(computingThread);
+        reader.performAndWait(Command.UNLOCK_AFTER_READ); // this shall unblock the writer
+        writer.performAndWait(Command.UNLOCK_AFTER_WRITE);
+        assertTrue(System.currentTimeMillis()-start < 5000); // must not take longer than 5s, otherwise a locking conflict must have occurred;
+        // see also LockUtil.NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK
     }
     
     @After
@@ -134,6 +151,7 @@ public class SmartFutureCacheDeadlockTest {
     private static class LockingScript implements Runnable {
         private static final Logger logger = Logger.getLogger(LockingScript.class.getName());
         private boolean running;
+        private boolean waitingForLock;
         private final SmartFutureCache<String, String, EmptyUpdateInterval> sfc;
         private final NamedReentrantReadWriteLock lock;
         private final BlockingQueue<Command> commandQueue;
@@ -144,15 +162,24 @@ public class SmartFutureCacheDeadlockTest {
             this.sfc = sfc;
         }
         
+        public void waitUntilWaitingForLock() throws InterruptedException {
+            synchronized (this) {
+                while (!waitingForLock) {
+                    wait();
+                }
+            }
+            Thread.sleep(10); // sleep a little to make it incredibly likely that the LockUtil.lockFor...(...) method now really acquires the lock
+        }
+
         public void perform(Command command) {
             commandQueue.offer(command);
         }
         
         public void performAndWait(Command command) throws InterruptedException {
             commandQueue.offer(command);
-            synchronized (this) {
+            synchronized (commandQueue) {
                 while (!commandQueue.isEmpty()) {
-                    wait();
+                    commandQueue.wait();
                 }
             }
         }
@@ -181,10 +208,20 @@ public class SmartFutureCacheDeadlockTest {
                     logger.info("Took command "+command.name()+" in thread "+Thread.currentThread().getName());
                     switch (command) {
                     case LOCK_FOR_READ:
+                        synchronized (this) {
+                            waitingForLock = true;
+                            notifyAll(); // as good as it gets; the lock statement is still outside the synchronized block
+                        }
                         LockUtil.lockForRead(lock);
+                        waitingForLock = false;
                         break;
                     case LOCK_FOR_WRITE:
+                        synchronized (this) {
+                            waitingForLock = true;
+                            notifyAll(); // as good as it gets; the lock statement is still outside the synchronized block
+                        }
                         LockUtil.lockForWrite(lock);
+                        waitingForLock = false;
                         break;
                     case UNLOCK_AFTER_READ:
                         LockUtil.unlockAfterRead(lock);
@@ -205,8 +242,8 @@ public class SmartFutureCacheDeadlockTest {
                         break;
                     }
                     logger.info("Done processing command "+command.name()+" in thread "+Thread.currentThread().getName());
-                    synchronized (this) {
-                        notifyAll(); // unblock wait in performAndWait
+                    synchronized (commandQueue) {
+                        commandQueue.notifyAll(); // unblock wait in performAndWait
                     }
                 }
             } catch (InterruptedException e) {
