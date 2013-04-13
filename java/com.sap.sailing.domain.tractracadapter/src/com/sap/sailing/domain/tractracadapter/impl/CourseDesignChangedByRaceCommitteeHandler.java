@@ -13,6 +13,7 @@ import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.logging.Logger;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -21,6 +22,7 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tractracadapter.CourseUpdateResponse;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -32,6 +34,8 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 
 public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignChangedListener {
+    
+    private final static Logger logger = Logger.getLogger(CourseDesignChangedByRaceCommitteeHandler.class.getName());
     
     private JsonSerializer<CourseBase> courseSerializer;
     private JsonDeserializer<CourseUpdateResponse> courseUpdateDeserializer;
@@ -76,17 +80,13 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
 
             sendWithPayload(connection, payload);
 
-            InputStream inputStream = connection.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            BufferedReader reader = getResponseOnCourseUpdateFromTracTrac(connection);
 
             try {
                 Object responseBody = JSONValue.parseWithException(reader);
                 JSONObject responseObject = Helpers.toJSONObjectSafe(responseBody);
 
-                CourseUpdateResponse courseUpdateResponse = courseUpdateDeserializer.deserialize(responseObject);
-                if (courseUpdateResponse.getStatus().equals(ResponseCodeForFailure)) {
-                    System.out.println(courseUpdateResponse.getMessage());
-                }
+                checkAndLogCourseUpdateResponse(responseObject);
             } catch (ParseException pe) {
                 pe.printStackTrace();
             }
@@ -94,8 +94,25 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
         } finally {
             if (connection != null) {
                 connection.disconnect();
+            } else {
+                logger.severe("Connection to TracTrac Course Update URL " + currentCourseDesignURL.toString() + " could not be established");
             }
         }
+    }
+
+    private void checkAndLogCourseUpdateResponse(JSONObject responseObject) throws JsonDeserializationException {
+        CourseUpdateResponse courseUpdateResponse = courseUpdateDeserializer.deserialize(responseObject);
+        if (courseUpdateResponse.getStatus().equals(ResponseCodeForFailure)) {
+            logger.severe("Failed to send new course to TracTrac, got following response: " + courseUpdateResponse.getMessage());
+        } else {
+            logger.info("Successfully sent course update to TracTrac with response: " + courseUpdateResponse.getMessage());
+        }
+    }
+
+    private BufferedReader getResponseOnCourseUpdateFromTracTrac(HttpURLConnection connection) throws IOException {
+        InputStream inputStream = connection.getInputStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        return reader;
     }
 
     private void sendWithPayload(HttpURLConnection connection, String payload) throws IOException {

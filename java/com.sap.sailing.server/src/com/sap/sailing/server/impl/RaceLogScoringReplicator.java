@@ -145,7 +145,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
             }
             
             if (scoreHasBeenCorrected) {
-                applyMetadataUpdate(leaderboard, timePoint, "Update triggered by racecommittee app.");
+                applyMetadataUpdate(leaderboard, timePoint, "Update triggered by Race Committee.");
             }
         }
     }
