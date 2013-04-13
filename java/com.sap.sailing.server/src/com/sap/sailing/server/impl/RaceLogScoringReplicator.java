@@ -32,6 +32,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     private static final long serialVersionUID = -5958519195756937338L;
     
     private final RacingEventService service;
+    private final static String CommentTextOnScoreCorrection = "Update triggered by Race Committee.";
     
     public RaceLogScoringReplicator(RacingEventService service) {
         this.service = service;
@@ -123,36 +124,68 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
                 
                 if (positionedCompetitor.getC().equals(MaxPointsReason.NONE)) {
                     try {
-                        if (!leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint).equals(MaxPointsReason.NONE)) {
-                            applyMaxPointsReasonOperation(leaderboard, raceColumn, competitor, MaxPointsReason.NONE, timePoint);
+                        if (resetMaxPointsReasonIfNecessary(leaderboard, raceColumn, timePoint, competitor)) {
                             scoreHasBeenCorrected = true;
                         }
                         
                         int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positioningList, positionedCompetitor);
 
-                        Double scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(raceColumn, competitor, rankByRaceCommittee, numberOfCompetitorsInRace);
-                        Double trackedNetPoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);
-                        if (trackedNetPoints == null || !trackedNetPoints.equals(scoreByRaceCommittee)) {
-                            applyScoreCorrectionOperation(leaderboard, raceColumn, competitor, scoreByRaceCommittee, timePoint);
+                        if (correctScoreInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, 
+                                competitor, rankByRaceCommittee)) {
                             scoreHasBeenCorrected = true;
                         }
+                        
                     } catch (NoWindException ex) {
                         ex.printStackTrace();
                     }
                 } else {
-                    MaxPointsReason trackedMaxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
-                    MaxPointsReason maxPointsReasonByRaceCommittee = positionedCompetitor.getC();
-                    if (!maxPointsReasonByRaceCommittee.equals(trackedMaxPointsReason)) {
-                        applyMaxPointsReasonOperation(leaderboard, raceColumn, competitor, maxPointsReasonByRaceCommittee, timePoint);
+                    if (setMaxPointsReasonInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, positionedCompetitor, competitor)) {
                         scoreHasBeenCorrected = true;
                     }
+                    
                 }
             }
             
             if (scoreHasBeenCorrected) {
-                applyMetadataUpdate(leaderboard, timePoint, "Update triggered by Race Committee.");
+                applyMetadataUpdate(leaderboard, timePoint, CommentTextOnScoreCorrection);
             }
         }
+    }
+
+    private boolean setMaxPointsReasonInLeaderboardIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn,
+            TimePoint timePoint, Triple<Serializable, String, MaxPointsReason> positionedCompetitor, Competitor competitor) {
+        boolean scoreHasBeenCorrected = false;
+        
+        MaxPointsReason trackedMaxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
+        MaxPointsReason maxPointsReasonByRaceCommittee = positionedCompetitor.getC();
+        if (!maxPointsReasonByRaceCommittee.equals(trackedMaxPointsReason)) {
+            applyMaxPointsReasonOperation(leaderboard, raceColumn, competitor, maxPointsReasonByRaceCommittee, timePoint);
+            scoreHasBeenCorrected = true;
+        }
+        return scoreHasBeenCorrected;
+    }
+
+    private boolean correctScoreInLeaderboardIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint, int numberOfCompetitorsInRace, 
+            Competitor competitor, int rankByRaceCommittee) throws NoWindException {
+        boolean scoreHasBeenCorrected = false;
+        
+        Double scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(raceColumn, competitor, rankByRaceCommittee, numberOfCompetitorsInRace);
+        Double trackedNetPoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);
+        
+        if (trackedNetPoints == null || !trackedNetPoints.equals(scoreByRaceCommittee)) {
+            applyScoreCorrectionOperation(leaderboard, raceColumn, competitor, scoreByRaceCommittee, timePoint);
+            scoreHasBeenCorrected = true;
+        }
+        return scoreHasBeenCorrected;
+    }
+
+    private boolean resetMaxPointsReasonIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint, Competitor competitor) {
+        boolean scoreHasBeenCorrected = false;
+        if (!leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint).equals(MaxPointsReason.NONE)) {
+            applyMaxPointsReasonOperation(leaderboard, raceColumn, competitor, MaxPointsReason.NONE, timePoint);
+            scoreHasBeenCorrected = true;
+        }
+        return scoreHasBeenCorrected;
     }
     
     private void applyScoreCorrectionOperation(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, Double correctedScore, TimePoint timePoint) {
