@@ -6,15 +6,25 @@
 
 To export data from MongoDB you simply have to use the monogexport command. It will export data to human readable JSON format. Make absolutely sure to use fields backed by an index in your query otherwise it can put MongoDB under heavy load and take ages.
 
-`/opt/mongodb/bin/mongoexport --port 10202 -d winddb -c WIND_TRACKS -q "{'REGATTA_NAME': 'ESS 2013 Muscat (Extreme40)'}" > tmp/ess2013-muscat-wind.json`
+#### Wind
 
-`/opt/mongodb/bin/mongoexport --port 10202 -d winddb -c LEADERBOARDS -q "{LEADERBOARD_NAME: 'ESS 2013 Singapore (Extreme40)'}" > /tmp/ess2013-singapore-scoring.json`
+`/opt/mongodb/bin/mongoexport --port 10202 -d winddb -c WIND_TRACKS -q "{'REGATTA_NAME': 'ESS 2013 Muscat (Extreme40)'}" > /tmp/ess2013-muscat-wind.json`
+
+#### Score Corrections
+
+`/opt/mongodb/bin/mongoexport --port 10202 -d winddb -c LEADERBOARDS -q "{LEADERBOARD_NAME: 'ESS 2013 Singapore (Extreme40)'}" > /tmp/singapore.json`
 
 ### Import to MongoDB
 
 Importing requires data to be in JSON format (as exported by mongoexport). To make sure that old entries just get updated and not overwritten you must use the --upsert parameter.
 
-`/opt/mongodb/bin/mongoimport --port 10202 -d winddb -c WIND_TRACKS --upsert tmp/ess2013-muscat-wind.json`
+#### Wind
+
+`/opt/mongodb/bin/mongoimport --port 10202 -d winddb -c WIND_TRACKS --upsert /tmp/ess2013-muscat-wind.json`
+
+#### Score Corrections
+
+`/opt/mongodb/bin/mongoimport --port 10202 -d winddb -c LEADERBOARDS --upsert /tmp/singapore.json`
 
 ### Hot Deploy Java Packages to a running Server
 
