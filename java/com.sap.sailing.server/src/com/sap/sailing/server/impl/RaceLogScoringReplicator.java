@@ -123,6 +123,11 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
                 
                 if (positionedCompetitor.getC().equals(MaxPointsReason.NONE)) {
                     try {
+                        if (!leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint).equals(MaxPointsReason.NONE)) {
+                            applyMaxPointsReasonOperation(leaderboard, raceColumn, competitor, MaxPointsReason.NONE, timePoint);
+                            scoreHasBeenCorrected = true;
+                        }
+                        
                         int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positioningList, positionedCompetitor);
 
                         Double scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(raceColumn, competitor, rankByRaceCommittee, numberOfCompetitorsInRace);
