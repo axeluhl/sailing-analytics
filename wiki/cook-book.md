@@ -8,6 +8,8 @@ To export data from MongoDB you simply have to use the monogexport command. It w
 
 `/opt/mongodb/bin/mongoexport --port 10202 -d winddb -c WIND_TRACKS -q "{'REGATTA_NAME': 'ESS 2013 Muscat (Extreme40)'}" > tmp/ess2013-muscat-wind.json`
 
+`$MONGODB_PATH/bin/mongoexport --port $MONGO_SOURCE_PORT -d winddb -c LEADERBOARDS -q "{LEADERBOARD_NAME: '$LEADERBOARD_NAME'}" > /tmp/$EXPORT_FILE_NAME`
+
 ### Import to MongoDB
 
 Importing requires data to be in JSON format (as exported by mongoexport). To make sure that old entries just get updated and not overwritten you must use the --upsert parameter.
