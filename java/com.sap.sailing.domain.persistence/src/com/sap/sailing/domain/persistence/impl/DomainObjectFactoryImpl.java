@@ -644,18 +644,32 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         Set<Leaderboard> result = new HashSet<Leaderboard>();
         try {
+            // For MongoDB 2.4 $where with refs to global objects no longer works
+            // http://docs.mongodb.org/manual/reference/operator/where/#op._S_where
+            // Also a single where leads to a table walk without using indexes. So avoid $where.
+            
             // Don't change the query object, unless you know what you're doing.
             // It queries all leaderboards not referenced to be part of a leaderboard group
             // and in particular not being an overall leaderboard of a leaderboard group.
-            BasicDBObject query = new BasicDBObject("$where", "function() { return db." + CollectionNames.LEADERBOARD_GROUPS.name() + ".find({ "
-                    + FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name() + ": this._id }).count() == 0 && "
-                    + "db."+CollectionNames.LEADERBOARD_GROUPS.name()+".find({ "+FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name() + ": this._id }).count() == 0 && "
-                    + "db."+CollectionNames.LEADERBOARD_GROUPS.name()+".find({ "+FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name()+
-                    ": this."+FieldNames.LEADERBOARD_NAME.name()+" }).count() == 0; }}");
-            for (DBObject o : leaderboardCollection.find(query)) {
-                final Leaderboard loadedLeaderboard = loadLeaderboard(o, regattaRegistry, leaderboardRegistry, /* groupForMetaLeaderboard */ null);
-                if (loadedLeaderboard != null) {
-                    result.add(loadedLeaderboard);
+            DBCursor allLeaderboards = leaderboardCollection.find();
+            for (DBObject leaderboardFromDB : allLeaderboards) {
+                DBObject inLeaderboardGroupsQuery = new BasicDBObject();
+                inLeaderboardGroupsQuery.put(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name(), ((ObjectId)leaderboardFromDB.get("_id")).toString());
+                boolean inLeaderboardGroups = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name()).find(inLeaderboardGroupsQuery).size()>0;
+
+                DBObject inLeaderboardGroupOverallQuery = new BasicDBObject();
+                inLeaderboardGroupOverallQuery.put(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name(), ((ObjectId)leaderboardFromDB.get("_id")).toString());
+                boolean inLeaderboardGroupOverall = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name()).find(inLeaderboardGroupOverallQuery).size()>0;
+                
+                DBObject inLeaderboardGroupOverallQueryName = new BasicDBObject();
+                inLeaderboardGroupOverallQueryName.put(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name(), leaderboardFromDB.get(FieldNames.LEADERBOARD_NAME.name()));
+                boolean inLeaderboardGroupOverallName = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name()).find(inLeaderboardGroupOverallQueryName).size()>0;
+            
+                if (!inLeaderboardGroups && !inLeaderboardGroupOverall && !inLeaderboardGroupOverallName) {
+                    final Leaderboard loadedLeaderboard = loadLeaderboard(leaderboardFromDB, regattaRegistry, leaderboardRegistry, /* groupForMetaLeaderboard */ null);
+                    if (loadedLeaderboard != null) {
+                        result.add(loadedLeaderboard);
+                    }
                 }
             }
         } catch (Exception e) {
