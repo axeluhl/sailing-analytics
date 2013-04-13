@@ -89,6 +89,7 @@ fi
 
 echo PROJECT_HOME is $PROJECT_HOME
 echo SERVERS_HOME is $SERVERS_HOME
+echo BRANCH is $active_branch
 
 options=':gtocpm:n:l:'
 while getopts $options option
@@ -265,6 +266,13 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         echo "Could not find directory $ACDIR - perhaps you are on a wrong branch?"
         exit
     fi
+
+    # secure current state so that it can be reused if something goes wrong
+    if [ -f "$ACDIR/backup-binaries.tar.gz" ]; then
+        rm -f $ACDIR/backup-binaries.tar.gz
+    fi
+
+    tar cvzf $ACDIR/backup-binaries.tar.gz $ACDIR/plugins $ACDIR/configuration
 
     if [ ! -d "$ACDIR/plugins" ]; then
         mkdir $ACDIR/plugins
