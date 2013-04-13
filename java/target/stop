@@ -10,4 +10,4 @@ fi
 NC_CMD="nc -t 127.0.0.1 $OSGI_TELNET_PORT"
 echo -n exit | $NC_CMD > /dev/null
 
-echo "Stopped server MASTER"
+echo "Stopped server DEV"
