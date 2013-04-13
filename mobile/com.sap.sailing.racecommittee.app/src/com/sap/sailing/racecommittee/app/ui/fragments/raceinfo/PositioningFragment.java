@@ -151,7 +151,8 @@ public class PositioningFragment extends RaceDialogFragment {
     
     private void deletePositionedCompetitorsFromUnpositionedList() {
         for (Triple<Serializable, String, MaxPointsReason> positionedItem : positionedCompetitors) {
-            competitors.remove(positionedItem.getA());
+            Competitor competitor = DomainFactoryImpl.INSTANCE.getExistingCompetitorById(positionedItem.getA());
+            competitors.remove(competitor);
         }
     }
     
