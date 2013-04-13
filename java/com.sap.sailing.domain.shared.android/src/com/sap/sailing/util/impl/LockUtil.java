@@ -78,14 +78,6 @@ public class LockUtil {
         while (!locked) {
             synchronized (getCurrentThreadsLockCounts()) {
                 if (!ifIsInCurrentThreadsLockSetThenIncrementLockCount(lock.readLock())) {
-                    // FIXME if propagation is about to happen while we're waiting for the lock and we're then getting the lock,
-                    // then this synchronized block ends, the propagation takes place, and we're holding the lock although the counters
-                    // suggest we didn't actually acquire the lock but got it through propagation. This will then lead to the unlock
-                    // method to not actually unlock again but just decrement the counter.
-                    // The fix will need to also count successful actual lock attempts by the current thread; the problem is that
-                    // read locks *may* actually be granted to multiple threads at the same time (more than one concurrent reader) and
-                    // that therefore both, the propagating and the receiving thread may hold on to the actual lock. It then needs to
-                    // be clear to both that they both will need to release the read lock eventually.
                     locked = lock(lock.readLock(), lock.getReadLockName(), lock);
                     if (locked) {
                         logger.finest("actually acquired read lock " + lock.getName() + " in thread " + Thread.currentThread().getName());
@@ -168,7 +160,7 @@ public class LockUtil {
         Map<Lock, Integer> currentThreadLockCounts = getCurrentThreadsLockCounts();
         synchronized (currentThreadLockCounts) {
             final Integer countForLock = currentThreadLockCounts.get(lock.readLock());
-            if (countForLock == 1) {
+            if (countForLock == 1 || lock.getReaders().contains(Thread.currentThread())) {
                 logger.finest("actually unlocking read lock "+lock.getName()+" in thread "+Thread.currentThread().getName());
                 lock.readLock().unlock();
                 decrementLockCountForCurrentThread(lock.readLock());

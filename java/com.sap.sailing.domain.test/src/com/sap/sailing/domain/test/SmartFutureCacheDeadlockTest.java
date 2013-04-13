@@ -130,7 +130,7 @@ public class SmartFutureCacheDeadlockTest {
         assertNotNull(computingThread);
         reader.performAndWait(Command.UNLOCK_AFTER_READ); // this shall unblock the writer
         writer.performAndWait(Command.UNLOCK_AFTER_WRITE);
-        assertTrue(System.currentTimeMillis()-start < 5000); // must not take longer than 5s, otherwise a locking conflict must have occurred;
+        assertTrue(System.currentTimeMillis()-start < 10000); // must not take longer than 5s, otherwise a locking conflict must have occurred;
         // see also LockUtil.NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK
     }
     
