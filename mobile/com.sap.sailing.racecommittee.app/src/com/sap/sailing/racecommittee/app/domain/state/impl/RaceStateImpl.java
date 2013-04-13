@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.domain.state.impl;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +12,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -219,7 +220,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     @Override
-    public void setFinishPositioningListChanged(List<Pair<Competitor,MaxPointsReason>> positionedCompetitors) {
+    public void setFinishPositioningListChanged(List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
         TimePoint eventTime = MillisecondsTimePoint.now();
         
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningListChangedEvent(eventTime, raceLog.getCurrentPassId(), positionedCompetitors);
@@ -227,7 +228,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
     
     @Override
-    public List<Pair<Competitor, MaxPointsReason>> getFinishPositioningList() {
+    public List<Triple<Serializable, String, MaxPointsReason>> getFinishPositioningList() {
         return finishPositioningListFinder.getFinishPositioningList();
     }
     

@@ -1,8 +1,10 @@
 package com.sap.sailing.server.impl;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -10,7 +12,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -114,27 +116,29 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         
         FinishPositioningListFinder positioningListFinder = new FinishPositioningListFinder(raceLog);
         
-        List<Pair<Competitor, MaxPointsReason>> positioningList = positioningListFinder.getFinishPositioningList();
+        List<Triple<Serializable, String, MaxPointsReason>> positioningList = positioningListFinder.getFinishPositioningList();
         if (positioningList != null) {
-            for (Pair<Competitor, MaxPointsReason> positionedCompetitor : positioningList) {
-                if (positionedCompetitor.getB().equals(MaxPointsReason.NONE)) {
+            for (Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positioningList) {
+                Competitor competitor = DomainFactory.INSTANCE.getExistingCompetitorById(positionedCompetitor.getA());
+                
+                if (positionedCompetitor.getC().equals(MaxPointsReason.NONE)) {
                     try {
                         int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positioningList, positionedCompetitor);
 
-                        Double scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(raceColumn, positionedCompetitor.getA(), rankByRaceCommittee, numberOfCompetitorsInRace);
-                        Double trackedNetPoints = leaderboard.getNetPoints(positionedCompetitor.getA(), raceColumn, timePoint);
+                        Double scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(raceColumn, competitor, rankByRaceCommittee, numberOfCompetitorsInRace);
+                        Double trackedNetPoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);
                         if (trackedNetPoints == null || !trackedNetPoints.equals(scoreByRaceCommittee)) {
-                            applyScoreCorrectionOperation(leaderboard, raceColumn, positionedCompetitor.getA(), scoreByRaceCommittee, timePoint);
+                            applyScoreCorrectionOperation(leaderboard, raceColumn, competitor, scoreByRaceCommittee, timePoint);
                             scoreHasBeenCorrected = true;
                         }
                     } catch (NoWindException ex) {
                         ex.printStackTrace();
                     }
                 } else {
-                    MaxPointsReason trackedMaxPointsReason = leaderboard.getMaxPointsReason(positionedCompetitor.getA(), raceColumn, timePoint);
-                    MaxPointsReason maxPointsReasonByRaceCommittee = positionedCompetitor.getB();
+                    MaxPointsReason trackedMaxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
+                    MaxPointsReason maxPointsReasonByRaceCommittee = positionedCompetitor.getC();
                     if (!maxPointsReasonByRaceCommittee.equals(trackedMaxPointsReason)) {
-                        applyMaxPointsReasonOperation(leaderboard, raceColumn, positionedCompetitor.getA(), maxPointsReasonByRaceCommittee, timePoint);
+                        applyMaxPointsReasonOperation(leaderboard, raceColumn, competitor, maxPointsReasonByRaceCommittee, timePoint);
                         scoreHasBeenCorrected = true;
                     }
                 }
@@ -161,7 +165,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         service.apply(operation);
     }
 
-    private int getRankInPositioningListByRaceCommittee(List<Pair<Competitor, MaxPointsReason>> positioningList, Pair<Competitor, MaxPointsReason> positionedCompetitor) {
+    private int getRankInPositioningListByRaceCommittee(List<Triple<Serializable, String, MaxPointsReason>> positioningList, Triple<Serializable, String, MaxPointsReason> positionedCompetitor) {
         return positioningList.indexOf(positionedCompetitor) + 1;
     }
 

@@ -64,6 +64,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -1035,7 +1036,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogEvent loadRaceLogFinishPositioningListChangedEvent(TimePoint createdAt, TimePoint timePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         BasicDBList dbPositionedCompetitorList = (BasicDBList) dbObject.get(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name());
-        List<Pair<Competitor,MaxPointsReason>> positionedCompetitors = loadPositionedCompetitors(dbPositionedCompetitorList);
+        List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = loadPositionedCompetitors(dbPositionedCompetitorList);
         
         return raceLogEventFactory.createFinishPositioningListChangedEvent(createdAt, timePoint, id, competitors, passId, positionedCompetitors);
     }
@@ -1055,20 +1056,33 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return raceLogEventFactory.createCourseAreaChangedEvent(createdAt, timePoint, id, competitors, passId, courseAreaId);
     }
     
-    private List<Pair<Competitor, MaxPointsReason>> loadPositionedCompetitors(BasicDBList dbPositionedCompetitorList) {
-        List<Pair<Competitor, MaxPointsReason>> positionedCompetitors = new ArrayList<Pair<Competitor, MaxPointsReason>>();
+    private List<Triple<Serializable, String, MaxPointsReason>> loadPositionedCompetitors(BasicDBList dbPositionedCompetitorList) {
+        List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = new ArrayList<Triple<Serializable, String, MaxPointsReason>>();
         for (Object object : dbPositionedCompetitorList) {
             DBObject dbObject = (DBObject) object;
 
             Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
-            Competitor competitor = DomainFactory.INSTANCE.getExistingCompetitorById(competitorId);
+            competitorId = tryUuidConversion(competitorId.toString());
+            String competitorName = (String) dbObject.get(FieldNames.COMPETITOR_DISPLAY_NAME.name());
+            if (competitorName == null) {
+                competitorName = "loaded competitor";
+            }
             
             MaxPointsReason maxPointsReason = MaxPointsReason.valueOf((String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name()));
             
-            Pair<Competitor,MaxPointsReason> positionedCompetitor = new Pair<Competitor, MaxPointsReason>(competitor, maxPointsReason);
+            Triple<Serializable, String, MaxPointsReason> positionedCompetitor = new Triple<Serializable, String, MaxPointsReason>(competitorId, competitorName, maxPointsReason);
             positionedCompetitors.add(positionedCompetitor);
         }
         return positionedCompetitors;
+    }
+    
+    public static Serializable tryUuidConversion(String id) {
+        try {
+            return UUID.fromString(id);
+        } catch (IllegalArgumentException iae) {
+            // / TODO: insert warning of non-uuid id.
+        }
+        return id;
     }
 
     private List<Competitor> loadCompetitorsForRaceLogEvent(BasicDBList dbCompetitorList) {
