@@ -268,6 +268,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                 final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
                 jsonEntry.put("fleet", fleetOfCompetitor==null?"":fleetOfCompetitor.getName());
                 jsonEntry.put("netPoints", leaderboard.getNetPoints(competitor, raceColumn, resultTimePoint));
+                jsonEntry.put("uncorrectedNetPoints", leaderboard.getTrackedRank(competitor, raceColumn, resultTimePoint));
                 jsonEntry.put("totalPoints", leaderboard.getTotalPoints(competitor, raceColumn, resultTimePoint));
                 MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, resultTimePoint);
                 jsonEntry.put("maxPointsReason", maxPointsReason != null ? maxPointsReason.toString(): null);
