@@ -39,7 +39,7 @@ public class RaceLogFinishPositioningListChangedEventDeserializer extends BaseRa
             JSONObject jsonPositionedCompetitor = Helpers.toJSONObjectSafe(object);
             
             Serializable competitorId = (Serializable) jsonPositionedCompetitor.get(RaceLogFinishPositioningListChangedEventSerializer.FIELD_COMPETITOR_ID);
-            competitorId = Helpers.tryUuidConversion(competitorId.toString());
+            competitorId = Helpers.tryUuidConversion(competitorId);
             String competitorName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningListChangedEventSerializer.FIELD_COMPETITOR_NAME);
             
             String maxPointsReasonName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningListChangedEventSerializer.FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON);

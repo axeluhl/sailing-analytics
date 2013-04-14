@@ -1084,7 +1084,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
            
             //Otherwise with some tracking providers it might be the case that the competitor id is not a UUID anymore but for example a name represented as a String. 
             //In this case the conversion to a UUID will fail and the given id as String is returned as the result of this method.
-            competitorId = tryUuidConversion(competitorId.toString());
+            competitorId = tryUuidConversion(competitorId);
             String competitorName = (String) dbObject.get(FieldNames.COMPETITOR_DISPLAY_NAME.name());
             //The Competitor name is a new field in the list. Therefore the name might be null for existing events. In this case a standard name is set. 
             if (competitorName == null) {
@@ -1112,13 +1112,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      * @return when successful the UUID representation of the given id. When the conversion is not successful (e.g. the id is not in UUID format) the string is returned as
      * a Serializable
      */
-    public static Serializable tryUuidConversion(String id) {
+    public static Serializable tryUuidConversion(Serializable serializableId) {
         try {
-            return UUID.fromString(id);
+            return UUID.fromString(serializableId.toString());
         } catch (IllegalArgumentException iae) {
             //This is called when the conversion of the given string to a UUID was not successful. In this case the given ID as String is returned as a Serializable
         }
-        return id;
+        return serializableId;
     }
 
     private List<Competitor> loadCompetitorsForRaceLogEvent(BasicDBList dbCompetitorList) {
