@@ -140,8 +140,8 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
                 }
             }
 
-            //Since the metadata update is used by the Sailing suite to determine the live state of a race, it has to be triggered, even though 
-            //no score correction was needed
+            //Since the metadata update is used by the Sailing suite to determine the final state of a race, it has to be triggered, even though 
+            //no score correction was performed
             applyMetadataUpdate(leaderboard, timePoint, CommentTextOnScoreCorrection);
         }
     }

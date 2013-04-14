@@ -1076,13 +1076,25 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             DBObject dbObject = (DBObject) object;
 
             Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
+            
+            //The conversion is needed when the competitor id is loaded from database as a String. The competitor id shall be used in the following to retrieve a competitor
+            //object from the DomainFactory via getExistingCompetitorById. The lookup expects a Serializable, but mostly UUIDs are hold in the DomainFactory cache.
+            //When the lookup happens and the loaded competitor id remains as a string, the lookup does not work as long as the competitor id provided by the 
+            //tracking provider is a UUID. Therefore the conversion of the competitor id to a UUID is needed.
+           
+            //Otherwise with some tracking providers it might be the case that the competitor id is not a UUID anymore but for example a name represented as a String. 
+            //In this case the conversion to a UUID will fail and the given id as String is returned as the result of this method.
             competitorId = tryUuidConversion(competitorId.toString());
             String competitorName = (String) dbObject.get(FieldNames.COMPETITOR_DISPLAY_NAME.name());
             //The Competitor name is a new field in the list. Therefore the name might be null for existing events. In this case a standard name is set. 
             if (competitorName == null) {
                 competitorName = "loaded competitor";
             }
-            //The DomainFactory is not used here since the competitor object might not be loaded from a tracking provider at the time of database load for lookup purposes.
+            
+            //At this point we do not retrieve the competitor object since at any point in time, especially after a server restart, the DomainFactory and its competitor
+            //cache might be empty. But at this time the race log is loaded from database, so the competitor would be null.
+            //By not using the Competitor object retrieved from the DomainFactory we get completely independent from server restarts and the timepoint of loading
+            //competitors by tracking providers.
             
             MaxPointsReason maxPointsReason = MaxPointsReason.valueOf((String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name()));
             
@@ -1094,12 +1106,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     /**
      * This method tries to convert a Serializable as String to a UUID. When the given id is a UUID, the UUID representation is returned, otherwise the string itself 
-     * is returned. 
-     * <p>
-     * The conversion is needed when the competitor id is loaded from database as a String. For Competitor lookup purposes the UUID representation of the ID is needed.
+     * is returned. This is the case when the given Id is not in a UUID format representation.
      * 
-     * @param id
-     * @return
+     * @param id the ID to be converted to its string representation
+     * @return when successful the UUID representation of the given id. When the conversion is not successful (e.g. the id is not in UUID format) the string is returned as
+     * a Serializable
      */
     public static Serializable tryUuidConversion(String id) {
         try {
