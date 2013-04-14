@@ -1820,11 +1820,22 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }
             }
             if (extendedTo != null) {
-                List<Maneuver> extendedResultForCache = detectManeuvers(
-                        competitor,
-                        approximate(competitor, getRace().getBoatClass().getMaximumDistanceForCourseApproximation(),
-                                extendedFrom, extendedTo));
-                result = new Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom, extendedTo, extendedResultForCache);
+                try {
+                    List<Maneuver> extendedResultForCache = detectManeuvers(
+                            competitor,
+                            approximate(competitor, getRace().getBoatClass().getMaximumDistanceForCourseApproximation(),
+                                    extendedFrom, extendedTo));
+                    result = new Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom, extendedTo, extendedResultForCache);
+                } catch (NoWindException ex) {
+                    // Catching the NoWindException here without letting it propagate thru other handlers.
+                    // This is mainly to avoid having logs flooded with stack traces. It is safe to catch
+                    // it here because we can assume that this exception does not hide any severe problem
+                    // other than that there is no wind. Because maneuvers are mostly computed using a
+                    // future cache and need wind (like getTack) they will often fail before the wind has been 
+                    // loaded from database. We can safely return null here because we can be sure that
+                    // cache will be updated when new fixes are fed into the stream therefore leading to a recomputation.
+                    logger.fine("NoWindException during computation of maneuvers for " + competitor.getName());
+                }
             } // else competitor has no fixes to consider; remove any maneuver cache entry
         } // else competitor hasn't started yet; remove any maneuver cache entry
         logger.fine("computeManeuvers("+competitor.getName()+") called in tracked race "+this+

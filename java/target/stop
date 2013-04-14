@@ -1,0 +1,13 @@
+#!/bin/bash
+
+OSGI_TELNET_PORT=14886
+TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$OSGI_TELNET_PORT"`
+if [[ $OSGI_TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
+        echo "Could not find server on telnet port $OSGI_TELNET_PORT. Perhaps server is not running?"
+        exit
+fi
+
+NC_CMD="nc -t 127.0.0.1 $OSGI_TELNET_PORT"
+echo -n exit | $NC_CMD > /dev/null
+
+echo "Stopped server MASTER"
