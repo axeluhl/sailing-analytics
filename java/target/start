@@ -1,3 +1,4 @@
+#!/bin/bash
 scriptdir=`dirname "$0"`
 LIB_DIR=`pwd`/native-libraries
 echo scriptdir is $scriptdir and LIB_DIR is $LIB_DIR
