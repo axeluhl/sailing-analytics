@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.After;
@@ -137,9 +138,7 @@ public class SmartFutureCacheDeadlockTest {
     @After
     public void tearDown() throws InterruptedException {
         reader.perform(Command.EXIT);
-        reader.waitUntilRunning();
         writer.perform(Command.EXIT);
-        writer.waitUntilRunning();
         readerThread.join();
         writerThread.join();
         assertFalse(reader.isRunning());
@@ -191,14 +190,6 @@ public class SmartFutureCacheDeadlockTest {
             return running;
         }
         
-        public void waitUntilRunning() throws InterruptedException {
-            synchronized (this) {
-                while (!running) {
-                    this.wait();
-                }
-            }
-        }
-
         @Override
         public void run() {
             synchronized (this) {
@@ -251,6 +242,9 @@ public class SmartFutureCacheDeadlockTest {
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException("Someone interrupted us", e);
+            } catch (Exception ex) {
+                logger.log(Level.SEVERE, "Exception in LockingScript.run() for thread "+Thread.currentThread().getName(), ex);
+                throw ex;
             } finally {
                 running = false;
             }

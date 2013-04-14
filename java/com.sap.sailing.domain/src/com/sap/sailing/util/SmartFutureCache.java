@@ -296,7 +296,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 }
                 // make sure we don't propagate from the same thread twice in case gettingThread == callerThread
                 if (callerWaitsSynchronouslyForResult && callerThread != locksPropagatedFromGettingThread) {
-                    logger.finest("propagating lock set from "+locksPropagatedFromGettingThread.getName()+" to "+executingThread.getName()+
+                    logger.finest("propagating lock set from "+callerThread.getName()+" to "+executingThread.getName()+
                             " due to synchronous execution");
                     LockUtil.propagateLockSetFrom(callerThread);
                 }
@@ -322,7 +322,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                         executingThread = null;
                     }
                     if (callerWaitsSynchronouslyForResult && callerThread != locksPropagatedFromGettingThread) {
-                        logger.finest("unpropagating lock set from "+locksPropagatedFromGettingThread.getName()+" to "+executingThread.getName()+
+                        logger.finest("unpropagating lock set from "+callerThread.getName()+" to "+Thread.currentThread().getName()+
                                 " due to synchronous execution");
                         LockUtil.unpropagateLockSetFrom(callerThread);
                     }
