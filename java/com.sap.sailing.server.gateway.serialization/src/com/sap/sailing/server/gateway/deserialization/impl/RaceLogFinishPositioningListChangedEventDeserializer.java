@@ -10,7 +10,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -27,24 +27,25 @@ public class RaceLogFinishPositioningListChangedEventDeserializer extends BaseRa
             throws JsonDeserializationException {
         
         JSONArray jsonPositionedCompetitors = Helpers.getNestedArraySafe(object, RaceLogFinishPositioningListChangedEventSerializer.FIELD_POSITIONED_COMPETITORS);
-        List<Pair<Competitor, MaxPointsReason>> positionedCompetitors = deserializePositionedCompetitors(jsonPositionedCompetitors);
+        List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = deserializePositionedCompetitors(jsonPositionedCompetitors);
 
         return factory.createFinishPositioningListChangedEvent(timePoint, id, competitors, passId, positionedCompetitors);
     }
 
-    private List<Pair<Competitor, MaxPointsReason>> deserializePositionedCompetitors(JSONArray jsonPositionedCompetitors) throws JsonDeserializationException {
-        List<Pair<Competitor, MaxPointsReason>> positionedCompetitors = new ArrayList<Pair<Competitor,MaxPointsReason>>();
+    private List<Triple<Serializable, String, MaxPointsReason>> deserializePositionedCompetitors(JSONArray jsonPositionedCompetitors) throws JsonDeserializationException {
+        List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = new ArrayList<Triple<Serializable, String, MaxPointsReason>>();
         
         for (Object object : jsonPositionedCompetitors) {
             JSONObject jsonPositionedCompetitor = Helpers.toJSONObjectSafe(object);
             
-            JSONObject jsonCompetitor = Helpers.toJSONObjectSafe(jsonPositionedCompetitor.get(RaceLogFinishPositioningListChangedEventSerializer.FIELD_COMPETITOR));
-            Competitor competitor = competitorDeserializer.deserialize(jsonCompetitor);
+            Serializable competitorId = (Serializable) jsonPositionedCompetitor.get(RaceLogFinishPositioningListChangedEventSerializer.FIELD_COMPETITOR_ID);
+            competitorId = Helpers.tryUuidConversion(competitorId.toString());
+            String competitorName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningListChangedEventSerializer.FIELD_COMPETITOR_NAME);
             
             String maxPointsReasonName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningListChangedEventSerializer.FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON);
             MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName);
             
-            Pair<Competitor, MaxPointsReason> positionedCompetitor = new Pair<Competitor, MaxPointsReason>(competitor, maxPointsReason);
+            Triple<Serializable, String, MaxPointsReason> positionedCompetitor = new Triple<Serializable, String, MaxPointsReason>(competitorId, competitorName, maxPointsReason);
             positionedCompetitors.add(positionedCompetitor);
         }
         

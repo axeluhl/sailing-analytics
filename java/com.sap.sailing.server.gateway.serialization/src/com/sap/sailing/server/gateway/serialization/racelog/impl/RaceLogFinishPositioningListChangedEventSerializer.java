@@ -1,5 +1,6 @@
 package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.json.simple.JSONArray;
@@ -7,7 +8,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -16,7 +17,8 @@ public class RaceLogFinishPositioningListChangedEventSerializer extends BaseRace
 
     public static final String VALUE_CLASS = RaceLogFinishPositioningListChangedEvent.class.getSimpleName();
     public static final String FIELD_POSITIONED_COMPETITORS = "positionedCompetitors";
-    public static final String FIELD_COMPETITOR = "competitor";
+    public static final String FIELD_COMPETITOR_ID = "competitorId";
+    public static final String FIELD_COMPETITOR_NAME = "competitorName";
     public static final String FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON = "maxPointsReason";
     
     public RaceLogFinishPositioningListChangedEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
@@ -39,16 +41,15 @@ public class RaceLogFinishPositioningListChangedEventSerializer extends BaseRace
         return result;
     }
 
-    private JSONArray serializePositionedCompetitors(List<Pair<Competitor, MaxPointsReason>> positionedCompetitors) {
+    private JSONArray serializePositionedCompetitors(List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
         JSONArray jsonPositionedCompetitors = new JSONArray();
         
-        for (Pair<Competitor, MaxPointsReason> positionedCompetitor : positionedCompetitors) {
+        for (Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positionedCompetitors) {
             JSONObject jsonPositionedCompetitor = new JSONObject();
-            if (positionedCompetitor == null || positionedCompetitor.getA() == null) {
-                continue;
-            }
-            jsonPositionedCompetitor.put(FIELD_COMPETITOR, competitorSerializer.serialize(positionedCompetitor.getA()));
-            jsonPositionedCompetitor.put(FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON, positionedCompetitor.getB().name());
+            
+            jsonPositionedCompetitor.put(FIELD_COMPETITOR_ID, positionedCompetitor.getA().toString());
+            jsonPositionedCompetitor.put(FIELD_COMPETITOR_NAME, positionedCompetitor.getB());
+            jsonPositionedCompetitor.put(FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON, positionedCompetitor.getC().name());
             jsonPositionedCompetitors.add(jsonPositionedCompetitor);
         }
         

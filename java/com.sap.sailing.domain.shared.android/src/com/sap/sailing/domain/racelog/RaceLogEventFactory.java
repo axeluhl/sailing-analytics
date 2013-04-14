@@ -7,7 +7,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
@@ -33,8 +33,8 @@ public interface RaceLogEventFactory {
     RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, CourseBase courseData);
     RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, int passId, CourseBase courseData);
     
-    RaceLogFinishPositioningListChangedEvent createFinishPositioningListChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, List<Pair<Competitor, MaxPointsReason>> positionedCompetitors);
-    RaceLogFinishPositioningListChangedEvent createFinishPositioningListChangedEvent(TimePoint timePoint, int passId, List<Pair<Competitor, MaxPointsReason>> positionedCompetitors);
+    RaceLogFinishPositioningListChangedEvent createFinishPositioningListChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
+    RaceLogFinishPositioningListChangedEvent createFinishPositioningListChangedEvent(TimePoint timePoint, int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
     
     RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId);
     RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint timePoint, int passId);

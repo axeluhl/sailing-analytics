@@ -99,8 +99,8 @@ public class FinishingRaceFragment extends RaceFragment {
     private CharSequence getTimeLimitText() {
         TimePoint timeLimit = getTimeLimit();
         if (timeLimit != null) {
-            return String.format("%s %s", getString(R.string.race_time_limit),
-                    getFormattedTime(timeLimit.asDate()));
+            return String.format(getString(R.string.race_time_limit),
+                    getFormattedTime(getRace().getState().getFinishingStartTime().asDate()), getFormattedTime(timeLimit.asDate()));
         }
         return getString(R.string.empty);
     }
@@ -133,7 +133,7 @@ public class FinishingRaceFragment extends RaceFragment {
             public void onClick(DialogInterface dialog, int id) {
                 ExLog.i(ExLog.FLAG_BLUE_REMOVE, getRace().getId().toString(), getActivity());
                 getRace().getState().getStartProcedure().setFinished(MillisecondsTimePoint.now());
-                getRace().getState().setFinishPositioningConfirmed();
+                //getRace().getState().setFinishPositioningConfirmed();
             }
         })
         .setNegativeButton(getActivity().getResources().getString(R.string.no), new DialogInterface.OnClickListener() {
