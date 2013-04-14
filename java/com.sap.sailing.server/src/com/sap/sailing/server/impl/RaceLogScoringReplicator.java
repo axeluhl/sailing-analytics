@@ -105,50 +105,44 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
      * Retrieves the last RaceLogFinishPositioningListChangedEvent from the racelog and compares the ranks and disqualifications 
      * entered by the race committee with the tracked ranks. When a tracked rank for a competitor is not the same as the rank of the race committee,
      * a score correction is issued.
+     * The positioning list contains a list of competitors sorted by the positioning order when finishing. Additionally a MaxPointsReason might be entered by the 
+     * Race Committee.
      * @param timePoint the TimePoint at which the race committee confirmed their last rank list entered in the app.
      */
     private void checkNeedForScoreCorrectionByResultsOfRaceCommittee(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, RaceLog raceLog, TimePoint timePoint) {
         
         int numberOfCompetitorsInLeaderboard = Util.size(leaderboard.getCompetitors());
         int numberOfCompetitorsInRace;
-        boolean scoreHasBeenCorrected = false;
         
         numberOfCompetitorsInRace = getNumberOfCompetitorsInRace(raceColumn, fleet, numberOfCompetitorsInLeaderboard);
         
         FinishPositioningListFinder positioningListFinder = new FinishPositioningListFinder(raceLog);
-        
+
         List<Triple<Serializable, String, MaxPointsReason>> positioningList = positioningListFinder.getFinishPositioningList();
         if (positioningList != null) {
             for (Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positioningList) {
                 Competitor competitor = DomainFactory.INSTANCE.getExistingCompetitorById(positionedCompetitor.getA());
-                
+
                 if (positionedCompetitor.getC().equals(MaxPointsReason.NONE)) {
                     try {
-                        if (resetMaxPointsReasonIfNecessary(leaderboard, raceColumn, timePoint, competitor)) {
-                            scoreHasBeenCorrected = true;
-                        }
-                        
+                        resetMaxPointsReasonIfNecessary(leaderboard, raceColumn, timePoint, competitor);
+
                         int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positioningList, positionedCompetitor);
 
-                        if (correctScoreInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, 
-                                competitor, rankByRaceCommittee)) {
-                            scoreHasBeenCorrected = true;
-                        }
-                        
+                        correctScoreInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, 
+                                competitor, rankByRaceCommittee);
+
                     } catch (NoWindException ex) {
                         ex.printStackTrace();
                     }
                 } else {
-                    if (setMaxPointsReasonInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, positionedCompetitor, competitor)) {
-                        scoreHasBeenCorrected = true;
-                    }
-                    
+                    setMaxPointsReasonInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, positionedCompetitor, competitor);
                 }
             }
-            
-            if (scoreHasBeenCorrected) {
-                applyMetadataUpdate(leaderboard, timePoint, CommentTextOnScoreCorrection);
-            }
+
+            //Since the metadata update is used by the Sailing suite to determine the live state of a race, it has to be triggered, even though 
+            //no score correction was needed
+            applyMetadataUpdate(leaderboard, timePoint, CommentTextOnScoreCorrection);
         }
     }
 
@@ -203,8 +197,15 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         service.apply(operation);
     }
 
+    /**
+     * The positioning list contains a list of competitors sorted by the positioning order when finishing. Additionally a MaxPointsReason might be entered by the 
+     * Race Committee. The rank of a competitor according to the Race Committee is represented by the position in the given positioningList
+     * @param positioningList The list containing the competitors. The rank is represented by the position of a competitor in the list
+     * @param positionedCompetitor the competitor whose rank shall be determined
+     * @return the rank of the given positionedCompetitor
+     */
     private int getRankInPositioningListByRaceCommittee(List<Triple<Serializable, String, MaxPointsReason>> positioningList, Triple<Serializable, String, MaxPointsReason> positionedCompetitor) {
-        return positioningList.indexOf(positionedCompetitor) + 1;
+        return positioningList.indexOf(positionedCompetitor) + 1; // indexOf gives the zero-based position requested competitor in the list, + 1 gives the one-based rank
     }
 
     private int getNumberOfCompetitorsInRace(RaceColumn raceColumn, Fleet fleet, int numberOfCompetitorsInLeaderboard) {

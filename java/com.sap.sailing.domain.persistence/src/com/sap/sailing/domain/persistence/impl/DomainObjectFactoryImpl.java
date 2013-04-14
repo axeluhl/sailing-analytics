@@ -1078,9 +1078,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
             competitorId = tryUuidConversion(competitorId.toString());
             String competitorName = (String) dbObject.get(FieldNames.COMPETITOR_DISPLAY_NAME.name());
+            //The Competitor name is a new field in the list. Therefore the name might be null for existing events. In this case a standard name is set. 
             if (competitorName == null) {
                 competitorName = "loaded competitor";
             }
+            //The DomainFactory is not used here since the competitor object might not be loaded from a tracking provider at the time of database load for lookup purposes.
             
             MaxPointsReason maxPointsReason = MaxPointsReason.valueOf((String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name()));
             
@@ -1090,11 +1092,20 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return positionedCompetitors;
     }
     
+    /**
+     * This method tries to convert a Serializable as String to a UUID. When the given id is a UUID, the UUID representation is returned, otherwise the string itself 
+     * is returned. 
+     * <p>
+     * The conversion is needed when the competitor id is loaded from database as a String. For Competitor lookup purposes the UUID representation of the ID is needed.
+     * 
+     * @param id
+     * @return
+     */
     public static Serializable tryUuidConversion(String id) {
         try {
             return UUID.fromString(id);
         } catch (IllegalArgumentException iae) {
-            // / TODO: insert warning of non-uuid id.
+            //This is called when the conversion of the given string to a UUID was not successful. In this case the given ID as String is returned as a Serializable
         }
         return id;
     }
