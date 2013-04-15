@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.impl;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -20,6 +21,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
@@ -30,6 +32,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardCache;
 import com.sap.sailing.domain.leaderboard.LeaderboardCacheManager;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.util.SmartFutureCache;
@@ -185,7 +188,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                     ResultStates resultState = resolveRequestedResultState(req.getParameter(PARAM_NAME_RESULTSTATE));
                     TimePoint resultTimePoint = calculateTimePointForResultState(leaderboard, resultState);
                     JSONObject jsonLeaderboard;
-                    if(resultTimePoint != null) {
+                    if (resultTimePoint != null) {
                         Pair<TimePoint, ResultStates> resultStateAndTimePoint = new Pair<>(resultTimePoint, resultState);
                         if(useCache) {
                             jsonLeaderboard = getLeaderboardJsonFromCacheOrCompute(leaderboard, resultStateAndTimePoint, requestTimePoint);
@@ -265,6 +268,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                 final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
                 jsonEntry.put("fleet", fleetOfCompetitor==null?"":fleetOfCompetitor.getName());
                 jsonEntry.put("netPoints", leaderboard.getNetPoints(competitor, raceColumn, resultTimePoint));
+                jsonEntry.put("uncorrectedNetPoints", leaderboard.getTrackedRank(competitor, raceColumn, resultTimePoint));
                 jsonEntry.put("totalPoints", leaderboard.getTotalPoints(competitor, raceColumn, resultTimePoint));
                 MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, resultTimePoint);
                 jsonEntry.put("maxPointsReason", maxPointsReason != null ? maxPointsReason.toString(): null);
@@ -372,8 +376,36 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
             break;
         case Preliminary:
         case Final:
-            if (leaderboard.getScoreCorrection() != null) {
+            if (leaderboard.getScoreCorrection() != null && leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity() != null) {
                 result = leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity();
+                // As we don't have implemented bug 1246 (Define a clear result state for races and leaderboards) so far
+                // we need to make sure that the timpoint for the final state is not determined in the middle of a running race,
+                // because this would deliver not only final results but also some "mixed-in" live results.
+                // Therefore, if there is a race that hasn't finished yet and whose first start mark passing is before
+                // the current result, move result to before the start mark passing.
+                for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+                    TimePoint endOfRace = trackedRace.getEndOfRace();
+                    if (endOfRace == null) {
+                        Waypoint firstWaypoint = trackedRace.getRace().getCourse().getFirstWaypoint();
+                        if (firstWaypoint != null) {
+                            Iterable<MarkPassing> markPassingsForFirstWaypoint = trackedRace.getMarkPassingsInOrder(firstWaypoint);
+                            if (markPassingsForFirstWaypoint != null) {
+                                trackedRace.lockForRead(markPassingsForFirstWaypoint);
+                                try {
+                                    Iterator<MarkPassing> i = markPassingsForFirstWaypoint.iterator();
+                                    if (i.hasNext()) {
+                                        TimePoint earliestMarkPassingTimePoint = i.next().getTimePoint();
+                                        if (result == null || earliestMarkPassingTimePoint.before(result)) {
+                                            result = earliestMarkPassingTimePoint.minus(1);
+                                        }
+                                    }
+                                } finally {
+                                    trackedRace.unlockAfterRead(markPassingsForFirstWaypoint);
+                                }
+                            }
+                        }
+                    }
+                }
             }
             break;
         }

@@ -64,6 +64,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -644,18 +645,32 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         Set<Leaderboard> result = new HashSet<Leaderboard>();
         try {
+            // For MongoDB 2.4 $where with refs to global objects no longer works
+            // http://docs.mongodb.org/manual/reference/operator/where/#op._S_where
+            // Also a single where leads to a table walk without using indexes. So avoid $where.
+            
             // Don't change the query object, unless you know what you're doing.
             // It queries all leaderboards not referenced to be part of a leaderboard group
             // and in particular not being an overall leaderboard of a leaderboard group.
-            BasicDBObject query = new BasicDBObject("$where", "function() { return db." + CollectionNames.LEADERBOARD_GROUPS.name() + ".find({ "
-                    + FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name() + ": this._id }).count() == 0 && "
-                    + "db."+CollectionNames.LEADERBOARD_GROUPS.name()+".find({ "+FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name() + ": this._id }).count() == 0 && "
-                    + "db."+CollectionNames.LEADERBOARD_GROUPS.name()+".find({ "+FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name()+
-                    ": this."+FieldNames.LEADERBOARD_NAME.name()+" }).count() == 0; }}");
-            for (DBObject o : leaderboardCollection.find(query)) {
-                final Leaderboard loadedLeaderboard = loadLeaderboard(o, regattaRegistry, leaderboardRegistry, /* groupForMetaLeaderboard */ null);
-                if (loadedLeaderboard != null) {
-                    result.add(loadedLeaderboard);
+            DBCursor allLeaderboards = leaderboardCollection.find();
+            for (DBObject leaderboardFromDB : allLeaderboards) {
+                DBObject inLeaderboardGroupsQuery = new BasicDBObject();
+                inLeaderboardGroupsQuery.put(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name(), ((ObjectId)leaderboardFromDB.get("_id")).toString());
+                boolean inLeaderboardGroups = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name()).find(inLeaderboardGroupsQuery).size()>0;
+
+                DBObject inLeaderboardGroupOverallQuery = new BasicDBObject();
+                inLeaderboardGroupOverallQuery.put(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name(), ((ObjectId)leaderboardFromDB.get("_id")).toString());
+                boolean inLeaderboardGroupOverall = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name()).find(inLeaderboardGroupOverallQuery).size()>0;
+                
+                DBObject inLeaderboardGroupOverallQueryName = new BasicDBObject();
+                inLeaderboardGroupOverallQueryName.put(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name(), leaderboardFromDB.get(FieldNames.LEADERBOARD_NAME.name()));
+                boolean inLeaderboardGroupOverallName = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name()).find(inLeaderboardGroupOverallQueryName).size()>0;
+            
+                if (!inLeaderboardGroups && !inLeaderboardGroupOverall && !inLeaderboardGroupOverallName) {
+                    final Leaderboard loadedLeaderboard = loadLeaderboard(leaderboardFromDB, regattaRegistry, leaderboardRegistry, /* groupForMetaLeaderboard */ null);
+                    if (loadedLeaderboard != null) {
+                        result.add(loadedLeaderboard);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -1035,7 +1050,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogEvent loadRaceLogFinishPositioningListChangedEvent(TimePoint createdAt, TimePoint timePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         BasicDBList dbPositionedCompetitorList = (BasicDBList) dbObject.get(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name());
-        List<Pair<Competitor,MaxPointsReason>> positionedCompetitors = loadPositionedCompetitors(dbPositionedCompetitorList);
+        List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = loadPositionedCompetitors(dbPositionedCompetitorList);
         
         return raceLogEventFactory.createFinishPositioningListChangedEvent(createdAt, timePoint, id, competitors, passId, positionedCompetitors);
     }
@@ -1055,20 +1070,55 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return raceLogEventFactory.createCourseAreaChangedEvent(createdAt, timePoint, id, competitors, passId, courseAreaId);
     }
     
-    private List<Pair<Competitor, MaxPointsReason>> loadPositionedCompetitors(BasicDBList dbPositionedCompetitorList) {
-        List<Pair<Competitor, MaxPointsReason>> positionedCompetitors = new ArrayList<Pair<Competitor, MaxPointsReason>>();
+    private List<Triple<Serializable, String, MaxPointsReason>> loadPositionedCompetitors(BasicDBList dbPositionedCompetitorList) {
+        List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = new ArrayList<Triple<Serializable, String, MaxPointsReason>>();
         for (Object object : dbPositionedCompetitorList) {
             DBObject dbObject = (DBObject) object;
 
             Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
-            Competitor competitor = DomainFactory.INSTANCE.getExistingCompetitorById(competitorId);
+            
+            //The conversion is needed when the competitor id is loaded from database as a String. The competitor id shall be used in the following to retrieve a competitor
+            //object from the DomainFactory via getExistingCompetitorById. The lookup expects a Serializable, but mostly UUIDs are hold in the DomainFactory cache.
+            //When the lookup happens and the loaded competitor id remains as a string, the lookup does not work as long as the competitor id provided by the 
+            //tracking provider is a UUID. Therefore the conversion of the competitor id to a UUID is needed.
+           
+            //Otherwise with some tracking providers it might be the case that the competitor id is not a UUID anymore but for example a name represented as a String. 
+            //In this case the conversion to a UUID will fail and the given id as String is returned as the result of this method.
+            competitorId = tryUuidConversion(competitorId.toString());
+            String competitorName = (String) dbObject.get(FieldNames.COMPETITOR_DISPLAY_NAME.name());
+            //The Competitor name is a new field in the list. Therefore the name might be null for existing events. In this case a standard name is set. 
+            if (competitorName == null) {
+                competitorName = "loaded competitor";
+            }
+            
+            //At this point we do not retrieve the competitor object since at any point in time, especially after a server restart, the DomainFactory and its competitor
+            //cache might be empty. But at this time the race log is loaded from database, so the competitor would be null.
+            //By not using the Competitor object retrieved from the DomainFactory we get completely independent from server restarts and the timepoint of loading
+            //competitors by tracking providers.
             
             MaxPointsReason maxPointsReason = MaxPointsReason.valueOf((String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name()));
             
-            Pair<Competitor,MaxPointsReason> positionedCompetitor = new Pair<Competitor, MaxPointsReason>(competitor, maxPointsReason);
+            Triple<Serializable, String, MaxPointsReason> positionedCompetitor = new Triple<Serializable, String, MaxPointsReason>(competitorId, competitorName, maxPointsReason);
             positionedCompetitors.add(positionedCompetitor);
         }
         return positionedCompetitors;
+    }
+    
+    /**
+     * This method tries to convert a Serializable as String to a UUID. When the given id is a UUID, the UUID representation is returned, otherwise the string itself 
+     * is returned. This is the case when the given Id is not in a UUID format representation.
+     * 
+     * @param id the ID to be converted to its string representation
+     * @return when successful the UUID representation of the given id. When the conversion is not successful (e.g. the id is not in UUID format) the string is returned as
+     * a Serializable
+     */
+    public static Serializable tryUuidConversion(String id) {
+        try {
+            return UUID.fromString(id);
+        } catch (IllegalArgumentException iae) {
+            //This is called when the conversion of the given string to a UUID was not successful. In this case the given ID as String is returned as a Serializable
+        }
+        return id;
     }
 
     private List<Competitor> loadCompetitorsForRaceLogEvent(BasicDBList dbCompetitorList) {

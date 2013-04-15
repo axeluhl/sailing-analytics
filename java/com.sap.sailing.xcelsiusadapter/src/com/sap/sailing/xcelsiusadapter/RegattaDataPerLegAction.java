@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -48,7 +49,7 @@ public class RegattaDataPerLegAction extends HttpAction {
 //            return;
 //        }
         
-        final RegattaLeaderboard leaderboard = getRegattaLeaderboard(); // Get leaderboard data from request (get value for regatta name from URL parameter regatta)
+        final Leaderboard leaderboard = getLeaderboard(); // Get leaderboard data from request (get value for regatta name from URL parameter regatta)
         // if the regatta does not exist a tag <message> will be returned with a text message from function
         // getLeaderboard().
         if (leaderboard == null) {
@@ -58,7 +59,7 @@ public class RegattaDataPerLegAction extends HttpAction {
         final Document doc = new Document(); // initialize xml document
         final Element regatta_node = addNamedElement(doc, "regatta"); // add root to xml
         addNamedElementWithValue(regatta_node, "name", leaderboard.getName());
-        addNamedElementWithValue(regatta_node, "boat_class", leaderboard.getRegatta().getBoatClass().getName());
+        addNamedElementWithValue(regatta_node, "boat_class", getBoatClassName(leaderboard));
         
         
         
@@ -540,6 +541,24 @@ public class RegattaDataPerLegAction extends HttpAction {
 //        } // regatta end
 //        sendDocument(doc, regatta.getName() + ".xml");// output doc to client
     } // function end
+
+
+    private String getBoatClassName(final Leaderboard leaderboard) {
+        String result = null;
+        if (leaderboard instanceof RegattaLeaderboard) { 
+            result = ((RegattaLeaderboard) leaderboard).getRegatta().getBoatClass().getName();
+        } else {
+            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                    if (trackedRace != null) {
+                        result = trackedRace.getRace().getBoatClass().getName();
+                    }
+                }
+            }
+        }
+        return result;
+    }
 
     private Pair<Double, Double> calculateAverageWindSpeedofRace(TrackedRace trackedRace) {
         Pair<Double, Double> result = null;
