@@ -219,7 +219,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.isOpportunistic.setValue(true);
 
         this.isPathPolylineFreeMode = new CheckBox(this.stringMessages.freemode(), true);
-        this.isPathPolylineFreeMode.setValue(false);
+        this.isPathPolylineFreeMode.setValue(true);
 
         leftPanel = new FlowPanel();
         rightPanel = new FlowPanel();
@@ -560,7 +560,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     }
 
     public boolean isPathPolylineFreeMode() {
-        return this.isPathPolylineFreeMode.getValue();
+        return (!this.isPathPolylineFreeMode.getValue());
     }
 
     public Widget getTimeWidget() {
