@@ -82,6 +82,7 @@ public class SmartFutureCacheDeadlockTest {
     
     @Test
     public void testBasicLockingAndUnlockingWithScripts() throws InterruptedException {
+        logger.info("starting testBasicLockingAndUnlockingWithScripts");
         assertFalse(lock.getReaders().contains(readerThread));
         reader.performAndWait(Command.LOCK_FOR_READ);
         assertTrue(lock.getReaders().contains(readerThread));
@@ -94,6 +95,7 @@ public class SmartFutureCacheDeadlockTest {
     
     @Test
     public void testBasicCaching() {
+        logger.info("starting testBasicCaching");
         assertNull(computingThread);
         sfc.triggerUpdate(CACHE_KEY, /* updateInterval */ null);
         String result = sfc.get(CACHE_KEY, /* waitForLatest */ true);
@@ -103,6 +105,7 @@ public class SmartFutureCacheDeadlockTest {
     
     @Test
     public void testReadReadDeadlockBetweenGetterAndTriggerInSynchronousScenario() throws InterruptedException {
+        logger.info("starting testReadReadDeadlockBetweenGetterAndTriggerInSynchronousScenario");
         long start = System.currentTimeMillis();
         sfc.suspend();
         sfc.triggerUpdate(CACHE_KEY, /* update interval */ null); // queues the update, but get(CACHE_KEY, true) will now trigger recalculation synchronously
@@ -119,7 +122,23 @@ public class SmartFutureCacheDeadlockTest {
     }
     
     @Test
+    public void testRenetranceOfReadLockHeldAfterWriterTriesToGetFairLock() throws InterruptedException {
+        logger.info("starting testRenetranceOfReadLockHeldAfterWriterTriesToGetFairLock");
+        long start = System.currentTimeMillis();
+        reader.performAndWait(Command.LOCK_FOR_READ);
+        writer.perform(Command.LOCK_FOR_WRITE);
+        reader.performAndWait(Command.LOCK_FOR_READ);
+        reader.performAndWait(Command.UNLOCK_AFTER_READ);
+        assertNull(lock.getWriter());
+        reader.performAndWait(Command.UNLOCK_AFTER_READ); // this shall unblock the writer
+        writer.performAndWait(Command.UNLOCK_AFTER_WRITE);
+        assertTrue(System.currentTimeMillis()-start < 5000); // must not take longer than 5s, otherwise a locking conflict must have occurred;
+        // see also LockUtil.NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK
+    }
+    
+    @Test
     public void testReadReadDeadlockBetweenGetterAndTriggerInAsynchronousScenario() throws InterruptedException {
+        logger.info("starting testReadReadDeadlockBetweenGetterAndTriggerInAsynchronousScenario");
         long start = System.currentTimeMillis();
         reader.performAndWait(Command.LOCK_FOR_READ);
         writer.perform(Command.LOCK_FOR_WRITE);
