@@ -13,10 +13,7 @@ public class CompetitorRankFilter extends AbstractFilter<CompetitorDTO, Integer>
     
     static {
         supportedOperators = new ArrayList<FilterOperators>();
-        supportedOperators.add(FilterOperators.GreaterThan);
-        supportedOperators.add(FilterOperators.GreaterThanEquals);
-        supportedOperators.add(FilterOperators.LessThan);
-        supportedOperators.add(FilterOperators.LessThanEquals);
+        supportedOperators.add(FilterOperators.Equals);
     }
     
     public Class<Integer> getValueType() {
@@ -36,12 +33,27 @@ public class CompetitorRankFilter extends AbstractFilter<CompetitorDTO, Integer>
     @Override
     public Collection<CompetitorDTO> filter(Collection<CompetitorDTO> competitors) {
         Set<CompetitorDTO> result = new LinkedHashSet<CompetitorDTO>();
-        if(filterValue > 0) {
+        if(filterValue > 0 && filterOperator != null) {
             int counter = 1;
             for(CompetitorDTO competitor :competitors) {
-                if(counter > filterValue) {
-                    break;
+                switch (filterOperator) {
+                    case Equals:
+                        if(counter > filterValue) {
+                            return result;
+                        }
+                        break;
+                    case GreaterThanEquals:
+                    case LessThan:
+                    case LessThanEquals:
+                    case Contains:
+                    case EndsWith:
+                    case GreaterThan:
+                    case NotContains:
+                    case NotEqualTo:
+                    case StartsWith:
+                        throw new RuntimeException("Operator " + filterOperator.name() + " is not supported."); 
                 }
+
                 result.add(competitor);
                 counter++;
             }
@@ -52,14 +64,15 @@ public class CompetitorRankFilter extends AbstractFilter<CompetitorDTO, Integer>
         return result;
     }
 
+    
     @Override
     public String getName() {
-        return "Top X competitors";
+        return "Top ranked competitors";
     }
     
     @Override
     public String getDescription() {
-        return "Top X competitors";
+        return "Shows the top [number] ranked competitors";
     }
 
     @Override

@@ -22,8 +22,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.client.AbstractCompetitorsFilterSetDialog;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.CreateCompetitorsFilterSetDialog;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
+import com.sap.sailing.gwt.ui.client.EditCompetitorsFilterSetDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.FilterSet;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -40,6 +45,7 @@ import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPresele
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
@@ -172,6 +178,43 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         addComponentToNavigationMenu(leaderboardAndMapViewer, windChart,  true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, competitorChart, true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, raceMap, false);
+
+        Button editCompetitorsFilterButton = new Button("Filter competitors...");
+        
+        editCompetitorsFilterButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                FilterSet<CompetitorDTO> competitorsFilterSet = competitorSelectionModel.getCompetitorsFilterSet();
+                
+                AbstractCompetitorsFilterSetDialog dialog;
+                if(competitorsFilterSet == null) {
+                    dialog = new CreateCompetitorsFilterSetDialog(stringMessages, new DialogCallback<FilterSet<CompetitorDTO>>() {
+                        @Override
+                        public void ok(final FilterSet<CompetitorDTO> competitorsFilterSet) {
+                            competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSet);
+                         }
+
+                        @Override
+                        public void cancel() { 
+                        }
+                    });
+                } else {
+                    dialog = new EditCompetitorsFilterSetDialog(competitorsFilterSet, stringMessages, new DialogCallback<FilterSet<CompetitorDTO>>() {
+                        @Override
+                        public void ok(final FilterSet<CompetitorDTO> competitorsFilterSet) {
+                            competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSet);
+                        }
+
+                        @Override
+                        public void cancel() { 
+                        }
+                    });
+                }
+                dialog.show();
+            }
+        });
+        
+        componentsNavigationPanel.add(editCompetitorsFilterButton);
 
         addMediaSelectorToNavigationMenu();   
     }

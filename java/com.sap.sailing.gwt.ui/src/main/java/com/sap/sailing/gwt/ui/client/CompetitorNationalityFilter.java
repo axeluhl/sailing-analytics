@@ -32,10 +32,36 @@ public class CompetitorNationalityFilter extends AbstractFilter<CompetitorDTO, S
     @Override
     public boolean filter(CompetitorDTO competitor) {
         boolean result = false;
-        if(filterValue != null && filterValue.length() == 2) {
-            if(competitor.twoLetterIsoCountryCode != null && competitor.twoLetterIsoCountryCode.equals(filterValue)) {
-                result = true;
-            }            
+        if(filterValue != null && filterOperator != null) {
+            switch (filterOperator) {
+            case Contains:
+            case Equals:
+                if(filterValue.length() == 2 && competitor.twoLetterIsoCountryCode != null && 
+                    competitor.twoLetterIsoCountryCode.equalsIgnoreCase(filterValue)) {
+                    result = true;
+                } else if(filterValue.length() == 3 && competitor.threeLetterIocCountryCode != null && 
+                        competitor.threeLetterIocCountryCode.equalsIgnoreCase(filterValue)) {
+                    result = true;
+                }
+                break;
+            case NotContains:
+            case NotEqualTo:
+                if(filterValue.length() == 2 && competitor.twoLetterIsoCountryCode != null && 
+                    !competitor.twoLetterIsoCountryCode.equalsIgnoreCase(filterValue)) {
+                    result = true;
+                } else if(filterValue.length() == 3 && competitor.threeLetterIocCountryCode != null && 
+                        !competitor.threeLetterIocCountryCode.equalsIgnoreCase(filterValue)) {
+                    result = true;
+                }
+                break;
+            case EndsWith:
+            case GreaterThan:
+            case GreaterThanEquals:
+            case LessThan:
+            case LessThanEquals:
+            case StartsWith:
+                throw new RuntimeException("Operator " + filterOperator.name() + " is not supported."); 
+            }
         }
         return result;
     }
@@ -52,7 +78,7 @@ public class CompetitorNationalityFilter extends AbstractFilter<CompetitorDTO, S
     
     @Override
     public String getDescription() {
-        return "Nationality";
+        return "Shows competitors of a nationality (ISO code or IOC code).";
     }
 
     @Override

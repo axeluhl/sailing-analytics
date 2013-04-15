@@ -50,12 +50,9 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         public String getErrorMessage(FilterSet<CompetitorDTO> competitorsFilterSet) {
             String errorMessage = null;
 
-            int filterCount = competitorsFilterSet.getFilters().size();
             boolean nameNotEmpty = competitorsFilterSet.getName() != null && competitorsFilterSet.getName().length() > 0;
             if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
-            } else if(filterCount < 1) {
-                errorMessage = "Please define at least one filter.";
             } else {
                 for(Filter<CompetitorDTO, ?> filter: competitorsFilterSet.getFilters()) {
                     Object filterValue = filter.getConfiguration().getB();
@@ -75,7 +72,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         this.competitorsFilterSet = competitorsFilterSet;
         this.stringMessages = stringMessages; 
         
-        filterDescriptionLabel = new Label(stringMessages.description() + ":");
+        filterDescriptionLabel = new Label("Filter description:");
         filterDescriptionText = new Label();
         competitorsFiltersGrid = new Grid(0,0);
 
