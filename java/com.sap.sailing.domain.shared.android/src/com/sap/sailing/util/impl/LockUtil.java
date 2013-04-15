@@ -6,12 +6,22 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 
+/**
+ * Supports lock management for {@link NamedReentrantReadWriteLock} which is a specialization of {@link ReentrantReadWriteLock} that provides
+ * enhanced tracing capabilities. This class offers a number of utility methods which also support the propagation of locks from one thread
+ * to another. This can be used by threads to testify that they will wait for another thread which therefore doesn't need to acquire the
+ * same locks again. This can help to avoid deadlocks.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class LockUtil {
     private static final int NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK = 5;
     private static final Logger logger = Logger.getLogger(Util.class.getName());
