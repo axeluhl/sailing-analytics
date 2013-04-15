@@ -153,12 +153,10 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         List<Component<?>> components = new ArrayList<Component<?>>();
         competitorChart = new MultiChartPanel(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider,
                     timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
-        competitorChart.setVisible(false);
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(competitorChart);
         windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeRangeWithZoomModel, new WindChartSettings(),
                 stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
-        windChart.setVisible(false);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(windChart);
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components);
@@ -167,7 +165,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
             mainPanel.add(componentViewer.getViewerWidget());
         }
         setLeaderboardVisible(getConfiguration().isShowLeaderboard());
-
+        setWindChartVisible(getConfiguration().isShowWindChart());
+        setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
+        
         addComponentToNavigationMenu(leaderboardAndMapViewer, leaderboardPanel, true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, windChart,  true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, competitorChart, true);
