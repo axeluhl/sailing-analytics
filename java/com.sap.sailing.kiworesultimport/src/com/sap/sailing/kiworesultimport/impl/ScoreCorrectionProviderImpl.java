@@ -17,6 +17,7 @@ import org.xml.sax.SAXException;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.kiworesultimport.ParserFactory;
 import com.sap.sailing.kiworesultimport.RegattaSummary;
 import com.sap.sailing.kiworesultimport.ZipFile;
@@ -57,7 +58,7 @@ public class ScoreCorrectionProviderImpl extends AbstractFileBasedScoreCorrectio
     private Iterable<RegattaSummary> getAllRegattaSummaries() throws IOException, SAXException, ParserConfigurationException {
         List<RegattaSummary> result = new ArrayList<RegattaSummary>();
         ZipFileParser zipFileParser = ParserFactory.INSTANCE.createZipFileParser();
-        for (Pair<InputStream, String> streamAndName : getResultDocumentProvider().getDocumentsAndNames()) {
+        for (Triple<InputStream, String, TimePoint> streamAndName : getResultDocumentProvider().getDocumentsAndNamesAndLastModified()) {
             if (streamAndName.getB().toLowerCase().endsWith(".zip")) {
                 ZipFile zipFile = zipFileParser.parse(streamAndName.getA());
                 for (RegattaSummary regattaSummary : zipFile.getRegattaSummaries()) {

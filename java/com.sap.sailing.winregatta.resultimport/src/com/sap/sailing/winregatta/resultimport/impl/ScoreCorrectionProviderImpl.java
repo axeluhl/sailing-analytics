@@ -1,35 +1,29 @@
 package com.sap.sailing.winregatta.resultimport.impl;
 
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
-import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.resultimport.RegattaResults;
-import com.sap.sailing.resultimport.UrlResultProvider;
+import com.sap.sailing.resultimport.ResultDocumentProvider;
+import com.sap.sailing.resultimport.impl.AbstractDocumentBasedScoreCorrectionProvider;
 import com.sap.sailing.resultimport.impl.RegattaScoreCorrectionsImpl;
 
-public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, UrlResultProvider {
-	private static final long serialVersionUID = -5501186796881875686L;
+public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorrectionProvider {
+    private static final long serialVersionUID = -5501186796881875686L;
 
-	private static final String name = "'WinRegatta Plus' XLS Score Importer";
+    private static final String name = "Barbados 2013 505 Worlds Excel Result Importer";
 
-    private final Set<URL> allUrls;
-    
-    private String sheetName = "Erg_Drachen";
-
-    public ScoreCorrectionProviderImpl() throws MalformedURLException {
-        allUrls = new HashSet<URL>();
+    public ScoreCorrectionProviderImpl(ResultDocumentProvider resultDocumentProvider) {
+        super(resultDocumentProvider);
     }
 
     @Override

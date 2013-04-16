@@ -20,15 +20,16 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
-import com.sap.sailing.resultimport.impl.AbstractFileBasedScoreCorrectionProvider;
+import com.sap.sailing.resultimport.impl.AbstractDocumentBasedScoreCorrectionProvider;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.resultimport.schema.Division;
 import com.sap.sailing.xrr.resultimport.schema.Event;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 
-public class ScoreCorrectionProviderImpl extends AbstractFileBasedScoreCorrectionProvider {
+public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorrectionProvider {
     private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
     private static final long serialVersionUID = -4596215011753860781L;
 
@@ -128,7 +129,7 @@ public class ScoreCorrectionProviderImpl extends AbstractFileBasedScoreCorrectio
     private Iterable<Parser> getAllRegattaResults() throws SAXException, IOException,
             ParserConfigurationException {
         List<Parser> result = new ArrayList<>();
-        for (Pair<InputStream, String> is : getResultDocumentProvider().getDocumentsAndNames()) {
+        for (Triple<InputStream, String, TimePoint> is : getResultDocumentProvider().getDocumentsAndNamesAndLastModified()) {
             Parser parser = parserFactory.createParser(is.getA(), is.getB());
             result.add(parser);
         }

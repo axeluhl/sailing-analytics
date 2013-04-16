@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 
 public class FileBasedResultDocumentProvider implements ResultDocumentProvider {
@@ -21,14 +23,15 @@ public class FileBasedResultDocumentProvider implements ResultDocumentProvider {
     }
 
     @Override
-    public Iterable<Pair<InputStream, String>> getDocumentsAndNames() throws FileNotFoundException {
-        List<Pair<InputStream, String>> result = new ArrayList<>();
+    public Iterable<Triple<InputStream, String, TimePoint>> getDocumentsAndNamesAndLastModified() throws FileNotFoundException {
+        List<Triple<InputStream, String, TimePoint>> result = new ArrayList<>();
         final File[] fileList = scanDir.listFiles();
         if (fileList != null) {
             for (File file : fileList) {
                 if (file.isFile()) {
                     logger.fine("adding " + file + " to result import list");
-                    result.add(new Pair<InputStream, String>(new FileInputStream(file), file.toString()));
+                    result.add(new Triple<InputStream, String, TimePoint>(new FileInputStream(file), file.toString(),
+                            new MillisecondsTimePoint(file.lastModified())));
                 }
             }
         }

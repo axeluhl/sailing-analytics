@@ -33,6 +33,7 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsFor
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.resultimport.impl.ScoreCorrectionProviderImpl;
@@ -56,13 +57,14 @@ public class ParserTest {
     private ResultDocumentProvider getTestDocumentProvider() {
         return new ResultDocumentProvider() {
             @Override
-            public Iterable<Pair<InputStream, String>> getDocumentsAndNames() throws FileNotFoundException {
+            public Iterable<Triple<InputStream, String, TimePoint>> getDocumentsAndNamesAndLastModified() throws FileNotFoundException {
                 try {
-                    List<Pair<InputStream, String>> result = new ArrayList<>();
-                    result.add(new Pair<InputStream, String>(getInputStream(SAMPLE_INPUT_NAME_LASER), SAMPLE_INPUT_NAME_LASER));
-                    result.add(new Pair<InputStream, String>(getInputStream(SAMPLE_INPUT_NAME_STAR), SAMPLE_INPUT_NAME_STAR));
-                    result.add(new Pair<InputStream, String>(getInputStream(SAMPLE_INPUT_NAME_MELBOURNE), SAMPLE_INPUT_NAME_MELBOURNE));
-                    result.add(new Pair<InputStream, String>(getInputStream(SAMPLE_INPUT_NAME_SPLIT_FLEET), SAMPLE_INPUT_NAME_SPLIT_FLEET));
+                    List<Triple<InputStream, String, TimePoint>> result = new ArrayList<>();
+                    TimePoint now = MillisecondsTimePoint.now();
+                    result.add(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_LASER), SAMPLE_INPUT_NAME_LASER, now));
+                    result.add(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_STAR), SAMPLE_INPUT_NAME_STAR, now));
+                    result.add(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_MELBOURNE), SAMPLE_INPUT_NAME_MELBOURNE, now));
+                    result.add(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_SPLIT_FLEET), SAMPLE_INPUT_NAME_SPLIT_FLEET, now));
                     return result;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
