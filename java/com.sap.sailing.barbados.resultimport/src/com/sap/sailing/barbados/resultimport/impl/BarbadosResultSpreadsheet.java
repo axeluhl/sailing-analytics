@@ -49,7 +49,7 @@ public class BarbadosResultSpreadsheet {
         String iocCountryCode;
         while ((row=overallResultsSheet.getRow(rowIndex)) != null && (iocCountryCode = row.getCell(1).getStringCellValue()) != null && !iocCountryCode.isEmpty()) {
             Integer totalRank = row.getCell(0) == null ? null : (int) row.getCell(0).getNumericCellValue();
-            String sailID = iocCountryCode + ((int) row.getCell(2).getNumericCellValue());
+            String sailID = iocCountryCode.trim() + " " + ((int) row.getCell(2).getNumericCellValue());
             String helm = row.getCell(3).getStringCellValue();
             String crew = row.getCell(4).getStringCellValue();
             Iterable<String> names = Arrays.asList(new String[] { helm, crew });
