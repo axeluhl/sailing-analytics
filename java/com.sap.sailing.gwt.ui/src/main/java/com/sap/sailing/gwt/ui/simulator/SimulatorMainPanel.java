@@ -14,6 +14,7 @@ import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -27,6 +28,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -36,9 +38,8 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.SplitLayoutPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -60,8 +61,9 @@ import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
 import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 
-public class SimulatorMainPanel extends SplitLayoutPanel {
+public class SimulatorMainPanel extends SimplePanel {
 
+    private DockLayoutPanel mainPanel;
     private FlowPanel leftPanel;
     private FlowPanel rightPanel;
     private VerticalPanel windPanel;
@@ -72,7 +74,6 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private RadioButton summaryButton;
     private RadioButton replayButton;
     private RadioButton windDisplayButton;
-    // private TimePanel<TimePanelSettings> timePanel;
 
     private Map<String, WindPatternDisplay> patternDisplayMap;
     private Map<String, Panel> patternPanelMap;
@@ -105,12 +106,12 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private char mode;
 
     private TimePanel<TimePanelSettings> timePanel;
-
+    private FlowPanel fullTimePanel;
+    
     private CheckBox isOmniscient;
     private CheckBox isOpportunistic;
     private CheckBox isPathPolylineFreeMode;
     private Chart chart;
-    // private Timer timer;
 
     private boolean warningAlreadyShown = false;
     private DialogBox polarDiagramDialogBox;
@@ -221,6 +222,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.isPathPolylineFreeMode = new CheckBox(this.stringMessages.freemode(), true);
         this.isPathPolylineFreeMode.setValue(true);
 
+        this.setSize("100%", "100%");
+        
         leftPanel = new FlowPanel();
         rightPanel = new FlowPanel();
         patternSelector = new ListBox();
@@ -256,23 +259,15 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         windParams.setShowStreamlets(showStreamlets);
 
         timer = new Timer(PlayModes.Replay, 1000l);
-        timer.setAutoAdvance(false);
-        // timer.setTime(windParams.getStartTime().getTime());
-        // TO DO make it work for no time panel display
-        FlowPanel timeSliderWrapperPanel = new FlowPanel();
 
-        /*
-         * timePanel = new TimePanel<TimePanelSettings>(timer, stringMessages);
-         * timeSliderWrapperPanel.getElement().getStyle().setProperty("height", "20%");
-         * timeSliderWrapperPanel.getElement().setClassName("timeSliderWrapperPanel" );
-         * timeSliderWrapperPanel.add(timePanel); timePanel.setVisible(false);
-         */
-        //timePanel = new SimulatorTimePanel(timer, stringMessages, windParams);
         TimeRangeWithZoomProvider timeRangeProvider = new TimeRangeWithZoomModel();
-        timePanel = new TimePanel<TimePanelSettings>(timer, timeRangeProvider, stringMessages);
         initTimer();
         timer.setTime(windParams.getStartTime().getTime());
-        //timePanel.setActive(false);
+        int secondsTimeStep = (int) windParams.getTimeStep().getTime() / 1000;
+        timer.setPlaySpeedFactor(secondsTimeStep);
+        timer.setAutoAdvance(true);
+
+        timePanel = new TimePanel<TimePanelSettings>(timer, timeRangeProvider, stringMessages);
 
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         // LogoAndTitlePanel logoAndTitlePanel = new
@@ -280,23 +275,48 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         // logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         // this.addNorth(logoAndTitlePanel, 68);
 
-        // leftPanel.getElement().getStyle().setBackgroundColor("#4f4f4f");
         createOptionsPanelTop();
         createOptionsPanel();
         createMapOptionsPanel();
 
-        rightPanel.add(timeSliderWrapperPanel);
+        fullTimePanel = this.createTimePanel();
 
-        this.addWest(leftPanel, 470);
-        // leftPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
-
-        this.add(rightPanel);
-        // rightPanel.getElement().getStyle().setFloat(Style.Float.RIGHT);
+        mainPanel = new DockLayoutPanel(Unit.PX);
+        mainPanel.setSize("100%", "100%");        
+        mainPanel.addWest(leftPanel, 470);
+        mainPanel.addSouth(fullTimePanel, 90);
+        mainPanel.add(rightPanel);
+        this.setWidget(mainPanel);        
 
         this.polarDiagramDialogBox = this.createPolarDiagramDialogBox();
 
     }
 
+    private void showTimePanel(boolean visible) {
+        
+        boolean isContained = mainPanel.getWidgetIndex(fullTimePanel) >= 0;
+        
+        if (visible) {
+            
+            if (!isContained) {
+                fullTimePanel.setVisible(true);
+                mainPanel.insertSouth(fullTimePanel, 90, null);
+            }
+            
+        } else {
+            
+            if (isContained) {
+                mainPanel.remove(fullTimePanel);
+                fullTimePanel.setVisible(false);
+            }
+            
+        }
+        
+        mainPanel.forceLayout();
+        
+    }
+    
+    
     private void createOptionsPanelTop() {
         HorizontalPanel optionsPanel = new HorizontalPanel();
         optionsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -563,8 +583,21 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         return (!this.isPathPolylineFreeMode.getValue());
     }
 
-    public Widget getTimeWidget() {
-        return timePanel;
+    private FlowPanel createTimePanel() {
+
+        FlowPanel timeLineInnerBgPanel = new FlowPanel();
+        timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
+        timeLineInnerBgPanel.add(timePanel);
+
+        FlowPanel timeLineInnerPanel = new FlowPanel();
+        timeLineInnerPanel.add(timeLineInnerBgPanel);
+        timeLineInnerPanel.addStyleName("timeLineInnerPanel");
+
+        FlowPanel fullTimePanel = new FlowPanel();
+        fullTimePanel.add(timeLineInnerPanel);
+        fullTimePanel.addStyleName("timeLinePanel");
+
+        return fullTimePanel;
     }
 
     private Panel createPolarSelector() {
@@ -768,13 +801,13 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
                 this.competitorSelector.getSelectedIndex(), this.legSelector.getSelectedIndex());
 
         if (this.windDisplayButton.getValue()) {
-            //TODO: Activate TimePanel this.timePanel.setActive(true);
+            this.showTimePanel(true);
             this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, selection, true);
         } else if (this.summaryButton.getValue()) {
-            //TODO: Activate TimePanel this.timePanel.setActive(false);
+            this.showTimePanel(false);
             this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selection, true);
         } else if (this.replayButton.getValue()) {
-            //TODO: Activate TimePanel this.timePanel.setActive(true);
+            this.showTimePanel(true);
             this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, selection, true);
         } else {
             if (this.mode == SailingSimulatorUtil.measured) {
@@ -782,10 +815,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
                 if (selectedLegIndex % 2 != 0) {
                     errorReporter.reportError("Downwind legs are NOT supported yet. Sorry about that :)");
                 } else {
-
                     this.simulatorMap.removePolyline();
-
-                    //TODO: Activate TimePanel this.timePanel.setActive(false);
+                    this.showTimePanel(false);
                     this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selection, true);
                 }
             }
@@ -799,12 +830,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.summaryButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
-                // timePanel.setVisible(false);
-                //TODO: Activate TimePanel timePanel.setActive(false);
-
+                showTimePanel(false);
                 SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(boatClassSelector.getSelectedIndex(), raceSelector.getSelectedIndex(),
                         competitorSelector.getSelectedIndex(), legSelector.getSelectedIndex());
-
                 simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, selection, false);
             }
         });
@@ -814,11 +842,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.replayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
-                //TODO: Activate TimePanel timePanel.setActive(true);
-
+                showTimePanel(true);
                 SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(boatClassSelector.getSelectedIndex(), raceSelector.getSelectedIndex(),
                         competitorSelector.getSelectedIndex(), legSelector.getSelectedIndex());
-
                 simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, selection, false);
             }
         });
@@ -827,11 +853,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.windDisplayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
-                //TODO: Activate TimePanel timePanel.setActive(true);
-
+                showTimePanel(true);
                 SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(boatClassSelector.getSelectedIndex(), raceSelector.getSelectedIndex(),
                         competitorSelector.getSelectedIndex(), legSelector.getSelectedIndex());
-
                 simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, selection, false);
             }
         });

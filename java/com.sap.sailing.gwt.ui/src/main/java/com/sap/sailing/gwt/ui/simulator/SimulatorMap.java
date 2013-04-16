@@ -416,6 +416,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 }
                 timePanel.setMinMax(windParams.getStartTime(), windParams.getEndTime(), true);
                 timePanel.resetTimeSlider();
+                //timer.setTime(windParams.getStartTime().getTime());
 
                 busyIndicator.setBusy(false);
             }
@@ -614,6 +615,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     r.setVisible(false);
                 }
                 this.legendCanvasOverlay.setVisible(false);
+
                 if (this.windFieldCanvasOverlay != null) {
                     this.windFieldCanvasOverlay.setVisible(true);
                     this.windFieldCanvasOverlay.redraw(true);
@@ -630,6 +632,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     this.windLineCanvasOverlay.setVisible(true);
                     this.windLineCanvasOverlay.redraw(true);
                 }
+
             } else {
                 this.windParams.setDefaultTimeSettings();
                 this.generateWindField(windPatternDisplay, true);

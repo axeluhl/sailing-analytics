@@ -144,7 +144,6 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
         if (timer != null) {
             timeChanged(timer.getTime());
-
         } else {
             drawWindField(wl.getMatrix());
         }
@@ -175,7 +174,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
             final double dx = px0.getX()-px1.getX();
             final double dy = px0.getY()-px1.getY();
             final double pxLength = Math.sqrt( dx*dx + dy*dy );
-            System.out.println("pxLength = "+pxLength);
+            logger.fine("pxLength = "+pxLength);
 
             windDTOIter = windDTOList.iterator();
             int index = 0;

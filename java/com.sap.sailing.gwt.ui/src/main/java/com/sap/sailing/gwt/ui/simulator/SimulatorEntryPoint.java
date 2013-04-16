@@ -118,23 +118,6 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         
     }
 
-    private FlowPanel createTimePanel(SimulatorMainPanel simulatorPanel) {
-
-        FlowPanel timeLineInnerBgPanel = new FlowPanel();
-        timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
-        timeLineInnerBgPanel.add(simulatorPanel.getTimeWidget());
-
-        FlowPanel timeLineInnerPanel = new FlowPanel();
-        timeLineInnerPanel.add(timeLineInnerBgPanel);
-        timeLineInnerPanel.addStyleName("timeLineInnerPanel");
-
-        FlowPanel timelinePanel = new FlowPanel();
-        timelinePanel.add(timeLineInnerPanel);
-        timelinePanel.addStyleName("timeLinePanel");
-
-        return timelinePanel;
-    }
-
     private FlowPanel createLogoAndTitlePanel(SimulatorMainPanel simulatorPanel) {
 
         //LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(titleName, rightLabelName, stringMessages);
@@ -166,10 +149,8 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         // p.addNorth(toolbarPanel, 40);
 
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(simulatorPanel);
-        FlowPanel timePanel = createTimePanel(simulatorPanel);
 
         p.addNorth(logoAndTitlePanel, 68);
-        p.addSouth(timePanel, 90);
         p.add(simulatorPanel);
         p.addStyleName("dockLayoutPanel");
 

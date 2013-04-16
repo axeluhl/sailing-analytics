@@ -132,7 +132,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
             final SortByWindSpeed windSpeedSorter = new SortByWindSpeed();
             final double maxSpeed = Collections.max(wl.getMatrix(), windSpeedSorter).trueWindSpeedInKnots;
             final double minSpeed = Collections.min(wl.getMatrix(), windSpeedSorter).trueWindSpeedInKnots;
-            System.out.println("minSpeed: " + minSpeed + " maxSpeed: " + maxSpeed);
+            logger.fine("minSpeed: " + minSpeed + " maxSpeed: " + maxSpeed);
 
             colorPalette = new WindGridColorPalette(minSpeed, maxSpeed);
             logger.fine("Color minSpeed: " + colorPalette.getColor(minSpeed));
