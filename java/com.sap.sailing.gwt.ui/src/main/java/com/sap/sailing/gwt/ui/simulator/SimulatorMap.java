@@ -572,6 +572,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
             if (this.replayPathCanvasOverlays != null && !this.replayPathCanvasOverlays.isEmpty()) {
                 System.out.println("Soft refresh");
+                timePanel.resetTimeSlider();
                 for (PathCanvasOverlay r : this.replayPathCanvasOverlays) {
                     r.displayWindAlongPath = false;
                     r.setTimer(this.timer);
@@ -611,6 +612,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
             if (this.replayPathCanvasOverlays != null && !this.replayPathCanvasOverlays.isEmpty()) {
                 System.out.println("Soft refresh");
+                timePanel.resetTimeSlider();
                 for (PathCanvasOverlay r : this.replayPathCanvasOverlays) {
                     r.setVisible(false);
                 }
