@@ -14,8 +14,6 @@ public class RaceMapSettings {
 
     private boolean showOnlySelectedCompetitors = false;
 
-    private boolean showAllCompetitors = false;
-
     private RaceMapZoomSettings zoomSettings;
 
     private RaceMapHelpLinesSettings helpLinesSettings;
@@ -23,8 +21,6 @@ public class RaceMapSettings {
     private long tailLengthInMilliseconds = 100000l;
 
     private double buoyZoneRadiusInMeters = 0.0;
-
-    private int maxVisibleCompetitorsCount = 50;
 
     private boolean showSelectedCompetitorsInfo = true;
 
@@ -96,22 +92,6 @@ public class RaceMapSettings {
 
     public void setHelpLinesSettings(RaceMapHelpLinesSettings helpLinesSettings) {
         this.helpLinesSettings = helpLinesSettings;
-    }
-
-    public int getMaxVisibleCompetitorsCount() {
-        return maxVisibleCompetitorsCount;
-    }
-
-    public void setMaxVisibleCompetitorsCount(int maxVisibleCompetitorsCount) {
-        this.maxVisibleCompetitorsCount = maxVisibleCompetitorsCount;
-    }
-
-    public boolean isShowAllCompetitors() {
-        return showAllCompetitors;
-    }
-
-    public void setShowAllCompetitors(boolean showAllCompetitors) {
-        this.showAllCompetitors = showAllCompetitors;
     }
 
     public boolean isShowSelectedCompetitorsInfo() {

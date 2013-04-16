@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -36,11 +35,9 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox zoomOnlyToSelectedCompetitorsCheckBox;
     private CheckBox showDouglasPeuckerPointsCheckBox;
     private CheckBox showOnlySelectedCompetitorsCheckBox;
-    private CheckBox showAllCompetitorsCheckBox;
     private CheckBox showSelectedCompetitorsInfoCheckBox;
     private LongBox tailLengthBox;
     private DoubleBox buoyZoneRadiusBox;
-    private IntegerBox maxVisibleCompetitorsCountBox;
     
     private final StringMessages stringMessages;
     private final RaceMapSettings initialSettings;
@@ -59,28 +56,6 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         Label competitorsLabel = dialog.createHeadlineLabel(stringMessages.competitors());
         vp.add(competitorsLabel);
 
-        // max competitors count settings
-        HorizontalPanel maxCompetitotorsCountPanel = new HorizontalPanel();
-        showAllCompetitorsCheckBox = dialog.createCheckbox(stringMessages.showAllCompetitors());
-        showAllCompetitorsCheckBox.setValue(initialSettings.isShowAllCompetitors());
-        maxCompetitotorsCountPanel.add(showAllCompetitorsCheckBox);
-        showAllCompetitorsCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> vce) {
-                boolean newValue = vce.getValue();
-                RaceMapSettingsDialogComponent.this.maxVisibleCompetitorsCountBox.setEnabled(!newValue);
-            }
-        });
-        Label maxCompetitorsCountLabel = new Label(stringMessages.maximalCount() + ":");
-        maxCompetitorsCountLabel.getElement().getStyle().setMarginLeft(25, Unit.PX);
-        maxCompetitotorsCountPanel.add(maxCompetitorsCountLabel);
-        maxCompetitotorsCountPanel.setCellVerticalAlignment(maxCompetitorsCountLabel, HasVerticalAlignment.ALIGN_MIDDLE);
-        maxVisibleCompetitorsCountBox = dialog.createIntegerBox(initialSettings.getMaxVisibleCompetitorsCount(), 4);
-        maxVisibleCompetitorsCountBox.setEnabled(!initialSettings.isShowAllCompetitors());
-        maxCompetitotorsCountPanel.add(maxVisibleCompetitorsCountBox);
-        maxCompetitotorsCountPanel.setCellVerticalAlignment(maxVisibleCompetitorsCountBox, HasVerticalAlignment.ALIGN_MIDDLE);
-        vp.add(maxCompetitotorsCountPanel);
-        
         showOnlySelectedCompetitorsCheckBox = dialog.createCheckbox(stringMessages.showOnlySelectedCompetitors());
         showOnlySelectedCompetitorsCheckBox.setValue(initialSettings.isShowOnlySelectedCompetitors());
         vp.add(showOnlySelectedCompetitorsCheckBox);
@@ -226,14 +201,12 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         result.setShowDouglasPeuckerPoints(showDouglasPeuckerPointsCheckBox.getValue());
         result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitorsCheckBox.getValue());
         result.setShowSelectedCompetitorsInfo(showSelectedCompetitorsInfoCheckBox.getValue());
-        result.setShowAllCompetitors(showAllCompetitorsCheckBox.getValue());
         if(helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
             result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue()*1000l);
         }
         if(helpLinesSettings.isVisible(HelpLineTypes.BUOYZONE)) {
             result.setBuoyZoneRadiusInMeters(buoyZoneRadiusBox.getValue());
         }
-        result.setMaxVisibleCompetitorsCount(maxVisibleCompetitorsCountBox.getValue() == null ? -1 : maxVisibleCompetitorsCountBox.getValue());
         
         return result;
     }
@@ -274,8 +247,6 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 } else if (valueToValidate.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE) 
                         && (valueToValidate.getBuoyZoneRadiusInMeters() < 0.0 || valueToValidate.getBuoyZoneRadiusInMeters() > 100.0)) {
                         errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.buoyZone(), "0", "100");
-                } else if (!valueToValidate.isShowAllCompetitors() && valueToValidate.getMaxVisibleCompetitorsCount() <= 0) {
-                    errorMessage = stringMessages.maxVisibleCompetitorsCountMustBePositive();
                 }
                 return errorMessage;
             }

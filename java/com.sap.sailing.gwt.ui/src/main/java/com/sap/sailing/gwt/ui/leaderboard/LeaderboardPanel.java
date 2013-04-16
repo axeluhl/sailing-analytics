@@ -1856,12 +1856,20 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      */
     private Collection<LeaderboardRowDTO> getRowsToDisplay(LeaderboardDTO leaderboard) {
         Collection<LeaderboardRowDTO> result;
+        List<CompetitorDTO> allFilteredCompetitors = new ArrayList<CompetitorDTO>();
+        Util.addAll(competitorSelectionProvider.getFilteredCompetitors(), allFilteredCompetitors);
+        result = new ArrayList<LeaderboardRowDTO>();
         if (preSelectedRace == null) {
-            result = leaderboard.rows.values();
+            for (CompetitorDTO competitor : leaderboard.rows.keySet()) {
+                if(allFilteredCompetitors.contains(competitor)) {
+                    result.add(leaderboard.rows.get(competitor));
+                }
+            }
         } else {
-            result = new ArrayList<LeaderboardRowDTO>();
             for (CompetitorDTO competitorInPreSelectedRace : getCompetitors(preSelectedRace)) {
-                result.add(leaderboard.rows.get(competitorInPreSelectedRace));
+                if(allFilteredCompetitors.contains(competitorInPreSelectedRace)) {
+                    result.add(leaderboard.rows.get(competitorInPreSelectedRace));
+                }
             }
         }
         return result;

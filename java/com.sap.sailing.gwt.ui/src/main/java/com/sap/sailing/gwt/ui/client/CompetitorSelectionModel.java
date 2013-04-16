@@ -106,11 +106,11 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
 
     @Override
     public Iterable<CompetitorDTO> getAllCompetitors() {
-        //return Collections.unmodifiableCollection(allCompetitors);
-        return Collections.unmodifiableCollection(getFilteredCompetitors());
+        return Collections.unmodifiableCollection(allCompetitors);
     }
     
-    private Collection<CompetitorDTO> getFilteredCompetitors() {
+    @Override
+    public Collection<CompetitorDTO> getFilteredCompetitors() {
         Set<CompetitorDTO> filteredCompetitors = new LinkedHashSet<CompetitorDTO>();
         Set<CompetitorDTO> currentFilteredList = new LinkedHashSet<CompetitorDTO>();
         Util.addAll(allCompetitors, currentFilteredList);
@@ -133,7 +133,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
             }
         }
         
-        return currentFilteredList;
+        return Collections.unmodifiableCollection(currentFilteredList);
     }
     
     public void setSelected(CompetitorDTO competitor, boolean selected, CompetitorSelectionChangeListener... listenersNotToNotify) {
@@ -233,16 +233,16 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         return null;
     }
 
+    @Override
     public FilterSet<CompetitorDTO> getCompetitorsFilterSet() {
         return competitorsFilterSet;
     }
 
+    @Override
     public void setCompetitorsFilterSet(FilterSet<CompetitorDTO> competitorsFilterSet) {
         this.competitorsFilterSet = competitorsFilterSet;
         for (CompetitorSelectionChangeListener listener : listeners) {
             listener.competitorsListChanged(getAllCompetitors());
         }
     }
-
-
 }
