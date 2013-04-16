@@ -33,8 +33,8 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsFor
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
-import com.sap.sailing.xrr.resultimport.XRRDocumentProvider;
 import com.sap.sailing.xrr.resultimport.impl.ScoreCorrectionProviderImpl;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 
@@ -53,8 +53,8 @@ public class ParserTest {
         return new File(RESOURCES + filename);
     }
 
-    private XRRDocumentProvider getTestDocumentProvider() {
-        return new XRRDocumentProvider() {
+    private ResultDocumentProvider getTestDocumentProvider() {
+        return new ResultDocumentProvider() {
             @Override
             public Iterable<Pair<InputStream, String>> getDocumentsAndNames() throws FileNotFoundException {
                 try {

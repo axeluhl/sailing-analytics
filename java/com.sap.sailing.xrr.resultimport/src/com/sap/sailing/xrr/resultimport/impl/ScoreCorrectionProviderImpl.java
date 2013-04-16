@@ -18,32 +18,26 @@ import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
-import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.resultimport.ResultDocumentProvider;
+import com.sap.sailing.resultimport.impl.AbstractFileBasedScoreCorrectionProvider;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
-import com.sap.sailing.xrr.resultimport.XRRDocumentProvider;
 import com.sap.sailing.xrr.resultimport.schema.Division;
 import com.sap.sailing.xrr.resultimport.schema.Event;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 
-public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
+public class ScoreCorrectionProviderImpl extends AbstractFileBasedScoreCorrectionProvider {
     private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
     private static final long serialVersionUID = -4596215011753860781L;
 
     private static final String name = "ISAF XML Regatta Result (XRR) Importer";
     
-    /**
-     * The directory that will be scanned for <code>.zip</code> files which will then be passed to
-     * {@link ZipFileParser} for analysis.
-     */
-    private final XRRDocumentProvider documentProvider;
-
     private final ParserFactory parserFactory;
     
-    public ScoreCorrectionProviderImpl(XRRDocumentProvider documentProvider, ParserFactory parserFactory) {
-        this.documentProvider = documentProvider;
+    public ScoreCorrectionProviderImpl(ResultDocumentProvider documentProvider, ParserFactory parserFactory) {
+        super(documentProvider);
         this.parserFactory = parserFactory;
     }
 
@@ -134,7 +128,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     private Iterable<Parser> getAllRegattaResults() throws SAXException, IOException,
             ParserConfigurationException {
         List<Parser> result = new ArrayList<>();
-        for (Pair<InputStream, String> is : documentProvider.getDocumentsAndNames()) {
+        for (Pair<InputStream, String> is : getResultDocumentProvider().getDocumentsAndNames()) {
             Parser parser = parserFactory.createParser(is.getA(), is.getB());
             result.add(parser);
         }

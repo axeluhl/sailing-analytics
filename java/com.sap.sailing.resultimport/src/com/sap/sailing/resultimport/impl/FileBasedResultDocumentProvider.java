@@ -1,0 +1,37 @@
+package com.sap.sailing.resultimport.impl;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.resultimport.ResultDocumentProvider;
+
+public class FileBasedResultDocumentProvider implements ResultDocumentProvider {
+    private static final Logger logger = Logger.getLogger(FileBasedResultDocumentProvider.class.getName());
+    
+    private final File scanDir;
+    
+    public FileBasedResultDocumentProvider(File scanDir) {
+        this.scanDir = scanDir;
+    }
+
+    @Override
+    public Iterable<Pair<InputStream, String>> getDocumentsAndNames() throws FileNotFoundException {
+        List<Pair<InputStream, String>> result = new ArrayList<>();
+        final File[] fileList = scanDir.listFiles();
+        if (fileList != null) {
+            for (File file : fileList) {
+                if (file.isFile()) {
+                    logger.fine("adding " + file + " to result import list");
+                    result.add(new Pair<InputStream, String>(new FileInputStream(file), file.toString()));
+                }
+            }
+        }
+        return result;
+    }
+}

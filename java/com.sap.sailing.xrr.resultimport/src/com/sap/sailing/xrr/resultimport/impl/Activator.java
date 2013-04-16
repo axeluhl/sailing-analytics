@@ -1,20 +1,14 @@
 package com.sap.sailing.xrr.resultimport.impl;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.resultimport.impl.FileBasedResultDocumentProvider;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
-import com.sap.sailing.xrr.resultimport.XRRDocumentProvider;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -30,22 +24,9 @@ public class Activator implements BundleActivator {
         } else {
             scanDirPath = context.getProperty(SCAN_DIR_PATH_PROPERTY_NAME);
         }
-        final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(new XRRDocumentProvider() {
-            @Override
-            public Iterable<Pair<InputStream, String>> getDocumentsAndNames() throws FileNotFoundException {
-                List<Pair<InputStream, String>> result = new ArrayList<>();
-                final File[] fileList = new File(scanDirPath).listFiles();
-                if (fileList != null) {
-                    for (File file : fileList) {
-                        if (file.isFile()) {
-                            logger.fine("adding " + file + " to XRR import list");
-                            result.add(new Pair<InputStream, String>(new FileInputStream(file), file.toString()));
-                        }
-                    }
-                }
-                return result;
-            }
-        }, ParserFactory.INSTANCE);
+        final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(new FileBasedResultDocumentProvider(
+                new File(scanDirPath)),
+                ParserFactory.INSTANCE);
         context.registerService(ScoreCorrectionProvider.class,
                 service, /* properties */ null);
         logger.info("Scanning "+scanDirPath+" for official XRR result lists of "+service.getName());
