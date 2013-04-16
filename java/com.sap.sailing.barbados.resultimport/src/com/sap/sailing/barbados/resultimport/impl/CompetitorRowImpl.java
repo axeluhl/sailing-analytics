@@ -1,4 +1,4 @@
-package com.sap.sailing.winregatta.resultimport.impl;
+package com.sap.sailing.barbados.resultimport.impl;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

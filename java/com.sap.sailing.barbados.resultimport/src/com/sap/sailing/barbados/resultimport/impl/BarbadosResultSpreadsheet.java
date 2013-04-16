@@ -1,4 +1,4 @@
-package com.sap.sailing.winregatta.resultimport.impl;
+package com.sap.sailing.barbados.resultimport.impl;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -75,7 +75,7 @@ public class BarbadosResultSpreadsheet {
             @Override
             public Map<String, String> getMetadata() {
                 Map<String, String> result = new HashMap<>();
-                result.put("boatclassName", "505");
+                result.put(ScoreCorrectionProviderImpl.BOATCLASS_NAME_METADATA_PROPERTY, "505");
                 return result;
             }
             

@@ -1,4 +1,4 @@
-package com.sap.sailing.winregatta.resultimport.impl;
+package com.sap.sailing.barbados.resultimport.impl;
 
 import java.io.InputStream;
 import java.util.Collections;
@@ -16,6 +16,8 @@ import com.sap.sailing.resultimport.impl.AbstractDocumentBasedScoreCorrectionPro
 import com.sap.sailing.resultimport.impl.RegattaScoreCorrectionsImpl;
 
 public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorrectionProvider {
+    public static final String BOATCLASS_NAME_METADATA_PROPERTY = "boatclassName";
+
     private static final long serialVersionUID = -5501186796881875686L;
 
     private static final String name = "Barbados 2013 505 Worlds Excel Result Importer";
@@ -43,7 +45,7 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
 
     private String getBoatClassName(RegattaResults regattaResult) {
         Map<String, String> metadata = regattaResult.getMetadata();
-        return metadata.get("boatClass");
+        return metadata.get(BOATCLASS_NAME_METADATA_PROPERTY);
     }
 
     @Override
