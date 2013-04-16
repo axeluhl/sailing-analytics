@@ -29,6 +29,7 @@ public class BarbadosResultImportTest {
     private static final String SAMPLE_INPUT_NAME_EMPTY_RESULTS = "RESULTS-505Barbados.xlsx";
     private static final String RESOURCES = "resources/";
     private BarbadosResultSpreadsheet spreadsheet;
+    private ScoreCorrectionProviderImpl scp;
 
     private InputStream getInputStream(String filename) throws FileNotFoundException, IOException {
         return new FileInputStream(getFile(filename));
@@ -41,6 +42,13 @@ public class BarbadosResultImportTest {
     @Before
     public void setUp() throws FileNotFoundException, IOException, Exception {
         spreadsheet = new BarbadosResultSpreadsheet(getInputStream(SAMPLE_INPUT_NAME_EMPTY_RESULTS));
+        scp = new ScoreCorrectionProviderImpl(new ResultDocumentProvider() {
+            @Override
+            public Iterable<Triple<InputStream, String, TimePoint>> getDocumentsAndNamesAndLastModified() throws IOException {
+                return Collections.singleton(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_EMPTY_RESULTS),
+                        SAMPLE_INPUT_NAME_EMPTY_RESULTS, MillisecondsTimePoint.now()));
+            }
+        });
     }
     
     @Test
@@ -53,13 +61,6 @@ public class BarbadosResultImportTest {
     
     @Test
     public void testResultsThroughScoreCorrectionProvider() throws Exception {
-        ScoreCorrectionProviderImpl scp = new ScoreCorrectionProviderImpl(new ResultDocumentProvider() {
-            @Override
-            public Iterable<Triple<InputStream, String, TimePoint>> getDocumentsAndNamesAndLastModified() throws IOException {
-                return Collections.singleton(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_EMPTY_RESULTS),
-                        SAMPLE_INPUT_NAME_EMPTY_RESULTS, MillisecondsTimePoint.now()));
-            }
-        });
         Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scp.getHasResultsForBoatClassFromDateByEventName();
         assertNotNull(hasResultsFor);
         assertEquals(1, hasResultsFor.size());

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -56,11 +57,21 @@ public class BarbadosResultSpreadsheet {
             double netPointsBeforeDiscarding = row.getCell(columnNumberOfNetScore).getNumericCellValue();
             List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded = new ArrayList<>();
             for (int raceNumber=0; raceNumber<numberOfRaces; raceNumber++) {
-                int rank = (int) row.getCell(COLUMN_NUMBER_OF_FIRST_RACE_RANK+raceNumber).getNumericCellValue();
+                final Cell rankOrMaxPointReasonCell = row.getCell(COLUMN_NUMBER_OF_FIRST_RACE_RANK+raceNumber);
+                Integer rank;
+                String maxPointsReason;
+                try {
+                    rank = (int) rankOrMaxPointReasonCell.getNumericCellValue();
+                    maxPointsReason = null;
+                } catch (IllegalStateException e) {
+                    // not a numeric value; try to parse text / IRM / MaxPointsReason
+                    rank = null;
+                    maxPointsReason = rankOrMaxPointReasonCell.getStringCellValue();
+                }
                 double score = row.getCell(columnNumberOfFirstRaceScore+raceNumber).getNumericCellValue();
                 if (score != 0.0) {
                     CompetitorEntry entry = new DefaultCompetitorEntryImpl(rank,
-                            /* maxPointsReason */ null, score, /* discarded */ false);
+                            maxPointsReason, score, /* discarded */ false);
                     rankAndMaxPointsReasonAndPointsAndDiscarded.add(entry);
                 } else {
                     rankAndMaxPointsReasonAndPointsAndDiscarded.add(null);
