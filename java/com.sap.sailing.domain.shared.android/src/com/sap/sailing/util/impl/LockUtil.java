@@ -95,14 +95,16 @@ public class LockUtil {
                 if (currentThreadsPropagationCounts.containsKey(readOrWriteLock)) {
                     // read lock was propagated to current thread by at least one other thread; use virtual lock by incrementing counter:
                     incrementVirtualLockCountForCurrentThread(readOrWriteLock);
-                    logger.finest("only incremented virtual count for "+readOrWrite+" lock " + lock.getName() + " in thread "
-                            + Thread.currentThread().getName()+" to "+getCurrentThreadsVirtualLockCounts().get(readOrWriteLock));
+                    // Uncomment the following in case of issues you want to debug with logging:
+                    // logger.finest("only incremented virtual count for "+readOrWrite+" lock " + lock.getName() + " in thread "
+                    //       + Thread.currentThread().getName()+" to "+getCurrentThreadsVirtualLockCounts().get(readOrWriteLock));
                     locked = true;
                 } else {
                     // lock was not yet propagated; try to actually obtain lock
                     locked = lock(readOrWriteLock, lock.getReadLockName(), lock);
                     if (locked) {
-                        logger.finest("actually acquired "+readOrWrite+" lock " + lock.getName() + " in thread " + Thread.currentThread().getName());
+                        // Uncomment the following in case of issues you want to debug with logging:
+                        // logger.finest("actually acquired "+readOrWrite+" lock " + lock.getName() + " in thread " + Thread.currentThread().getName());
                         incrementLockCountForCurrentThread(readOrWriteLock);
                     }
                 }
@@ -127,9 +129,11 @@ public class LockUtil {
             if (virtualLockCount != null) {
                 // an entry is a positive entry and means the current thread acquired the lock virtually; unlock virtually again
                 decrementVirtualLockCountForCurrentThread(readOrWriteLock);
-                logger.finest("only decremented virtual count for "+readOrWrite+" lock "+lock.getName()+" in thread "+Thread.currentThread().getName()+" from "+virtualLockCount);
+                // Uncomment the following in case of issues you want to debug with logging:
+                // logger.finest("only decremented virtual count for "+readOrWrite+" lock "+lock.getName()+" in thread "+Thread.currentThread().getName()+" from "+virtualLockCount);
             } else {
-                logger.finest("actually unlocking "+readOrWrite+" lock "+lock.getName()+" in thread "+Thread.currentThread().getName());
+                // Uncomment the following in case of issues you want to debug with logging:
+                // logger.finest("actually unlocking "+readOrWrite+" lock "+lock.getName()+" in thread "+Thread.currentThread().getName());
                 readOrWriteLock.unlock();
                 decrementLockCountForCurrentThread(readOrWriteLock);
             }
