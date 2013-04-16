@@ -40,6 +40,7 @@ public class LockTraceTest {
     }
     
     @Test
+<<<<<<< HEAD
     public void testReentrantReadLocking() {
         NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("testReentrantReadLocking-Lock", /* fair */ true);
         LockUtil.lockForRead(lock);
@@ -51,6 +52,18 @@ public class LockTraceTest {
         LockUtil.unlockAfterRead(lock);
         assertFalse(lock.getReaders().contains(Thread.currentThread()));
         assertEquals(0, lock.getReadHoldCount());
+=======
+    public void testLockingPerformance() {
+        NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("Lock", /* fair */ true);
+        long start = System.currentTimeMillis();
+        for (int i=0; i<100000; i++) {
+            LockUtil.lockForRead(lock);
+            LockUtil.unlockAfterRead(lock);
+            LockUtil.lockForWrite(lock);
+            LockUtil.unlockAfterWrite(lock);
+        }
+        System.out.println("Took "+(System.currentTimeMillis()-start)+"ms");
+>>>>>>> master
     }
     
     @Ignore
