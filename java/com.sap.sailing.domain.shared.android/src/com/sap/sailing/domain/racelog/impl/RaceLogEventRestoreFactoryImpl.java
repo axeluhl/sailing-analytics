@@ -7,7 +7,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
@@ -60,7 +60,7 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
 
     @Override
     public RaceLogFinishPositioningListChangedEvent createFinishPositioningListChangedEvent(TimePoint createdAt,
-            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, List<Pair<Competitor, MaxPointsReason>> positionedCompetitors) {
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
         return new RaceLogFinishPositioningListChangedEventImpl(createdAt, logicalTimePoint, id, competitors, passId, positionedCompetitors);
     }
 

@@ -376,6 +376,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     Regatta getOrCreateDefaultRegatta(String regattaBaseName, String boatClassName, Serializable id);
 
+    /**
+     * @param series the series must not have any {@link RaceColumn}s yet
+     */
     Regatta createRegatta(String regattaBaseName, String boatClassName, Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId);
 
     /**

@@ -23,7 +23,7 @@
     <string name="current_time">Current time</string>
     <string name="race_finished_template">%s is finished</string>
     <string name="race_first_boat_finished">First boat finished at:</string>
-    <string name="race_time_limit">Race time limit at:</string>
+    <string name="race_time_limit" formatted="false">First finisher at %s, Race finishing limit is at %s</string>
     <string name="choose_startmode">Choose the start mode for this race</string>
     <string name="choose_abort_mode">Select the flags you want to display</string>
     <string name="choose_abort_flag_mode">Select the aborting flag mode</string>
