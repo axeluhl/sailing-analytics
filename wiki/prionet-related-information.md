@@ -4,8 +4,8 @@
 
 The provider for our servers is PIRONET. They are responsible in any case of emergency not related to our technology (like server crash or firewall). Currently they manage two servers that are important for the project.
 
-- sapcoe-app01
-- sapcoe-template01
+- sapcoe-app01 (main server running all services)
+- sapcoe-template01 (backup server for data and servers)
 
 You can find additional information here: [[Welcome Guide|wiki/uploads/WGuidePironet.pdf]]
 
