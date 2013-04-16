@@ -1,5 +1,6 @@
 package com.sap.sailing.winregatta.resultimport.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
@@ -38,10 +39,5 @@ public class BarbadosResultImportTest {
         RegattaResults regattaResults = spreadsheet.getRegattaResults();
         assertNotNull(regattaResults);
         assertEquals("505", regattaResults.getMetadata().get("boatclassName"));
-    }
-
-    private void assertEquals(String string, String string2) {
-        // TODO Auto-generated method stub
-        
     }
 }

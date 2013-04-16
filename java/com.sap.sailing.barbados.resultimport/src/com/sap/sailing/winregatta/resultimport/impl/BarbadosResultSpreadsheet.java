@@ -75,7 +75,7 @@ public class BarbadosResultSpreadsheet {
             @Override
             public Map<String, String> getMetadata() {
                 Map<String, String> result = new HashMap<>();
-                result.put("boatClass", "505");
+                result.put("boatclassName", "505");
                 return result;
             }
             

@@ -1,17 +1,15 @@
 package com.sap.sailing.winregatta.resultimport.impl;
 
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.impl.AbstractDocumentBasedScoreCorrectionProvider;
@@ -32,21 +30,13 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
     }
 
     @Override
-    public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() {
+    public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception {
         Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String,TimePoint>>>();
-    	CompetitorResultsXlsImporter importer = new CompetitorResultsXlsImporter();
-        for (URL url : getAllUrls()) {
-            URLConnection conn;
-            try {
-                conn = url.openConnection();
-                TimePoint lastModified = new MillisecondsTimePoint(conn.getLastModified());
-                RegattaResults regattaResult = importer.getRegattaResults((InputStream) conn.getContent(),
-                		CompetitorResultsXlsImporter.IMPORT_TEMPLATE_WITHOUT_RANKS_DRACHEN, sheetName);
-                final String boatClassName = getBoatClassName(regattaResult);
-                result.put(boatClassName, Collections.singleton(new Pair<String, TimePoint>(boatClassName, lastModified)));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        for (Triple<InputStream, String, TimePoint> inputStreamAndNameAndLastModified : getResultDocumentProvider().getDocumentsAndNamesAndLastModified()) {
+            RegattaResults regattaResults = new BarbadosResultSpreadsheet(inputStreamAndNameAndLastModified.getA()).getRegattaResults(); 
+            TimePoint lastModified = inputStreamAndNameAndLastModified.getC();
+            final String boatClassName = getBoatClassName(regattaResults);
+            result.put(boatClassName, Collections.singleton(new Pair<String, TimePoint>(boatClassName, lastModified)));
         }
         return result;
     }
@@ -57,33 +47,14 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
     }
 
     @Override
-    public Iterable<URL> getAllUrls() {
-        return Collections.unmodifiableSet(allUrls);
-    }
-
-    @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
             TimePoint timePoint) throws Exception {
-    	CompetitorResultsXlsImporter importer = new CompetitorResultsXlsImporter();
-        for (URL url : getAllUrls()) {
-            final URLConnection conn = url.openConnection();
-            RegattaResults regattaResult = importer.getRegattaResults((InputStream) conn.getContent(), 
-            		CompetitorResultsXlsImporter.IMPORT_TEMPLATE_WITHOUT_RANKS_DRACHEN, sheetName);
-            if ((boatClassName == null && getBoatClassName(regattaResult) == null) ||
-                    boatClassName.equals(getBoatClassName(regattaResult))) {
-                return new RegattaScoreCorrectionsImpl(this, regattaResult);
+        for (Triple<InputStream, String, TimePoint> inputStreamAndNameAndLastModified : getResultDocumentProvider().getDocumentsAndNamesAndLastModified()) {
+            RegattaResults regattaResults = new BarbadosResultSpreadsheet(inputStreamAndNameAndLastModified.getA()).getRegattaResults(); 
+            if ((boatClassName == null && getBoatClassName(regattaResults) == null) || boatClassName.equals(getBoatClassName(regattaResults))) {
+                return new RegattaScoreCorrectionsImpl(this, regattaResults);
             }
         }
         return null;
-    }
-
-    @Override
-    public void registerResultUrl(URL url) {
-        allUrls.add(url);
-    }
-
-    @Override
-    public void removeResultUrl(URL url) {
-        allUrls.remove(url);
     }
 }
