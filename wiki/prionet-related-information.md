@@ -7,6 +7,8 @@ The provider for our servers is PIRONET. They are responsible in any case of eme
 - sapcoe-app01
 - sapcoe-template01
 
+You can find additional information here: [[Welcome Guide|wiki/uploads/WGuidePironet.pdf]]
+
 ### 24x7 Bereitschaft (Emergency)
 
 - Tel. +49 (0) 2203 / 935 30 – 88
