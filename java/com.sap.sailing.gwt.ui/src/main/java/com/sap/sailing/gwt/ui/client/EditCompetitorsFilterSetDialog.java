@@ -6,7 +6,7 @@ public class EditCompetitorsFilterSetDialog extends AbstractCompetitorsFilterSet
 
     public EditCompetitorsFilterSetDialog(FilterSet<CompetitorDTO> competitorsFilterSet, StringMessages stringMessages,
             com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback<FilterSet<CompetitorDTO>> callback) {
-        super(competitorsFilterSet, stringMessages, callback);
+        super(competitorsFilterSet, "Edit filter set", stringMessages, callback);
         
         filterListBox = createListBox(false);
         filterSetNameTextBox = createTextBox(competitorsFilterSet.getName());

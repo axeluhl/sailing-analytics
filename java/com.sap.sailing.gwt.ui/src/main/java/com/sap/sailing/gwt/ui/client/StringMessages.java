@@ -534,4 +534,14 @@ public interface StringMessages extends Messages {
     String currentTime();
     String tractracUsername();
     String tractracPassword();
+    String operatorEquals();
+    String operatorNotEqualTo();
+    String operatorLessThan();
+    String operatorLessThanEquals();
+    String operatorGreaterThan();
+    String operatorGreaterThanEquals();
+    String operatorContains();
+    String operatorNotContains();
+    String operatorStartsWith();
+    String operatorEndsWith();
 }

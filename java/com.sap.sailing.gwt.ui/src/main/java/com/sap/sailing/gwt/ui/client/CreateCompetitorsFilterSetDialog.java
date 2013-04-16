@@ -7,7 +7,7 @@ public class CreateCompetitorsFilterSetDialog extends AbstractCompetitorsFilterS
 
     public CreateCompetitorsFilterSetDialog(StringMessages stringMessages,
             DialogCallback<FilterSet<CompetitorDTO>> callback) {
-        super(new FilterSet<CompetitorDTO>(null), stringMessages, callback);
+        super(new FilterSet<CompetitorDTO>(null), "Create a filter set", stringMessages, callback);
         
         filterListBox = createListBox(false);
         filterSetNameTextBox = createTextBox(null);

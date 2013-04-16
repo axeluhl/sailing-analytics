@@ -25,8 +25,6 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
     private final List<Filter<CompetitorDTO, ?>> availableCompetitorsFilter;
 
     protected ListBox filterListBox;
-    private final Label filterDescriptionLabel;
-    private final Label filterDescriptionText;
     private final Button addFilterButton;
 
     protected TextBox filterSetNameTextBox;
@@ -50,9 +48,12 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         public String getErrorMessage(FilterSet<CompetitorDTO> competitorsFilterSet) {
             String errorMessage = null;
 
+            int filterCount = competitorsFilterSet.getFilters().size();
             boolean nameNotEmpty = competitorsFilterSet.getName() != null && competitorsFilterSet.getName().length() > 0;
             if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
+            } else if(filterCount < 1) {
+                errorMessage = "Please add at least one filter.";
             } else {
                 for(Filter<CompetitorDTO, ?> filter: competitorsFilterSet.getFilters()) {
                     Object filterValue = filter.getConfiguration().getB();
@@ -67,13 +68,11 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         }
     }
 
-    public AbstractCompetitorsFilterSetDialog(FilterSet<CompetitorDTO> competitorsFilterSet, StringMessages stringMessages, DialogCallback<FilterSet<CompetitorDTO>> callback) {
-        super("Filter competitors...", null, stringMessages.ok(), stringMessages.cancel(), new CompetitorsFilterSetValidator(stringMessages), callback);
+    public AbstractCompetitorsFilterSetDialog(FilterSet<CompetitorDTO> competitorsFilterSet, String dialogTitle, StringMessages stringMessages, DialogCallback<FilterSet<CompetitorDTO>> callback) {
+        super(dialogTitle, null, stringMessages.ok(), stringMessages.cancel(), new CompetitorsFilterSetValidator(stringMessages), callback);
         this.competitorsFilterSet = competitorsFilterSet;
         this.stringMessages = stringMessages; 
         
-        filterDescriptionLabel = new Label("Filter description:");
-        filterDescriptionText = new Label();
         competitorsFiltersGrid = new Grid(0,0);
 
         filterOperatorSelectionListBoxes = new ArrayList<ListBox>();
@@ -125,15 +124,6 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             }
         });       
        
-        Grid grid = new Grid(2, 3);
-        mainPanel.add(grid);
-        grid.setWidget(0, 0, new Label("Available Filters:"));
-        grid.setWidget(0, 1, filterListBox);
-        grid.setWidget(0, 2, addFilterButton);
-
-        grid.setWidget(1, 0, filterDescriptionLabel);
-        grid.setWidget(1, 1, filterDescriptionText);       
-
         mainPanel.add(competitorsFiltersGrid);
         
         for(Filter<CompetitorDTO, ?> filter: competitorsFilterSet.getFilters()) {
@@ -144,7 +134,13 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         }
 
         updateCompetitorsFiltersGrid(mainPanel);
-        
+
+        HorizontalPanel addFilterPanel = new HorizontalPanel();
+        mainPanel.add(addFilterPanel);
+        addFilterPanel.add(new Label("Available Filters:"));
+        addFilterPanel.add(filterListBox);
+        addFilterPanel.add(addFilterButton);
+
         return mainPanel;
     }
 
@@ -159,7 +155,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         ListBox operatorsListBox = this.createListBox(false);
         int i = 0;
         for(FilterOperators op: supportedOperators) {
-            operatorsListBox.addItem(op.name());
+            operatorsListBox.addItem(FilterOperatorsFormatter.format(op), op.name());
             if(filter.getConfiguration().getA() != null && filter.getConfiguration().getA().equals(op)) {
                 operatorsListBox.setSelectedIndex(i);
             } else if (filter.getDefaultOperator() != null && filter.getDefaultOperator().equals(op)) {
@@ -195,7 +191,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         return filterValueWidget; 
     }
 
-    private Widget createFilterDeleteButton(Filter<CompetitorDTO,?> filter) {
+    private Button createFilterDeleteButton(Filter<CompetitorDTO,?> filter) {
         final Button filterDeleteBtn = new Button(stringMessages.delete()); 
         filterDeleteBtn.addStyleName("inlineButton");
         filterDeleteButtons.add(filterDeleteBtn);
@@ -224,12 +220,8 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         Filter<CompetitorDTO,?> selectedFilter = getSelectedFilter();
         if(selectedFilter != null) {
             addFilterButton.setEnabled(true);
-            filterDescriptionLabel.setVisible(true);
-            filterDescriptionText.setText(selectedFilter.getDescription());
         } else {
             addFilterButton.setEnabled(false);
-            filterDescriptionLabel.setVisible(false);
-            filterDescriptionText.setText("");
         }
     }
 
@@ -242,7 +234,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             String filterName = filterNameLabels.get(i).getText();
             Filter<CompetitorDTO,?> filter = findFilterByName(filterName);
             ListBox operatorSelectionListbox = filterOperatorSelectionListBoxes.get(i);
-            FilterOperators op = FilterOperators.valueOf(operatorSelectionListbox.getItemText(operatorSelectionListbox.getSelectedIndex()));
+            FilterOperators op = FilterOperators.valueOf(operatorSelectionListbox.getValue(operatorSelectionListbox.getSelectedIndex()));
             if(filter.getValueType().equals(Integer.class)) {
                 IntegerBox integerBox = (IntegerBox) filterValueFields.get(i);
                 Filter<CompetitorDTO,Integer> newFilter = (Filter<CompetitorDTO, Integer>) filter.copy();
@@ -274,9 +266,9 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         Filter<CompetitorDTO,?> result = null;
         int selectedIndex = filterListBox.getSelectedIndex();
         if(selectedIndex > 0) {
-            String selectedItemText = filterListBox.getItemText(selectedIndex);
+            String selectedItemValue = filterListBox.getValue(selectedIndex);
             for(Filter<CompetitorDTO,?> filter: availableCompetitorsFilter) {
-                if(filter.getName().equals(selectedItemText)) {
+                if(filter.getName().equals(selectedItemValue)) {
                     result = filter;
                     break;
                 }
@@ -290,14 +282,22 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         parentPanel.remove(competitorsFiltersGrid);
         
         int filterCount = filterNameLabels.size();
+        int headlineRow = filterCount >= 1 ? 1 : 0;  
+        int footerRow = filterCount >= 1 ? 1 : 0;  
         if(filterCount > 0) {
-            competitorsFiltersGrid = new Grid(filterCount, 4);
+            competitorsFiltersGrid = new Grid(filterCount + headlineRow + footerRow, 4);
             competitorsFiltersGrid.setCellSpacing(4);
+            if(headlineRow == 1) {
+                competitorsFiltersGrid.setWidget(0 ,0, new Label("Filter name"));
+                competitorsFiltersGrid.setWidget(0 ,1, new Label("Operator"));
+                competitorsFiltersGrid.setWidget(0 ,2, new Label("Value"));
+            }
+            
             for(int i = 0; i < filterCount; i++) {
-                competitorsFiltersGrid.setWidget(i, 0, filterNameLabels.get(i));
-                competitorsFiltersGrid.setWidget(i, 1, filterOperatorSelectionListBoxes.get(i));
-                competitorsFiltersGrid.setWidget(i, 2, filterValueFields.get(i));
-                competitorsFiltersGrid.setWidget(i, 3, filterDeleteButtons.get(i));
+                competitorsFiltersGrid.setWidget(i + headlineRow, 0, filterNameLabels.get(i));
+                competitorsFiltersGrid.setWidget(i + headlineRow, 1, filterOperatorSelectionListBoxes.get(i));
+                competitorsFiltersGrid.setWidget(i + headlineRow, 2, filterValueFields.get(i));
+                competitorsFiltersGrid.setWidget(i + headlineRow, 3, filterDeleteButtons.get(i));
             }
         } else {
             competitorsFiltersGrid = new Grid(0, 0);
