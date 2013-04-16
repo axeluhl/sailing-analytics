@@ -94,18 +94,6 @@ public class SmartFutureCacheDeadlockTest {
     }
     
     @Test
-    public void testPerformanceOfGetAndCall() {
-        long start = System.currentTimeMillis();
-        for (int i=0; i<100000; i++) {
-            sfc.triggerUpdate(CACHE_KEY, /* update interval */ null);
-        }
-        for (int i=0; i<100000; i++) {
-            sfc.get(CACHE_KEY, /* waitForLatest */ false);
-        }
-        System.out.println("testPerformanceOfGetAndCall took "+(System.currentTimeMillis()-start)+"ms");
-    }
-    
-    @Test
     public void testBasicCaching() {
         logger.info("starting testBasicCaching");
         assertNull(computingThread);
