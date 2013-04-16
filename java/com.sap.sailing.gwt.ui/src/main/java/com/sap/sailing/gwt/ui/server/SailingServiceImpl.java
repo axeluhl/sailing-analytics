@@ -2677,6 +2677,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result = new CompetitorsRaceDataDTO(detailType, startTime==null?null:startTime.asDate(), endTime==null?null:endTime.asDate());
 
             for (CompetitorDTO competitorDTO : competitors) {
+                // TODO parallelize across competitors
                 Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(), competitorDTO.id);
                 ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
                 ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
@@ -2699,6 +2700,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 if (startTime != null && endTime != null) {
                     for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += stepSizeInMs) {
+                        // TODO parallelize across time points
                         MillisecondsTimePoint time = new MillisecondsTimePoint(i);
                         Double competitorRaceData = getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time, leaderboardGroupName, leaderboardName);
                         if (competitorRaceData != null) {

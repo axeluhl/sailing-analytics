@@ -146,7 +146,7 @@ if [[ "$@" == "hot-deploy" ]]; then
         echo "WARNING: Bundle versions do not differ. Update not needed."
     fi
 
-    read -s -n1 -p "Do you really want to hot-deploy bundle $OSGI_BUNDLE_NAME to $PROJECT_HOME/$active_branch? (y/N): " answer
+    read -s -n1 -p "Do you really want to hot-deploy bundle $OSGI_BUNDLE_NAME to $SERVERS_HOME/$active_branch? (y/N): " answer
     case $answer in
     "Y" | "y") echo "Continuing";;
     *) echo "Aborting..."
