@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -47,6 +47,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -65,7 +66,12 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private final Regatta regatta;
     private final WindStore windStore;
 
+    /**
+     * Starts out as <code>null</code> and is set when the race definition has been created. When this happens, this object is
+     * {@link Object#notifyAll() notified}.
+     */
     private RaceDefinition race;
+    
     private Course course;
     private StartList startList;
     private DynamicTrackedRace trackedRace;
@@ -111,6 +117,10 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     @Override
     public void stop() throws MalformedURLException, IOException, InterruptedException {
+        if (isTrackedRaceStillReachable()) {
+            TrackedRaceStatus newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
+            trackedRace.setStatus(newStatus);
+        }
         connector.removeSailMasterListener(raceID, this);
     }
 
@@ -130,12 +140,37 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
             @Override
             public Set<RaceDefinition> getRaces() {
+                synchronized (this) {
+                    while (race == null) {
+                        try {
+                            this.wait();
+                        } catch (InterruptedException e) {
+                            logger.log(Level.SEVERE, "Interrupted wait", e);
+                        }
+                    }
+                }
                 return Collections.singleton(race);
             }
 
             @Override
             public Set<RaceDefinition> getRaces(long timeoutInMilliseconds) {
-                return Collections.singleton(race);
+                long start = System.currentTimeMillis();
+                synchronized (this) {
+                    RaceDefinition result = race;
+                    boolean interrupted = false;
+                    while ((System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && result == null) {
+                        try {
+                            long timeToWait = timeoutInMilliseconds - (System.currentTimeMillis() - start);
+                            if (timeToWait > 0) {
+                                this.wait(timeToWait);
+                            }
+                            result = race;
+                        } catch (InterruptedException e) {
+                            interrupted = true;
+                        }
+                    }
+                    return result == null ? null : Collections.singleton(result);
+                }
             }
 
             @Override
@@ -282,11 +317,11 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         StartList oldStartList = this.startList;
         this.startList = startList;
         if (oldStartList == null && course != null) {
-            createRaceDefinition(raceID);
+            createRaceDefinition(raceID, course);
         }
     }
 
-    private void createRaceDefinition(String raceID) {
+    private void createRaceDefinition(String raceID, Course course) {
         assert this.raceID.equals(raceID);
         assert startList != null;
         assert course != null;
@@ -320,15 +355,16 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     @Override
     public void receivedCourseConfiguration(String raceID, Course course) {
         Course oldCourse = this.course;
-        this.course = course;
         if (trackedRace == null) {
             if (oldCourse == null && startList != null) {
-                createRaceDefinition(raceID);
+                createRaceDefinition(raceID, course);
+                this.course = course;
             }
         } else {
             if (isTrackedRaceStillReachable()) {
                 try {
                     domainFactory.updateCourseWaypoints(trackedRace.getRace().getCourse(), course.getMarks());
+                    this.course = course;
                 } catch (PatchFailedException e) {
                     logger.info("Internal error trying to update course: " + e.getMessage());
                     logger.throwing(SwissTimingRaceTrackerImpl.class.getName(), "receivedCourseConfiguration", e);

@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -366,7 +367,7 @@ public class ClientParamsPHP {
             return getTimePoint("RaceTrackingStartTime");
         } catch (ParseException e) {
             logger.info("Exception trying to parse property RaceTrackingStartTime with value "+properties.get("RaceTrackingStartTime"));
-            logger.throwing(ClientParamsPHP.class.getName(), "getRaceTrackingStartTime", e);
+            logger.log(Level.SEVERE, "getRaceTrackingStartTime", e);
             return null;
         }
     }
@@ -376,7 +377,7 @@ public class ClientParamsPHP {
             return getTimePoint("RaceTrackingEndTime");
         } catch (ParseException e) {
             logger.info("Exception trying to parse property RaceTrackingEndTime with value "+properties.get("RaceTrackingEndTime"));
-            logger.throwing(ClientParamsPHP.class.getName(), "RaceTrackingEndTime", e);
+            logger.log(Level.SEVERE, "RaceTrackingEndTime", e);
             return null;
         }
     }

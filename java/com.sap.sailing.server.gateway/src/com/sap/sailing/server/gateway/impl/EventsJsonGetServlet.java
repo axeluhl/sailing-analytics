@@ -15,7 +15,7 @@ import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.EventDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 
-public class EventsJsonExportServlet extends AbstractJsonHttpServlet {
+public class EventsJsonGetServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = -7313766879733880267L;
 
     @Override

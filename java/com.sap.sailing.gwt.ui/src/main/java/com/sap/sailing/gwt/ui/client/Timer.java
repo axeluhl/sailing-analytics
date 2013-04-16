@@ -78,6 +78,13 @@ public class Timer {
      * Set to <code>true</code> to enable the timer to advance the max time automatically if the current time gets greater than the max time 
      */
     private boolean autoAdvance;
+
+    /**
+     * If {@link #setLivePlayDelayInMillisExplicitly(long)} was called, this flag is set to <code>true</code> which will
+     * cause calls to {@link #setLivePlayDelayInMillis(long)} to be ignored. Then, the only way to update the live delay is
+     * to call {@link #setLivePlayDelayInMillisExplicitly(long)}.
+     */
+    private boolean delaySetExplicity;
     
     /**
      * The timer can run in two different modes: Live and Replay
@@ -265,6 +272,21 @@ public class Timer {
     }
     
     public void setLivePlayDelayInMillis(long delayInMilliseconds) {
+        if (!delaySetExplicity) {
+            basicSetLivePlayDelayInMillis(delayInMilliseconds);
+        }
+    }
+    
+    /**
+     * Always updates the delay if it is different from the current delay setting. The fact that an explicit delay update was
+     * performed is recorded which will block further automatic delay updates from this point onwards.
+     */
+    public void setLivePlayDelayInMillisExplicitly(long delayInMilliseconds) {
+        basicSetLivePlayDelayInMillis(delayInMilliseconds);
+        delaySetExplicity = true;
+    }
+
+    private void basicSetLivePlayDelayInMillis(long delayInMilliseconds) {
         if (this.livePlayDelayInMillis != delayInMilliseconds) {
             this.livePlayDelayInMillis = delayInMilliseconds;
             if (getPlayMode() == PlayModes.Live) {

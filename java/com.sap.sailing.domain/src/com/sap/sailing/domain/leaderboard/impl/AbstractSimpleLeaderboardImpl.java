@@ -280,7 +280,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     /**
      * All competitors with non-<code>null</code> net points are added to the result which is then sorted by net points in ascending
-     * order. The fleet is the primary ordering criterion, followed by the net points.
+     * order. The fleet, if ordered, is the primary ordering criterion, followed by the net points.
      */
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {

@@ -141,21 +141,37 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             }
         });
 
-
         TextColumn<SwissTimingRaceRecordDTO> raceNameColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.ID;
             }
         };
+
+        TextColumn<SwissTimingRaceRecordDTO> raceDescriptionColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                return object.description;
+            }
+        };
         
+        TextColumn<SwissTimingRaceRecordDTO> boatClassColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                String result = object.boatClass != null ? object.boatClass : "";
+                if(object.discipline != null) {
+                    result += " (" + object.discipline + ")";
+                }
+                return result;
+            }
+        };
+
         TextColumn<SwissTimingRaceRecordDTO> raceStartTrackingColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.raceStartTime==null?"":dateFormatter.render(object.raceStartTime) + " " + timeFormatter.render(object.raceStartTime);
             }
         };
-
 
         HorizontalPanel racesSplitPanel = new HorizontalPanel();
         mainPanel.add(racesSplitPanel);
@@ -217,6 +233,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<SwissTimingRaceRecordDTO>(/* pageSize */ 10000, tableRes);
         raceTable.addColumn(raceNameColumn, stringConstants.name());
+        raceTable.addColumn(raceDescriptionColumn, stringConstants.description());
+        raceTable.addColumn(boatClassColumn, stringConstants.boatClass());
         raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTimeColumn());
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(new MultiSelectionModel<SwissTimingRaceRecordDTO>() {});

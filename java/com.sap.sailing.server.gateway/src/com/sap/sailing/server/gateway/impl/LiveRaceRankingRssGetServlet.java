@@ -26,7 +26,7 @@ import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.feed.synd.SyndFeedImpl;
 import com.sun.syndication.io.SyndFeedOutput;
 
-public class LiveRaceRankingAsRssFeedServlet extends SailingServerHttpServlet {
+public class LiveRaceRankingRssGetServlet extends SailingServerHttpServlet {
     private static final long serialVersionUID = -508373964426868319L;
     private static final String PARAM_NAME_LEADERBOARDNAME = "leaderboardName";
     private static final String PARAM_MAX_COMPETITORS = "max";

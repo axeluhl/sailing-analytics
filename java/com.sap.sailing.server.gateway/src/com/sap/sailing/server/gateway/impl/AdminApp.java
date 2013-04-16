@@ -215,7 +215,7 @@ public class AdminApp extends SailingServerHttpServlet {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
                 TrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
-                TimePoint time = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
+                TimePoint time = readTimePointParam(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
                 TimePoint oneHourLater = new MillisecondsTimePoint(time.asMillis()+3600*1000);
                 String[] latitudes = req.getParameterValues(PARAM_NAME_LATDEG);
                 String[] longitudes = req.getParameterValues(PARAM_NAME_LNGDEG);
@@ -257,10 +257,10 @@ public class AdminApp extends SailingServerHttpServlet {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
                 TrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
-                TimePoint from = getTimePoint(req, PARAM_NAME_FROM_TIME, PARAM_NAME_FROM_TIME_MILLIS,
+                TimePoint from = readTimePointParam(req, PARAM_NAME_FROM_TIME, PARAM_NAME_FROM_TIME_MILLIS,
                         trackedRace.getStartOfRace()==null?new MillisecondsTimePoint(0):
                             /* 24h before race start */ new MillisecondsTimePoint(trackedRace.getStartOfRace().asMillis()-24*3600*1000));
-                TimePoint to = getTimePoint(req, PARAM_NAME_TO_TIME, PARAM_NAME_TO_TIME_MILLIS, MillisecondsTimePoint.now());
+                TimePoint to = readTimePointParam(req, PARAM_NAME_TO_TIME, PARAM_NAME_TO_TIME_MILLIS, MillisecondsTimePoint.now());
                 JSONObject jsonWindTracks = new JSONObject();
                 List<WindSource> windSources = new ArrayList<WindSource>();
                 for (WindSource windSource : trackedRace.getWindSources()) {
@@ -349,7 +349,7 @@ public class AdminApp extends SailingServerHttpServlet {
                         }
                     }
                     try {
-                        TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
+                        TimePoint timePoint = readTimePointParam(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
                         Wind wind = new WindImpl(p, timePoint, speed);
                         final DynamicTrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getExistingTrackedRace(race);
                         if (trackedRace != null) {
@@ -386,7 +386,7 @@ public class AdminApp extends SailingServerHttpServlet {
                             final DynamicTrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta)
                                     .getTrackedRace(race);
                             WindTrack windTrack = trackedRace.getOrCreateWindTrack(trackedRace.getWindSources(windSourceType).iterator().next());
-                            TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
+                            TimePoint timePoint = readTimePointParam(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
                                     MillisecondsTimePoint.now());
                             Wind wind = windTrack.getLastFixAtOrBefore(timePoint);
                             if (wind != null  && wind.getTimePoint().equals(timePoint)) {

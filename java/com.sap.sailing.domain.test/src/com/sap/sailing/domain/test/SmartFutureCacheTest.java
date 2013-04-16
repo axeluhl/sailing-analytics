@@ -36,10 +36,20 @@ public class SmartFutureCacheTest {
         final boolean[] updateWasCalled = new boolean[1];
         final boolean[] cacheWasCalled = new boolean[1];
         final boolean[] mayProceed = new boolean[1];
+        
         SmartFutureCache<String, String, SmartFutureCache.EmptyUpdateInterval> sfc = new SmartFutureCache<String, String, SmartFutureCache.EmptyUpdateInterval>(
                 new SmartFutureCache.AbstractCacheUpdater<String, String, SmartFutureCache.EmptyUpdateInterval>() {
                     @Override
                     public String computeCacheUpdate(String key, EmptyUpdateInterval updateInterval) throws Exception {
+                        synchronized (mayProceed) {
+                            while (!mayProceed[0]) {
+                                try {
+                                    mayProceed.wait();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                } // wait until test driver has checked the un-updated cache
+                            }
+                        }
                         updateWasCalled[0] = true;
                         return "Humba";
                     }
@@ -47,22 +57,13 @@ public class SmartFutureCacheTest {
                     @Override
                     protected void cache(String key, String value) {
                         super.cache(key, value);
-                        synchronized (mayProceed) {
-                            while (!mayProceed[0]) {
-                                try {
-                                    cacheWasCalled.wait();
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                } // wait until test driver has checked the un-updated cache
-                            }
-                        }
                         synchronized (cacheWasCalled) {
                             cacheWasCalled[0] = true;
                             cacheWasCalled.notifyAll();
                         }
                     }
         };
-        sfc.triggerUpdate("Trala", /* updateInterval */ null);
+        sfc.triggerUpdate("Trala", /* updateInterval */ null); // will be held up in computeCacheUpdate
         assertNull(sfc.get("Trala", /* waitForLatest */ false));
         synchronized (mayProceed) {
             mayProceed[0] = true;
