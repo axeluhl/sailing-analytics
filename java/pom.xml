@@ -68,14 +68,12 @@
 		<module>com.sap.sailing.kiworesultimport.test</module>
 		<module>com.sap.sailing.ess40.resultimport</module>
 		<module>com.sap.sailing.ess40.resultimport.test</module>
-		<module>com.sap.sailing.odf.resultimport</module>
-		<module>com.sap.sailing.odf.resultimport.test</module>
 		<module>com.sap.sailing.xrr.resultimport</module>
 		<module>com.sap.sailing.xrr.resultimport.test</module>
 		<module>com.sap.sailing.freg.resultimport</module>
 		<module>com.sap.sailing.freg.resultimport.test</module>
-		<module>com.sap.sailing.winregatta.resultimport</module>
-		<module>com.sap.sailing.winregatta.resultimport.test</module>
+		<module>com.sap.sailing.barbados.resultimport</module>
+		<module>com.sap.sailing.barbados.resultimport.test</module>
 		<module>com.sap.sailing.selenium.test</module>
 		<module>org.openqa.selenium.osgi</module>
 		<module>com.sap.sailing.monitoring</module>
