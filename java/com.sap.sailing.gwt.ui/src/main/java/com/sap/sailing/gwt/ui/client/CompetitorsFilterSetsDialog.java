@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.filter.FilterSet;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 /**
@@ -45,7 +46,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
     }
 
     public CompetitorsFilterSetsDialog(CompetitorsFilterSets competitorsFilterSets, StringMessages stringMessages, DialogCallback<CompetitorsFilterSets> callback) {
-        super("Competitors filter sets...", null, stringMessages.ok(), stringMessages.cancel(), new CompetitorsFilterSetsValidator(), callback);
+        super("Competitors filters", null, stringMessages.ok(), stringMessages.cancel(), new CompetitorsFilterSetsValidator(), callback);
         this.competitorsFilterSets = competitorsFilterSets;
         this.stringMessages = stringMessages; 
         
@@ -56,7 +57,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
         deleteFilterSetButtons = new ArrayList<Button>();
         filterSets = new ArrayList<FilterSet<CompetitorDTO>>();
         
-        addFilterSetButton = new Button("Add filter set");
+        addFilterSetButton = new Button("Add filter");
     }
     
     @Override
@@ -67,7 +68,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
         if(competitorsFilterSets.getFilterSets().size() < 1) {
             headLineText = "Please create a filter set to filter the list of competitors.";
         } else {
-            headLineText = "Available filter sets...";
+            headLineText = "Available filters";
         }
         
         mainPanel.add(new Label(headLineText));
@@ -184,6 +185,12 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
                     }
                     index++;
                 }
+                
+                // in case the filter set to delete is the 'active' one, we set the "Filter nothing" filter set 'active'
+                if(activeFilterSetRadioButtons.get(index).getValue()) {
+                    activeFilterSetRadioButtons.get(0).setValue(true);
+                }
+                
                 activeFilterSetRadioButtons.remove(index);
                 editFilterSetButtons.remove(index);
                 deleteFilterSetButtons.remove(index);
@@ -207,11 +214,11 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
             if(!filterSet.getName().equals(FILTER_NOTHING_FILTERSET)) {
                 result.addFilterSet(filterSet);
                 if(isActiveFilterSet) {
-                    result.setActiveFilter(filterSet);
+                    result.setActiveFilterSet(filterSet);
                 }
             } else {
                 if(isActiveFilterSet) {
-                   result.setActiveFilter(null); 
+                   result.setActiveFilterSet(null); 
                 }
             }
         }

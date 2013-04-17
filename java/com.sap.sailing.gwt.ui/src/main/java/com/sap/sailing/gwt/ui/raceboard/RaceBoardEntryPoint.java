@@ -9,6 +9,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
@@ -173,7 +174,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private FlowPanel createTimePanel(RaceBoardPanel raceBoardPanel) {
         FlowPanel timeLineInnerBgPanel = new FlowPanel();
         timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
-        timeLineInnerBgPanel.add(raceBoardPanel.getTimeWidget());
+        timeLineInnerBgPanel.add(raceBoardPanel.getTimePanel());
         
         FlowPanel timeLineInnerPanel = new FlowPanel();
         timeLineInnerPanel.add(timeLineInnerBgPanel);
@@ -209,8 +210,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel) {
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
-        FlowPanel toolbarPanel = new FlowPanel();
-        toolbarPanel.add(raceBoardPanel.getNavigationWidget());
+        Panel toolbarPanel = raceBoardPanel.getToolbarPanel();
         if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
             HTML lbl = new HTML(stringMessages.warningBrowserUnsupported());
             lbl.setStyleName("browserOptimizedMessage");

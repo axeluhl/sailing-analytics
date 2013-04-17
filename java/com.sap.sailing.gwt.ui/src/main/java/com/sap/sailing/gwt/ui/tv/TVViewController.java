@@ -187,7 +187,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     private FlowPanel createTimePanel(RaceBoardPanel raceBoardPanel) {
         FlowPanel timeLineInnerBgPanel = new FlowPanel();
         timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
-        timeLineInnerBgPanel.add(raceBoardPanel.getTimeWidget());
+        timeLineInnerBgPanel.add(raceBoardPanel.getTimePanel());
         
         FlowPanel timeLineInnerPanel = new FlowPanel();
         timeLineInnerPanel.add(timeLineInnerBgPanel);

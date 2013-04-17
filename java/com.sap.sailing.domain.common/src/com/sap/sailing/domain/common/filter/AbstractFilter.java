@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sailing.domain.common.filter;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
 

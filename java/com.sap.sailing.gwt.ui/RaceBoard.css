@@ -124,6 +124,12 @@ img.openColumn {
 	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
 }
 
+.raceBoardControls {
+	float: right;
+	margin: 9px 0 0 12px;
+	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
+}
+
 .raceBoardNavigation-navigationitem {
 	color: #dddcdc;
 	text-transform: uppercase;

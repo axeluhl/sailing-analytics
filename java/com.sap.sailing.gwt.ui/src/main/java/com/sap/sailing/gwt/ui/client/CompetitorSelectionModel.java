@@ -8,6 +8,10 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.common.filter.CollectionFilter;
+import com.sap.sailing.domain.common.filter.Filter;
+import com.sap.sailing.domain.common.filter.FilterSet;
+import com.sap.sailing.domain.common.filter.ObjectFilter;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 

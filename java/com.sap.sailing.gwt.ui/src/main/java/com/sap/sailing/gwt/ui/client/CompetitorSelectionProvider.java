@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import com.sap.sailing.domain.common.filter.FilterSet;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public interface CompetitorSelectionProvider {

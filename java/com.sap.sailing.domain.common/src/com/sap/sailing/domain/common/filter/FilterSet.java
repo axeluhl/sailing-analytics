@@ -1,7 +1,8 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sailing.domain.common.filter;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 
 /**
  * A named set of filters.

@@ -17,11 +17,16 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.MenuBar;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.filter.FilterOperators;
+import com.sap.sailing.domain.common.filter.FilterSet;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.client.CompetitorRankFilter;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorsFilterSets;
 import com.sap.sailing.gwt.ui.client.CompetitorsFilterSetsDialog;
@@ -43,6 +48,7 @@ import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPresele
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
@@ -82,8 +88,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     private int scrollOffset;
 
     private final List<ComponentViewer> componentViewers;
-    private FlowPanel componentsNavigationPanel;
-    private FlowPanel settingsPanel;
+    private final FlowPanel componentControlsPanel;
+    private final FlowPanel viewControlsPanel;
+    private final FlowPanel toolbarPanel;
     private RaceTimePanel timePanel;
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
@@ -96,6 +103,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     private LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
     private MultiChartPanel competitorChart;
+    
+    private CheckBox competitorsFilterCheckBox;
+    private FilterSet<CompetitorDTO> lastActiveCompetitorFilterSet;
     
     /**
      * The component viewer in <code>ONESCREEN</code> view mode. <code>null</code> if in <code>CASCADE</code> view mode
@@ -132,8 +142,27 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         componentViewers = new ArrayList<ComponentViewer>();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-        componentsNavigationPanel = new FlowPanel();
-        componentsNavigationPanel.addStyleName("raceBoardNavigation");
+        
+        // create a default Top N competitors filter as default filter
+        FilterSet<CompetitorDTO> topNCompetitorsFilterSet = new FilterSet<CompetitorDTO>("Top 50");
+        CompetitorRankFilter rankFilter = new CompetitorRankFilter();
+        rankFilter.setConfiguration(new Pair<FilterOperators, Integer>(FilterOperators.Equals, 50));
+        topNCompetitorsFilterSet.addFilter(rankFilter);
+        competitorsFilterSets.addFilterSet(topNCompetitorsFilterSet);
+        competitorsFilterSets.setActiveFilterSet(topNCompetitorsFilterSet);
+        
+        competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
+        
+        toolbarPanel = new FlowPanel();
+        toolbarPanel.setWidth("100%");
+        mainPanel.add(toolbarPanel);
+        componentControlsPanel = new FlowPanel();
+        componentControlsPanel.addStyleName("raceBoardNavigation");
+        toolbarPanel.add(componentControlsPanel);
+        viewControlsPanel = new FlowPanel();
+        viewControlsPanel.addStyleName("raceBoardControls");
+        toolbarPanel.add(viewControlsPanel);
+        
         switch (getConfiguration().getViewMode()) {
             case ONESCREEN:
                 createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);                
@@ -178,31 +207,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         addComponentToNavigationMenu(leaderboardAndMapViewer, competitorChart, true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, raceMap, false);
 
-        Button editCompetitorsFilterButton = new Button("Filter competitors...");
-        componentsNavigationPanel.add(editCompetitorsFilterButton);
-        
-        editCompetitorsFilterButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                CompetitorsFilterSetsDialog competitorsFilterSetsDialog = new CompetitorsFilterSetsDialog(competitorsFilterSets,
-                        stringMessages, new DialogCallback<CompetitorsFilterSets>() {
-                    @Override
-                    public void ok(final CompetitorsFilterSets newCompetitorsFilterSets) {
-                        competitorsFilterSets.getFilterSets().clear();
-                        competitorsFilterSets.getFilterSets().addAll(newCompetitorsFilterSets.getFilterSets());
-                        competitorsFilterSets.setActiveFilter(newCompetitorsFilterSets.getActiveFilterSet());
-                        
-                        competitorSelectionModel.setCompetitorsFilterSet(newCompetitorsFilterSets.getActiveFilterSet());
-                     }
-
-                    @Override
-                    public void cancel() { 
-                    }
-                });
-                
-                competitorsFilterSetsDialog .show();
-            }
-        });
+        addCompetitorsFilterControl(viewControlsPanel);
 
         addMediaSelectorToNavigationMenu();   
     }
@@ -214,7 +219,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         timer.addTimeListener(mediaSelector);
         mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);
         for (Widget widget : mediaSelector.widgets()) {
-            componentsNavigationPanel.add(widget);
+            componentControlsPanel.add(widget);
         }
     }
 
@@ -239,8 +244,92 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier,
                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
                 userAgent, /* showRaceDetails */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false);
-     }
+    }
 
+    private void updateCompetitorsFilterControlState(CompetitorsFilterSets filterSets) {
+        FilterSet<CompetitorDTO> activeFilterSet = filterSets.getActiveFilterSet();
+        if(activeFilterSet != null) {
+            if(lastActiveCompetitorFilterSet != activeFilterSet) {
+                lastActiveCompetitorFilterSet = activeFilterSet;
+            }
+        } else {
+            lastActiveCompetitorFilterSet = null;
+        }
+        competitorsFilterCheckBox.setValue(activeFilterSet != null, false /* fireChangeValue*/);
+        
+        if(lastActiveCompetitorFilterSet != null) {
+            competitorsFilterCheckBox.setText("Competitors Filter" + "(" + lastActiveCompetitorFilterSet.getName() + ")");
+        } else {
+            competitorsFilterCheckBox.setText("Competitors Filter");            
+        }
+    }
+    
+    private void addCompetitorsFilterControl(Panel parentPanel) {
+        String competitorsFilterTitle = "Competitors filter";
+        competitorsFilterCheckBox = new CheckBox(competitorsFilterTitle);
+        competitorsFilterCheckBox.getElement().getStyle().setFloat(Style.Float.LEFT);
+
+        competitorsFilterCheckBox.setTitle(competitorsFilterTitle);
+        competitorsFilterCheckBox.addStyleName("raceBoardNavigation-innerElement");
+
+        competitorsFilterCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> newValue) {
+                boolean isChecked = competitorsFilterCheckBox.getValue();
+                if(isChecked) {
+                    if(lastActiveCompetitorFilterSet != null) {
+                        competitorsFilterSets.setActiveFilterSet(lastActiveCompetitorFilterSet);
+                        competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
+                        updateCompetitorsFilterControlState(competitorsFilterSets);
+                    } else {
+                        showEditCompetitorsFiltersDialog();
+                    }
+                } else {
+                    competitorsFilterSets.setActiveFilterSet(null);
+                    competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
+                    updateCompetitorsFilterControlState(competitorsFilterSets);
+                }
+            }
+        });
+
+        parentPanel.add(competitorsFilterCheckBox);
+
+        Button settingsButton = new Button("");
+        settingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                showEditCompetitorsFiltersDialog();
+            }
+        });
+        settingsButton.addStyleName("raceBoardNavigation-settingsButton");
+        settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
+        settingsButton.setTitle("Competitors filter");
+        
+        parentPanel.add(settingsButton);
+        updateCompetitorsFilterControlState(competitorsFilterSets);
+    }
+    
+    private void showEditCompetitorsFiltersDialog() {
+        CompetitorsFilterSetsDialog competitorsFilterSetsDialog = new CompetitorsFilterSetsDialog(competitorsFilterSets,
+                stringMessages, new DialogCallback<CompetitorsFilterSets>() {
+            @Override
+            public void ok(final CompetitorsFilterSets newCompetitorsFilterSets) {
+                competitorsFilterSets.getFilterSets().clear();
+                competitorsFilterSets.getFilterSets().addAll(newCompetitorsFilterSets.getFilterSets());
+                competitorsFilterSets.setActiveFilterSet(newCompetitorsFilterSets.getActiveFilterSet());
+                
+                competitorSelectionModel.setCompetitorsFilterSet(newCompetitorsFilterSets.getActiveFilterSet());
+                updateCompetitorsFilterControlState(newCompetitorsFilterSets);
+             }
+
+            @Override
+            public void cancel() { 
+            }
+        });
+        
+        competitorsFilterSetsDialog .show();
+    }
+    
     private <SettingsType> void addComponentToNavigationMenu(final ComponentViewer componentViewer,
             final Component<SettingsType> component, boolean isToogleCheckboxEnabled) {
         final CheckBox checkBox= new CheckBox(component.getLocalizedShortName());
@@ -269,7 +358,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
             }
         });
 
-        componentsNavigationPanel.add(checkBox);
+        componentControlsPanel.add(checkBox);
 
         if(component.hasSettings()) {
             Button settingsButton = new Button("");
@@ -283,7 +372,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
             settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
             settingsButton.setTitle(stringMessages.settingsForComponent(component.getLocalizedShortName()));
             
-            componentsNavigationPanel.add(settingsButton);
+            componentControlsPanel.add(settingsButton);
         }
     }
     
@@ -340,15 +429,11 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         }
     }
     
-    public Widget getNavigationWidget() {
-        return componentsNavigationPanel; 
-    }
-    
-    public Widget getSettingsWidget() {
-        return settingsPanel;
+    public Panel getToolbarPanel() {
+        return toolbarPanel; 
     }
 
-    public Widget getTimeWidget() {
+    public Panel getTimePanel() {
         return timePanel; 
     }
 

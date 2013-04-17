@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.core.shared.GWT;
+import com.sap.sailing.domain.common.filter.FilterOperators;
 
 public class FilterOperatorsFormatter {
     

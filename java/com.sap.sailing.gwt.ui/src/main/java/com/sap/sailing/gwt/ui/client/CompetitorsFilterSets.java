@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.client;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.common.filter.FilterSet;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public class CompetitorsFilterSets {
@@ -19,7 +20,7 @@ public class CompetitorsFilterSets {
         return activeFilterSet;
     }
 
-    public void setActiveFilter(FilterSet<CompetitorDTO> newActiveFilterSet) {
+    public void setActiveFilterSet(FilterSet<CompetitorDTO> newActiveFilterSet) {
         if(newActiveFilterSet != null) {
             if(filterSets.contains(newActiveFilterSet)) {
                 this.activeFilterSet = newActiveFilterSet;

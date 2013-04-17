@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sailing.domain.common.filter;
 
 /**
  * An enumeration of filter operators 

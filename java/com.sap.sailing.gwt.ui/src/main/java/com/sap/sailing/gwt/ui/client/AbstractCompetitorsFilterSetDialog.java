@@ -16,6 +16,9 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.filter.Filter;
+import com.sap.sailing.domain.common.filter.FilterOperators;
+import com.sap.sailing.domain.common.filter.FilterSet;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
@@ -53,7 +56,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
             } else if(filterCount < 1) {
-                errorMessage = "Please add at least one filter.";
+                errorMessage = "Please add at least one filter criteria.";
             } else {
                 for(Filter<CompetitorDTO, ?> filter: competitorsFilterSet.getFilters()) {
                     Object filterValue = filter.getConfiguration().getB();
@@ -93,7 +96,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
 
         HorizontalPanel hPanel = new HorizontalPanel();
         mainPanel.add(hPanel);
-        hPanel.add(new Label("Name of the filter set:"));
+        hPanel.add(new Label("Filter name:"));
         hPanel.add(filterSetNameTextBox);
         
         filterListBox.addChangeHandler(new ChangeHandler() {
@@ -103,7 +106,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             }
         });
 
-        filterListBox.addItem("Select a filter...");
+        filterListBox.addItem("Select a filter criteria...");
         for(Filter<?,?> filter: availableCompetitorsFilter) {
             filterListBox.addItem(filter.getName());
         }
@@ -137,7 +140,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
 
         HorizontalPanel addFilterPanel = new HorizontalPanel();
         mainPanel.add(addFilterPanel);
-        addFilterPanel.add(new Label("Available Filters:"));
+        addFilterPanel.add(new Label("Filter criterias:"));
         addFilterPanel.add(filterListBox);
         addFilterPanel.add(addFilterButton);
 
@@ -288,7 +291,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             competitorsFiltersGrid = new Grid(filterCount + headlineRow + footerRow, 4);
             competitorsFiltersGrid.setCellSpacing(4);
             if(headlineRow == 1) {
-                competitorsFiltersGrid.setWidget(0 ,0, new Label("Filter name"));
+                competitorsFiltersGrid.setWidget(0 ,0, new Label("Filter criteria"));
                 competitorsFiltersGrid.setWidget(0 ,1, new Label("Operator"));
                 competitorsFiltersGrid.setWidget(0 ,2, new Label("Value"));
             }
@@ -298,7 +301,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
                 competitorsFiltersGrid.setWidget(i + headlineRow, 1, filterOperatorSelectionListBoxes.get(i));
                 competitorsFiltersGrid.setWidget(i + headlineRow, 2, filterValueFields.get(i));
                 competitorsFiltersGrid.setWidget(i + headlineRow, 3, filterDeleteButtons.get(i));
-            }
+           }
         } else {
             competitorsFiltersGrid = new Grid(0, 0);
         }

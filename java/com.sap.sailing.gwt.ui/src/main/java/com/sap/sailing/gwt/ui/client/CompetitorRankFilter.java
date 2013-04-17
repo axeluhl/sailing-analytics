@@ -6,6 +6,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.sap.sailing.domain.common.filter.AbstractFilter;
+import com.sap.sailing.domain.common.filter.CollectionFilter;
+import com.sap.sailing.domain.common.filter.Filter;
+import com.sap.sailing.domain.common.filter.FilterOperators;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public class CompetitorRankFilter extends AbstractFilter<CompetitorDTO, Integer> implements CollectionFilter<CompetitorDTO, Integer> {
@@ -23,7 +27,6 @@ public class CompetitorRankFilter extends AbstractFilter<CompetitorDTO, Integer>
     public CompetitorRankFilter() {
         super();
     }
-
 
     @Override
     public FilterOperators getDefaultOperator() {
@@ -63,16 +66,10 @@ public class CompetitorRankFilter extends AbstractFilter<CompetitorDTO, Integer>
         
         return result;
     }
-
     
     @Override
     public String getName() {
         return "Top ranked competitors";
-    }
-    
-    @Override
-    public String getDescription() {
-        return "Shows the top [number] ranked competitors";
     }
 
     @Override

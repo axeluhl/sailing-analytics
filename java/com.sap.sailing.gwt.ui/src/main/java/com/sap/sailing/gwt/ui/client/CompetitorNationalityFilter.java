@@ -3,6 +3,10 @@ package com.sap.sailing.gwt.ui.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.common.filter.AbstractFilter;
+import com.sap.sailing.domain.common.filter.Filter;
+import com.sap.sailing.domain.common.filter.FilterOperators;
+import com.sap.sailing.domain.common.filter.ObjectFilter;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public class CompetitorNationalityFilter extends AbstractFilter<CompetitorDTO, String> implements ObjectFilter<CompetitorDTO, String> {
@@ -74,11 +78,6 @@ public class CompetitorNationalityFilter extends AbstractFilter<CompetitorDTO, S
     @Override
     public String getName() {
         return "Nationality";
-    }
-    
-    @Override
-    public String getDescription() {
-        return "Shows competitors of a nationality (ISO code or IOC code).";
     }
 
     @Override

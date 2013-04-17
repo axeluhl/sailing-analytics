@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
@@ -30,7 +29,7 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 import com.sap.sailing.gwt.ui.shared.controls.slider.TimeSlider;
 
-public class TimePanel<T extends TimePanelSettings> extends FormPanel implements Component<T>, TimeListener, TimeZoomChangeListener,
+public class TimePanel<T extends TimePanelSettings> extends SimplePanel implements Component<T>, TimeListener, TimeZoomChangeListener,
     TimeRangeChangeListener, PlayStateListener, RequiresResize {
     protected final Timer timer;
     protected final TimeRangeWithZoomProvider timeRangeProvider;
