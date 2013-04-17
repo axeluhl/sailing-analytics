@@ -354,7 +354,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         if (race != null) {
             RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
             String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboardName
-                    + "&raceName=" + raceIdentifier.getRaceName() + "&root=" + root + raceIdentifier.getRaceName()
+                    + "&raceName=" + raceIdentifier.getRaceName() + "&root=" + root
                     + "&regattaName=" + raceIdentifier.getRegattaName() + "&leaderboardGroupName=" + leaderboardGroup.name);
             if (debugParam != null && !debugParam.isEmpty()) {
                 link += "&gwt.codesvr=" + debugParam;
