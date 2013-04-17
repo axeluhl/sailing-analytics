@@ -13,8 +13,8 @@ import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.shared.panels.UserStatusPanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.panels.UserStatusPanel;
 
 public class AdminConsoleEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
     private Set<RegattaDisplayer> regattaDisplayers;

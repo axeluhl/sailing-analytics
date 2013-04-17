@@ -27,7 +27,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.swisstimingreplayadapter
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
-Export-Package: com.sap.sailing.gwt.ui.shared.media
+Export-Package: com.sap.sailing.gwt.ui.client.shared.media
 Import-Package: javax.jms;version="1.1.0",
  javax.servlet;version="2.5.0",
  javax.servlet.http;version="2.5.0",
