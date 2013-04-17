@@ -60,15 +60,15 @@ This document should depict the infrastructure used for upcoming events. The mai
  </tr>
  <tr>
   <th>505 Barbados</th>
-  <th>??</th>
-  <th>??)</th>
-  <th>??</th>
-  <th>??</th>
-  <th>??</th>
-  <th>??</th>
-  <th>??</th>
-  <th>??</th>
-  <th>??</th>
+  <th>24.4.2013-3.5.2013</th>
+  <th>http://sapcoe-app01.pironet-ndh.com (195.227.10.246)</th>
+  <th>PROD2 (8889)</th>
+  <th>TEST (8887)</th>
+  <th>Telnet 14889 / 14887</th>
+  <th>505worlds2013.sapsailing.com</th>
+  <th>TracTrac</th>
+  <th>10202</th>
+  <th>2014</th>
   <th>Axel</th>
  </tr>
  <tr>
