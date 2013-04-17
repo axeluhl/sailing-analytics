@@ -32,12 +32,12 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack.MediaType;
+import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack.Status;
 import com.sap.sailing.gwt.ui.raceboard.MediaSelectionDialog.MediaSelectionListener;
 import com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer.PopupCloseListener;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MediaType;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack.Status;
 
 public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateListener, TimeListener,
         AsyncCallback<Collection<MediaTrack>>, MediaSelectionListener, CloseHandler<Window>, ClosingHandler {
@@ -143,10 +143,10 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
     native void addLoadMetadataHandler(MediaElement mediaElement, MediaTrack mediaTrack) /*-{ 
         var that = this;
         mediaElement.addEventListener('loadedmetadata', function() {
-            that.@com.sap.sailing.gwt.ui.raceboard.MediaSelector::loadedmetadata(Lcom/sap/sailing/gwt/ui/shared/media/MediaTrack;)(mediaTrack);
+            that.@com.sap.sailing.gwt.ui.raceboard.MediaSelector::loadedmetadata(Lcom/sap/sailing/gwt/ui/client/shared/media/MediaTrack;)(mediaTrack);
         });
         mediaElement.addEventListener('error', function() {
-            that.@com.sap.sailing.gwt.ui.raceboard.MediaSelector::mediaError(Lcom/sap/sailing/gwt/ui/shared/media/MediaTrack;)(mediaTrack);
+            that.@com.sap.sailing.gwt.ui.raceboard.MediaSelector::mediaError(Lcom/sap/sailing/gwt/ui/client/shared/media/MediaTrack;)(mediaTrack);
         });
     }-*/;
     

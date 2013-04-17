@@ -7,10 +7,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.core.IsEqual.*;
+
 import org.junit.Test;
 import org.moxieapps.gwt.highcharts.client.Point;
 
-import com.sap.sailing.gwt.ui.shared.charts.WindChartPointRecalculator;
+import com.sap.sailing.gwt.ui.client.shared.charts.WindChartPointRecalculator;
 
 public class TestWindChartPointRecalculation {
 
@@ -37,12 +38,12 @@ public class TestWindChartPointRecalculation {
     
     @Test
     public void testContinuousWrapAround() {
-        //Test multiple wrap around between 350° and 30°
+        //Test multiple wrap around between 350ï¿½ and 30ï¿½
         List<Double> pointYValues = Arrays.asList(356.74, 10.54, 30.192, 20.625, 5.647, 350.526);
         List<Double> expectedPointYValues = Arrays.asList(356.74, 10.54 + 360, 30.192 + 360, 20.625 + 360, 5.647 + 360, 350.526);
         assertThat(recalculatePoints(pointYValues), equalTo(expectedPointYValues));
         
-        //Test multiple round trips from 0° to 360°
+        //Test multiple round trips from 0ï¿½ to 360ï¿½
         pointYValues = Arrays.asList(5.34, 358.97, 10.42, 50.0, 110.65, 140.54, 210.85, 280.38, 330.5, 358.97,
                                      7.24, 48.0, 112.65, 135.54, 215.85, 278.38, 333.5, 356.97,
                                      8.24, 48.245, 112.57, 133.54, 215.637, 278.38, 333.5, 356.97);
