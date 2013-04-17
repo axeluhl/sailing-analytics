@@ -49,9 +49,9 @@ import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLinesDTO;
 import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
+import com.sap.sailing.gwt.ui.shared.windpattern.WindPattern;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager;
-import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager.WindPattern;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternNotFoundException;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
 import com.sap.sailing.simulator.Path;
@@ -230,7 +230,15 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
     @Override
     public WindPatternDisplay getWindPatternDisplay(WindPatternDTO pattern) {
-        return wpDisplayManager.getDisplay(WindPattern.valueOf(pattern.name));
+        WindPatternDisplay display = wpDisplayManager.getDisplay(WindPattern.valueOf(pattern.name));
+        try {
+            return display;
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+        
     }
 
     @Override
