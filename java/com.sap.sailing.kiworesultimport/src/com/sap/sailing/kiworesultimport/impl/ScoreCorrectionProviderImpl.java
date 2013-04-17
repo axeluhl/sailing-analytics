@@ -1,8 +1,8 @@
 package com.sap.sailing.kiworesultimport.impl;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,34 +15,22 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
-import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.kiworesultimport.ParserFactory;
 import com.sap.sailing.kiworesultimport.RegattaSummary;
 import com.sap.sailing.kiworesultimport.ZipFile;
 import com.sap.sailing.kiworesultimport.ZipFileParser;
+import com.sap.sailing.resultimport.impl.AbstractFileBasedScoreCorrectionProvider;
 
-public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
+public class ScoreCorrectionProviderImpl extends AbstractFileBasedScoreCorrectionProvider {
     private static final long serialVersionUID = -4596215011753860781L;
 
     private static final String name = "Kieler Woche Official Results by b+m";
     
-    /**
-     * The directory that will be scanned for <code>.zip</code> files which will then be passed to
-     * {@link ZipFileParser} for analysis.
-     */
-    private final File scanDir;
-    
     public ScoreCorrectionProviderImpl(File scanDir) {
-        super();
-        if (!scanDir.exists()) {
-            scanDir.mkdirs();
-        }
-        if (!scanDir.isDirectory()) {
-            throw new IllegalArgumentException("scanDir "+scanDir+" must be a directory");
-        }
-        this.scanDir = scanDir;
+        super(scanDir);
     }
 
     @Override
@@ -70,9 +58,9 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     private Iterable<RegattaSummary> getAllRegattaSummaries() throws IOException, SAXException, ParserConfigurationException {
         List<RegattaSummary> result = new ArrayList<RegattaSummary>();
         ZipFileParser zipFileParser = ParserFactory.INSTANCE.createZipFileParser();
-        for (File file : scanDir.listFiles()) {
-            if (file.getName().toLowerCase().endsWith(".zip")) {
-                ZipFile zipFile = zipFileParser.parse(new FileInputStream(file));
+        for (Triple<InputStream, String, TimePoint> streamAndName : getResultDocumentProvider().getDocumentsAndNamesAndLastModified()) {
+            if (streamAndName.getB().toLowerCase().endsWith(".zip")) {
+                ZipFile zipFile = zipFileParser.parse(streamAndName.getA());
                 for (RegattaSummary regattaSummary : zipFile.getRegattaSummaries()) {
                     result.add(regattaSummary);
                 }
@@ -80,7 +68,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
         }
         return result;
     }
-    
+
     @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
             TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException {
