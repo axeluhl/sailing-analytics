@@ -5,6 +5,7 @@ import java.util.Arrays;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
 
 public class LeaderboardGroupConfigImagesBarCell extends ImagesBarCell {
     public static final String ACTION_REMOVE = "ACTION_REMOVE";
