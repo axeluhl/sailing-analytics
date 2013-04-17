@@ -7,6 +7,6 @@
     <groupId>com.sap.sailing</groupId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
-  <artifactId>com.sap.sailing.winregatta.resultimport</artifactId>
+  <artifactId>com.sap.sailing.barbados.resultimport</artifactId>
   <packaging>eclipse-plugin</packaging>
 </project>
