@@ -342,7 +342,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             this.windFieldCanvasOverlay = new WindFieldCanvasOverlay(this.timer);
         }
         if (this.windParams.isShowStreamlets()) {
-            this.windStreamletsCanvasOverlay = new WindStreamletsCanvasOverlay(this.timer);
+            this.windStreamletsCanvasOverlay = new WindStreamletsCanvasOverlay(this.timer, this.xRes, this.yRes);
         }
         if (this.windParams.isShowGrid()) {
             this.windGridCanvasOverlay = new WindGridCanvasOverlay(this.timer, this.xRes, this.yRes);

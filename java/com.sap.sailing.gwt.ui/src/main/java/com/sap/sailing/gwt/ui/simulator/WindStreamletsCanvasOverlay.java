@@ -49,13 +49,17 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     protected WindFieldMapMouseMoveHandler mmHandler;
     protected double arrowLength = 15;
 
+    private int xRes;
+    private int yRes;
     private Timer timer;
 
     private static Logger logger = Logger.getLogger(WindStreamletsCanvasOverlay.class.getName());
 
-    public WindStreamletsCanvasOverlay(final Timer timer) {
+    public WindStreamletsCanvasOverlay(final Timer timer, int xRes, int yRes) {
         super();
         this.timer = timer;
+        this.xRes = xRes;
+        this.yRes = yRes;
         init();
     }
 
@@ -119,7 +123,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
 
     @Override
     protected Overlay copy() {
-        return new WindStreamletsCanvasOverlay(this.timer);
+        return new WindStreamletsCanvasOverlay(this.timer, this.xRes, this.yRes);
     }
 
     @Override
@@ -179,10 +183,13 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
             windDTOIter = windDTOList.iterator();
             int index = 0;
             while (windDTOIter.hasNext()) {
-                final SimulatorWindDTO windDTO = windDTOIter.next();
-                //System.out.println("wind angle: "+windDTO.trueWindBearingDeg);
-                final DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
-                drawScaledArrow(windDTO, dbi.getRadians(), ++index, pxLength, drawHead);
+                SimulatorWindDTO windDTO = windDTOIter.next();
+                //System.out.println("wind angle: "+index+", "+windDTO.trueWindBearingDeg);
+                if (((index % xRes) > 0)&&((index % xRes) < (xRes-1))) {
+                    DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
+                    drawScaledArrow(windDTO, dbi.getRadians(), index, pxLength, drawHead);
+                }
+                index++;
             }
             final String title = "Wind Field at " + windDTOList.size() + " points.";
             getCanvas().setTitle(title);
@@ -193,6 +200,9 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         final String msg = "Wind @ P" + index + ": time : " + windDTO.timepoint + " speed: " + windDTO.trueWindSpeedInKnots + "knots "
                 + windDTO.trueWindBearingDeg;
         logger.fine(msg);
+
+        final Context2d context2d = canvas.getContext2d();
+        context2d.setGlobalAlpha(0.2);
 
         final PositionDTO position = windDTO.position;
 
@@ -223,6 +233,9 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         //String text = "P" + index;// + NumberFormat.getFormat("0.00").format(windDTO.trueWindBearingDeg) + "°";
         //drawPointWithText(x, y, text);
         //drawPoint(x, y);
+        
+        context2d.setGlobalAlpha(0.4);
+
     }
 
     protected void drawHead(final double x, final double y, final double theta, final double headLength, final double weight) {
