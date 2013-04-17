@@ -215,7 +215,7 @@ if [[ "$@" == "hot-deploy" ]]; then
     exit
 fi
 
-echo "Starting $@ of server (maven configuration set to $MAVEN_SETTINGS)..."
+echo "Starting $@ of server..."
 
 if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	# yield build so that we get updated product
