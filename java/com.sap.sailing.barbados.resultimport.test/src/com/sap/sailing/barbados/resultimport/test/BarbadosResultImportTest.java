@@ -84,8 +84,11 @@ public class BarbadosResultImportTest {
         RegattaScoreCorrections result = scp.getScoreCorrections(eventName, boatClassName, timePoint);
         Iterator<ScoreCorrectionsForRace> scfr = result.getScoreCorrectionsForRaces().iterator();
         ScoreCorrectionsForRace scfr1 = scfr.next();
+        assertEquals("1", scfr1.getRaceNameOrNumber());
         ScoreCorrectionsForRace scfr2 = scfr.next();
+        assertEquals("2", scfr2.getRaceNameOrNumber());
         ScoreCorrectionsForRace scfr3 = scfr.next();
+        assertEquals("3", scfr3.getRaceNameOrNumber());
         assertTrue(scfr1.getSailIDs().contains("GER 9113"));
         assertTrue(scfr1.getSailIDs().contains("GER 9112"));
         assertTrue(scfr1.getSailIDs().contains("GER 9110"));
