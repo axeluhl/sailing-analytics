@@ -9,5 +9,5 @@ public interface WindPatternDisplay {
     
     public void addSetting(WindPatternSetting<?> setting);
 
-    public WindPattern getWindPattern();
+    public String getWindPatternName();
 }

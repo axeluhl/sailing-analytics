@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
 
 public class WindPatternDisplayImpl implements WindPatternDisplay, IsSerializable {
     
-    private WindPattern windPattern;
+    private String windPatternName;
     private List<WindPatternSetting<?>> windPatternSettings;
     
     public WindPatternDisplayImpl() {
@@ -18,7 +18,7 @@ public class WindPatternDisplayImpl implements WindPatternDisplay, IsSerializabl
     }
     
     public WindPatternDisplayImpl(WindPattern windPattern) {
-        this.windPattern = windPattern;
+        this.windPatternName = windPattern.name();
         windPatternSettings = new ArrayList<WindPatternSetting<?>>();
     }
     
@@ -33,8 +33,8 @@ public class WindPatternDisplayImpl implements WindPatternDisplay, IsSerializabl
     }
     
     @Override
-    public WindPattern getWindPattern() {
-        return windPattern;
+    public String getWindPatternName() {
+        return windPatternName;
     }
 
 }

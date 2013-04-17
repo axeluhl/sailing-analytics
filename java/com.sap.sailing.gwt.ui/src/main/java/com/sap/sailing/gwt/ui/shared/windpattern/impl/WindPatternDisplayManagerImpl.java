@@ -69,7 +69,7 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
 
     private void addOscillationParameters(WindPatternDisplay display) {
         WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("baseWindSpeed",
-                "Base Speed (kn)", 2, 22, 12,10);
+                "Base Speed (kn)", 2, 22, 12,10);    
         display.addSetting(windSpeedSetting);
         WindPatternSetting<Double> baseWindBearing = new WindPatternSettingSliderBar("baseWindBearing",
                 "Average Direction (Degrees)", -20, 20, 0,10);

@@ -192,7 +192,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         LOGGER.info("Boundary south direction " + bd.getSouth());
         controlParameters.baseWindBearing += bd.getSouth().getDegrees();
 
-        WindFieldGenerator wf = wfGenFactory.createWindFieldGenerator(pattern.getWindPattern().name(), bd,
+        WindFieldGenerator wf = wfGenFactory.createWindFieldGenerator(pattern.getWindPatternName(), bd,
                 controlParameters);
 
         if (wf == null) {
@@ -253,7 +253,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         this.controlParameters.resetBlastRandomStream = params.isKeepState();
         this.retreiveWindControlParameters(pattern);
 
-        wf = wfGenFactory.createWindFieldGenerator(pattern.getWindPattern().name(), null, this.controlParameters);
+        wf = wfGenFactory.createWindFieldGenerator(pattern.getWindPatternName(), null, this.controlParameters);
 
         if (wf == null) {
             throw new WindPatternNotFoundException("Please select a valid wind pattern.");
