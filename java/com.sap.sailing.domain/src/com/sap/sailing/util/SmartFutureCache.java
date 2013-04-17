@@ -89,7 +89,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      * would occur. Remember that there may still be single-core machines, so the factor with which
      * <code>availableProcessors</code> is multiplied needs to be greater than one at least.
      */
-    private final static Executor recalculator = new ThreadPoolExecutor(/* corePoolSize */ 0,
+    private final static Executor recalculator = new ThreadPoolExecutor(/* corePoolSize */ 3*Runtime.getRuntime().availableProcessors(),
             /* maximumPoolSize */ 3*Runtime.getRuntime().availableProcessors(),
             /* keepAliveTime */ 60, TimeUnit.SECONDS,
             /* workQueue */ new LinkedBlockingQueue<Runnable>());
