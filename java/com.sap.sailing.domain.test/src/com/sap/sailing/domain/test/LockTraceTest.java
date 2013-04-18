@@ -1,11 +1,16 @@
 package com.sap.sailing.domain.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 public class LockTraceTest {
@@ -32,6 +37,33 @@ public class LockTraceTest {
                 wait();
             }
         }
+    }
+    
+    @Test
+    public void testReentrantReadLocking() {
+        NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("testReentrantReadLocking-Lock", /* fair */ true);
+        LockUtil.lockForRead(lock);
+        assertTrue(lock.getReaders().contains(Thread.currentThread()));
+        LockUtil.lockForRead(lock);
+        assertTrue(lock.getReaders().contains(Thread.currentThread()));
+        LockUtil.unlockAfterRead(lock);
+        assertTrue(lock.getReaders().contains(Thread.currentThread()));
+        LockUtil.unlockAfterRead(lock);
+        assertFalse(lock.getReaders().contains(Thread.currentThread()));
+        assertEquals(0, lock.getReadHoldCount());
+    }
+
+    @Test
+    public void testLockingPerformance() {
+        NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("Lock", /* fair */ true);
+        long start = System.currentTimeMillis();
+        for (int i=0; i<100000; i++) {
+            LockUtil.lockForRead(lock);
+            LockUtil.unlockAfterRead(lock);
+            LockUtil.lockForWrite(lock);
+            LockUtil.unlockAfterWrite(lock);
+        }
+        System.out.println("Took "+(System.currentTimeMillis()-start)+"ms");
     }
     
     @Ignore

@@ -160,7 +160,6 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
-import com.sap.sailing.freg.resultimport.FregResultProvider;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
@@ -221,6 +220,7 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.resultimport.UrlResultProvider;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
@@ -2677,6 +2677,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result = new CompetitorsRaceDataDTO(detailType, startTime==null?null:startTime.asDate(), endTime==null?null:endTime.asDate());
 
             for (CompetitorDTO competitorDTO : competitors) {
+                // TODO parallelize across competitors
                 Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(), competitorDTO.id);
                 ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
                 ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
@@ -2699,6 +2700,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 if (startTime != null && endTime != null) {
                     for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += stepSizeInMs) {
+                        // TODO parallelize across time points
                         MillisecondsTimePoint time = new MillisecondsTimePoint(i);
                         Double competitorRaceData = getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time, leaderboardGroupName, leaderboardName);
                         if (competitorRaceData != null) {
@@ -3208,24 +3210,36 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return new ScoreCorrectionEntryDTO(scoreCorrectionForCompetitor.getPoints(),
                 scoreCorrectionForCompetitor.isDiscarded(), scoreCorrectionForCompetitor.getMaxPointsReason());
     }
-
-    private FregResultProvider getFregService() {
-        FregResultProvider result = null;
+    
+    @Override
+    public List<String> getUrlResultProviderNames() {
+        List<String> result = new ArrayList<String>();
         for (ScoreCorrectionProvider scp : getScoreCorrectionProviders()) {
-            if (scp instanceof FregResultProvider) {
-                result = (FregResultProvider) scp;
-                break;
+            if (scp instanceof UrlResultProvider) {
+            	result.add(scp.getName());
+            }
+        }
+        return result;
+    }
+
+    private UrlResultProvider getUrlBasedScoreCorrectionProvider(String resultProviderName) {
+    	UrlResultProvider result = null;
+        for (ScoreCorrectionProvider scp : getScoreCorrectionProviders()) {
+            if (scp instanceof UrlResultProvider && scp.getName().equals(resultProviderName)) {
+            	result = (UrlResultProvider) scp;
+            	break;
             }
         }
         return result;
     }
 
     @Override
-    public List<String> getFregResultUrls() {
+    public List<String> getResultImportUrls(String resultProviderName) {
         List<String> result = new ArrayList<String>();
-        final FregResultProvider fregService = getFregService();
-        if (fregService != null) {
-            Iterable<URL> allUrls = fregService.getAllUrls();
+
+        UrlResultProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        if (urlBasedScoreCorrectionProvider != null) {
+            Iterable<URL> allUrls = urlBasedScoreCorrectionProvider.getAllUrls();
             for (URL url : allUrls) {
                 result.add(url.toString());
             }
@@ -3234,22 +3248,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void removeFregURLs(Set<String> toRemove) throws Exception {
-        FregResultProvider fregService = getFregService();
-        if (fregService != null) {
+    public void removeResultImportURLs(String resultProviderName, Set<String> toRemove) throws Exception {
+        UrlResultProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        if (urlBasedScoreCorrectionProvider != null) {
             for (String urlToRemove : toRemove) {
-                fregService.removeResultUrl(new URL(urlToRemove));
+            	urlBasedScoreCorrectionProvider.removeResultUrl(new URL(urlToRemove));
             }
         }
     }
 
     @Override
-    public void addFragUrl(String result) throws Exception {
-        FregResultProvider fregService = getFregService();
-        if (fregService != null) {
-            fregService.registerResultUrl(new URL(result));
+    public void addResultImportUrl(String resultProviderName, String url) throws Exception {
+        UrlResultProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        if (urlBasedScoreCorrectionProvider != null) {
+        	urlBasedScoreCorrectionProvider.registerResultUrl(new URL(url));
         }
-    }
+    }    
 
     @Override
     public List<Pair<String, List<CompetitorDTO>>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date) throws NoWindException {

@@ -7,7 +7,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.shared.charts.LeaderboardRankChart;
+import com.sap.sailing.gwt.ui.client.shared.charts.LeaderboardRankChart;
 
 public class RankChartDialog extends DialogBoxExt {
     public RankChartDialog(SailingServiceAsync sailingService, String leaderboardName, CompetitorSelectionProvider competitorSelectionProvider,
