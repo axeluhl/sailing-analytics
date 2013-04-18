@@ -1,6 +1,7 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sailing.gwt.ui.client.shared.filter;
 
 import com.sap.sailing.domain.common.filter.FilterSet;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public class EditCompetitorsFilterSetDialog extends AbstractCompetitorsFilterSetDialog {

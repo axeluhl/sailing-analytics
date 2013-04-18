@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sailing.gwt.ui.client.shared.filter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +20,11 @@ import com.sap.sailing.domain.common.filter.Filter;
 import com.sap.sailing.domain.common.filter.FilterOperators;
 import com.sap.sailing.domain.common.filter.FilterSet;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.client.CompetitorNationalityFilter;
+import com.sap.sailing.gwt.ui.client.CompetitorRankFilter;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.FilterOperatorsFormatter;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog<FilterSet<CompetitorDTO>> {

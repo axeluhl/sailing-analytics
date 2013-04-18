@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sailing.gwt.ui.client.shared.filter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,9 @@ import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.filter.FilterSet;
+import com.sap.sailing.gwt.ui.client.CompetitorsFilterSets;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 /**
