@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.video;
+package com.sap.sailing.gwt.ui.client.media.popup;
 
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.dom.client.VideoElement;
@@ -53,15 +53,12 @@ public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenu
     native void addNativeEventHandlers(VideoElement videoElement) /*-{
 		var that = this;
 		videoElement.addEventListener('loadedmetadata', function() {
-			that.@com.sap.sailing.gwt.ui.video.VideoPopupWindow::loadedmetadata()();
+			that.@com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow::loadedmetadata()();
 		});
-                videoElement.addEventListener('timeupdate', function() {
-                    that.@com.sap.sailing.gwt.ui.raceboard.AbstractMediaPlayer::onMediaTimeUpdate()();
-                });
                 videoElement.addEventListener('canplay', function() { //see http://www.w3schools.com/tags/av_event_canplay.asp
                         var deferredPlayState = $wnd.deferredPlayState
                         if (deferredPlayState && !$wnd.videoPlayer) {
-                            that.@com.sap.sailing.gwt.ui.video.VideoPopupWindow::initPlayState(DZDZ)(deferredPlayState.deferredMediaTime, deferredPlayState.isDeferredMuted, deferredPlayState.deferredPlaybackSpeed, deferredPlayState.isDeferredPlaying);
+                            that.@com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow::initPlayState(DZDZ)(deferredPlayState.deferredMediaTime, deferredPlayState.deferredIsMuted, deferredPlayState.deferredPlaybackSpeed, deferredPlayState.deferredIsPlaying);
                         }
                 });
     }-*/;

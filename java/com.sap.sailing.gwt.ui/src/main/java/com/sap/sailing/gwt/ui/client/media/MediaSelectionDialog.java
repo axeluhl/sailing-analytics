@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.raceboard;
+package com.sap.sailing.gwt.ui.client.media;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,7 +43,7 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
         dialogControl.addCloseHandler(this);
     }
     
-    public void show(Collection<MediaTrack> videoTracks, Set<MediaTrack> selectedVideos, Collection<MediaTrack> audioTracks, MediaTrack selectedAudioTrack, UIObject popupLocation) {
+    public void show(Collection<MediaTrack> videoTracks, Set<MediaTrack> selectedVideos, Collection<MediaTrack> audioTracks, MediaTrack selectedAudioTrack, boolean showAddButton, UIObject popupLocation) {
         Panel grid = new VerticalPanel();
         if (!audioTracks.isEmpty()) {
             grid.add(createAudioHeader());

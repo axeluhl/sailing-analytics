@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -22,6 +23,8 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
+import com.sap.sailing.gwt.ui.client.media.MediaTrackDialog;
+import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -310,7 +313,8 @@ public class MediaPanel extends FlowPanel {
     }
 
     private void addUrlMediaTrack() {
-        MediaTrackDialog dialog = new MediaTrackDialog(stringMessages, new DialogCallback<MediaTrack>() {
+        Date defaultStartTime = new Date();
+        MediaTrackDialog dialog = new MediaTrackDialog(defaultStartTime , stringMessages, new DialogCallback<MediaTrack>() {
 
             @Override
             public void cancel() {
@@ -318,8 +322,8 @@ public class MediaPanel extends FlowPanel {
             }
 
             @Override
-            public void ok(MediaTrack mediaTrack) {
-                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<Void>() {
+            public void ok(final MediaTrack mediaTrack) {
+                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
 
                     @Override
                     public void onFailure(Throwable t) {
@@ -327,7 +331,8 @@ public class MediaPanel extends FlowPanel {
                     }
 
                     @Override
-                    public void onSuccess(Void allMediaTracks) {
+                    public void onSuccess(String dbId) {
+                        mediaTrack.dbId = dbId;
                         loadMediaTracks();
                     }
                 });
@@ -346,8 +351,8 @@ public class MediaPanel extends FlowPanel {
             }
 
             @Override
-            public void ok(MediaTrack mediaTrack) {
-                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<Void>() {
+            public void ok(final MediaTrack mediaTrack) {
+                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
 
                     @Override
                     public void onFailure(Throwable t) {
@@ -355,7 +360,8 @@ public class MediaPanel extends FlowPanel {
                     }
 
                     @Override
-                    public void onSuccess(Void allMediaTracks) {
+                    public void onSuccess(String dbId) {
+                        mediaTrack.dbId = dbId;
                         loadMediaTracks();
                     }
                 });

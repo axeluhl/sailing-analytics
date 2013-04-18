@@ -86,9 +86,9 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
 
     @Override
-    public void addMediaTrack(MediaTrack mediaTrack) {
+    public String addMediaTrack(MediaTrack mediaTrack) {
         String mimeType = mediaTrack.mimeType != null ? mediaTrack.mimeType.name() : null;
-        mediaDB().insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime, mediaTrack.durationInMillis, mimeType);
+        return mediaDB().insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime, mediaTrack.durationInMillis, mimeType);
     }
 
     private MediaDB mediaDB() {

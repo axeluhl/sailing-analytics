@@ -1,20 +1,22 @@
-package com.sap.sailing.gwt.ui.raceboard;
+package com.sap.sailing.gwt.ui.client.media.popup;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.Window;
+import com.sap.sailing.gwt.ui.client.media.AbstractMediaPlayer;
+import com.sap.sailing.gwt.ui.client.media.VideoPlayer;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 
 public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements VideoPlayer {
 
-    interface PopupCloseListener {
+    public interface PopupCloseListener {
         void popupClosed();
     }
 
     private final JavaScriptObject playerWindow;
     private final PopupCloseListener popupCloseHandler;
 
-    protected PopupWindowPlayer(MediaTrack mediaTrack, MediaEventHandler mediaEventHandler, PopupCloseListener popupCloseListener) {
-        super(mediaTrack, mediaEventHandler);
+    protected PopupWindowPlayer(MediaTrack mediaTrack, PopupCloseListener popupCloseListener) {
+        super(mediaTrack);
         this.popupCloseHandler = popupCloseListener;
         
         String playerWindowUrl = getPlayerWindowUrl();  
@@ -36,7 +38,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     @Override
     public native void destroy() /*-{
-            var playerWindow = this.@com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer::playerWindow;
+            var playerWindow = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow;
             if (!playerWindow.closed) {
                 playerWindow.close();
             }
@@ -44,31 +46,31 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     native JavaScriptObject registerNativeStuff() /*-{
                 var that = this;
-                var window = that.@com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer::playerWindow; 
+                var window = that.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow; 
                 window.onbeforeunload = function() {
-                        that.@com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer::onClosingPopup()();
+                        that.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::onClosingPopup()();
                 }
                 window.onbeforeunload = function() {
-                        that.@com.sap.sailing.gwt.ui.raceboard.AbstractMediaPlayer::onMediaTimeUpdate()();
+                        that.@com.sap.sailing.gwt.ui.client.media.AbstractMediaPlayer::onMediaTimeUpdate()();
                 }
                 window.parent.deferredPlayState = {
-                    isDeferredPlaying: false,
-                    isDeferredMuted: true,
+                    deferredIsPlaying: false,
+                    deferredIsMuted: true,
                     deferredMediaTime: 0,
                     playbackSpeed: 1
                 };
     }-*/;
 
     private void onClosingPopup() {
-        pause();
+        pauseMedia();
         popupCloseHandler.popupClosed();
     }
 
     @Override
-    public native void play() /*-{
-                var window = this.@com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer::playerWindow; 
+    public native void playMedia() /*-{
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow; 
                 if (!window.parent.videoPlayer) {
-                        window.parent.deferredPlayState.isDeferredPlaying = true;
+                        window.parent.deferredPlayState.deferredIsPlaying = true;
                 } else {
                         window.parent.videoPlayer.play();
                 }
@@ -76,10 +78,10 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
     }-*/;
 
     @Override
-    public native void pause() /*-{
-                var window = this.@com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer::playerWindow; 
+    public native void pauseMedia() /*-{
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow; 
                 if (!window.parent.videoPlayer) {
-                        window.parent.deferredPlayState.isDeferredPlaying = false;
+                        window.parent.deferredPlayState.deferredIsPlaying = false;
                 } else {
                         window.parent.videoPlayer.pause();
                 }
@@ -88,7 +90,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     @Override
     public native void setCurrentMediaTime(double mediaTime) /*-{
-                var window = this.@com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer::playerWindow; 
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow; 
                 if (!window.parent.videoPlayer) {
                         window.parent.deferredPlayState.deferredMediaTime = mediaTime;
                 } else {
@@ -99,19 +101,19 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     @Override
     public native void setMuted(boolean muted) /*-{
-                var window = this.@com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer::playerWindow; 
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow; 
                 if (!window.parent.videoPlayer) {
-                        window.parent.deferredPlayState.isDeferredMuted = muted;
+                        window.parent.deferredPlayState.deferredIsMuted = muted;
                 } else {
                         window.parent.videoPlayer.setMuted(muted);
                 }
     }-*/;
 
     @Override
-    public native boolean isPaused() /*-{
-                var window = this.@com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer::playerWindow;
+    public native boolean isMediaPaused() /*-{
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow;
                 if (!window.parent.videoPlayer) {
-                        return !window.parent.deferredPlayState.isDeferredPlaying;
+                        return !window.parent.deferredPlayState.deferredIsPlaying;
                 } else {
                         return window.parent.videoPlayer.isPaused();
                 }
@@ -119,7 +121,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     @Override
     public native double getDuration() /*-{
-                var window = this.@com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer::playerWindow;
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow;
                 if (!window.parent.videoPlayer) {
                         return NaN;
                 } else {
@@ -129,7 +131,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     @Override
     public native double getCurrentMediaTime() /*-{
-                var window = this.@com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer::playerWindow;
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow;
                 if (!window.parent.videoPlayer) {
                         return window.parent.deferredPlayState.deferredMediaTime;
                 } else {
@@ -139,7 +141,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     @Override
     public native void setPlaybackSpeed(double playbackSpeed) /*-{
-                var window = this.@com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer::playerWindow;
+                var window = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow;
                 if (!window.parent.videoPlayer) {
                         window.parent.deferredPlayState.deferredPlaybackSpeed = playbackSpeed;
                 } else {

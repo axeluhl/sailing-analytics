@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.raceboard;
+package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.media.client.MediaBase;
@@ -13,13 +13,13 @@ abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
     private boolean isReady = false;
     private double deferredMediaTime;
     private double deferredPlaybackSpeed = 1;
-    private boolean isDeferredPlaying;
-    private boolean isDeferredMuted;
+    private boolean deferredIsPlaying;
+    private boolean deferredIsMuted;
     
     protected final MediaBase mediaControl;
 
-    public AbstractEmbeddedMediaPlayer(MediaTrack mediaTrack, MediaEventHandler mediaEventHandler) {
-        super(mediaTrack, mediaEventHandler);
+    public AbstractEmbeddedMediaPlayer(MediaTrack mediaTrack) {
+        super(mediaTrack);
         mediaControl = createMediaControl();
         if (mediaControl != null) {
             mediaControl.setControls(false);
@@ -36,19 +36,21 @@ abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
     abstract protected MediaBase createMediaControl();
 
     native void addNativeEventHandlers(MediaElement mediaElement) /*-{
-    var that = this;
-    mediaElement.addEventListener('canplay',
-                                    function() {
-                                            that.@com.sap.sailing.gwt.ui.raceboard.AbstractEmbeddedMediaPlayer::initPlayState()();
-                                    });
+        var that = this;
+        mediaElement.addEventListener('canplay', function() {
+            that.@com.sap.sailing.gwt.ui.client.media.AbstractEmbeddedMediaPlayer::initPlayState()();
+        });
+        mediaElement.addEventListener('timeupdate', function(event) {
+            that.@com.sap.sailing.gwt.ui.client.media.AbstractMediaPlayer::onMediaTimeUpdate()();
+        });
     }-*/;
     
     private void initPlayState() {
         if (!isReady && (mediaControl != null)) {
             mediaControl.setCurrentTime(deferredMediaTime);
-            mediaControl.setMuted(isDeferredMuted);
+            mediaControl.setMuted(deferredIsMuted);
             mediaControl.setPlaybackRate(deferredPlaybackSpeed);
-            if (isDeferredPlaying) {
+            if (deferredIsPlaying) {
                 mediaControl.play();
             } else {
                 mediaControl.pause();
@@ -58,25 +60,25 @@ abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
     }
 
     @Override
-    public boolean isPaused() {
+    public boolean isMediaPaused() {
         if (isReady) {
             return mediaControl.isPaused();
         } else {
-            return !isDeferredPlaying;
+            return !deferredIsPlaying;
         }
     }
 
     @Override
-    public void pause() {
-        isDeferredPlaying = false;
+    public void pauseMedia() {
+        deferredIsPlaying = false;
         if (isReady && mediaControl != null) {
             mediaControl.pause();
         }
     }
 
     @Override
-    public void play() {
-        isDeferredPlaying = true;
+    public void playMedia() {
+        deferredIsPlaying = true;
         if (isReady && mediaControl != null) {
             mediaControl.play();
         }
@@ -92,7 +94,7 @@ abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
     
     @Override
     public void setMuted(boolean isToBeMuted) {
-        isDeferredMuted = isToBeMuted;
+        deferredIsMuted = isToBeMuted;
         if (isReady && mediaControl != null) {
             mediaControl.setMuted(isToBeMuted);
         }

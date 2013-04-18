@@ -1,15 +1,21 @@
-package com.sap.sailing.gwt.ui.raceboard;
+package com.sap.sailing.gwt.ui.client.media;
 
-public interface MediaSynchListener {
+public interface MediaSynchAdapter {
 
     long getOffset();
 
-    void setOffset(long offset);
+    void changeOffsetBy(long delta);
 
     void setControlsVisible(boolean isVisible);
 
     void save();
 
     void discard();
+
+    void pauseMedia();
+
+    void pauseRace();
+
+    void updateOffset();
 
 }

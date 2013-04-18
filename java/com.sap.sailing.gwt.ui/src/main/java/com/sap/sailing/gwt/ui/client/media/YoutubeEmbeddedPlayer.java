@@ -4,8 +4,6 @@ import java.util.Date;
 
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.media.client.MediaBase;
-import com.google.gwt.media.client.Video;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -16,7 +14,7 @@ import com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer.PopupCloseLis
 import com.sap.sailing.gwt.ui.shared.controls.dialog.WindowBox;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 
-public class YoutubeEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements VideoPlayer, CloseHandler<PopupPanel>, MediaSynchAdapter {
+public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoPlayer, CloseHandler<PopupPanel>, MediaSynchAdapter {
 
     private final WindowBox dialogBox;
     private MediaSynchControl mediaSynchControl;
@@ -25,53 +23,38 @@ public class YoutubeEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implement
     private final MediaTrack backupVideoTrack;
 
     private final MediaServiceAsync mediaService;
-    private Timer raceTimer;
+    private final Timer raceTimer;
     private final ErrorReporter errorReporter;
     private final PopupCloseListener popupCloseListener;
+    private final YoutubeVideoControl videoControl;
 
-    public YoutubeEmbeddedPlayer(MediaTrack videoTrack, long raceStartTimeMillis, boolean showVideoSynch, Timer raceTimer, MediaServiceAsync mediaService, ErrorReporter errorReporter, PopupCloseListener popCloseListener) {
+    public YoutubeEmbeddedPlayer(MediaTrack videoTrack, long raceStartTimeMillis, boolean showSynchControls, Timer raceTimer, MediaServiceAsync mediaService, ErrorReporter errorReporter, PopupCloseListener popupCloseListener) {
         super(videoTrack);
         this.raceTimer = raceTimer;
+        this.raceStartTimeMillis = raceStartTimeMillis;
+        this.popupCloseListener = popupCloseListener;
         this.mediaService = mediaService;
         this.errorReporter = errorReporter;
-        backupVideoTrack = new MediaTrack(videoTrack.dbId, videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.durationInMillis, videoTrack.mimeType);
-        
-        
-        this.raceStartTimeMillis = raceStartTimeMillis;
-        this.popupCloseListener = popCloseListener;
+        backupVideoTrack = new MediaTrack(null, videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.durationInMillis, videoTrack.mimeType);
 
         this.dialogBox = new WindowBox(false, false, true, true);
         dialogBox.setText(videoTrack.title);        
         dialogBox.setTitle(videoTrack.toString());        
 
-        if (mediaControl != null) {
-            
-            
-            // HTML videoFrame = new
-            // HTML("<iframe class=\"youtube-player\" type=\"text/html\" width=\"640\" height=\"385\" src=\"http://www.youtube.com/embed/dP15zlyra3c?html5=1\" frameborder=\"0\"></iframe>");
-            //
-            // SimplePanel videoFrameHolder = new SimplePanel();
-            // videoFrameHolder.add(videoFrame); 
-
-            VerticalPanel rootPanel = new VerticalPanel();
-            if (showVideoSynch) {
-                
-                mediaSynchControl = new MediaSynchControl(this);
-                rootPanel.add(mediaSynchControl.widget());
-            }
-            rootPanel.add(mediaControl);
-            dialogBox.setWidget(rootPanel);
+        VerticalPanel rootPanel = new VerticalPanel();
+        if (showSynchControls) {
+            mediaSynchControl = new MediaSynchControl(this);
+            rootPanel.add(mediaSynchControl.widget());
         }
+
+        videoControl = new YoutubeVideoControl(videoTrack.url); 
+        rootPanel.add(videoControl.widget());
+        dialogBox.setWidget(rootPanel);
         
         dialogBox.addCloseHandler(this);
         show();
     }
     
-    @Override
-    protected MediaBase createMediaControl() {
-        return Video.createIfSupported();
-    }
-
     private void show() {
         dialogBox.show();
     }
@@ -82,13 +65,12 @@ public class YoutubeEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implement
 
     @Override
     public void onClose(CloseEvent<PopupPanel> event) {
-        pauseMedia();
+//        pauseMedia();
         this.popupCloseListener.popupClosed();
     }
 
     @Override
     public void destroy() {
-        super.destroy();
         hide();
     }
 
@@ -110,7 +92,7 @@ public class YoutubeEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implement
 
     @Override
     public void setControlsVisible(boolean isVisible) {
-        mediaControl.setControls(isVisible);
+        videoControl.setControlsVisible(isVisible);
     }
 
     @Override
@@ -137,20 +119,49 @@ public class YoutubeEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implement
         getMediaTrack().durationInMillis = backupVideoTrack.durationInMillis;
     }
 
-//    @Override
-//    protected void onMediaTimeUpdate() {
-//        if (mediaSynchControl != null) {
-//            long currentMediaTime = getMediaTrack().startTime.getTime() + getCurrentMediaTimeMillis();
-//            long currentRaceTime = raceTimer.getTime().getTime();
-//            long currentOffset = currentMediaTime - currentRaceTime;
-//            mediaSynchControl.offsetChanged(currentOffset);
-//        }
-//        
-//    }
-    
     @Override
     public void pauseRace() {
         raceTimer.pause();
+    }
+
+    @Override
+    public boolean isMediaPaused() {
+        return videoControl.isPaused();
+    }
+
+    @Override
+    public void pauseMedia() {
+        videoControl.pause();
+    }
+
+    @Override
+    public void playMedia() {
+        videoControl.play();
+    }
+
+    @Override
+    public double getDuration() {
+        return videoControl.getDuration();
+    }
+
+    @Override
+    public double getCurrentMediaTime() {
+        return videoControl.getCurrentTime();
+    }
+
+    @Override
+    public void setCurrentMediaTime(double mediaTime) {
+        videoControl.setCurrentTime(mediaTime);
+    }
+
+    @Override
+    public void setPlaybackSpeed(double newPlaySpeedFactor) {
+        videoControl.setPlaybackSpeed(newPlaySpeedFactor);
+    }
+
+    @Override
+    public void setMuted(boolean isToBeMuted) {
+        videoControl.setMuted(isToBeMuted);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.raceboard;
+package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.adminconsole.TimeFormatUtil;
 
 public class MediaSynchControl {
 
@@ -18,12 +17,12 @@ public class MediaSynchControl {
     
     private final HorizontalPanel mainPanel;
     private final  HorizontalPanel buttonPanel;
-    private final MediaSynchListener mediaSynchListener;
+    private final MediaSynchAdapter mediaSynchAdapter;
     private final TextBox offsetEdit;
     private final ToggleButton lockButton;
 
-    public MediaSynchControl(MediaSynchListener mediaSynchListener) {
-        this.mediaSynchListener = mediaSynchListener;
+    public MediaSynchControl(MediaSynchAdapter mediaSynchListener) {
+        this.mediaSynchAdapter = mediaSynchListener;
         mainPanel = new HorizontalPanel();
         buttonPanel = new HorizontalPanel();
         Button fastRewindButton = new Button("<p>-1s &lt;&lt;</p>", new ClickHandler() {
@@ -66,7 +65,7 @@ public class MediaSynchControl {
         lockButton = new ToggleButton("Locked", "Unlocked", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                toggleLockState();
+                setLocked(!isLocked());
             }
         });
         
@@ -89,26 +88,35 @@ public class MediaSynchControl {
     }
 
     protected void discard() {
-        this.mediaSynchListener.discard();
+        this.mediaSynchAdapter.discard();
         updateOffset();
     }
 
     protected void save() {
-        this.mediaSynchListener.save();
+        this.mediaSynchAdapter.save();
     }
 
     private void setLocked(boolean isLocked) {
-        for (int i = 0; i < buttonPanel.getWidgetCount(); i++) {
-            Widget widget = buttonPanel.getWidget(i);
-            if (widget instanceof FocusWidget) {
-                ((FocusWidget) widget).setEnabled(isLocked);
+        if (isLocked != this.isLocked()) {
+            for (int i = 0; i < buttonPanel.getWidgetCount(); i++) {
+                Widget widget = buttonPanel.getWidget(i);
+                if (widget instanceof FocusWidget) {
+                    ((FocusWidget) widget).setEnabled(isLocked());
+                }
             }
+            mediaSynchAdapter.setControlsVisible(!isLocked());
+            
+            mediaSynchAdapter.pauseMedia();
+            mediaSynchAdapter.pauseRace();
+            if (isLocked()) {
+                mediaSynchAdapter.updateOffset();
+            }
+            updateOffset();
         }
-        mediaSynchListener.setControlsVisible(!isLocked);
     }
 
-    private void toggleLockState() {
-        setLocked(!lockButton.isDown());
+    private boolean isLocked() {
+        return !lockButton.isDown();
     }
 
     private void fastForward() {
@@ -128,20 +136,16 @@ public class MediaSynchControl {
     }
     
     private void changeOffsetBy(int delta) {
-        mediaSynchListener.setOffset(mediaSynchListener.getOffset() + delta);
+        mediaSynchAdapter.changeOffsetBy(delta);
         updateOffset();
     }
 
     public void updateOffset() {
-        offsetEdit.setText(TimeFormatUtil.milliSecondsToHrsMinSec(mediaSynchListener.getOffset()));
+        offsetEdit.setText(TimeFormatUtil.milliSecondsToHrsMinSec(mediaSynchAdapter.getOffset()));
     }
 
     public Widget widget() {
         return mainPanel;
     }
-
-    private boolean isLocked() {
-        return !lockButton.isDown();
-    }
-
+    
 }

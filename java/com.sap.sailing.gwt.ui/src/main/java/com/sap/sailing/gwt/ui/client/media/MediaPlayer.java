@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sailing.gwt.ui.client.media;
 
 import java.util.Date;
 
@@ -6,21 +6,23 @@ import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 
 public interface MediaPlayer {
 
-    boolean isPaused();
+    boolean isMediaPaused();
 
-    void pause();
+    void pauseMedia();
 
-    void play();
+    void playMedia();
 
-    void alignTime(Date raceTime);
+    void raceTimeChanged(Date raceTime);
 
     MediaTrack getMediaTrack();
     
     double getDuration();
     
+    double getCurrentMediaTime();
+    
     void setCurrentMediaTime(double mediaTime);
     
-    double getCurrentMediaTime();
+    long getCurrentMediaTimeMillis();
     
     void setPlaybackSpeed(double newPlaySpeedFactor);
 

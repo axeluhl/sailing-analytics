@@ -4,7 +4,7 @@
     <stylesheet src="../reset.css" />
     <stylesheet src="../VideoPopup.css" />
     <inherits name="com.google.gwt.user.User" />
-	<entry-point class="com.sap.sailing.gwt.ui.video.VideoPopupWindow" />
+    <entry-point class="com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow" />
   	<extend-property name="locale" values="de"/>
-	<source path='video'/>
+	<source path='client/media/popup'/>
 </module>

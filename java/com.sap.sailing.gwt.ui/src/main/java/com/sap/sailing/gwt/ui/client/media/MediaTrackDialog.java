@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.client.media;
 
 import java.util.Date;
 
@@ -44,8 +44,11 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
     
     private Label durationLabel;
 
-    public MediaTrackDialog(StringMessages stringMessages, DialogCallback<MediaTrack> dialogCallback) {
+    private Date defaultStartTime;
+
+    public MediaTrackDialog(Date defaultStartTime, StringMessages stringMessages, DialogCallback<MediaTrack> dialogCallback) {
         super(stringMessages.addMediaTrack(), "", stringMessages.ok(), stringMessages.cancel(), MEDIA_TRACK_VALIDATOR, dialogCallback);
+        this.defaultStartTime = defaultStartTime;
         this.stringMessages = stringMessages;
     }
 
@@ -70,13 +73,12 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
     native void addLoadMetadataHandler(MediaElement mediaElement) /*-{ 
         var that = this;
         mediaElement.addEventListener('loadedmetadata', function() {
-            that.@com.sap.sailing.gwt.ui.adminconsole.MediaTrackDialog::loadedmetadata(Lcom/google/gwt/dom/client/MediaElement;)(mediaElement);
+            that.@com.sap.sailing.gwt.ui.client.media.MediaTrackDialog::loadedmetadata(Lcom/google/gwt/dom/client/MediaElement;)(mediaElement);
         });
     }-*/;
     
     public void loadedmetadata(MediaElement mediaElement) {
-        double startOffsetTime = mediaElement.getStartOffsetTime();
-        mediaTrack.startTime = Double.isNaN(startOffsetTime) ? null : new Date(Math.round(startOffsetTime * 1000));
+        mediaTrack.startTime = this.defaultStartTime != null ? this.defaultStartTime : new Date();
         mediaTrack.durationInMillis = (int) Math.round(mediaElement.getDuration() * 1000);
         refreshUI();
     }

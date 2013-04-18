@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MimeType;
 

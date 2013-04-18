@@ -1,6 +1,5 @@
-package com.sap.sailing.gwt.ui.raceboard;
+package com.sap.sailing.gwt.ui.client.media;
 
-import com.sap.sailing.gwt.ui.client.MediaPlayer;
 
 public interface VideoPlayer extends MediaPlayer {
 

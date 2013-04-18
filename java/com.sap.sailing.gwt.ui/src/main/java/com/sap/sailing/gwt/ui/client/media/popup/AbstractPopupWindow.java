@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.video;
+package com.sap.sailing.gwt.ui.client.media.popup;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.Window;
@@ -16,28 +16,28 @@ public abstract class AbstractPopupWindow implements EntryPoint {
 		var that = this;
 		$wnd.videoPlayer = {
 			play : function() {
-				that.@com.sap.sailing.gwt.ui.video.AbstractPopupWindow::play()();
+				that.@com.sap.sailing.gwt.ui.client.media.popup.AbstractPopupWindow::play()();
 			},
 			pause : function() {
-				that.@com.sap.sailing.gwt.ui.video.AbstractPopupWindow::pause()();
+				that.@com.sap.sailing.gwt.ui.client.media.popup.AbstractPopupWindow::pause()();
 			},
 			setTime : function(time) {
-				that.@com.sap.sailing.gwt.ui.video.AbstractPopupWindow::setTime(D)(time);
+				that.@com.sap.sailing.gwt.ui.client.media.popup.AbstractPopupWindow::setTime(D)(time);
 			},
 			setMuted : function(muted) {
-				that.@com.sap.sailing.gwt.ui.video.AbstractPopupWindow::setMuted(Z)(muted);
+				that.@com.sap.sailing.gwt.ui.client.media.popup.AbstractPopupWindow::setMuted(Z)(muted);
 			},
 			isPaused : function() {
-				return that.@com.sap.sailing.gwt.ui.video.AbstractPopupWindow::isPaused()();
+				return that.@com.sap.sailing.gwt.ui.client.media.popup.AbstractPopupWindow::isPaused()();
 			},
 			getDuration : function() {
-				return that.@com.sap.sailing.gwt.ui.video.AbstractPopupWindow::getDuration()();
+				return that.@com.sap.sailing.gwt.ui.client.media.popup.AbstractPopupWindow::getDuration()();
 			},
 			getTime : function() {
-				return that.@com.sap.sailing.gwt.ui.video.AbstractPopupWindow::getTime()();
+				return that.@com.sap.sailing.gwt.ui.client.media.popup.AbstractPopupWindow::getTime()();
 			},
 			setPlaybackSpeed : function(newPlaySpeedFactor) {
-				that.@com.sap.sailing.gwt.ui.video.AbstractPopupWindow::setPlaybackSpeed(D)(newPlaySpeedFactor);
+				that.@com.sap.sailing.gwt.ui.client.media.popup.AbstractPopupWindow::setPlaybackSpeed(D)(newPlaySpeedFactor);
 			}
 		};
     }-*/;
@@ -58,15 +58,15 @@ public abstract class AbstractPopupWindow implements EntryPoint {
 
     public abstract void setPlaybackSpeed(double newPlaySpeedFactor);
 
-    public void initPlayState(double deferredMediaTime, boolean isDeferredMuted, double deferredPlaybackSpeed,
-            boolean isDeferredPlaying) {
+    public void initPlayState(double deferredMediaTime, boolean deferredIsMuted, double deferredPlaybackSpeed,
+            boolean deferredIsPlaying) {
 
         addCallbackMethods();
 
         setTime(deferredMediaTime);
-        setMuted(isDeferredMuted);
+        setMuted(deferredIsMuted);
         setPlaybackSpeed(deferredPlaybackSpeed);
-        if (isDeferredPlaying) {
+        if (deferredIsPlaying) {
             play();
         } else {
             pause();

@@ -1,12 +1,12 @@
-package com.sap.sailing.gwt.ui.raceboard;
+package com.sap.sailing.gwt.ui.client.media.popup;
 
 import com.google.gwt.http.client.URL;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 
 public class VideoWindowPlayer extends PopupWindowPlayer {
     
-    public VideoWindowPlayer(MediaTrack mediaTrack, MediaEventHandler videoEventHandler , PopupCloseListener popCloseListener) {
-        super(mediaTrack, videoEventHandler, popCloseListener);
+    public VideoWindowPlayer(MediaTrack mediaTrack, PopupCloseListener popupCloseListener) {
+        super(mediaTrack, popupCloseListener);
     }
 
     @Override

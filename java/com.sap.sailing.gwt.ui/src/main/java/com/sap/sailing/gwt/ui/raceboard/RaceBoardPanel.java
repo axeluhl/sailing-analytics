@@ -37,6 +37,7 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomModel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
+import com.sap.sailing.gwt.ui.client.media.MediaSelector;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
@@ -181,7 +182,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
     }
 
     private void addMediaSelectorToNavigationMenu() {
-        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, mediaService, errorReporter, this.user);
+        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, this.user);
 //        raceTimesInfoProvider.addRaceTimesInfoProviderListener(mediaSelector);
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);

@@ -1,9 +1,7 @@
-package com.sap.sailing.gwt.ui.raceboard;
+package com.sap.sailing.gwt.ui.client.media;
 
 import java.util.Date;
 
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.VideoElement;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.media.client.MediaBase;
@@ -13,21 +11,27 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer.PopupCloseListener;
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer.PopupCloseListener;
 import com.sap.sailing.gwt.ui.shared.controls.dialog.WindowBox;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 
-public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements VideoPlayer, CloseHandler<PopupPanel>, MediaSynchListener {
+public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements VideoPlayer, CloseHandler<PopupPanel>, MediaSynchAdapter {
 
     private final WindowBox dialogBox;
-    private final  PopupCloseListener popupCloseListener;
+    private MediaSynchControl mediaSynchControl;
+
     private final long raceStartTimeMillis;
     private final MediaTrack backupVideoTrack;
-    private final MediaServiceAsync mediaService;
-    private final ErrorReporter errorReporter;
 
-    public VideoEmbeddedPlayer(MediaTrack videoTrack, long raceStartTimeMillis, boolean showVideoSynch, MediaServiceAsync mediaService, MediaEventHandler mediaEventHandler, ErrorReporter errorReporter, PopupCloseListener popCloseListener) {
-        super(videoTrack, mediaEventHandler);
+    private final MediaServiceAsync mediaService;
+    private final Timer raceTimer;
+    private final ErrorReporter errorReporter;
+    private final PopupCloseListener popupCloseListener;
+
+    public VideoEmbeddedPlayer(MediaTrack videoTrack, long raceStartTimeMillis, boolean showSynchControls, Timer raceTimer, MediaServiceAsync mediaService, ErrorReporter errorReporter, PopupCloseListener popCloseListener) {
+        super(videoTrack);
+        this.raceTimer = raceTimer;
         this.mediaService = mediaService;
         this.errorReporter = errorReporter;
         backupVideoTrack = new MediaTrack(videoTrack.dbId, videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.durationInMillis, videoTrack.mimeType);
@@ -50,9 +54,9 @@ public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements 
             // videoFrameHolder.add(videoFrame); 
 
             VerticalPanel rootPanel = new VerticalPanel();
-            if (showVideoSynch) {
+            if (showSynchControls) {
                 
-                MediaSynchControl mediaSynchControl = new MediaSynchControl(this);
+                mediaSynchControl = new MediaSynchControl(this);
                 rootPanel.add(mediaSynchControl.widget());
             }
             rootPanel.add(mediaControl);
@@ -63,13 +67,6 @@ public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements 
         show();
     }
     
-    native void addNativeEventHandlers(VideoElement videoElement) /*-{
-        var that = this;
-        videoElement.addEventListener('timeupdate', function() {
-            that.@com.sap.sailing.gwt.ui.raceboard.AbstractMediaPlayer::onMediaTimeUpdate()();
-        });
-    }-*/;
-
     @Override
     protected MediaBase createMediaControl() {
         return Video.createIfSupported();
@@ -85,7 +82,7 @@ public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements 
 
     @Override
     public void onClose(CloseEvent<PopupPanel> event) {
-        pause();
+        pauseMedia();
         this.popupCloseListener.popupClosed();
     }
 
@@ -101,9 +98,14 @@ public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements 
     }
 
     @Override
-    public void setOffset(long offset) {
-        getMediaTrack().startTime = new Date(raceStartTimeMillis + offset);
+    public void changeOffsetBy(long delta) {
+        getMediaTrack().startTime = new Date(getMediaTrack().startTime.getTime() + delta);
         forceAlign();
+    }
+
+    @Override
+    public void updateOffset() {
+        getMediaTrack().startTime = new Date(raceTimer.getTime().getTime() - getCurrentMediaTimeMillis());
     }
 
     @Override
@@ -133,6 +135,22 @@ public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements 
         getMediaTrack().url = backupVideoTrack.url;
         getMediaTrack().startTime = backupVideoTrack.startTime;
         getMediaTrack().durationInMillis = backupVideoTrack.durationInMillis;
+    }
+
+//    @Override
+//    protected void onMediaTimeUpdate() {
+//        if (mediaSynchControl != null) {
+//            long currentMediaTime = getMediaTrack().startTime.getTime() + getCurrentMediaTimeMillis();
+//            long currentRaceTime = raceTimer.getTime().getTime();
+//            long currentOffset = currentMediaTime - currentRaceTime;
+//            mediaSynchControl.offsetChanged(currentOffset);
+//        }
+//        
+//    }
+    
+    @Override
+    public void pauseRace() {
+        raceTimer.pause();
     }
 
 }

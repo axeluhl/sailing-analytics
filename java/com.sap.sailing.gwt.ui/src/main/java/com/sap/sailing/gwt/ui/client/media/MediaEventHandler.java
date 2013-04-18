@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.raceboard;
+package com.sap.sailing.gwt.ui.client.media;
 
 public interface MediaEventHandler {
 

@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.client.media;
 
-import java.util.UUID;
-
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -9,27 +7,31 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class YoutubeVideoControl  {
 
-    private final String VIDEO_CONTAINER_ID = "videoContainer-" + UUID.randomUUID();
-
+    private static int containerId;
+    
     private JavaScriptObject youtubePlayer;
 
     private final Panel containerPanel;
     
     private boolean deferredIsPlaying;
 
-    private double currentTime;
+    private double deferredCurrentTime;
 
     private boolean deferredIsMuted;
 
     private boolean deferredIsControlsVisible;
 
+    private double deferredPlaybackSpeed;
+
     YoutubeVideoControl(String videoUrl) {
         
         containerPanel = new SimplePanel();
 
-        containerPanel.getElement().setId(VIDEO_CONTAINER_ID);
+        String videoContainerId = "videoContainer-" + containerId++;
 
-        loadYoutubePlayer(videoUrl, VIDEO_CONTAINER_ID);
+        containerPanel.getElement().setId(videoContainerId);
+
+        loadYoutubePlayer(videoUrl, videoContainerId);
     }
 
     // Inspired by https://developers.google.com/youtube/iframe_api_reference#Examples
@@ -68,8 +70,17 @@ public class YoutubeVideoControl  {
 
     public void initPlayState(JavaScriptObject youtubePlayer) {
         this.youtubePlayer = youtubePlayer;
+        nativeSetPlaybackSpeed(deferredPlaybackSpeed);
+        nativeSetControlsVisible(deferredIsControlsVisible);
+        nativeSetCurrentTime(deferredCurrentTime);
+        nativeSetMuted(deferredIsMuted);
+        if (deferredIsPlaying) {
+            nativePlay();
+        } else {
+            nativePause();
+        }
     }
-    
+        
     public void play() {
         if (this.youtubePlayer != null) {
             nativePlay();
@@ -98,9 +109,9 @@ public class YoutubeVideoControl  {
 
     public void setCurrentTime(double time) {
         if (this.youtubePlayer != null) {
-            setCurrentTime(time);
+            nativeSetCurrentTime(time);
         } else {
-            this.currentTime = time;
+            this.deferredCurrentTime = time;
         }
     }
     
@@ -127,22 +138,43 @@ public class YoutubeVideoControl  {
                 }
     }-*/;
 
-    public native boolean isPaused() /*-{
+    public boolean isPaused() {
+        boolean isPaused = youtubePlayer == null ? !deferredIsPlaying : nativeIsPaused();
+        return isPaused;
+    }
+    
+    private native boolean nativeIsPaused() /*-{
                 var player = this.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::youtubePlayer;
                 return player.getPlayerState() == $wnd.YT.PlayerState.PAUSED;
     }-*/;
 
-    public native double getDuration() /*-{
+    public double getDuration() {
+        return youtubePlayer == null ? Double.NaN : nativeGetDuration(); 
+    }
+    
+    private native double nativeGetDuration() /*-{
                 var player = this.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::youtubePlayer;
                 return player.getDuration();
     }-*/;
 
-    public native double getCurrentTime() /*-{
+    public double getCurrentTime() {
+        return youtubePlayer == null ? deferredCurrentTime : nativeGetCurrentTime(); 
+    }
+    
+    private native double nativeGetCurrentTime() /*-{
                 var player = this.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::youtubePlayer;
                 return player.getCurrentTime();
     }-*/;
 
-    public native void setPlaybackSpeed(double newPlaySpeedFactor) /*-{
+    public void setPlaybackSpeed(double newPlaySpeedFactor) {
+        if (this.youtubePlayer != null) {
+            nativeSetPlaybackSpeed(newPlaySpeedFactor);
+        } else {
+            this.deferredPlaybackSpeed = newPlaySpeedFactor;
+        }
+    }
+    
+    private native void nativeSetPlaybackSpeed(double newPlaySpeedFactor) /*-{
                 var player = this.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::youtubePlayer;
                 player.setPlaybackRate(newPlaySpeedFactor);
     }-*/;

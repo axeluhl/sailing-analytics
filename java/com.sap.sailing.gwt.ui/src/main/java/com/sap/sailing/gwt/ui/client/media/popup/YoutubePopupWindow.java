@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.video;
+package com.sap.sailing.gwt.ui.client.media.popup;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.Window;
@@ -40,9 +40,9 @@ public class YoutubePopupWindow extends AbstractPopupWindow {
                                 width: '853',
                                 events: { //https://developers.google.com/youtube/iframe_api_reference?hl=en#Events
                                     'onReady': function(event) {
-                                                    var deferredPlayState = $wnd.deferredPlayState
+                                                    var deferredPlayState = $wnd.deferredPlayState;
                                                     if (deferredPlayState && !$wnd.videoPlayer) {
-                                                        that.@com.sap.sailing.gwt.ui.video.YoutubePopupWindow::initPlayState(DZDZ)(deferredPlayState.deferredMediaTime, deferredPlayState.isDeferredMuted, deferredPlayState.deferredPlaybackSpeed, deferredPlayState.isDeferredPlaying);
+                                                        that.@com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow::initPlayState(DZDZ)(deferredPlayState.deferredMediaTime, deferredPlayState.deferredIsMuted, deferredPlayState.deferredPlaybackSpeed, deferredPlayState.deferredIsPlaying);
                                                     }
                                                }
                                 },
@@ -51,7 +51,7 @@ public class YoutubePopupWindow extends AbstractPopupWindow {
 					'controls' : 0
 				}
 			});
-			that.@com.sap.sailing.gwt.ui.video.YoutubePopupWindow::setYoutubePlayer(Lcom/google/gwt/core/client/JavaScriptObject;)(player);
+			that.@com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow::setYoutubePlayer(Lcom/google/gwt/core/client/JavaScriptObject;)(player);
 		}
 
                 // Use script tag trick to cope with browser's cross domain restrictions
@@ -67,29 +67,29 @@ public class YoutubePopupWindow extends AbstractPopupWindow {
     }
     
     @Override
-    public void initPlayState(double deferredMediaTime, boolean isDeferredMuted, double deferredPlaybackSpeed, boolean isDeferredPlaying) {
+    public void initPlayState(double deferredMediaTime, boolean deferredIsMuted, double deferredPlaybackSpeed, boolean deferredIsPlaying) {
         adjustWindowSize();
-        super.initPlayState(deferredMediaTime, isDeferredMuted, deferredPlaybackSpeed, isDeferredPlaying);
+        super.initPlayState(deferredMediaTime, deferredIsMuted, deferredPlaybackSpeed, deferredIsPlaying);
     }
 
     public native void play() /*-{
-		var player = this.@com.sap.sailing.gwt.ui.video.YoutubePopupWindow::youtubePlayer;
+		var player = this.@com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow::youtubePlayer;
 		player.playVideo();
     }-*/;
 
     public native void pause() /*-{
-		var player = this.@com.sap.sailing.gwt.ui.video.YoutubePopupWindow::youtubePlayer;
+		var player = this.@com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow::youtubePlayer;
 		player.pauseVideo();
     }-*/;
 
     public native void setTime(double time) /*-{
-		var player = this.@com.sap.sailing.gwt.ui.video.YoutubePopupWindow::youtubePlayer;
+		var player = this.@com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow::youtubePlayer;
 		var allowSeekAhead = true; 
 		player.seekTo(time, allowSeekAhead);
     }-*/;
 
     public native void setMuted(boolean muted) /*-{
-		var player = this.@com.sap.sailing.gwt.ui.video.YoutubePopupWindow::youtubePlayer;
+		var player = this.@com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow::youtubePlayer;
 		if (muted) {
 		    player.mute();
 		} else {
@@ -98,22 +98,22 @@ public class YoutubePopupWindow extends AbstractPopupWindow {
     }-*/;
 
     public native boolean isPaused() /*-{
-		var player = this.@com.sap.sailing.gwt.ui.video.YoutubePopupWindow::youtubePlayer;
+		var player = this.@com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow::youtubePlayer;
 		return player.getPlayerState() == $wnd.YT.PlayerState.PAUSED;
     }-*/;
 
     public native double getDuration() /*-{
-		var player = this.@com.sap.sailing.gwt.ui.video.YoutubePopupWindow::youtubePlayer;
+		var player = this.@com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow::youtubePlayer;
 		return player.getDuration();
     }-*/;
 
     public native double getTime() /*-{
-		var player = this.@com.sap.sailing.gwt.ui.video.YoutubePopupWindow::youtubePlayer;
+		var player = this.@com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow::youtubePlayer;
 		return player.getCurrentTime();
     }-*/;
 
     public native void setPlaybackSpeed(double newPlaySpeedFactor) /*-{
-		var player = this.@com.sap.sailing.gwt.ui.video.YoutubePopupWindow::youtubePlayer;
+		var player = this.@com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow::youtubePlayer;
 		player.setPlaybackRate(newPlaySpeedFactor);
     }-*/;
 
