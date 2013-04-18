@@ -89,7 +89,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      * would occur. Remember that there may still be single-core machines, so the factor with which
      * <code>availableProcessors</code> is multiplied needs to be greater than one at least.
      */
-    private final static Executor recalculator = new ThreadPoolExecutor(/* corePoolSize */ 0,
+    private final static Executor recalculator = new ThreadPoolExecutor(/* corePoolSize */ 3*Runtime.getRuntime().availableProcessors(),
             /* maximumPoolSize */ 3*Runtime.getRuntime().availableProcessors(),
             /* keepAliveTime */ 60, TimeUnit.SECONDS,
             /* workQueue */ new LinkedBlockingQueue<Runnable>());
@@ -271,8 +271,9 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 if (!callHasTerminatedWhenGetWasCalled) {
                     gettingThreads.add(Thread.currentThread()); // call() will remove the gettingThreads before it returns and deal with lock unpropagation
                     if (propagatedToExecutingThread != null) {
-                        logger.finest("propagating lock set from " + Thread.currentThread().getName() + " to "
-                                + propagatedToExecutingThread.getName());
+                        // Turn this logging on in case you need to debug the SmartFutureCache. Otherwise, log level detection is too expensive here.
+                        // logger.finest("propagating lock set from " + Thread.currentThread().getName() + " to "
+                        //        + propagatedToExecutingThread.getName());
                         LockUtil.propagateLockSetTo(propagatedToExecutingThread);
                     }
                 }
@@ -293,14 +294,16 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                         // get() was called and cannot have returned yet because call() hasn't returned; propagate locks from getting thread
                         for (Thread locksPropagatedFromGettingThread : locksPropagatedFromGettingThreads) {
                             LockUtil.propagateLockSetFrom(locksPropagatedFromGettingThread);
-                            logger.finest("propagating lock set from " + locksPropagatedFromGettingThread.getName()
-                                    + " to " + executingThread.getName());
+                            // Turn this logging on in case you need to debug the SmartFutureCache. Otherwise, log level detection is too expensive here.
+                            // logger.finest("propagating lock set from " + locksPropagatedFromGettingThread.getName()
+                            //        + " to " + executingThread.getName());
                         }
                     }
                     // make sure we don't propagate from the same thread twice in case gettingThread == callerThread
                     if (callerWaitsSynchronouslyForResult && !locksPropagatedFromGettingThreads.contains(callerThread)) {
-                        logger.finest("propagating lock set from "+callerThread.getName()+" to "+executingThread.getName()+
-                                " due to synchronous execution");
+                        // Turn this logging on in case you need to debug the SmartFutureCache. Otherwise, log level detection is too expensive here.
+                        // logger.finest("propagating lock set from "+callerThread.getName()+" to "+executingThread.getName()+
+                        //        " due to synchronous execution");
                         LockUtil.propagateLockSetFrom(callerThread);
                     }
                     runningAndReadUpdateInterval = true;
@@ -321,14 +324,16 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 } finally {
                     synchronized (this) {
                         for (Thread locksPropagatedFromGettingThread : gettingThreads) {
-                            logger.finest("unpropagating lock set from "+locksPropagatedFromGettingThread.getName()+" to "+executingThread.getName());
+                            // Turn this logging on in case you need to debug the SmartFutureCache. Otherwise, log level detection is too expensive here.
+                            // logger.finest("unpropagating lock set from "+locksPropagatedFromGettingThread.getName()+" to "+executingThread.getName());
                             LockUtil.unpropagateLockSetFrom(locksPropagatedFromGettingThread);
                         }
                         executingThread = null;
                     }
                     if (callerWaitsSynchronouslyForResult && !gettingThreads.contains(callerThread)) {
-                        logger.finest("unpropagating lock set from "+callerThread.getName()+" to "+Thread.currentThread().getName()+
-                                " due to synchronous execution");
+                        // Turn this logging on in case you need to debug the SmartFutureCache. Otherwise, log level detection is too expensive here.
+                        // logger.finest("unpropagating lock set from "+callerThread.getName()+" to "+Thread.currentThread().getName()+
+                        //        " due to synchronous execution");
                         LockUtil.unpropagateLockSetFrom(callerThread);
                     }
                     gettingThreads.clear();
@@ -383,6 +388,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     }
     
     public void suspend() {
+        logger.finest("suspending cache "+nameForLocks);
         synchronized (ongoingRecalculations) {
             suspended = true;
         }
@@ -391,8 +397,12 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     public void resume() {
         synchronized (ongoingRecalculations) {
             suspended = false;
+            logger.finest("resuming cache "+nameForLocks);
             for (Iterator<Map.Entry<K, U>> i=triggeredWhileSuspended.entrySet().iterator(); i.hasNext(); ) {
                 Entry<K, U> e = i.next();
+                if (logger.isLoggable(Level.FINEST)) {
+                    logger.finest("while resuming "+nameForLocks+", triggering update for key "+e.getKey()+" with update interval "+e.getValue());
+                }
                 triggerUpdate(e.getKey(), e.getValue());
                 i.remove();
             }
@@ -433,6 +443,8 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 }
             }
             if (suspended) {
+                // Turn this logging on in case you need to debug the SmartFutureCache. Otherwise, log level detection is too expensive here.
+                // logger.finest("triggerUpdate on cache "+nameForLocks+" while suspended for key "+key);
                 triggeredWhileSuspended.put(key, joinedUpdateInterval);
             } else {
                 boolean reuseExistingFuture = false;
@@ -441,8 +453,12 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                         reuseExistingFuture = oldFuture.tryToUpdateUpdateInterval(joinedUpdateInterval);
                     }
                     if (!reuseExistingFuture) {
+                        // Turn this logging on in case you need to debug the SmartFutureCache. Otherwise, log level detection is too expensive here.
+                        // logger.finest("cancelling existing future task on cache "+nameForLocks+" for key "+key);
                         oldFuture.cancel(/* mayInterruptIfRunning */ false);
                     } else {
+                        // Turn this logging on in case you need to debug the SmartFutureCache. Otherwise, log level detection is too expensive here.
+                        // logger.finest("re-using existing future task on cache "+nameForLocks+" for key "+key);
                         smartFutureCacheTaskReuseCounter++;
                     }
                 }
@@ -470,6 +486,8 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         synchronized (ongoingRecalculations) {
             final FutureTaskWithCancelBlocking future = new FutureTaskWithCancelBlocking(key,
                     joinedUpdateInterval, callerWaitsSynchronouslyForResult, callerThread);
+            // Turn this logging on in case you need to debug the SmartFutureCache. Otherwise, log level detection is too expensive here.
+            // logger.finest("creating future task on cache "+nameForLocks+" for key "+key);
             ongoingRecalculations.put(key, future);
             recalculator.execute(future);
         }

@@ -1781,9 +1781,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     protected void triggerManeuverCacheRecalculation(final Competitor competitor) {
-        if (getStatus().getStatus() != TrackedRaceStatusEnum.LOADING) {
-            maneuverCache.triggerUpdate(competitor, /* updateInterval */ null);
-        }
+        maneuverCache.triggerUpdate(competitor, /* updateInterval */ null);
     }
 
     private Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuvers(Competitor competitor) throws NoWindException {

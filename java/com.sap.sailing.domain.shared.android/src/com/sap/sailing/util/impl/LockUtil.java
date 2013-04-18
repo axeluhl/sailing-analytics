@@ -47,6 +47,8 @@ import com.sap.sailing.domain.common.impl.Util;
  * 
  */
 public class LockUtil {
+    private enum ReadOrWrite { READ, WRITE };
+    
     private static final int NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK = 5;
     private static final Logger logger = Logger.getLogger(Util.class.getName());
     private static final Map<NamedReentrantReadWriteLock, TimePoint> lastTimeWriteLockWasObtained = new WeakHashMap<NamedReentrantReadWriteLock, TimePoint>();
@@ -77,17 +79,17 @@ public class LockUtil {
     private static final Map<Thread, Map<Lock, Integer>> lockCounts = new ConcurrentHashMap<Thread, Map<Lock, Integer>>();
     
     public static void lockForRead(NamedReentrantReadWriteLock lock) {
-        acquireLockVirtuallyOrActually(lock, lock.readLock(), "read");
+        acquireLockVirtuallyOrActually(lock, lock.readLock(), ReadOrWrite.READ);
     }
 
     public static void lockForWrite(NamedReentrantReadWriteLock lock) {
-        acquireLockVirtuallyOrActually(lock, lock.writeLock(), "write");
+        acquireLockVirtuallyOrActually(lock, lock.writeLock(), ReadOrWrite.WRITE);
         synchronized (lastTimeWriteLockWasObtained) {
             lastTimeWriteLockWasObtained.put(lock, MillisecondsTimePoint.now());
         }
     }
     
-    private static void acquireLockVirtuallyOrActually(NamedReentrantReadWriteLock lock, final Lock readOrWriteLock, final String readOrWrite) {
+    private static void acquireLockVirtuallyOrActually(NamedReentrantReadWriteLock lock, final Lock readOrWriteLock, final ReadOrWrite readOrWrite) {
         boolean locked = false;
         while (!locked) {
             final Map<Lock, Integer> currentThreadsPropagationCounts = getCurrentThreadsPropagationCounts();
@@ -101,7 +103,7 @@ public class LockUtil {
                     locked = true;
                 } else {
                     // lock was not yet propagated; try to actually obtain lock
-                    locked = lock(readOrWriteLock, lock.getReadLockName(), lock);
+                    locked = lock(readOrWriteLock, readOrWrite==ReadOrWrite.READ ? lock.getReadLockName() : lock.getWriteLockName(), lock);
                     if (locked) {
                         // Uncomment the following in case of issues you want to debug with logging:
                         // logger.finest("actually acquired "+readOrWrite+" lock " + lock.getName() + " in thread " + Thread.currentThread().getName());
@@ -116,12 +118,11 @@ public class LockUtil {
     }
     
     public static void unlockAfterRead(NamedReentrantReadWriteLock lock) {
-        final String readOrWrite = "read";
         final ReadLock readOrWriteLock = lock.readLock();
-        unlockVirtuallyOrActually(lock, readOrWrite, readOrWriteLock);
+        unlockVirtuallyOrActually(lock, readOrWriteLock);
     }
 
-    private static void unlockVirtuallyOrActually(NamedReentrantReadWriteLock lock, final String readOrWrite, final Lock readOrWriteLock) {
+    private static void unlockVirtuallyOrActually(NamedReentrantReadWriteLock lock, final Lock readOrWriteLock) {
         Map<Lock, Integer> currentThreadPropagationCounts = getCurrentThreadsPropagationCounts();
         synchronized (currentThreadPropagationCounts) {
             assert isInCurrentThreadsLockSet(readOrWriteLock);
@@ -143,7 +144,7 @@ public class LockUtil {
     public static void unlockAfterWrite(NamedReentrantReadWriteLock lock) {
         Map<Lock, Integer> currentThreadPropagationCounts = getCurrentThreadsPropagationCounts();
         synchronized (currentThreadPropagationCounts) {
-            unlockVirtuallyOrActually(lock, "write", lock.writeLock());
+            unlockVirtuallyOrActually(lock, lock.writeLock());
         }
         final TimePoint timePointWriteLockWasObtained;
         synchronized (lastTimeWriteLockWasObtained) {
