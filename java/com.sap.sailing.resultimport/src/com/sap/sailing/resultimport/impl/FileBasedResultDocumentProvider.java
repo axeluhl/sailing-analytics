@@ -28,7 +28,7 @@ public class FileBasedResultDocumentProvider implements ResultDocumentProvider {
         final File[] fileList = scanDir.listFiles();
         if (fileList != null) {
             for (File file : fileList) {
-                if (file.isFile()) {
+                if (file.isFile() && !file.getName().startsWith(".")) {
                     logger.fine("adding " + file + " to result import list");
                     result.add(new Triple<InputStream, String, TimePoint>(new FileInputStream(file), file.toString(),
                             new MillisecondsTimePoint(file.lastModified())));
