@@ -34,6 +34,7 @@ import com.sap.sailing.resultimport.ResultDocumentProvider;
 
 public class BarbadosResultImportTest {
     private static final String SAMPLE_INPUT_NAME_EMPTY_RESULTS = "RESULTS-505Barbados.xlsx";
+    private static final String SAMPLE_INPUT_NAME_SOME_RESULTS = "RESULTS2.xlsx";
     private static final String RESOURCES = "resources/";
     private BarbadosResultSpreadsheet spreadsheet;
     private ScoreCorrectionProviderImpl scp;
@@ -106,5 +107,44 @@ public class BarbadosResultImportTest {
         assertEquals(7, scfr2.getScoreCorrectionForCompetitor("GER 9110").getPoints(), 0.0000000001);
         assertEquals(78, scfr3.getScoreCorrectionForCompetitor("GER 9110").getPoints(), 0.0000000001);
         assertSame(MaxPointsReason.OCS, scfr3.getScoreCorrectionForCompetitor("GER 9110").getMaxPointsReason());
+    }
+
+    @Test
+    public void testResultsThroughScoreCorrectionProviderWithSomeExperimentalResults() throws Exception {
+        ScoreCorrectionProviderImpl scp2 = new ScoreCorrectionProviderImpl(new ResultDocumentProvider() {
+            @Override
+            public Iterable<Triple<InputStream, String, TimePoint>> getDocumentsAndNamesAndLastModified() throws IOException {
+                return Collections.singleton(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_SOME_RESULTS),
+                        SAMPLE_INPUT_NAME_SOME_RESULTS, MillisecondsTimePoint.now()));
+            }
+        });
+        Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scp2.getHasResultsForBoatClassFromDateByEventName();
+        String eventName = hasResultsFor.entrySet().iterator().next().getKey();
+        String boatClassName = hasResultsFor.entrySet().iterator().next().getValue().iterator().next().getA();
+        TimePoint timePoint = hasResultsFor.entrySet().iterator().next().getValue().iterator().next().getB();
+        RegattaScoreCorrections result = scp2.getScoreCorrections(eventName, boatClassName, timePoint);
+        Iterator<ScoreCorrectionsForRace> scfr = result.getScoreCorrectionsForRaces().iterator();
+        ScoreCorrectionsForRace scfr1 = scfr.next();
+        assertEquals("1", scfr1.getRaceNameOrNumber());
+        ScoreCorrectionsForRace scfr2 = scfr.next();
+        assertEquals("2", scfr2.getRaceNameOrNumber());
+        ScoreCorrectionsForRace scfr3 = scfr.next();
+        assertEquals("3", scfr3.getRaceNameOrNumber());
+        assertTrue(scfr1.getSailIDs().contains("FRA 9067"));
+        assertTrue(scfr1.getSailIDs().contains("GER 9071"));
+        assertTrue(scfr1.getSailIDs().contains("GBR 9079"));
+        assertEquals(18, scfr1.getScoreCorrectionForCompetitor("FRA 9067").getPoints(), 0.0000000001);
+        assertEquals(2, scfr2.getScoreCorrectionForCompetitor("FRA 9067").getPoints(), 0.0000000001);
+        assertEquals(18, scfr3.getScoreCorrectionForCompetitor("FRA 9067").getPoints(), 0.0000000001);
+        assertNull(scfr3.getScoreCorrectionForCompetitor("FRA 9067").getMaxPointsReason());
+        
+        assertEquals(17, scfr1.getScoreCorrectionForCompetitor("GER 9071").getPoints(), 0.0000000001);
+        assertEquals(79, scfr2.getScoreCorrectionForCompetitor("GER 9071").getPoints(), 0.0000000001);
+        assertEquals(17, scfr3.getScoreCorrectionForCompetitor("GER 9071").getPoints(), 0.0000000001);
+        assertSame(MaxPointsReason.DNF, scfr2.getScoreCorrectionForCompetitor("GER 9071").getMaxPointsReason());
+        
+        assertEquals(16, scfr1.getScoreCorrectionForCompetitor("GBR 9079").getPoints(), 0.0000000001);
+        assertEquals(6, scfr2.getScoreCorrectionForCompetitor("GBR 9079").getPoints(), 0.0000000001);
+        assertEquals(14, scfr3.getScoreCorrectionForCompetitor("GBR 9079").getPoints(), 0.0000000001);
     }
 }
