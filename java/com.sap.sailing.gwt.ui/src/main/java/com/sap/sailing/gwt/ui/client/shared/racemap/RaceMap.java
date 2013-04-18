@@ -1163,25 +1163,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         Iterable<CompetitorDTO> selection = competitorSelection.getSelectedCompetitors();
         if (!settings.isShowOnlySelectedCompetitors() || Util.isEmpty(selection)) {
             result = competitorSelection.getFilteredCompetitors();
-//            if(settings.isShowAllCompetitors()) {
-//                result = competitorSelection.getAllCompetitors();
-//            } else {
-//                int visibleCompetitorsCount = settings.getMaxVisibleCompetitorsCount();
-//                if(quickRanks != null && quickRanks.size() >= visibleCompetitorsCount) {
-//                    Set<CompetitorDTO> competitorList = new HashSet<CompetitorDTO>();
-//                    int i = 1;
-//                    for(QuickRankDTO quickRank: quickRanks) {
-//                        if(i++ <= visibleCompetitorsCount) {
-//                            competitorList.add(quickRank.competitor);
-//                        } else {
-//                            break;
-//                        }
-//                    }
-//                    result = competitorList;
-//                } else {
-//                    result = competitorSelection.getAllCompetitors();
-//                }
-//            }
         } else {
             result = selection;
         }

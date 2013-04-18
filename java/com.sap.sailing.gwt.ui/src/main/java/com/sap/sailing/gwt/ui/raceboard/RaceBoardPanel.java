@@ -22,13 +22,12 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.filter.Filter;
 import com.sap.sailing.domain.common.filter.FilterOperators;
 import com.sap.sailing.domain.common.filter.FilterSet;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
-import com.sap.sailing.gwt.ui.client.CompetitorRankFilter;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
-import com.sap.sailing.gwt.ui.client.CompetitorsFilterSets;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -43,6 +42,17 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomModel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiChartPanel;
+import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
+import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
+import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.client.shared.filter.AbstractCompetitorInLeaderboardFilter;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorTotalRankFilter;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsDialog;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
@@ -51,14 +61,6 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
-import com.sap.sailing.gwt.ui.client.shared.charts.MultiChartPanel;
-import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
-import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsDialog;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 
 /**
  * A view showing a list of components visualizing a race from the regattas announced by calls to {@link #fillRegattas(List)}.
@@ -145,8 +147,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         
         // create a default Top N competitors filter as default filter
         FilterSet<CompetitorDTO> topNCompetitorsFilterSet = new FilterSet<CompetitorDTO>("Top 50");
-        CompetitorRankFilter rankFilter = new CompetitorRankFilter();
-        rankFilter.setConfiguration(new Pair<FilterOperators, Integer>(FilterOperators.Equals, 50));
+        CompetitorTotalRankFilter rankFilter = new CompetitorTotalRankFilter();
+        rankFilter.setConfiguration(new Pair<FilterOperators, Integer>(FilterOperators.LessThanEquals, 50));
         topNCompetitorsFilterSet.addFilter(rankFilter);
         competitorsFilterSets.addFilterSet(topNCompetitorsFilterSet);
         competitorsFilterSets.setActiveFilterSet(topNCompetitorsFilterSet);
@@ -170,6 +172,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
                 getElement().getStyle().setMarginRight(12, Unit.PX);
                 break;
         }
+        
+        updateCompetitorsFilterContexts(competitorsFilterSets);
+        
         timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider);
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
@@ -246,14 +251,24 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
                 userAgent, /* showRaceDetails */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false);
     }
 
+    private void updateCompetitorsFilterContexts(CompetitorsFilterSets filterSets) {
+        for(FilterSet<CompetitorDTO> filterSet: filterSets.getFilterSets()) {
+            for(Filter<CompetitorDTO, ?> filter: filterSet.getFilters()) {
+               if(filter instanceof AbstractCompetitorInLeaderboardFilter) {
+                   ((AbstractCompetitorInLeaderboardFilter<?>) filter).setContextProvider(leaderboardPanel); 
+               }
+            }
+        }
+    }
+
     private void updateCompetitorsFilterControlState(CompetitorsFilterSets filterSets) {
         FilterSet<CompetitorDTO> activeFilterSet = filterSets.getActiveFilterSet();
         if(activeFilterSet != null) {
-            if(lastActiveCompetitorFilterSet != activeFilterSet) {
-                lastActiveCompetitorFilterSet = activeFilterSet;
-            }
+            lastActiveCompetitorFilterSet = activeFilterSet;
         } else {
-            lastActiveCompetitorFilterSet = null;
+            if(filterSets.getFilterSets().size() == 0) {
+                lastActiveCompetitorFilterSet = null;
+            }
         }
         competitorsFilterCheckBox.setValue(activeFilterSet != null, false /* fireChangeValue*/);
         
@@ -318,6 +333,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
                 competitorsFilterSets.getFilterSets().addAll(newCompetitorsFilterSets.getFilterSets());
                 competitorsFilterSets.setActiveFilterSet(newCompetitorsFilterSets.getActiveFilterSet());
                 
+                updateCompetitorsFilterContexts(newCompetitorsFilterSets);
                 competitorSelectionModel.setCompetitorsFilterSet(newCompetitorsFilterSets.getActiveFilterSet());
                 updateCompetitorsFilterControlState(newCompetitorsFilterSets);
              }

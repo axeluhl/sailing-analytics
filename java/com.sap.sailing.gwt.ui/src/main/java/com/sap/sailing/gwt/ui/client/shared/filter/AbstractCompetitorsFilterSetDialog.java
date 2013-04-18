@@ -20,8 +20,6 @@ import com.sap.sailing.domain.common.filter.Filter;
 import com.sap.sailing.domain.common.filter.FilterOperators;
 import com.sap.sailing.domain.common.filter.FilterSet;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.client.CompetitorNationalityFilter;
-import com.sap.sailing.gwt.ui.client.CompetitorRankFilter;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.FilterOperatorsFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -91,7 +89,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         addFilterButton = new Button(stringMessages.add());
         
         availableCompetitorsFilter = new ArrayList<Filter<CompetitorDTO, ?>>();
-        availableCompetitorsFilter.add(new CompetitorRankFilter());
+        availableCompetitorsFilter.add(new CompetitorTotalRankFilter());
         availableCompetitorsFilter.add(new CompetitorNationalityFilter());
     }
     

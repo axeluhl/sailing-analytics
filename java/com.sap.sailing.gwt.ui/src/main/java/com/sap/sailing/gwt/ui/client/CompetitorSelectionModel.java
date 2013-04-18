@@ -8,10 +8,8 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.filter.CollectionFilter;
 import com.sap.sailing.domain.common.filter.Filter;
 import com.sap.sailing.domain.common.filter.FilterSet;
-import com.sap.sailing.domain.common.filter.ObjectFilter;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
@@ -121,16 +119,11 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         if(competitorsFilterSet != null) {
             for (Filter<CompetitorDTO, ?> filter : competitorsFilterSet.getFilters()) {
                 filteredCompetitors.clear();
-                if(filter instanceof ObjectFilter) {
-                    ObjectFilter<CompetitorDTO, ?> objectFilter = (ObjectFilter<CompetitorDTO, ?>) filter;
-                    for(CompetitorDTO competitorDTO: currentFilteredList) {
-                        if(objectFilter.filter(competitorDTO)) {
-                            filteredCompetitors.add(competitorDTO);
-                        }
+
+                for(CompetitorDTO competitorDTO: currentFilteredList) {
+                    if(filter.matches(competitorDTO)) {
+                        filteredCompetitors.add(competitorDTO);
                     }
-                } else if(filter instanceof CollectionFilter) {
-                    CollectionFilter<CompetitorDTO, ?> collectionFilter = (CollectionFilter<CompetitorDTO, ?>) filter;
-                    filteredCompetitors.addAll(collectionFilter.filter(currentFilteredList)); 
                 }
                 currentFilteredList.clear();
                 currentFilteredList.addAll(filteredCompetitors);
@@ -170,7 +163,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         }
     }
     
-    private void fireListChanged(Iterable<CompetitorDTO> competitors, CompetitorSelectionChangeListener... listenersNotToNotify) {
+    protected void fireListChanged(Iterable<CompetitorDTO> competitors, CompetitorSelectionChangeListener... listenersNotToNotify) {
         for (CompetitorSelectionChangeListener listener : listeners) {
             if (listenersNotToNotify == null || !Arrays.asList(listenersNotToNotify).contains(listener)) {
                 listener.competitorsListChanged(competitors);

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sailing.gwt.ui.client.shared.filter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,10 +6,9 @@ import java.util.List;
 import com.sap.sailing.domain.common.filter.AbstractFilter;
 import com.sap.sailing.domain.common.filter.Filter;
 import com.sap.sailing.domain.common.filter.FilterOperators;
-import com.sap.sailing.domain.common.filter.ObjectFilter;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
-public class CompetitorNationalityFilter extends AbstractFilter<CompetitorDTO, String> implements ObjectFilter<CompetitorDTO, String> {
+public class CompetitorNationalityFilter extends AbstractFilter<CompetitorDTO, String> implements Filter<CompetitorDTO, String> {
     private static List<FilterOperators> supportedOperators;
     
     static {
@@ -34,7 +33,7 @@ public class CompetitorNationalityFilter extends AbstractFilter<CompetitorDTO, S
     }
 
     @Override
-    public boolean filter(CompetitorDTO competitor) {
+    public boolean matches(CompetitorDTO competitor) {
         boolean result = false;
         if(filterValue != null && filterOperator != null) {
             switch (filterOperator) {

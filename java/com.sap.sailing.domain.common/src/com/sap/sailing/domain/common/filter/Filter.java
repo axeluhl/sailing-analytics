@@ -32,6 +32,13 @@ public interface Filter<FilterObjectType, ValueType> {
      */
     void setConfiguration(Pair<FilterOperators, ValueType> filterValueAndOperator);
 
+    /**
+     * 
+     * @param the object to match against the filter
+     * @return True if the object matches the filter criteria ('is filtered'), false otherwise
+     */
+    boolean matches(FilterObjectType object);
+    
     /** 
      * @return The name of the filter
      */
