@@ -84,13 +84,20 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     private final Map<K, V> cache;
     
     /**
+     * When many updates are triggered in a short period of time by a single thread, ensure that the single thread
+     * providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
+     * core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
+     */
+    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()-1, 3);
+    
+    /**
      * Note that this needs to have more than one thread because there may be calculations used for cache updates that
      * need to wait for other cache updates to finish. If those were all to be handled by a single thread, deadlocks
      * would occur. Remember that there may still be single-core machines, so the factor with which
      * <code>availableProcessors</code> is multiplied needs to be greater than one at least.
      */
-    private final static Executor recalculator = new ThreadPoolExecutor(/* corePoolSize */ 3*Runtime.getRuntime().availableProcessors(),
-            /* maximumPoolSize */ 3*Runtime.getRuntime().availableProcessors(),
+    private final static Executor recalculator = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
+            /* maximumPoolSize */ THREAD_POOL_SIZE,
             /* keepAliveTime */ 60, TimeUnit.SECONDS,
             /* workQueue */ new LinkedBlockingQueue<Runnable>());
 
