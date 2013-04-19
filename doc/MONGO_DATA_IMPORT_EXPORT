@@ -20,7 +20,7 @@ First, export the WIND_TRACKS collection from one database. For example...
 
   or with an additional query parameter if only want to export the wind of a specific race
 
-  /opt/mongodb/bin/mongoexport --port 10202 -d winddb -c WIND_TRACKS -q "{ 'EVENT_NAME': /Arenal Training Camps Regatta 2012/, 'RACE_NAME': /Laser/}" > /tmp/wind-tracks-dev.json
+  /opt/mongodb/bin/mongoexport --port 10202 -d winddb -c WIND_TRACKS -q "{ 'REGATTA_NAME': /Arenal Training Camps Regatta 2012/, 'RACE_NAME': /Laser/}" > /tmp/wind-tracks-dev.json
     
 To import the resulting JSON file into the DB instance call:
   /opt/mongodb/bin/mongoimport --port 10201 -d winddb -c WIND_TRACKS /tmp/wind-tracks-dev.json
@@ -32,4 +32,4 @@ Name change of the TracTrac Account
 Update the wind track data
 
 mongo update command:
-db.WIND_TRACKS.update({EVENT_NAME: "Sailing Team Germany"}, { $set: {EVENT_NAME: "Academy Tracking 2011"}}, true, true)
+db.WIND_TRACKS.update({REGATTA_NAME: "Sailing Team Germany"}, { $set: {REGATTA_NAME: "Academy Tracking 2011"}}, true, true)

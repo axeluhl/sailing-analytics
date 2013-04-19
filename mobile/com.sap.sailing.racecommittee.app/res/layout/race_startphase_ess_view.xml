@@ -62,7 +62,7 @@
                     android:contentDescription="@string/start_mode_flag"
                     android:src="@drawable/ap_flag" />
 
-                <com.sap.sailing.racecommittee.app.utils.views.MyVerticalTextView
+                <com.sap.sailing.racecommittee.app.ui.views.VerticalTextView
                     android:id="@+id/flagsUpLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -89,7 +89,7 @@
                     android:contentDescription="@string/start_mode_flag"
                     android:src="@drawable/three_min_flag" />
 
-                <com.sap.sailing.racecommittee.app.utils.views.MyVerticalTextView
+                <com.sap.sailing.racecommittee.app.ui.views.VerticalTextView
                     android:id="@+id/flagsDownLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -116,7 +116,7 @@
             android:orientation="vertical" >
 
             <ImageButton
-                android:id="@+id/apButton"
+                android:id="@+id/abortingFlagButton"
                 android:layout_width="200dp"
                 android:layout_height="110dp"
                 android:contentDescription="@string/flag_ap"
@@ -124,7 +124,7 @@
                 android:src="@drawable/ap_flag" />
 
             <TextView
-                android:id="@+id/apButtonLabel"
+                android:id="@+id/abortingFlagButtonLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"

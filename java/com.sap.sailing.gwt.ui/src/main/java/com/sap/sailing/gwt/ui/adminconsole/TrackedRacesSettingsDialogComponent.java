@@ -7,8 +7,8 @@ import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class TrackedRacesSettingsDialogComponent<T extends TrackedRacesSettings> implements SettingsDialogComponent<T> {
     protected LongBox timeDelayBox;

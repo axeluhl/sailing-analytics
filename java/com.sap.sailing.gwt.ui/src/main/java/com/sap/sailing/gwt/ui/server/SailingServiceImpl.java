@@ -33,6 +33,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,6 +50,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Gate;
@@ -122,6 +124,13 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -152,7 +161,6 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
-import com.sap.sailing.freg.resultimport.FregResultProvider;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
@@ -185,13 +193,13 @@ import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RaceEventDTO;
-import com.sap.sailing.gwt.ui.shared.RaceEventLogDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceStatusDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
@@ -213,6 +221,7 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.resultimport.UrlResultProvider;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
@@ -342,8 +351,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
-        executor = new ThreadPoolExecutor(/* corePoolSize */ 0,
-                /* maximumPoolSize */ Runtime.getRuntime().availableProcessors(),
+        // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
+        // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
+        // core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
+        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
+        executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
+                /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -1089,6 +1102,50 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
+    private RaceInfoDTO createRaceInfoDTO(RaceColumn raceColumn, Fleet fleet) {
+        RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
+        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        if (raceLog != null) {
+            PassAwareRaceLogImpl passAwareRaceLog = new PassAwareRaceLogImpl(raceLog);
+            StartTimeFinder startTimeFinder = new StartTimeFinder(passAwareRaceLog);
+            if (startTimeFinder.getStartTime() != null) {
+                raceInfoDTO.startTime = startTimeFinder.getStartTime().asDate();
+            }
+            RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(passAwareRaceLog);
+            raceInfoDTO.lastStatus = raceStatusAnalyzer.getStatus();
+            for(RaceLogEvent event : passAwareRaceLog.getFixes()){
+                if(event instanceof RaceLogFlagEvent){
+                    raceInfoDTO.lastFlag = ((RaceLogFlagEvent) event).getUpperFlag();
+                    raceInfoDTO.displayed = ((RaceLogFlagEvent) event).isDisplayed();
+                }
+            }
+            LastPublishedCourseDesignFinder courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
+            raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(courseDesignFinder.getLastCourseDesign());
+        }
+        raceInfoDTO.raceName = raceColumn.getName();
+        raceInfoDTO.fleet = fleet.getName();
+        raceInfoDTO.raceIdentifier = raceColumn.getRaceIdentifier(fleet);
+        return raceInfoDTO;
+    }
+
+    private RaceCourseDTO convertCourseDesignToRaceCourseDTO(CourseBase lastCourseDesign) {
+        RaceCourseDTO result = new RaceCourseDTO(Collections.<WaypointDTO> emptyList());
+        if (lastCourseDesign != null) {
+            List<WaypointDTO> waypointDTOs = new ArrayList<WaypointDTO>();
+            for (Waypoint waypoint : lastCourseDesign.getWaypoints()) {
+                ControlPointDTO controlPointDTO = convertToControlPointDTO(waypoint.getControlPoint());
+                List<MarkDTO> marks = new ArrayList<MarkDTO>();
+                for (MarkDTO markDTO : controlPointDTO.getMarks()) {
+                    marks.add(markDTO);
+                }
+                WaypointDTO waypointDTO = new WaypointDTO(waypoint.getName(), controlPointDTO, marks, waypoint.getPassingSide());
+                waypointDTOs.add(waypointDTO);
+            }
+            result = new RaceCourseDTO(waypointDTOs);
+        }
+        return result;
+    }
+
     private FleetDTO convertToFleetDTO(Series series, Fleet fleet) {
         return new FleetDTO(fleet.getName(), series.getName(), fleet.getOrdering(), fleet.getColor());
     }
@@ -1171,8 +1228,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI,
-            boolean trackWind, final boolean correctWindByDeclination, final boolean simulateWithStartTimeNow) throws Exception {
+    public void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI, 
+            String courseDesignUpdateURI, boolean trackWind, final boolean correctWindByDeclination, final boolean simulateWithStartTimeNow, 
+            String tracTracUsername, String tracTracPassword) throws Exception {
+        logger.info("tracWithTracTrac for regatta "+regattaToAddTo+" for race records "+rrs+" with liveURI "+liveURI+" and storedURI "+storedURI);
         for (TracTracRaceRecordDTO rr : rrs) {
             if (liveURI == null || liveURI.trim().length() == 0) {
                 liveURI = rr.liveURI;
@@ -1181,11 +1240,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 storedURI = rr.storedURI;
             }
             final RacesHandle raceHandle = getService().addTracTracRace(regattaToAddTo, new URL(rr.paramURL),
-                    new URI(liveURI), new URI(storedURI), new MillisecondsTimePoint(rr.trackingStartTime),
+                    new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI), new MillisecondsTimePoint(rr.trackingStartTime),
                     new MillisecondsTimePoint(rr.trackingEndTime),
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                     MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
-                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow);
+                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow, tracTracUsername, tracTracPassword);
             if (trackWind) {
                 new Thread("Wind tracking starter for race " + rr.regattaName + "/" + rr.name) {
                     public void run() {
@@ -1207,14 +1266,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<TracTracConfigurationDTO> result = new ArrayList<TracTracConfigurationDTO>();
         for (TracTracConfiguration ttConfig : configs) {
             result.add(new TracTracConfigurationDTO(ttConfig.getName(), ttConfig.getJSONURL().toString(),
-                    ttConfig.getLiveDataURI().toString(), ttConfig.getStoredDataURI().toString()));
+                    ttConfig.getLiveDataURI().toString(), ttConfig.getStoredDataURI().toString(), ttConfig.getCourseDesignUpdateURI().toString(),
+                    ttConfig.getTracTracUsername().toString(), ttConfig.getTracTracPassword().toString()));
         }
         return result;
     }
 
     @Override
-    public void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) throws Exception {
-        tractracMongoObjectFactory.storeTracTracConfiguration(tractracDomainFactory.createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI));
+    public void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
+        tractracMongoObjectFactory.storeTracTracConfiguration(tractracDomainFactory.createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI, 
+                courseDesignUpdateURI, tracTracUsername, tracTracPassword));
     }
 
     @Override
@@ -1814,6 +1875,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return result;
     }
+    
+    private ControlPointDTO convertToControlPointDTO(ControlPoint controlPoint) {
+        ControlPointDTO result;
+        if (controlPoint instanceof Gate) {
+            final Mark left = ((Gate) controlPoint).getLeft();
+            final Mark right = ((Gate) controlPoint).getRight();
+            result = new GateDTO(controlPoint.getId().toString(), controlPoint.getName(), convertToMarkDTO(left, null), convertToMarkDTO(right, null)); 
+        } else {
+            result = new MarkDTO(controlPoint.getId().toString(), controlPoint.getName());
+        }
+        return result;
+    }
 
     /**
      * For each {@link ControlPointDTO} in <code>controlPoints</code> tries to find the best-matching waypoint
@@ -2027,8 +2100,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return convertedUuid;
     }
 
-
-
     public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds) {
         return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(regattaIdentifier, leaderboardDisplayName, discardThresholds)), false);
     }
@@ -2119,9 +2190,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             leaderboardDTO.isRegattaLeaderboard = false;
             leaderboardDTO.scoringScheme = leaderboard.getScoringScheme().getType();
-            if (leaderboard.getDefaultCourseArea() != null) {
-                leaderboardDTO.courseAreaId = leaderboard.getDefaultCourseArea().getId().toString();
-            }
+        }
+        if (leaderboard.getDefaultCourseArea() != null) {
+            leaderboardDTO.defaultCourseAreaIdAsString = leaderboard.getDefaultCourseArea().getId().toString();
+            leaderboardDTO.defaultCourseAreaName = leaderboard.getDefaultCourseArea().getName();
         }
         leaderboardDTO.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
         leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
@@ -2161,7 +2233,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private RaceDTO createRaceDTO(boolean withGeoLocationData, RegattaAndRaceIdentifier raceIdentifier, TrackedRace trackedRace) {
         // Optional: Getting the places of the race
         PlacemarkOrderDTO racePlaces = withGeoLocationData ? getRacePlaces(trackedRace) : null;
-
         TrackedRaceDTO trackedRaceDTO = new TrackedRaceDTO();
         trackedRaceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
         trackedRaceDTO.hasWindData = trackedRace.hasWindData();
@@ -2439,6 +2510,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname, int port,
             boolean canSendRequests, boolean trackWind, final boolean correctWindByDeclination) throws Exception {
+        logger.info("tracWithSwissTiming for regatta " + regattaToAddTo + " for race records " + rrs
+                + " with hostname " + hostname + " and port " + port + " and canSendRequests=" + canSendRequests);
         for (SwissTimingRaceRecordDTO rr : rrs) {
             final RacesHandle raceHandle = getService().addSwissTimingRace(regattaToAddTo, rr.ID, hostname, port,
                     canSendRequests,
@@ -2479,6 +2552,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaceDTOs,
             boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow) {
+        logger.info("replaySwissTimingRace for regatta "+regattaIdentifier+" for races "+replayRaceDTOs);
         Regatta regatta;
         for (SwissTimingReplayRaceDTO replayRaceDTO : replayRaceDTOs) {
             if (regattaIdentifier == null) {
@@ -2598,46 +2672,70 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
-            long stepSizeInMs, DetailType detailType, String leaderboardGroupName, String leaderboardName) throws NoWindException {
+            final long stepSizeInMs, final DetailType detailType, final String leaderboardGroupName, final String leaderboardName) throws NoWindException {
         CompetitorsRaceDataDTO result = null;
-        TrackedRace trackedRace = getExistingTrackedRace(race);
+        final TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
-            TimePoint startTime = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
-            TimePoint endTime = (to == null || to.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(to);
+            final TimePoint startTime = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
+            final TimePoint endTime = (to == null || to.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(to);
             result = new CompetitorsRaceDataDTO(detailType, startTime==null?null:startTime.asDate(), endTime==null?null:endTime.asDate());
 
-            for (CompetitorDTO competitorDTO : competitors) {
-                Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(), competitorDTO.id);
-                ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
-                ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
-                // Filling the mark passings
-                Set<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
-                if (competitorMarkPassings != null) {
-                    trackedRace.lockForRead(competitorMarkPassings);
-                    try {
-                        for (MarkPassing markPassing : competitorMarkPassings) {
-                            MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
-                            Double competitorMarkPassingsData = getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time, leaderboardGroupName, leaderboardName);
-                            if (competitorMarkPassingsData != null) {
-                                markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint()
-                                        .getName(), time.asDate(), competitorMarkPassingsData));
+            Map<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>> resultFutures = new HashMap<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>>();
+            for (final CompetitorDTO competitorDTO : competitors) {
+                FutureTask<CompetitorRaceDataDTO> future = new FutureTask<CompetitorRaceDataDTO>(new Callable<CompetitorRaceDataDTO>() {
+                    @Override
+                            public CompetitorRaceDataDTO call() throws NoWindException {
+                                Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(),
+                                        competitorDTO.id);
+                                ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
+                                ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
+                                // Filling the mark passings
+                                Set<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
+                                if (competitorMarkPassings != null) {
+                                    trackedRace.lockForRead(competitorMarkPassings);
+                                    try {
+                                        for (MarkPassing markPassing : competitorMarkPassings) {
+                                            MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
+                                            Double competitorMarkPassingsData = getCompetitorRaceDataEntry(detailType,
+                                                    trackedRace, competitor, time, leaderboardGroupName, leaderboardName);
+                                            if (competitorMarkPassingsData != null) {
+                                                markPassingsData.add(new Triple<String, Date, Double>(markPassing
+                                                        .getWaypoint().getName(), time.asDate(), competitorMarkPassingsData));
+                                            }
+                                        }
+                                    } finally {
+                                        trackedRace.unlockAfterRead(competitorMarkPassings);
+                                    }
+                                }
+                                if (startTime != null && endTime != null) {
+                                    for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += stepSizeInMs) {
+                                        MillisecondsTimePoint time = new MillisecondsTimePoint(i);
+                                        Double competitorRaceData = getCompetitorRaceDataEntry(detailType, trackedRace,
+                                                competitor, time, leaderboardGroupName, leaderboardName);
+                                        if (competitorRaceData != null) {
+                                            raceData.add(new Pair<Date, Double>(time.asDate(), competitorRaceData));
+                                        }
+                                    }
+                                }
+                                return new CompetitorRaceDataDTO(competitorDTO, detailType, markPassingsData, raceData);
                             }
-                        }
-                    } finally {
-                        trackedRace.unlockAfterRead(competitorMarkPassings);
-                    }
+                        });
+                resultFutures.put(competitorDTO, future);
+                executor.execute(future);
+            }
+            for (Map.Entry<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>> e : resultFutures.entrySet()) {
+                CompetitorRaceDataDTO competitorData;
+                try {
+                    competitorData = e.getValue().get();
+                } catch (InterruptedException e1) {
+                    competitorData = null;
+                    logger.log(Level.SEVERE, "Exception while trying to compute competitor data "+detailType+" for competitor "+e.getKey().name, e1);
+                } catch (ExecutionException e1) {
+                    competitorData = null;
+                    logger.log(Level.SEVERE, "Exception while trying to compute competitor data "+detailType+" for competitor "+e.getKey().name, e1);
                 }
-                if (startTime != null && endTime != null) {
-                    for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += stepSizeInMs) {
-                        MillisecondsTimePoint time = new MillisecondsTimePoint(i);
-                        Double competitorRaceData = getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time, leaderboardGroupName, leaderboardName);
-                        if (competitorRaceData != null) {
-                            raceData.add(new Pair<Date, Double>(time.asDate(), competitorRaceData));
-                        }
-                    }
-                }
-                result.setCompetitorData(competitorDTO, new CompetitorRaceDataDTO(competitorDTO, detailType, markPassingsData, raceData));
+                result.setCompetitorData(e.getKey(), competitorData);
             }
         }
         return result;
@@ -2958,14 +3056,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return result;
     }
+    
+    @Override
+    public EventDTO getEventByIdAsString(String eventIdAsString) {
+        UUID eventUuid = convertIdentifierStringToUuid(eventIdAsString);
+        return getEventById(eventUuid);
+    }
 
+    @Override
     public EventDTO getEventById(Serializable id) {
         EventDTO result = null;
-        for (Event event : getService().getAllEvents()) {
-            if(event.getId().equals(id)) {
-                result = convertToEventDTO(event);
-                break;
-            }
+        Event event = getService().getEvent(id);
+        if (event != null) {
+            result = convertToEventDTO(event);
         }
         return result;
     }
@@ -2996,7 +3099,42 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         courseAreaDTO.id = courseArea.getId().toString();
         return courseAreaDTO;
     }
+    
+    @Override
+    public List<RegattaOverviewEntryDTO> getRegattaOverviewEntriesForEvent(String eventIdAsString) {
+        List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
+        Event event = getService().getEvent(convertIdentifierStringToUuid(eventIdAsString));
+        if (event != null) {
+            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
+                    if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea().equals(courseArea)) {
+                        String regattaName = getRegattaNameFromLeaderboard(leaderboard);
+                        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                            for (Fleet fleet : raceColumn.getFleets()) {
+                                RegattaOverviewEntryDTO entry = new RegattaOverviewEntryDTO();
+                                entry.courseAreaName = courseArea.getName();
+                                entry.regattaName = regattaName;
+                                entry.raceInfo = createRaceInfoDTO(raceColumn, fleet);
+                                result.add(entry);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
 
+    private String getRegattaNameFromLeaderboard(Leaderboard leaderboard) {
+        String regattaName;
+        if (leaderboard instanceof RegattaLeaderboard) {
+            regattaName = ((RegattaLeaderboard) leaderboard).getRegatta().getName();
+        } else {
+            regattaName = leaderboard.getDisplayName();
+        }
+        return regattaName;
+    }
+    
     @Override
     public void removeRegatta(RegattaIdentifier regattaIdentifier) {
         getService().apply(new RemoveRegatta(regattaIdentifier));
@@ -3099,24 +3237,36 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return new ScoreCorrectionEntryDTO(scoreCorrectionForCompetitor.getPoints(),
                 scoreCorrectionForCompetitor.isDiscarded(), scoreCorrectionForCompetitor.getMaxPointsReason());
     }
-
-    private FregResultProvider getFregService() {
-        FregResultProvider result = null;
+    
+    @Override
+    public List<String> getUrlResultProviderNames() {
+        List<String> result = new ArrayList<String>();
         for (ScoreCorrectionProvider scp : getScoreCorrectionProviders()) {
-            if (scp instanceof FregResultProvider) {
-                result = (FregResultProvider) scp;
-                break;
+            if (scp instanceof UrlResultProvider) {
+            	result.add(scp.getName());
+            }
+        }
+        return result;
+    }
+
+    private UrlResultProvider getUrlBasedScoreCorrectionProvider(String resultProviderName) {
+    	UrlResultProvider result = null;
+        for (ScoreCorrectionProvider scp : getScoreCorrectionProviders()) {
+            if (scp instanceof UrlResultProvider && scp.getName().equals(resultProviderName)) {
+            	result = (UrlResultProvider) scp;
+            	break;
             }
         }
         return result;
     }
 
     @Override
-    public List<String> getFregResultUrls() {
+    public List<String> getResultImportUrls(String resultProviderName) {
         List<String> result = new ArrayList<String>();
-        final FregResultProvider fregService = getFregService();
-        if (fregService != null) {
-            Iterable<URL> allUrls = fregService.getAllUrls();
+
+        UrlResultProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        if (urlBasedScoreCorrectionProvider != null) {
+            Iterable<URL> allUrls = urlBasedScoreCorrectionProvider.getAllUrls();
             for (URL url : allUrls) {
                 result.add(url.toString());
             }
@@ -3125,31 +3275,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void removeFregURLs(Set<String> toRemove) throws Exception {
-        FregResultProvider fregService = getFregService();
-        if (fregService != null) {
+    public void removeResultImportURLs(String resultProviderName, Set<String> toRemove) throws Exception {
+        UrlResultProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        if (urlBasedScoreCorrectionProvider != null) {
             for (String urlToRemove : toRemove) {
-                fregService.removeResultUrl(new URL(urlToRemove));
+            	urlBasedScoreCorrectionProvider.removeResultUrl(new URL(urlToRemove));
             }
         }
     }
 
     @Override
-    public void addFragUrl(String result) throws Exception {
-        FregResultProvider fregService = getFregService();
-        if (fregService != null) {
-            fregService.registerResultUrl(new URL(result));
+    public void addResultImportUrl(String resultProviderName, String url) throws Exception {
+        UrlResultProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        if (urlBasedScoreCorrectionProvider != null) {
+        	urlBasedScoreCorrectionProvider.registerResultUrl(new URL(url));
         }
-    }
-
-    @Override
-    public RaceEventLogDTO getRaceEventLog() {
-        RaceEventLogDTO result = new RaceEventLogDTO("My race");
-        for(int i = 0; i < 10; i++) {
-            result.raceEvents.add(new RaceEventDTO("Event " + i));
-        }
-        return result;
-    }
+    }    
 
     @Override
     public List<Pair<String, List<CompetitorDTO>>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date) throws NoWindException {

@@ -64,6 +64,9 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         URL paramURL = AbstractTracTracLiveTest.getParamURL(eventID, raceID);
         URI liveURI = AbstractTracTracLiveTest.getLiveURI();
         URI storedURI = AbstractTracTracLiveTest.getStoredURI();
+        URI courseDesignUpdateURI = AbstractTracTracLiveTest.getCourseDesignUpdateURI();
+        String tracTracUsername = AbstractTracTracLiveTest.getTracTracUsername();
+        String tracTracPassword = AbstractTracTracLiveTest.getTracTracPassword();
         GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         cal.set(2011, 05, 23, 13, 14, 31);
         MillisecondsTimePoint startOfTracking = new MillisecondsTimePoint(cal.getTimeInMillis());
@@ -81,8 +84,8 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
             }
         });
         trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE.createTrackingConnectivityParameters(paramURL,
-                liveURI, storedURI, startOfTracking, endOfTracking, /* delayToLiveInMillis */
-                        0l, /* simulateWithStartTimeNow */false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE);
+                liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, /* delayToLiveInMillis */
+                        0l, /* simulateWithStartTimeNow */false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, tracTracUsername, tracTracPassword);
     }
 
     private void startTracking() throws Exception, InterruptedException {

@@ -688,6 +688,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     
     @Override
     public Iterable<Competitor> getCompetitors() {
+        // TODO bug 1348: try to cache result; invalidation would have to listen for columns added and suppression changing;
+        // for meta-leaderbaords, transitive listening to those events would be necessary.
         Set<Competitor> result = new HashSet<>();
         for (Competitor competitor : getAllCompetitors()) {
             if (!isSuppressed(competitor)) {
