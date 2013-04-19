@@ -181,8 +181,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     }
 
     private void addMediaSelectorToNavigationMenu() {
-        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, this.user);
-//        raceTimesInfoProvider.addRaceTimesInfoProviderListener(mediaSelector);
+        MediaSelector mediaSelector = new MediaSelector(errorReporter);
+        raceTimesInfoProvider.addRaceTimesInfoProviderListener(mediaSelector);
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);
         mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);
