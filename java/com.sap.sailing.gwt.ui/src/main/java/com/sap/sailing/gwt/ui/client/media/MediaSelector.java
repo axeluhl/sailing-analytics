@@ -37,11 +37,13 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.media.MediaSelectionDialog.MediaSelectionListener;
 import com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer;
+import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
+import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
+import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack.MediaType;
+import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack.Status;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MediaType;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack.Status;
 
 public class MediaSelector implements /*RaceTimesInfoProviderListener,*/ PlayStateListener, TimeListener,
         AsyncCallback<Collection<MediaTrack>>, MediaSelectionListener, CloseHandler<Window>, ClosingHandler {
@@ -194,10 +196,10 @@ public class MediaSelector implements /*RaceTimesInfoProviderListener,*/ PlaySta
     native void addLoadMetadataHandler(MediaElement mediaElement, MediaTrack mediaTrack) /*-{ 
         var that = this;
         mediaElement.addEventListener('loadedmetadata', function() {
-            that.@com.sap.sailing.gwt.ui.client.media.MediaSelector::loadedmetadata(Lcom/sap/sailing/gwt/ui/shared/media/MediaTrack;)(mediaTrack);
+            that.@com.sap.sailing.gwt.ui.client.media.MediaSelector::loadedmetadata(Lcom/sap/sailing/gwt/ui/client/shared/media/MediaTrack;)(mediaTrack);
         });
         mediaElement.addEventListener('error', function() {
-            that.@com.sap.sailing.gwt.ui.client.media.MediaSelector::mediaError(Lcom/sap/sailing/gwt/ui/shared/media/MediaTrack;)(mediaTrack);
+            that.@com.sap.sailing.gwt.ui.client.media.MediaSelector::mediaError(Lcom/sap/sailing/gwt/ui/client/shared/media/MediaTrack;)(mediaTrack);
         });
     }-*/;
     

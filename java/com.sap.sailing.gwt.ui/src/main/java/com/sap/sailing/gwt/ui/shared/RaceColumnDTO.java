@@ -57,7 +57,7 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
     public Double getExplicitFactor() {
         return explicitFactor;
     }
-
+    
     public void setExplicitFactor(Double explicitFactor) {
         this.explicitFactor = explicitFactor;
     }

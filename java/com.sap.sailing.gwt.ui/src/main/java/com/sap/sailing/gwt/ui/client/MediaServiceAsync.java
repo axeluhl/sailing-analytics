@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
 
 public interface MediaServiceAsync {
 

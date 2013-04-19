@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.client.media.popup;
 
 import com.google.gwt.http.client.URL;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
 
 public class YoutubeWindowPlayer extends PopupWindowPlayer {
     

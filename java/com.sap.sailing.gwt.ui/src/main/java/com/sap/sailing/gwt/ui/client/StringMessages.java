@@ -346,13 +346,13 @@ public interface StringMessages extends Messages {
     String boatTails();
     String maximalCount();
     String maxVisibleCompetitorsCountMustBePositive();
-    String fregResultImportUrls();
-    String errorRefreshingFregUrlList(String message);
-    String successfullyUpdatedFregUrls();
-    String errorRemovingFregUrls(String message);
+    String resultImportUrls();
+    String errorRefreshingResultImportUrlList(String message);
+    String successfullyUpdatedResultImportUrls();
+    String errorRemovingResultImportUrls(String message);
     String pleaseEnterNonEmptyUrl();
-    String addFragUrl();
-    String errorAddingFragUrl(String message);
+    String addResultImportUrl();
+    String errorAddingResultImportUrl(String message);
     String errorTryingToObtainLeaderboardContents(String message);
     String lastScoreUpdate();
     String warningBrowserUnsupported();
@@ -514,6 +514,8 @@ public interface StringMessages extends Messages {
     String totalDistanceTraveledTooltip();
     String totalAverageSpeedOverGround();
     String totalAverageSpeedOverGroundTooltip();
+    String noStarttimeAnnouncedYet();
+    String lastFlag();
     String filterRegattasByName();
     String noRegattasYet();
     String cannotAddRacesToRegattaLeaderboardButOnlyToRegatta();
@@ -524,4 +526,12 @@ public interface StringMessages extends Messages {
     String timePointMustBeAfterStartOfTracking();
     String timePointMustBeBeforeEndOfTracking();
     String regattaUsedForTheTrackedRace();
+    String courseDesignUpdateUrl();
+    String passingSide();
+    String refreshNow();
+    String stopUpdating();
+    String startUpdating();
+    String currentTime();
+    String tractracUsername();
+    String tractracPassword();
 }

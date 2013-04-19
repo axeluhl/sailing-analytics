@@ -11,31 +11,31 @@ import android.os.Handler;
  * TODO: make it possible to report ticks in other times (e.g. 2s...)
  */
 public enum TickSingleton implements Runnable {
-	INSTANCE;
-	
-	private Set<TickListener> listeners = new HashSet<TickListener>();
-	private Handler handler;
+    INSTANCE;
 
-	private TickSingleton() {
-		handler = new Handler();
-		handler.post(this);
-	}
+    private Set<TickListener> listeners = new HashSet<TickListener>();
+    private Handler handler;
 
-	public void registerListener(TickListener toRegister) {
-		listeners.add(toRegister);
-	}
+    private TickSingleton() {
+        handler = new Handler();
+        handler.post(this);
+    }
 
-	public void unregisterListener(TickListener toUnregister) {
-		listeners.remove(toUnregister);
-	}
+    public void registerListener(TickListener toRegister) {
+        listeners.add(toRegister);
+    }
 
-	public void run() {
-		for (TickListener item : listeners) {
-			if (item != null) {
-				item.notifyTick();
-			}
-		}
-		handler.removeCallbacks(this);
-		handler.postDelayed(this, 1000);
-	}
+    public void unregisterListener(TickListener toUnregister) {
+        listeners.remove(toUnregister);
+    }
+
+    public void run() {
+        for (TickListener item : listeners) {
+            if (item != null) {
+                item.notifyTick();
+            }
+        }
+        handler.removeCallbacks(this);
+        handler.postDelayed(this, 1000);
+    }
 }

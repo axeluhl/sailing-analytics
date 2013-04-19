@@ -2,9 +2,9 @@ package com.sap.sailing.gwt.ui.client.media.popup;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.Window;
-import com.sap.sailing.gwt.ui.client.media.AbstractMediaPlayer;
-import com.sap.sailing.gwt.ui.client.media.VideoPlayer;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
+import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
+import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
 
 public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements VideoPlayer {
 
@@ -51,7 +51,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
                         that.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::onClosingPopup()();
                 }
                 window.onbeforeunload = function() {
-                        that.@com.sap.sailing.gwt.ui.client.media.AbstractMediaPlayer::onMediaTimeUpdate()();
+                        that.@com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer::onMediaTimeUpdate()();
                 }
                 window.parent.deferredPlayState = {
                     deferredIsPlaying: false,

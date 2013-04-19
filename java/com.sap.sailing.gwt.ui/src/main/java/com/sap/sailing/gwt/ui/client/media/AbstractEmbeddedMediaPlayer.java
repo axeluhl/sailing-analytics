@@ -2,7 +2,8 @@ package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.media.client.MediaBase;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
+import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
 
 abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
     
@@ -41,7 +42,7 @@ abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
             that.@com.sap.sailing.gwt.ui.client.media.AbstractEmbeddedMediaPlayer::initPlayState()();
         });
         mediaElement.addEventListener('timeupdate', function(event) {
-            that.@com.sap.sailing.gwt.ui.client.media.AbstractMediaPlayer::onMediaTimeUpdate()();
+            that.@com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer::onMediaTimeUpdate()();
         });
     }-*/;
     
