@@ -8,7 +8,9 @@ import com.google.gwt.resources.client.ImageResource;
 
 public class FlagImageResolver {
 
-	private static Map<String, ImageResource> flagImagesMap;
+	private static final String NONE = "none";
+
+    private static Map<String, ImageResource> flagImagesMap;
 	
     private static FlagImageResources flagImageResources = GWT.create(FlagImageResources.class);
 
@@ -27,7 +29,7 @@ public class FlagImageResolver {
 		"lb", "lc", "li", "lk", "lr", "ls", "lt", "lu", "lv", "ly", "ma",
 		"mc", "md", "me", "mg", "mh", "mk", "ml", "mm", "mn", "mo", "mp",
 		"mq", "mr", "ms", "mt", "mu", "mv", "mw", "mx", "my", "mz", "na",
-		"nc", "ne", "nf", "ng", "ni", "nl", "no", "np", "nr", "nu", "nz",
+		"nc", "ne", "nf", "ng", "ni", "nl", "no", NONE, "np", "nr", "nu", "nz",
 		"om", "pa", "pe", "pf", "pg", "ph", "pk", "pl", "pm", "pn", "pr",
 		"ps", "pt", "pw", "py", "qa", "re", "ro", "rs", "ru", "rw", "sa",
 		"sb", "sc", "scotland", "sd", "se", "sg", "sh", "si", "sj", "sk",
@@ -204,6 +206,7 @@ public class FlagImageResolver {
 		flagImagesMap.put("ni", flagImageResources.flagNI());
 		flagImagesMap.put("nl", flagImageResources.flagNL());
 		flagImagesMap.put("no", flagImageResources.flagNO());
+                flagImagesMap.put(NONE, flagImageResources.flagNONE());
 		flagImagesMap.put("np", flagImageResources.flagNP());
 		flagImagesMap.put("nr", flagImageResources.flagNR());
 		flagImagesMap.put("nu", flagImageResources.flagNU());
@@ -291,5 +294,9 @@ public class FlagImageResolver {
 	public static ImageResource getFlagImageResource(String twoLetterIsoCountryCode) {
 		return flagImagesMap.get(twoLetterIsoCountryCode.toLowerCase());
 	}
+
+    public static ImageResource getEmptyFlagImageResource() {
+        return flagImagesMap.get(NONE);
+    }
 
 }
