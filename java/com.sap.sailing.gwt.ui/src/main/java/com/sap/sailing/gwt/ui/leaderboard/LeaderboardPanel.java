@@ -625,8 +625,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
             ImageResourceRenderer renderer = new ImageResourceRenderer();
-            ImageResource flagImageResource = FlagImageResolver
-                    .getFlagImageResource(competitorFetcher.getCompetitor(object).twoLetterIsoCountryCode);
+            final String twoLetterIsoCountryCode = competitorFetcher.getCompetitor(object).twoLetterIsoCountryCode;
+            final ImageResource flagImageResource;
+            if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
+                flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+            } else {
+                flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+            }
             if (flagImageResource != null) {
                 sb.append(renderer.render(flagImageResource));
                 sb.appendHtmlConstant("&nbsp;");
