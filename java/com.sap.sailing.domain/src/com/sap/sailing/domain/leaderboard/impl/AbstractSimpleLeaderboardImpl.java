@@ -27,6 +27,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
+import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -137,6 +138,37 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             return fleet;
         }
     }
+    
+    /**
+     * Computing the competitors can be a bit expensive, particularly if the fleet is large and there may be suppressed
+     * competitors, and the leaderboard may be a meta-leaderboard that refers to other leaderboards which each have
+     * several tracked races attached from where the competitors need to be retrieved. Ideally, the competitors list
+     * would be cached, but that is again difficult because we would have to monitor all changes in all dependent
+     * leaderboards and columns and tracked races properly.
+     * <p>
+     * 
+     * As it turns out, one of the most frequent uses of the {@link AbstractSimpleLeaderboardImpl#getCompetitors}
+     * competitors list is to determine their number which in turn is only required for high-point scoring systems and
+     * for computing the default score for penalties. Again, the most frequently used low-point family of scoring schemes
+     * does not require this number. Yet, the scoring scheme requires an argument for polymorphic use by those that
+     * need it. Instead of computing it for each call, this interface lets us defer the actual calculation until the
+     * point when it's really needed. Once asked, this object will cache the result. Therefore, a new one should be
+     * constructed each time the number shall be computed.
+     * 
+     * @author Axel Uhl (D043530)
+     * 
+     */
+    public class NumberOfCompetitorsFetcherImpl implements NumberOfCompetitorsInLeaderboardFetcher {
+        private int numberOfCompetitors = -1;
+        
+        @Override
+        public int getNumberOfCompetitorsInLeaderboard() {
+            if (numberOfCompetitors == -1) {
+                numberOfCompetitors = Util.size(getCompetitors());
+            }
+            return numberOfCompetitors;
+        }
+    }
 
     public AbstractSimpleLeaderboardImpl(SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
@@ -223,7 +255,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         return getTrackedRank(competitor, raceColumn, timePoint);
                     }
                 }, competitor,
-                raceColumn, timePoint, Util.size(getCompetitors()), getScoringScheme()).getCorrectedScore();
+                raceColumn, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme()).getCorrectedScore();
     }
 
     @Override
@@ -398,7 +430,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             }
         };
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedRankProvider, competitor, race,
-                timePoint, Util.size(getCompetitors()), getScoringScheme());
+                timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
         boolean discarded = isDiscarded(competitor, race, timePoint);
         final Double correctedScore = correctedResults.getCorrectedScore();
         return new EntryImpl(trackedRankProvider, correctedScore, correctedResults.isCorrected(),
@@ -431,7 +463,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                     }
                 };
                 Result correctedResults = getScoreCorrection().getCorrectedScore(trackedRankProvider, competitor, raceColumn,
-                        timePoint, Util.size(getCompetitors()), getScoringScheme());
+                        timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
                 Set<RaceColumn> discardedRacesForCompetitor = discardedRaces.get(competitor);
                 if (discardedRacesForCompetitor == null) {
                     discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);

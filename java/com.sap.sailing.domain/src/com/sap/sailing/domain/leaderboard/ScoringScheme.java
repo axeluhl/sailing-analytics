@@ -55,14 +55,14 @@ public interface ScoringScheme extends Serializable {
      * know the number of competitors in the race, some need to know the total number of competitors in the leaderboard
      * or regatta.
      * 
-     * @param numberOfCompetitorsInRace
-     *            if <code>null</code>, the caller cannot determine the number of competitors in the single race;
+     * @param numberOfCompetitorsInLeaderboardFetcher
+     *            if it returns <code>null</code>, the caller cannot determine the number of competitors in the single race;
      *            otherwise, this parameter tells the number of competitors in the same race as <code>competitor</code>,
      *            not in the entire <code>raceColumn</code> (those may be more in case of split fleets). The scoring scheme
      *            may use this number, if available, to infer a penalty score.
      */
     Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
-            Integer numberOfCompetitorsInRace, int numberOfCompetitorsInLeaderboard);
+            Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher);
 
     /**
      * @param competitor1Scores scores of the first competitor, in the order of race columns in the leaderboard
