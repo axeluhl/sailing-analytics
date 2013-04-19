@@ -499,6 +499,9 @@ public interface FlagImageResources extends ClientBundle {
 	@Source("com/sap/sailing/gwt/ui/client/images/flags/no.png")
 	ImageResource flagNO();
 
+        @Source("com/sap/sailing/gwt/ui/client/images/flags/none.png")
+        ImageResource flagNONE();
+
 	@Source("com/sap/sailing/gwt/ui/client/images/flags/np.png")
 	ImageResource flagNP();
 
