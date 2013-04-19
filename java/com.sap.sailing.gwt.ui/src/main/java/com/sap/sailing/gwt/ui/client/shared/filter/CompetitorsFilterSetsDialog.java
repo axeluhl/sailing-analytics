@@ -98,7 +98,10 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
         addFilterSetButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                CreateCompetitorsFilterSetDialog dialog = new CreateCompetitorsFilterSetDialog(stringMessages, new DialogCallback<FilterSet<CompetitorDTO>>() {
+                List<String> existingFilterSetNames = new ArrayList<String>();
+                
+                CreateCompetitorsFilterSetDialog dialog = new CreateCompetitorsFilterSetDialog(existingFilterSetNames, stringMessages,
+                        new DialogCallback<FilterSet<CompetitorDTO>>() {
                     @Override
                     public void ok(final FilterSet<CompetitorDTO> filterSet) {
                         createActiveFilterSetRadioButton(filterSet, false);
@@ -136,7 +139,10 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
         editFilterSetBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                EditCompetitorsFilterSetDialog dialog = new EditCompetitorsFilterSetDialog(filterSet, stringMessages, new DialogCallback<FilterSet<CompetitorDTO>>() {
+                List<String> existingFilterSetNames = new ArrayList<String>();
+                
+                EditCompetitorsFilterSetDialog dialog = new EditCompetitorsFilterSetDialog(filterSet, existingFilterSetNames, 
+                        stringMessages, new DialogCallback<FilterSet<CompetitorDTO>>() {
                     @Override
                     public void ok(final FilterSet<CompetitorDTO> changedFilterSet) {
                         // update the changed filter set

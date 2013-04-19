@@ -12,6 +12,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -52,6 +56,7 @@ import com.sap.sailing.gwt.ui.client.shared.filter.AbstractCompetitorInLeaderboa
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorTotalRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsDialog;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsJsonDeSerializer;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
@@ -132,7 +137,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         this.userAgent = userAgent;
         this.timer = timer;
         this.scrollOffset = 0;        
-        competitorsFilterSets = new CompetitorsFilterSets();
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
         selectedRaceIdentifier = raceSelectionProvider.getSelectedRaces().iterator().next();
@@ -145,13 +149,22 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         componentViewers = new ArrayList<ComponentViewer>();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         
-        // create a default Top N competitors filter as default filter
-        FilterSet<CompetitorDTO> topNCompetitorsFilterSet = new FilterSet<CompetitorDTO>("Top 50");
-        CompetitorTotalRankFilter rankFilter = new CompetitorTotalRankFilter();
-        rankFilter.setConfiguration(new Pair<FilterOperators, Integer>(FilterOperators.LessThanEquals, 50));
-        topNCompetitorsFilterSet.addFilter(rankFilter);
-        competitorsFilterSets.addFilterSet(topNCompetitorsFilterSet);
-        competitorsFilterSets.setActiveFilterSet(topNCompetitorsFilterSet);
+        CompetitorsFilterSets loadedCompetitorsFilterSets = loadCompetitorsFilterSets();
+        if(loadedCompetitorsFilterSets != null) {
+            competitorsFilterSets = loadedCompetitorsFilterSets;
+        } else {
+            // create a default Top N competitors filter as default filter
+            competitorsFilterSets = new CompetitorsFilterSets();
+            
+            FilterSet<CompetitorDTO> topNCompetitorsFilterSet = new FilterSet<CompetitorDTO>("Top 50");
+            CompetitorTotalRankFilter rankFilter = new CompetitorTotalRankFilter();
+            rankFilter.setConfiguration(new Pair<FilterOperators, Integer>(FilterOperators.LessThanEquals, 50));
+            topNCompetitorsFilterSet.addFilter(rankFilter);
+            competitorsFilterSets.addFilterSet(topNCompetitorsFilterSet);
+            competitorsFilterSets.setActiveFilterSet(topNCompetitorsFilterSet);
+            
+            storeCompetitorsFilterSets(competitorsFilterSets);
+        }
         
         competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
         
@@ -336,6 +349,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
                 updateCompetitorsFilterContexts(newCompetitorsFilterSets);
                 competitorSelectionModel.setCompetitorsFilterSet(newCompetitorsFilterSets.getActiveFilterSet());
                 updateCompetitorsFilterControlState(newCompetitorsFilterSets);
+                storeCompetitorsFilterSets(newCompetitorsFilterSets);
              }
 
             @Override
@@ -344,6 +358,35 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         });
         
         competitorsFilterSetsDialog .show();
+    }
+
+    private CompetitorsFilterSets loadCompetitorsFilterSets() {
+        String localeStorageKey = "sailingAnalytics.raceBoard.competitorsFilterSets";
+        CompetitorsFilterSets result = null;
+        Storage localStorage = Storage.getLocalStorageIfSupported();
+        if(localStorage != null) {
+            String jsonAsLocalStore = localStorage.getItem(localeStorageKey);
+            if(jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
+                CompetitorsFilterSetsJsonDeSerializer deserializer = new CompetitorsFilterSetsJsonDeSerializer();
+                JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
+                result = deserializer.deserialize(value);
+            }
+        }
+        return result;
+    }
+
+    private void storeCompetitorsFilterSets(CompetitorsFilterSets newCompetitorsFilterSets) {
+        String localeStorageKey = "sailingAnalytics.raceBoard.competitorsFilterSets";
+        Storage localStorage = Storage.getLocalStorageIfSupported();
+        if(localStorage != null) {
+            // delete old value
+            localStorage.removeItem(localeStorageKey);
+            
+            // store the competiors filter set 
+            CompetitorsFilterSetsJsonDeSerializer serializer = new CompetitorsFilterSetsJsonDeSerializer();
+            JSONObject jsonObject = serializer.serialize(newCompetitorsFilterSets);
+            localStorage.setItem(localeStorageKey, jsonObject.toString());
+        }
     }
     
     private <SettingsType> void addComponentToNavigationMenu(final ComponentViewer componentViewer,

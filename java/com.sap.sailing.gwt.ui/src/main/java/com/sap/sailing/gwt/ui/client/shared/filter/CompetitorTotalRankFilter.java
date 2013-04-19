@@ -3,13 +3,14 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.domain.common.filter.Filter;
 import com.sap.sailing.domain.common.filter.FilterOperators;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public class CompetitorTotalRankFilter extends AbstractCompetitorInLeaderboardFilter<Integer> { 
     private static List<FilterOperators> supportedOperators;
     
+    public static final String FILTER_NAME = "CompetitorTotalRankFilter";
+
     static {
         supportedOperators = new ArrayList<FilterOperators>();
         supportedOperators.add(FilterOperators.LessThanEquals);
@@ -58,20 +59,11 @@ public class CompetitorTotalRankFilter extends AbstractCompetitorInLeaderboardFi
         
      @Override
     public String getName() {
-        return "Total rank";
+        return FILTER_NAME;
     }
 
     @Override
     public Iterable<FilterOperators> getSupportedOperators() {
         return supportedOperators;
     }
-
-    @Override
-    public Filter<CompetitorDTO, Integer> copy() {
-        CompetitorTotalRankFilter result = new CompetitorTotalRankFilter();
-        result.setContextProvider(getContextProvider());
-        result.setConfiguration(getConfiguration());
-        return result; 
-    }
-
 }

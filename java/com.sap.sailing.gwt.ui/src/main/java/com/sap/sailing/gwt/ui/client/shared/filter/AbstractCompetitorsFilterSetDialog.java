@@ -45,8 +45,12 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
     protected static class CompetitorsFilterSetValidator implements Validator<FilterSet<CompetitorDTO>> {
         private final StringMessages stringMessages;
         
-        public CompetitorsFilterSetValidator(StringMessages stringMessages){
+        // TODO: use the list for the validation of the new filter set name
+        private final List<String> existingFilterSetNames;
+        
+        public CompetitorsFilterSetValidator(List<String> existingFilterSetNames, StringMessages stringMessages){
             super();
+            this.existingFilterSetNames = existingFilterSetNames;
             this.stringMessages = stringMessages;
         }
 
@@ -74,8 +78,9 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         }
     }
 
-    public AbstractCompetitorsFilterSetDialog(FilterSet<CompetitorDTO> competitorsFilterSet, String dialogTitle, StringMessages stringMessages, DialogCallback<FilterSet<CompetitorDTO>> callback) {
-        super(dialogTitle, null, stringMessages.ok(), stringMessages.cancel(), new CompetitorsFilterSetValidator(stringMessages), callback);
+    public AbstractCompetitorsFilterSetDialog(FilterSet<CompetitorDTO> competitorsFilterSet, List<String> existingFilterSetNames, String dialogTitle, StringMessages stringMessages, DialogCallback<FilterSet<CompetitorDTO>> callback) {
+        super(dialogTitle, null, stringMessages.ok(), stringMessages.cancel(),
+                new CompetitorsFilterSetValidator(existingFilterSetNames, stringMessages), callback);
         this.competitorsFilterSet = competitorsFilterSet;
         this.stringMessages = stringMessages; 
         
@@ -238,33 +243,23 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         int filterCount = filterNameLabels.size();
         for (int i = 0; i < filterCount; i++) {
             String filterName = filterNameLabels.get(i).getText();
-            Filter<CompetitorDTO,?> filter = findFilterByName(filterName);
+            // TODO: Improve by using a hidden field for the filter name and not the label name 
+            Filter<CompetitorDTO,?> filter = CompetitorsFilterFactory.getFilter(filterName);
             ListBox operatorSelectionListbox = filterOperatorSelectionListBoxes.get(i);
             FilterOperators op = FilterOperators.valueOf(operatorSelectionListbox.getValue(operatorSelectionListbox.getSelectedIndex()));
             if(filter.getValueType().equals(Integer.class)) {
                 IntegerBox integerBox = (IntegerBox) filterValueFields.get(i);
-                Filter<CompetitorDTO,Integer> newFilter = (Filter<CompetitorDTO, Integer>) filter.copy();
+                Filter<CompetitorDTO,Integer> newFilter = (Filter<CompetitorDTO, Integer>) filter;
                 newFilter.setConfiguration(new Pair<FilterOperators, Integer>(op, integerBox.getValue()));
                 result.addFilter(newFilter);
             } else if(filter.getValueType().equals(String.class)) {
                 TextBox textBox = (TextBox) filterValueFields.get(i);
-                Filter<CompetitorDTO,String> newFilter = (Filter<CompetitorDTO, String>) filter.copy();
+                Filter<CompetitorDTO,String> newFilter = (Filter<CompetitorDTO, String>) filter;
                 newFilter.setConfiguration(new Pair<FilterOperators, String>(op, textBox.getText()));
                 result.addFilter(newFilter);
             }
         }
 
-        return result;
-    }
-
-    private Filter<CompetitorDTO,?> findFilterByName(String filterName) {
-        Filter<CompetitorDTO,?> result = null;
-        for(Filter<CompetitorDTO,?> filter: availableCompetitorsFilter) {
-            if(filter.getName().equals(filterName)) {
-                result = filter;
-                break;
-            }
-        }
         return result;
     }
     

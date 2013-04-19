@@ -45,4 +45,6 @@ public class CompetitorsFilterSets {
     public Set<FilterSet<CompetitorDTO>> getFilterSets() {
         return filterSets;
     }
+    
+    
 }

@@ -35,7 +35,7 @@ public interface Filter<FilterObjectType, ValueType> {
     /**
      * 
      * @param the object to match against the filter
-     * @return True if the object matches the filter criteria ('is filtered'), false otherwise
+     * @return True if the object matches the filter criteria ('is not filtered'), false otherwise
      */
     boolean matches(FilterObjectType object);
     
@@ -43,9 +43,4 @@ public interface Filter<FilterObjectType, ValueType> {
      * @return The name of the filter
      */
     String getName();
-    
-    /**
-     * @return a copy of the filter object
-     */
-    Filter<FilterObjectType, ValueType> copy();
 }

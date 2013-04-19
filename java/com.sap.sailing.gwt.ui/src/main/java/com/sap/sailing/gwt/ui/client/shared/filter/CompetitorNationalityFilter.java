@@ -11,6 +11,8 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 public class CompetitorNationalityFilter extends AbstractFilter<CompetitorDTO, String> implements Filter<CompetitorDTO, String> {
     private static List<FilterOperators> supportedOperators;
     
+    public static final String FILTER_NAME = "CompetitorNationalityFilter";
+            
     static {
         supportedOperators = new ArrayList<FilterOperators>();
         supportedOperators.add(FilterOperators.Equals);
@@ -76,14 +78,6 @@ public class CompetitorNationalityFilter extends AbstractFilter<CompetitorDTO, S
 
     @Override
     public String getName() {
-        return "Nationality";
+        return FILTER_NAME;
     }
-
-    @Override
-    public Filter<CompetitorDTO, String> copy() {
-        CompetitorNationalityFilter result = new CompetitorNationalityFilter();
-        result.setConfiguration(getConfiguration());
-        return result; 
-    }
-
 }
