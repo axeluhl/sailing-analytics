@@ -99,6 +99,9 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
             @Override
             public void onClick(ClickEvent event) {
                 List<String> existingFilterSetNames = new ArrayList<String>();
+                for(FilterSet<CompetitorDTO> filterSet: getResult().getFilterSets()) {
+                    existingFilterSetNames.add(filterSet.getName());
+                }
                 
                 CreateCompetitorsFilterSetDialog dialog = new CreateCompetitorsFilterSetDialog(existingFilterSetNames, stringMessages,
                         new DialogCallback<FilterSet<CompetitorDTO>>() {
@@ -131,24 +134,29 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
         return activeFilterSetRadioButton; 
     }
 
-    private Button createEditFilterSetButton(final FilterSet<CompetitorDTO> filterSet) {
+    private Button createEditFilterSetButton(final FilterSet<CompetitorDTO> filterSetToEdit) {
         final Button editFilterSetBtn = new Button(stringMessages.edit()); 
-        final String filterSetName = filterSet.getName();
+        final String filterSetToEditName = filterSetToEdit.getName();
         editFilterSetBtn.addStyleName("inlineButton");
         editFilterSetButtons.add(editFilterSetBtn);
         editFilterSetBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 List<String> existingFilterSetNames = new ArrayList<String>();
+                for(FilterSet<CompetitorDTO> filterSet: getResult().getFilterSets()) {
+                    if(!filterSet.getName().equals(filterSetToEditName)) {
+                        existingFilterSetNames.add(filterSet.getName());
+                    }
+                }
                 
-                EditCompetitorsFilterSetDialog dialog = new EditCompetitorsFilterSetDialog(filterSet, existingFilterSetNames, 
+                EditCompetitorsFilterSetDialog dialog = new EditCompetitorsFilterSetDialog(filterSetToEdit, existingFilterSetNames, 
                         stringMessages, new DialogCallback<FilterSet<CompetitorDTO>>() {
                     @Override
                     public void ok(final FilterSet<CompetitorDTO> changedFilterSet) {
                         // update the changed filter set
                         int index = -1;
                         for (int i = 0; i < filterSets.size(); i++) {
-                            if(filterSetName.equals(filterSets.get(i).getName())) {
+                            if(filterSetToEditName.equals(filterSets.get(i).getName())) {
                                 index = i;
                                 break;
                             }

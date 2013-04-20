@@ -63,6 +63,8 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             boolean nameNotEmpty = competitorsFilterSet.getName() != null && competitorsFilterSet.getName().length() > 0;
             if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
+            } else if (existingFilterSetNames.contains(competitorsFilterSet.getName())) {
+                errorMessage = "A filter with this name already exists.";
             } else if(filterCount < 1) {
                 errorMessage = "Please add at least one filter criteria.";
             } else {
