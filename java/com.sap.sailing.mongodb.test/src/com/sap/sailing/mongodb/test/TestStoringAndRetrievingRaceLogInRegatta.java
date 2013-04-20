@@ -121,7 +121,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogPathfinderEvent() {        
         RaceLogPathfinderEvent expectedEvent = RaceLogEventFactory.INSTANCE.createPathfinderEvent(now, 0, "GER 20");
 
-        addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
+       addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
 
         RaceLog loadedRaceLog = retrieveRaceLog();
 

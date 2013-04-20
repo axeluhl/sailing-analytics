@@ -97,11 +97,11 @@ import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogPathfinderEventImpl;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -1038,7 +1038,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogFinishPositioningListChangedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogFinishPositioningConfirmedEvent.class.getSimpleName())) {
             return loadRaceLogFinishPositioningConfirmedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
-        } else if (eventClass.equals(RaceLogPathfinderEventImpl.class.getSimpleName())) {
+        } else if (eventClass.equals(RaceLogPathfinderEvent.class.getSimpleName())) {
             return loadRaceLogPathfinderEvent(createdAt, timePoint, id, passId, competitors, dbObject);
         }
 
