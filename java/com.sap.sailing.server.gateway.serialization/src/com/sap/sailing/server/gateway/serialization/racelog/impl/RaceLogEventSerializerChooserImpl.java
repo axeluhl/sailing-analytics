@@ -46,7 +46,7 @@ public class RaceLogEventSerializerChooserImpl implements RaceLogEventSerializer
         this.courseDesignChangedEventSerializer = courseDesignChangedEventSerializer;
         this.finishPositioningListChangedEventSerializer = finishPositioningListChangedEventSerializer;
         this.finishPositioningConfirmedEventSerializer = finishPositioningConfirmedEventSerializer;
-        this.pathfinderEventSerializer = finishPositioningConfirmedEventSerializer;
+        this.pathfinderEventSerializer = pathfinderEventSerializer;
         
         this.chosenSerializer = null;
     }
