@@ -1110,7 +1110,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             raceInfoDTO.lastStatus = raceStatusAnalyzer.getStatus();
             for(RaceLogEvent event : passAwareRaceLog.getFixes()){
                 if(event instanceof RaceLogFlagEvent){
-                    raceInfoDTO.lastFlag = ((RaceLogFlagEvent) event).getUpperFlag();
+                    raceInfoDTO.lastUpperFlag = ((RaceLogFlagEvent) event).getUpperFlag();
+                    raceInfoDTO.lastLowerFlag = ((RaceLogFlagEvent) event).getLowerFlag();
                     raceInfoDTO.displayed = ((RaceLogFlagEvent) event).isDisplayed();
                 }
             }

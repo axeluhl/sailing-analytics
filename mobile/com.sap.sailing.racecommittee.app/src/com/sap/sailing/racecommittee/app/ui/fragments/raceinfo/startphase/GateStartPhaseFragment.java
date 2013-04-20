@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase;
 
 import android.app.Activity;
 import android.app.FragmentManager;
-import android.opengl.Visibility;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -91,7 +90,6 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
     }
 
     private void setupUi() {
-        displayedFlag.setVisibility(View.INVISIBLE);
         RaceLog log = getRace().getState().getRaceLog();
         log.lockForRead();
         try {
@@ -100,14 +98,15 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
                 RaceLogFlagEvent flagEvent = (RaceLogFlagEvent) lastEvent;
                 Flags flag = flagEvent.getUpperFlag();
                 
-                if (!flagEvent.isDisplayed() && flag.equals(Flags.CLASS) && flagEvent.getLowerFlag().equals(Flags.GOLF)) {
+                if (flagEvent.isDisplayed() && flag.equals(Flags.CLASS) && flagEvent.getLowerFlag().equals(Flags.GOLF)) {
                     onClassOverGolfUp();
                 } else if (flagEvent.isDisplayed() && flag.equals(Flags.PAPA)) {
                     onPapaUp();
                 } else if (!flagEvent.isDisplayed() && flag.equals(Flags.PAPA)) {
                     onPapaDown(); 
                 }
-            }
+            } else
+                displayedFlag.setVisibility(View.INVISIBLE);
         } finally {
             log.unlockAfterRead();
         }
@@ -213,6 +212,6 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
 
     @Override
     public void onPapaDown() {
-        displayedFlag.setImageResource(R.drawable.fivehundred_five_500px);
+        displayedFlag.setImageResource(R.drawable.fivehundred_five_over_golf_flag);
     }
 }

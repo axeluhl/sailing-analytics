@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartPhaseEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureRaceStateChangedListener;
@@ -284,18 +285,16 @@ public class GateStartProcedure implements StartProcedure {
 
     @Override
     public Pair<String, Long> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart) {
-        Pair<String, Long> result = new Pair<String, Long>("dei mudda...", millisecondsTillStart);
-        /*if (millisecondsTillStart < startPhasePapaDownInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.), millisecondsTillStart);
-        } else if (millisecondsTillStart < startPhaseESSTwoUpInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_one_flag_display), millisecondsTillStart - startPhaseESSOneUpInterval);
-        } else if (millisecondsTillStart < startPhaseESSThreeUpInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_two_flag_display), millisecondsTillStart - startPhaseESSTwoUpInterval);
-        } else if (millisecondsTillStart < startPhaseAPDownInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_three_flag_display), millisecondsTillStart - startPhaseESSThreeUpInterval);
+        Pair<String, Long> result;
+        if (millisecondsTillStart < startPhasePapaDownInterval) {
+            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_gate_class_over_golf_removed), millisecondsTillStart);
+        } else if (millisecondsTillStart < startPhasePapaUpInterval) {
+            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_gate_papa_removed), millisecondsTillStart - startPhasePapaDownInterval);
+        } else if (millisecondsTillStart < startPhaseClassOverGolfUpIntervall) {
+            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_gate_papa_display), millisecondsTillStart - startPhasePapaUpInterval);
         } else {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_ap_flag_removed), millisecondsTillStart - startPhaseAPDownInterval);
-        }*/
+            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_gate_class_over_golf_display), millisecondsTillStart - startPhaseClassOverGolfUpIntervall);
+        }
         return result;
     }
 

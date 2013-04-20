@@ -87,7 +87,7 @@
                     android:layout_centerInParent="true"
                     android:layout_marginRight="10dp"
                     android:contentDescription="@string/start_mode_flag"
-                    android:src="@drawable/fivehundred_five_over_golf_flag" />
+                    android:src="@drawable/papa_flag" />
 
                 <com.sap.sailing.racecommittee.app.ui.views.VerticalTextView
                     android:id="@+id/flagsDownLabel"

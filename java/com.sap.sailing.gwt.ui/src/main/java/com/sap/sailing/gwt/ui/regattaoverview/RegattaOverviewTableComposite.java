@@ -251,22 +251,30 @@ public class RegattaOverviewTableComposite extends Composite {
             
         });
 
-        Column<RegattaOverviewEntryDTO, ImageResource> lastFlagColumn = new Column<RegattaOverviewEntryDTO, ImageResource>(new ImageResourceCell()) {
+        Column<RegattaOverviewEntryDTO, ImageResource> lastUpperFlagColumn = new Column<RegattaOverviewEntryDTO, ImageResource>(new ImageResourceCell()) {
             @Override
             public ImageResource getValue(RegattaOverviewEntryDTO entryDTO) {
-                return flagImageResolver.resolveFlagToImage(entryDTO.raceInfo.lastFlag);
+                return flagImageResolver.resolveFlagToImage(entryDTO.raceInfo.lastUpperFlag);
+            }
+        };
+        
+        Column<RegattaOverviewEntryDTO, ImageResource> lastLowerFlagColumn = new Column<RegattaOverviewEntryDTO, ImageResource>(new ImageResourceCell()) {
+            @Override
+            public ImageResource getValue(RegattaOverviewEntryDTO entryDTO) {
+                return flagImageResolver.resolveFlagToImage(entryDTO.raceInfo.lastLowerFlag);
             }
         };
         
         Column<RegattaOverviewEntryDTO, ImageResource> lastFlagDirectionColumn = new Column<RegattaOverviewEntryDTO, ImageResource>(new ImageResourceCell()) {
             @Override
             public ImageResource getValue(RegattaOverviewEntryDTO entryDTO) {
-                if(entryDTO.raceInfo.lastFlag != null)
+                if(entryDTO.raceInfo.lastUpperFlag != null)
                     return flagImageResolver.resolveFlagDirectionToImage(entryDTO.raceInfo.displayed);
                 else
                     return null;
             }
         };
+        
 
         table.addColumn(courseAreaColumn, stringMessages.courseArea());
         table.addColumn(regattaNameColumn, stringMessages.boatClass()); // For sailors the boat class also contains additional infos such as woman/man, e.g. Laser Radial Woman or Laser Radial Men
@@ -274,8 +282,9 @@ public class RegattaOverviewTableComposite extends Composite {
         table.addColumn(raceNameColumn, stringMessages.race());
         table.addColumn(raceStartTimeColumn, stringMessages.startTime());
         table.addColumn(raceStatusColumn, stringMessages.status());
-        table.addColumn(lastFlagColumn, stringMessages.lastFlag());
-        table.addColumn(lastFlagDirectionColumn, "");
+        table.addColumn(lastUpperFlagColumn, stringMessages.lastUpperFlag());
+        table.addColumn(lastLowerFlagColumn, stringMessages.lastLowerFlag());
+        table.addColumn(lastFlagDirectionColumn, stringMessages.flagStatus());
         table.addColumnSortHandler(regattaOverviewListHandler);
 
         return table;
@@ -292,9 +301,9 @@ public class RegattaOverviewTableComposite extends Composite {
     
     private String getStatusText(RaceInfoDTO raceInfo) {
         String statusText = "";
-        if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING) && raceInfo.lastFlag.equals(Flags.XRAY) && raceInfo.displayed) {
+        if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING) && raceInfo.lastUpperFlag.equals(Flags.XRAY) && raceInfo.displayed) {
             statusText = "Race is running (had early starters)";
-        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING) && raceInfo.lastFlag.equals(Flags.XRAY) && !raceInfo.displayed) {
+        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING) && raceInfo.lastUpperFlag.equals(Flags.XRAY) && !raceInfo.displayed) {
             statusText = "Race is running";
         } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING)) {
             statusText = "Race is running";
@@ -308,13 +317,13 @@ public class RegattaOverviewTableComposite extends Composite {
             statusText = "Race in start phase";
         } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
             statusText = stringMessages.noStarttimeAnnouncedYet();
-        } else if (raceInfo.lastFlag == null) {
+        } else if (raceInfo.lastUpperFlag == null) {
             statusText = "";
-        } else if (raceInfo.lastFlag.equals(Flags.FIRSTSUBSTITUTE)) {
+        } else if (raceInfo.lastUpperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
             statusText = "General recall";
-        } else if (raceInfo.lastFlag.equals(Flags.AP) && raceInfo.displayed) {
+        } else if (raceInfo.lastUpperFlag.equals(Flags.AP) && raceInfo.displayed) {
             statusText = "Start postponed";
-        } else if (raceInfo.lastFlag.equals(Flags.NOVEMBER) && raceInfo.displayed) {
+        } else if (raceInfo.lastUpperFlag.equals(Flags.NOVEMBER) && raceInfo.displayed) {
             statusText = "Start abandoned";
         }
         return statusText;
