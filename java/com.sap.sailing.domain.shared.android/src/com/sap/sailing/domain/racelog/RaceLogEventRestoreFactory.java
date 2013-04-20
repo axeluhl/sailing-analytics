@@ -38,4 +38,7 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
     
     RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint createdAt, TimePoint logicalTimePoint,
             Serializable id, List<Competitor> competitors, int passId);
+    
+    RaceLogPathfinderEvent createPathfinderEvent(TimePoint createdAt, TimePoint logicalTimePoint, Serializable id, 
+            List<Competitor> competitors, int passId, String pathfinderId);
 }
