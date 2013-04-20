@@ -12,6 +12,7 @@ import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 
@@ -74,6 +75,12 @@ public class MongoRaceLogListener implements RaceLogEventVisitor {
     public void visit(RaceLogFinishPositioningConfirmedEvent event) {
         DBObject finishPositioningConfirmedEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         raceLogsCollection.insert(finishPositioningConfirmedEventTrackEntry);
+    }
+
+    @Override
+    public void visit(RaceLogPathfinderEvent event) {
+        DBObject pathfinderEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
+        raceLogsCollection.insert(pathfinderEventTrackEntry);
     }
 
 }

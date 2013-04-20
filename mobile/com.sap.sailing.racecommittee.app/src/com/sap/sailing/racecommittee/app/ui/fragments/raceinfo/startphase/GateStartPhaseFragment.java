@@ -25,6 +25,8 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartPha
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseLineOpeningTimeDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChoosePathFinderDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
@@ -35,10 +37,14 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
     
     TextView raceCountdown;
     TextView nextFlagCountdown;
+    TextView pathfinderLabel;
+    TextView lineOpeningTimeLabel;
     ImageButton abortingFlagButton;
     ImageView displayedFlag;
     ImageView nextToBeDisplayedFlag;
     Button resetTimeButton;
+    Button pathFinderButton;
+    Button lineOpeningTimeButton;
 
     @Override
     public void onAttach(Activity activity) {
@@ -85,8 +91,42 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
                 infoListener.onResetTime();
             }
         });
+        pathFinderButton = (Button) getView().findViewById(R.id.pathFinderButton);
+        lineOpeningTimeButton = (Button) getView().findViewById(R.id.lineOpeningTimeButton);
+        pathfinderLabel = (TextView) getView().findViewById(R.id.pathfinderLabel);
+        lineOpeningTimeLabel = (TextView) getView().findViewById(R.id.lineOpeningTimeLabel);
+        
+        pathFinderButton.setOnClickListener(new OnClickListener() {
+
+            public void onClick(View v) {
+                showPathFinderDialog();
+            }
+        });
+
+        lineOpeningTimeButton.setOnClickListener(new OnClickListener() {
+
+            public void onClick(View v) {
+                showLineOpeningTimeDialog();
+            }
+        });
         
         setupUi();
+    }
+
+    private void showPathFinderDialog() {
+        FragmentManager fragmentManager = getFragmentManager();
+        RaceDialogFragment fragment = new RaceChoosePathFinderDialog();
+        Bundle args = getParameterBundle();
+        fragment.setArguments(args);
+        fragment.show(fragmentManager, null);
+    }
+
+    private void showLineOpeningTimeDialog() {
+        FragmentManager fragmentManager = getFragmentManager();
+        RaceDialogFragment fragment = new RaceChooseLineOpeningTimeDialog();
+        Bundle args = getParameterBundle();
+        fragment.setArguments(args);
+        fragment.show(fragmentManager, null);
     }
 
     private void setupUi() {

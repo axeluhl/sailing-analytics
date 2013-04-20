@@ -38,4 +38,8 @@ public interface RaceLogEventFactory {
     
     RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId);
     RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint timePoint, int passId);
+    
+    RaceLogPathfinderEvent createPathfinderEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, String pathfinderId);
+    RaceLogPathfinderEvent createPathfinderEvent(TimePoint timePoint, int passId, String pathfinderId);
+    
 }

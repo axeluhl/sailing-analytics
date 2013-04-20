@@ -19,6 +19,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 
@@ -114,6 +115,17 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     @Override
     public RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint timePoint, int passId) {
         return createFinishPositioningConfirmedEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId);
+    }
+
+    @Override
+    public RaceLogPathfinderEvent createPathfinderEvent(TimePoint timePoint, Serializable id,
+            List<Competitor> competitors, int passId, String pathfinderId) {
+        return new RaceLogPathfinderEventImpl(MillisecondsTimePoint.now(), timePoint, id, competitors, passId, pathfinderId);
+    }
+
+    @Override
+    public RaceLogPathfinderEvent createPathfinderEvent(TimePoint timePoint, int passId, String pathfinderId) {
+        return createPathfinderEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId, pathfinderId);
     }
 
 }

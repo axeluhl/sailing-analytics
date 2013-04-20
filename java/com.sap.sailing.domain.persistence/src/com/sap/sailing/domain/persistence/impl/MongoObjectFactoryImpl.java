@@ -52,6 +52,7 @@ import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.tracking.Positioned;
@@ -575,6 +576,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFinishPositioningConfirmedEvent(finishPositioningConfirmedEvent));
         return result;
     }
+    
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogPathfinderEvent pathfinderEvent) {
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));       
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogPathfinderEventEvent(pathfinderEvent));
+        return result;
+    }
 
     private DBObject storeRaceLogStartTimeEvent(RaceLogStartTimeEvent startTimeEvent) {
         DBObject result = new BasicDBObject();
@@ -671,6 +679,16 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningConfirmedEvent.class.getSimpleName());
 
+        return result;
+    }
+    
+    private Object storeRaceLogPathfinderEventEvent(RaceLogPathfinderEvent pathfinderEvent) {
+        DBObject result = new BasicDBObject();
+        storeRaceLogEventProperties(pathfinderEvent, result);
+
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogPathfinderEvent.class.getSimpleName());
+
+        result.put(FieldNames.RACE_LOG_PATHFINDER_ID.name(), pathfinderEvent.getPathfinderId());
         return result;
     }
     

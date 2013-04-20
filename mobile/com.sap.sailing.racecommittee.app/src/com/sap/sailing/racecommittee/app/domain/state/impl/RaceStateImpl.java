@@ -23,6 +23,7 @@ import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.racecommittee.app.domain.racelog.RaceLogChangedListener;
@@ -48,6 +49,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private LastPublishedCourseDesignFinder lastCourseDesignFinder;
     private FinishPositioningListFinder finishPositioningListFinder;
     private IndividualRecallFinder individualRecallFinder;
+    private PathfinderFinder pathfinderFinder;
 
     public RaceStateImpl(PassAwareRaceLog raceLog, StartProcedure procedure) {
         this.raceLog = raceLog;
@@ -265,6 +267,26 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         for (RaceStateChangedListener listener : stateChangedListeners) {
             listener.onIndividualRecallRemoval();
         }
+    }
+
+    @Override
+    public String getPathfinder() {
+        return pathfinderFinder.getPathfinderId();
+    }
+
+    @Override
+    public void setPathfinder(String sailingId) {
+        
+        /*RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(eventTime, UUID.randomUUID(), 
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newStartTime);
+        this.raceLog.add(event);*/
+        
+        notifyListenersAboutPathFinderChange();
+    }
+
+    private void notifyListenersAboutPathFinderChange() {
+        // TODO Auto-generated method stub
+        
     }
 
 }

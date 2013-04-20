@@ -120,4 +120,8 @@ public interface RaceState extends StartProcedureRaceStateChangedListener {
      */
     TimePoint getIndividualRecallDisplayedTime();
 
+    String getPathfinder();
+
+    void setPathfinder(String sailingId);
+
 }

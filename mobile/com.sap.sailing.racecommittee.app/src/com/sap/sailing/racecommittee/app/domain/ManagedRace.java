@@ -45,4 +45,5 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
          * @return list of competitors
          */
         public Iterable<Competitor> getCompetitors();
+
 }

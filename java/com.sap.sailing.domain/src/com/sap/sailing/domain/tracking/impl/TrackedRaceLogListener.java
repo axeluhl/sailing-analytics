@@ -7,6 +7,7 @@ import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -59,6 +60,11 @@ public class TrackedRaceLogListener implements RaceLogEventVisitor {
     @Override
     public void visit(RaceLogFinishPositioningConfirmedEvent event) {
      // do nothing score correction is handled by the leaderboard
+    }
+
+    @Override
+    public void visit(RaceLogPathfinderEvent event) {
+        // doo nothing
     }
 
 }

@@ -25,6 +25,7 @@ public class RaceLogEventSerializerChooserTest {
     private JsonSerializer<RaceLogEvent> courseDesignChangedEventSerializer;
     private JsonSerializer<RaceLogEvent> finishPositioningListChangedEventSerializer;
     private JsonSerializer<RaceLogEvent> finishPositioningConfirmedEventSerializer;
+    private JsonSerializer<RaceLogEvent> pathfinderEventSerializer;
     
     private RaceLogEventFactory factory;
     
@@ -39,6 +40,7 @@ public class RaceLogEventSerializerChooserTest {
         courseDesignChangedEventSerializer = mock(JsonSerializer.class);
         finishPositioningListChangedEventSerializer = mock(JsonSerializer.class);
         finishPositioningConfirmedEventSerializer = mock(JsonSerializer.class);
+        pathfinderEventSerializer = mock(JsonSerializer.class);
         
         chooser = new RaceLogEventSerializerChooserImpl(
                 flagEventSerializer, 
@@ -48,7 +50,8 @@ public class RaceLogEventSerializerChooserTest {
                 passChangedSerializer,
                 courseDesignChangedEventSerializer,
                 finishPositioningListChangedEventSerializer,
-                finishPositioningConfirmedEventSerializer);
+                finishPositioningConfirmedEventSerializer,
+                pathfinderEventSerializer);
         
         factory = RaceLogEventFactory.INSTANCE;
     }
@@ -107,6 +110,13 @@ public class RaceLogEventSerializerChooserTest {
         // we use the real event type here because we do not want to re-implement the dispatching.
         RaceLogEvent event = factory.createFinishPositioningConfirmedEvent(null, 0);
         assertEquals(finishPositioningConfirmedEventSerializer, chooser.getSerializer(event));
+    }
+    
+    @Test
+    public void testChoosesPathfinderSerializer() {
+        // we use the real event type here because we do not want to re-implement the dispatching.
+        RaceLogEvent event = factory.createPathfinderEvent(null, 0, "GER 20");
+        assertEquals(pathfinderEventSerializer, chooser.getSerializer(event));
     }
 
 }
