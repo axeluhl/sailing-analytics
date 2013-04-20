@@ -166,6 +166,15 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
             storeCompetitorsFilterSets(competitorsFilterSets);
         }
         
+        // in case the URL configuration contains the name of a competitors filter set we try to activate it  
+        if(raceboardViewConfiguration.getActiveCompetitorsFilterSetName() != null) {
+            for(FilterSet<CompetitorDTO> filterSet: competitorsFilterSets.getFilterSets()) {
+                if(filterSet.getName().equals(raceboardViewConfiguration.getActiveCompetitorsFilterSetName())) {
+                    competitorsFilterSets.setActiveFilterSet(filterSet);
+                    break;
+                }
+            }
+        }
         competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
         
         toolbarPanel = new FlowPanel();
