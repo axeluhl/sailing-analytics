@@ -42,7 +42,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.RaceLogEventDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 
 /**
  * Enables accessing of data.
