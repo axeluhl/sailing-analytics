@@ -8,7 +8,6 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.EssStartPhaseEventListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
 public interface StartProcedure {
@@ -49,7 +48,7 @@ public interface StartProcedure {
     
     Class<? extends RaceFragment> getStartphaseFragment();
     
-    void setEssStartPhaseEventListener(EssStartPhaseEventListener listener);
+    void setStartPhaseEventListener(StartPhaseEventListener listener);
     
     Pair<String, Long> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart);
 }

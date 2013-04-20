@@ -19,6 +19,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.StartPhaseEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureRaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
@@ -312,8 +313,8 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     @Override
-    public void setEssStartPhaseEventListener(EssStartPhaseEventListener listener) {
-        startPhaseEventListener = listener;
+    public void setStartPhaseEventListener(StartPhaseEventListener listener) {
+        startPhaseEventListener = (EssStartPhaseEventListener) listener;
     }
 
     @Override
