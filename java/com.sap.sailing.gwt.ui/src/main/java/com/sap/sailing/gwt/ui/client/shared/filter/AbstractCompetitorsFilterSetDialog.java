@@ -30,7 +30,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
     private final StringMessages stringMessages;
     private final List<Filter<CompetitorDTO, ?>> availableCompetitorsFilter;
 
-    protected ListBox filterListBox;
+    private ListBox filterListBox;
     private final Button addFilterButton;
 
     protected TextBox filterSetNameTextBox;
@@ -40,6 +40,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
     private final List<ListBox> filterOperatorSelectionListBoxes;
     private final List<Widget> filterValueFields;
     private final List<Label> filterNameLabels;
+    private final List<String> filterNames;
     private final List<Button> filterDeleteButtons;
     
     protected static class CompetitorsFilterSetValidator implements Validator<FilterSet<CompetitorDTO>> {
@@ -89,9 +90,11 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         filterOperatorSelectionListBoxes = new ArrayList<ListBox>();
         filterValueFields = new ArrayList<Widget>();
         filterNameLabels = new ArrayList<Label>();
+        filterNames = new ArrayList<String>();
         filterDeleteButtons = new ArrayList<Button>();
         
         addFilterButton = new Button(stringMessages.add());
+        filterListBox = createListBox(false);
         
         availableCompetitorsFilter = new ArrayList<Filter<CompetitorDTO, ?>>();
         availableCompetitorsFilter.add(new CompetitorTotalRankFilter());
@@ -115,8 +118,8 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         });
 
         filterListBox.addItem("Select a filter criteria...");
-        for(Filter<?,?> filter: availableCompetitorsFilter) {
-            filterListBox.addItem(filter.getName());
+        for(Filter<CompetitorDTO,?> filter: availableCompetitorsFilter) {
+            filterListBox.addItem(CompetitorsFilterFormatter.format(filter));
         }
         updateSelectedFilterInfo();
 
@@ -125,7 +128,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             public void onClick(ClickEvent event) {
                 Filter<CompetitorDTO,?> selectedFilter = getSelectedFilter();
                 if(selectedFilter != null) {
-                    createFilterNameLabel(selectedFilter);
+                    createFilterNameAndLabel(selectedFilter);
                     createFilterSelectionListBox(selectedFilter);
                     createFilterValueWidget(selectedFilter);
                     createFilterDeleteButton(selectedFilter);
@@ -138,7 +141,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         mainPanel.add(competitorsFiltersGrid);
         
         for(Filter<CompetitorDTO, ?> filter: competitorsFilterSet.getFilters()) {
-            createFilterNameLabel(filter);
+            createFilterNameAndLabel(filter);
             createFilterSelectionListBox(filter);
             createFilterValueWidget(filter);
             createFilterDeleteButton(filter);
@@ -155,9 +158,10 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         return mainPanel;
     }
 
-    private Label createFilterNameLabel(Filter<CompetitorDTO,?> filter) {
-        Label filterNameLabel = new Label(filter.getName()); 
+    private Label createFilterNameAndLabel(Filter<CompetitorDTO,?> filter) {
+        Label filterNameLabel = new Label(CompetitorsFilterFormatter.format(filter) + ":"); 
         filterNameLabels.add(filterNameLabel);
+        filterNames.add(filter.getName());
         return filterNameLabel; 
     }
 
@@ -216,6 +220,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
                     }
                     index++;
                 }
+                filterNames.remove(index);
                 filterNameLabels.remove(index);
                 filterOperatorSelectionListBoxes.remove(index);
                 filterValueFields.remove(index);
@@ -242,8 +247,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
 
         int filterCount = filterNameLabels.size();
         for (int i = 0; i < filterCount; i++) {
-            String filterName = filterNameLabels.get(i).getText();
-            // TODO: Improve by using a hidden field for the filter name and not the label name 
+            String filterName = filterNames.get(i);
             Filter<CompetitorDTO,?> filter = CompetitorsFilterFactory.getFilter(filterName);
             ListBox operatorSelectionListbox = filterOperatorSelectionListBoxes.get(i);
             FilterOperators op = FilterOperators.valueOf(operatorSelectionListbox.getValue(operatorSelectionListbox.getSelectedIndex()));
@@ -269,7 +273,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         if(selectedIndex > 0) {
             String selectedItemValue = filterListBox.getValue(selectedIndex);
             for(Filter<CompetitorDTO,?> filter: availableCompetitorsFilter) {
-                if(filter.getName().equals(selectedItemValue)) {
+                if(selectedItemValue.equals(CompetitorsFilterFormatter.format(filter))) {
                     result = filter;
                     break;
                 }

@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -26,6 +27,7 @@ import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 
@@ -364,6 +366,17 @@ public abstract class DataEntryDialog<T> {
         });
         AbstractEntryPoint.linkEnterToButton(getOkButton(), result);
         AbstractEntryPoint.linkEscapeToButton(getCancelButton(), result);
+        return result;
+    }
+
+    public <S> ValueListBox<S> createValueListBox(Renderer<S> renderer) {
+        ValueListBox<S> result = new ValueListBox<S>(renderer);
+        result.addValueChangeHandler(new ValueChangeHandler<S>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<S> event) {
+                validate();
+            }
+        });
         return result;
     }
 

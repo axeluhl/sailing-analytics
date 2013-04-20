@@ -544,4 +544,5 @@ public interface StringMessages extends Messages {
     String operatorNotContains();
     String operatorStartsWith();
     String operatorEndsWith();
+    String nationality();
 }
