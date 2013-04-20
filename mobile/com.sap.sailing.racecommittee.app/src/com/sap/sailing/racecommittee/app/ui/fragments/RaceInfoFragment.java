@@ -43,7 +43,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     private View resetRaceDialogView;
 
     public RaceInfoFragment() {
-        this.infoFragmentChooser = new RaceInfoFragmentChooser();
+        this.infoFragmentChooser = null;
         this.infoFragment = null;	// will be set later by switchToInfoFragment()
     }
 
@@ -55,6 +55,9 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        
+        // decide on start procedure...
+        this.infoFragmentChooser = new RaceInfoFragmentChooser();
 
         this.fleetInfoHeader = (TextView) getView().findViewById(R.id.regattaGroupInfoHeader);
         this.raceInfoHeader = (TextView) getView().findViewById(R.id.raceInfoHeader);

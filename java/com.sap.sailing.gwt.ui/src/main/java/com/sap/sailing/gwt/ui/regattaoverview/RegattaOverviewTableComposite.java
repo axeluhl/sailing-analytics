@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.regattaoverview;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -110,9 +111,21 @@ public class RegattaOverviewTableComposite extends Composite {
             @Override
             protected void handleSuccess(List<RegattaOverviewEntryDTO> result) {
                 regattaOverviewDataProvider.getList().clear();
-                regattaOverviewDataProvider.getList().addAll(result);
+                regattaOverviewDataProvider.getList().addAll(filter(result));
                 // now sort again according to selected criterion
                 ColumnSortEvent.fire(regattaOverviewTable, regattaOverviewTable.getColumnSortList());
+            }
+
+            private Collection<? extends RegattaOverviewEntryDTO> filter(List<RegattaOverviewEntryDTO> unfilteredRaceList) {
+                        List<RegattaOverviewEntryDTO> filterResult = new ArrayList<RegattaOverviewEntryDTO>();
+                        for (RegattaOverviewEntryDTO entry : unfilteredRaceList) {
+                            if (entry.raceInfo.lastStatus != RaceLogRaceStatus.UNKNOWN
+                                    && entry.raceInfo.lastStatus != RaceLogRaceStatus.UNSCHEDULED
+                                    && entry.raceInfo.lastStatus != RaceLogRaceStatus.FINISHED) {
+                                filterResult.add(entry);
+                            }
+                        }
+                        return filterResult;
             }
         });
     }
@@ -248,7 +261,10 @@ public class RegattaOverviewTableComposite extends Composite {
         Column<RegattaOverviewEntryDTO, ImageResource> lastFlagDirectionColumn = new Column<RegattaOverviewEntryDTO, ImageResource>(new ImageResourceCell()) {
             @Override
             public ImageResource getValue(RegattaOverviewEntryDTO entryDTO) {
-                return flagImageResolver.resolveFlagDirectionToImage(entryDTO.raceInfo.displayed);
+                if(entryDTO.raceInfo.lastFlag != null)
+                    return flagImageResolver.resolveFlagDirectionToImage(entryDTO.raceInfo.displayed);
+                else
+                    return null;
             }
         };
 
