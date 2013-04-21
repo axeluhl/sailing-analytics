@@ -245,6 +245,11 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         
     }
 
+    @Override
+    public void onPathfinderSelected() {
+        notifyDataChanged();
+    }
+
     /*
      * 
      * public void notifyDataChanged() { List<RaceListDataType> list = adapter.getItems(); for (int i = 0; i <

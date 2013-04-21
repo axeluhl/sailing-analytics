@@ -25,13 +25,14 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartPha
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PathfinderSelectedUiListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseLineOpeningTimeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChoosePathFinderDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
-public class GateStartPhaseFragment extends RaceFragment implements GateStartPhaseEventListener {
+public class GateStartPhaseFragment extends RaceFragment implements GateStartPhaseEventListener, PathfinderSelectedUiListener {
 
     private RaceInfoListener infoListener;
     
@@ -94,6 +95,9 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
         pathFinderButton = (Button) getView().findViewById(R.id.pathFinderButton);
         lineOpeningTimeButton = (Button) getView().findViewById(R.id.lineOpeningTimeButton);
         pathfinderLabel = (TextView) getView().findViewById(R.id.pathfinderLabel);
+        if(getRace().getState().getPathfinder()!=null){
+            pathfinderLabel.setText(getRace().getState().getPathfinder());
+        }
         lineOpeningTimeLabel = (TextView) getView().findViewById(R.id.lineOpeningTimeLabel);
         
         pathFinderButton.setOnClickListener(new OnClickListener() {
@@ -253,5 +257,12 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
     @Override
     public void onPapaDown() {
         displayedFlag.setImageResource(R.drawable.fivehundred_five_over_golf_flag);
+    }
+
+    @Override
+    public void updatePathfinderLabel() {
+        if(getRace().getState().getPathfinder()!=null){
+            pathfinderLabel.setText(getRace().getState().getPathfinder());
+        }
     }
 }

@@ -2,10 +2,14 @@ package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,8 +22,6 @@ public class RaceChoosePathFinderDialog extends RaceDialogFragment {
 		public void onPathfinderSelected();
 	}
 	
-	private PathfinderSelectionListener selectionListener;
-
 	private EditText sailingNationalityEditText;
 	private EditText sailingNumberEditText;
 	private Button chooseButton;
@@ -43,6 +45,25 @@ public class RaceChoosePathFinderDialog extends RaceDialogFragment {
 		
 		sailingNationalityEditText = (EditText) getView().findViewById(R.id.pathFinderNationality);
 		sailingNumberEditText = (EditText) getView().findViewById(R.id.pathFinderNumber);
+		
+		final EditText focusEditText = sailingNumberEditText;
+		sailingNationalityEditText.addTextChangedListener(new TextWatcher() {
+                    
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    }
+                    
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+                    
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        if(s.length() == 3)
+                            focusEditText.requestFocus();
+                    }
+                });
+		
 		chooseButton = (Button) getDialog().findViewById(R.id.choosePathFinderButton);
 		
 		chooseButton.setOnClickListener(new OnClickListener() {
@@ -55,7 +76,6 @@ public class RaceChoosePathFinderDialog extends RaceDialogFragment {
 	protected void onChooseClicked(View view) {
 		String sailingId = sailingNationalityEditText.getText().toString() + " " + sailingNumberEditText.getText().toString();
 		this.getRace().getState().setPathfinder(sailingId);
-		selectionListener.onPathfinderSelected();
 		Log.i("RACE_SET_PATHFINDER", sailingId);
 		dismiss();
 	}
