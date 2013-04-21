@@ -20,13 +20,13 @@ public class RaceLogRaceStatusEventDeserializer extends BaseRaceLogEventDeserial
     }
 
     @Override
-    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint timePoint, int passId, List<Competitor> competitors)
+    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
 
         String statusValue = object.get(RaceLogRaceStatusEventSerializer.FIELD_NEXT_STATUS).toString();
         RaceLogRaceStatus nextStatus = RaceLogRaceStatus.valueOf(statusValue);
 
-        return factory.createRaceStatusEvent(timePoint, id, competitors, passId, nextStatus);
+        return factory.createRaceStatusEvent(createdAt, timePoint, id, competitors, passId, nextStatus);
     }
 
 }

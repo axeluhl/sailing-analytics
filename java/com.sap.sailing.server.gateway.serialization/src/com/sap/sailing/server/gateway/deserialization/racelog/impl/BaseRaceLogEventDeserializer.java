@@ -27,13 +27,14 @@ public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<R
         this.competitorDeserializer = competitorDeserializer;
     }
     
-    protected abstract RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint timePoint, int passId, List<Competitor> competitors)
+    protected abstract RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException;
 
     @Override
     public RaceLogEvent deserialize(JSONObject object) throws JsonDeserializationException {
         // Factory handles class field and subclassing...
         Serializable id = (Serializable) object.get(BaseRaceLogEventSerializer.FIELD_ID);
+        Number createdAt = (Number) object.get(BaseRaceLogEventSerializer.FIELD_CREATED_AT);
         Number timeStamp = (Number) object.get(BaseRaceLogEventSerializer.FIELD_TIMESTAMP);
         Number passId = (Number) object.get(BaseRaceLogEventSerializer.FIELD_PASS_ID);
         
@@ -48,7 +49,8 @@ public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<R
 
         return deserialize(
                 object, 
-                Helpers.tryUuidConversion(id), 
+                Helpers.tryUuidConversion(id),
+                new MillisecondsTimePoint(createdAt.longValue()),
                 new MillisecondsTimePoint(timeStamp.longValue()), 
                 passId.intValue(),
                 competitors);
