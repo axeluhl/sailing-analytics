@@ -21,6 +21,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishPositioningListFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
@@ -50,6 +51,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private FinishPositioningListFinder finishPositioningListFinder;
     private IndividualRecallFinder individualRecallFinder;
     private PathfinderFinder pathfinderFinder;
+    private GateLineOpeningTimeFinder gateLineOpeningTimeFinder;
 
     public RaceStateImpl(PassAwareRaceLog raceLog, StartProcedure procedure) {
         this.raceLog = raceLog;
@@ -70,6 +72,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.finishPositioningListFinder = new FinishPositioningListFinder(raceLog);
         this.individualRecallFinder = new IndividualRecallFinder(raceLog);
         this.pathfinderFinder = new PathfinderFinder(raceLog);
+        this.gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
         updateStatus();
     }
 
@@ -291,6 +294,29 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private void notifyListenersAboutPathFinderChange() {
         for (RaceStateChangedListener listener : stateChangedListeners) {
             listener.onPathfinderSelected();
+        }
+    }
+
+    @Override
+    public Long getGateLineOpeningTime() {
+        return gateLineOpeningTimeFinder.getGateLineOpeningTime();
+    }
+
+    @Override
+    public void setGateLineOpeningTime(Long gateLineOpeningTimeInMillis) {
+        TimePoint eventTime = MillisecondsTimePoint.now();
+
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createGateLineOpeningTimeEvent(eventTime, raceLog.getCurrentPassId(),
+                gateLineOpeningTimeInMillis);
+        
+        this.raceLog.add(event);
+
+        notifyListenersAboutGateLineOpeningTimeChange();
+    }
+    
+    private void notifyListenersAboutGateLineOpeningTimeChange() {
+        for (RaceStateChangedListener listener : stateChangedListeners) {
+            listener.onGateLineOpeningTimeChanged();
         }
     }
 

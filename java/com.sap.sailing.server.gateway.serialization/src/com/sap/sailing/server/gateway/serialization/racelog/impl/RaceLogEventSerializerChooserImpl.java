@@ -7,6 +7,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
@@ -25,6 +26,7 @@ public class RaceLogEventSerializerChooserImpl implements RaceLogEventSerializer
     private final JsonSerializer<RaceLogEvent> finishPositioningListChangedEventSerializer;
     private final JsonSerializer<RaceLogEvent> finishPositioningConfirmedEventSerializer;
     private final JsonSerializer<RaceLogEvent> pathfinderEventSerializer;
+    private final JsonSerializer<RaceLogEvent> gateLineOpeningTimeEventSerializer;
 
     private JsonSerializer<RaceLogEvent> chosenSerializer;
 
@@ -37,7 +39,8 @@ public class RaceLogEventSerializerChooserImpl implements RaceLogEventSerializer
             JsonSerializer<RaceLogEvent> courseDesignChangedEventSerializer, 
             JsonSerializer<RaceLogEvent> finishPositioningListChangedEventSerializer,
             JsonSerializer<RaceLogEvent> finishPositioningConfirmedEventSerializer,
-            JsonSerializer<RaceLogEvent> pathfinderEventSerializer) {
+            JsonSerializer<RaceLogEvent> pathfinderEventSerializer,
+            JsonSerializer<RaceLogEvent> gateLineOpeningTimeEventSerializer) {
         this.flagEventSerializer = flagEventSerializer;
         this.startTimeSerializer = startTimeSerializer;
         this.raceStatusSerializer = raceStatusSerializer;
@@ -47,6 +50,7 @@ public class RaceLogEventSerializerChooserImpl implements RaceLogEventSerializer
         this.finishPositioningListChangedEventSerializer = finishPositioningListChangedEventSerializer;
         this.finishPositioningConfirmedEventSerializer = finishPositioningConfirmedEventSerializer;
         this.pathfinderEventSerializer = pathfinderEventSerializer;
+        this.gateLineOpeningTimeEventSerializer = gateLineOpeningTimeEventSerializer;
         
         this.chosenSerializer = null;
     }
@@ -106,6 +110,11 @@ public class RaceLogEventSerializerChooserImpl implements RaceLogEventSerializer
     @Override
     public void visit(RaceLogPathfinderEvent event) {
         chosenSerializer = pathfinderEventSerializer;
+    }
+
+    @Override
+    public void visit(RaceLogGateLineOpeningTimeEvent event) {
+        chosenSerializer = gateLineOpeningTimeEventSerializer;
     }
 
 }

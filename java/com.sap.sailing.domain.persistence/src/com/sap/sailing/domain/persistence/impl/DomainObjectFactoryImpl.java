@@ -95,6 +95,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
@@ -1040,17 +1041,25 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogFinishPositioningConfirmedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogPathfinderEvent.class.getSimpleName())) {
             return loadRaceLogPathfinderEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogGateLineOpeningTimeEvent.class.getSimpleName())) {
+            return loadRaceLogGateLineOpeningTimeEvent(createdAt, timePoint, id, passId, competitors, dbObject);
         }
 
         throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
     }
 
+    private RaceLogEvent loadRaceLogGateLineOpeningTimeEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,
+            Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        Long gateLineOpeningTime = (Long) dbObject.get(FieldNames.RACE_LOG_GATE_LINE_OPENING_TIME.name());
+        return raceLogEventFactory.createGateLineOpeningTimeEvent(createdAt, timePoint, id, competitors, passId, gateLineOpeningTime);
+    }
+    
     private RaceLogEvent loadRaceLogPathfinderEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,
             Integer passId, List<Competitor> competitors, DBObject dbObject) {
         String pathfinderId = dbObject.get(FieldNames.RACE_LOG_PATHFINDER_ID.name()).toString();
         return raceLogEventFactory.createPathfinderEvent(createdAt, timePoint, id, competitors, passId, pathfinderId);
     }
-
+    
     private RaceLogEvent loadRaceLogFinishPositioningConfirmedEvent(TimePoint createdAt, TimePoint timePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         return raceLogEventFactory.createFinishPositioningConfirmedEvent(createdAt, timePoint, id, competitors, passId);

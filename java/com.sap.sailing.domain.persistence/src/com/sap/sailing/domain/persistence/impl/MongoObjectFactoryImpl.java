@@ -50,6 +50,7 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
@@ -580,7 +581,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogPathfinderEvent pathfinderEvent) {
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));       
-        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogPathfinderEventEvent(pathfinderEvent));
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogPathfinderEvent(pathfinderEvent));
+        return result;
+    }
+    
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogGateLineOpeningTimeEvent gateLineOpeningTimeEvent) {
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));       
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogGateLineOpeningTimeEvent(gateLineOpeningTimeEvent));
         return result;
     }
 
@@ -682,13 +690,23 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
     
-    private Object storeRaceLogPathfinderEventEvent(RaceLogPathfinderEvent pathfinderEvent) {
+    private Object storeRaceLogPathfinderEvent(RaceLogPathfinderEvent pathfinderEvent) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(pathfinderEvent, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogPathfinderEvent.class.getSimpleName());
 
         result.put(FieldNames.RACE_LOG_PATHFINDER_ID.name(), pathfinderEvent.getPathfinderId());
+        return result;
+    }
+    
+    private Object storeRaceLogGateLineOpeningTimeEvent(RaceLogGateLineOpeningTimeEvent gateLineOpeningTimeEvent){
+        DBObject result = new BasicDBObject();
+        storeRaceLogEventProperties(gateLineOpeningTimeEvent, result);
+
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogGateLineOpeningTimeEvent.class.getSimpleName());
+
+        result.put(FieldNames.RACE_LOG_GATE_LINE_OPENING_TIME.name(), gateLineOpeningTimeEvent.getGateLineOpeningTime());
         return result;
     }
     

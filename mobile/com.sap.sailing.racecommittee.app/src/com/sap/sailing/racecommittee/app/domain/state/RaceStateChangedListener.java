@@ -16,4 +16,7 @@ public interface RaceStateChangedListener {
     void onAutomaticRaceEnd(TimePoint automaticRaceEnd);
     
     void onPathfinderSelected();
+
+    void onGateLineOpeningTimeChanged();
+
 }

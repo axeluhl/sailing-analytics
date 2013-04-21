@@ -10,6 +10,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
@@ -81,6 +82,12 @@ public class MongoRaceLogListener implements RaceLogEventVisitor {
     public void visit(RaceLogPathfinderEvent event) {
         DBObject pathfinderEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         raceLogsCollection.insert(pathfinderEventTrackEntry);
+    }
+
+    @Override
+    public void visit(RaceLogGateLineOpeningTimeEvent event) {
+        DBObject gateLineOpeningTimeEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
+        raceLogsCollection.insert(gateLineOpeningTimeEventTrackEntry);
     }
 
 }

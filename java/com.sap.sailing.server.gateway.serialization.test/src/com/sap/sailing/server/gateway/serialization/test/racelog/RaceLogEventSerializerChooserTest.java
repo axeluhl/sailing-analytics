@@ -26,6 +26,7 @@ public class RaceLogEventSerializerChooserTest {
     private JsonSerializer<RaceLogEvent> finishPositioningListChangedEventSerializer;
     private JsonSerializer<RaceLogEvent> finishPositioningConfirmedEventSerializer;
     private JsonSerializer<RaceLogEvent> pathfinderEventSerializer;
+    private JsonSerializer<RaceLogEvent> gateLineOpeningTimeEventSerializer;
     
     private RaceLogEventFactory factory;
     
@@ -41,6 +42,7 @@ public class RaceLogEventSerializerChooserTest {
         finishPositioningListChangedEventSerializer = mock(JsonSerializer.class);
         finishPositioningConfirmedEventSerializer = mock(JsonSerializer.class);
         pathfinderEventSerializer = mock(JsonSerializer.class);
+        gateLineOpeningTimeEventSerializer = mock(JsonSerializer.class);
         
         chooser = new RaceLogEventSerializerChooserImpl(
                 flagEventSerializer, 
@@ -51,7 +53,7 @@ public class RaceLogEventSerializerChooserTest {
                 courseDesignChangedEventSerializer,
                 finishPositioningListChangedEventSerializer,
                 finishPositioningConfirmedEventSerializer,
-                pathfinderEventSerializer);
+                pathfinderEventSerializer, gateLineOpeningTimeEventSerializer);
         
         factory = RaceLogEventFactory.INSTANCE;
     }
@@ -117,6 +119,13 @@ public class RaceLogEventSerializerChooserTest {
         // we use the real event type here because we do not want to re-implement the dispatching.
         RaceLogEvent event = factory.createPathfinderEvent(null, 0, "GER 20");
         assertEquals(pathfinderEventSerializer, chooser.getSerializer(event));
+    }
+    
+    @Test
+    public void testChoosesGateLineOpeningTimeSerializer() {
+        // we use the real event type here because we do not want to re-implement the dispatching.
+        RaceLogEvent event = factory.createGateLineOpeningTimeEvent(null, 0, new Long(0));
+        assertEquals(gateLineOpeningTimeEventSerializer, chooser.getSerializer(event));
     }
 
 }

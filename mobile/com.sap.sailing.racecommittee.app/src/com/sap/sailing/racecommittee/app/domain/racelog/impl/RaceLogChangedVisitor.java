@@ -6,6 +6,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
@@ -56,6 +57,11 @@ public class RaceLogChangedVisitor implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogPathfinderEvent event) {
+        listener.eventAdded(event);
+    }
+
+    @Override
+    public void visit(RaceLogGateLineOpeningTimeEvent event) {
         listener.eventAdded(event);
     }
 

@@ -25,7 +25,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.GateSt
 public class GateStartProcedure implements StartProcedure {
     
     private final static long startPhaseClassOverGolfUpIntervall = 8 * 60 * 1000; // minutes * seconds * milliseconds
-    private final static long startPhasePapaUpInterval = 5 * 60 * 1000; // minutes * seconds * milliseconds
+    private final static long startPhasePapaUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhasePapaDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseClassOverGolfDownInterval = 0 * 60 * 1000; // minutes * seconds * milliseconds
     

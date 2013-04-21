@@ -45,6 +45,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
@@ -133,6 +134,28 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
             assertEquals(expectedEvent.getPassId(), actualEvent.getPassId());
             assertEquals(expectedEvent.getId(), actualEvent.getId());
             assertEquals(expectedEvent.getPathfinderId(), actualEvent.getPathfinderId());
+            assertEquals(1, Util.size(loadedRaceLog.getFixes()));
+        } finally {
+            loadedRaceLog.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogGateLineOpeningTimeEvent() {        
+        RaceLogGateLineOpeningTimeEvent expectedEvent = RaceLogEventFactory.INSTANCE.createGateLineOpeningTimeEvent(now, 0, 1234l);
+
+       addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
+
+        RaceLog loadedRaceLog = retrieveRaceLog();
+
+        loadedRaceLog.lockForRead();
+        try {
+            RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
+            RaceLogGateLineOpeningTimeEvent actualEvent = (RaceLogGateLineOpeningTimeEvent) loadedEvent;
+            assertEquals(expectedEvent.getTimePoint(), actualEvent.getTimePoint());
+            assertEquals(expectedEvent.getPassId(), actualEvent.getPassId());
+            assertEquals(expectedEvent.getId(), actualEvent.getId());
+            assertEquals(expectedEvent.getGateLineOpeningTime(), actualEvent.getGateLineOpeningTime());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
             loadedRaceLog.unlockAfterRead();

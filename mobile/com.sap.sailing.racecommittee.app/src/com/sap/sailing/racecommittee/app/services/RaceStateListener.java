@@ -49,6 +49,10 @@ public class RaceStateListener implements RaceStateChangedListener {
     @Override
     public void onPathfinderSelected() {
         // do nothing
-        
+    }
+
+    @Override
+    public void onGateLineOpeningTimeChanged() {
+        // do nothing
     }
 }

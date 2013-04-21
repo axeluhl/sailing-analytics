@@ -16,6 +16,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
@@ -75,6 +76,12 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
     public RaceLogPathfinderEvent createPathfinderEvent(TimePoint createdAt, TimePoint logicalTimePoint,
             Serializable id, List<Competitor> competitors, int passId, String pathfinderId) {
         return new RaceLogPathfinderEventImpl(createdAt, logicalTimePoint, id, competitors, passId, pathfinderId);
+    }
+
+    @Override
+    public RaceLogGateLineOpeningTimeEvent createGateLineOpeningTimeEvent(TimePoint createdAt, TimePoint logicalTimePoint,
+            Serializable id, List<Competitor> competitors, int passId, Long gateLineOpeningTime) {
+        return new RaceLogGateLineOpeningTimeEventImpl(createdAt, logicalTimePoint, id, competitors, passId, gateLineOpeningTime);
     }
 
 

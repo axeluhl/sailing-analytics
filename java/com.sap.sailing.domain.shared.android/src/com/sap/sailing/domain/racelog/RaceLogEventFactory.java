@@ -42,4 +42,7 @@ public interface RaceLogEventFactory {
     RaceLogPathfinderEvent createPathfinderEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, String pathfinderId);
     RaceLogPathfinderEvent createPathfinderEvent(TimePoint timePoint, int passId, String pathfinderId);
     
+    RaceLogGateLineOpeningTimeEvent createGateLineOpeningTimeEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, Long gateLineOpeningTimeInMillis);
+    RaceLogGateLineOpeningTimeEvent createGateLineOpeningTimeEvent(TimePoint timePoint, int passId, Long gateLineOpeningTimeInMillis);
+    
 }

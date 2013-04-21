@@ -24,6 +24,7 @@ import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.CourseDesignDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.GateLineOpeningTimeChangeUiListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.IndividualRecallUiListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PathfinderSelectedUiListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
@@ -250,6 +251,13 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     public void onPathfinderSelected() {
         if (infoFragment instanceof PathfinderSelectedUiListener) {
             ((PathfinderSelectedUiListener) infoFragment).updatePathfinderLabel();
+        }
+    }
+
+    @Override
+    public void onGateLineOpeningTimeChanged() {
+        if (infoFragment instanceof GateLineOpeningTimeChangeUiListener) {
+            ((GateLineOpeningTimeChangeUiListener) infoFragment).updateGateLineOpeningTimeLabel();
         }
     }
 

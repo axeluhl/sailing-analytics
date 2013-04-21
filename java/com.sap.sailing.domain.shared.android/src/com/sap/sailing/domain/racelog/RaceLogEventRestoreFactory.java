@@ -41,4 +41,7 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
     
     RaceLogPathfinderEvent createPathfinderEvent(TimePoint createdAt, TimePoint logicalTimePoint, Serializable id, 
             List<Competitor> competitors, int passId, String pathfinderId);
+    
+    RaceLogGateLineOpeningTimeEvent createGateLineOpeningTimeEvent(TimePoint createdAt, TimePoint logicalTimePoint, Serializable id, 
+            List<Competitor> competitors, int passId, Long gateLineOpeningTime);
 }

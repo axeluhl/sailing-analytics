@@ -25,6 +25,7 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartPha
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.GateLineOpeningTimeChangeUiListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PathfinderSelectedUiListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseLineOpeningTimeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChoosePathFinderDialog;
@@ -32,7 +33,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
-public class GateStartPhaseFragment extends RaceFragment implements GateStartPhaseEventListener, PathfinderSelectedUiListener {
+public class GateStartPhaseFragment extends RaceFragment implements GateStartPhaseEventListener, PathfinderSelectedUiListener, GateLineOpeningTimeChangeUiListener {
 
     private RaceInfoListener infoListener;
     
@@ -99,7 +100,9 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
             pathfinderLabel.setText(getRace().getState().getPathfinder());
         }
         lineOpeningTimeLabel = (TextView) getView().findViewById(R.id.lineOpeningTimeLabel);
-        
+        if(getRace().getState().getGateLineOpeningTime()!=null){
+            lineOpeningTimeLabel.setText(getRace().getState().getGateLineOpeningTime().toString());
+        }
         pathFinderButton.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
@@ -261,8 +264,15 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
 
     @Override
     public void updatePathfinderLabel() {
-        if(getRace().getState().getPathfinder()!=null){
+        if (getRace().getState().getPathfinder() != null) {
             pathfinderLabel.setText(getRace().getState().getPathfinder());
+        }
+    }
+
+    @Override
+    public void updateGateLineOpeningTimeLabel() {
+        if (getRace().getState().getGateLineOpeningTime() != null) {
+            lineOpeningTimeLabel.setText(getRace().getState().getGateLineOpeningTime().toString());
         }
     }
 }
