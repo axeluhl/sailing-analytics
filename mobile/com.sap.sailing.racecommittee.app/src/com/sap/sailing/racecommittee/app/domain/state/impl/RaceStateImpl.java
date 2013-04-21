@@ -69,6 +69,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.lastCourseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
         this.finishPositioningListFinder = new FinishPositioningListFinder(raceLog);
         this.individualRecallFinder = new IndividualRecallFinder(raceLog);
+        this.pathfinderFinder = new PathfinderFinder(raceLog);
         updateStatus();
     }
 
@@ -276,17 +277,21 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     @Override
     public void setPathfinder(String sailingId) {
+
+        TimePoint eventTime = MillisecondsTimePoint.now();
+
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createPathfinderEvent(eventTime, raceLog.getCurrentPassId(),
+                sailingId);
         
-        /*RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(eventTime, UUID.randomUUID(), 
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newStartTime);
-        this.raceLog.add(event);*/
-        
+        this.raceLog.add(event);
+
         notifyListenersAboutPathFinderChange();
     }
 
     private void notifyListenersAboutPathFinderChange() {
-        // TODO Auto-generated method stub
-        
+        for (RaceStateChangedListener listener : stateChangedListeners) {
+            listener.onPathfinderSelected();
+        }
     }
 
 }

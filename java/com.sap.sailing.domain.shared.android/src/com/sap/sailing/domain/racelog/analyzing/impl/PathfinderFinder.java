@@ -27,7 +27,7 @@ public class PathfinderFinder extends RaceLogAnalyzer {
 
         for (RaceLogEvent event : getPassEvents()) {
             if (event instanceof RaceLogPathfinderEvent) {
-                pathfinderId = ((PathfinderFinder) event).getPathfinderId();
+                pathfinderId = ((RaceLogPathfinderEvent) event).getPathfinderId();
 
             }
         }

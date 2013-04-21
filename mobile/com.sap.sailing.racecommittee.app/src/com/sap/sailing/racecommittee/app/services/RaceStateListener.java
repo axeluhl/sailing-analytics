@@ -45,4 +45,10 @@ public class RaceStateListener implements RaceStateChangedListener {
     public void onAutomaticRaceEnd(TimePoint automaticRaceEnd) {
         service.handleAutomaticRaceEnd(race, automaticRaceEnd);
     }
+
+    @Override
+    public void onPathfinderSelected() {
+        // do nothing
+        
+    }
 }
