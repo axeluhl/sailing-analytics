@@ -18,10 +18,10 @@ public class RaceLogFinishPositioningConfirmedEventDeserializer extends BaseRace
     }
 
     @Override
-    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint timePoint, int passId, List<Competitor> competitors)
+    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
 
-        return factory.createFinishPositioningConfirmedEvent(timePoint, id, competitors, passId);
+        return factory.createFinishPositioningConfirmedEvent(createdAt, timePoint, id, competitors, passId);
     }
 
 }

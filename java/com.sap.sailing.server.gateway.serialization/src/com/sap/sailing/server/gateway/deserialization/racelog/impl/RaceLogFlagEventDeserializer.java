@@ -19,13 +19,13 @@ public class RaceLogFlagEventDeserializer extends BaseRaceLogEventDeserializer {
     }
 
     @Override
-    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint timePoint, int passId, List<Competitor> competitors) {
+    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, TimePoint timePoint, int passId, List<Competitor> competitors) {
 
         Flags upperFlag = Flags.valueOf(object.get(RaceLogFlagEventSerializer.FIELD_UPPER_FLAG).toString());
         Flags lowerFlag = Flags.valueOf(object.get(RaceLogFlagEventSerializer.FIELD_LOWER_FLAG).toString());
         boolean isDisplayed = (Boolean) object.get(RaceLogFlagEventSerializer.FIELD_DISPLAYED);
 
-        return factory.createFlagEvent(timePoint, id, competitors, passId, upperFlag, lowerFlag, isDisplayed);
+        return factory.createFlagEvent(createdAt, timePoint, id, competitors, passId, upperFlag, lowerFlag, isDisplayed);
     }
 
 }

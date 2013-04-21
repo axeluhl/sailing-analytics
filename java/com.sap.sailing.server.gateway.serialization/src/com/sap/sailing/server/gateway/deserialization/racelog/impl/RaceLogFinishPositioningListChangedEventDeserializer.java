@@ -24,13 +24,13 @@ public class RaceLogFinishPositioningListChangedEventDeserializer extends BaseRa
     }
 
     @Override
-    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint timePoint, int passId, List<Competitor> competitors)
+    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
         
         JSONArray jsonPositionedCompetitors = Helpers.getNestedArraySafe(object, RaceLogFinishPositioningListChangedEventSerializer.FIELD_POSITIONED_COMPETITORS);
         List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = deserializePositionedCompetitors(jsonPositionedCompetitors);
 
-        return factory.createFinishPositioningListChangedEvent(timePoint, id, competitors, passId, positionedCompetitors);
+        return factory.createFinishPositioningListChangedEvent(createdAt, timePoint, id, competitors, passId, positionedCompetitors);
     }
 
     private List<Triple<Serializable, String, MaxPointsReason>> deserializePositionedCompetitors(JSONArray jsonPositionedCompetitors) throws JsonDeserializationException {
