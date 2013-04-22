@@ -534,4 +534,12 @@ public interface StringMessages extends Messages {
     String currentTime();
     String tractracUsername();
     String tractracPassword();
+    String distanceToLineAtRaceStart();
+    String speedOverGroundAtRaceStart();
+    String speedOverGroundWhenPassingStart();
+    String distanceToLineAtRaceStartTooltip();
+    String speedOverGroundAtRaceStartTooltip();
+    String speedOverGroundWhenPassingStartTooltip();
+    String startTack();
+    String startTackTooltip();
 }

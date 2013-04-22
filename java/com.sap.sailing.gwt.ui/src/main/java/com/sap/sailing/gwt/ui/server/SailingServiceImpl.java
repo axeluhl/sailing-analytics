@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
@@ -684,6 +685,29 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         : raceDetails.getWindwardDistanceToOverallLeader().getMeters();
                 entryDTO.averageCrossTrackErrorInMeters = raceDetails.getAverageCrossTrackError() == null ? null
                         : raceDetails.getAverageCrossTrackError().getMeters();
+                final TimePoint startOfRace = trackedRace.getStartOfRace();
+                if (startOfRace != null) {
+                    Distance distanceToStartLineAtStartOfRace = trackedRace.getDistanceToStartLine(competitor,
+                            startOfRace);
+                    entryDTO.distanceToStartLineAtStartOfRaceInMeters = distanceToStartLineAtStartOfRace == null ? null
+                            : distanceToStartLineAtStartOfRace.getMeters();
+                    Speed speedAtStartTime = trackedRace.getTrack(competitor).getEstimatedSpeed(startOfRace);
+                    entryDTO.speedOverGroundAtStartOfRaceInKnots = speedAtStartTime == null ? null : speedAtStartTime.getKnots();
+                    NavigableSet<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
+                    trackedRace.lockForRead(competitorMarkPassings);
+                    try {
+                        if (!competitorMarkPassings.isEmpty()) {
+                            TimePoint competitorStartTime = competitorMarkPassings.iterator().next().getTimePoint();
+                            Speed competitorSpeedWhenPassingStart = trackedRace.getTrack(competitor).getEstimatedSpeed(
+                                    competitorStartTime);
+                            entryDTO.speedOverGroundAtPassingStartWaypointInKnots = competitorSpeedWhenPassingStart == null ? null
+                                    : competitorSpeedWhenPassingStart.getKnots();
+                            entryDTO.startTack = trackedRace.getTack(competitor, competitorStartTime);
+                        }
+                    } finally {
+                        trackedRace.unlockAfterRead(competitorMarkPassings);
+                    }
+                }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             } catch (ExecutionException e) {

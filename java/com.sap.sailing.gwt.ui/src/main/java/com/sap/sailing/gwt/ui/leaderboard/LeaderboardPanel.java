@@ -783,7 +783,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 DetailType.RACE_DISTANCE_TRAVELED, 
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                 DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
-                DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS };
+                DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
+                DetailType.DISTANCE_TO_START_AT_RACE_START, DetailType.SPEED_OVER_GROUND_AT_RACE_START,
+                DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START };
     }
 
     public static DetailType[] getAvailableOverallDetailColumnTypes() {
@@ -845,33 +847,34 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
                 String detailColumnStyle) {
             Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
-            
             result.put(DetailType.RACE_DISTANCE_TRAVELED,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED, new RaceDistanceTraveledInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-                    
             result.put(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, 
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new RaceAverageSpeedInKnots(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-
             result.put(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS, new RaceGapToLeaderInSeconds(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-
             result.put(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, new CurrentSpeedOverGroundInKnots(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-
             result.put(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS, new RaceDistanceToLeaderInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            
             result.put(DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS, new RaceAverageCrossTrackErrorInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            
+            result.put(DetailType.DISTANCE_TO_START_AT_RACE_START,
+                    new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TO_START_AT_RACE_START, new DistanceToStartAtRaceStartInMeters(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailType.SPEED_OVER_GROUND_AT_RACE_START,
+                    new FormattedDoubleDetailTypeColumn(DetailType.SPEED_OVER_GROUND_AT_RACE_START, new SpeedOverGroundAtRaceStartInKnots(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
+                    new FormattedDoubleDetailTypeColumn(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START, new SpeedOverGroundWhenPassingStartInKnots(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
-            
             result.put(DetailType.CURRENT_LEG,
                     new FormattedDoubleDetailTypeColumn(DetailType.CURRENT_LEG, new CurrentLeg(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
 
@@ -967,6 +970,57 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null) {
                     result = fieldsForRace.averageCrossTrackErrorInMeters;
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Fetches the competitor's distance to the start mark at the time the race started
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class DistanceToStartAtRaceStartInMeters implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.distanceToStartLineAtStartOfRaceInMeters;
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Fetches the competitor's speed over ground at the time the race started
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class SpeedOverGroundAtRaceStartInKnots implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.speedOverGroundAtStartOfRaceInKnots;
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Fetches the competitor's speed over ground at the time the competitor passed the start
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class SpeedOverGroundWhenPassingStartInKnots implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.speedOverGroundAtPassingStartWaypointInKnots;
                 }
                 return result;
             }
