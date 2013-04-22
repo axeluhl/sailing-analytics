@@ -45,8 +45,6 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
     
     protected static class CompetitorsFilterSetValidator implements Validator<FilterSet<CompetitorDTO>> {
         private final StringMessages stringMessages;
-        
-        // TODO: use the list for the validation of the new filter set name
         private final List<String> existingFilterSetNames;
         
         public CompetitorsFilterSetValidator(List<String> existingFilterSetNames, StringMessages stringMessages){
@@ -66,13 +64,26 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             } else if (existingFilterSetNames.contains(competitorsFilterSet.getName())) {
                 errorMessage = "A filter with this name already exists.";
             } else if(filterCount < 1) {
-                errorMessage = "Please add at least one filter criteria.";
+                errorMessage = "Add at least one filter criteria.";
             } else {
                 for(Filter<CompetitorDTO, ?> filter: competitorsFilterSet.getFilters()) {
                     Object filterValue = filter.getConfiguration().getB();
-                    if(filterValue == null) {
-                        errorMessage = stringMessages.pleaseEnterAValue();
-                        break;
+                    if(filter.getValueType().equals(Integer.class)) {
+                        if(filterValue != null) {
+                            Integer intfilterValue = (Integer) filterValue;
+                            if(intfilterValue <= 0) {
+                                errorMessage = stringMessages.numberMustBePositive();
+                                break;
+                            }
+                        } else {
+                            errorMessage = stringMessages.pleaseEnterANumber();
+                            break;
+                        }
+                    } else if(filter.getValueType().equals(String.class)) {
+                        if(filterValue == null) {
+                            errorMessage = stringMessages.pleaseEnterAValue();
+                            break;
+                        }
                     }
                 }
             }
@@ -81,10 +92,12 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         }
     }
 
-    public AbstractCompetitorsFilterSetDialog(FilterSet<CompetitorDTO> competitorsFilterSet, List<String> existingFilterSetNames, String dialogTitle, StringMessages stringMessages, DialogCallback<FilterSet<CompetitorDTO>> callback) {
+    public AbstractCompetitorsFilterSetDialog(FilterSet<CompetitorDTO> competitorsFilterSet, List<Filter<CompetitorDTO, ?>> availableCompetitorsFilter, List<String> existingFilterSetNames, 
+            String dialogTitle, StringMessages stringMessages, DialogCallback<FilterSet<CompetitorDTO>> callback) {
         super(dialogTitle, null, stringMessages.ok(), stringMessages.cancel(),
                 new CompetitorsFilterSetValidator(existingFilterSetNames, stringMessages), callback);
         this.competitorsFilterSet = competitorsFilterSet;
+        this.availableCompetitorsFilter = availableCompetitorsFilter;
         this.stringMessages = stringMessages; 
         
         competitorsFiltersGrid = new Grid(0,0);
@@ -97,10 +110,6 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         
         addFilterButton = new Button(stringMessages.add());
         filterListBox = createListBox(false);
-        
-        availableCompetitorsFilter = new ArrayList<Filter<CompetitorDTO, ?>>();
-        availableCompetitorsFilter.add(new CompetitorTotalRankFilter());
-        availableCompetitorsFilter.add(new CompetitorNationalityFilter());
     }
     
     @Override

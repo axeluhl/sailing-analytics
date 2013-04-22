@@ -344,8 +344,6 @@ public interface StringMessages extends Messages {
     String waypoint();
     String showAllCompetitors();
     String boatTails();
-    String maximalCount();
-    String maxVisibleCompetitorsCountMustBePositive();
     String resultImportUrls();
     String errorRefreshingResultImportUrlList(String message);
     String successfullyUpdatedResultImportUrls();
@@ -545,4 +543,6 @@ public interface StringMessages extends Messages {
     String operatorStartsWith();
     String operatorEndsWith();
     String nationality();
+    String numberMustBePositive();
+    String pleaseEnterANumber();
 }
