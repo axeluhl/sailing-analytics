@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test;
+package com.sap.sailing.domain.racelog.test;
 
 import static org.junit.Assert.assertEquals;
 
