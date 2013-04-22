@@ -764,4 +764,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         // TODO Auto-generated method stub
         
     }
+
+    @Override
+    public Distance getDistanceToStartLine(Competitor competitor, TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
