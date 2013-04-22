@@ -1709,8 +1709,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * 
      * </pre>
      * 
-     * In this case, the boat's sails will be on the starboard side, so the result has to be {@link Tack#STARBOARD}. The
-     * angle between the boat's heading (which we can only approximate by the boat's bearing) and the wind bearing in
+     * In this case, the boat gets the wind from port, so the result has to be {@link Tack#PORT}. The
+     * angle between the boat's heading (which we can only approximate by the boat's course over ground) and the wind bearing in
      * this case is 90 degrees. <code>wind.{@link Bearing#getDifferenceTo(Bearing) getDifferenceTo}(boat)</code> in this
      * case will return a bearing representing -90 degrees.
      * <p>
@@ -1753,7 +1753,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         Bearing windBearing = wind.getBearing();
         Bearing difference = windBearing.getDifferenceTo(boatBearing);
-        result = difference.getDegrees() <= 0 ? Tack.STARBOARD : Tack.PORT;
+        result = difference.getDegrees() <= 0 ? Tack.PORT : Tack.STARBOARD;
         return result;
     }
 

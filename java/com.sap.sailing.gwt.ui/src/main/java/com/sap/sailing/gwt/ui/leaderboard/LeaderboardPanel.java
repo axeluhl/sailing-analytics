@@ -55,6 +55,7 @@ import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -75,13 +76,13 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.panels.BusyIndicator;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleBusyIndicator;
-import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
@@ -785,7 +786,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
                 DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
                 DetailType.DISTANCE_TO_START_AT_RACE_START, DetailType.SPEED_OVER_GROUND_AT_RACE_START,
-                DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START };
+                DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START, DetailType.START_TACK };
     }
 
     public static DetailType[] getAvailableOverallDetailColumnTypes() {
@@ -874,6 +875,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             result.put(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
                     new FormattedDoubleDetailTypeColumn(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START, new SpeedOverGroundWhenPassingStartInKnots(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailType.START_TACK, new StartingTackColumn(new TackWhenStarting(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
             result.put(DetailType.CURRENT_LEG,
                     new FormattedDoubleDetailTypeColumn(DetailType.CURRENT_LEG, new CurrentLeg(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
@@ -1021,6 +1023,23 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null) {
                     result = fieldsForRace.speedOverGroundAtPassingStartWaypointInKnots;
+                }
+                return result;
+            }
+        }
+        
+        /**
+         * Fetches the competitor's speed over ground at the time the competitor passed the start
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class TackWhenStarting implements LegDetailField<Tack> {
+            @Override
+            public Tack get(LeaderboardRowDTO row) {
+                Tack result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.startTack;
                 }
                 return result;
             }
@@ -1261,6 +1280,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         @Override
         public SafeHtmlHeader getHeader() {
             return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.totalRank()), stringMessages.rankColumnTooltip());
+        }
+    }
+
+    private class StartingTackColumn extends DetailTypeColumn<Tack, String> {
+        public StartingTackColumn(LegDetailField<Tack> field, String headerStyle, String columnStyle) {
+            super(DetailType.START_TACK, field, new TextCell(), headerStyle, columnStyle);
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDTO row) {
+            return getField().get(row) == null ? null : getField().get(row).name();
         }
     }
 

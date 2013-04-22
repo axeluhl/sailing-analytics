@@ -153,6 +153,7 @@ public class DetailTypeFormatter {
         case OVERALL_RANK:
         case CURRENT_LEG:
         case TACK:
+        case START_TACK:
         case JIBE:
         case PENALTY_CIRCLE:
         case RANK_GAIN:
