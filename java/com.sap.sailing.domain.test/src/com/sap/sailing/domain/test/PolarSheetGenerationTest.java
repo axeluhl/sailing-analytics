@@ -45,7 +45,7 @@ public class PolarSheetGenerationTest {
     
     @Test
     public void testPolarSheetRawDataGeneration() throws InterruptedException {
-        Executor executor = new ThreadPoolExecutor(/* corePoolSize */ 0,
+        Executor executor = new ThreadPoolExecutor(/* corePoolSize */ Runtime.getRuntime().availableProcessors(),
                 /* maximumPoolSize */ Runtime.getRuntime().availableProcessors(),
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());

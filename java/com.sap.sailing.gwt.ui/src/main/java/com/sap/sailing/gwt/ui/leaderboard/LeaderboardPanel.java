@@ -75,6 +75,12 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.client.shared.panels.BusyIndicator;
+import com.sap.sailing.gwt.ui.client.shared.panels.SimpleBusyIndicator;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
@@ -86,12 +92,6 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
-import com.sap.sailing.gwt.ui.shared.components.Component;
-import com.sap.sailing.gwt.ui.shared.components.IsEmbeddableComponent;
-import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.shared.panels.BusyIndicator;
-import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -625,8 +625,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
             ImageResourceRenderer renderer = new ImageResourceRenderer();
-            ImageResource flagImageResource = FlagImageResolver
-                    .getFlagImageResource(competitorFetcher.getCompetitor(object).twoLetterIsoCountryCode);
+            final String twoLetterIsoCountryCode = competitorFetcher.getCompetitor(object).twoLetterIsoCountryCode;
+            final ImageResource flagImageResource;
+            if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
+                flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+            } else {
+                flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+            }
             if (flagImageResource != null) {
                 sb.append(renderer.render(flagImageResource));
                 sb.appendHtmlConstant("&nbsp;");

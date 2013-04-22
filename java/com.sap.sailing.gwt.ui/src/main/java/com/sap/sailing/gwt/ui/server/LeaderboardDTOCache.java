@@ -78,11 +78,12 @@ public class LeaderboardDTOCache implements LeaderboardCache {
         // if the leaderboard becomes weakly referenced and eventually GCed, then so can the cached results for it
         this.leaderboardCache = new WeakHashMap<Leaderboard, Map<Util.Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>>();
         this.leaderboardCacheManager = new LeaderboardCacheManager(this);
+        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
         this.computeLeadearboardByNameExecutor =
-                new ThreadPoolExecutor(/* corePoolSize */ 0,
-                        /* maximumPoolSize */ 10*Runtime.getRuntime().availableProcessors(),
-                        /* keepAliveTime */ 60, TimeUnit.SECONDS,
-                        /* workQueue */ new LinkedBlockingQueue<Runnable>());
+                new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
+                /* maximumPoolSize */ THREAD_POOL_SIZE,
+                /* keepAliveTime */ 60, TimeUnit.SECONDS,
+                /* workQueue */ new LinkedBlockingQueue<Runnable>());
     }
     
     @Override

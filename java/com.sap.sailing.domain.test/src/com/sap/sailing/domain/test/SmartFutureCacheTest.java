@@ -19,6 +19,25 @@ import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
 
 public class SmartFutureCacheTest {
     @Test
+    public void testPerformanceOfGetAndCall() {
+        SmartFutureCache<String, String, EmptyUpdateInterval> sfc = new SmartFutureCache<String, String, SmartFutureCache.EmptyUpdateInterval>(
+                new SmartFutureCache.AbstractCacheUpdater<String, String, SmartFutureCache.EmptyUpdateInterval>() {
+                    @Override
+                    public String computeCacheUpdate(String key, EmptyUpdateInterval updateInterval) {
+                        return key;
+                    }
+                }, "SmartFutureCacheTest.testPerformanceOfGetAndCall");
+        long start = System.currentTimeMillis();
+        for (int i=0; i<100000; i++) {
+            sfc.triggerUpdate("humba", /* update interval */ null);
+        }
+        for (int i=0; i<100000; i++) {
+            sfc.get("humba", /* waitForLatest */ false);
+        }
+        System.out.println("testPerformanceOfGetAndCall took "+(System.currentTimeMillis()-start)+"ms");
+    }
+    
+    @Test
     public void testSuspendAndResume() {
         final boolean[] updateWasCalled = new boolean[1];
         SmartFutureCache<String, String, SmartFutureCache.EmptyUpdateInterval> sfc = new SmartFutureCache<String, String, SmartFutureCache.EmptyUpdateInterval>(

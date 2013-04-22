@@ -89,6 +89,7 @@ fi
 
 echo PROJECT_HOME is $PROJECT_HOME
 echo SERVERS_HOME is $SERVERS_HOME
+echo BRANCH is $active_branch
 
 options=':gtocpm:n:l:'
 while getopts $options option
@@ -145,7 +146,7 @@ if [[ "$@" == "hot-deploy" ]]; then
         echo "WARNING: Bundle versions do not differ. Update not needed."
     fi
 
-    read -s -n1 -p "Do you really want to hot-deploy bundle $OSGI_BUNDLE_NAME to $PROJECT_HOME/$active_branch? (y/N): " answer
+    read -s -n1 -p "Do you really want to hot-deploy bundle $OSGI_BUNDLE_NAME to $SERVERS_HOME/$active_branch? (y/N): " answer
     case $answer in
     "Y" | "y") echo "Continuing";;
     *) echo "Aborting..."
@@ -178,7 +179,7 @@ if [[ "$@" == "hot-deploy" ]]; then
 
     # first get bundle ID
     NC_CMD="nc -t 127.0.0.1 $OSGI_TELNET_PORT"
-    OLD_BUNDLE_INFORMATION=`echo -n ss | $NC_CMD | grep $OSGI_BUNDLE_NAME`
+    OLD_BUNDLE_INFORMATION=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
     BUNDLE_ID=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 1`
     OLD_ACTIVATED_NAME=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 3`
     echo "Could identify bundle-id $BUNDLE_ID for $OLD_ACTIVATED_NAME"
@@ -188,7 +189,7 @@ if [[ "$@" == "hot-deploy" ]]; then
     echo -n uninstall $BUNDLE_ID | $NC_CMD > /dev/null
 
     # make sure bundle is removed
-    UNINSTALL_INFORMATION=`echo -n ss | $NC_CMD | grep $OSGI_BUNDLE_NAME`
+    UNINSTALL_INFORMATION=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
     if [[ $UNINSTALL_INFORMATION == "" ]]; then
         echo "Uninstall procedure sucessful!"
     else
@@ -198,13 +199,13 @@ if [[ "$@" == "hot-deploy" ]]; then
 
     # now reinstall bundle
     NEW_BUNDLE_ID=`echo -n install file://$SERVERS_HOME/$active_branch/plugins/deploy/${NEW_BUNDLE_BASENAME}.jar | $NC_CMD`
-    NEW_BUNDLE_INFORMATION=`echo -n ss | $NC_CMD | grep $OSGI_BUNDLE_NAME`
+    NEW_BUNDLE_INFORMATION=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
     NEW_BUNDLE_ID=`echo $NEW_BUNDLE_INFORMATION | cut -d " " -f 1`
     echo "Installed new bundle file://$SERVERS_HOME/$active_branch/plugins/deploy/${NEW_BUNDLE_BASENAME}.jar with id $NEW_BUNDLE_ID"
 
     # and start
     echo -n start $NEW_BUNDLE_ID | $NC_CMD > /dev/null && sleep 1
-    NEW_BUNDLE_STATUS=`echo -n ss | $NC_CMD | grep $OSGI_BUNDLE_NAME | grep ACTIVE`
+    NEW_BUNDLE_STATUS=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_ | grep ACTIVE`
     if [[ $NEW_BUNDLE_STATUS == "" ]]; then
         echo "ERROR: Something went wrong with start of bundle. Please check if everything went ok."
         exit
@@ -214,7 +215,7 @@ if [[ "$@" == "hot-deploy" ]]; then
     exit
 fi
 
-echo "Starting $@ of server (maven configuration set to $MAVEN_SETTINGS)..."
+echo "Starting $@ of server..."
 
 if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	# yield build so that we get updated product
@@ -265,6 +266,13 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         echo "Could not find directory $ACDIR - perhaps you are on a wrong branch?"
         exit
     fi
+
+    # secure current state so that it can be reused if something goes wrong
+    if [ -f "$ACDIR/backup-binaries.tar.gz" ]; then
+        rm -f $ACDIR/backup-binaries.tar.gz
+    fi
+
+    tar cvzf $ACDIR/backup-binaries.tar.gz $ACDIR/plugins $ACDIR/configuration
 
     if [ ! -d "$ACDIR/plugins" ]; then
         mkdir $ACDIR/plugins

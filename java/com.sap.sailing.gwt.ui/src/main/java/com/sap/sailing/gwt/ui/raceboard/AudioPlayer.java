@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.raceboard;
 import com.google.gwt.dom.client.AudioElement;
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.media.client.Audio;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
 
 public class AudioPlayer extends AbstractMediaPlayer {
     

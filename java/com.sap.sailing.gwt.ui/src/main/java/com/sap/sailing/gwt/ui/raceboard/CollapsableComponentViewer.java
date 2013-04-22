@@ -6,12 +6,12 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.components.CollapsablePanel;
-import com.sap.sailing.gwt.ui.shared.components.Component;
-import com.sap.sailing.gwt.ui.shared.components.ComponentGroup;
-import com.sap.sailing.gwt.ui.shared.components.ComponentToolbar;
-import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
-import com.sap.sailing.gwt.ui.shared.components.IsEmbeddableComponent;
+import com.sap.sailing.gwt.ui.client.shared.components.CollapsablePanel;
+import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.ComponentGroup;
+import com.sap.sailing.gwt.ui.client.shared.components.ComponentToolbar;
+import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
+import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
 
 /**
  * A GWT component that visualizes a {@link ComponentGroup} or a {@link Component} including menus to scroll quickly to
