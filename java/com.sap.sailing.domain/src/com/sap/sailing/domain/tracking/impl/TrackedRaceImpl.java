@@ -49,6 +49,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -2034,7 +2035,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, timePointBeforeManeuver);
         TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, timePointAfterManeuver);
         Waypoint waypointPassed = null; // set for MARK_PASSING maneuvers only
-        Tack sideToWhichWaypointWasPassed = null; // set for MARK_PASSING maneuvers only
+        NauticalSide sideToWhichWaypointWasPassed = null; // set for MARK_PASSING maneuvers only
         // check for mask passing first; a tacking / jibe-setting mark rounding thus takes precedence over being detected as a penalty circle
         if (legBeforeManeuver != legAfterManeuver
                 // a maneuver at the start line is not to be considered a MARK_PASSING maneuver; show a tack as a tack
@@ -2042,7 +2043,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 && legAfterManeuver.getLeg().getFrom() != getRace().getCourse().getFirstWaypoint()) {
             maneuverType = ManeuverType.MARK_PASSING;
             waypointPassed = legAfterManeuver.getLeg().getFrom();
-            sideToWhichWaypointWasPassed = totalCourseChangeInDegrees < 0 ? Tack.PORT : Tack.STARBOARD;
+            sideToWhichWaypointWasPassed = totalCourseChangeInDegrees < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
         } else if (Math.abs(totalCourseChangeInDegrees) > PENALTY_CIRCLE_DEGREES_THRESHOLD) {
             maneuverType = ManeuverType.PENALTY_CIRCLE;
             if (legBeforeManeuver != null) {

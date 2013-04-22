@@ -1290,7 +1290,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDTO row) {
-            return getField().get(row) == null ? null : getField().get(row).name();
+            return getField().get(row) == null ? null : getField().get(row) == Tack.PORT ? stringMessages.portTack() : stringMessages.starboardTack();
         }
     }
 

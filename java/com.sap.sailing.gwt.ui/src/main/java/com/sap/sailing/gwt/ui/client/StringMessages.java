@@ -542,4 +542,8 @@ public interface StringMessages extends Messages {
     String speedOverGroundWhenPassingStartTooltip();
     String startTack();
     String startTackTooltip();
+    String portTack();
+    String starboardTack();
+    String portSide();
+    String starboardSide();
 }
