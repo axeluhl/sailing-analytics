@@ -166,10 +166,10 @@ public class DomainFactoryImpl implements DomainFactory {
                     String mark1UUID = controlPointMetadata.get("P1.UUID");
                     String mark2UUID = controlPointMetadata.get("P2.UUID");
                     final String name1 = controlPointName + " (1)";
-                    final Serializable id1 = mark1UUID == null ? name1 : mark1UUID;
+                    final Serializable id1 = mark1UUID == null ? name1 : UUID.fromString(mark1UUID);
                     Mark mark1 = baseDomainFactory.getOrCreateMark(id1, name1, type1, color1, shape1, pattern1);
                     final String name2 = controlPointName + " (2)";
-                    final Serializable id2 = mark2UUID == null ? name2 : mark2UUID;
+                    final Serializable id2 = mark2UUID == null ? name2 : UUID.fromString(mark2UUID);
                     Mark mark2 = baseDomainFactory.getOrCreateMark(id2, name2, type2, color2, shape2, pattern2);
                     domainControlPoint = baseDomainFactory.createGate(controlPoint.getId(), mark1, mark2, controlPointName);
                 } else {
