@@ -545,4 +545,5 @@ public interface StringMessages extends Messages {
     String nationality();
     String numberMustBePositive();
     String pleaseEnterANumber();
+    String competitorsFilter();
 }

@@ -284,6 +284,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     }
 
     private void updateCompetitorsFilterControlState(CompetitorsFilterSets filterSets) {
+        String competitorsFilterTitle = stringMessages.competitorsFilter();
         FilterSet<CompetitorDTO> activeFilterSet = filterSets.getActiveFilterSet();
         if(activeFilterSet != null) {
             lastActiveCompetitorFilterSet = activeFilterSet;
@@ -295,14 +296,14 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         competitorsFilterCheckBox.setValue(activeFilterSet != null, false /* fireChangeValue*/);
         
         if(lastActiveCompetitorFilterSet != null) {
-            competitorsFilterCheckBox.setText("Competitors Filter" + "(" + lastActiveCompetitorFilterSet.getName() + ")");
+            competitorsFilterCheckBox.setText(competitorsFilterTitle + "(" + lastActiveCompetitorFilterSet.getName() + ")");
         } else {
-            competitorsFilterCheckBox.setText("Competitors Filter");            
+            competitorsFilterCheckBox.setText(competitorsFilterTitle);            
         }
     }
     
     private void addCompetitorsFilterControl(Panel parentPanel) {
-        String competitorsFilterTitle = "Competitors filter";
+        String competitorsFilterTitle = stringMessages.competitorsFilter();
         competitorsFilterCheckBox = new CheckBox(competitorsFilterTitle);
         competitorsFilterCheckBox.getElement().getStyle().setFloat(Style.Float.LEFT);
 
@@ -331,18 +332,18 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
 
         parentPanel.add(competitorsFilterCheckBox);
 
-        Button settingsButton = new Button("");
-        settingsButton.addClickHandler(new ClickHandler() {
+        Button filterButton = new Button("");
+        filterButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 showEditCompetitorsFiltersDialog();
             }
         });
-        settingsButton.addStyleName("raceBoardNavigation-settingsButton");
-        settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        settingsButton.setTitle("Competitors filter");
+        filterButton.addStyleName("raceBoardNavigation-filterButton");
+        filterButton.getElement().getStyle().setFloat(Style.Float.LEFT);
+        filterButton.setTitle(competitorsFilterTitle);
         
-        parentPanel.add(settingsButton);
+        parentPanel.add(filterButton);
         updateCompetitorsFilterControlState(competitorsFilterSets);
     }
     

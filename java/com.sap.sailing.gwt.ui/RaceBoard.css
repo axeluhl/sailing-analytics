@@ -196,6 +196,24 @@ img.openColumn {
     cursor: pointer;
 }
 
+.raceBoardNavigation-filterButton {
+	background: url(images/filter_white.png), url(images/btn-cta-orangeleft.png);
+	background-position: center, center 0;
+	background-repeat: no-repeat, repeat-x;
+	width: 27px;
+	height: 23px;	
+    margin: 0 12px 0 1px;
+	-webkit-border-radius: 0px 3px 3px 0px;
+	border-radius: 0px 3px 3px 0px; 
+}
+
+.raceBoardNavigation-filterButton:hover {
+	background-image: url(images/filter_white.png), url(images/btn-cta-orangeleft.png);
+	background-position: center, center -30px;
+	background-repeat: no-repeat, repeat-x;
+    cursor: pointer;
+}
+
 .raceBoardNavigation-innerElement {
     background: url("images/btn-cta-orangeleft.png") repeat-x scroll center 0 transparent;
 	border-bottom-left-radius: 3px;
