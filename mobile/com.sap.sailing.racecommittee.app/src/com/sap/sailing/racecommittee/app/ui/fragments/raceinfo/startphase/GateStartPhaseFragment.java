@@ -101,7 +101,7 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
         }
         lineOpeningTimeLabel = (TextView) getView().findViewById(R.id.lineOpeningTimeLabel);
         if(getRace().getState().getGateLineOpeningTime()!=null){
-            lineOpeningTimeLabel.setText(getRace().getState().getGateLineOpeningTime().toString());
+            lineOpeningTimeLabel.setText(String.valueOf(getRace().getState().getGateLineOpeningTime()/(60 * 1000))+" minutes");
         }
         pathFinderButton.setOnClickListener(new OnClickListener() {
 
@@ -212,36 +212,6 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
         fragment.show(fragmentManager, "dialogAPMode");
     }
 
-    /*@Override
-    public void onAPDown() {
-        displayedFlag.setVisibility(View.INVISIBLE);
-        
-        resetTimeButton.setEnabled(false);
-        resetTimeButton.setVisibility(View.GONE);
-    }
-
-    @Override
-    public void onEssThreeUp() {
-        displayedFlag.setVisibility(View.VISIBLE);
-        displayedFlag.setImageResource(R.drawable.three_min_flag);
-        
-        nextToBeDisplayedFlag.setImageResource(R.drawable.two_min_flag);
-    }
-
-    @Override
-    public void onEssTwoUp() {
-        displayedFlag.setImageResource(R.drawable.two_min_flag);
-        
-        nextToBeDisplayedFlag.setImageResource(R.drawable.one_min_flag);
-    }
-
-    @Override
-    public void onEssOneUp() {
-        displayedFlag.setImageResource(R.drawable.one_min_flag);
-        
-        nextToBeDisplayedFlag.setVisibility(View.INVISIBLE);
-    }*/
-
     @Override
     public void onClassOverGolfUp() {
         displayedFlag.setVisibility(View.VISIBLE);
@@ -272,7 +242,7 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
     @Override
     public void updateGateLineOpeningTimeLabel() {
         if (getRace().getState().getGateLineOpeningTime() != null) {
-            lineOpeningTimeLabel.setText(getRace().getState().getGateLineOpeningTime().toString());
+            lineOpeningTimeLabel.setText(String.valueOf(getRace().getState().getGateLineOpeningTime()/(60 * 1000))+" minutes");
         }
     }
 }
