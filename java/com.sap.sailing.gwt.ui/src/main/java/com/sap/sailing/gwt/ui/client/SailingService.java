@@ -257,15 +257,17 @@ public interface SailingService extends RemoteService {
 
     WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier);
 
-    List<String> getFregResultUrls();
+    List<String> getResultImportUrls(String resultProviderName);
 
-    void removeFregURLs(Set<String> toRemove) throws Exception;
+    void removeResultImportURLs(String resultProviderName, Set<String> toRemove) throws Exception;
 
-    void addFragUrl(String result) throws Exception;
+    void addResultImportUrl(String resultProviderName, String url) throws Exception;
 
     Void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment);
 
+    List<String> getUrlResultProviderNames();
+    
     void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, NauticalSide>> controlPoints);
 
     void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd);

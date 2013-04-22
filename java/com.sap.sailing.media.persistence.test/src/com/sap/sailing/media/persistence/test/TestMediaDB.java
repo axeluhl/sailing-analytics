@@ -12,11 +12,10 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.persistence.media.DBMediaTrack;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MimeType;
+import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack.MimeType;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-
 import static org.hamcrest.core.Is.is;
 
 public class TestMediaDB extends AbstractMongoDBTest {

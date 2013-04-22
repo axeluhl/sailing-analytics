@@ -203,6 +203,13 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          unpack="false"/>
 
    <plugin
+         id="com.sap.sailing.resultimport"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+         
+   <plugin
          id="com.sap.sailing.kiworesultimport"
          download-size="0"
          install-size="0"
@@ -224,6 +231,13 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          unpack="false"/>
 
    <plugin
+         id="com.sap.sailing.barbados.resultimport"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="com.sap.sailing.monitoring"
          download-size="0"
          install-size="0"
@@ -236,5 +250,4 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
 </feature>

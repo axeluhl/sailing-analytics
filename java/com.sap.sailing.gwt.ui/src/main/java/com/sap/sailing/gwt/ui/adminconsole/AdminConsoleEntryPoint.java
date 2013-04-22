@@ -13,8 +13,8 @@ import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.shared.panels.UserStatusPanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.panels.UserStatusPanel;
 
 public class AdminConsoleEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
     private Set<RegattaDisplayer> regattaDisplayers;
@@ -101,9 +101,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.add(leaderboardConfigPanel, stringMessages.leaderboardConfiguration(), /* asHTML */ false);
         regattaDisplayers.add(leaderboardConfigPanel);
         
-        FregResultImportUrlPanel resultImportPanel = new FregResultImportUrlPanel(sailingService, this, stringMessages);
-        //resultImportPanel.ensureDebugId("FregResultImport");
-        tabPanel.add(resultImportPanel, stringMessages.fregResultImportUrls(), /* asHTML */ false);
+        tabPanel.add(new ResultImportUrlsManagementPanel(sailingService, this, stringMessages), stringMessages.resultImportUrls(), /* asHTML */ false);
         
         ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, this, stringMessages);
         //replicationPanel.ensureDebugId("ReplicationManagement");

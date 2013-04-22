@@ -443,7 +443,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         controlPointPositionPoller.cancel(/* mayInterruptIfRunning */ false);
         controller.stop(/* abortStored */ true);
         for (Receiver receiver : receivers) {
-            receiver.stopPreemptively();
+            receiver.stopAfterProcessingQueuedEvents();
         }
         ioThread.join(3000); // wait no more than three seconds
         if (ioThread.isAlive()) {

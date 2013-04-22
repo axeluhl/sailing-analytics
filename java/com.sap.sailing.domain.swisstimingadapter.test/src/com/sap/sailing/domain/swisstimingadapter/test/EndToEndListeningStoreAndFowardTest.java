@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -22,7 +23,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -31,6 +31,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
@@ -42,6 +43,7 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.StoreAndForward;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -50,6 +52,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -121,15 +124,7 @@ public class EndToEndListeningStoreAndFowardTest {
         String scriptName = "/InitMessagesScript.txt";
         setUpUsingScript(racesToTrack, scriptName);
 
-        Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Regatta> allRegattas = racingEventService.getAllRegattas();
-        for (Regatta regatta : allRegattas) {
-            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
-            Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
-            for (TrackedRace trackedRace : trackedRaces) {
-                allTrackedRaces.add(trackedRace);
-            }
-        }
+        Set<TrackedRace> allTrackedRaces = getAllTrackedRaces();
         assertEquals(2, Util.size(allTrackedRaces));
         Set<String> raceIDs = new HashSet<String>();
         for (TrackedRace trackedRace : allTrackedRaces) {
@@ -162,15 +157,7 @@ public class EndToEndListeningStoreAndFowardTest {
     }
 
     private void coreOfTestLongRaceLog() {
-        Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Regatta> allRegattas = racingEventService.getAllRegattas();
-        for (Regatta regatta : allRegattas) {
-            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
-            Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
-            for (TrackedRace trackedRace : trackedRaces) {
-                allTrackedRaces.add(trackedRace);
-            }
-        }
+        Set<TrackedRace> allTrackedRaces = getAllTrackedRaces();
         assertEquals(1, Util.size(allTrackedRaces));
         Set<RaceDefinition> races = raceHandles.iterator().next().getRaceTracker().getRaces();
         assertEquals(1, races.size());
@@ -226,15 +213,7 @@ public class EndToEndListeningStoreAndFowardTest {
         String scriptName2 = "/SailMasterDataInterface-ExampleAsText.txt";
         String scriptNewCourseConfig = "/SailMasterDataInterfaceNewCourseConfig.txt";
         setUpUsingScript(racesToTrack, scriptName1, scriptName2, scriptNewCourseConfig);
-        Set<TrackedRace> allNewTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Regatta> allNewEvents = racingEventService.getAllRegattas();
-        for (Regatta event : allNewEvents) {
-            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(event);
-            Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
-            for (TrackedRace trackedRace : trackedRaces) {
-                allNewTrackedRaces.add(trackedRace);
-            }
-        }
+        Set<TrackedRace> allNewTrackedRaces = getAllTrackedRaces();
         assertEquals(1, Util.size(allNewTrackedRaces));
         Set<RaceDefinition> races = raceHandles.iterator().next().getRaceTracker().getRaces();
         assertEquals(1, races.size());
@@ -287,15 +266,7 @@ public class EndToEndListeningStoreAndFowardTest {
         String[] racesToTrack = new String[] { "W4702" };
         setUpUsingScript(racesToTrack, "/DuplicateCCG.txt");
 
-        Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Regatta> allEvents = racingEventService.getAllRegattas();
-        for (Regatta event : allEvents) {
-            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(event);
-            Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
-            for (TrackedRace trackedRace : trackedRaces) {
-                allTrackedRaces.add(trackedRace);
-            }
-        }
+        Set<TrackedRace> allTrackedRaces = getAllTrackedRaces();
         assertEquals(1, allTrackedRaces.size());
         TrackedRace trackedRace = allTrackedRaces.iterator().next();
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
@@ -310,15 +281,7 @@ public class EndToEndListeningStoreAndFowardTest {
         final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         String[] racesToTrack = new String[] { "SAM005923" };
         setUpUsingScript(racesToTrack, "/TMDBeforeStartTimeExample.txt");
-        Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Regatta> allEvents = racingEventService.getAllRegattas();
-        for (Regatta event : allEvents) {
-            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(event);
-            Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
-            for (TrackedRace trackedRace : trackedRaces) {
-                allTrackedRaces.add(trackedRace);
-            }
-        }
+        Set<TrackedRace> allTrackedRaces = getAllTrackedRaces();
         assertEquals(1, allTrackedRaces.size());
         TrackedRace trackedRace = allTrackedRaces.iterator().next();
         assertEquals("SAM005923", trackedRace.getRace().getName());
@@ -331,12 +294,8 @@ public class EndToEndListeningStoreAndFowardTest {
             }
         }
     }
-    
-    @Test
-    public void testTMDMessageBeforeReceivingStartTimeWithManyTMDs() throws Exception {
-        final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-        String[] racesToTrack = new String[] { "SAM005923" };
-        setUpUsingScript(racesToTrack, "/TMDBeforeStartTimeExample_ManyTMDs.txt");
+
+    private Set<TrackedRace> getAllTrackedRaces() {
         Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
         Iterable<Regatta> allEvents = racingEventService.getAllRegattas();
         for (Regatta event : allEvents) {
@@ -346,6 +305,15 @@ public class EndToEndListeningStoreAndFowardTest {
                 allTrackedRaces.add(trackedRace);
             }
         }
+        return allTrackedRaces;
+    }
+    
+    @Test
+    public void testTMDMessageBeforeReceivingStartTimeWithManyTMDs() throws Exception {
+        final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        String[] racesToTrack = new String[] { "SAM005923" };
+        setUpUsingScript(racesToTrack, "/TMDBeforeStartTimeExample_ManyTMDs.txt");
+        Set<TrackedRace> allTrackedRaces = getAllTrackedRaces();
         assertEquals(1, allTrackedRaces.size());
         TrackedRace trackedRace = allTrackedRaces.iterator().next();
         assertEquals("SAM005923", trackedRace.getRace().getName());
@@ -365,15 +333,7 @@ public class EndToEndListeningStoreAndFowardTest {
         String[] racesToTrack = new String[] { "W4702" };
         String scriptName2 = "/SailMasterDataInterfaceRACZero.txt";
         setUpUsingScript(racesToTrack, scriptName2);
-        Set<TrackedRace> allNewTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Regatta> allNewEvents = racingEventService.getAllRegattas();
-        for (Regatta event : allNewEvents) {
-            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(event);
-            Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
-            for (TrackedRace trackedRace : trackedRaces) {
-                allNewTrackedRaces.add(trackedRace);
-            }
-        }
+        Set<TrackedRace> allNewTrackedRaces = getAllTrackedRaces();
         assertEquals(0, Util.size(allNewTrackedRaces));
     }
 
@@ -383,16 +343,7 @@ public class EndToEndListeningStoreAndFowardTest {
         String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
         String scriptName2 = "/SailMasterDataInterface-ExampleAsText.txt";
         setUpUsingScript(racesToTrack, scriptName1, scriptName2);
-
-        Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Regatta> allEvents = racingEventService.getAllRegattas();
-        for (Regatta event : allEvents) {
-            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(event);
-            Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
-            for (TrackedRace trackedRace : trackedRaces) {
-                allTrackedRaces.add(trackedRace);
-            }
-        }
+        assertFalse(getAllTrackedRaces().isEmpty());
     }
 
     private void setUpUsingScript(String[] racesToTrack, String... scriptNames) throws Exception {
@@ -411,8 +362,21 @@ public class EndToEndListeningStoreAndFowardTest {
             InputStream is = getClass().getResourceAsStream(scriptName);
             scriptedMessagesReader.addMessagesFromTextFile(is);
         }
+        Set<TrackedRace> trackedRacesSoFar = new HashSet<>();
+        int i=0;
+        int numberOfMessages = scriptedMessagesReader.getMessages().size();
         for (String msg : scriptedMessagesReader.getMessages()) {
             transceiver.sendMessage(msg, sendingStream);
+            i++;
+            for (TrackedRace trackedRace : getAllTrackedRaces()) {
+                if (!trackedRacesSoFar.contains(trackedRace)) {
+                    trackedRacesSoFar.add(trackedRace);
+                    ((DynamicTrackedRace) trackedRace).setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, ((double) i) / (double) numberOfMessages));
+                }
+            }
+        }
+        for (TrackedRace trackedRace : getAllTrackedRaces()) {
+            ((DynamicTrackedRace) trackedRace).setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0));
         }
         transceiver.sendMessage(swissTimingFactory.createMessage(MessageType._STOPSERVER.name(), null), sendingStream);
         synchronized (connector) {

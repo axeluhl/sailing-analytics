@@ -405,11 +405,13 @@ public interface SailingServiceAsync {
 
     void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, NauticalSide>> controlPoints, AsyncCallback<Void> callback);
 
-    void getFregResultUrls(AsyncCallback<List<String>> asyncCallback);
+    void getResultImportUrls(String resultProviderName, AsyncCallback<List<String>> callback);
 
-    void removeFregURLs(Set<String> toRemove, AsyncCallback<Void> asyncCallback);
+    void removeResultImportURLs(String resultProviderName, Set<String> toRemove, AsyncCallback<Void> callback);
 
-    void addFragUrl(String result, AsyncCallback<Void> asyncCallback);
+    void addResultImportUrl(String resultProviderName, String url, AsyncCallback<Void> callback);
+
+    void getUrlResultProviderNames(AsyncCallback<List<String>> callback);
 
     void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd,
             AsyncCallback<Void> callback);
@@ -455,3 +457,4 @@ public interface SailingServiceAsync {
     void getEventByIdAsString(String eventIdAsString, AsyncCallback<EventDTO> asyncCallback);
     
 }
+
