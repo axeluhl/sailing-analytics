@@ -536,4 +536,5 @@ public interface StringMessages extends Messages {
     String tractracUsername();
     String tractracPassword();
     String flagStatus();
+    String additionalInformation();
 }

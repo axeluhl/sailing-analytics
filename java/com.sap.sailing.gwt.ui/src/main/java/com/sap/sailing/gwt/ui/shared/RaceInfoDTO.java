@@ -17,8 +17,8 @@ public class RaceInfoDTO implements IsSerializable {
     public boolean displayed;
     public RaceCourseDTO lastCourseDesign;
     public RaceIdentifier raceIdentifier;
-    public String additionalInformation;
-    
+    public String pathfinderId;
+    public Long gateLineOpeningTime;
     // for GWT serialization
     public RaceInfoDTO() { }
     
