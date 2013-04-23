@@ -41,6 +41,15 @@
 		<url-pattern>/rc/marks</url-pattern>
 	</servlet-mapping>
 	
+	<servlet>
+		<servlet-name>RCCurrentCourse</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.rc.CourseJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RCCurrentCourse</servlet-name>
+		<url-pattern>/rc/currentcourse</url-pattern>
+	</servlet-mapping>
+	
 	<!-- RACE COMMITTEE END -->
 
 	<servlet>
