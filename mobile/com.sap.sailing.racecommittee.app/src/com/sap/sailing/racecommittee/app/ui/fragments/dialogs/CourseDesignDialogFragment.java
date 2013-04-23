@@ -38,6 +38,7 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.RoundingDirection;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementListAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.DraggableCourseElementListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.MarkGridAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NamedComparator;
@@ -50,7 +51,7 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
     private MarkGridAdapter gridAdapter;
     private List<CourseListDataElement> courseElements;
     private List<CourseListDataElement> previousCourseElements;
-    private CourseElementListAdapter courseElementAdapter;
+    private DraggableCourseElementListAdapter courseElementAdapter;
     private CourseElementListAdapter previousCourseElementAdapter;
     private DragSortListView newCourseListView;
     private ListView previousCourseListView;
@@ -106,7 +107,7 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         previousCourseElements = new ArrayList<CourseListDataElement>();
 
         gridAdapter = new MarkGridAdapter(getActivity(), R.layout.welter_one_row_no_image, aMarkList);
-        courseElementAdapter = new CourseElementListAdapter(getActivity(), R.layout.welter_draggable_waypoint_item, courseElements);
+        courseElementAdapter = new DraggableCourseElementListAdapter(getActivity(), R.layout.welter_draggable_waypoint_item, courseElements);
         previousCourseElementAdapter = new CourseElementListAdapter(getActivity(), R.layout.welter_one_row_three_columns, previousCourseElements);
         
         loadMarks();
