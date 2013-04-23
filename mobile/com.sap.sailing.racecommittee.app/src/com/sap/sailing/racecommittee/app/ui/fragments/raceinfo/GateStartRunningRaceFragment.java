@@ -14,8 +14,6 @@ import android.widget.TextView;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagFinder;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartRunningRaceEventListener;
@@ -65,16 +63,13 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
         
         displayedFlag = (ImageView) getView().findViewById(R.id.currentlyDisplayedFlag);
         flagToBeDisplayed = (ImageView) getView().findViewById(R.id.flagToBeDisplayed);
-        
-        boolean golfFlagDisplayed = true;
-        for(RaceLogEvent event : getRace().getRaceLog().getFixes()){
-            if(event instanceof RaceLogFlagEvent){
-                RaceLogFlagEvent flagEvent = (RaceLogFlagEvent) event;
-                golfFlagDisplayed = flagEvent.getUpperFlag().equals(Flags.GOLF) && flagEvent.isDisplayed();
-                    
-            }
+
+        boolean golfFlagTakenDown = false;
+        LastFlagFinder lastFlagFinder = new LastFlagFinder(getRace().getRaceLog());
+        if (lastFlagFinder.getLastFlagEvent() != null) {
+            golfFlagTakenDown = lastFlagFinder.getLastFlagEvent().getUpperFlag().equals(Flags.GOLF) && !lastFlagFinder.getLastFlagEvent().isDisplayed();
         }
-        displayGolfFlag(golfFlagDisplayed);
+        displayGolfFlag(!golfFlagTakenDown);
         
         getRace().getState().getStartProcedure().setRunningRaceEventListener(this);
     }
@@ -175,7 +170,7 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
 
     @Override
     public void onGolfDown() {
-        displayedFlag.setVisibility(View.GONE);
+        displayGolfFlag(false);
     }
 
 }
