@@ -19,10 +19,12 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.RunningRaceEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartPhaseEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureRaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RunningRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.EssStartPhaseFragment;
 
 public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
@@ -311,6 +313,11 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     public Class<? extends RaceFragment> getStartphaseFragment() {
         return EssStartPhaseFragment.class;
     }
+    
+    @Override
+    public Class<? extends RaceFragment> getRunningRaceFragment() {
+        return RunningRaceFragment.class;
+    }
 
     @Override
     public void setStartPhaseEventListener(StartPhaseEventListener listener) {
@@ -332,6 +339,18 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
             result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_ap_flag_removed), millisecondsTillStart - startPhaseAPDownInterval);
         }
         return result;
+    }
+
+    @Override
+    public void dispatchAutomaticGateClose(TimePoint eventTime) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setRunningRaceEventListener(RunningRaceEventListener listener) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

@@ -18,5 +18,7 @@ public interface RaceStateChangedListener {
     void onPathfinderSelected();
 
     void onGateLineOpeningTimeChanged();
+    
+    void onGateLineOpeningTimeTrigger(TimePoint gateCloseTimePoint);
 
 }

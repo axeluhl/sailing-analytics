@@ -48,7 +48,14 @@ public interface StartProcedure {
     
     Class<? extends RaceFragment> getStartphaseFragment();
     
+    Class<? extends RaceFragment> getRunningRaceFragment();
+    
     void setStartPhaseEventListener(StartPhaseEventListener listener);
     
     Pair<String, Long> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart);
+
+    void dispatchAutomaticGateClose(TimePoint eventTime);
+
+    void setRunningRaceEventListener(RunningRaceEventListener listener);
+
 }

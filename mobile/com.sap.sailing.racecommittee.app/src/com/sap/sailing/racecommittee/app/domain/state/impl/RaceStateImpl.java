@@ -30,6 +30,7 @@ import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.racecommittee.app.domain.racelog.RaceLogChangedListener;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartProcedure;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 
@@ -184,6 +185,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public void onRaceStarted(TimePoint eventTime) {
         RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.RUNNING);
         this.raceLog.add(statusEvent);
+        notifyListenersAboutGateLineOpeningTimeTrigger();
     }
 
     @Override
@@ -310,13 +312,23 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
                 gateLineOpeningTimeInMillis);
         
         this.raceLog.add(event);
-
-        notifyListenersAboutGateLineOpeningTimeChange();
+        notifyListenersAboutGateLineOpeningTimeChanged();
     }
     
-    private void notifyListenersAboutGateLineOpeningTimeChange() {
+    private void notifyListenersAboutGateLineOpeningTimeChanged() {
         for (RaceStateChangedListener listener : stateChangedListeners) {
             listener.onGateLineOpeningTimeChanged();
+        }
+    }
+    
+    private void notifyListenersAboutGateLineOpeningTimeTrigger() {
+        for (RaceStateChangedListener listener : stateChangedListeners) {
+            Long gateLineOpeningTime = GateStartProcedure.startPhaseGolfDownStandardInterval;
+            if(this.getGateLineOpeningTime()!=null){
+                gateLineOpeningTime = this.getGateLineOpeningTime();
+            }
+                
+            listener.onGateLineOpeningTimeTrigger(this.getStartTime().plus(GateStartProcedure.startPhaseGolfDownStandardIntervalConstantSummand+gateLineOpeningTime));
         }
     }
 
