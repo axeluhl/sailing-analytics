@@ -110,6 +110,7 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         previousCourseElementAdapter = new CourseElementListAdapter(getActivity(), R.layout.welter_one_row_three_columns, previousCourseElements);
         
         loadMarks();
+        loadCourseOnServer();
 
         GridView gridView = (GridView) getView().findViewById(R.id.gridViewAssets);
         gridView.setAdapter(gridAdapter);
@@ -158,10 +159,6 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
 
         previousCourseListView = (ListView) getView().findViewById(R.id.listViewPreviousCourse);
         previousCourseListView.setAdapter(previousCourseElementAdapter);
-
-        if(InMemoryDataStore.INSTANCE.getLastPublishedCourseDesign() != null){
-            fillPreviousCourseElementsInList();
-        }
 
         takePreviousButton = (Button) getView().findViewById(R.id.takePreviousCourseDesignButton);
         takePreviousButton.setOnClickListener(new OnClickListener() {
@@ -229,6 +226,25 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         super.onResume();
         onLoadMarksSucceeded(hostActivity.getDataManager().getDataStore().getMarks());
     }
+    
+    private void loadCourseOnServer() {
+        hostActivity.getDataManager().loadCourse(getRace(), new LoadClient<CourseBase>() {
+
+            @Override
+            public void onLoadFailed(Exception reason) {
+                CourseBase lastPublishedCourseDesign = InMemoryDataStore.INSTANCE.getLastPublishedCourseDesign();
+                if(lastPublishedCourseDesign != null) {
+                    fillPreviousCourseElementsInList(lastPublishedCourseDesign);
+                }
+            }
+
+            @Override
+            public void onLoadSucceded(CourseBase data) {
+                fillPreviousCourseElementsInList(data);
+            }
+            
+        });
+    }
 
     private void loadMarks() {
         hostActivity.getDataManager().loadMarks(getRace(), new LoadClient<Collection<Mark>>() {
@@ -252,8 +268,7 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         gridAdapter.notifyDataSetChanged();
     }
 
-    private void fillPreviousCourseElementsInList() {
-        CourseBase previousCourseData = InMemoryDataStore.INSTANCE.getLastPublishedCourseDesign();
+    private void fillPreviousCourseElementsInList(CourseBase previousCourseData) {
         if (previousCourseData != null) {
             previousCourseElements.clear();
             previousCourseElements.addAll(convertCourseDesignToCourseElements(previousCourseData));

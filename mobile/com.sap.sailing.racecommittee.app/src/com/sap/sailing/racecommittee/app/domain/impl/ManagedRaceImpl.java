@@ -24,6 +24,7 @@ public class ManagedRaceImpl implements ManagedRace {
     private ManagedRaceIdentifier identifier;	
     private RaceState state;
     private Iterable<Competitor> competitors;
+    private CourseBase courseOnServer;
 
     public ManagedRaceImpl(ManagedRaceIdentifier identifier, PassAwareRaceLog raceLog, Iterable<Competitor> competitors) {
         //TODO To be changed when the start procedure for a regatta/leaderboard can be selected in the GWT Admin Console on backend side
@@ -36,6 +37,7 @@ public class ManagedRaceImpl implements ManagedRace {
         this.identifier = identifier;
         this.state = state;
         this.competitors = competitors;
+        this.courseOnServer = null;
     }
 
     public Serializable getId() {
@@ -86,6 +88,16 @@ public class ManagedRaceImpl implements ManagedRace {
     @Override
     public Iterable<Competitor> getCompetitors() {
         return competitors;
+    }
+
+    @Override
+    public CourseBase getCourseOnServer() {
+        return courseOnServer;
+    }
+
+    @Override
+    public void setCourseOnServer(CourseBase course) {
+        courseOnServer = course;
     }
 
 }
