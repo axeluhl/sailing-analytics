@@ -10,7 +10,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.GwtHttpRequestUtils;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 
 public class TVEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
@@ -20,6 +22,7 @@ public class TVEntryPoint extends AbstractEntryPoint {
     private String leaderboardName;
     private String leaderboardGroupName;
     private TVViewController tvViewController;
+    private RaceBoardViewConfiguration raceboardViewConfig;
     
     @Override
     public void doOnModuleLoad() {     
@@ -29,8 +32,17 @@ public class TVEntryPoint extends AbstractEntryPoint {
                 && Window.Location.getParameter(PARAM_SHOW_RACE_DETAILS).equalsIgnoreCase("true");
         final boolean embedded = Window.Location.getParameter(PARAM_EMBEDDED) != null
                 && Window.Location.getParameter(PARAM_EMBEDDED).equalsIgnoreCase("true");
-        final long delayToLiveMillis = Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS) != null ?
-                Long.valueOf(Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS)) : 5000l; // default 5s
+        final long delayToLiveMillis = Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS) != null ? Long
+                .valueOf(Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS)) : 5000l; // default 5s
+        boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(
+                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_LEADERBOARD, true /* default */);
+        boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(
+                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default */);
+        boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(
+                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default */);
+        raceboardViewConfig = new RaceBoardViewConfiguration(RaceBoardViewConfiguration.ViewModes.ONESCREEN, showLeaderboard, showWindChart,
+                showCompetitorsChart);
+
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> leaderboardNames) {
@@ -65,7 +77,7 @@ public class TVEntryPoint extends AbstractEntryPoint {
         }
         
         tvViewController = new TVViewController(sailingService, mediaService, stringMessages, this, leaderboardGroupName,
-                leaderboardName, userAgent, logoAndTitlePanel, mainPanel, delayToLiveMillis, showRaceDetails);
+                leaderboardName, userAgent, logoAndTitlePanel, mainPanel, delayToLiveMillis, showRaceDetails, raceboardViewConfig);
         tvViewController.updateTvView(TVViews.Leaderboard);
     }
 }
