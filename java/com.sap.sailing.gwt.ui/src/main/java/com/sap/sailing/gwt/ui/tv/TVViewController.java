@@ -61,10 +61,11 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     /**
      * @param leaderboardGroupName TODO
      * @param logoAndTitlePanel allowed to be <code>null</code>
+     * @param raceboardViewConfig TODO
      */
     public TVViewController(SailingServiceAsync sailingService, MediaServiceAsync mediaService, StringMessages stringMessages, ErrorReporter errorReporter,
             String leaderboardGroupName, String leaderboardName, UserAgentDetails userAgent,
-            LogoAndTitlePanel logoAndTitlePanel, DockLayoutPanel dockPanel, long delayToLiveInMillis, boolean showRaceDetails) {
+            LogoAndTitlePanel logoAndTitlePanel, DockLayoutPanel dockPanel, long delayToLiveInMillis, boolean showRaceDetails, RaceBoardViewConfiguration raceboardViewConfig) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
@@ -126,7 +127,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, null, timer, raceSelectionModel, leaderboardName, null,
-                new RaceBoardViewConfiguration(),  errorReporter, stringMessages, userAgent, raceTimesInfoProvider);
+                new RaceBoardViewConfiguration(), errorReporter, stringMessages, userAgent, raceTimesInfoProvider);
         return raceBoardPanel;
     }
     
