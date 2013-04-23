@@ -24,9 +24,8 @@ import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.CourseDesignDialogFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.GateLineOpeningTimeChangeUiListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.IndividualRecallUiListener;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PathfinderSelectedUiListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.GateStartUiListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
@@ -249,16 +248,22 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
 
     @Override
     public void onPathfinderSelected() {
-        if (infoFragment instanceof PathfinderSelectedUiListener) {
-            ((PathfinderSelectedUiListener) infoFragment).updatePathfinderLabel();
+        if (infoFragment instanceof GateStartUiListener) {
+            ((GateStartUiListener) infoFragment).updatePathfinderLabel();
         }
     }
 
     @Override
     public void onGateLineOpeningTimeChanged() {
-        if (infoFragment instanceof GateLineOpeningTimeChangeUiListener) {
-            ((GateLineOpeningTimeChangeUiListener) infoFragment).updateGateLineOpeningTimeLabel();
+        if (infoFragment instanceof GateStartUiListener) {
+            ((GateStartUiListener) infoFragment).updateGateLineOpeningTimeLabel();
         }
+    }
+
+    @Override
+    public void onGateLineOpeningTimeTrigger(TimePoint gateCloseTimePoint) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

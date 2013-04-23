@@ -16,10 +16,12 @@ import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.RunningRaceEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartPhaseEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureRaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartRunningRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.GateStartPhaseFragment;
 
 public class GateStartProcedure implements StartProcedure {
@@ -28,19 +30,21 @@ public class GateStartProcedure implements StartProcedure {
     private final static long startPhasePapaUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhasePapaDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseClassOverGolfDownInterval = 0 * 60 * 1000; // minutes * seconds * milliseconds
-    
-    private final static long individualRecallRemovalInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
+    public final static long startPhaseGolfDownStandardInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
+    public final static long startPhaseGolfDownStandardIntervalConstantSummand = 3 * 60 * 1000; // minutes * seconds * milliseconds
     
     private List<Long> startProcedureEventIntervals;
     private PassAwareRaceLog raceLog;
     private StartProcedureRaceStateChangedListener raceStateChangedListener;
     private GateStartPhaseEventListener startPhaseEventListener;
+    private GateStartRunningRaceEventListener runningRaceEventListener;
     
     public GateStartProcedure(PassAwareRaceLog raceLog) {
         this.raceLog = raceLog;
         startProcedureEventIntervals = new ArrayList<Long>();
         raceStateChangedListener = null;
         startPhaseEventListener = null;
+        runningRaceEventListener = null;
         
         startProcedureEventIntervals.add(startPhaseClassOverGolfUpIntervall);
         startProcedureEventIntervals.add(startPhasePapaUpInterval);
@@ -162,6 +166,7 @@ public class GateStartProcedure implements StartProcedure {
         }
     }
     
+    @Override
     public void dispatchAutomaticRaceEndEvent(TimePoint automaticRaceEnd) {
 
     }
@@ -239,48 +244,28 @@ public class GateStartProcedure implements StartProcedure {
     }
 
     @Override
-    public void setIndividualRecall(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
-                raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, /*isDisplayed*/true);
-        raceLog.add(event);
-        
-        TimePoint individualRecallRemovalFireTimePoint = eventTime.plus(individualRecallRemovalInterval);
-        
-        if (raceStateChangedListener != null) {
-            raceStateChangedListener.onIndividualRecall(individualRecallRemovalFireTimePoint);
-        }
-    }
-
-    @Override
-    public void dispatchFiredIndividualRecallRemovalEvent(TimePoint individualRecallDisplayedTime, TimePoint eventTime) {
-        if (individualRecallDisplayedTime != null) {
-            long interval = eventTime.asMillis() - individualRecallDisplayedTime.asMillis();
-            
-            if (interval == individualRecallRemovalInterval) {
-                setIndividualRecallRemoval(eventTime);
-            }
-        }
-    }
-
-    @Override
     public void setIndividualRecallRemoval(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
-                raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, /*isDisplayed*/false);
-        raceLog.add(event);
         
-        if (raceStateChangedListener != null) {
-            raceStateChangedListener.onIndividualRecallRemoval();
-        }
     }
 
     @Override
     public Class<? extends RaceFragment> getStartphaseFragment() {
         return GateStartPhaseFragment.class;
     }
+    
+    @Override
+    public Class<? extends RaceFragment> getRunningRaceFragment() {
+        return GateStartRunningRaceFragment.class;
+    }
 
     @Override
     public void setStartPhaseEventListener(StartPhaseEventListener listener) {
         startPhaseEventListener = (GateStartPhaseEventListener) listener;
+    }
+    
+    @Override
+    public void setRunningRaceEventListener(RunningRaceEventListener listener) {
+        runningRaceEventListener = (GateStartRunningRaceEventListener) listener;
     }
 
     @Override
@@ -296,6 +281,27 @@ public class GateStartProcedure implements StartProcedure {
             result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_gate_class_over_golf_display), millisecondsTillStart - startPhaseClassOverGolfUpIntervall);
         }
         return result;
+    }
+
+    @Override
+    public void setIndividualRecall(TimePoint eventTime) {
+        
+    }
+
+    @Override
+    public void dispatchFiredIndividualRecallRemovalEvent(TimePoint individualRecallDisplayedTime, TimePoint eventTime) {
+        
+    }
+
+    @Override
+    public void dispatchAutomaticGateClose(TimePoint eventTime) {
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+                raceLog.getCurrentPassId(), Flags.GOLF, Flags.NONE, /*isDisplayed*/false);
+        raceLog.add(event);
+        
+        if (runningRaceEventListener != null) {
+            runningRaceEventListener.onGolfDown();
+        }
     }
 
 }

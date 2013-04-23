@@ -247,12 +247,18 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 
     @Override
     public void onPathfinderSelected() {
-        notifyDataChanged();
+        // do nothing
     }
 
     @Override
     public void onGateLineOpeningTimeChanged() {
         notifyDataChanged();
+    }
+
+    @Override
+    public void onGateLineOpeningTimeTrigger(TimePoint gateCloseTimePoint) {
+        // do nothing
+        
     }
 
     /*

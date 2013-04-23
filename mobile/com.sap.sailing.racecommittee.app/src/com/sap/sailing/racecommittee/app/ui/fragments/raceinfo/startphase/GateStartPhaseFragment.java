@@ -25,15 +25,14 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartPha
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.GateLineOpeningTimeChangeUiListener;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PathfinderSelectedUiListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.GateStartUiListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseLineOpeningTimeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChoosePathFinderDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
-public class GateStartPhaseFragment extends RaceFragment implements GateStartPhaseEventListener, PathfinderSelectedUiListener, GateLineOpeningTimeChangeUiListener {
+public class GateStartPhaseFragment extends RaceFragment implements GateStartPhaseEventListener, GateStartUiListener {
 
     private RaceInfoListener infoListener;
     

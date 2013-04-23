@@ -55,4 +55,9 @@ public class RaceStateListener implements RaceStateChangedListener {
     public void onGateLineOpeningTimeChanged() {
         // do nothing
     }
+
+    @Override
+    public void onGateLineOpeningTimeTrigger(TimePoint gateCloseTimePoint) {
+        service.handleGateLineOpeningTimeChanged(race, gateCloseTimePoint);
+    }
 }

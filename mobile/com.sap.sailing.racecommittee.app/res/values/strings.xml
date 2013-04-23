@@ -9,6 +9,7 @@
     <string name="intentActionAlarmAction">com.sap.sailing.racecommittee.app.action.alarmAction</string>
     <string name="intentActionIndividualRecallRemoval">com.sap.sailing.racecommittee.app.action.individualrecallremovalaction</string>
     <string name="intentActionAutomaticRaceEnd">com.sap.sailing.racecommittee.app.action.automaticRaceEnd</string>
+    <string name="intentActionAutomaticGateClose">com.sap.sailing.racecommittee.app.action.automaticGateClose</string>
     
     <string name="hello">Hello World, RaceCommitteeActivity!</string>
     <string name="running_on_course">(on course %s)</string>
