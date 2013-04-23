@@ -499,4 +499,20 @@ public interface TrackedRace extends Serializable {
      */
     void setCourseDesignChangedListener(CourseDesignChangedListener listener);
 
+    /**
+     * Tells how far the given <code>competitor</code> was from the start line at the given <code>timePoint</code>.
+     * Using the {@link #getStartOfRace() race start time} for <code>timePoint</code>, this tells the competitor's
+     * distance to the line when the race was started.
+     * <p>
+     * 
+     * The distance to the line is calculated by projecting the competitor's position onto the line orthogonally and
+     * computing the distance of the projected position and the competitor's position.
+     * <p
+     * .
+     * 
+     * Should the course be empty, <code>null</code> is returned. If the course's first waypoint is not a line or gate,
+     * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
+     * returned. If the competitor's position cannot be determined, <code>null</code> is returned.
+     */
+    Distance getDistanceToStartLine(Competitor competitor, TimePoint timePoint);
 }
