@@ -275,6 +275,24 @@ public class RegattaOverviewTableComposite extends Composite {
             }
         };
         
+        TextColumn<RegattaOverviewEntryDTO> raceAddditionalInformationColumn = new TextColumn<RegattaOverviewEntryDTO>() {
+            @Override
+            public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                StringBuffer additionalInformation = new StringBuffer();
+                if(entryDTO.raceInfo.pathfinderId!=null){
+                    additionalInformation.append("Pathfinder: "+entryDTO.raceInfo.pathfinderId);
+                }
+                if(entryDTO.raceInfo.pathfinderId!=null && entryDTO.raceInfo.gateLineOpeningTime!=null){
+                    additionalInformation.append("  /  ");
+                }
+                if(entryDTO.raceInfo.gateLineOpeningTime!=null){
+                    additionalInformation.append("GateLineOpeningTime: "+(entryDTO.raceInfo.gateLineOpeningTime/(60*1000))+" minutes");
+                }
+                    
+                return additionalInformation.toString();
+            }
+        };
+        
 
         table.addColumn(courseAreaColumn, stringMessages.courseArea());
         table.addColumn(regattaNameColumn, stringMessages.boatClass()); // For sailors the boat class also contains additional infos such as woman/man, e.g. Laser Radial Woman or Laser Radial Men
@@ -285,6 +303,7 @@ public class RegattaOverviewTableComposite extends Composite {
         table.addColumn(lastUpperFlagColumn, stringMessages.lastUpperFlag());
         table.addColumn(lastLowerFlagColumn, stringMessages.lastLowerFlag());
         table.addColumn(lastFlagDirectionColumn, stringMessages.flagStatus());
+        table.addColumn(raceAddditionalInformationColumn, stringMessages.additionalInformation());
         table.addColumnSortHandler(regattaOverviewListHandler);
 
         return table;

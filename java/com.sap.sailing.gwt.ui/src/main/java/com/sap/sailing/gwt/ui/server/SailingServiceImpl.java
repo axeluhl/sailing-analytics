@@ -125,9 +125,11 @@ import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
@@ -1106,20 +1108,31 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
+
             PassAwareRaceLogImpl passAwareRaceLog = new PassAwareRaceLogImpl(raceLog);
             StartTimeFinder startTimeFinder = new StartTimeFinder(passAwareRaceLog);
-            if (startTimeFinder.getStartTime() != null) {
+            if(startTimeFinder.getStartTime()!=null){
                 raceInfoDTO.startTime = startTimeFinder.getStartTime().asDate();
             }
+
             RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(passAwareRaceLog);
             raceInfoDTO.lastStatus = raceStatusAnalyzer.getStatus();
-            for(RaceLogEvent event : passAwareRaceLog.getFixes()){
-                if(event instanceof RaceLogFlagEvent){
-                    raceInfoDTO.lastUpperFlag = ((RaceLogFlagEvent) event).getUpperFlag();
-                    raceInfoDTO.lastLowerFlag = ((RaceLogFlagEvent) event).getLowerFlag();
-                    raceInfoDTO.displayed = ((RaceLogFlagEvent) event).isDisplayed();
-                }
+
+            PathfinderFinder pathfinderFinder = new PathfinderFinder(passAwareRaceLog);
+            raceInfoDTO.pathfinderId = pathfinderFinder.getPathfinderId();
+
+            GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(passAwareRaceLog);
+            raceInfoDTO.gateLineOpeningTime = gateLineOpeningTimeFinder.getGateLineOpeningTime();
+
+            LastFlagFinder lastFlagFinder = new LastFlagFinder(passAwareRaceLog);
+
+            RaceLogFlagEvent lastFlagEvent = lastFlagFinder.getLastFlagEvent();
+            if (lastFlagEvent != null) {
+                raceInfoDTO.lastUpperFlag = lastFlagEvent.getUpperFlag();
+                raceInfoDTO.lastLowerFlag = lastFlagEvent.getLowerFlag();
+                raceInfoDTO.displayed = lastFlagEvent.isDisplayed();
             }
+
             LastPublishedCourseDesignFinder courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
             raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(courseDesignFinder.getLastCourseDesign());
         }
