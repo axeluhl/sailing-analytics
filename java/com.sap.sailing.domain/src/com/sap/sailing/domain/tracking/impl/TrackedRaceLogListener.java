@@ -10,6 +10,7 @@ import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -70,6 +71,11 @@ public class TrackedRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogGateLineOpeningTimeEvent event) {
+        // do nothing
+    }
+
+    @Override
+    public void visit(RaceLogStartProcedureChangedEvent event) {
         // do nothing
     }
 

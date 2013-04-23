@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -27,6 +28,7 @@ public class RaceLogEventSerializerChooserTest {
     private JsonSerializer<RaceLogEvent> finishPositioningConfirmedEventSerializer;
     private JsonSerializer<RaceLogEvent> pathfinderEventSerializer;
     private JsonSerializer<RaceLogEvent> gateLineOpeningTimeEventSerializer;
+    private JsonSerializer<RaceLogEvent> startProcedureTypeChangedEventSerializer;
     
     private RaceLogEventFactory factory;
     
@@ -43,6 +45,7 @@ public class RaceLogEventSerializerChooserTest {
         finishPositioningConfirmedEventSerializer = mock(JsonSerializer.class);
         pathfinderEventSerializer = mock(JsonSerializer.class);
         gateLineOpeningTimeEventSerializer = mock(JsonSerializer.class);
+        startProcedureTypeChangedEventSerializer = mock(JsonSerializer.class);
         
         chooser = new RaceLogEventSerializerChooserImpl(
                 flagEventSerializer, 
@@ -53,7 +56,8 @@ public class RaceLogEventSerializerChooserTest {
                 courseDesignChangedEventSerializer,
                 finishPositioningListChangedEventSerializer,
                 finishPositioningConfirmedEventSerializer,
-                pathfinderEventSerializer, gateLineOpeningTimeEventSerializer);
+                pathfinderEventSerializer, gateLineOpeningTimeEventSerializer,
+                startProcedureTypeChangedEventSerializer);
         
         factory = RaceLogEventFactory.INSTANCE;
     }
@@ -126,6 +130,13 @@ public class RaceLogEventSerializerChooserTest {
         // we use the real event type here because we do not want to re-implement the dispatching.
         RaceLogEvent event = factory.createGateLineOpeningTimeEvent(null, 0, new Long(0));
         assertEquals(gateLineOpeningTimeEventSerializer, chooser.getSerializer(event));
+    }
+    
+    @Test
+    public void testStartProcedureTypeChangedSerializer() {
+        // we use the real event type here because we do not want to re-implement the dispatching.
+        RaceLogEvent event = factory.createStartProcedureChangedEvent(null, 0, StartProcedureType.GateStart);
+        assertEquals(startProcedureTypeChangedEventSerializer, chooser.getSerializer(event));
     }
 
 }
