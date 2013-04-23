@@ -163,13 +163,8 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     @Override
     public void onRaceAborted(TimePoint eventTime) {
-        TimePoint abortEventTime = eventTime.plus(1);
-        
         RaceLogEvent passChangeEvent = RaceLogEventFactory.INSTANCE.createPassChangeEvent(eventTime, raceLog.getCurrentPassId() + 1);
         this.raceLog.add(passChangeEvent);
-        
-        RaceLogEvent abortEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(abortEventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.UNSCHEDULED);
-        this.raceLog.add(abortEvent);
         
         notifyListenersAboutRaceAbortion();
     }

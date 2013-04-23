@@ -69,6 +69,7 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections.LeaderboardCorrectionsResolvedListener;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -100,6 +101,7 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
@@ -1043,9 +1045,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogPathfinderEvent(createdAt, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogGateLineOpeningTimeEvent.class.getSimpleName())) {
             return loadRaceLogGateLineOpeningTimeEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogStartProcedureChangedEvent.class.getSimpleName())) {
+            return loadRaceLogStartProcedureChangedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
         }
 
         throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
+    }
+
+    private RaceLogEvent loadRaceLogStartProcedureChangedEvent(TimePoint createdAt, TimePoint timePoint,
+            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        StartProcedureType type = StartProcedureType.valueOf(dbObject.get(FieldNames.RACE_LOG_START_PROCEDURE_TYPE.name()).toString());
+        return raceLogEventFactory.createStartProcedureChangedEvent(createdAt, timePoint, id, competitors, passId, type);
     }
 
     private RaceLogEvent loadRaceLogGateLineOpeningTimeEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,

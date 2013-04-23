@@ -23,6 +23,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogGateLine
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogPassChangeEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogPathfinderEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogRaceStatusEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartProcedureChangedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartTimeEventSerializer;
 
 public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {
@@ -43,19 +44,21 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogFinishPositioningConfirmedEventDeserializer(competitorDeserializer),
                 new RaceLogPassChangeEventDeserializer(competitorDeserializer),
                 new RaceLogPathFinderEventDeserializer(competitorDeserializer),
-                new RaceLogGateLineOpeningTimeEventDeserializer(competitorDeserializer));
+                new RaceLogGateLineOpeningTimeEventDeserializer(competitorDeserializer),
+                new RaceLogStartProcedureChangedEventDeserializer(competitorDeserializer));
     }
 
-    protected JsonDeserializer<RaceLogEvent> flagEventDeserializer;
-    protected JsonDeserializer<RaceLogEvent> startTimeEventDeserializer;
-    protected JsonDeserializer<RaceLogEvent> raceStatusEventDeserializer;
-    protected JsonDeserializer<RaceLogEvent> courseAreaChangedEventDeserializer;
-    protected JsonDeserializer<RaceLogEvent> courseDesignChangedEventDeserializer;
-    protected JsonDeserializer<RaceLogEvent> finishPositioningListChangedEventDeserializer;
-    protected JsonDeserializer<RaceLogEvent> finishPositioningConfirmedEventDeserializer;
-    protected JsonDeserializer<RaceLogEvent> passChangeEventDeserializer;
-    protected JsonDeserializer<RaceLogEvent> pathfinderEventDeserializer;
-    protected JsonDeserializer<RaceLogEvent> gateLineOpeningTimeEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> flagEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> startTimeEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> raceStatusEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> courseAreaChangedEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> courseDesignChangedEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> finishPositioningListChangedEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> finishPositioningConfirmedEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> passChangeEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> pathfinderEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> gateLineOpeningTimeEventDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> startProcedureChangedEventDeserializer;
 
     public RaceLogEventDeserializer(JsonDeserializer<RaceLogEvent> flagEventDeserializer,
             JsonDeserializer<RaceLogEvent> startTimeEventDeserializer,
@@ -66,7 +69,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             JsonDeserializer<RaceLogEvent> finishPositioningConfirmedEventDeserializer,
             JsonDeserializer<RaceLogEvent> passChangeEventDeserializer,
             JsonDeserializer<RaceLogEvent> pathfinderEventDeserializer,
-            JsonDeserializer<RaceLogEvent> gateLineOpeningTimeEventDeserializer) {
+            JsonDeserializer<RaceLogEvent> gateLineOpeningTimeEventDeserializer,
+            JsonDeserializer<RaceLogEvent> startProcedureChangedEventDeserializer) {
         this.flagEventDeserializer = flagEventDeserializer;
         this.startTimeEventDeserializer = startTimeEventDeserializer;
         this.raceStatusEventDeserializer = raceStatusEventDeserializer;
@@ -77,6 +81,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
         this.passChangeEventDeserializer = passChangeEventDeserializer;
         this.pathfinderEventDeserializer = pathfinderEventDeserializer;
         this.gateLineOpeningTimeEventDeserializer = gateLineOpeningTimeEventDeserializer;
+        this.startProcedureChangedEventDeserializer = startProcedureChangedEventDeserializer;
     }
 
     protected JsonDeserializer<RaceLogEvent> getDeserializer(JSONObject object) throws JsonDeserializationException {
@@ -102,6 +107,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             return pathfinderEventDeserializer;
         } else if (type.equals(RaceLogGateLineOpeningTimeEventSerializer.VALUE_CLASS)) {
             return gateLineOpeningTimeEventDeserializer;
+        } else if (type.equals(RaceLogStartProcedureChangedEventSerializer.VALUE_CLASS)) {
+            return startProcedureChangedEventDeserializer;
         }
 
         throw new JsonDeserializationException(String.format("There is no deserializer defined for event type %s.",
