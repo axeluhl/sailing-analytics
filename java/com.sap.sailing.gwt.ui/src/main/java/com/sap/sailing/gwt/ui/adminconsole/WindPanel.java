@@ -378,9 +378,8 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
     
     private void showWindFixesList(RegattaAndRaceIdentifier selectedRace, RaceDTO raceDTO) {
         List<String> windSourceTypeNames = new ArrayList<String>();
-        windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
-        sailingService.getAveragedWindInfo(selectedRace, raceDTO.startOfRace, 60000L, 10, windSourceTypeNames, new AsyncCallback<WindInfoForRaceDTO>() {
+        sailingService.getAveragedWindInfo(selectedRace, raceDTO.startOfRace, 30000L, 100, windSourceTypeNames, new AsyncCallback<WindInfoForRaceDTO>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -390,9 +389,9 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
             public void onSuccess(WindInfoForRaceDTO result) {
                 windFixPanel.clear();
                 
-                for (WindSourceType input : new WindSourceType[]{WindSourceType.COMBINED, WindSourceType.EXPEDITION}) {
+                for (WindSourceType input : new WindSourceType[]{WindSourceType.COMBINED}) {
                     windFixPanel.add(new HTML("&nbsp;"));
-                    windFixPanel.add(new Label("Wind Fixes ("+input.name()+", first 3, last 3, true values)"));
+                    windFixPanel.add(new Label(stringMessages.windFixListingDescription() + " " + input.name()));
                     WindTrackInfoDTO windTrackInfo = result.windTrackInfoByWindSource.get(new WindSourceImpl(input));
                     if (windTrackInfo != null && windTrackInfo.windFixes.size()>=7) {
                         NumberFormat formatter = NumberFormat.getFormat(".##");
@@ -403,6 +402,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
                                     formatter.format(windFix.position.lngDeg) + " (lng) " +
                                     new Date(windFix.measureTimepoint)));
                         }
+                        // These fixes must not necessarily be the real last ones. This especially holds for long races.
                         for (WindDTO windFix : windTrackInfo.windFixes.subList(windTrackInfo.windFixes.size()-4, windTrackInfo.windFixes.size()-1)) {
                             windFixPanel.add(new Label(""+formatter.format(windFix.trueWindFromDeg)+" (deg) "+
                                     formatter.format(windFix.trueWindSpeedInKnots)+" (kt) "+
@@ -411,7 +411,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
                                     new Date(windFix.measureTimepoint)));
                         }
                     } else {
-                        windFixPanel.add(new Label("No wind fixes available."));
+                        windFixPanel.add(new Label(stringMessages.noWindFixesAvailable()));
                     }
                 }
             }
