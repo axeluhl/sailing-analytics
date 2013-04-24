@@ -379,13 +379,10 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         List<String> windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
-        
         sailingService.getAveragedWindInfo(selectedRace, raceDTO.startOfRace, 60000L, 10, windSourceTypeNames, new AsyncCallback<WindInfoForRaceDTO>() {
 
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-                
             }
 
             @Override
@@ -394,7 +391,6 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
                 windFixPanel.add(new Label("Wind Fixes (COMBINED, first 3, last 3, true values)"));
                 WindTrackInfoDTO windTrackInfo = result.windTrackInfoByWindSource.get(new WindSourceImpl(WindSourceType.COMBINED));
                 if (windTrackInfo != null && windTrackInfo.windFixes.size()>=7) {
-                    
                     NumberFormat formatter = NumberFormat.getFormat(".##");
                     for (WindDTO windFix : windTrackInfo.windFixes.subList(0, 3)) {
                         windFixPanel.add(new Label(""+formatter.format(windFix.trueWindFromDeg)+" (deg) "+
@@ -415,9 +411,6 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
                 }
             }
         });
-        
-        
-        
     }
     
     private void updateWindDisplay() {
