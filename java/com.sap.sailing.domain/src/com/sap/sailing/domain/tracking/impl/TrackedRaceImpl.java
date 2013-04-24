@@ -2316,5 +2316,34 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public void setCourseDesignChangedListener(CourseDesignChangedListener listener) {
         this.courseDesignChangedListener = listener;
     }
-    
+
+    @Override
+    public Distance getDistanceToStartLine(Competitor competitor, TimePoint timePoint) {
+        Waypoint startWaypoint = getRace().getCourse().getFirstWaypoint();
+        final Distance result;
+        if (startWaypoint == null) {
+            result = null;
+        } else {
+            Position competitorPosition = getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ false);
+            if (competitorPosition == null) {
+                result = null;
+            } else {
+                Iterable<Mark> marks = startWaypoint.getControlPoint().getMarks();
+                Iterator<Mark> marksIterator = marks.iterator();
+                Mark first = marksIterator.next();
+                Position firstPosition = getOrCreateTrack(first).getEstimatedPosition(timePoint, /* extrapolate */ false);
+                if (marksIterator.hasNext()) {
+                    // it's a line / gate
+                    Mark second = marksIterator.next();
+                    Position secondPosition = getOrCreateTrack(second).getEstimatedPosition(timePoint, /* extrapolate */ false);
+                    Position competitorProjectedOntoStartLine = competitorPosition.projectToLineThrough(firstPosition,
+                            firstPosition.getBearingGreatCircle(secondPosition));
+                    result = competitorPosition.getDistance(competitorProjectedOntoStartLine);
+                } else {
+                    result = competitorPosition.getDistance(firstPosition);
+                }
+            }
+        }
+        return result;
+    }
 }

@@ -9,6 +9,7 @@
     <string name="intentActionAlarmAction">com.sap.sailing.racecommittee.app.action.alarmAction</string>
     <string name="intentActionIndividualRecallRemoval">com.sap.sailing.racecommittee.app.action.individualrecallremovalaction</string>
     <string name="intentActionAutomaticRaceEnd">com.sap.sailing.racecommittee.app.action.automaticRaceEnd</string>
+    <string name="intentActionAutomaticGateClose">com.sap.sailing.racecommittee.app.action.automaticGateClose</string>
     
     <string name="hello">Hello World, RaceCommitteeActivity!</string>
     <string name="running_on_course">(on course %s)</string>
@@ -23,7 +24,8 @@
     <string name="current_time">Current time</string>
     <string name="race_finished_template">%s is finished</string>
     <string name="race_first_boat_finished">First boat finished at:</string>
-    <string name="race_time_limit" formatted="false">First finisher at %s, Race finishing limit is at %s</string>
+    <string name="race_first_finisher_and_time_limit" formatted="false">First finisher at %s, Race finishing limit is at %s</string>
+    <string name="race_time_limit">Race finishing limit is at %s</string>
     <string name="choose_startmode">Choose the start mode for this race</string>
     <string name="choose_abort_mode">Select the flags you want to display</string>
     <string name="choose_abort_flag_mode">Select the aborting flag mode</string>
@@ -116,6 +118,10 @@
 	<string name="race_startphase_countdown_class_remove">%1$s until %2$s class flag is removed and race starts</string>
 	<string name="race_startphase_ess_countdown_one_flag_remove">%1$s until One flag is removed and race starts</string>
 	<string name="race_startphase_countdown_class_display">%1$s until %2$s class flag is displayed</string><string name="race_startphase_countdown_start">%1$s until %2$s starts&quot;</string>
+	<string name="race_startphase_gate_class_over_golf_display">%1$s until Class flag over Golf flag is displayed</string>
+	<string name="race_startphase_gate_class_over_golf_removed">%1$s until Class flag over Golf flag is removed and race starts</string>
+	<string name="race_startphase_gate_papa_display">%1$s until Papa flag is displayed</string>
+	<string name="race_startphase_gate_papa_removed">%1$s until Papa flag is removed</string>
 	<string name="set_pathfinder">Set Pathfinder</string>
 	<string name="set_pathfinder_title">Choose the pathfinder</string>
 	<string name="protest_dialog_title">Set the protest start time</string>

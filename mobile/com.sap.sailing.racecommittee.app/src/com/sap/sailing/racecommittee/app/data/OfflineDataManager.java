@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -156,6 +157,11 @@ public class OfflineDataManager extends DataManager {
     @Override
     public void loadMarks(ManagedRace managedRace, LoadClient<Collection<Mark>> client) {
         client.onLoadSucceded(dataStore.getMarks());
+    }
+
+    @Override
+    public void loadCourse(ManagedRace managedRace, LoadClient<CourseBase> client) {
+        client.onLoadSucceded(managedRace.getCourseOnServer());
     }
 
 }

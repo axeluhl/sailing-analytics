@@ -31,7 +31,7 @@ public class FinishPositioningListFinder extends RaceLogAnalyzer {
     private List<Triple<Serializable, String, MaxPointsReason>> searchForLastFinishPositioningList() {
         List<Triple<Serializable, String, MaxPointsReason>> lastFinishPositioningList = null;
         
-        for (RaceLogEvent event : getAllEvents()) {
+        for (RaceLogEvent event : getPassEvents()) {
             if (event instanceof RaceLogFinishPositioningListChangedEvent) {
                 RaceLogFinishPositioningListChangedEvent finishPositioningEvent = (RaceLogFinishPositioningListChangedEvent) event;
                 lastFinishPositioningList = finishPositioningEvent.getPositionedCompetitors();

@@ -69,6 +69,7 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections.LeaderboardCorrectionsResolvedListener;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -95,9 +96,12 @@ import com.sap.sailing.domain.racelog.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
@@ -1037,11 +1041,35 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogFinishPositioningListChangedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogFinishPositioningConfirmedEvent.class.getSimpleName())) {
             return loadRaceLogFinishPositioningConfirmedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogPathfinderEvent.class.getSimpleName())) {
+            return loadRaceLogPathfinderEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogGateLineOpeningTimeEvent.class.getSimpleName())) {
+            return loadRaceLogGateLineOpeningTimeEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogStartProcedureChangedEvent.class.getSimpleName())) {
+            return loadRaceLogStartProcedureChangedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
         }
 
         throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
     }
 
+    private RaceLogEvent loadRaceLogStartProcedureChangedEvent(TimePoint createdAt, TimePoint timePoint,
+            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        StartProcedureType type = StartProcedureType.valueOf(dbObject.get(FieldNames.RACE_LOG_START_PROCEDURE_TYPE.name()).toString());
+        return raceLogEventFactory.createStartProcedureChangedEvent(createdAt, timePoint, id, competitors, passId, type);
+    }
+
+    private RaceLogEvent loadRaceLogGateLineOpeningTimeEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,
+            Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        Long gateLineOpeningTime = (Long) dbObject.get(FieldNames.RACE_LOG_GATE_LINE_OPENING_TIME.name());
+        return raceLogEventFactory.createGateLineOpeningTimeEvent(createdAt, timePoint, id, competitors, passId, gateLineOpeningTime);
+    }
+    
+    private RaceLogEvent loadRaceLogPathfinderEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,
+            Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        String pathfinderId = dbObject.get(FieldNames.RACE_LOG_PATHFINDER_ID.name()).toString();
+        return raceLogEventFactory.createPathfinderEvent(createdAt, timePoint, id, competitors, passId, pathfinderId);
+    }
+    
     private RaceLogEvent loadRaceLogFinishPositioningConfirmedEvent(TimePoint createdAt, TimePoint timePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         return raceLogEventFactory.createFinishPositioningConfirmedEvent(createdAt, timePoint, id, competitors, passId);
@@ -1077,14 +1105,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
             Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
             
-            //The conversion is needed when the competitor id is loaded from database as a String. The competitor id shall be used in the following to retrieve a competitor
-            //object from the DomainFactory via getExistingCompetitorById. The lookup expects a Serializable, but mostly UUIDs are hold in the DomainFactory cache.
-            //When the lookup happens and the loaded competitor id remains as a string, the lookup does not work as long as the competitor id provided by the 
-            //tracking provider is a UUID. Therefore the conversion of the competitor id to a UUID is needed.
-           
-            //Otherwise with some tracking providers it might be the case that the competitor id is not a UUID anymore but for example a name represented as a String. 
-            //In this case the conversion to a UUID will fail and the given id as String is returned as the result of this method.
-            competitorId = tryUuidConversion(competitorId.toString());
             String competitorName = (String) dbObject.get(FieldNames.COMPETITOR_DISPLAY_NAME.name());
             //The Competitor name is a new field in the list. Therefore the name might be null for existing events. In this case a standard name is set. 
             if (competitorName == null) {
@@ -1102,23 +1122,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             positionedCompetitors.add(positionedCompetitor);
         }
         return positionedCompetitors;
-    }
-    
-    /**
-     * This method tries to convert a Serializable as String to a UUID. When the given id is a UUID, the UUID representation is returned, otherwise the string itself 
-     * is returned. This is the case when the given Id is not in a UUID format representation.
-     * 
-     * @param id the ID to be converted to its string representation
-     * @return when successful the UUID representation of the given id. When the conversion is not successful (e.g. the id is not in UUID format) the string is returned as
-     * a Serializable
-     */
-    public static Serializable tryUuidConversion(String id) {
-        try {
-            return UUID.fromString(id);
-        } catch (IllegalArgumentException iae) {
-            //This is called when the conversion of the given string to a UUID was not successful. In this case the given ID as String is returned as a Serializable
-        }
-        return id;
     }
 
     private List<Competitor> loadCompetitorsForRaceLogEvent(BasicDBList dbCompetitorList) {
