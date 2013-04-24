@@ -183,7 +183,9 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public void onRaceStarted(TimePoint eventTime) {
         RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.RUNNING);
         this.raceLog.add(statusEvent);
-        notifyListenersAboutGateLineOpeningTimeTrigger();
+        if(getGateLineOpeningTime()!=null){
+            notifyListenersAboutGateLineOpeningTimeTrigger();
+        }
     }
 
     @Override
@@ -311,6 +313,9 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         
         this.raceLog.add(event);
         notifyListenersAboutGateLineOpeningTimeChanged();
+        if(eventTime.after(getStartTime()) && getStatus().equals(RaceLogRaceStatus.RUNNING)){
+            notifyListenersAboutGateLineOpeningTimeTrigger();
+        }
     }
     
     private void notifyListenersAboutGateLineOpeningTimeChanged() {
@@ -322,6 +327,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private void notifyListenersAboutGateLineOpeningTimeTrigger() {
         for (RaceStateChangedListener listener : stateChangedListeners) {
             Long gateLineOpeningTime = GateStartProcedure.startPhaseGolfDownStandardInterval;
+            //this should not happen
             if(this.getGateLineOpeningTime()!=null){
                 gateLineOpeningTime = this.getGateLineOpeningTime();
             }
