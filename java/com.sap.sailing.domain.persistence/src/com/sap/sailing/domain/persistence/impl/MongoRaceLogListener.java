@@ -31,74 +31,74 @@ public class MongoRaceLogListener implements RaceLogEventVisitor {
         this.raceLogsCollection = this.mongoObjectFactory.getRaceLogCollection();
     }
 
-    private void remember(DBObject eventEntry) {
+    private void storeEventInCollection(DBObject eventEntry) {
         raceLogsCollection.insert(eventEntry);
     }
 
     @Override
     public void visit(RaceLogFlagEvent event) {
         DBObject flagEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        remember(flagEventTrackEntry);
+        storeEventInCollection(flagEventTrackEntry);
     }
 
     @Override
     public void visit(RaceLogPassChangeEvent event) {
         DBObject passChangeEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        remember(passChangeEventTrackEntry);
+        storeEventInCollection(passChangeEventTrackEntry);
     }
 
     @Override
     public void visit(RaceLogRaceStatusEvent event) {
         DBObject raceStatusEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        remember(raceStatusEventTrackEntry);
+        storeEventInCollection(raceStatusEventTrackEntry);
     }
 
     @Override
     public void visit(RaceLogStartTimeEvent event) {
         DBObject startTimeEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        remember(startTimeEventTrackEntry);
+        storeEventInCollection(startTimeEventTrackEntry);
     }
 
     @Override
     public void visit(RaceLogCourseAreaChangedEvent event) {
         DBObject courseAreaChangedEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        remember(courseAreaChangedEventTrackEntry);
+        storeEventInCollection(courseAreaChangedEventTrackEntry);
     }
 
     @Override
     public void visit(RaceLogCourseDesignChangedEvent event) {
         DBObject courseDesignChangedEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        remember(courseDesignChangedEventTrackEntry);
+        storeEventInCollection(courseDesignChangedEventTrackEntry);
     }
 
     @Override
     public void visit(RaceLogFinishPositioningListChangedEvent event) {
         DBObject finishPositioningListChangedEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        remember(finishPositioningListChangedEventTrackEntry);
+        storeEventInCollection(finishPositioningListChangedEventTrackEntry);
     }
 
     @Override
     public void visit(RaceLogFinishPositioningConfirmedEvent event) {
         DBObject finishPositioningConfirmedEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        remember(finishPositioningConfirmedEventTrackEntry);
+        storeEventInCollection(finishPositioningConfirmedEventTrackEntry);
     }
 
     @Override
     public void visit(RaceLogPathfinderEvent event) {
         DBObject pathfinderEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        remember(pathfinderEventTrackEntry);
+        storeEventInCollection(pathfinderEventTrackEntry);
     }
 
     @Override
     public void visit(RaceLogGateLineOpeningTimeEvent event) {
         DBObject gateLineOpeningTimeEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        remember(gateLineOpeningTimeEventTrackEntry);
+        storeEventInCollection(gateLineOpeningTimeEventTrackEntry);
     }
 
     @Override
     public void visit(RaceLogStartProcedureChangedEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        remember(object);
+        storeEventInCollection(object);
     }
 
 }
