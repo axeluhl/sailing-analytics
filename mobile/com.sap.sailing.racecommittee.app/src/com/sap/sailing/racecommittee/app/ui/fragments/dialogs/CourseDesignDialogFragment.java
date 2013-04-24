@@ -368,7 +368,9 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
     
     private RoundingDirection getRoundingDirection(NauticalSide passingSide) {
         RoundingDirection direction = null;
-        if (passingSide.name().equalsIgnoreCase(RoundingDirection.Port.name())) {
+        if (passingSide == null) {
+            direction = RoundingDirection.None;
+        } else if (passingSide.name().equalsIgnoreCase(RoundingDirection.Port.name())) {
             direction = RoundingDirection.Port;
         } else if (passingSide.name().equalsIgnoreCase(RoundingDirection.Starboard.name())){
             direction = RoundingDirection.Starboard;
