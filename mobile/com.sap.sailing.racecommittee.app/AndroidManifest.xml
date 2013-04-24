@@ -66,8 +66,11 @@
                 <action android:name="com.sap.sailing.racecommittee.app.action.sendEvent" />
             </intent-filter>
         </service>
-        
-        
+        <receiver android:name=".receiver.ConnectivityChangedReceiver">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+            </intent-filter>
+        </receiver>
         
     </application>
 
