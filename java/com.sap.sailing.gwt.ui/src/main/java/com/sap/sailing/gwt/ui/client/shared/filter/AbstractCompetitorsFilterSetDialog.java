@@ -195,25 +195,25 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
 
     private Widget createFilterValueWidget(Filter<CompetitorDTO,?> filter) {
         Widget filterValueWidget = null;
-        if(filter.getValueType().equals(String.class)) {
+        if (filter.getValueType().equals(String.class)) {
             String initialValue = null;
-            if(filter.getConfiguration().getB() != null) {
-                initialValue = (String) filter.getConfiguration().getB(); 
+            if (filter.getConfiguration().getB() != null) {
+                initialValue = (String) filter.getConfiguration().getB();
             }
-            TextBox textBox = createTextBox(initialValue); 
+            TextBox textBox = createTextBox(initialValue);
             textBox.setVisibleLength(20);
             textBox.setFocus(true);
             filterValueWidget = textBox;
-        } else if(filter.getValueType().equals(Integer.class)) {
+        } else if (filter.getValueType().equals(Integer.class)) {
             Integer initialValue = null;
-            if(filter.getConfiguration().getB() != null) {
-                initialValue = (Integer) filter.getConfiguration().getB(); 
+            if (filter.getConfiguration().getB() != null) {
+                initialValue = (Integer) filter.getConfiguration().getB();
             }
-            IntegerBox integerBox = createIntegerBox(initialValue, 20); 
+            IntegerBox integerBox = createIntegerBox(initialValue, 20);
             integerBox.setFocus(true);
             filterValueWidget = integerBox;
         }
-        filterValueFields.add(filterValueWidget);        
+        filterValueFields.add(filterValueWidget);
         return filterValueWidget; 
     }
 
@@ -255,26 +255,26 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
     @Override
     protected FilterSet<CompetitorDTO> getResult() {
         FilterSet<CompetitorDTO> result = new FilterSet<CompetitorDTO>(filterSetNameTextBox.getText());
-
         int filterCount = filterNameLabels.size();
         for (int i = 0; i < filterCount; i++) {
             String filterName = filterNames.get(i);
-            Filter<CompetitorDTO,?> filter = CompetitorsFilterFactory.getFilter(filterName);
+            Filter<CompetitorDTO, ?> filter = CompetitorsFilterFactory.getFilter(filterName);
             ListBox operatorSelectionListbox = filterOperatorSelectionListBoxes.get(i);
             FilterOperators op = FilterOperators.valueOf(operatorSelectionListbox.getValue(operatorSelectionListbox.getSelectedIndex()));
-            if(filter.getValueType().equals(Integer.class)) {
+            if (filter.getValueType().equals(Integer.class)) {
                 IntegerBox integerBox = (IntegerBox) filterValueFields.get(i);
-                Filter<CompetitorDTO,Integer> newFilter = (Filter<CompetitorDTO, Integer>) filter;
+                @SuppressWarnings("unchecked") // TODO see bug 1356
+                Filter<CompetitorDTO, Integer> newFilter = (Filter<CompetitorDTO, Integer>) filter;
                 newFilter.setConfiguration(new Pair<FilterOperators, Integer>(op, integerBox.getValue()));
                 result.addFilter(newFilter);
-            } else if(filter.getValueType().equals(String.class)) {
+            } else if (filter.getValueType().equals(String.class)) {
                 TextBox textBox = (TextBox) filterValueFields.get(i);
-                Filter<CompetitorDTO,String> newFilter = (Filter<CompetitorDTO, String>) filter;
+                @SuppressWarnings("unchecked") // TODO see bug 1356
+                Filter<CompetitorDTO, String> newFilter = (Filter<CompetitorDTO, String>) filter;
                 newFilter.setConfiguration(new Pair<FilterOperators, String>(op, textBox.getText()));
                 result.addFilter(newFilter);
             }
         }
-
         return result;
     }
     

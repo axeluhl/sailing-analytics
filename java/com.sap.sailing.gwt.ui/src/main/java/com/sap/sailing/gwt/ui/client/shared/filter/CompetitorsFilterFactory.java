@@ -6,9 +6,9 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 public class CompetitorsFilterFactory {
     public static Filter<CompetitorDTO, ?> getFilter(String filterName) {
         Filter<CompetitorDTO, ?> filter = null;
-        if(filterName.equals(CompetitorTotalRankFilter.FILTER_NAME)) {
+        if (filterName.equals(CompetitorTotalRankFilter.FILTER_NAME)) {
             filter = new CompetitorTotalRankFilter();
-        } else if(filterName.equals(CompetitorNationalityFilter.FILTER_NAME)) {
+        } else if (filterName.equals(CompetitorNationalityFilter.FILTER_NAME)) {
             filter = new CompetitorNationalityFilter();
         }
         return filter;
