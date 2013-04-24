@@ -26,6 +26,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -388,26 +389,30 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
             @Override
             public void onSuccess(WindInfoForRaceDTO result) {
                 windFixPanel.clear();
-                windFixPanel.add(new Label("Wind Fixes (COMBINED, first 3, last 3, true values)"));
-                WindTrackInfoDTO windTrackInfo = result.windTrackInfoByWindSource.get(new WindSourceImpl(WindSourceType.COMBINED));
-                if (windTrackInfo != null && windTrackInfo.windFixes.size()>=7) {
-                    NumberFormat formatter = NumberFormat.getFormat(".##");
-                    for (WindDTO windFix : windTrackInfo.windFixes.subList(0, 3)) {
-                        windFixPanel.add(new Label(""+formatter.format(windFix.trueWindFromDeg)+" (deg) "+
-                                formatter.format(windFix.trueWindSpeedInKnots)+" (kt) "+
-                                formatter.format(windFix.position.latDeg) + " (lat) "+
-                                formatter.format(windFix.position.lngDeg) + " (lng) " +
-                                new Date(windFix.measureTimepoint)));
+                
+                for (WindSourceType input : new WindSourceType[]{WindSourceType.COMBINED, WindSourceType.EXPEDITION}) {
+                    windFixPanel.add(new HTML("&nbsp;"));
+                    windFixPanel.add(new Label("Wind Fixes ("+input.name()+", first 3, last 3, true values)"));
+                    WindTrackInfoDTO windTrackInfo = result.windTrackInfoByWindSource.get(new WindSourceImpl(input));
+                    if (windTrackInfo != null && windTrackInfo.windFixes.size()>=7) {
+                        NumberFormat formatter = NumberFormat.getFormat(".##");
+                        for (WindDTO windFix : windTrackInfo.windFixes.subList(0, 3)) {
+                            windFixPanel.add(new Label(""+formatter.format(windFix.trueWindFromDeg)+" (deg) "+
+                                    formatter.format(windFix.trueWindSpeedInKnots)+" (kt) "+
+                                    formatter.format(windFix.position.latDeg) + " (lat) "+
+                                    formatter.format(windFix.position.lngDeg) + " (lng) " +
+                                    new Date(windFix.measureTimepoint)));
+                        }
+                        for (WindDTO windFix : windTrackInfo.windFixes.subList(windTrackInfo.windFixes.size()-4, windTrackInfo.windFixes.size()-1)) {
+                            windFixPanel.add(new Label(""+formatter.format(windFix.trueWindFromDeg)+" (deg) "+
+                                    formatter.format(windFix.trueWindSpeedInKnots)+" (kt) "+
+                                    formatter.format(windFix.position.latDeg) + " (lat) "+
+                                    formatter.format(windFix.position.lngDeg) + " (lng) " +
+                                    new Date(windFix.measureTimepoint)));
+                        }
+                    } else {
+                        windFixPanel.add(new Label("No wind fixes available."));
                     }
-                    for (WindDTO windFix : windTrackInfo.windFixes.subList(windTrackInfo.windFixes.size()-4, windTrackInfo.windFixes.size()-1)) {
-                        windFixPanel.add(new Label(""+formatter.format(windFix.trueWindFromDeg)+" (deg) "+
-                                formatter.format(windFix.trueWindSpeedInKnots)+" (kt) "+
-                                formatter.format(windFix.position.latDeg) + " (lat) "+
-                                formatter.format(windFix.position.lngDeg) + " (lng) " +
-                                new Date(windFix.measureTimepoint)));
-                    }
-                } else {
-                    windFixPanel.add(new Label("No wind fixes available."));
                 }
             }
         });
