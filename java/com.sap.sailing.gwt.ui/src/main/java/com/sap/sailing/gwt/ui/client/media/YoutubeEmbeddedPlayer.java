@@ -5,8 +5,8 @@ import java.util.Date;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.Timer;
@@ -29,21 +29,19 @@ public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoP
     private final ErrorReporter errorReporter;
     private final PopupCloseListener popupCloseListener;
     private final YoutubeVideoControl videoControl;
+    private final PopoutListener popoutListener;
 
-    public YoutubeEmbeddedPlayer(MediaTrack videoTrack, long raceStartTimeMillis, boolean showSynchControls, Timer raceTimer, MediaServiceAsync mediaService, ErrorReporter errorReporter, PopupCloseListener popupCloseListener) {
+    public YoutubeEmbeddedPlayer(final MediaTrack videoTrack, long raceStartTimeMillis, boolean showSynchControls, Timer raceTimer, MediaServiceAsync mediaService, ErrorReporter errorReporter, PopupCloseListener popupCloseListener, PopoutListener popoutListener) {
         super(videoTrack);
         this.raceTimer = raceTimer;
         this.raceStartTimeMillis = raceStartTimeMillis;
         this.popupCloseListener = popupCloseListener;
         this.mediaService = mediaService;
         this.errorReporter = errorReporter;
+        this.popoutListener = popoutListener;
         backupVideoTrack = new MediaTrack(null, videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.durationInMillis, videoTrack.mimeType);
 
-        this.dialogBox = new WindowBox(false, false, true, true);
-        dialogBox.setText(videoTrack.title);        
-        dialogBox.setTitle(videoTrack.toString());        
-
-        VerticalPanel rootPanel = new VerticalPanel();
+        FlowPanel rootPanel = new FlowPanel();
         if (showSynchControls) {
             mediaSynchControl = new MediaSynchControl(this);
             rootPanel.add(mediaSynchControl.widget());
@@ -51,9 +49,16 @@ public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoP
 
         videoControl = new YoutubeVideoControl(videoTrack.url); 
         rootPanel.add(videoControl.widget());
-        dialogBox.setWidget(rootPanel);
-        
+        this.dialogBox = new WindowBox(videoTrack.title, videoTrack.toString(), rootPanel, new WindowBox.PopoutHandler() {
+            
+            @Override
+            public void popout() {
+                YoutubeEmbeddedPlayer.this.popoutListener.popoutVideo(videoTrack);
+                
+            }
+        });
         dialogBox.addCloseHandler(this);
+        
         show();
     }
     

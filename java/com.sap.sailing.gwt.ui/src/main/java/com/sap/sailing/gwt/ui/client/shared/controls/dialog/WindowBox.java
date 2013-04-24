@@ -19,7 +19,6 @@ package com.sap.sailing.gwt.ui.client.shared.controls.dialog;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -28,13 +27,6 @@ import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.logical.shared.HasOpenHandlers;
-import com.google.gwt.event.logical.shared.OpenEvent;
-import com.google.gwt.event.logical.shared.OpenHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.CssResource.NotStrict;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
@@ -46,13 +38,11 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.shared.controls.slider.SliderBar;
 
 /**
- * Extension of the standard GWT DialogBox to provide a more "window"-like functionality. By default, the WindowBox has
- * two control-buttons in the top right corner of the header, which allow the box to be reduced to it's header
- * ("minimize") or the whole box to be hidden ("close"). The visiblity of these controls can be toggled seperately with
- * {@link #setMinimizeIconVisible(boolean)} and {@link #setCloseIconVisible(boolean)} respectively. <br>
+ * Extension of the standard GWT DialogBox to provide a more "window"-like functionality. The WindowBox has
+ * two control-buttons in the top right corner of the header, which allow the box to be turned into a dedicated browser window
+ * ("popout") or the whole box to be closed. <br>
  * <br>
  * The WindowBox relies on the css settings of {@link DialogBox} for styling of the border and header. It also uses the
  * following classes to style the additional elements:
@@ -77,25 +67,17 @@ import com.sap.sailing.gwt.ui.client.shared.controls.slider.SliderBar;
  *      and vice-versa
  * </pre>
  */
-public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
-
-    /**
-     * A {@link ClientBundle} that provides images for {@link SliderBar}.
-     */
-    public static interface WindowBoxStyles extends ClientBundle {
-        public static final WindowBoxStyles INSTANCE = GWT.create(WindowBoxStyles.class);
-
-        @NotStrict
-        @Source("WindowBox.css")
-        CssResource windowBoxCss();
+public class WindowBox extends DialogBox {
+    
+    public interface PopoutHandler {
+        void popout();
     }
 
-    private static final int MIN_WIDTH = 100;
-    private static final int MIN_HEIGHT = 100;
+    private static final int MIN_WIDTH = 50;
+    private static final int MIN_HEIGHT = 50;
 
     private FlowPanel container;
-    // private FlowPanel content;
-    private FlowPanel controls;
+    private FlowPanel controlsPanel;
     private Anchor close;
     private Anchor minimize;
 
@@ -106,10 +88,7 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
     private int minHeight = MIN_HEIGHT;
 
     private int dragMode;
-
-    private boolean resizable;
-
-    private boolean minimized;
+    private PopoutHandler popoutHandler;
 
     /**
      * Static helper method to change the cursor for a given element when resizing is enabled.
@@ -163,117 +142,13 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
         element.getStyle().setCursor(cursor);
     }
 
-    /**
-     * Creates a DialogBoxEx which is permanent (no auto-hide), non-modal, has a "minimize"- and "close"-button in the
-     * top-right corner and is not resizeable. The dialog box should not be shown until a child widget has been added
-     * using {@link #add(com.google.gwt.user.client.ui.IsWidget)}. <br>
-     * <br>
-     * This is the equivalent for calling <code>DialogBoxEx(false, false, true, false)</code>.
-     * 
-     * @see WindowBox#DialogBoxEx(boolean, boolean, boolean, boolean)
-     */
-    public WindowBox() {
-        this(false, false, true, true, false);
-    }
-
-    /**
-     * Creates a DialogBoxEx which is permanent, non-modal, has a "minimize"- and "close"-button and is optionally
-     * resizeable. The dialog box should not be shown until a child widget has been added using
-     * {@link #setWidget(Widget)}.
-     * 
-     * @see WindowBox#DialogBoxEx(boolean, boolean, boolean, boolean)
-     * 
-     * @param resizeable
-     *            <code>true</code> to allow resizing by dragging the borders
-     */
-    public WindowBox(boolean resizeable) {
-        this(false, false, true, true, resizeable);
-    }
-
-    /**
-     * Creates a DialogBoxEx which is permanent and nonmodal, optionally resizeable and/or has a "minimize"- and
-     * "close"-button. The dialog box should not be shown until a child widget has been added using
-     * {@link #setWidget(Widget)}.
-     * 
-     * @see WindowBox#DialogBoxEx(boolean, boolean, boolean, boolean)
-     * 
-     * @param resizeable
-     *            <code>true</code> to allow resizing by dragging the borders
-     * @param showCloseIcon
-     *            <code>true</code> to show "close"-icon in the top right corner of the header
-     */
-    public WindowBox(boolean showCloseIcon, boolean resizeable) {
-        this(false, false, true, showCloseIcon, resizeable);
-    }
-
-    /**
-     * Creates a DialogBoxEx which is permanent and nonmodal, optionally resizeable and/or has a "minimize"- and
-     * "close"-button. The dialog box should not be shown until a child widget has been added using
-     * {@link #setWidget(Widget)}.
-     * 
-     * @see WindowBox#DialogBoxEx(boolean, boolean, boolean, boolean)
-     * 
-     * @param showMinimizeIcon
-     *            <code>true</code> to show "minimize"-icon int the top right corner of the header
-     * @param resizeable
-     *            <code>true</code> to allow resizing by dragging the borders
-     * @param showCloseIcon
-     *            <code>true</code> to show "close"-icon in the top right corner of the header
-     */
-    public WindowBox(boolean showMinimizeIcon, boolean showCloseIcon, boolean resizeable) {
-        this(false, false, showMinimizeIcon, showCloseIcon, resizeable);
-    }
-
-    /**
-     * Creates a DialogBoxEx which is permanent, optionally modal, resizeable and/or has a "minimize"- and
-     * "close"-button. The dialog box should not be shown until a child widget has been added using
-     * {@link #setWidget(Widget)}.
-     * 
-     * @param modal
-     *            <code>true</code> if keyboard and mouse events for widgets not contained by the dialog should be
-     *            ignored
-     * @param showMinimizeIcon
-     *            <code>true</code> to show "minimize"-icon int the top right corner of the header
-     * @param resizeable
-     *            <code>true</code> to allow resizing by dragging the borders
-     * @param showCloseIcon
-     *            <code>true</code> to show "close"-icon in the top right corner of the header
-     */
-    public WindowBox(boolean modal, boolean showMinimizeIcon, boolean showCloseIcon, boolean resizeable) {
-        this(false, modal, showMinimizeIcon, showCloseIcon, resizeable);
-    }
-
-    /**
-     * Creates an empty DialogBoxEx with all configuration options. The dialog box should not be shown until a child
-     * widget has been added using {@link #setWidget(Widget)}.
-     * 
-     * @see DialogBox#DialogBox()
-     * @see DialogBox#DialogBox(boolean)
-     * @see DialogBox#DialogBox(boolean, boolean)
-     * @see DialogBox#DialogBox(boolean, boolean, boolean)
-     * 
-     * @param autoHide
-     *            <code>true</code> if the dialog should be automatically hidden when the user clicks outside of it
-     * @param modal
-     *            <code>true</code> if keyboard and mouse events for widgets not contained by the dialog should be
-     *            ignored
-     * @param showMinimizeIcon
-     *            <code>true</code> to show "minimize"-icon int the top right corner of the header
-     * @param showCloseIcon
-     *            <code>true</code> to show "close"-icon in the top right corner of the header
-     * @param resizeable
-     *            <code>true</code> to allow resizing by dragging the borders
-     */
-    public WindowBox(boolean autoHide, boolean modal, boolean showMinimizeIcon, boolean showCloseIcon,
-            boolean resizeable) {
-        super(autoHide, modal);
-
-        WindowBoxStyles.INSTANCE.windowBoxCss().ensureInjected();
+    public WindowBox(String title, String titleTooltip, Widget content, PopoutHandler popoutHandler) {
+        super(false, false);
+        this.popoutHandler = popoutHandler;
 
         this.setStyleName("gwt-extras-WindowBox", true);
 
         this.container = new FlowPanel();
-        this.container.addStyleName("gwt-extras-dialog-container");
 
         // this.content = new FlowPanel();
 
@@ -284,27 +159,28 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
                 onCloseClick(event);
             }
         });
-        setCloseIconVisible(showCloseIcon);
 
         this.minimize = new Anchor();
         this.minimize.setStyleName("gwt-extras-dialog-minimize");
         this.minimize.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                onMinimizeClick(event);
+                onPopoutClick(event);
             }
         });
-        setMinimizeIconVisible(showMinimizeIcon);
 
         Grid ctrlGrid = new Grid(1, 2);
         ctrlGrid.setWidget(0, 0, this.minimize);
         ctrlGrid.setWidget(0, 1, this.close);
 
-        this.controls = new FlowPanel();
-        this.controls.setStyleName("gwt-extras-dialog-controls");
-        this.controls.add(ctrlGrid);
+        this.controlsPanel = new FlowPanel();
+        this.controlsPanel.setStyleName("gwt-extras-dialog-controls");
+        this.controlsPanel.add(ctrlGrid);
         this.dragMode = -1;
+        
+        setTitle(titleTooltip);
+        setText(title);
+        setWidget(content);
 
-        this.resizable = resizeable;
     }
 
     /**
@@ -328,35 +204,14 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
      * @param dragMode
      */
     protected void updateCursor(int dragMode) {
-        if (this.resizable) {
-            updateCursor(dragMode, this.getElement());
+        updateCursor(dragMode, this.getElement());
 
-            com.google.gwt.dom.client.Element top = this.getCellElement(0, 1);
+        com.google.gwt.dom.client.Element top = this.getCellElement(0, 1);
+        updateCursor(dragMode, top);
+
+        top = Element.as(top.getFirstChild());
+        if (top != null)
             updateCursor(dragMode, top);
-
-            top = Element.as(top.getFirstChild());
-            if (top != null)
-                updateCursor(dragMode, top);
-        }
-    }
-
-    /**
-     * Returns whether the dialog box is mouse-resizeable
-     * 
-     * @return <code>true</code> if the user can resize the dialog with the mouse
-     */
-    public boolean isResizable() {
-        return this.resizable;
-    }
-
-    /**
-     * Set the dialog box to be resizeable by the user
-     * 
-     * @param resizable
-     *            <code>true</code> if the user can resize the dialog with the mouse
-     */
-    public void setResizable(boolean resizable) {
-        this.resizable = resizable;
     }
 
     /*
@@ -369,35 +224,33 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
 
         // If we're not yet dragging, only trigger mouse events if the event occurs
         // in the caption wrapper
-        if (this.resizable) {
-            switch (event.getTypeInt()) {
-            case Event.ONMOUSEDOWN:
-            case Event.ONMOUSEUP:
-            case Event.ONMOUSEMOVE:
-            case Event.ONMOUSEOVER:
-            case Event.ONMOUSEOUT:
+        switch (event.getTypeInt()) {
+        case Event.ONMOUSEDOWN:
+        case Event.ONMOUSEUP:
+        case Event.ONMOUSEMOVE:
+        case Event.ONMOUSEOVER:
+        case Event.ONMOUSEOUT:
 
-                if (this.dragMode >= 0 || calcDragMode(event.getClientX(), event.getClientY()) >= 0) {
-                    // paste'n'copy from Widget.onBrowserEvent
-                    switch (DOM.eventGetType(event)) {
-                    case Event.ONMOUSEOVER:
-                        // Only fire the mouse over event if it's coming from outside this
-                        // widget.
-                    case Event.ONMOUSEOUT:
-                        // Only fire the mouse out event if it's leaving this
-                        // widget.
-                        Element related = event.getRelatedEventTarget().cast();
-                        if (related != null && getElement().isOrHasChild(related)) {
-                            return;
-                        }
-                        break;
+            if (this.dragMode >= 0 || calcDragMode(event.getClientX(), event.getClientY()) >= 0) {
+                // paste'n'copy from Widget.onBrowserEvent
+                switch (DOM.eventGetType(event)) {
+                case Event.ONMOUSEOVER:
+                    // Only fire the mouse over event if it's coming from outside this
+                    // widget.
+                case Event.ONMOUSEOUT:
+                    // Only fire the mouse out event if it's leaving this
+                    // widget.
+                    Element related = event.getRelatedEventTarget().cast();
+                    if (related != null && getElement().isOrHasChild(related)) {
+                        return;
                     }
-                    DomEvent.fireNativeEvent(event, this, this.getElement());
-                    return;
+                    break;
                 }
-                if (this.dragMode < 0)
-                    this.updateCursor(this.dragMode);
+                DomEvent.fireNativeEvent(event, this, this.getElement());
+                return;
             }
+            if (this.dragMode < 0)
+                this.updateCursor(this.dragMode);
         }
 
         super.onBrowserEvent(event);
@@ -435,9 +288,9 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
      *         information)
      */
     protected int calcDragMode(int clientX, int clientY) {
-        
+
         int tolerance = 5;
-        
+
         com.google.gwt.dom.client.Element resize = this.getCellElement(2, 2).getParentElement();
         int xr = this.getRelX(resize, clientX);
         int yr = this.getRelY(resize, clientY);
@@ -455,38 +308,34 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
         w = resize.getClientWidth();
         h = resize.getClientHeight();
 
-        if ((xr >= 0 && xr <= w && yr >= -tolerance && yr <= h) || (yr >= 0 && yr <= h && xr >= 0 && xr <= w + tolerance))
+        if ((xr >= 0 && xr <= w && yr >= -tolerance && yr <= h)
+                || (yr >= 0 && yr <= h && xr >= 0 && xr <= w + tolerance))
             return 6;
 
-/*        resize = this.getCellElement(0, 2).getParentElement();
-        xr = this.getRelX(resize, clientX);
-        yr = this.getRelY(resize, clientY);
-
-        w = resize.getClientWidth();
-        h = resize.getClientHeight();
-
-        if ((xr >= 0 && xr <= w && yr >= 0 && yr <= h + tolerance) || (yr >= 0 && yr <= h && xr >= -tolerance && xr <= w))
-            return 2;
-
-        resize = this.getCellElement(0, 0).getParentElement();
-        xr = this.getRelX(resize, clientX);
-        yr = this.getRelY(resize, clientY);
-
-        w = resize.getClientWidth();
-        h = resize.getClientHeight();
-
-        if ((xr >= 0 && xr <= w && yr >= 0 && yr <= h + tolerance) || (yr >= 0 && yr <= h && xr >= 0 && xr <= w + tolerance))
-            return 0;
-
-        resize = this.getCellElement(0, 1).getParentElement();
-        xr = this.getRelX(resize, clientX);
-        yr = this.getRelY(resize, clientY);
-
-        w = resize.getClientWidth();
-        h = resize.getClientHeight();
-
-        if (yr >= 0 && yr <= h)
-            return 1;*/
+        /*
+         * resize = this.getCellElement(0, 2).getParentElement(); xr = this.getRelX(resize, clientX); yr =
+         * this.getRelY(resize, clientY);
+         * 
+         * w = resize.getClientWidth(); h = resize.getClientHeight();
+         * 
+         * if ((xr >= 0 && xr <= w && yr >= 0 && yr <= h + tolerance) || (yr >= 0 && yr <= h && xr >= -tolerance && xr
+         * <= w)) return 2;
+         * 
+         * resize = this.getCellElement(0, 0).getParentElement(); xr = this.getRelX(resize, clientX); yr =
+         * this.getRelY(resize, clientY);
+         * 
+         * w = resize.getClientWidth(); h = resize.getClientHeight();
+         * 
+         * if ((xr >= 0 && xr <= w && yr >= 0 && yr <= h + tolerance) || (yr >= 0 && yr <= h && xr >= 0 && xr <= w +
+         * tolerance)) return 0;
+         * 
+         * resize = this.getCellElement(0, 1).getParentElement(); xr = this.getRelX(resize, clientX); yr =
+         * this.getRelY(resize, clientY);
+         * 
+         * w = resize.getClientWidth(); h = resize.getClientHeight();
+         * 
+         * if (yr >= 0 && yr <= h) return 1;
+         */
 
         resize = this.getCellElement(1, 0).getParentElement();
         xr = this.getRelX(resize, clientX);
@@ -581,10 +430,9 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
     protected void beginDragging(MouseDownEvent event) {
         int dm = -1;
 
-        if (this.resizable && !this.minimized)
             dm = this.calcDragMode(event.getClientX(), event.getClientY());
 
-        if (this.resizable && dm >= 0) {
+        if (dm >= 0) {
             this.dragMode = dm;
 
             DOM.setCapture(getElement());
@@ -606,7 +454,7 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
      */
     @Override
     protected void continueDragging(MouseMoveEvent event) {
-        if (this.dragMode >= 0 && this.resizable) {
+        if (this.dragMode >= 0) {
             this.updateCursor(this.dragMode);
 
             int dx = event.getClientX() - this.dragX;
@@ -618,10 +466,8 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
             dragResizeWidget(this, dx, dy);
         } else {
             // this updates the cursor when dragging is NOT activated
-            if (!this.minimized) {
                 int dm = calcDragMode(event.getClientX(), event.getClientY());
                 this.updateCursor(dm);
-            }
             super.continueDragging(event);
         }
     }
@@ -634,7 +480,6 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
      */
     @Override
     protected void onPreviewNativeEvent(NativePreviewEvent event) {
-        if (this.resizable) {
             // We need to preventDefault() on mouseDown events (outside of the
             // DialogBox content) to keep text from being selected when it
             // is dragged.
@@ -644,7 +489,6 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
                     && calcDragMode(nativeEvent.getClientX(), nativeEvent.getClientY()) >= 0) {
                 nativeEvent.preventDefault();
             }
-        }
 
         super.onPreviewNativeEvent(event);
     }
@@ -656,7 +500,7 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
      */
     @Override
     protected void endDragging(MouseUpEvent event) {
-        if (this.dragMode >= 0 && this.resizable) {
+        if (this.dragMode >= 0) {
             DOM.releaseCapture(getElement());
 
             this.dragX = event.getClientX() - this.dragX;
@@ -679,7 +523,7 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
     public void setWidget(Widget widget) {
         if (this.container.getWidgetCount() == 0) {
             // setup
-            this.container.add(this.controls);
+            this.container.add(this.controlsPanel);
             // this.container.add(this.content);
             super.setWidget(this.container);
         } else {
@@ -716,33 +560,6 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
     }
 
     /**
-     * Set whether the "close"-button should appear in the top right corner of the header
-     * 
-     * @param visible
-     *            <code>true</code> if a "close"-button should be shown
-     */
-    public void setCloseIconVisible(boolean visible) {
-        this.close.setVisible(visible);
-    }
-
-    /**
-     * Set whether the "minimize"-button should appear in the top right corner of the header
-     * 
-     * @param visible
-     *            <code>true</code> if a "minimize"-button should be shown
-     */
-    public void setMinimizeIconVisible(boolean visible) {
-        this.minimize.setVisible(visible);
-    }
-
-    /**
-     * Returns the FlowPanel that contains the controls. More controls can be added directly to this.
-     */
-    public FlowPanel getControlPanel() {
-        return this.controls;
-    }
-
-    /**
      * Called when the close icon is clicked. The default implementation hides the dialog box.
      * 
      * @param event
@@ -758,80 +575,10 @@ public class WindowBox extends DialogBox implements HasOpenHandlers<WindowBox> {
      * @param event
      *            The {@link ClickEvent} to handle
      */
-    protected void onMinimizeClick(ClickEvent event) {
-        Widget widget = getWidget();
-
-        if (widget == null)
-            return;
-
-        boolean visible = widget.isVisible();
-
-        int offsetWidth = widget.getOffsetWidth();
-
-        widget.setVisible(!visible);
-        this.minimized = visible;
-
-        if (visible) {
-            this.container.setWidth(offsetWidth + "px");
-            this.minimize.setStyleName("gwt-extras-dialog-maximize");
-        } else {
-            this.container.setWidth(null);
-            this.minimize.setStyleName("gwt-extras-dialog-minimize");
+    protected void onPopoutClick(ClickEvent event) {
+        if (popoutHandler != null) {
+            popoutHandler.popout();
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.google.gwt.event.logical.shared.HasOpenHandlers#addOpenHandler(com.google.gwt.event.logical.shared.OpenHandler
-     * )
-     */
-    @Override
-    public HandlerRegistration addOpenHandler(OpenHandler<WindowBox> handler) {
-        return addHandler(handler, OpenEvent.getType());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.google.gwt.user.client.ui.DialogBox#show()
-     */
-    @Override
-    public void show() {
-        boolean fireOpen = !isShowing();
-        super.show();
-        if (fireOpen) {
-            OpenEvent.fire(this, this);
-        }
-    }
-
-    /**
-     * Sets the minimum width to which this widget can be resized by the user, if resizing is enabled. If the value is
-     * invalid, it is reset to {@link #MIN_WIDTH}
-     * 
-     * @param minWidth
-     *            A positive int value
-     */
-    public void setMinWidth(int minWidth) {
-        if (minWidth < 1)
-            minWidth = MIN_WIDTH;
-
-        this.minWidth = minWidth;
-    }
-
-    /**
-     * Sets the minimum height to which this widget can be resized by the user, if resizing is enabled. If the value is
-     * invalid, it is reset to {@link #MIN_WIDTH}
-     * 
-     * @param minHeight
-     *            A positive int value
-     */
-    public void setMinHeight(int minHeight) {
-        if (minHeight < 1)
-            minHeight = MIN_HEIGHT;
-
-        this.minHeight = minHeight;
     }
 
 }

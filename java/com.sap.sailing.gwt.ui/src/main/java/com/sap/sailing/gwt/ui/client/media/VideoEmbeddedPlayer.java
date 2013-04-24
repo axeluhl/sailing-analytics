@@ -7,8 +7,8 @@ import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.media.client.MediaBase;
 import com.google.gwt.media.client.Video;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.Timer;
@@ -29,22 +29,21 @@ public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements 
     private final Timer raceTimer;
     private final ErrorReporter errorReporter;
     private final PopupCloseListener popupCloseListener;
+    private final PopoutListener popoutListener;
 
-    public VideoEmbeddedPlayer(MediaTrack videoTrack, long raceStartTimeMillis, boolean showSynchControls, Timer raceTimer, MediaServiceAsync mediaService, ErrorReporter errorReporter, PopupCloseListener popCloseListener) {
+    public VideoEmbeddedPlayer(final MediaTrack videoTrack, long raceStartTimeMillis, boolean showSynchControls, Timer raceTimer, MediaServiceAsync mediaService, ErrorReporter errorReporter, PopupCloseListener popCloseListener, PopoutListener popoutListener) {
         super(videoTrack);
         this.raceTimer = raceTimer;
         this.mediaService = mediaService;
         this.errorReporter = errorReporter;
+        this.popoutListener = popoutListener;
         backupVideoTrack = new MediaTrack(videoTrack.dbId, videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.durationInMillis, videoTrack.mimeType);
         
         
         this.raceStartTimeMillis = raceStartTimeMillis;
         this.popupCloseListener = popCloseListener;
 
-        this.dialogBox = new WindowBox(false, false, true, true);
-        dialogBox.setText(videoTrack.title);        
-        dialogBox.setTitle(videoTrack.toString());        
-
+        FlowPanel rootPanel = new FlowPanel();
         if (mediaControl != null) {
             
             
@@ -54,17 +53,23 @@ public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements 
             // SimplePanel videoFrameHolder = new SimplePanel();
             // videoFrameHolder.add(videoFrame); 
 
-            VerticalPanel rootPanel = new VerticalPanel();
             if (showSynchControls) {
                 
                 mediaSynchControl = new MediaSynchControl(this);
                 rootPanel.add(mediaSynchControl.widget());
             }
             rootPanel.add(mediaControl);
-            dialogBox.setWidget(rootPanel);
         }
-        
+        this.dialogBox = new WindowBox(videoTrack.title, videoTrack.toString(), rootPanel, new WindowBox.PopoutHandler() {
+            
+            @Override
+            public void popout() {
+                VideoEmbeddedPlayer.this.popoutListener.popoutVideo(videoTrack);
+                
+            }
+        });        
         dialogBox.addCloseHandler(this);
+        
         show();
     }
     
