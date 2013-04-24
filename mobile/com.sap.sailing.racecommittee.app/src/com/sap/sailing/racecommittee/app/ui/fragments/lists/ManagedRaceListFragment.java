@@ -32,7 +32,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeTitle;
 import com.sap.sailing.racecommittee.app.ui.comparators.NamedRaceComparator;
-import com.sap.sailing.racecommittee.app.ui.comparators.SeriesComparator;
+import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesBaseFleetComparator;
 
 public class ManagedRaceListFragment extends ListFragment implements JuryFlagClickedListener, RaceStateChangedListener {
 
@@ -127,7 +127,7 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         }
 
         TreeMap<BoatClassSeriesDataFleet, List<ManagedRace>> raceListHashMap = new TreeMap<BoatClassSeriesDataFleet, List<ManagedRace>>(
-                new SeriesComparator());
+                new BoatClassSeriesBaseFleetComparator());
         if (managedRacesById != null) {
 
             // Group Managed Races by boat class and group
@@ -242,6 +242,22 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     @Override
     public void onAutomaticRaceEnd(TimePoint automaticRaceEnd) {
         notifyDataChanged();
+        
+    }
+
+    @Override
+    public void onPathfinderSelected() {
+        // do nothing
+    }
+
+    @Override
+    public void onGateLineOpeningTimeChanged() {
+        notifyDataChanged();
+    }
+
+    @Override
+    public void onGateLineOpeningTimeTrigger(TimePoint gateCloseTimePoint) {
+        // do nothing
         
     }
 

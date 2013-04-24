@@ -16,4 +16,10 @@ public interface RaceLogEventVisitor {
     public void visit(RaceLogFinishPositioningListChangedEvent event);
     
     public void visit(RaceLogFinishPositioningConfirmedEvent event);
+    
+    public void visit(RaceLogPathfinderEvent event);
+    
+    public void visit(RaceLogGateLineOpeningTimeEvent event);
+    
+    public void visit(RaceLogStartProcedureChangedEvent event);
 }

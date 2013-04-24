@@ -19,7 +19,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.deserialization.impl.RaceLogEventDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 
 public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 7704668926551060433L;

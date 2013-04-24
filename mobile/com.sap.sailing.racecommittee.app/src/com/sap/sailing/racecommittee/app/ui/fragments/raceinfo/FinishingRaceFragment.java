@@ -99,7 +99,7 @@ public class FinishingRaceFragment extends RaceFragment {
     private CharSequence getTimeLimitText() {
         TimePoint timeLimit = getTimeLimit();
         if (timeLimit != null) {
-            return String.format(getString(R.string.race_time_limit),
+            return String.format(getString(R.string.race_first_finisher_and_time_limit),
                     getFormattedTime(getRace().getState().getFinishingStartTime().asDate()), getFormattedTime(timeLimit.asDate()));
         }
         return getString(R.string.empty);

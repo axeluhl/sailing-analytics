@@ -6,29 +6,37 @@ import com.sap.sailing.domain.base.SeriesBase;
 
 public class RaceListDataTypeTitle extends RaceListDataType {
 
-	private BoatClassSeriesDataFleet data;
-	
-	public RaceListDataTypeTitle(BoatClassSeriesDataFleet data) {
-		this.data = data;
-	}
-	
-	public BoatClassSeriesDataFleet getBoatClassSeriesDataFleet() {
-		return data;
-	}
+    private BoatClassSeriesDataFleet data;
+    private final static String DEFAULT = "Default";
 
-	public BoatClass getBoatClass() {
-		return data.getBoatClass();
-	}
-	
-	public SeriesBase getSeries() {
-		return data.getSeries();
-	}
+    public RaceListDataTypeTitle(BoatClassSeriesDataFleet data) {
+        this.data = data;
+    }
 
-	public Fleet getFleet() {
-		return data.getFleet();
-	}
+    public BoatClassSeriesDataFleet getBoatClassSeriesDataFleet() {
+        return data;
+    }
 
-	public String toString() {
-		return getBoatClass().getName() + " - " + getSeries().getName() + " - " + getFleet().getName();
-	}
+    public BoatClass getBoatClass() {
+        return data.getBoatClass();
+    }
+
+    public SeriesBase getSeries() {
+        return data.getSeries();
+    }
+
+    public Fleet getFleet() {
+        return data.getFleet();
+    }
+
+    public String toString() {
+        String result = getBoatClass().getName();
+        if (!getSeries().getName().equals(DEFAULT)) {
+            result += " - " + getSeries().getName();
+        }
+        if (!getFleet().getName().equals(DEFAULT)) {
+            result += " - " + getFleet().getName();
+        }
+        return result;
+    }
 }

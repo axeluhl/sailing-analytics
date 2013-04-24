@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
@@ -39,8 +40,11 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 
@@ -83,6 +87,72 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         Fleet loadedDefaultFleet = loadedLeaderboard.getFleet(null);
 
         return loadedLeaderboard.getRaceColumnByName(raceColumnName).getRaceLog(loadedDefaultFleet);
+    }
+    
+    @Test
+    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogStartProcedureChangedEvent() {        
+        RaceLogStartProcedureChangedEvent expectedEvent = RaceLogEventFactory.INSTANCE.createStartProcedureChangedEvent(now, 0, StartProcedureType.ESS);
+
+        addAndStoreRaceLogEvent(leaderboard, raceColumnName, expectedEvent);
+
+        RaceLog loadedRaceLog = retrieveRaceLog();
+
+        loadedRaceLog.lockForRead();
+        try {
+            RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
+            RaceLogStartProcedureChangedEvent actualEvent = (RaceLogStartProcedureChangedEvent) loadedEvent;
+            assertEquals(expectedEvent.getTimePoint(), actualEvent.getTimePoint());
+            assertEquals(expectedEvent.getPassId(), actualEvent.getPassId());
+            assertEquals(expectedEvent.getId(), actualEvent.getId());
+            assertEquals(expectedEvent.getStartProcedureType(), actualEvent.getStartProcedureType());
+            assertEquals(1, Util.size(loadedRaceLog.getFixes()));
+        } finally {
+            loadedRaceLog.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogGateLineOpeningTimeEvent() {        
+        RaceLogGateLineOpeningTimeEvent expectedEvent = RaceLogEventFactory.INSTANCE.createGateLineOpeningTimeEvent(now, 0, 1234l);
+
+        addAndStoreRaceLogEvent(leaderboard, raceColumnName, expectedEvent);
+
+        RaceLog loadedRaceLog = retrieveRaceLog();
+
+        loadedRaceLog.lockForRead();
+        try {
+            RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
+            RaceLogGateLineOpeningTimeEvent actualEvent = (RaceLogGateLineOpeningTimeEvent) loadedEvent;
+            assertEquals(expectedEvent.getTimePoint(), actualEvent.getTimePoint());
+            assertEquals(expectedEvent.getPassId(), actualEvent.getPassId());
+            assertEquals(expectedEvent.getId(), actualEvent.getId());
+            assertEquals(expectedEvent.getGateLineOpeningTime(), actualEvent.getGateLineOpeningTime());
+            assertEquals(1, Util.size(loadedRaceLog.getFixes()));
+        } finally {
+            loadedRaceLog.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogPathfinderEvent() {        
+        RaceLogPathfinderEvent expectedEvent = RaceLogEventFactory.INSTANCE.createPathfinderEvent(now, 0, "GER 20");
+
+        addAndStoreRaceLogEvent(leaderboard, raceColumnName, expectedEvent);
+
+        RaceLog loadedRaceLog = retrieveRaceLog();
+
+        loadedRaceLog.lockForRead();
+        try {
+            RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
+            RaceLogPathfinderEvent actualEvent = (RaceLogPathfinderEvent) loadedEvent;
+            assertEquals(expectedEvent.getTimePoint(), actualEvent.getTimePoint());
+            assertEquals(expectedEvent.getPassId(), actualEvent.getPassId());
+            assertEquals(expectedEvent.getId(), actualEvent.getId());
+            assertEquals(expectedEvent.getPathfinderId(), actualEvent.getPathfinderId());
+            assertEquals(1, Util.size(loadedRaceLog.getFixes()));
+        } finally {
+            loadedRaceLog.unlockAfterRead();
+        }
     }
 
     @Test

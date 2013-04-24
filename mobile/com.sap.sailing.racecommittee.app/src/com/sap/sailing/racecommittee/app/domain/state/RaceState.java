@@ -119,5 +119,27 @@ public interface RaceState extends StartProcedureRaceStateChangedListener {
      * @return the timepoint at which the individual recall was displayed or null when the individual recall is already removed
      */
     TimePoint getIndividualRecallDisplayedTime();
+    
+    /**
+     * @return the current pathfinder boat if it is a gate start race
+     */
+    String getPathfinder();
+
+    /**
+     * Set the current pathfinder boat if it is a gate start race
+     * @param sailingId
+     */
+    void setPathfinder(String sailingId);
+    
+    /**
+     * @return the current pathfinder boat if it is a gate start race
+     */
+    Long getGateLineOpeningTime();
+
+    /**
+     * Set the current pathfinder boat if it is a gate start race
+     * @param sailingId
+     */
+    void setGateLineOpeningTime(Long gateLineOpeningTimeInMillis);
 
 }
