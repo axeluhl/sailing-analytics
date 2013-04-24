@@ -86,17 +86,22 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
                     
                     Filter<CompetitorDTO, ?> filter = CompetitorsFilterFactory.getFilter(filterNameValue.stringValue());
                     FilterOperators op = FilterOperators.valueOf(filterOperatorValue.stringValue());
-                    if(filter != null) {
-                        if(filter.getValueType().equals(Integer.class)) {
+                    if (filter != null) {
+                        if (filter.getValueType().equals(Integer.class)) {
+                            @SuppressWarnings("unchecked") // TODO see bug 1356
                             Filter<CompetitorDTO, Integer> intFilter = (Filter<CompetitorDTO, Integer>) filter;
-                            intFilter.setConfiguration(new Pair<FilterOperators, Integer>(op, Integer.parseInt(filterValueValue.stringValue())));
+                            intFilter.setConfiguration(new Pair<FilterOperators, Integer>(op, Integer
+                                    .parseInt(filterValueValue.stringValue())));
                             filterSet.addFilter(intFilter);
-                        } if(filter.getValueType().equals(String.class)) {
+                        }
+                        if (filter.getValueType().equals(String.class)) {
+                            @SuppressWarnings("unchecked") // TODO see bug 1356
                             Filter<CompetitorDTO, String> stringFilter = (Filter<CompetitorDTO, String>) filter;
-                            stringFilter.setConfiguration(new Pair<FilterOperators, String>(op, filterValueValue.stringValue()));
+                            stringFilter.setConfiguration(new Pair<FilterOperators, String>(op, filterValueValue
+                                    .stringValue()));
                             filterSet.addFilter(stringFilter);
                         }
-                    }                    
+                    }
                 }
             }
             // finally set the active filter set
