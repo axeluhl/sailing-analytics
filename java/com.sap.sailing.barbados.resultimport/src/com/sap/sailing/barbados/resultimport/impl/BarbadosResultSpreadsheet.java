@@ -21,7 +21,7 @@ import com.sap.sailing.resultimport.impl.DefaultCompetitorEntryImpl;
 
 public class BarbadosResultSpreadsheet {
     private static final int COLUMN_NUMBER_OF_FIRST_RACE_RANK = 5;
-    private static final String RACE_SCORE_COLUMN_NAME = "RACE SCORE";
+    private static final String RACE_SCORE_COLUMN_NAME = "TOTAL SCORE";
     private static final String OVERALL_RESULTS_SHEET_NAME = "OVERALL RESULTS";
     private Sheet overallResultsSheet;
 

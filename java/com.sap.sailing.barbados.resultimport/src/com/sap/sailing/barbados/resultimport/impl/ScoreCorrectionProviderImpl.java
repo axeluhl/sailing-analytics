@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.TimePoint;
@@ -16,6 +18,7 @@ import com.sap.sailing.resultimport.impl.AbstractDocumentBasedScoreCorrectionPro
 import com.sap.sailing.resultimport.impl.RegattaScoreCorrectionsImpl;
 
 public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorrectionProvider {
+    private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
     public static final String BOATCLASS_NAME_METADATA_PROPERTY = "boatclassName";
 
     private static final long serialVersionUID = -5501186796881875686L;
@@ -35,10 +38,14 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
     public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception {
         Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String,TimePoint>>>();
         for (Triple<InputStream, String, TimePoint> inputStreamAndNameAndLastModified : getResultDocumentProvider().getDocumentsAndNamesAndLastModified()) {
-            RegattaResults regattaResults = new BarbadosResultSpreadsheet(inputStreamAndNameAndLastModified.getA()).getRegattaResults(); 
-            TimePoint lastModified = inputStreamAndNameAndLastModified.getC();
-            final String boatClassName = getBoatClassName(regattaResults);
-            result.put(boatClassName, Collections.singleton(new Pair<String, TimePoint>(boatClassName, lastModified)));
+            try {
+                RegattaResults regattaResults = new BarbadosResultSpreadsheet(inputStreamAndNameAndLastModified.getA()).getRegattaResults();
+                TimePoint lastModified = inputStreamAndNameAndLastModified.getC();
+                final String boatClassName = getBoatClassName(regattaResults);
+                result.put(boatClassName, Collections.singleton(new Pair<String, TimePoint>(boatClassName, lastModified)));
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Couldn't parse Barbados result document "+inputStreamAndNameAndLastModified.getB(), e);
+            }
         }
         return result;
     }
