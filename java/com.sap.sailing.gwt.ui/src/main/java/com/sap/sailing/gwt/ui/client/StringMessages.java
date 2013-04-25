@@ -537,4 +537,6 @@ public interface StringMessages extends Messages {
     String tractracPassword();
     String flagStatus();
     String additionalInformation();
+    String windFixListingDescription();
+    String noWindFixesAvailable();
 }
