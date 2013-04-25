@@ -54,7 +54,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 				for (RaceCell cell : raceRow.getCells()) {
 					PassAwareRaceLog log = cell.getRaceLog() instanceof PassAwareRaceLog ? 
 							(PassAwareRaceLog) cell.getRaceLog() : 
-								new PassAwareRaceLogImpl(cell.getRaceLog());
+								PassAwareRaceLogImpl.copy(cell.getRaceLog());
 					ManagedRace race = createManagedRace(
 							raceGroup, 
 							series, 

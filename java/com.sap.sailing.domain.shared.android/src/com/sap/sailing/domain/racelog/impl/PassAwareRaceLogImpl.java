@@ -13,21 +13,21 @@ public class PassAwareRaceLogImpl extends RaceLogImpl implements PassAwareRaceLo
     private static final String ReadWriteLockName = PassAwareRaceLogImpl.class.getName() + ".lock";
 
     public static final int DefaultPassId = 0;
-
-    private int currentPassId;
-
-    public PassAwareRaceLogImpl(RaceLog raceLog) {
-        this();
+    
+    public static PassAwareRaceLog copy(RaceLog raceLog) {
+        PassAwareRaceLog newRaceLog = new PassAwareRaceLogImpl();
         raceLog.lockForRead();
         try {
             for (RaceLogEvent event : raceLog.getRawFixes()) {
-                this.add(event);
+                newRaceLog.add(event);
             }
         } finally {
             raceLog.unlockAfterRead();
         }
-
+        return newRaceLog;
     }
+
+    private int currentPassId;
 
     public PassAwareRaceLogImpl() {
         this(DefaultPassId);
