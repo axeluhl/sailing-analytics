@@ -23,10 +23,10 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
   * [[Inventar|wiki/inventar-liste]]
-* Planning
-  * [[Project Planning|wiki/planning]]
+* Planning and Event Information
+  * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]
-  * [[Extreme Sailing Series|wiki/extreme-sailing-series]]
+  * [[Information about Extreme Sailing Series|wiki/extreme-sailing-series]]
 
 ### Internal services (not related to wiki but useful)
 
