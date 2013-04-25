@@ -74,7 +74,7 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
                 JSONObject filterSetValue = (JSONObject) filterSetsArray.get(i);
                 JSONString filterSetNameValue = (JSONString) filterSetValue.get(FIELD_FILTERSET_NAME);
                 
-                FilterSet<CompetitorDTO> filterSet = new FilterSet<CompetitorDTO>(filterSetNameValue.stringValue());
+                FilterSetWithUI<CompetitorDTO> filterSet = new FilterSetWithUI<CompetitorDTO>(filterSetNameValue.stringValue());
                 result.addFilterSet(filterSet);
 
                 JSONArray filterArray = (JSONArray) filterSetValue.get(FIELD_FILTERS); 
@@ -106,7 +106,7 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
             }
             // finally set the active filter set
             if(activeFilterSetName != null) {
-                for(FilterSet<CompetitorDTO> filterSet: result.getFilterSets()) {
+                for(FilterSetWithUI<CompetitorDTO> filterSet: result.getFilterSets()) {
                     if(activeFilterSetName.equals(filterSet.getName())) {
                         result.setActiveFilterSet(filterSet);
                         break;

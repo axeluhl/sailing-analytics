@@ -57,6 +57,7 @@ import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorTotalRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsJsonDeSerializer;
+import com.sap.sailing.gwt.ui.client.shared.filter.FilterSetWithUI;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
@@ -112,7 +113,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     private MultiChartPanel competitorChart;
     
     private CheckBox competitorsFilterCheckBox;
-    private FilterSet<CompetitorDTO> lastActiveCompetitorFilterSet;
+    private FilterSetWithUI<CompetitorDTO> lastActiveCompetitorFilterSet;
     
     /**
      * The component viewer in <code>ONESCREEN</code> view mode. <code>null</code> if in <code>CASCADE</code> view mode
@@ -156,7 +157,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
             // create a default Top N competitors filter as default filter
             competitorsFilterSets = new CompetitorsFilterSets();
             
-            FilterSet<CompetitorDTO> topNCompetitorsFilterSet = new FilterSet<CompetitorDTO>("Top 50");
+            FilterSetWithUI<CompetitorDTO> topNCompetitorsFilterSet = new FilterSetWithUI<CompetitorDTO>("Top 50");
             CompetitorTotalRankFilter rankFilter = new CompetitorTotalRankFilter();
             rankFilter.setConfiguration(new Pair<FilterOperators, Integer>(FilterOperators.LessThanEquals, 50));
             topNCompetitorsFilterSet.addFilter(rankFilter);
@@ -168,7 +169,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         
         // in case the URL configuration contains the name of a competitors filter set we try to activate it  
         if(raceboardViewConfiguration.getActiveCompetitorsFilterSetName() != null) {
-            for(FilterSet<CompetitorDTO> filterSet: competitorsFilterSets.getFilterSets()) {
+            for(FilterSetWithUI<CompetitorDTO> filterSet: competitorsFilterSets.getFilterSets()) {
                 if(filterSet.getName().equals(raceboardViewConfiguration.getActiveCompetitorsFilterSetName())) {
                     competitorsFilterSets.setActiveFilterSet(filterSet);
                     break;
@@ -285,7 +286,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
 
     private void updateCompetitorsFilterControlState(CompetitorsFilterSets filterSets) {
         String competitorsFilterTitle = stringMessages.competitorsFilter();
-        FilterSet<CompetitorDTO> activeFilterSet = filterSets.getActiveFilterSet();
+        FilterSetWithUI<CompetitorDTO> activeFilterSet = filterSets.getActiveFilterSet();
         if(activeFilterSet != null) {
             lastActiveCompetitorFilterSet = activeFilterSet;
         } else {

@@ -1,18 +1,20 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import com.sap.sailing.domain.common.filter.AbstractFilter;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.filter.Filter;
 import com.sap.sailing.domain.common.filter.FilterOperators;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
-public class CompetitorNationalityFilter extends AbstractFilter<CompetitorDTO, String> implements Filter<CompetitorDTO, String> {
-    private static List<FilterOperators> supportedOperators;
-    
+public class CompetitorNationalityFilter extends AbstractFilterWithUI<CompetitorDTO, String> {
     public static final String FILTER_NAME = "CompetitorNationalityFilter";
-            
+
     static {
         supportedOperators = new ArrayList<FilterOperators>();
         supportedOperators.add(FilterOperators.Equals);
@@ -22,14 +24,9 @@ public class CompetitorNationalityFilter extends AbstractFilter<CompetitorDTO, S
     }
     
     public CompetitorNationalityFilter() {
-        super();
+        super(FilterOperators.Equals);
     }
 
-    @Override
-    public FilterOperators getDefaultOperator() {
-        return FilterOperators.Equals;
-    }
-    
     public Class<String> getValueType() {
         return String.class;
     }
@@ -72,12 +69,53 @@ public class CompetitorNationalityFilter extends AbstractFilter<CompetitorDTO, S
     }
 
     @Override
-    public Iterable<FilterOperators> getSupportedOperators() {
-        return supportedOperators;
+    public String getName() {
+        return FILTER_NAME;
     }
 
     @Override
-    public String getName() {
-        return FILTER_NAME;
+    public String getLocalizedName(StringMessages stringMessages) {
+        return stringMessages.nationality();
+    }
+
+    @Override
+    public String validate(StringMessages stringMessages) {
+        String errorMessage = null;
+        if(filterValue == null) {
+            errorMessage = stringMessages.pleaseEnterAValue();
+        } else if (filterValue.length() != 2 && filterValue.length() != 3) {
+            errorMessage = "The nationality must be a two letter ISO code or a three letter IOC code.";
+        }
+        return errorMessage;
+    }
+    
+    @Override
+    public Filter<CompetitorDTO, String> createFilterFromWidgets(Widget valueInputWidget, Widget operatorSelectionWidget) {
+        Filter<CompetitorDTO, String> result = null;
+        if(valueInputWidget instanceof TextBox && operatorSelectionWidget instanceof ListBox) {
+            result = new CompetitorNationalityFilter();
+
+            TextBox valueInputWidgetTextBox = (TextBox) valueInputWidget;
+            ListBox operatorSelectionListBox = (ListBox) operatorSelectionWidget;
+            FilterOperators op = FilterOperators.valueOf(operatorSelectionListBox.getValue(operatorSelectionListBox.getSelectedIndex()));
+            String value = valueInputWidgetTextBox.getValue();
+            result.setConfiguration(new Pair<FilterOperators, String>(op, value));
+        }
+        
+        return result;
+    }
+
+    @Override
+    public Widget createValueInputWidget(DataEntryDialog<?> dataEntryDialog) {
+        TextBox valueInputWidget = dataEntryDialog.createTextBox(filterValue);
+        valueInputWidget.setVisibleLength(20);
+        valueInputWidget.setFocus(true);
+        return valueInputWidget;
+    }
+
+    @Override
+    public Widget createOperatorSelectionWidget(DataEntryDialog<?> dataEntryDialog) {
+        ListBox operatorSelectionWidget = createOperatorSelectionListBox(dataEntryDialog);
+        return operatorSelectionWidget;
     }
 }

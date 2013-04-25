@@ -3,11 +3,9 @@ package com.sap.sailing.domain.common.filter;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-
 /**
  * A named set of filters.
  * Each of the filters has it's own configuration.
- * The class supports both kind of filters: {@link ObjectFilter}s and {@link CollectionFilter}s
  * @author Frank
  *
  */
@@ -31,7 +29,7 @@ public class FilterSet<FilterObjectType> {
         return filters.remove(filter);
     }
 
-    public Set<Filter<FilterObjectType, ?>> getFilters() {
+    public Set<? extends Filter<FilterObjectType, ?>> getFilters() {
         return filters;
     }
     
