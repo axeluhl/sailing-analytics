@@ -160,6 +160,11 @@ if [[ "$@" == "hot-deploy" ]]; then
 
     # check telnet port connection
     TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$OSGI_TELNET_PORT"`
+    if [[ $TELNET_ACTIVE == "" ]]; then
+        # some BSD systems do not support -p
+        TELNET_ACTIVE=`netstat -an | grep ".$OSGI_TELNET_PORT"`
+    fi
+
     if [[ $OSGI_TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
         echo ""
         echo "ERROR: Could not find any process running on port $OSGI_TELNET_PORT. Make sure your server has been started with -console $OSGI_TELNET_PORT"
@@ -178,11 +183,20 @@ if [[ "$@" == "hot-deploy" ]]; then
     fi
 
     # first get bundle ID
+    echo -n "Connecting to OSGi server..."
     NC_CMD="nc -t 127.0.0.1 $OSGI_TELNET_PORT"
+    echo "OK"
     OLD_BUNDLE_INFORMATION=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
     BUNDLE_ID=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 1`
     OLD_ACTIVATED_NAME=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 3`
     echo "Could identify bundle-id $BUNDLE_ID for $OLD_ACTIVATED_NAME"
+
+    read -s -n1 -p "I will now stop bundle $OLD_BUNDLE_INFORMATION with id $BUNDLE_ID - is this right? (y/N): " answer
+    case $answer in
+    "Y" | "y") echo "Continuing";;
+    *) echo "Aborting..."
+       exit;;
+    esac
 
     # stop and uninstall
     echo -n stop $BUNDLE_ID | $NC_CMD > /dev/null
@@ -278,6 +292,14 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         mkdir $ACDIR/plugins
     fi
 
+    if [ ! -d "$ACDIR/logs" ]; then
+        mkdir $ACDIR/logs
+    fi
+
+    if [ ! -d "$ACDIR/tmp" ]; then
+        mkdir $ACDIR/tmp
+    fi
+
     if [ ! -d "$ACDIR/configuration" ]; then
         mkdir $ACDIR/configuration
     fi
@@ -316,6 +338,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+    cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
 
     echo "Installation complete. You may now start the server using ./start"
 fi
