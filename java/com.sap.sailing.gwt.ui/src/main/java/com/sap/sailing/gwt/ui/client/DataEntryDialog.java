@@ -369,17 +369,6 @@ public abstract class DataEntryDialog<T> {
         return result;
     }
 
-    public <S> ValueListBox<S> createValueListBox(Renderer<S> renderer) {
-        ValueListBox<S> result = new ValueListBox<S>(renderer);
-        result.addValueChangeHandler(new ValueChangeHandler<S>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<S> event) {
-                validate();
-            }
-        });
-        return result;
-    }
-
     public void alignAllPanelWidgetsVertically(HorizontalPanel panel, HasVerticalAlignment.VerticalAlignmentConstant alignment) {
         for(int i = 0; i < panel.getWidgetCount(); i++) {
             panel.setCellVerticalAlignment(panel.getWidget(i), alignment);
