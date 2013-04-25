@@ -19,6 +19,7 @@ Like businesses, sailors need the latest information to make strategic decisions
 * [[Configure Races on Server|wiki/configure-races-on-server]]
 * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
 * [[Cook Book|wiki/cook-book]]
+* [[Inventar|wiki/inventar-liste]]
 * [[Project Planning|wiki/planning]]
 * Event Specifica
   * [[General Planning|wiki/general-event-planning]]
