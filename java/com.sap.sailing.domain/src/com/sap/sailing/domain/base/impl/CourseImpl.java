@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,11 +49,11 @@ public class CourseImpl extends NamedImpl implements Course {
      * the transition from a read lock to a write lock, in case a write is actually needed, isn't interrupted by any other
      * call to {@link #update(List, DomainFactory)}.
      */
-    private final Object updateMonitor;
+    private final Serializable updateMonitor;
     
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
         super(name);
-        updateMonitor = new Object(); 
+        updateMonitor = ""; 
         lock = new NamedReentrantReadWriteLock("lock for CourseImpl "+name,
                 /* fair */ true); // if non-fair, course update may need to wait forever for many concurrent readers
         listeners = new HashSet<CourseListener>();
