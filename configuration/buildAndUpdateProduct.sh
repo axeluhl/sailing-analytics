@@ -122,6 +122,16 @@ if [[ "$@" == "hot-deploy" ]]; then
         exit 1
     fi
 
+    if [ ! -d $p2PluginRepository/plugins ]; then
+        echo "Could not find source directory $p2PluginRepository!"
+        exit
+    fi
+
+    if [ ! -d $SERVERS_HOME/$active_branch/plugins ]; then
+        echo "Could not find target directory $SERVERS_HOME/$active_branch/plugins!"
+        exit
+    fi
+
     # locate old bundle
     BUNDLE_COUNT=`find $SERVERS_HOME/$active_branch/plugins -maxdepth 1 -name "${OSGI_BUNDLE_NAME}_*.jar" | wc -l`
     OLD_BUNDLE=`find $SERVERS_HOME/$active_branch/plugins -maxdepth 1 -name "${OSGI_BUNDLE_NAME}_*.jar"`
@@ -190,8 +200,7 @@ if [[ "$@" == "hot-deploy" ]]; then
     BUNDLE_ID=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 1`
     OLD_ACTIVATED_NAME=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 3`
     echo "Could identify bundle-id $BUNDLE_ID for $OLD_ACTIVATED_NAME"
-
-    read -s -n1 -p "I will now stop bundle $OLD_BUNDLE_INFORMATION with id $BUNDLE_ID - is this right? (y/N): " answer
+    read -s -n1 -p "I will now stop and reinstall the bundle mentioned in the line above. Is this right? (y/N): " answer
     case $answer in
     "Y" | "y") echo "Continuing";;
     *) echo "Aborting..."
