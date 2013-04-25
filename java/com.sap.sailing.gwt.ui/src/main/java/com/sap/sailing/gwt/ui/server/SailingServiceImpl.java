@@ -757,7 +757,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             end = trackedRace.getEndOfTracking();
                         }
                         return calculateRaceDetails(trackedRace, competitor, end,
-                                /* waitForLatestManeuverAnalysis */ true /* because this is done only once after end of tracking */, legRanksCache);
+                                // TODO see bug 1358: for now, use waitForLatest==false until we've switched to optimistic locking for the course read lock
+                                /* TODO old comment when it was still true: "because this is done only once after end of tracking" */
+                                /* waitForLatestAnalyses (maneuver and cross track error) */ false,
+                                legRanksCache);
                     }
                 });
                 raceDetailsExecutor.execute(raceDetails);
