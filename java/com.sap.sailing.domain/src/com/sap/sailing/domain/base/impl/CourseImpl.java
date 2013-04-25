@@ -320,7 +320,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public synchronized Waypoint getWaypointForControlPoint(ControlPoint controlPoint, int start) {
+    public Waypoint getWaypointForControlPoint(ControlPoint controlPoint, int start) {
         lockForRead();
         try {
             if (start > legs.size()) {
