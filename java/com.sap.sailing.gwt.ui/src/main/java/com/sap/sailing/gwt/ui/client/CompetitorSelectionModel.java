@@ -113,19 +113,16 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     @Override
     public Collection<CompetitorDTO> getFilteredCompetitors() {
-        Set<CompetitorDTO> filteredCompetitors = new LinkedHashSet<CompetitorDTO>();
         Set<CompetitorDTO> currentFilteredList = new LinkedHashSet<CompetitorDTO>();
         Util.addAll(allCompetitors, currentFilteredList);
         if (competitorsFilterSet != null) {
             for (Filter<CompetitorDTO, ?> filter : competitorsFilterSet.getFilters()) {
-                filteredCompetitors.clear();
-                for (CompetitorDTO competitorDTO : currentFilteredList) {
-                    if (filter.matches(competitorDTO)) {
-                        filteredCompetitors.add(competitorDTO);
+                for (Iterator<CompetitorDTO> i=currentFilteredList.iterator(); i.hasNext(); ) {
+                    CompetitorDTO competitorDTO = i.next();
+                    if (!filter.matches(competitorDTO)) {
+                        i.remove();
                     }
                 }
-                currentFilteredList.clear();
-                currentFilteredList.addAll(filteredCompetitors);
             }
         }
         return Collections.unmodifiableCollection(currentFilteredList);
