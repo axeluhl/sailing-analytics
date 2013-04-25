@@ -109,15 +109,11 @@ public class GateStartProcedure implements StartProcedure {
     }
 
     private void handlePapaDown(TimePoint eventTime) {
-        TimePoint essThreeDownTimePoint = eventTime.minus(1);
+        TimePoint papaDownTimepoint = eventTime.minus(1);
         
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(essThreeDownTimePoint, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(papaDownTimepoint, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.PAPA, Flags.NONE, /*isDisplayed*/false);
         raceLog.add(event);
-        
-        RaceLogEvent essTwoUpEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
-                raceLog.getCurrentPassId(), Flags.ESSTWO, Flags.NONE, /*isDisplayed*/true);
-        raceLog.add(essTwoUpEvent);
         
         if (startPhaseEventListener != null) {
             startPhaseEventListener.onPapaDown();
