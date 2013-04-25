@@ -10,19 +10,22 @@ Like businesses, sailors need the latest information to make strategic decisions
 
 * [[Information about this Wiki and HowTo|wiki/howto]]
 * [[General Project Information|wiki/general-information]]
-* [[OnBoarding Information|wiki/onboarding]]
-* [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
-  * [[PIRONET Information|wiki/prionet-related-information]]
+* Production Environment
+  * [[PIRONET (Hosting Provider)|wiki/prionet-related-information]]
   * [[Production Environment|wiki/production-environment]]
+* Information for Developers
+  * [[Cook Book|wiki/cook-book]]
+  * [[OnBoarding Information|wiki/onboarding]]
+  * [[Server Replication|wiki/server-replication]]
+  * [[Configure Races on Server|wiki/configure-races-on-server]]
   * [[Development Environment|wiki/development-environment]]
-* [[Server Replication|wiki/server-replication]]
-* [[Configure Races on Server|wiki/configure-races-on-server]]
-* [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
-* [[Cook Book|wiki/cook-book]]
-* [[Inventar|wiki/inventar-liste]]
-* [[Project Planning|wiki/planning]]
-* Event Specifica
-  * [[General Planning|wiki/general-event-planning]]
+* General Information
+  * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
+  * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
+  * [[Inventar|wiki/inventar-liste]]
+* Planning
+  * [[Project Planning|wiki/planning]]
+  * [[General Event Planning|wiki/general-event-planning]]
   * [[Extreme Sailing Series|wiki/extreme-sailing-series]]
 
 ### Internal services (not related to wiki but useful)
