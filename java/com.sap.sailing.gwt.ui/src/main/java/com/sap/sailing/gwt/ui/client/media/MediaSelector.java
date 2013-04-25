@@ -39,6 +39,7 @@ import com.sap.sailing.gwt.ui.client.media.MediaSelectionDialog.MediaSelectionLi
 import com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer.PopupCloseListener;
 import com.sap.sailing.gwt.ui.client.media.popup.VideoWindowPlayer;
+import com.sap.sailing.gwt.ui.client.media.popup.YoutubeWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
@@ -434,8 +435,13 @@ public class MediaSelector implements /* RaceTimesInfoProviderListener, */PlaySt
                 @Override
                 public void popoutVideo(MediaTrack videoTrack) {
                     videoDeselected(videoTrack);
-                    VideoPlayer popupPlayer = new VideoWindowPlayer(videoTrack, popupCloseListener);
-                    registerVideo(videoTrack, popupPlayer);
+                    VideoPlayer popupPlayer;
+                    if (videoTrack.isYoutube()) {
+                        popupPlayer = new YoutubeWindowPlayer(videoTrack, popupCloseListener);
+                    } else {
+                        popupPlayer = new VideoWindowPlayer(videoTrack, popupCloseListener);
+                    }
+                    registerVideoPlayer(videoTrack, popupPlayer);
                 }
             };
 
@@ -451,7 +457,7 @@ public class MediaSelector implements /* RaceTimesInfoProviderListener, */PlaySt
                 popupPlayer = new VideoEmbeddedPlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer,
                         mediaService, errorReporter, popupCloseListener, popoutListener);
             }
-            registerVideo(videoTrack, popupPlayer);
+            registerVideoPlayer(videoTrack, popupPlayer);
         } else {
             // nothing changed
         }
@@ -460,7 +466,7 @@ public class MediaSelector implements /* RaceTimesInfoProviderListener, */PlaySt
 
     }
 
-    private void registerVideo(final MediaTrack videoTrack, final VideoPlayer popupPlayer) {
+    private void registerVideoPlayer(final MediaTrack videoTrack, final VideoPlayer popupPlayer) {
         videoPlayers.put(videoTrack, popupPlayer);
         if ((activeAudioPlayer != null) && (activeAudioPlayer.getMediaTrack() == videoTrack)) { // selected video track
                                                                                                 // has been playing as
