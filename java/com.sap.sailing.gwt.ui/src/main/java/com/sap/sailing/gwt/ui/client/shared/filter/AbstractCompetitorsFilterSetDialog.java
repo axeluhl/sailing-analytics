@@ -162,7 +162,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
 
         HorizontalPanel addFilterPanel = new HorizontalPanel();
         mainPanel.add(addFilterPanel);
-        addFilterPanel.add(new Label("Filter criterias:"));
+        addFilterPanel.add(new Label("Filter criteria:"));
         addFilterPanel.add(filterListBox);
         addFilterPanel.add(addFilterButton);
 

@@ -107,7 +107,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     private final RegattaAndRaceIdentifier selectedRaceIdentifier;
     private final CompetitorsFilterSets competitorsFilterSets;
 
-    private LeaderboardPanel leaderboardPanel;
+    private final LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
     private MultiChartPanel competitorChart;
     
@@ -189,14 +189,16 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         
         switch (getConfiguration().getViewMode()) {
             case ONESCREEN:
+                leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
+                leaderboardPanel.addStyleName(LeaderboardPanel.LEADERBOARD_MARGIN_STYLE);
                 createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);                
                 getElement().getStyle().setMarginLeft(12, Unit.PX);
                 getElement().getStyle().setMarginRight(12, Unit.PX);
                 break;
+            default:
+                leaderboardPanel = null;
         }
-        
         updateCompetitorsFilterContexts(competitorsFilterSets);
-        
         timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider);
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
@@ -206,8 +208,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {
         // create the default leaderboard and select the right race
-        leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
-        leaderboardPanel.addStyleName(LeaderboardPanel.LEADERBOARD_MARGIN_STYLE);
         RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel, stringMessages);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
