@@ -12,6 +12,7 @@ import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class TrackedRaceLogListener implements RaceLogEventVisitor {
@@ -40,8 +41,7 @@ public class TrackedRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogStartTimeEvent event) {
-        // TODO Auto-generated method stub
-
+        ((DynamicTrackedRace) trackedRace).setStartTimeReceived(event.getStartTime());
     }
 
     @Override

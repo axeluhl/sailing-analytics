@@ -21,6 +21,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.receiver.ConnectivityChangedReceiver;
 import com.sap.sailing.racecommittee.app.services.sending.EventSenderTask.EventSendingListener;
 
 /*
@@ -145,7 +146,7 @@ public class EventSendingService extends Service implements EventSendingListener
     private void handleSendEvents(Intent intent) {
         if (!isConnected()) {
             persistenceManager.persistIntent(intent);
-            //ConnectivityChangedReceiver.enable(this);
+            ConnectivityChangedReceiver.enable(this);
         } else {
             sendEvent(intent);
         }
@@ -181,7 +182,7 @@ public class EventSendingService extends Service implements EventSendingListener
             persistenceManager.persistIntent(intent);
             if (!isHandlerSet) {
                 SendDelayedEventsCaller delayedCaller = new SendDelayedEventsCaller(this);
-                handler.postDelayed(delayedCaller, 1000 * 60 * 1);
+                handler.postDelayed(delayedCaller, 1000 * 30); //after 30 sec, try the sending again
                 isHandlerSet = true;
             }
         } else {
