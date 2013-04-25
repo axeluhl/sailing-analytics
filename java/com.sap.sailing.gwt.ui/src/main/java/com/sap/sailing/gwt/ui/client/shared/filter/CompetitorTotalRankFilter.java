@@ -14,6 +14,11 @@ public class CompetitorTotalRankFilter extends AbstractCompetitorInLeaderboardFi
     static {
         supportedOperators = new ArrayList<FilterOperators>();
         supportedOperators.add(FilterOperators.LessThanEquals);
+        supportedOperators.add(FilterOperators.GreaterThanEquals);
+        supportedOperators.add(FilterOperators.LessThan);
+        supportedOperators.add(FilterOperators.GreaterThan);
+        supportedOperators.add(FilterOperators.NotEqualTo);
+        supportedOperators.add(FilterOperators.Equals);
     }
     
     public Class<Integer> getValueType() {
@@ -33,23 +38,32 @@ public class CompetitorTotalRankFilter extends AbstractCompetitorInLeaderboardFi
     public boolean matches(CompetitorDTO competitorDTO) {
         boolean result = false;
         
-        if(filterValue > 0 && filterOperator != null && getLeaderboard() != null) {
+        if (filterValue > 0 && filterOperator != null && getLeaderboard() != null) {
             int totalRank = getLeaderboard().getRank(competitorDTO);
             switch (filterOperator) {
                 case LessThanEquals:
-                    if(totalRank <= filterValue) {
-                        result = true;
-                    }
+                    result = totalRank <= filterValue;
                     break;
                 case Equals:
+                    result = totalRank == filterValue;
+                    break;
                 case GreaterThanEquals:
+                    result = totalRank >= filterValue;
+                    break;
                 case LessThan:
+                    result = totalRank < filterValue;
+                    break;
+                case GreaterThan:
+                    result = totalRank > filterValue;
+                    break;
+                case NotEqualTo:
+                    result = totalRank != filterValue;
+                    break;
+                case NotContains:
+                case StartsWith:
                 case Contains:
                 case EndsWith:
-                case GreaterThan:
-                case NotContains:
-                case NotEqualTo:
-                case StartsWith:
+                default:
                     throw new RuntimeException("Operator " + filterOperator.name() + " is not supported."); 
             }
         }
