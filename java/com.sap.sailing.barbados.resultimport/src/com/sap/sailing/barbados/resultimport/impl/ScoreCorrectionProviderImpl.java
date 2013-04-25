@@ -59,9 +59,13 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
             TimePoint timePoint) throws Exception {
         for (Triple<InputStream, String, TimePoint> inputStreamAndNameAndLastModified : getResultDocumentProvider().getDocumentsAndNamesAndLastModified()) {
-            RegattaResults regattaResults = new BarbadosResultSpreadsheet(inputStreamAndNameAndLastModified.getA()).getRegattaResults(); 
-            if ((boatClassName == null && getBoatClassName(regattaResults) == null) || boatClassName.equals(getBoatClassName(regattaResults))) {
-                return new RegattaScoreCorrectionsImpl(this, regattaResults);
+            try {
+                RegattaResults regattaResults = new BarbadosResultSpreadsheet(inputStreamAndNameAndLastModified.getA()).getRegattaResults();
+                if ((boatClassName == null && getBoatClassName(regattaResults) == null) || boatClassName.equals(getBoatClassName(regattaResults))) {
+                    return new RegattaScoreCorrectionsImpl(this, regattaResults);
+                }
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Couldn't parse Barbados result document "+inputStreamAndNameAndLastModified.getB(), e);
             }
         }
         return null;
