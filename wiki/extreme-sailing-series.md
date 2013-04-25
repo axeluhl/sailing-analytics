@@ -17,19 +17,17 @@ Usually not more than 8 competitors race against each other. One of the competit
 
 ## Equipment Needed
 
-* From WDF
+* **From WDF**
   * 1x Smartphone
   * 5x SIM Cards
   * 1x World Adapter
   * 1x Plug Strip
-
-* In Container
+* **In Container**
  * 1x Toughbook
  * 2x Samsung Tablet
  * 1x iPad
  * Expedition Wind Kit
-
-* In Container (after Qingdao)
+* **In Container (after Qingdao)**
  * 1x TFT
  * 1x USB-Keyboard
  * 1x USB-Mouse
