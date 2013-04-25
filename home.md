@@ -11,7 +11,7 @@ Like businesses, sailors need the latest information to make strategic decisions
 * [[Information about this Wiki and HowTo|wiki/howto]]
 * [[General Project Information|wiki/general-information]]
 * Production Environment
-  * [[PIRONET (Hosting Provider)|wiki/prionet-related-information]]
+  * [[PIRONET (Hosting Provider, Emergency Procedures)|wiki/prionet-related-information]]
   * [[Production Environment|wiki/production-environment]]
 * Information for Developers
   * [[Cook Book|wiki/cook-book]]
