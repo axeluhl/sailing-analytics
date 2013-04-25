@@ -10,7 +10,6 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.filter.Filter;
 import com.sap.sailing.domain.common.filter.FilterSet;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public class CompetitorSelectionModel implements CompetitorSelectionProvider {
@@ -113,8 +112,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     @Override
     public Collection<CompetitorDTO> getFilteredCompetitors() {
-        Set<CompetitorDTO> currentFilteredList = new LinkedHashSet<CompetitorDTO>();
-        Util.addAll(allCompetitors, currentFilteredList);
+        Set<CompetitorDTO> currentFilteredList = new LinkedHashSet<CompetitorDTO>(allCompetitors);
         if (competitorsFilterSet != null) {
             for (Filter<CompetitorDTO, ?> filter : competitorsFilterSet.getFilters()) {
                 for (Iterator<CompetitorDTO> i=currentFilteredList.iterator(); i.hasNext(); ) {
@@ -125,7 +123,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
                 }
             }
         }
-        return Collections.unmodifiableCollection(currentFilteredList);
+        return currentFilteredList;
     }
     
     public void setSelected(CompetitorDTO competitor, boolean selected, CompetitorSelectionChangeListener... listenersNotToNotify) {
