@@ -158,7 +158,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         }
     }
     
-    protected void fireListChanged(Iterable<CompetitorDTO> competitors, CompetitorSelectionChangeListener... listenersNotToNotify) {
+    private void fireListChanged(Iterable<CompetitorDTO> competitors, CompetitorSelectionChangeListener... listenersNotToNotify) {
         for (CompetitorSelectionChangeListener listener : listeners) {
             if (listenersNotToNotify == null || !Arrays.asList(listenersNotToNotify).contains(listener)) {
                 listener.competitorsListChanged(competitors);
