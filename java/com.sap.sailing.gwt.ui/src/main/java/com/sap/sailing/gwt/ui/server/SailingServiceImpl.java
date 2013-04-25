@@ -870,7 +870,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 LegEntryDTO legEntry;
                 // We loop over a copy of the course's legs; during a course change, legs may become "stale," even with
                 // regard to the leg/trackedLeg structures inside the tracked race which is updated by the course change
-                // immediately. Make sure we're tolerant against disappearing legs! See bug 794.
+                // immediately. That's why we've acquired a read lock for the course above.
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
                 if (trackedLeg != null && trackedLeg.hasStartedLeg(timePoint)) {
                     legEntry = createLegEntry(trackedLeg, timePoint, waitForLatestAnalyses, legRanksCache);
