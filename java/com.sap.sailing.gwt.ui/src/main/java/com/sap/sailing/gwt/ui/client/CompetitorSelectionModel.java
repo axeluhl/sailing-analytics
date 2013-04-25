@@ -116,12 +116,11 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         Set<CompetitorDTO> filteredCompetitors = new LinkedHashSet<CompetitorDTO>();
         Set<CompetitorDTO> currentFilteredList = new LinkedHashSet<CompetitorDTO>();
         Util.addAll(allCompetitors, currentFilteredList);
-        if(competitorsFilterSet != null) {
+        if (competitorsFilterSet != null) {
             for (Filter<CompetitorDTO, ?> filter : competitorsFilterSet.getFilters()) {
                 filteredCompetitors.clear();
-
-                for(CompetitorDTO competitorDTO: currentFilteredList) {
-                    if(filter.matches(competitorDTO)) {
+                for (CompetitorDTO competitorDTO : currentFilteredList) {
+                    if (filter.matches(competitorDTO)) {
                         filteredCompetitors.add(competitorDTO);
                     }
                 }
@@ -129,7 +128,6 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
                 currentFilteredList.addAll(filteredCompetitors);
             }
         }
-        
         return Collections.unmodifiableCollection(currentFilteredList);
     }
     
