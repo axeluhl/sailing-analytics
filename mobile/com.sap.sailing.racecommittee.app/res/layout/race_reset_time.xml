@@ -44,10 +44,10 @@
     	android:orientation="horizontal"
     	android:layout_marginBottom="18dp">
 	    
-        <LinearLayout 
+        <LinearLayout
             android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
     
 		    <LinearLayout
 		        android:layout_width="fill_parent"
@@ -58,7 +58,7 @@
 		        
 		        <Spinner
 		            android:id="@+id/race_reset_time_spinner_procedure"
-		            android:layout_width="wrap_content"
+		            android:layout_width="fill_parent"
 		            android:layout_height="wrap_content"
 		            android:gravity="center_horizontal" />
 		        
@@ -81,7 +81,7 @@
 			        android:id="@+id/race_reset_time_picker_time"
 			        android:layout_width="wrap_content"
 			        android:layout_height="wrap_content"
-			        android:layout_marginLeft="55dp"
+			        android:layout_marginLeft="75dp"
 			        android:scaleX="1.55"
 			        android:scaleY="1.55" />
 		        
@@ -89,10 +89,11 @@
 	    
 	    </LinearLayout>
 	    
-        <LinearLayout 
+        <LinearLayout
             android:layout_width="wrap_content"
-			android:layout_height="fill_parent"
-			android:orientation="vertical">
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+            android:paddingLeft="18dp" >
 	    
 		    <Button
 		        android:id="@+id/race_reset_time_btn_time"
