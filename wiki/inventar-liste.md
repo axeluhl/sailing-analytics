@@ -1,5 +1,7 @@
 # Inventar Liste
 
+Edit this table by simply copying the contents to http://ckeditor.com/demo and after performing changes just put text back again.
+
 <table border="0" cellpadding="0" cellspacing="0" style="width:1179px">
 	<tbody>
 		<tr>
