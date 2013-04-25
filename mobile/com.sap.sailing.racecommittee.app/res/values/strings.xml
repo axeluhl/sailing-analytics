@@ -18,8 +18,8 @@
     <string name="service_info">SAP Race Committee Service</string>
     <string name="service_title">Monitoring all races on selected event course.</string>
     <string name="app_name">SAP Race Committee Cockpit</string>
-    <string name="set_time">Set start time</string>
-    <string name="reset_time">Reset start time</string>
+    <string name="set_time">Start</string>
+    <string name="reset_time">Restart</string>
     <string name="choose">Choose</string>
     <string name="current_time">Current time</string>
     <string name="race_finished_template">%s is finished</string>

@@ -159,7 +159,7 @@ public class EssStartPhaseFragment extends RaceFragment implements EssStartPhase
 
         RaceDialogFragment fragment = new AbortModeSelectionDialog();
 
-        Bundle args = getParameterBundle();
+        Bundle args = getRecentArguments();
         args.putString(AppConstants.FLAG_KEY, Flags.AP.name());
         fragment.setArguments(args);
 

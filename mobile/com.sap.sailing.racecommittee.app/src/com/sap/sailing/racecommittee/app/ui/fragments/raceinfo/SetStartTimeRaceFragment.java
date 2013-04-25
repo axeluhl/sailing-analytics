@@ -1,7 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import android.app.FragmentManager;
 import android.os.Bundle;
@@ -9,10 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.TextView;
+import android.widget.Spinner;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -34,10 +37,10 @@ public class SetStartTimeRaceFragment extends RaceFragment {
 
     protected boolean isReset;
 
-    protected TimePicker startTimePicker;
-    protected Button setStartTimeButton;
-    protected TextView countdownView;
-    protected ImageButton abortRaceButton;
+    protected TimePicker pickerTime;
+    protected Button btSetDate;
+    protected Button btSetTime;
+    protected Button btPostpone;
 
     protected Date scheduledTime;
 
@@ -51,98 +54,50 @@ public class SetStartTimeRaceFragment extends RaceFragment {
         super.onActivityCreated(savedInstanceState);
 
         isReset = getArguments().getBoolean(AppConstants.RESET_TIME_FRAGMENT_IS_RESET);
+        
+        Spinner spinner = (Spinner) getView().findViewById(R.id.race_reset_time_spinner_procedure);
+        List<String> items = new ArrayList<String>();
+        //items.add("ESS");
+        items.add("Gate-Line-Start");
+        //items.add("Fix-Line-Start (RRS 26)");
+        spinner.setAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, items));
+        
 
-        startTimePicker = (TimePicker) getView().findViewById(R.id.timePicker);
-        setStartTimeButton = (Button) getView().findViewById(R.id.btnRescheduleTime);
-        countdownView = (TextView) getView().findViewById(R.id.time_below_picker);
-        abortRaceButton = (ImageButton) getView().findViewById(R.id.resetTimeAPButton);
+        pickerTime = (TimePicker) getView().findViewById(R.id.race_reset_time_picker_time);
+        btSetDate = (Button) getView().findViewById(R.id.race_reset_time_btn_date);
+        btSetTime = (Button) getView().findViewById(R.id.race_reset_time_btn_time);
+        btPostpone = (Button) getView().findViewById(R.id.race_reset_time_btn_postpone);
 
-        startTimePicker.setIs24HourView(true);
-        startTimePicker.setOnClickListener(new OnClickListener() {
+        pickerTime.setIs24HourView(true);
+        
+        btSetDate.setOnClickListener(new OnClickListener() {
+            @Override
             public void onClick(View view) {
-                refreshDifferenceTime();
+                Toast.makeText(getActivity(), "Not implemented yet.", Toast.LENGTH_SHORT).show();
             }
         });
-        setStartTimeButton.setText(isReset ? R.string.reset_time : R.string.set_time);
-        setStartTimeButton.setOnClickListener(new OnClickListener() {
+        
+        btSetTime.setText(isReset ? R.string.reset_time : R.string.set_time);
+        btSetTime.setOnClickListener(new OnClickListener() {
+            @Override
             public void onClick(View view) {
                 setStartTime();
             }
         });
         
-        abortRaceButton.setOnClickListener(new OnClickListener() {
-
+        btPostpone.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 ExLog.i(ExLog.RACE_SET_TIME_BUTTON_AP, getRace().getId().toString(), getActivity());
                 showAPModeDialog();
             }
-            
         });
-
-        // / TODO: click-listener for abort button
-
-        refreshTimePickerTime();
     }
     
     @Override
     public void onStart() {
         super.onStart();
-        ExLog.w(SetStartTimeRaceFragment.class.getName(), String.format("Fragment %s is now shown", SetStartTimeRaceFragment.class.getName()));
-    }
-
-    public void notifyTick() {
-        refreshDifferenceTime();
-    }
-
-    private void refreshTimePickerTime() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, AppConstants.DefaultStartTimeMinuteOffset);
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
-        startTimePicker.setCurrentHour(hour);
-        startTimePicker.setCurrentMinute(minute);
-        refreshDifferenceTime();
-    }
-
-    private void refreshDifferenceTime() {
-        // This method might be called by the ticker before initialization happens...
-        if (startTimePicker == null || countdownView == null) {
-            return;
-        }
-
-        // / TODO: Why is this method synchronized?
-        synchronized (this) {
-            int hourOfDay = startTimePicker.getCurrentHour();
-            int minute = startTimePicker.getCurrentMinute();
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(System.currentTimeMillis());
-            Date nowDate = calendar.getTime();
-
-            Date pickedDate = (Date) nowDate.clone();
-            pickedDate.setHours(hourOfDay);
-            pickedDate.setMinutes(minute);
-            pickedDate.setSeconds(0);
-
-            long nowTime = nowDate.getTime();
-            long pickedTime = pickedDate.getTime();
-            long diffTime = pickedTime - nowTime;
-            if (diffTime >= 0 && diffTime > 12 * 60 * 60 * 1000) {
-                diffTime -= (24 * 60 * 60 * 1000);
-            } else if (diffTime < 0 && diffTime < -(12 * 60 * 60 * 1000)) {
-                diffTime += (24 * 60 * 60 * 1000);
-            }
-
-            long diffHours = diffTime / 1000 / 60 / 60;
-            long diffMins = (diffTime / 1000 / 60) % 60;
-            long diffSecs = (diffTime / 1000) % 60;
-
-            String minusInd = (diffHours < 0 || diffMins < 0 || diffSecs < 0 ? "-" : "");
-
-            countdownView.setText(getString(R.string.time_until_start) + ": " + minusInd + Math.abs(diffHours) + "h "
-                    + Math.abs(diffMins) + "min " + Math.abs(diffSecs) + "sec");
-        }
+        ExLog.i(SetStartTimeRaceFragment.class.getName(), String.format("Fragment %s is now shown", SetStartTimeRaceFragment.class.getName()));
     }
 
     protected void setStartTime() {
@@ -153,8 +108,8 @@ public class SetStartTimeRaceFragment extends RaceFragment {
         }
 
         Calendar newStartTime = Calendar.getInstance();
-        newStartTime.set(Calendar.HOUR_OF_DAY, startTimePicker.getCurrentHour());
-        newStartTime.set(Calendar.MINUTE, startTimePicker.getCurrentMinute());
+        newStartTime.set(Calendar.HOUR_OF_DAY, pickerTime.getCurrentHour());
+        newStartTime.set(Calendar.MINUTE, pickerTime.getCurrentMinute());
         newStartTime.set(Calendar.SECOND, 0);
         newStartTime.set(Calendar.MILLISECOND, 0);
 
@@ -172,7 +127,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
 
         RaceDialogFragment fragment = new AbortModeSelectionDialog();
 
-        Bundle args = getParameterBundle();
+        Bundle args = getRecentArguments();
         args.putString(AppConstants.FLAG_KEY, Flags.AP.name());
         fragment.setArguments(args);
 

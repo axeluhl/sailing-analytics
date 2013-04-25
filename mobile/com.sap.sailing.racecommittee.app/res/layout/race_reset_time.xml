@@ -2,129 +2,119 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:baselineAligned="false"
+    android:gravity="center_horizontal"
     android:orientation="vertical" >
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:gravity="left"
-        android:scaleY="1"
-        android:text="@string/please_pick_a_time"
-        android:textAppearance="@style/TextAppearance.Welter.AppDescriptionText" />
-
-    <ImageView
-        android:layout_width="500dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:paddingBottom="2dp"
-        android:scaleType="fitXY"
-        android:contentDescription="@string/empty"
-        android:src="@android:drawable/divider_horizontal_textfield" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="30dp" >
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="200dp"
-        android:layout_gravity="center_vertical|center_horizontal" >
-
-        <LinearLayout
-            android:layout_width="400dp"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:scaleY="1.55" >
-
-            <ImageView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:paddingBottom="2dp"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:scaleType="fitXY"
-                android:contentDescription="@string/empty"
-                android:src="@android:drawable/divider_horizontal_textfield" />
-
-            <TimePicker
-                android:id="@+id/timePicker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|center_horizontal"
-                android:scaleX="1.55" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="30dp" >
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/time_below_picker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:gravity="left"
-        android:scaleY="1"
-        android:text="@string/time_until_start"
-        android:textAppearance="@style/TextAppearance.Welter.AppDescriptionText" />
-
-    <ImageView
-        android:layout_width="500dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:paddingBottom="2dp"
-        android:scaleType="fitXY"
-        android:contentDescription="@string/empty"
-        android:src="@android:drawable/divider_horizontal_textfield" />
     
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="30dp" >
+    	android:layout_height="wrap_content"
+    	android:gravity="center_horizontal"
+    	android:orientation="vertical"
+    	android:layout_marginBottom="18dp">
+    
+	    <TextView
+	        android:id="@+id/race_reset_time_txt_header"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel"
+	        android:text="Schedule race" />
+	
+	    <TextView
+	        android:id="@+id/race_reset_time_text_subheader"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"
+	        android:text="Select start mode and start time" />
+	
+	    <ImageView
+	        android:layout_width="500dp"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center_horizontal"
+	        android:paddingBottom="2dp"
+	        android:scaleType="fitXY"
+	        android:contentDescription="@string/app_name"
+	        android:src="@android:drawable/divider_horizontal_textfield" />
+    
     </LinearLayout>
-    
-    <RelativeLayout
+    
+    <LinearLayout 
         android:layout_width="wrap_content"
-        android:layout_height="200dp" 
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/btnRescheduleTime"
-            android:layout_width="400dp"
-            android:layout_height="200dp"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:text="@string/reset_time"
-            android:layout_centerHorizontal="true" />
+    	android:layout_height="wrap_content"
+    	android:gravity="center_horizontal"
+    	android:orientation="horizontal"
+    	android:layout_marginBottom="18dp">
+	    
         <LinearLayout 
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:orientation="vertical"
-            android:layout_marginRight="30dp">
-            <ImageButton
-                android:id="@+id/resetTimeAPButton"
-                android:layout_width="200dp"
-                android:layout_height="110dp"
-                android:scaleType="fitCenter"
-                android:contentDescription="@string/flag_ap"
-                android:src="@drawable/ap_flag" />
-            <TextView
-                android:id="@+id/abortingFlagButtonLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:layout_marginTop="2dp"
-                android:text="@string/postpone_race"
-                android:layout_gravity="center_horizontal"
-                android:textAppearance="@style/TextAppearance.Welter.AppDescriptionText" />
-        </LinearLayout>
+			android:layout_height="wrap_content"
+			android:orientation="vertical">
+    
+		    <LinearLayout
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:orientation="horizontal"
+		        android:gravity="center_horizontal"
+		        android:layout_margin="18dp">
+		        
+		        <Spinner
+		            android:id="@+id/race_reset_time_spinner_procedure"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:gravity="center_horizontal" />
+		        
+		    </LinearLayout>
+		    
+		    <LinearLayout 
+		        android:layout_width="400dp"
+		        android:layout_height="wrap_content"
+		        android:orientation="horizontal"
+		        android:layout_margin="18dp">
+		         
+		       <Button
+			        android:id="@+id/race_reset_time_btn_date"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_gravity="center_vertical"
+			        android:text="Today" />
+		        
+			    <TimePicker
+			        android:id="@+id/race_reset_time_picker_time"
+			        android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_marginLeft="55dp"
+			        android:scaleX="1.55"
+			        android:scaleY="1.55" />
+		        
+		    </LinearLayout>
+	    
+	    </LinearLayout>
+	    
+        <LinearLayout 
+            android:layout_width="wrap_content"
+			android:layout_height="fill_parent"
+			android:orientation="vertical">
+	    
+		    <Button
+		        android:id="@+id/race_reset_time_btn_time"
+		        android:layout_width="180dp"
+		        android:layout_height="0dp"
+		        android:layout_weight="1"
+		        android:layout_gravity="center_vertical"
+		        android:layout_marginTop="18dp"
+		        android:drawableLeft="@drawable/ic_menu_recent_history"
+		        android:text="Start" />
+	        
+	        <Button
+	            android:id="@+id/race_reset_time_btn_postpone"
+				android:layout_width="180dp"
+				android:layout_height="0dp"
+				android:layout_weight="0.2"
+				android:drawableLeft="@drawable/ic_menu_block"
+				android:text="Postpone" />
         
-    </RelativeLayout>
+        </LinearLayout>
+    
+    </LinearLayout>
     
 
 </LinearLayout>
