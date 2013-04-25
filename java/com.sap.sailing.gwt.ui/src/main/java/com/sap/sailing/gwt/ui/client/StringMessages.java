@@ -513,7 +513,8 @@ public interface StringMessages extends Messages {
     String totalAverageSpeedOverGround();
     String totalAverageSpeedOverGroundTooltip();
     String noStarttimeAnnouncedYet();
-    String lastFlag();
+    String lastUpperFlag();
+    String lastLowerFlag();
     String filterRegattasByName();
     String noRegattasYet();
     String cannotAddRacesToRegattaLeaderboardButOnlyToRegatta();
@@ -534,6 +535,8 @@ public interface StringMessages extends Messages {
     String tractracPassword();
     String operatorEquals();
     String operatorNotEqualTo();
+    String flagStatus();
+    String additionalInformation();
     String operatorLessThan();
     String operatorLessThanEquals();
     String operatorGreaterThan();

@@ -25,6 +25,7 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.CourseDesignDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.IndividualRecallUiListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.GateStartUiListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
@@ -43,7 +44,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     private View resetRaceDialogView;
 
     public RaceInfoFragment() {
-        this.infoFragmentChooser = new RaceInfoFragmentChooser();
+        this.infoFragmentChooser = null;
         this.infoFragment = null;	// will be set later by switchToInfoFragment()
     }
 
@@ -55,6 +56,9 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        
+        // decide on start procedure...
+        this.infoFragmentChooser = new RaceInfoFragmentChooser();
 
         this.fleetInfoHeader = (TextView) getView().findViewById(R.id.regattaGroupInfoHeader);
         this.raceInfoHeader = (TextView) getView().findViewById(R.id.raceInfoHeader);
@@ -238,6 +242,26 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
 
     @Override
     public void onAutomaticRaceEnd(TimePoint automaticRaceEnd) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onPathfinderSelected() {
+        if (infoFragment instanceof GateStartUiListener) {
+            ((GateStartUiListener) infoFragment).updatePathfinderLabel();
+        }
+    }
+
+    @Override
+    public void onGateLineOpeningTimeChanged() {
+        if (infoFragment instanceof GateStartUiListener) {
+            ((GateStartUiListener) infoFragment).updateGateLineOpeningTimeLabel();
+        }
+    }
+
+    @Override
+    public void onGateLineOpeningTimeTrigger(TimePoint gateCloseTimePoint) {
         // TODO Auto-generated method stub
         
     }
