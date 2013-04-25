@@ -18,7 +18,8 @@ public interface CompetitorSelectionProvider {
     Iterable<CompetitorDTO> getAllCompetitors();
 
     /**
-     * @return a non-<code>null</code> sequence of all competitors filtered by the applied filter set (which may be null).
+     * @return a non-<code>null</code> sequence of all competitors filtered by the applied
+     * {@link #getCompetitorsFilterSet() filter set} (which may be null).
      */
     Iterable<CompetitorDTO> getFilteredCompetitors();
 

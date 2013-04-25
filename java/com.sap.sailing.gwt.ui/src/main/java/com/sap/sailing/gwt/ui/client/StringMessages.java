@@ -535,8 +535,6 @@ public interface StringMessages extends Messages {
     String tractracPassword();
     String operatorEquals();
     String operatorNotEqualTo();
-    String flagStatus();
-    String additionalInformation();
     String operatorLessThan();
     String operatorLessThanEquals();
     String operatorGreaterThan();
@@ -549,4 +547,6 @@ public interface StringMessages extends Messages {
     String numberMustBePositive();
     String pleaseEnterANumber();
     String competitorsFilter();
+    String flagStatus();
+    String additionalInformation();
 }
