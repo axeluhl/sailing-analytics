@@ -5,12 +5,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -29,6 +34,12 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
         void videoSelected(MediaTrack videoTrack);
         
         void videoDeselected(MediaTrack videoTrack);
+        
+        void addMediaTrack();
+        
+        void deleteMediaTrack(MediaTrack mediaTrack);
+        
+        boolean allowsAddDelete();
         
     }
     
@@ -58,6 +69,16 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
                 grid.add(createVideoCheckBox(videoTrack, selectedVideos));
             }
         }
+        if (mediaSelectionListener.allowsAddDelete()) {
+            Button addButton = new Button("Add", new ClickHandler() {
+                
+                @Override
+                public void onClick(ClickEvent event) {
+                    mediaSelectionListener.addMediaTrack();
+                }
+            });
+            grid.add(addButton);
+        }
         dialogControl.add(grid);
         dialogControl.showRelativeTo(popupLocation);
     }
@@ -79,7 +100,26 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
             }
         });
         
-        return videoCheckBox;
+        if (mediaSelectionListener.allowsAddDelete()) {
+            HorizontalPanel panel = new HorizontalPanel();
+            panel.setWidth("100%");
+            panel.add(videoCheckBox);
+            
+            Button deleteButton = new Button("X", new ClickHandler() {
+                
+                @Override
+                public void onClick(ClickEvent event) {
+                    mediaSelectionListener.deleteMediaTrack(videoTrack);
+                }
+            });
+            panel.setCellHorizontalAlignment(deleteButton, HasHorizontalAlignment.ALIGN_RIGHT);
+            panel.add(deleteButton);
+            
+            return panel;
+        } else {
+            return videoCheckBox;
+        }
+        
     }
     
     public void selectVideo(MediaTrack videoTrack) {

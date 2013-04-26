@@ -37,14 +37,12 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.media.MediaSelectionDialog.MediaSelectionListener;
 import com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer;
-import com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer.PopupCloseListener;
 import com.sap.sailing.gwt.ui.client.media.popup.VideoWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.YoutubeWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack.MediaType;
-import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack.MimeType;
 import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack.Status;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
@@ -54,8 +52,6 @@ public class MediaSelector implements /* RaceTimesInfoProviderListener, */PlaySt
 
     private final CheckBox toggleMediaButton;
     private final Button manageMediaButton;
-    private final Button addMediaButton;
-    private final Button marcusStylingButton;
 
     private final MediaSelectionDialog mediaSelectionDialog;
 
@@ -97,27 +93,9 @@ public class MediaSelector implements /* RaceTimesInfoProviderListener, */PlaySt
             @Override
             public void onClick(ClickEvent event) {
                 if (mediaSelectionDialog.isShowing()) {
-                    mediaSelectionDialog.hide();
+                    hideSelectionDialog();
                 } else {
-                    MediaTrack playingAudioTrack = activeAudioPlayer != null ? activeAudioPlayer.getMediaTrack() : null;
-                    Set<MediaTrack> playingVideoTracks = videoPlayers.keySet();
-
-                    Collection<MediaTrack> reachableVideoTracks = new ArrayList<MediaTrack>();
-                    Collection<MediaTrack> reachableAudioTracks = new ArrayList<MediaTrack>();
-                    for (MediaTrack mediaTrack : mediaTracks) {
-                        if (isPotentiallyPlayable(mediaTrack)) {
-                            switch (mediaTrack.mimeType.mediaType) {
-                            case video:
-                                reachableVideoTracks.add(mediaTrack);
-                            case audio: // intentional fall through
-                                reachableAudioTracks.add(mediaTrack);
-                            }
-                        }
-                    }
-
-                    boolean showAddButton = MediaSelector.this.user != null;
-                    mediaSelectionDialog.show(reachableVideoTracks, playingVideoTracks, reachableAudioTracks,
-                            playingAudioTrack, showAddButton, toggleMediaButton);
+                    showSelectionDialog();
                 }
             }
         });
@@ -141,72 +119,6 @@ public class MediaSelector implements /* RaceTimesInfoProviderListener, */PlaySt
 
             }
 
-        });
-
-        addMediaButton = new Button("Add", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                Date defaultStartTime = new Date(getRaceStartTime());
-                MediaTrackDialog dialog = new MediaTrackDialog(defaultStartTime, MediaSelector.this.stringMessages,
-                        new DialogCallback<MediaTrack>() {
-
-                            @Override
-                            public void cancel() {
-                                // no op
-                            }
-
-                            @Override
-                            public void ok(final MediaTrack mediaTrack) {
-                                MediaSelector.this.mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
-
-                                    @Override
-                                    public void onFailure(Throwable t) {
-                                    }
-
-                                    @Override
-                                    public void onSuccess(String dbId) {
-                                        mediaTrack.dbId = dbId;
-                                        videoSelected(mediaTrack);
-                                    }
-                                });
-
-                            }
-                        });
-                dialog.show();
-            }
-        });
-
-        marcusStylingButton = new Button("Marcus", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                MediaTrack videoTrack = new MediaTrack();
-                boolean showSynchControls = true;
-                videoTrack.durationInMillis = 990000;
-                videoTrack.mimeType = MimeType.ogv;
-                videoTrack.startTime = new Date(1352032110000l);
-                videoTrack.status = Status.REACHABLE;
-                videoTrack.title = "Marcus - Test";
-                videoTrack.url = "http://ftp.realtvgroup.com/matchrace/programm/121104/121104_kleines_finale.mp4";
-                new VideoEmbeddedPlayer(videoTrack, getRaceStartTime(), showSynchControls,
-                        MediaSelector.this.raceTimer, MediaSelector.this.mediaService,
-                        MediaSelector.this.errorReporter, new PopupCloseListener() {
-
-                            @Override
-                            public void popupClosed() {
-                                // TODO Auto-generated method stub
-
-                            }
-
-                        }, new PopoutListener() {
-
-                            @Override
-                            public void popoutVideo(MediaTrack videoTrack) {
-                                // TODO Auto-generated method stub
-
-                            }
-
-                        });
-            }
         });
 
         setWidgetsVisible(false);
@@ -425,23 +337,37 @@ public class MediaSelector implements /* RaceTimesInfoProviderListener, */PlaySt
         MediaPlayer playingVideo = videoPlayers.get(videoTrack);
         if (playingVideo == null) {
             final PopupWindowPlayer.PopupCloseListener popupCloseListener = new PopupWindowPlayer.PopupCloseListener() {
+                
+                private VideoPlayer popoutPlayer;
+                
                 @Override
                 public void popupClosed() {
-                    videoDeselected(videoTrack);
+                    if (popoutPlayer == null) {
+                        videoDeselected(videoTrack);
+                    } else {
+                        mediaSelectionDialog.hide();
+                        registerVideoPlayer(videoTrack, popoutPlayer);
+                        popoutPlayer = null;
+                    }
+                }
+
+                @Override
+                public void setPopoutPlayer(VideoPlayer popoutPlayer) {
+                    this.popoutPlayer = popoutPlayer; 
                 }
             };
             PopoutListener popoutListener = new PopoutListener() {
 
                 @Override
                 public void popoutVideo(MediaTrack videoTrack) {
-                    videoDeselected(videoTrack);
-                    VideoPlayer popupPlayer;
+                    VideoPlayer popoutPlayer;
                     if (videoTrack.isYoutube()) {
-                        popupPlayer = new YoutubeWindowPlayer(videoTrack, popupCloseListener);
+                        popoutPlayer = new YoutubeWindowPlayer(videoTrack, popupCloseListener);
                     } else {
-                        popupPlayer = new VideoWindowPlayer(videoTrack, popupCloseListener);
+                        popoutPlayer = new VideoWindowPlayer(videoTrack, popupCloseListener);
                     }
-                    registerVideoPlayer(videoTrack, popupPlayer);
+                    popupCloseListener.setPopoutPlayer(popoutPlayer);
+                    videoDeselected(videoTrack);
                 }
             };
 
@@ -462,8 +388,6 @@ public class MediaSelector implements /* RaceTimesInfoProviderListener, */PlaySt
             // nothing changed
         }
 
-        updateToggleButton();
-
     }
 
     private void registerVideoPlayer(final MediaTrack videoTrack, final VideoPlayer popupPlayer) {
@@ -478,6 +402,7 @@ public class MediaSelector implements /* RaceTimesInfoProviderListener, */PlaySt
             popupPlayer.setMuted(true);
         }
         synchPlayState(popupPlayer);
+        updateToggleButton();
     }
 
     private long getRaceStartTime() {
@@ -543,7 +468,7 @@ public class MediaSelector implements /* RaceTimesInfoProviderListener, */PlaySt
     }
 
     public Widget[] widgets() {
-        return new Widget[] { toggleMediaButton, manageMediaButton, addMediaButton, marcusStylingButton };
+        return new Widget[] { toggleMediaButton, manageMediaButton};
     }
 
     @Override
@@ -568,6 +493,91 @@ public class MediaSelector implements /* RaceTimesInfoProviderListener, */PlaySt
         }
         videoPlayers.clear();
         updateToggleButton();
+    }
+
+    @Override
+    public void addMediaTrack() {
+        hideSelectionDialog();
+        Date defaultStartTime = new Date(getRaceStartTime());
+        NewMediaDialog dialog = new NewMediaDialog(defaultStartTime, MediaSelector.this.stringMessages,
+                new DialogCallback<MediaTrack>() {
+
+                    @Override
+                    public void cancel() {
+                        // no op
+                    }
+
+                    @Override
+                    public void ok(final MediaTrack mediaTrack) {
+                        MediaSelector.this.mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
+
+                            @Override
+                            public void onFailure(Throwable t) {
+                                errorReporter.reportError(t.toString());
+                            }
+
+                            @Override
+                            public void onSuccess(String dbId) {
+                                mediaTrack.dbId = dbId;
+                                mediaTracks.add(mediaTrack);
+                                videoSelected(mediaTrack);
+                            }
+                        });
+
+                    }
+                });
+        dialog.show();
+    }
+
+    @Override
+    public void deleteMediaTrack(final MediaTrack mediaTrack) {
+        if (Window.confirm(stringMessages.reallyRemoveMediaTrack(mediaTrack.title))) {
+            mediaSelectionDialog.hide();
+            mediaService.deleteMediaTrack(mediaTrack, new AsyncCallback<Void>() {
+                
+                @Override
+                public void onFailure(Throwable t) {
+                    errorReporter.reportError(t.toString());
+                }
+
+                @Override
+                public void onSuccess(Void _void) {
+                    MediaSelector.this.videoDeselected(mediaTrack);
+                    mediaTracks.remove(mediaTrack);
+                }
+            });
+        }
+    }
+
+    @Override
+    public boolean allowsAddDelete() {
+        return this.user != null;
+    }
+
+    private void showSelectionDialog() {
+        MediaTrack playingAudioTrack = activeAudioPlayer != null ? activeAudioPlayer.getMediaTrack() : null;
+        Set<MediaTrack> playingVideoTracks = videoPlayers.keySet();
+
+        Collection<MediaTrack> reachableVideoTracks = new ArrayList<MediaTrack>();
+        Collection<MediaTrack> reachableAudioTracks = new ArrayList<MediaTrack>();
+        for (MediaTrack mediaTrack : mediaTracks) {
+            if (isPotentiallyPlayable(mediaTrack)) {
+                switch (mediaTrack.mimeType.mediaType) {
+                case video:
+                    reachableVideoTracks.add(mediaTrack);
+                case audio: // intentional fall through
+                    reachableAudioTracks.add(mediaTrack);
+                }
+            }
+        }
+
+        boolean showAddButton = MediaSelector.this.user != null;
+        mediaSelectionDialog.show(reachableVideoTracks, playingVideoTracks, reachableAudioTracks,
+                playingAudioTrack, showAddButton, toggleMediaButton);
+    }
+
+    private void hideSelectionDialog() {
+        mediaSelectionDialog.hide();
     }
 
 }

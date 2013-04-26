@@ -23,7 +23,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
-import com.sap.sailing.gwt.ui.client.media.MediaTrackDialog;
+import com.sap.sailing.gwt.ui.client.media.NewMediaDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -306,7 +306,7 @@ public class MediaPanel extends FlowPanel {
 
     private void addUrlMediaTrack() {
         Date defaultStartTime = new Date();
-        MediaTrackDialog dialog = new MediaTrackDialog(defaultStartTime , stringMessages, new DialogCallback<MediaTrack>() {
+        NewMediaDialog dialog = new NewMediaDialog(defaultStartTime , stringMessages, new DialogCallback<MediaTrack>() {
 
             @Override
             public void cancel() {

@@ -10,6 +10,8 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
 
     public interface PopupCloseListener {
         void popupClosed();
+
+        void setPopoutPlayer(VideoPlayer popoutPlayer);
     }
 
     private final JavaScriptObject playerWindow;
@@ -49,9 +51,6 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
                 var window = that.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow; 
                 window.onbeforeunload = function() {
                         that.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::onClosingPopup()();
-                }
-                window.onbeforeunload = function() {
-                        that.@com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer::onMediaTimeUpdate()();
                 }
                 window.parent.deferredPlayState = {
                     deferredIsPlaying: false,
