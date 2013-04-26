@@ -2392,47 +2392,63 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor) {
         final Distance result;
-        NavigableSet<MarkPassing> competitorMarkPassings = getMarkPassings(competitor);
-        lockForRead(competitorMarkPassings);
-        try {
-            if (!competitorMarkPassings.isEmpty()) {
-                TimePoint competitorStartTime = competitorMarkPassings.iterator().next().getTimePoint();
-                Position competitorPositionWhenPassingStart = getTrack(competitor).getEstimatedPosition(
-                        competitorStartTime, /* extrapolate */false);
-                Waypoint startWaypoint = getRace().getCourse().getFirstWaypoint();
-                if (Util.size(startWaypoint.getMarks()) == 1) {
-                    result = getApproximatePosition(startWaypoint, competitorStartTime).getDistance(
-                            competitorPositionWhenPassingStart);
-                } else {
-                    SpeedWithBearing competitorSpeedWhenPassingStart = getTrack(competitor).getEstimatedSpeed(
-                            competitorStartTime);
-                    // find out which of the marks is the starboard side of the line by checking the angle between
-                    // competitor's COG and bearing to mark
+        TrackedLegOfCompetitor firstTrackedLegOfCompetitor = getTrackedLeg(competitor, getRace().getCourse().getFirstLeg());
+        TimePoint competitorStartTime = firstTrackedLegOfCompetitor.getStartTime();
+        if (competitorStartTime != null) {
+            Position competitorPositionWhenPassingStart = getTrack(competitor).getEstimatedPosition(
+                    competitorStartTime, /* extrapolate */false);
+            final Position starboardMarkPosition = getStarboardMarkOfStartlinePosition(competitorStartTime);
+            result = starboardMarkPosition == null ? null : competitorPositionWhenPassingStart.getDistance(starboardMarkPosition);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    /**
+     * The method has protected scope in order to allow for testing. Based on the bearing from the start waypoint to the
+     * next mark, identifies which of the two marks of the start line is on starboard. If the start waypoint has only
+     * one mark, that mark is returned. If the start line has two marks but the course has no other waypoint,
+     * <code>null<code> is returned. If the course has no waypoints at all, <code>null</code> is returned.
+     */
+    protected Position getStarboardMarkOfStartlinePosition(TimePoint at) {
+        final Position starboardMarkPosition;
+        final Course course = getRace().getCourse();
+        Iterator<Waypoint> waypointsIter = course.getWaypoints().iterator();
+        if (waypointsIter.hasNext()) {
+            Waypoint startWaypoint = waypointsIter.next();
+            if (Util.size(startWaypoint.getMarks()) == 1) {
+                starboardMarkPosition = getOrCreateTrack(startWaypoint.getMarks().iterator().next())
+                        .getEstimatedPosition(at, /* extrapolate */false);
+            } else {
+                if (waypointsIter.hasNext()) {
+                    final Position approximatePositionOfStart = getApproximatePosition(startWaypoint, at);
+                    // find out which of the marks is the starboard side of the line by checking the angle
+                    // between competitor's COG and bearing to mark
                     Iterator<Mark> markIter = startWaypoint.getMarks().iterator();
                     Mark mark1 = markIter.next();
-                    final Position estimatedPositionMark1 = getOrCreateTrack(
-                            mark1).getEstimatedPosition(competitorStartTime, /* extrapolate */ false);
-                    Bearing bearingToMark1 = competitorPositionWhenPassingStart.getBearingGreatCircle(estimatedPositionMark1);
-                    Bearing relativeBearingToMark1 = competitorSpeedWhenPassingStart.getBearing().getDifferenceTo(bearingToMark1);
                     Mark mark2 = markIter.next();
-                    final Position estimatedPositionMark2 = getOrCreateTrack(
-                            mark2).getEstimatedPosition(competitorStartTime, /* extrapolate */ false);
-                    Bearing bearingToMark2 = competitorPositionWhenPassingStart.getBearingGreatCircle(estimatedPositionMark2);
-                    Bearing relativeBearingToMark2 = competitorSpeedWhenPassingStart.getBearing().getDifferenceTo(bearingToMark2);
-                    final Position starboardMarkPosition;
-                    if (relativeBearingToMark1.getDegrees() > relativeBearingToMark2.getDegrees()) {
+                    final Position estimatedPositionMark1 = getOrCreateTrack(mark1).getEstimatedPosition(at, /* extrapolate */false);
+                    final Position estimatedPositionMark2 = getOrCreateTrack(mark2).getEstimatedPosition(at, /* extrapolate */false);
+                    Bearing bearingFromMark1ToMark2 = estimatedPositionMark1.getBearingGreatCircle(estimatedPositionMark2);
+                    Waypoint nextWaypoint = waypointsIter.next();
+                    Bearing bearingFromStartToNextWaypoint = approximatePositionOfStart
+                            .getBearingGreatCircle(getApproximatePosition(nextWaypoint, at));
+                    Bearing diffBetweenFromMark1ToMark2AndNextWaypoint = bearingFromMark1ToMark2.getDifferenceTo(bearingFromStartToNextWaypoint);
+                    if (diffBetweenFromMark1ToMark2AndNextWaypoint.getDegrees() > 0) {
                         starboardMarkPosition = estimatedPositionMark1;
                     } else {
                         starboardMarkPosition = estimatedPositionMark2;
                     }
-                    result = competitorPositionWhenPassingStart.getDistance(starboardMarkPosition);
+                } else {
+                    // only one waypoint in course; cannot determine bearing to next mark
+                    starboardMarkPosition = null;
                 }
-            } else {
-                result = null;
             }
-        } finally {
-            unlockAfterRead(competitorMarkPassings);
+        } else {
+            // only one waypoint in course; can't determine bearing to next waypoint
+            starboardMarkPosition = null;
         }
-        return result;
+        return starboardMarkPosition;
     }
 }
