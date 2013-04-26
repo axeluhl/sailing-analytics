@@ -10,17 +10,23 @@ import java.util.Collection;
 import android.content.Context;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
+import com.sap.sailing.racecommittee.app.data.handlers.CourseDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.ManagedRacesDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.MarksDataHandler;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoader;
+import com.sap.sailing.racecommittee.app.data.parsers.CompetitorsDataParser;
+import com.sap.sailing.racecommittee.app.data.parsers.CourseDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
@@ -40,9 +46,13 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseDataDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.RaceLogEventDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 
 /**
  * Enables accessing of data.
@@ -135,7 +145,7 @@ public class OnlineDataManager extends DataManager {
         DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(new RaceGroupDeserializer(
                 boatClassDeserializer, new SeriesWithRowsDeserializer(new RaceRowDeserializer(new FleetDeserializer(
                         new ColorDeserializer()), new RaceCellDeserializer(
-                                new RaceLogDeserializer(RaceLogEventDeserializer.create(domainFactory)), new CompetitorDeserializer(domainFactory))))));
+                                new RaceLogDeserializer(RaceLogEventDeserializer.create(domainFactory)))))));
         DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(this, client);
 
         try {
@@ -170,6 +180,61 @@ public class OnlineDataManager extends DataManager {
         try {
             new DataLoader<Collection<Mark>>(context, URI.create(AppConstants.getServerBaseURL(context)
                     + "/sailingserver/rc/marks?leaderboard=" + raceGroupName + "&raceColumn=" + raceColumnName 
+                    + "&fleet=" + fleetName), parser, handler)
+                    .forceLoad();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void loadCourse(ManagedRace managedRace, LoadClient<CourseBase> client) {
+        SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
+        JsonDeserializer<CourseBase> courseBaseDeserializer = new CourseDataDeserializer(
+                new WaypointDeserializer(
+                        new ControlPointDeserializer(
+                                new MarkDeserializer(domainFactory), 
+                                new GateDeserializer(domainFactory, 
+                                        new MarkDeserializer(domainFactory)))));
+        DataParser<CourseBase> parser = new CourseDataParser(courseBaseDeserializer);
+        DataHandler<CourseBase> handler = new CourseDataHandler(this, client, managedRace);
+        
+        ManagedRaceIdentifier identifier = managedRace.getIdentifier();
+        
+        String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName());
+        String raceColumnName = URLEncoder.encode(identifier.getRaceName());
+        String fleetName = URLEncoder.encode(identifier.getFleet().getName());
+        
+        try {
+            new DataLoader<CourseBase>(context, URI.create(AppConstants.getServerBaseURL(context)
+                    + "/sailingserver/rc/currentcourse?leaderboard=" + raceGroupName + "&raceColumn=" + raceColumnName 
+                    + "&fleet=" + fleetName), parser, handler)
+                    .forceLoad();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void loadCompetitors(ManagedRace managedRace, LoadClient<Collection<Competitor>> client) {
+        SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
+        JsonDeserializer<Competitor> competitorDeserializer = new CompetitorDeserializer(domainFactory);
+        DataParser<Collection<Competitor>> parser = new CompetitorsDataParser(competitorDeserializer);
+        DataHandler<Collection<Competitor>> handler = new CompetitorsDataHandler(this, client, managedRace);
+        
+        ManagedRaceIdentifier identifier = managedRace.getIdentifier();
+        
+        String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName());
+        String raceColumnName = URLEncoder.encode(identifier.getRaceName());
+        String fleetName = URLEncoder.encode(identifier.getFleet().getName());
+        
+        try {
+            new DataLoader<Collection<Competitor>>(context, URI.create(AppConstants.getServerBaseURL(context)
+                    + "/sailingserver/rc/competitors?leaderboard=" + raceGroupName + "&raceColumn=" + raceColumnName 
                     + "&fleet=" + fleetName), parser, handler)
                     .forceLoad();
         } catch (MalformedURLException e) {

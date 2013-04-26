@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventRestoreFactoryImpl;
 
 public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
@@ -32,10 +33,20 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
 
     RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint createdAt, TimePoint logicalTimePoint,
             Serializable id, List<Competitor> competitors, int passId, CourseBase courseData);
-    
-    RaceLogFinishPositioningListChangedEvent createFinishPositioningListChangedEvent(TimePoint createdAt, TimePoint logicalTimePoint,
-            Serializable id, List<Competitor> competitors, int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
-    
-    RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint createdAt, TimePoint logicalTimePoint,
-            Serializable id, List<Competitor> competitors, int passId);
+
+    RaceLogFinishPositioningListChangedEvent createFinishPositioningListChangedEvent(TimePoint createdAt,
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId,
+            List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
+
+    RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint createdAt,
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId);
+
+    RaceLogPathfinderEvent createPathfinderEvent(TimePoint createdAt, TimePoint logicalTimePoint, Serializable id,
+            List<Competitor> competitors, int passId, String pathfinderId);
+
+    RaceLogGateLineOpeningTimeEvent createGateLineOpeningTimeEvent(TimePoint createdAt, TimePoint logicalTimePoint,
+            Serializable id, List<Competitor> competitors, int passId, Long gateLineOpeningTime);
+
+    RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint createdAt, TimePoint timePoint,
+            Serializable id, List<Competitor> competitors, int passId, StartProcedureType type);
 }

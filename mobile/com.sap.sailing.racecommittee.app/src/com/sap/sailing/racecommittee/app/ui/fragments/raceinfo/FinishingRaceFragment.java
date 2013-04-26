@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import java.util.Date;
+
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
@@ -64,7 +65,7 @@ public class FinishingRaceFragment extends RaceFragment {
         });
         
     }
-    
+
     protected void setCountdownLabels(long millisecondsSinceStart) {
         setStarttimeCountupLabel(millisecondsSinceStart);
     }
@@ -99,7 +100,7 @@ public class FinishingRaceFragment extends RaceFragment {
     private CharSequence getTimeLimitText() {
         TimePoint timeLimit = getTimeLimit();
         if (timeLimit != null) {
-            return String.format(getString(R.string.race_time_limit),
+            return String.format(getString(R.string.race_first_finisher_and_time_limit),
                     getFormattedTime(getRace().getState().getFinishingStartTime().asDate()), getFormattedTime(timeLimit.asDate()));
         }
         return getString(R.string.empty);

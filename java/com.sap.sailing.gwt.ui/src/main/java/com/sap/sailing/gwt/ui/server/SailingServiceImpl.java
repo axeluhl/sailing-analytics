@@ -126,9 +126,11 @@ import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
@@ -779,7 +781,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             end = trackedRace.getEndOfTracking();
                         }
                         return calculateRaceDetails(trackedRace, competitor, end,
-                                /* waitForLatestManeuverAnalysis */ true /* because this is done only once after end of tracking */, legRanksCache);
+                                // TODO see bug 1358: for now, use waitForLatest==false until we've switched to optimistic locking for the course read lock
+                                /* TODO old comment when it was still true: "because this is done only once after end of tracking" */
+                                /* waitForLatestAnalyses (maneuver and cross track error) */ false,
+                                legRanksCache);
                     }
                 });
                 raceDetailsExecutor.execute(raceDetails);
@@ -889,7 +894,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 LegEntryDTO legEntry;
                 // We loop over a copy of the course's legs; during a course change, legs may become "stale," even with
                 // regard to the leg/trackedLeg structures inside the tracked race which is updated by the course change
-                // immediately. Make sure we're tolerant against disappearing legs! See bug 794.
+                // immediately. That's why we've acquired a read lock for the course above.
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
                 if (trackedLeg != null && trackedLeg.hasStartedLeg(timePoint)) {
                     legEntry = createLegEntry(trackedLeg, timePoint, waitForLatestAnalyses, legRanksCache);
@@ -1130,19 +1135,31 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
+
             PassAwareRaceLogImpl passAwareRaceLog = new PassAwareRaceLogImpl(raceLog);
             StartTimeFinder startTimeFinder = new StartTimeFinder(passAwareRaceLog);
-            if (startTimeFinder.getStartTime() != null) {
+            if(startTimeFinder.getStartTime()!=null){
                 raceInfoDTO.startTime = startTimeFinder.getStartTime().asDate();
             }
+
             RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(passAwareRaceLog);
             raceInfoDTO.lastStatus = raceStatusAnalyzer.getStatus();
-            for(RaceLogEvent event : passAwareRaceLog.getFixes()){
-                if(event instanceof RaceLogFlagEvent){
-                    raceInfoDTO.lastFlag = ((RaceLogFlagEvent) event).getUpperFlag();
-                    raceInfoDTO.displayed = ((RaceLogFlagEvent) event).isDisplayed();
-                }
+
+            PathfinderFinder pathfinderFinder = new PathfinderFinder(passAwareRaceLog);
+            raceInfoDTO.pathfinderId = pathfinderFinder.getPathfinderId();
+
+            GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(passAwareRaceLog);
+            raceInfoDTO.gateLineOpeningTime = gateLineOpeningTimeFinder.getGateLineOpeningTime();
+
+            LastFlagFinder lastFlagFinder = new LastFlagFinder(passAwareRaceLog);
+
+            RaceLogFlagEvent lastFlagEvent = lastFlagFinder.getLastFlagEvent();
+            if (lastFlagEvent != null) {
+                raceInfoDTO.lastUpperFlag = lastFlagEvent.getUpperFlag();
+                raceInfoDTO.lastLowerFlag = lastFlagEvent.getLowerFlag();
+                raceInfoDTO.displayed = lastFlagEvent.isDisplayed();
             }
+
             LastPublishedCourseDesignFinder courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
             raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(courseDesignFinder.getLastCourseDesign());
         }

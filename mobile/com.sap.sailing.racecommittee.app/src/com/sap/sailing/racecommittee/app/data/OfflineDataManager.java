@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -88,7 +89,7 @@ public class OfflineDataManager extends DataManager {
                         new FleetImpl("Default"), 
                         qualifying, 
                         raceGroup), 
-                        log, competitors);
+                        log);
 
         log = new PassAwareRaceLogImpl();
         /*log.add(factory.createStartTimeEvent(
@@ -104,7 +105,7 @@ public class OfflineDataManager extends DataManager {
                         new FleetImpl("Default"), 
                         qualifying, 
                         raceGroup), 
-                        log, competitors);
+                        log);
 
         log = new PassAwareRaceLogImpl();
         /*log.add(factory.createRaceStatusEvent(
@@ -117,7 +118,7 @@ public class OfflineDataManager extends DataManager {
                         new FleetImpl("Default"), 
                         qualifying, 
                         raceGroup), 
-                        log, competitors);
+                        log);
         /*ManagedRace m1 = new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(
 						"M1", 
@@ -156,6 +157,16 @@ public class OfflineDataManager extends DataManager {
     @Override
     public void loadMarks(ManagedRace managedRace, LoadClient<Collection<Mark>> client) {
         client.onLoadSucceded(dataStore.getMarks());
+    }
+
+    @Override
+    public void loadCourse(ManagedRace managedRace, LoadClient<CourseBase> client) {
+        client.onLoadSucceded(managedRace.getCourseOnServer());
+    }
+
+    @Override
+    public void loadCompetitors(ManagedRace managedRace, LoadClient<Collection<Competitor>> client) {
+        client.onLoadSucceded((Collection<Competitor>) managedRace.getCompetitors());
     }
 
 }

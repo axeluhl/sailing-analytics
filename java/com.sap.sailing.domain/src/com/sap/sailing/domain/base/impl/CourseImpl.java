@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,8 +44,16 @@ public class CourseImpl extends NamedImpl implements Course {
     private transient Set<CourseListener> listeners;
     private transient NamedReentrantReadWriteLock lock;
     
+    /**
+     * This monitor is used to serialize calls to {@link #update(List, DomainFactory)}. This helps to guarantee that
+     * the transition from a read lock to a write lock, in case a write is actually needed, isn't interrupted by any other
+     * call to {@link #update(List, DomainFactory)}.
+     */
+    private final Serializable updateMonitor;
+    
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
         super(name);
+        updateMonitor = ""; 
         lock = new NamedReentrantReadWriteLock("lock for CourseImpl "+name,
                 /* fair */ true); // if non-fair, course update may need to wait forever for many concurrent readers
         listeners = new HashSet<CourseListener>();
@@ -320,7 +329,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public synchronized Waypoint getWaypointForControlPoint(ControlPoint controlPoint, int start) {
+    public Waypoint getWaypointForControlPoint(ControlPoint controlPoint, int start) {
         lockForRead();
         try {
             if (start > legs.size()) {
@@ -372,44 +381,51 @@ public class CourseImpl extends NamedImpl implements Course {
 
     @Override
     public void update(List<Pair<ControlPoint, NauticalSide>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
-        LockUtil.lockForWrite(lock);
-        try {
-            Iterable<Waypoint> courseWaypoints = getWaypoints();
-            List<Waypoint> newWaypointList = new LinkedList<Waypoint>();
-            // key existing waypoints by control points and re-use each one at most once during construction of the
-            // new waypoint list; since several waypoints can have the same control point, the map goes from
-            // control point to List<Waypoint>. The waypoints in the lists are held in the order of their
-            // occurrence in courseToUpdate.getWaypoints().
-            Map<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>> existingWaypointsByControlPoint =
-                    new HashMap<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>>();
-            for (Waypoint waypoint : courseWaypoints) {
-                List<Waypoint> wpl = existingWaypointsByControlPoint.get(waypoint.getControlPoint());
-                if (wpl == null) {
-                    wpl = new ArrayList<Waypoint>();
-                    existingWaypointsByControlPoint.put(waypoint.getControlPoint(), wpl);
+        Patch<Waypoint> patch = null;
+        synchronized (updateMonitor) {
+            lockForRead();
+            try {
+                Iterable<Waypoint> courseWaypoints = getWaypoints();
+                List<Waypoint> newWaypointList = new LinkedList<Waypoint>();
+                // key existing waypoints by control points and re-use each one at most once during construction of the
+                // new waypoint list; since several waypoints can have the same control point, the map goes from
+                // control point to List<Waypoint>. The waypoints in the lists are held in the order of their
+                // occurrence in courseToUpdate.getWaypoints().
+                Map<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>> existingWaypointsByControlPoint = new HashMap<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>>();
+                for (Waypoint waypoint : courseWaypoints) {
+                    List<Waypoint> wpl = existingWaypointsByControlPoint.get(waypoint.getControlPoint());
+                    if (wpl == null) {
+                        wpl = new ArrayList<Waypoint>();
+                        existingWaypointsByControlPoint.put(waypoint.getControlPoint(), wpl);
+                    }
+                    wpl.add(waypoint);
                 }
-                wpl.add(waypoint);
-            }
-            for (Pair<ControlPoint, NauticalSide> newDomainControlPoint : newControlPoints) {
-                List<Waypoint> waypoints = existingWaypointsByControlPoint.get(newDomainControlPoint.getA());
-                Waypoint waypoint;
-                if (waypoints == null || waypoints.isEmpty()) {
-                    // must be a new control point for which we don't have a waypoint yet
-                    waypoint = baseDomainFactory.createWaypoint(newDomainControlPoint.getA(), newDomainControlPoint.getB());
-                } else {
-                    waypoint = waypoints.remove(0); // take the first from the list
+                for (Pair<ControlPoint, NauticalSide> newDomainControlPoint : newControlPoints) {
+                    List<Waypoint> waypoints = existingWaypointsByControlPoint.get(newDomainControlPoint.getA());
+                    Waypoint waypoint;
+                    if (waypoints == null || waypoints.isEmpty()) {
+                        // must be a new control point for which we don't have a waypoint yet
+                        waypoint = baseDomainFactory.createWaypoint(newDomainControlPoint.getA(),
+                                newDomainControlPoint.getB());
+                    } else {
+                        waypoint = waypoints.remove(0); // take the first from the list
+                    }
+                    newWaypointList.add(waypoint);
                 }
-                newWaypointList.add(waypoint);
+                patch = DiffUtils.diff(courseWaypoints, newWaypointList);
+            } finally {
+                unlockAfterRead();
             }
-            Patch<Waypoint> patch = DiffUtils.diff(courseWaypoints, newWaypointList);
-            if (!patch.isEmpty()) {
-                logger.info("applying course update " + patch + " to course " + this);
-                CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
-                patch.applyToInPlace(courseAsWaypointList);
+            if (patch != null && !patch.isEmpty()) {
+                lockForWrite();
+                try {
+                    logger.info("applying course update " + patch + " to course " + this);
+                    CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
+                    patch.applyToInPlace(courseAsWaypointList);
+                } finally {
+                    unlockAfterWrite();
+                }
             }
-        } finally {
-            LockUtil.unlockAfterWrite(lock);
         }
     }
-    
 }

@@ -515,7 +515,8 @@ public interface StringMessages extends Messages {
     String totalAverageSpeedOverGround();
     String totalAverageSpeedOverGroundTooltip();
     String noStarttimeAnnouncedYet();
-    String lastFlag();
+    String lastUpperFlag();
+    String lastLowerFlag();
     String filterRegattasByName();
     String noRegattasYet();
     String cannotAddRacesToRegattaLeaderboardButOnlyToRegatta();
@@ -546,4 +547,8 @@ public interface StringMessages extends Messages {
     String starboardTack();
     String portSide();
     String starboardSide();
+    String flagStatus();
+    String additionalInformation();
+    String windFixListingDescription();
+    String noWindFixesAvailable();
 }
