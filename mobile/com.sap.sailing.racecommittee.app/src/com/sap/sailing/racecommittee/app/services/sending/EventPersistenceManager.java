@@ -46,11 +46,11 @@ public class EventPersistenceManager {
 
     private void persistEvent(String raceUuid, Serializable serializedEvent) {
         String eventLine = String.format("%s;%s\n", raceUuid, serializedEvent);
-        ExLog.i(TAG, "Called to persist following event " + eventLine);
+        ExLog.i(TAG, String.format("Persisting event \"%s\" for race %s.", eventLine, raceUuid));
 
         if (!fileContent.isEmpty()) {
             if (fileContent.contains(eventLine)) {
-                ExLog.i(TAG, "The event to persist exists already in file");
+                ExLog.i(TAG, "The event already exists. Ignoring.");
                 return;
             }
         }
@@ -70,7 +70,7 @@ public class EventPersistenceManager {
         if (fileContent.isEmpty())
             return;
 
-        ExLog.i(TAG, "removeEvent is called for " + raceUuid + ", serializedEvent " + serializedEvent);
+        ExLog.i(TAG,  String.format("Removing event \"%s\" for race %s.", serializedEvent, raceUuid));
         String eventLine = String.format("%s;%s\n", raceUuid, serializedEvent);
 
         removeEntryInFileContent(eventLine);
@@ -84,7 +84,7 @@ public class EventPersistenceManager {
         if (fileContent.contains(eventLine)) {
             fileContent = fileContent.replace(eventLine, "");
             writeFileContentToFile();
-            ExLog.i(TAG, "Entry " + eventLine + " is removed from fileContent");
+            ExLog.i(TAG, "Event removed.");
         }
     }
 
@@ -97,7 +97,8 @@ public class EventPersistenceManager {
 
     public List<Intent> restoreEvents() {
         List<Intent> delayedIntents = new ArrayList<Intent>();
-        List<String> fileEntriesToBeRemoved = new ArrayList<String>(); //These file entries may be too old. No appropriate race id has been found for this event.
+      //These file entries may be too old. No appropriate race id has been found for this event.
+        List<String> fileEntriesToBeRemoved = new ArrayList<String>(); 
 
         if (!fileContent.isEmpty()) {
             String[] eventLines = fileContent.split("\n");

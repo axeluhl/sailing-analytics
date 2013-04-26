@@ -47,7 +47,7 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Pair<Intent, Intege
             } finally {
                 post.disconnect();
             }
-            ExLog.i(getClass().getName(), "Post request issued for the following Event: " + serializedEvent);
+            ExLog.i(getClass().getName(), "Post successful for the following event: " + serializedEvent);
         } catch (Exception e) {
             ExLog.e(getClass().getName(), e.toString());
             return Pair.create(intent, -1);

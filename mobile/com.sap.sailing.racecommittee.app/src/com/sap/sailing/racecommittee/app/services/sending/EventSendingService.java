@@ -43,6 +43,17 @@ public class EventSendingService extends Service implements EventSendingListener
     private final IBinder mBinder = new EventSendingBinder();
     private EventPersistenceManager persistenceManager;
     private boolean isHandlerSet;
+    
+    private EventSendingServiceLogger serviceLogger;
+    
+    public interface EventSendingServiceLogger {
+        public void onEventSentSuccessful();
+        public void onEventSentFailed();
+    }
+
+    public void setEventSendingServiceLogger(EventSendingServiceLogger logger) {
+        serviceLogger = logger;
+    }
 
     public class EventSendingBinder extends Binder {
         public EventSendingService getService() {
@@ -178,17 +189,21 @@ public class EventSendingService extends Service implements EventSendingListener
 
     public void onResult(Intent intent, boolean success) {
         if (!success) {
-            ExLog.w(TAG, "Could not POST intent to server.");
+            ExLog.w(TAG, "Error while posting intent to server. Will persist intent...");
             persistenceManager.persistIntent(intent);
             if (!isHandlerSet) {
                 SendDelayedEventsCaller delayedCaller = new SendDelayedEventsCaller(this);
                 handler.postDelayed(delayedCaller, 1000 * 30); //after 30 sec, try the sending again
                 isHandlerSet = true;
             }
+            
+            serviceLogger.onEventSentFailed();
         } else {
-            ExLog.i(TAG, "Event successfully send. " + intent.getStringExtra(AppConstants.EXTRAS_JSON_KEY));
+            ExLog.i(TAG, "Event successfully send.");
             persistenceManager.removeIntent(intent);
             lastSuccessfulSend = Calendar.getInstance().getTime();
+            
+            serviceLogger.onEventSentSuccessful();
         }
 
     }
