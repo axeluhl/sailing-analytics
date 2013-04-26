@@ -35,6 +35,8 @@ import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 public class TVViewController implements RaceTimesInfoProviderListener {
+    private static final int REFRESH_INTERVAL_IN_MILLIS_LEADERBOARD = 10000;
+    private static final long REFRESH_INTERVAL_IN_MILLIS_RACEBOARD = 1000;
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final StringMessages stringMessages;
@@ -158,33 +160,29 @@ public class TVViewController implements RaceTimesInfoProviderListener {
             }
             currentLiveRace = null;
             activeTvView = TVViews.Leaderboard;
+            timer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_LEADERBOARD);
         }
     }
     
     private void showRaceBoard() {
         if(activeTvView != TVViews.Raceboard) {
             clearContentPanels();
-
             RaceBoardPanel raceBoardPanel = createRaceBoardPanel(leaderboardName, currentLiveRace);
             raceBoardPanel.setSize("100%", "100%");
-            if(showWindChart) {
+            if (showWindChart) {
                 raceBoardPanel.setWindChartVisible(true);
             }
-
 //            FlowPanel toolbarPanel = new FlowPanel();
 //            toolbarPanel.add(raceBoardPanel.getNavigationWidget());
 //            dockPanel.addNorth(toolbarPanel, 40);
-            
             FlowPanel timePanel = createTimePanel(raceBoardPanel);
-            
             dockPanel.addSouth(timePanel, 90);                     
             dockPanel.add(raceBoardPanel);
-            
-            if(logoAndTitlePanel != null) {
+            if (logoAndTitlePanel != null) {
                 logoAndTitlePanel.setSubTitle(currentLiveRace.getRaceName());
             }
-
             activeTvView = TVViews.Raceboard;
+            timer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_RACEBOARD);
         }
     }
 
