@@ -84,7 +84,7 @@ public class CompetitorNationalityFilter extends AbstractFilterWithUI<Competitor
         if(filterValue == null) {
             errorMessage = stringMessages.pleaseEnterAValue();
         } else if (filterValue.length() != 2 && filterValue.length() != 3) {
-            errorMessage = "The nationality must be a two letter ISO code or a three letter IOC code.";
+            errorMessage = stringMessages.nationalityMustBeISOorIOCcode(); 
         }
         return errorMessage;
     }

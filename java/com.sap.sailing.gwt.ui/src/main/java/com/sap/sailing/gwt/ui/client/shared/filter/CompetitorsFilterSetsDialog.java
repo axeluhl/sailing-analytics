@@ -61,7 +61,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
         deleteFilterSetButtons = new ArrayList<Button>();
         filterSets = new ArrayList<FilterSetWithUI<CompetitorDTO>>();
         
-        addFilterSetButton = new Button("Add filter");
+        addFilterSetButton = new Button(stringMessages.actionAddFilter());
         
         availableCompetitorsFilter = new ArrayList<FilterWithUI<CompetitorDTO, ?>>();
         availableCompetitorsFilter.add(new CompetitorTotalRankFilter());
@@ -74,9 +74,9 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
 
         String headLineText;
         if(competitorsFilterSets.getFilterSets().size() < 1) {
-            headLineText = "Please create a filter set to filter the list of competitors.";
+            headLineText = stringMessages.createFilterHint();
         } else {
-            headLineText = "Available filters";
+            headLineText = stringMessages.availableFilters();
         }
         
         mainPanel.add(new Label(headLineText));

@@ -549,4 +549,16 @@ public interface StringMessages extends Messages {
     String competitorsFilter();
     String flagStatus();
     String additionalInformation();
+    String actionAddFilter();
+    String actionEditFilter();
+    String availableFilters();
+    String createFilterHint();
+    String filterThisNameAlreadyExists();
+    String addAtLeastOneFilterCriteria();
+    String filterCriteria();
+    String selectAFilterCriteria();
+    String filterName();
+    String operator();
+    String value();
+    String nationalityMustBeISOorIOCcode();
 }

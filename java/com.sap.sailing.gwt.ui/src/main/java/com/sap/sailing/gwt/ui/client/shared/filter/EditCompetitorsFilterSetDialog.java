@@ -10,7 +10,7 @@ public class EditCompetitorsFilterSetDialog extends AbstractCompetitorsFilterSet
 
     public EditCompetitorsFilterSetDialog(FilterSetWithUI<CompetitorDTO> competitorsFilterSet, List<FilterWithUI<CompetitorDTO, ?>> availableCompetitorsFilter, 
             List<String> existingFilterSetNames, StringMessages stringMessages, DialogCallback<FilterSetWithUI<CompetitorDTO>> callback) {
-        super(competitorsFilterSet, availableCompetitorsFilter, existingFilterSetNames, "Edit filter", stringMessages, callback);
+        super(competitorsFilterSet, availableCompetitorsFilter, existingFilterSetNames, stringMessages.actionEditFilter(), stringMessages, callback);
         
         filterSetNameTextBox = createTextBox(competitorsFilterSet.getName());
     }

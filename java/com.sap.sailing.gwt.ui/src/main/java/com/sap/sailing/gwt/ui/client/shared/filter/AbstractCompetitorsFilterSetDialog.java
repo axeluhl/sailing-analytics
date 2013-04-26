@@ -58,9 +58,9 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
             } else if (existingFilterSetNames.contains(competitorsFilterSet.getName())) {
-                errorMessage = "A filter with this name already exists.";
+                errorMessage = stringMessages.filterThisNameAlreadyExists();
             } else if(filterCount < 1) {
-                errorMessage = "Add at least one filter criteria.";
+                errorMessage = stringMessages.addAtLeastOneFilterCriteria();
             } else {
                 for(FilterWithUI<CompetitorDTO, ?> filter: competitorsFilterSet.getFilters()) {
                     errorMessage = filter.validate(stringMessages);
@@ -100,7 +100,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
 
         HorizontalPanel hPanel = new HorizontalPanel();
         mainPanel.add(hPanel);
-        hPanel.add(new Label("Filter name:"));
+        hPanel.add(new Label(stringMessages.filterName() + ":"));
         hPanel.add(filterSetNameTextBox);
         
         filterListBox.addChangeHandler(new ChangeHandler() {
@@ -110,7 +110,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             }
         });
 
-        filterListBox.addItem("Select a filter criteria...");
+        filterListBox.addItem(stringMessages.selectAFilterCriteria() + "...");
         for(FilterWithUI<CompetitorDTO,?> filter: availableCompetitorsFilter) {
             filterListBox.addItem(filter.getLocalizedName(stringMessages));
         }
@@ -144,7 +144,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
 
         HorizontalPanel addFilterPanel = new HorizontalPanel();
         mainPanel.add(addFilterPanel);
-        addFilterPanel.add(new Label("Filter criteria:"));
+        addFilterPanel.add(new Label(stringMessages.filterCriteria() + ":"));
         addFilterPanel.add(filterListBox);
         addFilterPanel.add(addFilterButton);
 
@@ -243,9 +243,9 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             competitorsFiltersGrid = new Grid(filterCount + headlineRow + footerRow, 4);
             competitorsFiltersGrid.setCellSpacing(4);
             if(headlineRow == 1) {
-                competitorsFiltersGrid.setWidget(0 ,0, new Label("Filter criteria"));
-                competitorsFiltersGrid.setWidget(0 ,1, new Label("Operator"));
-                competitorsFiltersGrid.setWidget(0 ,2, new Label("Value"));
+                competitorsFiltersGrid.setWidget(0 ,0, new Label(stringMessages.filterCriteria()));
+                competitorsFiltersGrid.setWidget(0 ,1, new Label(stringMessages.operator()));
+                competitorsFiltersGrid.setWidget(0 ,2, new Label(stringMessages.value()));
             }
             
             for(int i = 0; i < filterCount; i++) {
