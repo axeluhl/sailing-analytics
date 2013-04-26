@@ -89,9 +89,17 @@ public class SetStartTimeRaceFragment extends RaceFragment {
 
     private void setupTimePicker() {
         pickerTime.setIs24HourView(true);
+        
+        // In 10 minutes from now, but always a 5-minute-mark.
         Calendar now = Calendar.getInstance();
+        now.add(Calendar.MINUTE, 10);
         int hours = now.get(Calendar.HOUR_OF_DAY);
         int minutes = now.get(Calendar.MINUTE);
+        minutes = (int) (Math.ceil((minutes / 5.0)) * 5.0);
+        if (minutes >= 60) {
+            hours++;
+        }
+        
         pickerTime.setCurrentHour(hours);
         pickerTime.setCurrentMinute(minutes);
     }
