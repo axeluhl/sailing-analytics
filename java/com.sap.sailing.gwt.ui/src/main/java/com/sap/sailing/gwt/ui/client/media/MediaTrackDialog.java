@@ -3,10 +3,13 @@ package com.sap.sailing.gwt.ui.client.media;
 import java.util.Date;
 
 import com.google.gwt.dom.client.MediaElement;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.media.client.MediaBase;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -40,21 +43,24 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
 
     private Label startTimeLabel;
 
-    private Label mimeTypeLabel;
+    private Label infoLabel; //showing either mime type or youtube id
     
     private Label durationLabel;
 
     private Date defaultStartTime;
 
+    private Label infoLabelLabel;
+
     public MediaTrackDialog(Date defaultStartTime, StringMessages stringMessages, DialogCallback<MediaTrack> dialogCallback) {
         super(stringMessages.addMediaTrack(), "", stringMessages.ok(), stringMessages.cancel(), MEDIA_TRACK_VALIDATOR, dialogCallback);
         this.defaultStartTime = defaultStartTime;
         this.stringMessages = stringMessages;
+        registerNativeMethods();
     }
 
     @Override
     protected MediaTrack getResult() {
-        mediaTrack.url = urlBox.getValue();
+//        mediaTrack.url = urlBox.getValue();
         mediaTrack.title = titleBox.getValue();
         return mediaTrack;
     }
@@ -78,7 +84,7 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
     }-*/;
     
     public void loadedmetadata(MediaElement mediaElement) {
-        mediaTrack.startTime = this.defaultStartTime != null ? this.defaultStartTime : new Date();
+        mediaTrack.startTime = this.defaultStartTime;
         mediaTrack.durationInMillis = (int) Math.round(mediaElement.getDuration() * 1000);
         refreshUI();
     }
@@ -95,9 +101,10 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
         formGrid.setWidget(1, 0, new Label(stringMessages.name() + ":"));
         titleBox = createTextBox(null);
         formGrid.setWidget(1, 1, titleBox);
-        formGrid.setWidget(2, 0, new Label(stringMessages.mimeType() + ":"));
-        mimeTypeLabel = new Label();
-        formGrid.setWidget(2, 1, mimeTypeLabel);
+        infoLabelLabel = new Label();
+        formGrid.setWidget(2, 0, infoLabelLabel);
+        infoLabel = new Label();
+        formGrid.setWidget(2, 1, infoLabel);
         formGrid.setWidget(3, 0, new Label(stringMessages.startTime() + ":"));
         startTimeLabel = new Label();
         formGrid.setWidget(3, 1, startTimeLabel);
@@ -122,32 +129,118 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
     }
 
     protected void updateFromUrl() {
-        mediaTrack.url = urlBox.getValue();
-        loadMediaDuration();
+        String url = urlBox.getValue();
+        
+        String youtubeId = extractYoutubeId(url);
+        
+        if (youtubeId != null) {
+            mediaTrack.url = youtubeId;
+            mediaTrack.mimeType = MimeType.youtube;
+            loadYoutubeMetadata(youtubeId);
+            setUiEnabled(false);
+        } else {
+            mediaTrack.url = url;
+            loadMediaDuration();
 
-        String lastPathSegment = mediaTrack.url.substring(mediaTrack.url.lastIndexOf('/') + 1);
-        int dotPos = lastPathSegment.lastIndexOf('.');
-        if (dotPos >= 0) {
-            mediaTrack.title = lastPathSegment.substring(0, dotPos);
-            String fileEnding = lastPathSegment.substring(dotPos + 1).toLowerCase();
-    
-            try {
-                mediaTrack.mimeType = MimeType.valueOf(fileEnding);
-            } catch (IllegalArgumentException e) {
-                // ignore. TODO: Somehow put it into the error message.
-                // throw new IllegalArgumentException("Unsupported media type '" + mimeType + "'.", e);
+            String lastPathSegment = mediaTrack.url.substring(mediaTrack.url.lastIndexOf('/') + 1);
+            int dotPos = lastPathSegment.lastIndexOf('.');
+            if (dotPos >= 0) {
+                mediaTrack.title = lastPathSegment.substring(0, dotPos);
+                String fileEnding = lastPathSegment.substring(dotPos + 1).toLowerCase();
+        
+                try {
+                    mediaTrack.mimeType = MimeType.valueOf(fileEnding);
+                } catch (IllegalArgumentException e) {
+                    // ignore. TODO: Somehow put it into the error message.
+                    // throw new IllegalArgumentException("Unsupported media type '" + mimeType + "'.", e);
+                    mediaTrack.mimeType = null;
+                }
+            } else {
+                mediaTrack.title = mediaTrack.url;
                 mediaTrack.mimeType = null;
             }
-        } else {
-            mediaTrack.title = mediaTrack.url;
-            mediaTrack.mimeType = null;
         }
+        
+        refreshUI();
+    }
+
+    private String extractYoutubeId(String url) {
+         RegExp YOUTUBE_ID_REGEX = RegExp.compile("^.*(youtu.be/|v/|u/\\w/|embed/|watch\\?v=|\\&v=)([^#\\&\\?]*).*"); // from http://stackoverflow.com/questions/3452546/javascript-regex-how-to-get-youtube-video-id-from-url
+         RegExp HTTP_FTP_REGEX = RegExp.compile("^(http|ftp).*"); // starting with http, https or ftp
+         MatchResult match = YOUTUBE_ID_REGEX.exec(url);
+         int groupCount = match.getGroupCount();
+        if (groupCount == 3) {
+             return match.getGroup(2);
+         } else if (HTTP_FTP_REGEX.exec(url) == null) { //--> doesn't start with either http, https or ftp --> supposed to be a naked youtube id   
+             return url;
+         } else {
+             return null; // --> plain http, https or ftp URL --> no youtube 
+         }
+    }
+
+    protected void setUiEnabled(boolean isEnabled) {
+        urlBox.setEnabled(isEnabled);
+        getOkButton().setEnabled(isEnabled);
+        if (isEnabled)  {
+            setCursor(Style.Cursor.AUTO);
+        } else {
+            setCursor(Style.Cursor.WAIT);
+        }
+    }
+
+    private native void registerNativeMethods() /*-{
+                var that = this;
+                window.youtubeMetadataCallback = function(metadata) {
+                        var title = metadata.entry.media$group.media$title.$t;
+                        var duration = metadata.entry.media$group.yt$duration.seconds;
+                        var description = metadata.entry.media$group.media$description.$t;
+                        that.@com.sap.sailing.gwt.ui.client.media.MediaTrackDialog::youtubeMetadataCallback(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(title, duration, description);
+                }
+    }-*/;
+
+    /** Inspired by https://developers.google.com/web-toolkit/doc/latest/tutorial/Xsite
+     * 
+     * @param youtubeId
+     */
+    public native void loadYoutubeMetadata(String youtubeId) /*-{
+                var that = this;
+
+                //Create temporary script element.
+                window.youtubeMetadataCallbackScript = document.createElement("script");
+                window.youtubeMetadataCallbackScript.src = "http://gdata.youtube.com/feeds/api/videos/" + youtubeId + "?alt=json&orderby=published&format=6&callback=youtubeMetadataCallback";
+                document.body.appendChild(window.youtubeMetadataCallbackScript);
+
+                // Cancel meta data capturing after has 2-seconds timeout.
+                setTimeout(function() {
+                  //Remove temporary script element.
+                  document.body.removeChild(window.youtubeMetadataCallbackScript);
+                  delete window.youtubeMetadataCallbackScript;
+                  that.@com.sap.sailing.gwt.ui.client.media.MediaTrackDialog::setUiEnabled(Z)(true);
+                }, 2000);
+             
+    }-*/;
+
+    public void youtubeMetadataCallback(String title, String durationInSeconds, String description) {
+        setUiEnabled(true);
+        mediaTrack.title = title;
+        try {
+            mediaTrack.durationInMillis = (int) (1000 * Double.valueOf(durationInSeconds));
+        } catch (NumberFormatException ex) {
+            mediaTrack.durationInMillis = 0;
+        }
+        mediaTrack.startTime = this.defaultStartTime;
         refreshUI();
     }
 
     private void refreshUI() {
         titleBox.setValue(mediaTrack.title, DONT_FIRE_EVENTS);
-        mimeTypeLabel.setText(mediaTrack.typeToString());
+        if (mediaTrack.isYoutube()) {
+            infoLabelLabel.setText(stringMessages.youtubeId() + ":");
+            infoLabel.setText(mediaTrack.url);
+        } else {
+            infoLabelLabel.setText(stringMessages.mimeType() + ":");
+            infoLabel.setText(mediaTrack.typeToString());
+        }
         String startTimeText = mediaTrack.startTime == null ? "undefined" : TimeFormatUtil.DATETIME_FORMAT.format(mediaTrack.startTime);
         startTimeLabel.setText(startTimeText);
         durationLabel.setText(TimeFormatUtil.milliSecondsToHrsMinSec(mediaTrack.durationInMillis));        

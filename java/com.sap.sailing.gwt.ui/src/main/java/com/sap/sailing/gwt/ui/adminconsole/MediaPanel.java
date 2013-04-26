@@ -70,14 +70,6 @@ public class MediaPanel extends FlowPanel {
         });
         add(addUrlButton);
 
-        Button addYoutubeButton = new Button(stringMessages.addYoutubeTrack());
-        addYoutubeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                addYoutubeMediaTrack();
-            }
-        });
-        add(addYoutubeButton);
         createMediaTracksTable();
     }
 
@@ -342,35 +334,6 @@ public class MediaPanel extends FlowPanel {
         dialog.show();
     }
     
-    protected void addYoutubeMediaTrack() {
-        MediaTrackYoutubeDialog dialog = new MediaTrackYoutubeDialog(stringMessages, new DialogCallback<MediaTrack>() {
-
-            @Override
-            public void cancel() {
-                // no op
-            }
-
-            @Override
-            public void ok(final MediaTrack mediaTrack) {
-                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
-
-                    @Override
-                    public void onFailure(Throwable t) {
-                        errorReporter.reportError(t.toString());
-                    }
-
-                    @Override
-                    public void onSuccess(String dbId) {
-                        mediaTrack.dbId = dbId;
-                        loadMediaTracks();
-                    }
-                });
-
-            }
-        });
-        dialog.show();
-    }
-
     public void onShow() {
         loadMediaTracks();
     }
