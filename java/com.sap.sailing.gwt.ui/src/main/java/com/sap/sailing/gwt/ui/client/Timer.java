@@ -155,8 +155,8 @@ public class Timer {
         }
     }
     
-    public void setRefreshInterval(long refreshInterval) {
-        this.refreshInterval = refreshInterval;
+    public void setRefreshInterval(long refreshIntervalInMillis) {
+        this.refreshInterval = refreshIntervalInMillis;
         if (playState == PlayStates.Playing) {
             refreshIntervalChanged = true;
         }
