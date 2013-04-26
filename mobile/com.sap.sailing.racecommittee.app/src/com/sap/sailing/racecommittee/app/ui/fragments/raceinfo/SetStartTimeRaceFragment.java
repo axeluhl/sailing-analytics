@@ -1,9 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import android.app.FragmentManager;
 import android.os.Bundle;
@@ -11,6 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -36,13 +37,13 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     }
 
     protected boolean isReset;
+    private StartProcedureType selectedStartProcedureType;
 
+    protected Spinner spinnerStartProcedure;
     protected TimePicker pickerTime;
     protected Button btSetDate;
     protected Button btSetTime;
     protected Button btPostpone;
-
-    protected Date scheduledTime;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,31 +53,23 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         isReset = getArguments().getBoolean(AppConstants.RESET_TIME_FRAGMENT_IS_RESET);
-        
-        Spinner spinner = (Spinner) getView().findViewById(R.id.race_reset_time_spinner_procedure);
-        List<String> items = new ArrayList<String>();
-        //items.add("ESS");
-        items.add("Gate-Line-Start");
-        //items.add("Fix-Line-Start (RRS 26)");
-        spinner.setAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, items));
-        
 
+        spinnerStartProcedure = (Spinner) getView().findViewById(R.id.race_reset_time_spinner_procedure);
+        setupSpinner();
         pickerTime = (TimePicker) getView().findViewById(R.id.race_reset_time_picker_time);
+        setupTimePicker();
         btSetDate = (Button) getView().findViewById(R.id.race_reset_time_btn_date);
         btSetTime = (Button) getView().findViewById(R.id.race_reset_time_btn_time);
         btPostpone = (Button) getView().findViewById(R.id.race_reset_time_btn_postpone);
 
-        pickerTime.setIs24HourView(true);
-        
         btSetDate.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 Toast.makeText(getActivity(), "Not implemented yet.", Toast.LENGTH_SHORT).show();
             }
         });
-        
+
         btSetTime.setText(isReset ? R.string.reset_time : R.string.set_time);
         btSetTime.setOnClickListener(new OnClickListener() {
             @Override
@@ -84,7 +77,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
                 setStartTime();
             }
         });
-        
+
         btPostpone.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
@@ -93,11 +86,39 @@ public class SetStartTimeRaceFragment extends RaceFragment {
             }
         });
     }
-    
+
+    private void setupTimePicker() {
+        pickerTime.setIs24HourView(true);
+        Calendar now = Calendar.getInstance();
+        int hours = now.get(Calendar.HOUR_OF_DAY);
+        int minutes = now.get(Calendar.MINUTE);
+        pickerTime.setCurrentHour(hours);
+        pickerTime.setCurrentMinute(minutes);
+    }
+
+    private void setupSpinner() {
+        ArrayAdapter<StartProcedureType> adapter = new ArrayAdapter<StartProcedureType>(getActivity(),
+                android.R.layout.simple_spinner_dropdown_item, StartProcedureType.values());
+        spinnerStartProcedure.setAdapter(adapter);
+        spinnerStartProcedure.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                selectedStartProcedureType = (StartProcedureType) adapterView.getItemAtPosition(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+        StartProcedureType type = getRace().getState().getStartProcedureType();
+        spinnerStartProcedure.setSelection(adapter.getPosition(type));
+    }
+
     @Override
     public void onStart() {
         super.onStart();
-        ExLog.i(SetStartTimeRaceFragment.class.getName(), String.format("Fragment %s is now shown", SetStartTimeRaceFragment.class.getName()));
+        ExLog.i(SetStartTimeRaceFragment.class.getName(),
+                String.format("Fragment %s is now shown", SetStartTimeRaceFragment.class.getName()));
     }
 
     protected void setStartTime() {
@@ -119,7 +140,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     }
 
     private void setStartTime(Date newStartTime) {
-        getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime));
+        getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime), selectedStartProcedureType);
     }
 
     protected void showAPModeDialog() {

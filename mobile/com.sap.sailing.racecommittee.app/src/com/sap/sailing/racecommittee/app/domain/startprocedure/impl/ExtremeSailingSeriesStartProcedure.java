@@ -22,7 +22,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.RunningRaceEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartPhaseEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureRaceStateChangedListener;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RunningRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.EssStartPhaseFragment;
@@ -41,7 +41,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     
     private List<Long> startProcedureEventIntervals;
     private PassAwareRaceLog raceLog;
-    private StartProcedureRaceStateChangedListener raceStateChangedListener;
+    private StartProcedureListener raceStateChangedListener;
     private EssStartPhaseEventListener startPhaseEventListener;
     
     public ExtremeSailingSeriesStartProcedure(PassAwareRaceLog raceLog) {
@@ -159,7 +159,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
     
     @Override
-    public void setRaceStateChangedListener(StartProcedureRaceStateChangedListener raceStateChangedListener) {
+    public void setChangeListener(StartProcedureListener raceStateChangedListener) {
         this.raceStateChangedListener = raceStateChangedListener;
     }
 
