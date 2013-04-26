@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import java.util.Date;
+
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
@@ -64,7 +65,7 @@ public class FinishingRaceFragment extends RaceFragment {
         });
         
     }
-    
+
     protected void setCountdownLabels(long millisecondsSinceStart) {
         setStarttimeCountupLabel(millisecondsSinceStart);
     }

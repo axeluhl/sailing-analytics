@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.data;
 import java.io.Serializable;
 import java.util.Collection;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
@@ -23,4 +24,6 @@ public interface ReadonlyDataManager {
     public void loadMarks(ManagedRace managedRace, LoadClient<Collection<Mark>> client);
     
     public void loadCourse(ManagedRace managedRace, LoadClient<CourseBase> client);
+    
+    public void loadCompetitors(ManagedRace managedRace, LoadClient<Collection<Competitor>> client);
 }
