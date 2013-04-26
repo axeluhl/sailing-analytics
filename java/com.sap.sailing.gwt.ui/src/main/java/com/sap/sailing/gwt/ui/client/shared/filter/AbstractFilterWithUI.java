@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.ListBox;
@@ -12,11 +13,12 @@ import com.sap.sailing.gwt.ui.client.FilterWithUI;
 public abstract class AbstractFilterWithUI<FilterObjectType, ValueType> extends AbstractFilter<FilterObjectType, ValueType> 
     implements FilterWithUI<FilterObjectType, ValueType> {
     
-    protected static List<FilterOperators> supportedOperators;
+    protected List<FilterOperators> supportedOperators;
     protected FilterOperators defaultOperator;
     
     public AbstractFilterWithUI(FilterOperators defaultOperator) {
         this.defaultOperator = defaultOperator;
+        supportedOperators = new ArrayList<FilterOperators>();
     }
 
     @Override

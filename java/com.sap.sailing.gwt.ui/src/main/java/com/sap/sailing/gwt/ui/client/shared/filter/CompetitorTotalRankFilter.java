@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import java.util.ArrayList;
-
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -18,18 +16,15 @@ public class CompetitorTotalRankFilter extends AbstractCompetitorInLeaderboardFi
     private IntegerBox valueInputWidget;
     private ListBox operatorSelectionWidget;
 
-    static {
-        supportedOperators = new ArrayList<FilterOperators>();
+    public CompetitorTotalRankFilter() {
+        super(FilterOperators.GreaterThanEquals);
+        
         supportedOperators.add(FilterOperators.LessThanEquals);
         supportedOperators.add(FilterOperators.GreaterThanEquals);
         supportedOperators.add(FilterOperators.LessThan);
         supportedOperators.add(FilterOperators.GreaterThan);
         supportedOperators.add(FilterOperators.NotEqualTo);
         supportedOperators.add(FilterOperators.Equals);
-    }
-
-    public CompetitorTotalRankFilter() {
-        super(FilterOperators.GreaterThanEquals);
     }
 
     public Class<Integer> getValueType() {

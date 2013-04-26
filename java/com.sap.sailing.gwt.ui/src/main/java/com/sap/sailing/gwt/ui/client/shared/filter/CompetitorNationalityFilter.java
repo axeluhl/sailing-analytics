@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import java.util.ArrayList;
-
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -15,16 +13,13 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 public class CompetitorNationalityFilter extends AbstractFilterWithUI<CompetitorDTO, String> {
     public static final String FILTER_NAME = "CompetitorNationalityFilter";
 
-    static {
-        supportedOperators = new ArrayList<FilterOperators>();
+    public CompetitorNationalityFilter() {
+        super(FilterOperators.Equals);
+        
         supportedOperators.add(FilterOperators.Equals);
         supportedOperators.add(FilterOperators.NotEqualTo);
         supportedOperators.add(FilterOperators.Contains);
         supportedOperators.add(FilterOperators.NotContains);
-    }
-    
-    public CompetitorNationalityFilter() {
-        super(FilterOperators.Equals);
     }
 
     public Class<String> getValueType() {
