@@ -551,4 +551,6 @@ public interface StringMessages extends Messages {
     String additionalInformation();
     String windFixListingDescription();
     String noWindFixesAvailable();
+    String distanceToStarboardEndOfStartlineWhenPassingStart();
+    String distanceToStarboardEndOfStartlineWhenPassingStartTooltip();
 }

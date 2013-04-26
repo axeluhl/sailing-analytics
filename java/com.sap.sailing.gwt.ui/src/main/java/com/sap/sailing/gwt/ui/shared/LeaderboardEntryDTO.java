@@ -48,6 +48,8 @@ public class LeaderboardEntryDTO implements IsSerializable {
     
     public Double speedOverGroundAtPassingStartWaypointInKnots;
     
+    public Double distanceToStarboardSideOfStartLineInMeters;
+    
     public Tack startTack;
 
     /**

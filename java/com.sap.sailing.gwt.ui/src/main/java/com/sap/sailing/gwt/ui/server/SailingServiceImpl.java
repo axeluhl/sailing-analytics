@@ -705,6 +705,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             entryDTO.speedOverGroundAtPassingStartWaypointInKnots = competitorSpeedWhenPassingStart == null ? null
                                     : competitorSpeedWhenPassingStart.getKnots();
                             entryDTO.startTack = trackedRace.getTack(competitor, competitorStartTime);
+                            Distance distanceFromStarboardSideOfStartLineWhenPassingStart = trackedRace.getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor);
+                            entryDTO.distanceToStarboardSideOfStartLineInMeters = distanceFromStarboardSideOfStartLineWhenPassingStart == null ? null :
+                                distanceFromStarboardSideOfStartLineWhenPassingStart.getMeters();
                         }
                     } finally {
                         trackedRace.unlockAfterRead(competitorMarkPassings);

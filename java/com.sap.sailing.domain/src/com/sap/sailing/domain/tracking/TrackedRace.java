@@ -515,4 +515,11 @@ public interface TrackedRace extends Serializable {
      * returned. If the competitor's position cannot be determined, <code>null</code> is returned.
      */
     Distance getDistanceToStartLine(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * When the <code>competitor</code> has started, this method returns the distance to the starboard end of the start line
+     * or---if the start waypoint was a single mark---the distance to the single start mark at the time the competitor started.
+     * If the competitor hasn't started yet, <code>null</code> is returned.
+     */
+    Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor);
 }
