@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.racelog.impl;
 
 import java.util.NavigableSet;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -8,7 +9,7 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
 
 public class PassAwareRaceLogImpl extends RaceLogImpl implements PassAwareRaceLog {
-    // private static final String TAG = PassAwareRaceLogImpl.class.getName();
+    private static final Logger logger = Logger.getLogger(PassAwareRaceLogImpl.class.getName());
     private static final long serialVersionUID = -1252381252528365834L;
     private static final String ReadWriteLockName = PassAwareRaceLogImpl.class.getName() + ".lock";
 
@@ -44,7 +45,7 @@ public class PassAwareRaceLogImpl extends RaceLogImpl implements PassAwareRaceLo
 
     public void setCurrentPassId(int newPassId) {
         if (newPassId != this.currentPassId) {
-            // ExLog.i(TAG, String.format("Changing pass id to %d", newPassId));
+            logger.info(String.format("Changing pass id to %d", newPassId));
             this.currentPassId = newPassId;
         }
     }
@@ -79,11 +80,11 @@ public class PassAwareRaceLogImpl extends RaceLogImpl implements PassAwareRaceLo
             unlockAfterWrite();
         }
         if (isAdded) {
-            // ExLog.i(TAG, String.format("%s (%s) was added to log.", event, event.getClass().getName()));
+            logger.info(String.format("%s (%s) was added to log.", event, event.getClass().getName()));
             setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
             notifyListenersAboutReceive(event);
         } else {
-            // ExLog.w(TAG, String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
+            logger.warning(String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
         }
         return isAdded;
     }
