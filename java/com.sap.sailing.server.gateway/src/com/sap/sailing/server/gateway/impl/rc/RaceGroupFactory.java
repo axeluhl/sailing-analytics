@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -24,7 +23,6 @@ import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.RaceRowImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 
@@ -79,11 +77,7 @@ public class RaceGroupFactory {
         Collection<RaceCell> cells = new ArrayList<>();
         for (RaceColumn raceColumn : raceColumns) {
             Fleet fleet = raceColumn.getFleetByName(fleetName);
-            Collection<Competitor> competitors = new ArrayList<Competitor>();
-            if (raceColumn.getRaceDefinition(fleet) != null) {
-                Util.addAll(raceColumn.getRaceDefinition(fleet).getCompetitors(), competitors);
-            }
-            cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet), competitors));
+            cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet)));
         }
         return cells;
     }
