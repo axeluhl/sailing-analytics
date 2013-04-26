@@ -50,6 +50,15 @@
 		<url-pattern>/rc/currentcourse</url-pattern>
 	</servlet-mapping>
 	
+	<servlet>
+		<servlet-name>RCCompetitors</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.rc.CompetitorsJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RCCompetitors</servlet-name>
+		<url-pattern>/rc/competitors</url-pattern>
+	</servlet-mapping>
+	
 	<!-- RACE COMMITTEE END -->
 
 	<servlet>

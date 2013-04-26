@@ -89,7 +89,7 @@ public class OfflineDataManager extends DataManager {
                         new FleetImpl("Default"), 
                         qualifying, 
                         raceGroup), 
-                        log, competitors);
+                        log);
 
         log = new PassAwareRaceLogImpl();
         /*log.add(factory.createStartTimeEvent(
@@ -105,7 +105,7 @@ public class OfflineDataManager extends DataManager {
                         new FleetImpl("Default"), 
                         qualifying, 
                         raceGroup), 
-                        log, competitors);
+                        log);
 
         log = new PassAwareRaceLogImpl();
         /*log.add(factory.createRaceStatusEvent(
@@ -118,7 +118,7 @@ public class OfflineDataManager extends DataManager {
                         new FleetImpl("Default"), 
                         qualifying, 
                         raceGroup), 
-                        log, competitors);
+                        log);
         /*ManagedRace m1 = new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(
 						"M1", 
@@ -162,6 +162,11 @@ public class OfflineDataManager extends DataManager {
     @Override
     public void loadCourse(ManagedRace managedRace, LoadClient<CourseBase> client) {
         client.onLoadSucceded(managedRace.getCourseOnServer());
+    }
+
+    @Override
+    public void loadCompetitors(ManagedRace managedRace, LoadClient<Collection<Competitor>> client) {
+        client.onLoadSucceded((Collection<Competitor>) managedRace.getCompetitors());
     }
 
 }
