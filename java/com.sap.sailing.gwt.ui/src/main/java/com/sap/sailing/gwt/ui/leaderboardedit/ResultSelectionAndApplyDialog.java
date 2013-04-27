@@ -30,7 +30,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
         this.values = new LinkedHashMap<String, Triple<String, String, Pair<String, Date>>>();
         for (Triple<String, String, Pair<String, Date>> v : values) {
             this.values.put("" + v.getA() + ": " + v.getB() + " - " + v.getC().getA() + " "
-                    + stringMessages.of() + " " + v.getC().getB(), v);
+                    + stringMessages.of() + " " + v.getC().getB()+"."+(v.getC().getB().getTime() % 1000), v);
         }
         listBox = createListBox(/* isMultipleSelect */ false);
     }

@@ -275,7 +275,8 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
 
     @Override
     public void timeChanged(Date time) {
-        if(timeRangeProvider.isZoomed()) {
+        if (timeRangeProvider.isZoomed()) {
+            timeSlider.setCurrentValue(new Double(time.getTime()), false);
         } else {
             if (getFromTime() != null && getToTime() != null) {
                 // handle the case where time advances beyond slider's end.

@@ -1,8 +1,8 @@
 package com.sap.sailing.barbados.resultimport.impl;
 
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -42,7 +42,12 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
                 RegattaResults regattaResults = new BarbadosResultSpreadsheet(inputStreamAndNameAndLastModified.getA()).getRegattaResults();
                 TimePoint lastModified = inputStreamAndNameAndLastModified.getC();
                 final String boatClassName = getBoatClassName(regattaResults);
-                result.put(boatClassName, Collections.singleton(new Pair<String, TimePoint>(boatClassName, lastModified)));
+                Set<Pair<String, TimePoint>> set = result.get(boatClassName);
+                if (set == null) {
+                    set = new HashSet<>();
+                    result.put(boatClassName, set);
+                }
+                set.add(new Pair<String, TimePoint>(boatClassName, lastModified));
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Couldn't parse Barbados result document "+inputStreamAndNameAndLastModified.getB(), e);
             }
