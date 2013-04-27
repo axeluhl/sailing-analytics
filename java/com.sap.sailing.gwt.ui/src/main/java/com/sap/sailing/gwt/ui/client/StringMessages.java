@@ -577,4 +577,5 @@ public interface StringMessages extends Messages {
     String operator();
     String value();
     String nationalityMustBeISOorIOCcode();
+    String raceRank();
 }

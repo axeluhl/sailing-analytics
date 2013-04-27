@@ -36,6 +36,8 @@ public class LeaderboardEntryDTO implements IsSerializable {
     
     public Double totalPoints;
     
+    public Integer rank;
+    
     public boolean discarded;
     
     public Double windwardDistanceToOverallLeaderInMeters;

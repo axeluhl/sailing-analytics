@@ -629,6 +629,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     result.competitorDisplayNames.put(competitorDTO, displayName);
                 }
             }
+            // set race ranks for all LeaderboardEntryDTO's
+            try {
+                for(RaceColumnDTO raceColumnDTO: result.getRaceList()) {
+                    int raceRank = 1;
+                    for(CompetitorDTO competitorDTO: result.getCompetitorsFromBestToWorst(raceColumnDTO)) {
+                        LeaderboardRowDTO leaderboardRowDTO = result.rows.get(competitorDTO);
+                        LeaderboardEntryDTO leaderboardEntryDTO = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnDTO.name);
+                        leaderboardEntryDTO.rank = raceRank++;
+                    }
+                }
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
         logger.info("computeLeaderboardByName("+leaderboard.getName()+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");

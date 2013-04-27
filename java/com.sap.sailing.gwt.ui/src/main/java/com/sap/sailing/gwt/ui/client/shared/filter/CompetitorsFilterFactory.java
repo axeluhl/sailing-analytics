@@ -10,7 +10,9 @@ public class CompetitorsFilterFactory {
             filter = new CompetitorTotalRankFilter();
         } else if (filterName.equals(CompetitorNationalityFilter.FILTER_NAME)) {
             filter = new CompetitorNationalityFilter();
-        }
+        } else if (filterName.equals(CompetitorRaceRankFilter.FILTER_NAME)) {
+            filter = new CompetitorRaceRankFilter();
+        } 
         return filter;
     }
 }
