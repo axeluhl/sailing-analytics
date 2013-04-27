@@ -72,7 +72,7 @@ public class StarbordSideOfStartLineRecognitionTest {
         assertNull(p);
     }
     
-    private abstract class MockedTrackedRaceImpl extends TrackedRaceImpl {
+    public static abstract class MockedTrackedRaceImpl extends TrackedRaceImpl {
         /**
          * 
          */
