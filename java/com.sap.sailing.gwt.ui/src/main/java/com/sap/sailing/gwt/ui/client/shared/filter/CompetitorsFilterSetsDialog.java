@@ -65,6 +65,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
         
         availableCompetitorsFilter = new ArrayList<FilterWithUI<CompetitorDTO, ?>>();
         availableCompetitorsFilter.add(new CompetitorTotalRankFilter());
+        availableCompetitorsFilter.add(new CompetitorRaceRankFilter());
         availableCompetitorsFilter.add(new CompetitorNationalityFilter());
     }
     

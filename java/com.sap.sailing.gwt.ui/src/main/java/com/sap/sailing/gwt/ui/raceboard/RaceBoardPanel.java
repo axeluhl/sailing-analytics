@@ -278,7 +278,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         for(FilterSet<CompetitorDTO> filterSet: filterSets.getFilterSets()) {
             for(Filter<CompetitorDTO, ?> filter: filterSet.getFilters()) {
                if(filter instanceof AbstractCompetitorInLeaderboardFilter) {
-                   ((AbstractCompetitorInLeaderboardFilter<?>) filter).setContextProvider(leaderboardPanel); 
+                   AbstractCompetitorInLeaderboardFilter<?> competitorInLeaderboardFilter = (AbstractCompetitorInLeaderboardFilter<?>) filter; 
+                   competitorInLeaderboardFilter.setContextProvider(leaderboardPanel);
+                   competitorInLeaderboardFilter.setSelectedRace(selectedRaceIdentifier);
                }
             }
         }
