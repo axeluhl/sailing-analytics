@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
@@ -12,11 +13,11 @@ import com.sap.sailing.domain.tracking.MarkPassingManeuver;
 public class MarkPassingManeuverImpl extends ManeuverImpl implements MarkPassingManeuver {
     private static final long serialVersionUID = 8935348908557191614L;
     private final Waypoint waypointPassed;
-    private final Tack side;
+    private final NauticalSide side;
     
     public MarkPassingManeuverImpl(ManeuverType type, Tack newTack, Position position, TimePoint timePoint,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            double directionChangeInDegrees, Distance maneuverLoss, Waypoint waypointPassed, Tack side) {
+            double directionChangeInDegrees, Distance maneuverLoss, Waypoint waypointPassed, NauticalSide side) {
         super(type, newTack, position, timePoint, speedWithBearingBefore, speedWithBearingAfter,
                 directionChangeInDegrees, maneuverLoss);
         this.waypointPassed = waypointPassed;
@@ -29,7 +30,7 @@ public class MarkPassingManeuverImpl extends ManeuverImpl implements MarkPassing
     }
 
     @Override
-    public Tack getSide() {
+    public NauticalSide getSide() {
         return side;
     }
     

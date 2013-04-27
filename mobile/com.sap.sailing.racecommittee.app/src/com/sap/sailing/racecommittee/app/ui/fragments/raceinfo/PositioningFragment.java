@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -27,6 +28,8 @@ import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorPositioningListAdapter;
@@ -87,6 +90,7 @@ public class PositioningFragment extends RaceDialogFragment {
         Collections.sort(competitors, competitorComparator);
         competitorsAdapter = new CompetitorsAdapter(getActivity(), R.layout.welter_grid_competitor_cell, competitors);
         
+        loadCompetitors();
         
         positionedCompetitors = initializeFinishPositioningList();
         deletePositionedCompetitorsFromUnpositionedList();
@@ -142,6 +146,12 @@ public class PositioningFragment extends RaceDialogFragment {
         });
     }
     
+    @Override
+    public void onResume() {
+        super.onResume();
+        onLoadCompetitorsSucceeded(getRace().getCompetitors());
+    }
+    
     /**
      * Creates a DragSortController and thereby defines the behaviour of the drag sort list
      */
@@ -156,7 +166,32 @@ public class PositioningFragment extends RaceDialogFragment {
         controller.setBackgroundColor(getActivity().getResources().getColor(R.color.welter_medium_blue));
         return controller;
     }
-    
+
+    private void loadCompetitors() {
+
+        OnlineDataManager.create(getActivity()).loadCompetitors(getRace(), new LoadClient<Collection<Competitor>>() {
+
+            @Override
+            public void onLoadFailed(Exception reason) {
+                onLoadCompetitorsSucceeded(getRace().getCompetitors());
+            }
+
+            @Override
+            public void onLoadSucceded(Collection<Competitor> data) {
+                onLoadCompetitorsSucceeded(data);
+            }
+
+        });
+    }
+
+    protected void onLoadCompetitorsSucceeded(Collection<Competitor> data) {
+        competitors.clear();
+        competitors.addAll(data);
+        Collections.sort(competitors, competitorComparator);
+        deletePositionedCompetitorsFromUnpositionedList();
+        competitorsAdapter.notifyDataSetChanged();
+    }
+
     private void deletePositionedCompetitorsFromUnpositionedList() {
         for (Triple<Serializable, String, MaxPointsReason> positionedItem : positionedCompetitors) {
             Competitor competitor = DomainFactoryImpl.INSTANCE.getExistingCompetitorById(positionedItem.getA());

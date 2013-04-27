@@ -162,12 +162,6 @@ public interface TrackedRace extends Serializable {
     int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
     /**
-     * For a competitor, computes the distance (TODO not yet clear whether over ground or projected onto wind direction)
-     * into the race <code>secondsIntoTheRace</code> after the race {@link TrackedRace#getStart() started}.
-     */
-    Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace);
-
-    /**
      * For the given waypoint lists the {@link MarkPassing} events that describe which competitor passed the waypoint at
      * which point in time. This can, e.g., be used to sort those competitors who already finished a leg within the leg
      * that ends with <code>waypoint</code>. The remaining competitors need to be ordered by the advantage line-related
@@ -500,6 +494,12 @@ public interface TrackedRace extends Serializable {
     void setCourseDesignChangedListener(CourseDesignChangedListener listener);
 
     /**
+     * For a competitor, computes the distance (TODO not yet clear whether over ground or projected onto wind direction)
+     * into the race <code>secondsIntoTheRace</code> after the race {@link TrackedRace#getStart() started}.
+     */
+    Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace);
+
+    /**
      * Tells how far the given <code>competitor</code> was from the start line at the given <code>timePoint</code>.
      * Using the {@link #getStartOfRace() race start time} for <code>timePoint</code>, this tells the competitor's
      * distance to the line when the race was started.
@@ -515,4 +515,11 @@ public interface TrackedRace extends Serializable {
      * returned. If the competitor's position cannot be determined, <code>null</code> is returned.
      */
     Distance getDistanceToStartLine(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * When the <code>competitor</code> has started, this method returns the distance to the starboard end of the start line
+     * or---if the start waypoint was a single mark---the distance to the single start mark at the time the competitor started.
+     * If the competitor hasn't started yet, <code>null</code> is returned.
+     */
+    Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor);
 }

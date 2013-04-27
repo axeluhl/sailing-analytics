@@ -1,6 +1,8 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -23,20 +25,20 @@ public class ManagedRaceImpl implements ManagedRace {
 
     private ManagedRaceIdentifier identifier;	
     private RaceState state;
-    private Iterable<Competitor> competitors;
+    private Collection<Competitor> competitors;
     private CourseBase courseOnServer;
 
-    public ManagedRaceImpl(ManagedRaceIdentifier identifier, PassAwareRaceLog raceLog, Iterable<Competitor> competitors) {
+    public ManagedRaceImpl(ManagedRaceIdentifier identifier, PassAwareRaceLog raceLog) {
         //TODO To be changed when the start procedure for a regatta/leaderboard can be selected in the GWT Admin Console on backend side
-        this(identifier, new RaceStateImpl(raceLog, new GateStartProcedure(raceLog)), competitors);
+        this(identifier, new RaceStateImpl(raceLog, new GateStartProcedure(raceLog)));
     }
 
     public ManagedRaceImpl(
             ManagedRaceIdentifier identifier,
-            RaceState state, Iterable<Competitor> competitors) {
+            RaceState state) {
         this.identifier = identifier;
         this.state = state;
-        this.competitors = competitors;
+        this.competitors = new ArrayList<Competitor>();
         this.courseOnServer = null;
     }
 
@@ -86,7 +88,7 @@ public class ManagedRaceImpl implements ManagedRace {
     }
     
     @Override
-    public Iterable<Competitor> getCompetitors() {
+    public Collection<Competitor> getCompetitors() {
         return competitors;
     }
 
@@ -98,6 +100,11 @@ public class ManagedRaceImpl implements ManagedRace {
     @Override
     public void setCourseOnServer(CourseBase course) {
         courseOnServer = course;
+    }
+
+    @Override
+    public void setCompetitors(Collection<Competitor> competitors) {
+        this.competitors = competitors;
     }
 
 }

@@ -34,11 +34,13 @@ public class TVEntryPoint extends AbstractEntryPoint {
                 && Window.Location.getParameter(PARAM_EMBEDDED).equalsIgnoreCase("true");
         final long delayToLiveMillis = Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS) != null ? Long
                 .valueOf(Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS)) : 5000l; // default 5s
-        boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(
+        final boolean showNavigationPanel = GwtHttpRequestUtils.getBooleanParameter(
+                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, false /* default */);
+        final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(
                 RaceBoardViewConfiguration.PARAM_VIEW_SHOW_LEADERBOARD, true /* default */);
-        boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(
+        final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(
                 RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default */);
-        boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(
+        final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(
                 RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default */);
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
         raceboardViewConfig = new RaceBoardViewConfiguration(RaceBoardViewConfiguration.ViewModes.ONESCREEN,
@@ -50,7 +52,7 @@ public class TVEntryPoint extends AbstractEntryPoint {
                 leaderboardName = Window.Location.getParameter("name");
                 leaderboardGroupName = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
                 if (leaderboardNames.contains(leaderboardName)) {
-                    createUI(showRaceDetails, embedded, delayToLiveMillis);
+                    createUI(showRaceDetails, embedded, showNavigationPanel, delayToLiveMillis);
                 } else {
                     RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                 }
@@ -63,7 +65,7 @@ public class TVEntryPoint extends AbstractEntryPoint {
         });
     }
     
-    private void createUI(boolean showRaceDetails, boolean embedded, long delayToLiveMillis) {
+    private void createUI(boolean showRaceDetails, boolean embedded, boolean showNavigationPanel, long delayToLiveMillis) {
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(mainPanel);
         LogoAndTitlePanel logoAndTitlePanel = null;
@@ -77,8 +79,9 @@ public class TVEntryPoint extends AbstractEntryPoint {
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }
         
-        tvViewController = new TVViewController(sailingService, mediaService, stringMessages, this, leaderboardGroupName,
-                leaderboardName, userAgent, logoAndTitlePanel, mainPanel, delayToLiveMillis, showRaceDetails, raceboardViewConfig);
+        tvViewController = new TVViewController(sailingService, mediaService, stringMessages, this,
+                leaderboardGroupName, leaderboardName, userAgent, logoAndTitlePanel, mainPanel, delayToLiveMillis,
+                showRaceDetails, showNavigationPanel, raceboardViewConfig);
         tvViewController.updateTvView(TVViews.Leaderboard);
     }
 }

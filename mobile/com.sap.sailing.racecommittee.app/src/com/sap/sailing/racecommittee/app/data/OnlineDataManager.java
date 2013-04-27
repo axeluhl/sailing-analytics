@@ -10,6 +10,7 @@ import java.util.Collection;
 import android.content.Context;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
@@ -17,12 +18,14 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.CourseDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.ManagedRacesDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.MarksDataHandler;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoader;
+import com.sap.sailing.racecommittee.app.data.parsers.CompetitorsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.CourseDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
@@ -142,7 +145,7 @@ public class OnlineDataManager extends DataManager {
         DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(new RaceGroupDeserializer(
                 boatClassDeserializer, new SeriesWithRowsDeserializer(new RaceRowDeserializer(new FleetDeserializer(
                         new ColorDeserializer()), new RaceCellDeserializer(
-                                new RaceLogDeserializer(RaceLogEventDeserializer.create(domainFactory)), new CompetitorDeserializer(domainFactory))))));
+                                new RaceLogDeserializer(RaceLogEventDeserializer.create(domainFactory)))))));
         DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(this, client);
 
         try {
@@ -207,6 +210,31 @@ public class OnlineDataManager extends DataManager {
         try {
             new DataLoader<CourseBase>(context, URI.create(AppConstants.getServerBaseURL(context)
                     + "/sailingserver/rc/currentcourse?leaderboard=" + raceGroupName + "&raceColumn=" + raceColumnName 
+                    + "&fleet=" + fleetName), parser, handler)
+                    .forceLoad();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void loadCompetitors(ManagedRace managedRace, LoadClient<Collection<Competitor>> client) {
+        SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
+        JsonDeserializer<Competitor> competitorDeserializer = new CompetitorDeserializer(domainFactory);
+        DataParser<Collection<Competitor>> parser = new CompetitorsDataParser(competitorDeserializer);
+        DataHandler<Collection<Competitor>> handler = new CompetitorsDataHandler(this, client, managedRace);
+        
+        ManagedRaceIdentifier identifier = managedRace.getIdentifier();
+        
+        String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName());
+        String raceColumnName = URLEncoder.encode(identifier.getRaceName());
+        String fleetName = URLEncoder.encode(identifier.getFleet().getName());
+        
+        try {
+            new DataLoader<Collection<Competitor>>(context, URI.create(AppConstants.getServerBaseURL(context)
+                    + "/sailingserver/rc/competitors?leaderboard=" + raceGroupName + "&raceColumn=" + raceColumnName 
                     + "&fleet=" + fleetName), parser, handler)
                     .forceLoad();
         } catch (MalformedURLException e) {
