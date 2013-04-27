@@ -49,32 +49,34 @@ public class CompetitorRaceRankFilter extends AbstractCompetitorInLeaderboardFil
             if(raceColumnName != null) {
                 LeaderboardRowDTO leaderboardRowDTO = getLeaderboard().rows.get(competitorDTO);
                 LeaderboardEntryDTO leaderboardEntryDTO = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
-                int raceRank = leaderboardEntryDTO.rank;
-                switch (filterOperator) {
-                    case LessThanEquals:
-                        result = raceRank <= filterValue;
-                        break;
-                    case Equals:
-                        result = raceRank == filterValue;
-                        break;
-                    case GreaterThanEquals:
-                        result = raceRank >= filterValue;
-                        break;
-                    case LessThan:
-                        result = raceRank < filterValue;
-                        break;
-                    case GreaterThan:
-                        result = raceRank > filterValue;
-                        break;
-                    case NotEqualTo:
-                        result = raceRank != filterValue;
-                        break;
-                    case NotContains:
-                    case StartsWith:
-                    case Contains:
-                    case EndsWith:
-                    default:
-                        throw new RuntimeException("Operator " + filterOperator.name() + " is not supported."); 
+                if(leaderboardEntryDTO.rank != null) {
+                    int raceRank = leaderboardEntryDTO.rank;
+                    switch (filterOperator) {
+                        case LessThanEquals:
+                            result = raceRank <= filterValue;
+                            break;
+                        case Equals:
+                            result = raceRank == filterValue;
+                            break;
+                        case GreaterThanEquals:
+                            result = raceRank >= filterValue;
+                            break;
+                        case LessThan:
+                            result = raceRank < filterValue;
+                            break;
+                        case GreaterThan:
+                            result = raceRank > filterValue;
+                            break;
+                        case NotEqualTo:
+                            result = raceRank != filterValue;
+                            break;
+                        case NotContains:
+                        case StartsWith:
+                        case Contains:
+                        case EndsWith:
+                        default:
+                            throw new RuntimeException("Operator " + filterOperator.name() + " is not supported."); 
+                    }
                 }
             }
         }
