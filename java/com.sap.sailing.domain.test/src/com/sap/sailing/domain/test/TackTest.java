@@ -58,7 +58,7 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         hassosTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), now,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(45))));
-        assertEquals(Tack.STARBOARD, getTrackedRace().getTack(competitor, now));
+        assertEquals(Tack.PORT, getTrackedRace().getTack(competitor, now));
     }
 
     @Test
@@ -67,7 +67,7 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         hassosTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), now,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(270))));
-        assertEquals(Tack.PORT, getTrackedRace().getTack(competitor, now));
+        assertEquals(Tack.STARBOARD, getTrackedRace().getTack(competitor, now));
     }
 
     @Test
@@ -76,7 +76,7 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         hassosTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), now,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(180))));
-        assertEquals(Tack.STARBOARD, getTrackedRace().getTack(competitor, now));
+        assertEquals(Tack.PORT, getTrackedRace().getTack(competitor, now));
     }
 
 }
