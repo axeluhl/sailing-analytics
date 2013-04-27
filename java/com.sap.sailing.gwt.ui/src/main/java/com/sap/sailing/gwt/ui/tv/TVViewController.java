@@ -35,6 +35,8 @@ import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 public class TVViewController implements RaceTimesInfoProviderListener {
+    private static final int REFRESH_INTERVAL_IN_MILLIS_LEADERBOARD = 10000;
+    private static final long REFRESH_INTERVAL_IN_MILLIS_RACEBOARD = 1000;
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final StringMessages stringMessages;
@@ -58,16 +60,21 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     private boolean showRaceDetails;
     private boolean showWindChart;
     private final RaceBoardViewConfiguration raceboardViewConfig;
+    private final boolean showNavigationPanel;
     
     /**
-     * @param leaderboardGroupName TODO
-     * @param logoAndTitlePanel allowed to be <code>null</code>
-     * @param raceboardViewConfig TODO
+     * @param logoAndTitlePanel
+     *            allowed to be <code>null</code>
+     * @param showNavigationPanel
+     *            tells whether to show the navigation panel for the race board which allows users to turn on and off
+     *            the various components and lets them configure them; makes sense to use only if intended for "manned" mode.
      */
-    public TVViewController(SailingServiceAsync sailingService, MediaServiceAsync mediaService, StringMessages stringMessages, ErrorReporter errorReporter,
-            String leaderboardGroupName, String leaderboardName, UserAgentDetails userAgent,
-            LogoAndTitlePanel logoAndTitlePanel, DockLayoutPanel dockPanel, long delayToLiveInMillis, boolean showRaceDetails,
-            RaceBoardViewConfiguration raceboardViewConfig) {
+    public TVViewController(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
+            StringMessages stringMessages, ErrorReporter errorReporter, String leaderboardGroupName,
+            String leaderboardName, UserAgentDetails userAgent, LogoAndTitlePanel logoAndTitlePanel,
+            DockLayoutPanel dockPanel, long delayToLiveInMillis, boolean showRaceDetails,
+            boolean showNavigationPanel, RaceBoardViewConfiguration raceboardViewConfig) {
+        this.showNavigationPanel = showNavigationPanel;
         this.raceboardViewConfig = raceboardViewConfig;
         this.sailingService = sailingService;
         this.mediaService = mediaService;
@@ -158,33 +165,31 @@ public class TVViewController implements RaceTimesInfoProviderListener {
             }
             currentLiveRace = null;
             activeTvView = TVViews.Leaderboard;
+            timer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_LEADERBOARD);
         }
     }
     
     private void showRaceBoard() {
         if(activeTvView != TVViews.Raceboard) {
             clearContentPanels();
-
             RaceBoardPanel raceBoardPanel = createRaceBoardPanel(leaderboardName, currentLiveRace);
             raceBoardPanel.setSize("100%", "100%");
-            if(showWindChart) {
+            if (showWindChart) {
                 raceBoardPanel.setWindChartVisible(true);
             }
-
-//            FlowPanel toolbarPanel = new FlowPanel();
-//            toolbarPanel.add(raceBoardPanel.getNavigationWidget());
-//            dockPanel.addNorth(toolbarPanel, 40);
-            
+            if (showNavigationPanel) {
+                FlowPanel toolbarPanel = new FlowPanel();
+                toolbarPanel.add(raceBoardPanel.getComponentControlsPanel());
+                dockPanel.addNorth(toolbarPanel, 40);
+            }
             FlowPanel timePanel = createTimePanel(raceBoardPanel);
-            
             dockPanel.addSouth(timePanel, 90);                     
             dockPanel.add(raceBoardPanel);
-            
-            if(logoAndTitlePanel != null) {
+            if (logoAndTitlePanel != null) {
                 logoAndTitlePanel.setSubTitle(currentLiveRace.getRaceName());
             }
-
             activeTvView = TVViews.Raceboard;
+            timer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_RACEBOARD);
         }
     }
 

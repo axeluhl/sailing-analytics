@@ -20,6 +20,8 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartRun
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortTypeSelectionDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseLineOpeningTimeDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChoosePathFinderDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
 public class GateStartRunningRaceFragment extends RaceFragment implements GateStartRunningRaceEventListener {
@@ -72,6 +74,13 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
         displayGolfFlag(!golfFlagTakenDown);
         
         getRace().getState().getStartProcedure().setRunningRaceEventListener(this);
+        
+        if(getRace().getState().getPathfinder()==null){
+            showPathFinderDialog();
+        }
+        if(getRace().getState().getGateLineOpeningTime()==null){
+            showLineOpeningTimeDialog();
+        }
     }
 
     private void displayGolfFlag(boolean golfFlagDisplayed) {
@@ -171,6 +180,22 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
     @Override
     public void onGolfDown() {
         displayGolfFlag(false);
+    }
+    
+    private void showPathFinderDialog() {
+        FragmentManager fragmentManager = getFragmentManager();
+        RaceDialogFragment fragment = new RaceChoosePathFinderDialog();
+        Bundle args = getParameterBundle();
+        fragment.setArguments(args);
+        fragment.show(fragmentManager, null);
+    }
+
+    private void showLineOpeningTimeDialog() {
+        FragmentManager fragmentManager = getFragmentManager();
+        RaceDialogFragment fragment = new RaceChooseLineOpeningTimeDialog();
+        Bundle args = getParameterBundle();
+        fragment.setArguments(args);
+        fragment.show(fragmentManager, null);
     }
 
 }

@@ -24,9 +24,9 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
@@ -146,16 +146,21 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         FlowPanel raceDetailDialog = new FlowPanel();
         raceDetailDialog.add(dialog.createHeadline(stringMessages.raceDetailsToShow(), true));
         raceDetailDialog.addStyleName("SettingsDialogComponent");
-        FlowPanel raceDetailDialogContent = new FlowPanel();
-        raceDetailDialogContent.addStyleName("dialogInnerContent");
+        int detailCountInCurrentFlowPanel = 0;
         List<DetailType> currentRaceDetailSelection = raceDetailSelection;
+        FlowPanel raceDetailDialogContent = null;
         for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
+            if (detailCountInCurrentFlowPanel % 8 == 0) {
+                raceDetailDialogContent = new FlowPanel();
+                raceDetailDialogContent.addStyleName("dialogInnerContent");
+                raceDetailDialog.add(raceDetailDialogContent);
+            }
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
             checkbox.setValue(currentRaceDetailSelection.contains(type));
             raceDetailCheckboxes.put(type, checkbox);
             raceDetailDialogContent.add(checkbox);
+            detailCountInCurrentFlowPanel++;
         }
-        raceDetailDialog.add(raceDetailDialogContent);
         return raceDetailDialog;
     }
 
@@ -180,16 +185,21 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         FlowPanel legDetailsToShow = new FlowPanel();
         legDetailsToShow.add(dialog.createHeadline(stringMessages.legDetailsToShow(), true));
         legDetailsToShow.addStyleName("SettingsDialogComponent");
-        FlowPanel legDetailsContent = new FlowPanel();
-        legDetailsContent.addStyleName("dialogInnerContent");
+        FlowPanel legDetailsContent = null;
         List<DetailType> currentLegDetailSelection = legDetailSelection;
+        int detailCountInCurrentFlowPanel = 0;
         for (DetailType type : LegColumn.getAvailableLegDetailColumnTypes()) {
+            if (detailCountInCurrentFlowPanel % 8 == 0) {
+                legDetailsContent = new FlowPanel();
+                legDetailsContent.addStyleName("dialogInnerContent");
+                legDetailsToShow.add(legDetailsContent);
+            }
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
             checkbox.setValue(currentLegDetailSelection.contains(type));
             legDetailCheckboxes.put(type, checkbox);
             legDetailsContent.add(checkbox);
+            detailCountInCurrentFlowPanel++;
         }
-        legDetailsToShow.add(legDetailsContent);
         return legDetailsToShow;
     }
 

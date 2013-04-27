@@ -513,4 +513,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         return null;
     }
 
+    @Override
+    public Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

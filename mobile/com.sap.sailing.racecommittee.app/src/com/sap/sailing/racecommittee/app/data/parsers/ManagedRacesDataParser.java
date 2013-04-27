@@ -8,7 +8,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
@@ -60,8 +59,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 							series, 
 							fleet, 
 							cell.getName(), 
-							log,
-							cell.getCompetitors());
+							log);
 					target.add(race);
 				}
 			}
@@ -69,11 +67,11 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 	}
 
 	private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesWithRows series,
-			Fleet fleet, String name, PassAwareRaceLog raceLog, Iterable<Competitor> competitors) {
+			Fleet fleet, String name, PassAwareRaceLog raceLog) {
 		return new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(name, 
 						new FleetIdentifierImpl(fleet, series, raceGroup)),
-				raceLog, competitors);
+				raceLog);
 		
 	}
 

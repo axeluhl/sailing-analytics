@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
@@ -700,6 +701,32 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         : raceDetails.getWindwardDistanceToOverallLeader().getMeters();
                 entryDTO.averageCrossTrackErrorInMeters = raceDetails.getAverageCrossTrackError() == null ? null
                         : raceDetails.getAverageCrossTrackError().getMeters();
+                final TimePoint startOfRace = trackedRace.getStartOfRace();
+                if (startOfRace != null) {
+                    Distance distanceToStartLineAtStartOfRace = trackedRace.getDistanceToStartLine(competitor,
+                            startOfRace);
+                    entryDTO.distanceToStartLineAtStartOfRaceInMeters = distanceToStartLineAtStartOfRace == null ? null
+                            : distanceToStartLineAtStartOfRace.getMeters();
+                    Speed speedAtStartTime = trackedRace.getTrack(competitor).getEstimatedSpeed(startOfRace);
+                    entryDTO.speedOverGroundAtStartOfRaceInKnots = speedAtStartTime == null ? null : speedAtStartTime.getKnots();
+                    NavigableSet<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
+                    trackedRace.lockForRead(competitorMarkPassings);
+                    try {
+                        if (!competitorMarkPassings.isEmpty()) {
+                            TimePoint competitorStartTime = competitorMarkPassings.iterator().next().getTimePoint();
+                            Speed competitorSpeedWhenPassingStart = trackedRace.getTrack(competitor).getEstimatedSpeed(
+                                    competitorStartTime);
+                            entryDTO.speedOverGroundAtPassingStartWaypointInKnots = competitorSpeedWhenPassingStart == null ? null
+                                    : competitorSpeedWhenPassingStart.getKnots();
+                            entryDTO.startTack = trackedRace.getTack(competitor, competitorStartTime);
+                            Distance distanceFromStarboardSideOfStartLineWhenPassingStart = trackedRace.getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor);
+                            entryDTO.distanceToStarboardSideOfStartLineInMeters = distanceFromStarboardSideOfStartLineWhenPassingStart == null ? null :
+                                distanceFromStarboardSideOfStartLineWhenPassingStart.getMeters();
+                        }
+                    } finally {
+                        trackedRace.unlockAfterRead(competitorMarkPassings);
+                    }
+                }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             } catch (ExecutionException e) {
@@ -771,7 +798,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             end = trackedRace.getEndOfTracking();
                         }
                         return calculateRaceDetails(trackedRace, competitor, end,
-                                /* waitForLatestManeuverAnalysis */ true /* because this is done only once after end of tracking */, legRanksCache);
+                                // TODO see bug 1358: for now, use waitForLatest==false until we've switched to optimistic locking for the course read lock
+                                /* TODO old comment when it was still true: "because this is done only once after end of tracking" */
+                                /* waitForLatestAnalyses (maneuver and cross track error) */ false,
+                                legRanksCache);
                     }
                 });
                 raceDetailsExecutor.execute(raceDetails);
@@ -881,7 +911,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 LegEntryDTO legEntry;
                 // We loop over a copy of the course's legs; during a course change, legs may become "stale," even with
                 // regard to the leg/trackedLeg structures inside the tracked race which is updated by the course change
-                // immediately. Make sure we're tolerant against disappearing legs! See bug 794.
+                // immediately. That's why we've acquired a read lock for the course above.
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
                 if (trackedLeg != null && trackedLeg.hasStartedLeg(timePoint)) {
                     legEntry = createLegEntry(trackedLeg, timePoint, waitForLatestAnalyses, legRanksCache);

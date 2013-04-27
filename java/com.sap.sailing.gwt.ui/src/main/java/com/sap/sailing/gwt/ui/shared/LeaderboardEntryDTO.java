@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.Tack;
 
 /**
  * Holds a single competitor's scoring details for a single race. It may optionally contain
@@ -43,6 +44,16 @@ public class LeaderboardEntryDTO implements IsSerializable {
     
     public Double averageCrossTrackErrorInMeters;
     
+    public Double distanceToStartLineAtStartOfRaceInMeters;
+    
+    public Double speedOverGroundAtStartOfRaceInKnots;
+    
+    public Double speedOverGroundAtPassingStartWaypointInKnots;
+    
+    public Double distanceToStarboardSideOfStartLineInMeters;
+    
+    public Tack startTack;
+
     /**
      * If <code>null</code>, no leg details are known yet, the race is not being tracked or the details
      * haven't been requested from the server yet. Otherwise, the list holds one entry per {@link Leg} of the
