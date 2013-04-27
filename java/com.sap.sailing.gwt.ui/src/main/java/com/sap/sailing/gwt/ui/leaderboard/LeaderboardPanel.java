@@ -877,7 +877,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             result.put(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
                     new FormattedDoubleDetailTypeColumn(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START, new SpeedOverGroundWhenPassingStartInKnots(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
+            result.put(DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS,
                     new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS, new DistanceToStarboardSideOfStartLineInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.START_TACK, new StartingTackColumn(new TackWhenStarting(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
