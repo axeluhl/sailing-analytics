@@ -555,5 +555,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     public RaceBoardViewConfiguration getConfiguration() {
         return raceboardViewConfiguration;
     }
+    
+    public FlowPanel getComponentControlsPanel() {
+        return componentControlsPanel;
+    }
 }
 
