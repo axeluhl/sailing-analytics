@@ -1060,8 +1060,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private RaceLogEvent loadRaceLogGateLineOpeningTimeEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,
             Integer passId, List<Competitor> competitors, DBObject dbObject) {
-        Long gateLineOpeningTime = (Long) dbObject.get(FieldNames.RACE_LOG_GATE_LINE_OPENING_TIME.name());
-        return raceLogEventFactory.createGateLineOpeningTimeEvent(createdAt, timePoint, id, competitors, passId, gateLineOpeningTime);
+        Number gateLineOpeningTime = (Number) dbObject.get(FieldNames.RACE_LOG_GATE_LINE_OPENING_TIME.name());
+        return raceLogEventFactory.createGateLineOpeningTimeEvent(createdAt, timePoint, id, competitors, passId,
+                gateLineOpeningTime == null ? null : gateLineOpeningTime.longValue());
     }
     
     private RaceLogEvent loadRaceLogPathfinderEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,
