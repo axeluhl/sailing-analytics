@@ -2,7 +2,9 @@ package com.sap.sailing.xcelsiusadapter;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +19,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
@@ -48,7 +51,7 @@ public class RegattaDataPerLegAction extends HttpAction {
 //        if (regatta == null) {
 //            return;
 //        }
-        
+        TimePoint now = MillisecondsTimePoint.now();
         final Leaderboard leaderboard = getLeaderboard(); // Get leaderboard data from request (get value for regatta name from URL parameter regatta)
         // if the regatta does not exist a tag <message> will be returned with a text message from function
         // getLeaderboard().
@@ -72,7 +75,7 @@ public class RegattaDataPerLegAction extends HttpAction {
         for (RaceColumn r : leaderboard.getRaceColumns()) {
             for (Fleet f : r.getFleets()) {
                 TrackedRace trackedRace = r.getTrackedRace(f);
-   
+                Map<Competitor, Map<Waypoint, Integer>> rankAtWaypoint = getRankAtWaypoint(trackedRace);
                 // skip race if not tracked
                 if (trackedRace == null || !trackedRace.hasGPSData()) {
                     continue;
@@ -214,8 +217,8 @@ public class RegattaDataPerLegAction extends HttpAction {
                             // Calculate rank loss/gain
                             int posGL = 0;
                             if (previousLeg != null) {
-                                posGL = trackedLegOfCompetitor.getRank(compFinishedLeg)
-                                        - previousLeg.getTrackedLeg(competitor).getRank(compFinishedLeg);
+                                posGL = rankAtWaypoint.get(competitor).get(trackedLeg.getLeg().getTo()) -
+                                        - rankAtWaypoint.get(competitor).get(trackedLeg.getLeg().getFrom());
                             }
 
                             final Element competitor_node = addNamedElement(competitor_data_node, "competitor");
@@ -247,8 +250,8 @@ public class RegattaDataPerLegAction extends HttpAction {
                                 addNamedElementWithValue(competitor_node, "leg_finished_time_ms", compFinishedLeg.asMillis());
                                 addNamedElementWithValue(competitor_node, "time_elapsed_ms", compFinishedLeg.asMillis() - raceStarted.asMillis());
                                 addNamedElementWithValue(competitor_node, "leg_time_ms", compLegTimeAlt);
-                                addNamedElementWithValue(competitor_node, "leg_rank", trackedLegOfCompetitor.getRank(compFinishedLeg));     
-                                addNamedElementWithValue(competitor_node, "race_final_rank", trackedRace.getRank(competitor));
+                                addNamedElementWithValue(competitor_node, "leg_rank", rankAtWaypoint.get(competitor).get(trackedLeg.getLeg().getTo()));     
+                                addNamedElementWithValue(competitor_node, "race_final_rank", trackedRace.getRank(competitor, now));
                                 //
 //                                addNamedElementWithValue(competitor_node, "race_points", leaderboard.getTotalPoints(competitor, r, MillisecondsTimePoint.now()));
                                 //
@@ -541,6 +544,25 @@ public class RegattaDataPerLegAction extends HttpAction {
 //        } // regatta end
 //        sendDocument(doc, regatta.getName() + ".xml");// output doc to client
     } // function end
+
+
+    private Map<Competitor, Map<Waypoint, Integer>> getRankAtWaypoint(TrackedRace trackedRace) {
+        Map<Competitor, Map<Waypoint, Integer>> result = new HashMap<>();
+        Iterable<Waypoint> waypoints = trackedRace.getRace().getCourse().getWaypoints();
+        for (Waypoint waypoint : waypoints) {
+            Iterable<MarkPassing> markPassingsInOrder = trackedRace.getMarkPassingsInOrder(waypoint);
+            int rank = 1;
+            for (MarkPassing markPassing : markPassingsInOrder) {
+                Map<Waypoint, Integer> map = result.get(markPassing.getCompetitor());
+                if (map == null) {
+                    map = new HashMap<>();
+                    result.put(markPassing.getCompetitor(), map);
+                }
+                map.put(waypoint, rank++);
+            }
+        }
+        return result;
+    }
 
 
     private String getBoatClassName(final Leaderboard leaderboard) {
