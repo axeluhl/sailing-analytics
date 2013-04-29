@@ -553,4 +553,5 @@ public interface StringMessages extends Messages {
     String noWindFixesAvailable();
     String distanceToStarboardEndOfStartlineWhenPassingStart();
     String distanceToStarboardEndOfStartlineWhenPassingStartTooltip();
+    String registeredRacesForTrackingMessage();
 }

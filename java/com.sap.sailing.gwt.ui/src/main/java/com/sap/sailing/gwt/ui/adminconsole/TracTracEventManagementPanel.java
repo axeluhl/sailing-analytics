@@ -45,6 +45,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
+import com.sap.sailing.gwt.ui.client.MessageReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -69,6 +70,7 @@ import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 // TODO: Do not inherit from FormPanel since the provided functionality is never used!
 public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private final ErrorReporter errorReporter;
+    private final MessageReporter messageReporter;
     
     private final Map<String, TracTracConfigurationDTO> previousConfigurations;
 
@@ -96,9 +98,11 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
 
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+            MessageReporter messageReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringMessages);
         this.errorReporter = errorReporter;
+        this.messageReporter = messageReporter;
         this.previousConfigurations = new HashMap<String, TracTracConfigurationDTO>();
         this.availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();
         this.raceList = new ListDataProvider<TracTracRaceRecordDTO>();
@@ -706,7 +710,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
                     @Override
                     public void handleSuccess(Void result) {
-                        TracTracEventManagementPanel.this.regattaRefresher.fillRegattas();
+                        messageReporter.reportMessage(stringMessages.registeredRacesForTrackingMessage());
                     }
                 });
     }
