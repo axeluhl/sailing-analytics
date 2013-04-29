@@ -103,9 +103,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     private final RaceTimesInfoProvider raceTimesInfoProvider;
 
     public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserDTO theUser, Timer timer,
-            RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
-            RaceBoardViewConfiguration raceboardViewConfiguration, ErrorReporter errorReporter, final StringMessages stringMessages, 
-            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
+            boolean canReplayWhileLiveIsPossible, RaceSelectionProvider theRaceSelectionProvider, String leaderboardName,
+            String leaderboardGroupName, RaceBoardViewConfiguration raceboardViewConfiguration, ErrorReporter errorReporter, 
+            final StringMessages stringMessages, UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
@@ -136,7 +136,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
                 getElement().getStyle().setMarginRight(12, Unit.PX);
                 break;
         }
-        timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider);
+        timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider, canReplayWhileLiveIsPossible);
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
         raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
