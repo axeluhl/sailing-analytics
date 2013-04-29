@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.common.racelog;
 
 public enum StartProcedureType {
-    RRS26("Fix-Line-Start (RRS26)"),
+    //RRS26("Fix-Line-Start (RRS26)"),
     GateStart("Gate-Line-Start"),
     ESS("\"Extreme Sailing Series\"-Start");
     
