@@ -313,6 +313,10 @@ img.openColumn {
  * Begin CSS for WindowBox component:
  ******************************************************************************/
 
+.gwt-extras-WindowBox {
+	clip: rect(auto auto auto auto);
+}
+
 .gwt-extras-WindowBox .dialogMiddleCenter {
   padding: 0px !important;
 }
@@ -369,6 +373,16 @@ img.openColumn {
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-maximize:hover {
   background: transparent url(images/min-4panel.png) right bottom no-repeat;
+}
+
+.dialogBottomLeftInner, .dialogBottomRightInner {
+	width: 10px;
+	height: 10px;
+	
+}
+
+.dialogBottomLeftInner:hover, .dialogBottomRightInner:hover {
+	background: red;
 }
 /*******************************************************************************
  * End of CSS for WindowBox component.
