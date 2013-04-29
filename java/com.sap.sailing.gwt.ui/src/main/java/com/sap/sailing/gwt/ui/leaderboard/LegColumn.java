@@ -10,8 +10,8 @@ import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
@@ -102,9 +102,9 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
     
-    private class SideToWhichMarkAtLegStartWasRounded extends AbstractLegDetailField<Tack> {
+    private class SideToWhichMarkAtLegStartWasRounded extends AbstractLegDetailField<NauticalSide> {
         @Override
-        protected Tack getFromNonNullEntry(LegEntryDTO entry) {
+        protected NauticalSide getFromNonNullEntry(LegEntryDTO entry) {
             return entry.sideToWhichMarkAtLegStartWasRounded;
         }
     }
@@ -261,7 +261,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 
         result.put(DetailType.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED,
                 new SideToWhichMarkAtLegStartWasRoundedColumn(stringMessages.sideToWhichMarkAtLegStartWasRounded(),
-                        new SideToWhichMarkAtLegStartWasRounded(), detailHeaderStyle, detailColumnStyle));
+                        new SideToWhichMarkAtLegStartWasRounded(), detailHeaderStyle, detailColumnStyle, stringMessages));
         
         result.put(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS,
                 new FormattedDoubleDetailTypeColumn(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS, new VelocityMadeGoodInKnots(), detailHeaderStyle, detailColumnStyle));

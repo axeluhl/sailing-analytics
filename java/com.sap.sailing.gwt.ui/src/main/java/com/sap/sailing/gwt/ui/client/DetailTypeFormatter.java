@@ -51,8 +51,18 @@ public class DetailTypeFormatter {
             return stringMessages.windwardDistanceToLeaderInMeters();
         case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
             return stringMessages.averageCrossTrackErrorInMeters();
+        case START_TACK:
+            return stringMessages.startTack();
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
             return stringMessages.windwardDistanceToLeaderInMeters();
+        case DISTANCE_TO_START_AT_RACE_START:
+            return stringMessages.distanceToLineAtRaceStart();
+        case SPEED_OVER_GROUND_AT_RACE_START:
+            return stringMessages.speedOverGroundAtRaceStart();
+        case SPEED_OVER_GROUND_WHEN_PASSING_START:
+            return stringMessages.speedOverGroundWhenPassingStart();
+        case DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS:
+            return stringMessages.distanceToStarboardEndOfStartlineWhenPassingStart();
         case TACK:
             return stringMessages.tack();
         case JIBE:
@@ -108,6 +118,8 @@ public class DetailTypeFormatter {
         case VELOCITY_MADE_GOOD_IN_KNOTS:
         case AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
         case TOTAL_AVERAGE_SPEED_OVER_GROUND:
+        case SPEED_OVER_GROUND_AT_RACE_START:
+        case SPEED_OVER_GROUND_WHEN_PASSING_START:
             return stringMessages.knotsUnit();
 
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
@@ -120,7 +132,9 @@ public class DetailTypeFormatter {
         case AVERAGE_MANEUVER_LOSS_IN_METERS:
         case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
         case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
+        case DISTANCE_TO_START_AT_RACE_START:
         case TOTAL_DISTANCE_TRAVELED:
+        case DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS:
             return stringMessages.metersUnit();
 
         case GAP_TO_LEADER_IN_SECONDS:
@@ -142,6 +156,7 @@ public class DetailTypeFormatter {
         case OVERALL_RANK:
         case CURRENT_LEG:
         case TACK:
+        case START_TACK:
         case JIBE:
         case PENALTY_CIRCLE:
         case RANK_GAIN:
@@ -211,6 +226,16 @@ public class DetailTypeFormatter {
             return stringMessages.windwardDistanceToLeaderInMetersTooltip();
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
             return stringMessages.windwardDistanceToLeaderInMetersTooltip();
+        case DISTANCE_TO_START_AT_RACE_START:
+            return stringMessages.distanceToLineAtRaceStartTooltip();
+        case SPEED_OVER_GROUND_AT_RACE_START:
+            return stringMessages.speedOverGroundAtRaceStartTooltip();
+        case SPEED_OVER_GROUND_WHEN_PASSING_START:
+            return stringMessages.speedOverGroundWhenPassingStartTooltip();
+        case DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS:
+            return stringMessages.distanceToStarboardEndOfStartlineWhenPassingStartTooltip();
+        case START_TACK:
+            return stringMessages.startTackTooltip();
         case RACE_DISTANCE_TRAVELED:
             return stringMessages.raceDistanceTraveledTooltip();
         case RACE_GAP_TO_LEADER_IN_SECONDS:
