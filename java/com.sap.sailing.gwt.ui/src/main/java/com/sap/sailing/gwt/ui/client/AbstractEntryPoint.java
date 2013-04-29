@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, WindowSizeDetector {
+public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, MessageReporter, WindowSizeDetector {
     /**
      * <p>The attribute which is used for the debug id.</p>
      */
@@ -33,6 +33,8 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
     public static final String DEBUG_ID_PREFIX = ""; //$NON-NLS-1$
     
     private DialogBox errorDialogBox;
+    private DialogBox messageDialogBox;
+
     private HTML serverResponseLabel;
     private Button dialogCloseButton;
     protected StringMessages stringMessages;
@@ -52,6 +54,8 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
      * Create a remote service proxy to talk to the server-side user management service.
      */
     protected final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
+
+    private HTML messageLabel;
 
     /**
      * The message displayed to the user when the server cannot be reached or
@@ -81,6 +85,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
     protected void doOnModuleLoad() {
         stringMessages = GWT.create(StringMessages.class);
         errorDialogBox = createErrorDialog(); /* TODO: Make this more generic (e.g. make it support all kinds of messages) */
+        messageDialogBox = createMessageDialog();
         userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
         
         ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
@@ -109,6 +114,12 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
         } else {
             reportError(message);
         }
+    }
+    
+    @Override
+    public void reportMessage(String message) {
+       messageLabel.setHTML(message);
+       messageDialogBox.center();
     }
     
     @Override
@@ -149,6 +160,25 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
             }
         });
         return myErrorDialogBox;
+    }
+    
+    private DialogBox createMessageDialog() {
+        final DialogBox myMessageDialogBox = new DialogBox();
+        myMessageDialogBox.setText("Message");
+        myMessageDialogBox.setAnimationEnabled(true);
+        VerticalPanel vPanel = new VerticalPanel();
+        messageLabel = new HTML();
+        vPanel.add(messageLabel);
+        dialogCloseButton = new Button("Close"); //$NON-NLS-1$
+        dialogCloseButton.getElement().setId("closeButton"); //$NON-NLS-1$
+        dialogCloseButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                myMessageDialogBox.hide();
+            }
+        });
+        vPanel.add(dialogCloseButton);
+        myMessageDialogBox.add(vPanel);
+        return myMessageDialogBox;
     }
 
     public static void linkEnterToButton(final Button button, FocusWidget... widgets) {
