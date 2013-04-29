@@ -370,7 +370,6 @@ public abstract class GwtHttpRequestUtils {
      *            the name of the parameter
      */
     public static boolean getRequiredBooleanParameter(String name) throws ParseHttpParameterException {
-
         return BOOLEAN_PARSER.parseBoolean(name, Window.Location.getParameter(name));
     }
 

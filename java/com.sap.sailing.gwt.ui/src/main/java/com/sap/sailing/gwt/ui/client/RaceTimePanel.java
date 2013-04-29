@@ -14,12 +14,14 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener, RaceTimesInfoProviderListener {
     private final RaceTimesInfoProvider raceTimesInfoProvider;
+    
     private RegattaAndRaceIdentifier selectedRace;
     private boolean autoAdjustPlayMode;
     private RaceTimesInfoDTO lastRaceTimesInfo;
     
-    public RaceTimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider) {
-        super(timer, timeRangeProvider, stringMessages);
+    public RaceTimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
+            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible) {
+        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible);
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
         autoAdjustPlayMode = true;
@@ -61,6 +63,12 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 setJumpToLiveEnablement(liveModeToBeMadePossible && timer.getPlayMode() != PlayModes.Live);
                 if (autoAdjustPlayMode && liveModeToBeMadePossible) {
                     timer.setPlayMode(PlayModes.Live);
+                }
+                updatePlayPauseButtonsVisibility(timer.getPlayMode());
+                if (liveModeToBeMadePossible && !canReplayWhileLiveIsPossible() &&
+                        timer.getPlayMode()==PlayModes.Replay && timer.getPlayState()==PlayStates.Playing) {
+                    // pause timer because it must not be playing in replay mode while the race is live
+                    timer.pause();
                 }
                 
                 boolean timerAlreadyInitialized = getFromTime() != null && getToTime() != null && timeSlider.getCurrentValue() != null;
@@ -179,7 +187,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             timer.play();
             break;
         case Replay:
-            // set time to end of race
+            // set time to start of race
             if (newRaceTimesInfo.startOfRace != null) {
                 timer.setTime(newRaceTimesInfo.startOfRace.getTime());
             }

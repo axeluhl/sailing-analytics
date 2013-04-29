@@ -9,10 +9,12 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.GwtHttpRequestUtils;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
 import com.sap.sailing.gwt.ui.raceboard.GlobalNavigationPanel;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 
 /**
@@ -27,6 +29,8 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
         super.doOnModuleLoad();
         String groupParamValue = Window.Location.getParameter("leaderboardGroupName");
         String viewModeParamValue = Window.Location.getParameter("viewMode");
+        final boolean canReplayDuringLiveRaces = GwtHttpRequestUtils.getBooleanParameter(
+                RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, /* defaultValue */ false);
         boolean showRaceDetails = Window.Location.getParameter("showRaceDetails") != null
                 && Window.Location.getParameter("showRaceDetails").equalsIgnoreCase("true");
         final String groupName;
@@ -76,7 +80,7 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
             rootPanel.add(groupOverviewPanel);
         } else {
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this,
-                    groupName, root, viewModeParamValue, embedded, showRaceDetails);
+                    groupName, root, viewModeParamValue, embedded, showRaceDetails, canReplayDuringLiveRaces);
             groupAndFeedbackPanel.add(groupPanel);
             if (!embedded) {
                 groupPanel.setWelcomeWidget(new SimpleWelcomeWidget(stringMessages.welcomeToSailingAnalytics(),

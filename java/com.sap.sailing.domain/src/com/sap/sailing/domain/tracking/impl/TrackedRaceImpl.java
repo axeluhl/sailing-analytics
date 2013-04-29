@@ -2398,7 +2398,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             Position competitorPositionWhenPassingStart = getTrack(competitor).getEstimatedPosition(
                     competitorStartTime, /* extrapolate */false);
             final Position starboardMarkPosition = getStarboardMarkOfStartlinePosition(competitorStartTime);
-            result = starboardMarkPosition == null ? null : competitorPositionWhenPassingStart.getDistance(starboardMarkPosition);
+            if (competitorPositionWhenPassingStart != null && starboardMarkPosition != null) {
+                result = starboardMarkPosition == null ? null : competitorPositionWhenPassingStart.getDistance(starboardMarkPosition);
+            } else {
+                result = null;
+            }
         } else {
             result = null;
         }

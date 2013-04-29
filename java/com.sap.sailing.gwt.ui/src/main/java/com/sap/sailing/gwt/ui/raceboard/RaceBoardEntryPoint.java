@@ -76,9 +76,10 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         } else {
             viewMode = RaceBoardViewConfiguration.ViewModes.ONESCREEN;
         }
-        boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_LEADERBOARD, true /* default*/);
-        boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default*/);
-        boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default*/);
+        final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_LEADERBOARD, true /* default*/);
+        final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default*/);
+        final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default*/);
+        final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
         raceboardViewConfig = new RaceBoardViewConfiguration(viewMode, showLeaderboard, showWindChart, showCompetitorsChart);
         
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
@@ -90,7 +91,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 @Override
                 public void handleSuccess() {
                     checkUrlParameters(getLeaderboardNamesCallback.getData(),
-                            getLeaderboardGroupByNameCallback.getData(), getRegattasCallback.getData(), getUserCallback.getData());
+                            getLeaderboardGroupByNameCallback.getData(), canReplayWhileLiveIsPossible, getRegattasCallback.getData(), getUserCallback.getData());
                 }
                 @Override
                 public void handleFailure(Throwable t) {
@@ -101,7 +102,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             new ParallelExecutionHolder(getLeaderboardNamesCallback, getRegattasCallback, getUserCallback) {
                 @Override
                 public void handleSuccess() {
-                    checkUrlParameters(getLeaderboardNamesCallback.getData(), null, getRegattasCallback.getData(), getUserCallback.getData());
+                    checkUrlParameters(getLeaderboardNamesCallback.getData(), null, canReplayWhileLiveIsPossible, getRegattasCallback.getData(), getUserCallback.getData());
                 }
                 @Override
                 public void handleFailure(Throwable t) {
@@ -117,7 +118,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         userManagementService.getUser(getUserCallback);
     }
 
-    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, List<RegattaDTO> regattas, UserDTO user) {
+    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, boolean canReplayWhileLiveIsPossible, List<RegattaDTO> regattas, UserDTO user) {
         if (!leaderboardNames.contains(leaderboardName)) {
           createErrorPage(stringMessages.noSuchLeaderboard());
           return;
@@ -146,8 +147,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         raceSelectionModel.setSelection(singletonList);
         Timer timer = new Timer(PlayModes.Replay, 1000l);
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, this, singletonList, 5000l /* requestInterval*/);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
-                raceboardViewConfig, RaceBoardEntryPoint.this, stringMessages, userAgent, raceTimesInfoProvider);
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, user, timer, canReplayWhileLiveIsPossible, raceSelectionModel, leaderboardName,
+                leaderboardGroupName, raceboardViewConfig, RaceBoardEntryPoint.this, stringMessages, userAgent, raceTimesInfoProvider);
         raceBoardPanel.fillRegattas(regattas);
 
         switch (raceBoardPanel.getConfiguration().getViewMode()) {

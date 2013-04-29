@@ -45,6 +45,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -413,7 +414,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
             public SafeHtml getValue(LeaderboardGroupDTO group) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/Spectator.html?leaderboardGroupName=" + group.name
-                        + "&showRaceDetails=true"
+                        + "&showRaceDetails=true&"+RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES+"=true"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.cell(link, group.name);
             }

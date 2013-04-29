@@ -16,6 +16,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 
 public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String, String, Pair<String, Date>>> {
+    /**
+     * a unique and human-readable string key for a providerNameAndEventNameBoatClassNameCapturedWhen triple
+     */
     private final LinkedHashMap<String, Triple<String, String, Pair<String, Date>>> values;
     private final ListBox listBox;
 
@@ -23,12 +26,12 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
             EditableLeaderboardPanel leaderboardPanel,
             SailingServiceAsync sailingService,
             StringMessages stringMessages,
-            List<Triple<String, String, Pair<String, Date>>> values, ErrorReporter errorReporter) {
+            List<Triple<String, String, Pair<String, Date>>> providerNameAndEventNameBoatClassNameCapturedWhen, ErrorReporter errorReporter) {
         super(stringMessages.selectResultListToImportFrom(), stringMessages.selectResultListToImportFrom(),
                 stringMessages.ok(), stringMessages.cancel(), new Validator(),
                 new Callback(sailingService, leaderboardPanel, errorReporter, stringMessages));
         this.values = new LinkedHashMap<String, Triple<String, String, Pair<String, Date>>>();
-        for (Triple<String, String, Pair<String, Date>> v : values) {
+        for (Triple<String, String, Pair<String, Date>> v : providerNameAndEventNameBoatClassNameCapturedWhen) {
             this.values.put("" + v.getA() + ": " + v.getB() + " - " + v.getC().getA() + " "
                     + stringMessages.of() + " " + v.getC().getB()+"."+(v.getC().getB().getTime() % 1000), v);
         }
@@ -63,11 +66,11 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
         }
 
         @Override
-        public void ok(Triple<String, String, Pair<String, Date>> result) {
-            final String scoreCorrectionProviderName = result.getA();
-            final String eventName = result.getB();
-            final String boatClassName = result.getC().getA();
-            final Date timePointWhenResultPublished = result.getC().getB();
+        public void ok(Triple<String, String, Pair<String, Date>> providerNameAndEventNameBoatClassNameCapturedWhen) {
+            final String scoreCorrectionProviderName = providerNameAndEventNameBoatClassNameCapturedWhen.getA();
+            final String eventName = providerNameAndEventNameBoatClassNameCapturedWhen.getB();
+            final String boatClassName = providerNameAndEventNameBoatClassNameCapturedWhen.getC().getA();
+            final Date timePointWhenResultPublished = providerNameAndEventNameBoatClassNameCapturedWhen.getC().getB();
             leaderboardPanel.getBusyIndicator().setBusy(true);
             sailingService.getScoreCorrections(scoreCorrectionProviderName, eventName, boatClassName, timePointWhenResultPublished,
                     new AsyncCallback<RegattaScoreCorrectionDTO>() {
