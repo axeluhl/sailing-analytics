@@ -272,8 +272,25 @@ public interface TrackedRace extends Serializable {
      */
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
 
+    /**
+     * This obtains the course's read lock before asking for the read lock for the <code>markPassings</code> structure.
+     * See also bug 1370 (http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=1370). This is necessary because the
+     * code that executes a course update will first ask the course's write lock and then relay execution to the
+     * course change listeners among which there is a {@link TrackedRace} which will then update the mark passings
+     * for all competitors and therefore will need to ask the write lock for those. If the thread calling this method
+     * first obtains the mark passings read lock and later, while holding on to that lock, asks for the course's read
+     * lock, a deadlock may result.<p>
+     * 
+     * The {@link #unlockAfterRead(Iterable)} method will symmetrically unlock the course's read lock after releasing the
+     * read lock for the mark passings.
+     */
     void lockForRead(Iterable<MarkPassing> markPassings);
 
+    /**
+     * Releases the read lock for the mark passings and then the read lock for the course.
+     * 
+     * @see #lockForRead(Iterable)
+     */
     void unlockAfterRead(Iterable<MarkPassing> markPassings);
 
     /**
