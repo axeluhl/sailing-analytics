@@ -48,12 +48,12 @@ cd $PROJECT_HOME
 active_branch=$(git symbolic-ref -q HEAD)
 active_branch=`basename $active_branch`
 
-ACDIR=$SERVERS_HOME/$active_branch
-
 MAVEN_SETTINGS=$PROJECT_HOME/configuration/maven-settings.xml
 MAVEN_SETTINGS_PROXY=$PROJECT_HOME/configuration/maven-settings-proxy.xml
 
 p2PluginRepository=$PROJECT_HOME/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
+
+TARGET_SERVER_NAME=$active_branch
 
 gwtcompile=1
 testing=1
@@ -74,6 +74,7 @@ if [ $# -eq 0 ]; then
     echo "-n <package name> Name of the bundle you want to hot deploy. Needs fully qualified name like"
     echo "                  com.sap.sailing.monitoring. Only works if there is a fully built server available."
     echo "-l <telnet port>  Telnet port the OSGi server is running. Optional but enables fully automatic hot-deploy."
+    echo "-s <target server> Name of server you want to use as target for install. This overrides default behaviour."
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo "install: installs product and configuration to $SERVERS_HOME/$active_branch. Overwrites any configuration by using config from branch."
@@ -91,7 +92,7 @@ echo PROJECT_HOME is $PROJECT_HOME
 echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 
-options=':gtocpm:n:l:'
+options=':gtocpm:n:l:s:'
 while getopts $options option
 do
     case $option in
@@ -103,10 +104,14 @@ do
         m) MAVEN_SETTINGS=$OPTARG;;
         n) OSGI_BUNDLE_NAME=$OPTARG;;
         l) OSGI_TELNET_PORT=$OPTARG;;
+        s) TARGET_SERVER_NAME=$OPTARG;; 
         \?) echo "Invalid option"
             exit 2;;
     esac
 done
+
+ACDIR=$SERVERS_HOME/$TARGET_SERVER_NAME
+echo INSTALL goes to $ACDIR
 
 shift $((OPTIND-1))
 
