@@ -34,6 +34,15 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     protected final Timer timer;
     protected final TimeRangeWithZoomProvider timeRangeProvider;
     
+    /**
+     * Tells whether the user shall be enabled to run a replay with the timer auto-advancing while the race is still live.
+     * Live races are often watched by many. If in addition to that several users run the live race based on their own time line,
+     * too many re-calculations will be triggered as the live data will constantly invalidate many caches. Therefore, if scaling
+     * to many concurrent users is an issue, the capability to replay a live race with a non-live timing may be restricted using
+     * this attribute.
+     */
+    private final boolean canReplayWhileLiveIsPossible;
+    
     private final IntegerBox playSpeedBox;
     private final Label timeDelayLabel;
     private final Label timeLabel;
@@ -74,10 +83,11 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         }
     }
 
-    public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages) {
+    public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages, boolean canReplayWhileLiveIsPossible) {
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;
+        this.canReplayWhileLiveIsPossible = canReplayWhileLiveIsPossible;
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
         timeRangeProvider.addTimeRangeChangeListener(this);
@@ -112,8 +122,9 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         timeSlider.addValueChangeHandler(new ValueChangeHandler<Double>() {
             @Override
             public void onValueChange(ValueChangeEvent<Double> newValue) {
-                if(timeSlider.getCurrentValue() != null) {
+                if (timeSlider.getCurrentValue() != null) {
                     if (TimePanel.this.timer.getPlayMode() == PlayModes.Live) {
+                        // TODO bug 1372 only do this if canReplayWhileLive==true; otherwise pause and only allow going back to live
                         // put timer into replay mode when user explicitly adjusts time; avoids having to press pause first
                         TimePanel.this.timer.setPlayMode(PlayModes.Replay);
                     }
@@ -350,6 +361,12 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         timeSlider.redraw();
     }
     
+    /**
+     * Makes sure that the invariant regarding {@link #canReplayWhileLiveIsPossible} is fulfilled. The timer will be
+     * {@link Timer#pause() paused} if the state is {@link PlayStates#Playing} and the the play mode is
+     * {@link PlayModes#Replay}.
+     * 
+     */
     @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
         boolean liveModeToBeMadePossible = isLiveModeToBeMadePossible();
@@ -358,6 +375,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         switch (playState) {
         case Playing:
             playPauseButton.getElement().addClassName("playPauseButtonPause");
+            playPauseButton.setVisible(true);
             if (playMode == PlayModes.Live) {
                 playModeImage.setResource(playModeLiveActiveImg);
             } else {
@@ -365,8 +383,8 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             }
             break;
         case Paused:
-        	playPauseButton.getElement().removeClassName("playPauseButtonPause");
         case Stopped:
+            updatePlayPauseButtonsVisibility(playMode);
             playPauseButton.getElement().removeClassName("playPauseButtonPause");
             playModeImage.setResource(playModeInactiveImg);
             break;
@@ -390,8 +408,16 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             playSpeedBox.setEnabled(true);
             slowDownButton.setEnabled(true);
             speedUpButton.setEnabled(true);
+            if (!canReplayWhileLiveIsPossible() && playState == PlayStates.Playing && isLiveModeToBeMadePossible()) {
+                // can't leave the timer playing when race is still live and canReplayWhileLiveIsPossible==false 
+                timer.pause();
+            }
             break;
         }
+    }
+
+    public void updatePlayPauseButtonsVisibility(PlayModes playMode) {
+        playPauseButton.setVisible(playMode == PlayModes.Live || canReplayWhileLiveIsPossible() || !isLiveModeToBeMadePossible());
     }
     
     @Override
@@ -423,10 +449,13 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     }
     
     /**
-     * Iff <code>possible</code>, makes the {@link #backToLivePlayButton} button visible. 
+     * Iff <code>possible</code>, makes the {@link #backToLivePlayButton} button visible. Furthermore, if
+     * <code>possible==false</code> and {@link #canReplayWhileLiveIsPossible}<code>==false</code> and the timer is in
+     * state {@link PlayStates#Paused} and in mode {@link PlayModes#Replay}, the play/pause button will be shown.
      */
     protected void setLiveGenerallyPossible(boolean possible) {
         backToLivePlayButton.setVisible(possible);
+        updatePlayPauseButtonsVisibility(timer.getPlayMode());
     }
 
     @SuppressWarnings("unchecked")
@@ -486,5 +515,9 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     public void setLastReceivedDataTimepoint(Date lastReceivedDataTimepoint) {
         this.lastReceivedDataTimepoint = lastReceivedDataTimepoint;
+    }
+
+    protected boolean canReplayWhileLiveIsPossible() {
+        return canReplayWhileLiveIsPossible;
     }
 }
