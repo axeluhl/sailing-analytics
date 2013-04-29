@@ -472,9 +472,6 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-DialogBox {
-	-webkit-box-shadow: 7px 7px 5px rgba(50, 50, 50, 0.75);
-	-moz-box-shadow: 7px 7px 5px rgba(50, 50, 50, 0.75);
-	box-shadow: 7px 7px 5px rgba(50, 50, 50, 0.75);
 	line-height: 1.4;
 }
 
