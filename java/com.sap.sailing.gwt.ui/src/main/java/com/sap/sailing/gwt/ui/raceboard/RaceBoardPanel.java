@@ -106,9 +106,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     private final  UserDTO user;
 
     public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserDTO theUser, Timer timer,
-            RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
-            RaceBoardViewConfiguration raceboardViewConfiguration, ErrorReporter errorReporter, final StringMessages stringMessages, 
-            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
+            boolean canReplayWhileLiveIsPossible, RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, 
+            String leaderboardGroupName, RaceBoardViewConfiguration raceboardViewConfiguration, ErrorReporter errorReporter, 
+            final StringMessages stringMessages, UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.user = theUser; 

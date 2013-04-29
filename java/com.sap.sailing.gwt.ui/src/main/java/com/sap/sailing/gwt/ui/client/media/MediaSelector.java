@@ -274,7 +274,7 @@ public class MediaSelector implements /* RaceTimesInfoProviderListener, */PlaySt
 
     @Override
     public void onFailure(Throwable caught) {
-        setWidgetsVisible(false);
+        setWidgetsVisible((this.user != null));
         errorReporter.reportError("Remote Procedure Call getMediaTracksForRace(...) - Failure: " + caught.getMessage());
     }
 
@@ -285,7 +285,7 @@ public class MediaSelector implements /* RaceTimesInfoProviderListener, */PlaySt
         for (MediaTrack mediaTrack : this.mediaTracks) {
             setStatus(mediaTrack);
         }
-        setWidgetsVisible(this.mediaTracks.size() > 0);
+        setWidgetsVisible((this.mediaTracks.size() > 0) || (this.user != null));
     }
 
     private void setWidgetsVisible(boolean isVisible) {
