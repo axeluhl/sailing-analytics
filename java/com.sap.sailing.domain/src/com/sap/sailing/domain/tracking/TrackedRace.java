@@ -162,12 +162,6 @@ public interface TrackedRace extends Serializable {
     int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
     /**
-     * For a competitor, computes the distance (TODO not yet clear whether over ground or projected onto wind direction)
-     * into the race <code>secondsIntoTheRace</code> after the race {@link TrackedRace#getStart() started}.
-     */
-    Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace);
-
-    /**
      * For the given waypoint lists the {@link MarkPassing} events that describe which competitor passed the waypoint at
      * which point in time. This can, e.g., be used to sort those competitors who already finished a leg within the leg
      * that ends with <code>waypoint</code>. The remaining competitors need to be ordered by the advantage line-related
@@ -278,8 +272,25 @@ public interface TrackedRace extends Serializable {
      */
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
 
+    /**
+     * This obtains the course's read lock before asking for the read lock for the <code>markPassings</code> structure.
+     * See also bug 1370 (http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=1370). This is necessary because the
+     * code that executes a course update will first ask the course's write lock and then relay execution to the
+     * course change listeners among which there is a {@link TrackedRace} which will then update the mark passings
+     * for all competitors and therefore will need to ask the write lock for those. If the thread calling this method
+     * first obtains the mark passings read lock and later, while holding on to that lock, asks for the course's read
+     * lock, a deadlock may result.<p>
+     * 
+     * The {@link #unlockAfterRead(Iterable)} method will symmetrically unlock the course's read lock after releasing the
+     * read lock for the mark passings.
+     */
     void lockForRead(Iterable<MarkPassing> markPassings);
 
+    /**
+     * Releases the read lock for the mark passings and then the read lock for the course.
+     * 
+     * @see #lockForRead(Iterable)
+     */
     void unlockAfterRead(Iterable<MarkPassing> markPassings);
 
     /**
@@ -500,6 +511,12 @@ public interface TrackedRace extends Serializable {
     void setCourseDesignChangedListener(CourseDesignChangedListener listener);
 
     /**
+     * For a competitor, computes the distance (TODO not yet clear whether over ground or projected onto wind direction)
+     * into the race <code>secondsIntoTheRace</code> after the race {@link TrackedRace#getStart() started}.
+     */
+    Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace);
+
+    /**
      * Tells how far the given <code>competitor</code> was from the start line at the given <code>timePoint</code>.
      * Using the {@link #getStartOfRace() race start time} for <code>timePoint</code>, this tells the competitor's
      * distance to the line when the race was started.
@@ -515,4 +532,11 @@ public interface TrackedRace extends Serializable {
      * returned. If the competitor's position cannot be determined, <code>null</code> is returned.
      */
     Distance getDistanceToStartLine(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * When the <code>competitor</code> has started, this method returns the distance to the starboard end of the start line
+     * or---if the start waypoint was a single mark---the distance to the single start mark at the time the competitor started.
+     * If the competitor hasn't started yet, <code>null</code> is returned.
+     */
+    Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor);
 }

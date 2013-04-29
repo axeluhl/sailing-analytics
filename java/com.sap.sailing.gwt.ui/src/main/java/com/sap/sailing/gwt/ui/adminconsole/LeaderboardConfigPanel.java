@@ -64,6 +64,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
@@ -385,6 +386,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                     String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName="
                             + getSelectedLeaderboard().name + "&raceName=" + raceIdentifier.getRaceName() + "&regattaName="
                             + raceIdentifier.getRegattaName()
+                            + "&"+RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES+"=true"
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                     return ANCHORTEMPLATE.cell(link, raceInLeaderboardDTOAndFleetName.getA().getRaceColumnName());
                 } else {

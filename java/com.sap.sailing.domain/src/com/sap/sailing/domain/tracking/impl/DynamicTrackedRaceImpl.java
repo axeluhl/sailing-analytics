@@ -488,12 +488,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void lockForRead(Iterable<MarkPassing> markPassings) {
+        getRace().getCourse().lockForRead();
         LockUtil.lockForRead(getMarkPassingsLock(markPassings));
     }
 
     @Override
     public void unlockAfterRead(Iterable<MarkPassing> markPassings) {
         LockUtil.unlockAfterRead(getMarkPassingsLock(markPassings));
+        getRace().getCourse().unlockAfterRead();
     }
 
     private void clearMarkPassings(Competitor competitor) {

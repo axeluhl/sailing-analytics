@@ -140,7 +140,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
                 getElement().getStyle().setMarginRight(12, Unit.PX);
                 break;
         }
-        timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider);
+        timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider, canReplayWhileLiveIsPossible);
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
         raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
