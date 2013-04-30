@@ -660,3 +660,8 @@ body ::-webkit-scrollbar-track {
 	width: 60px;
 	text-align: left;
 }
+
+video {
+    max-width: 100%;
+    height: auto;
+}
