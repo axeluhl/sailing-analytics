@@ -621,7 +621,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     } catch (ExecutionException e) {
-                        throw new RuntimeException(e);
+                        // See also bug 1371: for stability reasons, don't let the exception percolate but rather accept null values.
+                        // If new evidence is provided, a re-calculation of the leaderboard will be triggered anyway. So this helps
+                        // robustness from a user's perspective.
+                        logger.log(Level.SEVERE, SailingServiceImpl.class.getName()+".computeLeaderboardByName("
+                                +leaderboard.getName()+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+
+                                "): exception during computing leaderboard entry for competitor "+competitor.getName()+
+                                " in race column "+raceColumnNameAndFuture.getKey()+". Leaving empty.", e);
                     }
                 }
                 result.rows.put(competitorDTO, row);
