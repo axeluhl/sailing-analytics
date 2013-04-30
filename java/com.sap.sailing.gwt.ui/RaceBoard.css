@@ -338,6 +338,10 @@ img.openColumn {
   width: 17px;  
 }
 
+.gwt-extras-WindowBox .dialogMiddleCenterInner {
+	overflow:hidden;
+}
+
 .gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-close {
   background: transparent url(images/closeButton.png) left top no-repeat;
 }
@@ -375,15 +379,18 @@ img.openColumn {
   background: transparent url(images/min-4panel.png) right bottom no-repeat;
 }
 
-.dialogBottomLeftInner, .dialogBottomRightInner {
+.gwt-extras-WindowBox .dialogBottomLeftInner, .gwt-extras-WindowBox .dialogBottomRightInner {
 	width: 10px;
 	height: 10px;
-	
+	background: url(images/resize_arrow_right.png) center center no-repeat;
 }
 
-.dialogBottomLeftInner:hover, .dialogBottomRightInner:hover {
-	background: red;
+.gwt-extras-WindowBox .dialogBottomLeftInner {
+    width: 10px;
+    height: 10px;
+    background: url(images/resize_arrow_left.png) center center no-repeat;
 }
+
 /*******************************************************************************
  * End of CSS for WindowBox component.
  ******************************************************************************/
