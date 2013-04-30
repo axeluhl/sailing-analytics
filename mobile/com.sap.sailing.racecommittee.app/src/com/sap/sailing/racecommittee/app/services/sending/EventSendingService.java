@@ -17,8 +17,6 @@ import android.os.IBinder;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.receiver.ConnectivityChangedReceiver;
@@ -95,22 +93,16 @@ public class EventSendingService extends Service implements EventSendingListener
                 URLEncoder.encode(race.getName()),
                 URLEncoder.encode(race.getFleet().getName()));
         
+        return createEventIntent(context, url, race.getId(), serializedEvent);
+    }
+    
+    public static Intent createEventIntent(Context context, String url, Serializable raceId, Serializable serializedEvent) {
         Intent eventIntent = new Intent(context.getString(R.string.intentActionSendEvent));
-        eventIntent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
-        eventIntent.putExtra(AppConstants.EXTRAS_JSON_KEY, serializedEvent);
+        eventIntent.putExtra(AppConstants.RACE_ID_KEY, raceId);
+        eventIntent.putExtra(AppConstants.EXTRAS_SERIALIZED_EVENT, serializedEvent);
         eventIntent.putExtra(AppConstants.EXTRAS_URL, url);
         ExLog.i(TAG, "Created event " + eventIntent + " for sending to backend");
         return eventIntent;
-    }
-    
-    public static Intent createEventIntent(Context context, Serializable raceId, Serializable serializedEvent) {
-        ReadonlyDataManager data = DataManager.create(context);
-        ManagedRace race = data.getDataStore().getRace(raceId);
-        if (race == null) {
-            ExLog.e(TAG, "There is no race with id " + raceId);
-            return null;
-        }
-        return createEventIntent(context, race, serializedEvent);
     }
 
     /*
@@ -200,7 +192,9 @@ public class EventSendingService extends Service implements EventSendingListener
             serviceLogger.onEventSentFailed();
         } else {
             ExLog.i(TAG, "Event successfully send.");
-            persistenceManager.removeIntent(intent);
+            if (persistenceManager.areIntentsDelayed()) {
+                persistenceManager.removeIntent(intent);
+            }
             lastSuccessfulSend = Calendar.getInstance().getTime();
             
             serviceLogger.onEventSentSuccessful();

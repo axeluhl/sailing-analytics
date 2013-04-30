@@ -38,15 +38,16 @@ public class EventPersistenceManager {
     public void persistIntent(Intent intent) {
         Bundle extras = intent.getExtras();
 
-        Serializable serializedEvent = extras.getSerializable(AppConstants.EXTRAS_JSON_KEY);
-        String raceUuid = extras.getSerializable(AppConstants.RACE_ID_KEY).toString();
-
-        persistEvent(raceUuid, serializedEvent);
+        String raceId = extras.getString(AppConstants.RACE_ID_KEY);
+        String url = extras.getString(AppConstants.EXTRAS_URL);
+        Serializable serializedEvent = extras.getSerializable(AppConstants.EXTRAS_SERIALIZED_EVENT);
+        
+        persistEvent(url, raceId, serializedEvent);
     }
 
-    private void persistEvent(String raceUuid, Serializable serializedEvent) {
-        String eventLine = getSerializedIntentForPersistence(raceUuid, serializedEvent);
-        ExLog.i(TAG, String.format("Persisting event \"%s\" for race %s.", eventLine, raceUuid));
+    private void persistEvent(String url, String raceId, Serializable serializedEvent) {
+        String eventLine = getSerializedIntentForPersistence(url, raceId, serializedEvent);
+        ExLog.i(TAG, String.format("Persisting event \"%s\" for race %s.", eventLine, raceId));
 
         if (persistedEvents.contains(eventLine)) {
             ExLog.i(TAG, "The event already exists. Ignoring.");
@@ -55,26 +56,28 @@ public class EventPersistenceManager {
         saveEvent(eventLine);
     }
 
-    private String getSerializedIntentForPersistence(String raceUuid, Serializable serializedEvent) {
-        String eventLine = String.format("%s;%s", raceUuid, serializedEvent);
+    private String getSerializedIntentForPersistence(String url, String raceId, Serializable serializedEvent) {
+        String eventLine = String.format("%s;%s;%s", raceId, serializedEvent, url);
         return eventLine;
     }
 
     public void removeIntent(Intent intent) {
         Bundle extras = intent.getExtras();
 
-        String serializedEvent = extras.getString(AppConstants.EXTRAS_JSON_KEY);
-        String raceUuid = extras.getString(AppConstants.RACE_ID_KEY);
+        String url = extras.getString(AppConstants.EXTRAS_URL);
+        String raceId = extras.getString(AppConstants.RACE_ID_KEY);
+        String serializedEvent = extras.getString(AppConstants.EXTRAS_SERIALIZED_EVENT);
+        
 
-        removeEvent(raceUuid, serializedEvent);
+        removeEvent(url, raceId, serializedEvent);
     }
 
-    private void removeEvent(String raceUuid, String serializedEvent) {
+    private void removeEvent(String url, String raceId, String serializedEvent) {
         if (persistedEvents.isEmpty())
             return;
 
-        ExLog.i(TAG,  String.format("Removing event \"%s\" for race %s.", serializedEvent, raceUuid));
-        String eventLine = getSerializedIntentForPersistence(raceUuid, serializedEvent);
+        ExLog.i(TAG,  String.format("Removing event \"%s\" for race %s.", serializedEvent, raceId));
+        String eventLine = getSerializedIntentForPersistence(url, raceId, serializedEvent);
 
         removePersistedEvent(eventLine);
     }
@@ -96,23 +99,18 @@ public class EventPersistenceManager {
 
     public List<Intent> restoreEvents() {
         List<Intent> delayedIntents = new ArrayList<Intent>();
-        //These file entries may be too old. No appropriate race id has been found for this event.
-        List<String> entriesToBeRemoved = new ArrayList<String>(); 
 
         for (String persistedEvent : persistedEvents) {
 
             String[] lineParts = persistedEvent.split(";");
+            String url = lineParts[2];
+            String raceId = lineParts[0];
+            String serializedEvent = lineParts[1];
 
-            Intent eventIntent = EventSendingService.createEventIntent(context, lineParts[0], lineParts[1]);
+            Intent eventIntent = EventSendingService.createEventIntent(context, url, raceId, serializedEvent);
             if (eventIntent != null) {
                 delayedIntents.add(eventIntent);
-            } else {
-                entriesToBeRemoved.add(persistedEvent);
             }
-        }
-
-        for (String entryToBeRemoved : entriesToBeRemoved) {
-            removePersistedEvent(entryToBeRemoved);
         }
 
         ExLog.i(TAG, "Restored " + delayedIntents.size() + " events");

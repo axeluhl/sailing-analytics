@@ -34,7 +34,7 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Pair<Intent, Intege
         }
 
         Bundle extras = intent.getExtras();
-        Serializable serializedEvent = extras.getSerializable(AppConstants.EXTRAS_JSON_KEY);
+        Serializable serializedEvent = extras.getSerializable(AppConstants.EXTRAS_SERIALIZED_EVENT);
         String url = extras.getString(AppConstants.EXTRAS_URL);
         if (serializedEvent == null || url == null) {
             return Pair.create(intent, -1);
