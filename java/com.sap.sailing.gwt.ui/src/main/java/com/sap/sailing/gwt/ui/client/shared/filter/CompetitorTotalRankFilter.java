@@ -3,28 +3,27 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.filter.Filter;
-import com.sap.sailing.domain.common.filter.FilterOperators;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.filter.BinaryOperator;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.ValueFilterWithUI;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
-public class CompetitorTotalRankFilter extends AbstractCompetitorInLeaderboardFilter<Integer> { 
+public class CompetitorTotalRankFilter extends AbstractCompetitorNumberFilterWithUI<Integer> { 
     public static final String FILTER_NAME = "CompetitorTotalRankFilter";
 
     private IntegerBox valueInputWidget;
     private ListBox operatorSelectionWidget;
 
     public CompetitorTotalRankFilter() {
-        super(FilterOperators.LessThanEquals);
+        super(BinaryOperator.Operators.LessThanEquals);
         
-        supportedOperators.add(FilterOperators.LessThanEquals);
-        supportedOperators.add(FilterOperators.GreaterThanEquals);
-        supportedOperators.add(FilterOperators.LessThan);
-        supportedOperators.add(FilterOperators.GreaterThan);
-        supportedOperators.add(FilterOperators.NotEqualTo);
-        supportedOperators.add(FilterOperators.Equals);
+        supportedOperators.add(BinaryOperator.Operators.LessThanEquals);
+        supportedOperators.add(BinaryOperator.Operators.GreaterThanEquals);
+        supportedOperators.add(BinaryOperator.Operators.LessThan);
+        supportedOperators.add(BinaryOperator.Operators.GreaterThan);
+        supportedOperators.add(BinaryOperator.Operators.NotEqualTo);
+        supportedOperators.add(BinaryOperator.Operators.Equals);
     }
 
     public Class<Integer> getValueType() {
@@ -35,34 +34,9 @@ public class CompetitorTotalRankFilter extends AbstractCompetitorInLeaderboardFi
     public boolean matches(CompetitorDTO competitorDTO) {
         boolean result = false;
         
-        if (filterValue > 0 && filterOperator != null && getLeaderboard() != null) {
+        if (value > 0 && operator != null && getLeaderboard() != null) {
             int totalRank = getLeaderboard().getRank(competitorDTO);
-            switch (filterOperator) {
-                case LessThanEquals:
-                    result = totalRank <= filterValue;
-                    break;
-                case Equals:
-                    result = totalRank == filterValue;
-                    break;
-                case GreaterThanEquals:
-                    result = totalRank >= filterValue;
-                    break;
-                case LessThan:
-                    result = totalRank < filterValue;
-                    break;
-                case GreaterThan:
-                    result = totalRank > filterValue;
-                    break;
-                case NotEqualTo:
-                    result = totalRank != filterValue;
-                    break;
-                case NotContains:
-                case StartsWith:
-                case Contains:
-                case EndsWith:
-                default:
-                    throw new RuntimeException("Operator " + filterOperator.name() + " is not supported."); 
-            }
+            result = operator.matchValues(value, totalRank);
         }
         
         return result;
@@ -80,7 +54,7 @@ public class CompetitorTotalRankFilter extends AbstractCompetitorInLeaderboardFi
 
     @Override
     public Widget createValueInputWidget(DataEntryDialog<?> dataEntryDialog) {
-        valueInputWidget = dataEntryDialog.createIntegerBox(filterValue, 20);
+        valueInputWidget = dataEntryDialog.createIntegerBox(value, 20);
         valueInputWidget.setFocus(true);
         return valueInputWidget;
     }
@@ -88,8 +62,8 @@ public class CompetitorTotalRankFilter extends AbstractCompetitorInLeaderboardFi
     @Override
     public String validate(StringMessages stringMessages) {
         String errorMessage = null;
-        if(filterValue != null) {
-            Integer intfilterValue = (Integer) filterValue;
+        if(value != null) {
+            Integer intfilterValue = (Integer) value;
             if(intfilterValue <= 0) {
                 errorMessage = stringMessages.numberMustBePositive();
             }
@@ -106,16 +80,19 @@ public class CompetitorTotalRankFilter extends AbstractCompetitorInLeaderboardFi
     }
 
     @Override
-    public Filter<CompetitorDTO, Integer> createFilterFromWidgets(Widget valueInputWidget, Widget operatorSelectionWidget) {
-        Filter<CompetitorDTO, Integer> result = null;
+    public ValueFilterWithUI<CompetitorDTO, Integer> createFilterFromWidgets(Widget valueInputWidget, Widget operatorSelectionWidget) {
+        ValueFilterWithUI<CompetitorDTO, Integer> result = null;
         if(valueInputWidget instanceof IntegerBox && operatorSelectionWidget instanceof ListBox) {
             result = new CompetitorTotalRankFilter();
             IntegerBox valueInputIntegerBox = (IntegerBox) valueInputWidget;
             ListBox operatorSelectionListBox = (ListBox) operatorSelectionWidget;
 
-            FilterOperators op = FilterOperators.valueOf(operatorSelectionListBox.getValue(operatorSelectionListBox.getSelectedIndex()));
+            BinaryOperator.Operators op = BinaryOperator.Operators.valueOf(operatorSelectionListBox.getValue(operatorSelectionListBox.getSelectedIndex()));
+            BinaryOperator<Integer> binaryOperator = new BinaryOperator<Integer>(op);
+            
             Integer value = valueInputIntegerBox.getValue();
-            result.setConfiguration(new Pair<FilterOperators, Integer>(op, value));
+            result.setOperator(binaryOperator);
+            result.setValue(value);
         }
         return result;
     }

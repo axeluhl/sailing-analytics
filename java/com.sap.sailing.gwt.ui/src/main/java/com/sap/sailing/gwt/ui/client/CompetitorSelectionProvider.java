@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import com.sap.sailing.domain.common.filter.Filter;
 import com.sap.sailing.domain.common.filter.FilterSet;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
@@ -59,7 +60,7 @@ public interface CompetitorSelectionProvider {
 
     void removeCompetitorSelectionChangeListener(CompetitorSelectionChangeListener listener);
     
-    public FilterSet<CompetitorDTO> getCompetitorsFilterSet();
+    public FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> getCompetitorsFilterSet();
 
-    public void setCompetitorsFilterSet(FilterSet<CompetitorDTO> competitorsFilterSet);
+    public void setCompetitorsFilterSet(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> competitorsFilterSet);
 }

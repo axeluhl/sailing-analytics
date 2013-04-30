@@ -26,14 +26,14 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.filter.BinaryOperator;
 import com.sap.sailing.domain.common.filter.Filter;
-import com.sap.sailing.domain.common.filter.FilterOperators;
 import com.sap.sailing.domain.common.filter.FilterSet;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.ValueFilterWithUI;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -52,12 +52,11 @@ import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.client.shared.filter.AbstractCompetitorInLeaderboardFilter;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorInLeaderboardFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorTotalRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsJsonDeSerializer;
-import com.sap.sailing.gwt.ui.client.shared.filter.FilterSetWithUI;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
@@ -113,7 +112,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     private MultiChartPanel competitorChart;
     
     private CheckBox competitorsFilterCheckBox;
-    private FilterSetWithUI<CompetitorDTO> lastActiveCompetitorFilterSet;
+    private FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> lastActiveCompetitorFilterSet;
     
     /**
      * The component viewer in <code>ONESCREEN</code> view mode. <code>null</code> if in <code>CASCADE</code> view mode
@@ -157,9 +156,10 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
             // create a default Top N competitors filter as default filter
             competitorsFilterSets = new CompetitorsFilterSets();
             
-            FilterSetWithUI<CompetitorDTO> topNCompetitorsFilterSet = new FilterSetWithUI<CompetitorDTO>("Top 50");
+            FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> topNCompetitorsFilterSet = new FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>>("Top 50");
             CompetitorTotalRankFilter rankFilter = new CompetitorTotalRankFilter();
-            rankFilter.setConfiguration(new Pair<FilterOperators, Integer>(FilterOperators.LessThanEquals, 50));
+            rankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
+            rankFilter.setValue(50);
             topNCompetitorsFilterSet.addFilter(rankFilter);
             competitorsFilterSets.addFilterSet(topNCompetitorsFilterSet);
             competitorsFilterSets.setActiveFilterSet(topNCompetitorsFilterSet);
@@ -169,7 +169,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         
         // in case the URL configuration contains the name of a competitors filter set we try to activate it  
         if(raceboardViewConfiguration.getActiveCompetitorsFilterSetName() != null) {
-            for(FilterSetWithUI<CompetitorDTO> filterSet: competitorsFilterSets.getFilterSets()) {
+            for(FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> filterSet: competitorsFilterSets.getFilterSets()) {
                 if(filterSet.getName().equals(raceboardViewConfiguration.getActiveCompetitorsFilterSetName())) {
                     competitorsFilterSets.setActiveFilterSet(filterSet);
                     break;
@@ -275,10 +275,10 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     }
 
     private void updateCompetitorsFilterContexts(CompetitorsFilterSets filterSets) {
-        for(FilterSet<CompetitorDTO> filterSet: filterSets.getFilterSets()) {
-            for(Filter<CompetitorDTO, ?> filter: filterSet.getFilters()) {
-               if(filter instanceof AbstractCompetitorInLeaderboardFilter) {
-                   AbstractCompetitorInLeaderboardFilter<?> competitorInLeaderboardFilter = (AbstractCompetitorInLeaderboardFilter<?>) filter; 
+        for(FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> filterSet: filterSets.getFilterSets()) {
+            for(Filter<CompetitorDTO> filter: filterSet.getFilters()) {
+               if(filter instanceof CompetitorInLeaderboardFilter) {
+                   CompetitorInLeaderboardFilter<?> competitorInLeaderboardFilter = (CompetitorInLeaderboardFilter<?>) filter; 
                    competitorInLeaderboardFilter.setContextProvider(leaderboardPanel);
                    competitorInLeaderboardFilter.setSelectedRace(selectedRaceIdentifier);
                }
@@ -288,7 +288,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
 
     private void updateCompetitorsFilterControlState(CompetitorsFilterSets filterSets) {
         String competitorsFilterTitle = stringMessages.competitorsFilter();
-        FilterSetWithUI<CompetitorDTO> activeFilterSet = filterSets.getActiveFilterSet();
+        FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> activeFilterSet = filterSets.getActiveFilterSet();
         if(activeFilterSet != null) {
             lastActiveCompetitorFilterSet = activeFilterSet;
         } else {

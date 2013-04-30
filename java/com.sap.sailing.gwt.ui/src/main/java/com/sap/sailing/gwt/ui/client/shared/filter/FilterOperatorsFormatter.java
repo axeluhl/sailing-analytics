@@ -1,20 +1,18 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sailing.gwt.ui.client.shared.filter;
 
 import com.google.gwt.core.shared.GWT;
-import com.sap.sailing.domain.common.filter.FilterOperators;
+import com.sap.sailing.domain.common.filter.BinaryOperator;
+import com.sap.sailing.domain.common.filter.TextOperator;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class FilterOperatorsFormatter {
     
     private FilterOperatorsFormatter() { }
         
     private static final StringMessages stringMessages = GWT.create(StringMessages.class);
-        
-    public static String format(FilterOperators operator) {
+
+    public static String format(BinaryOperator.Operators operator) {
         switch (operator) {
-        case Contains:
-            return stringMessages.operatorContains();
-        case EndsWith:
-            return stringMessages.operatorEndsWith();
         case Equals:
             return stringMessages.operatorEquals();
         case GreaterThan:
@@ -25,6 +23,20 @@ public class FilterOperatorsFormatter {
             return stringMessages.operatorLessThan();
         case LessThanEquals:
             return stringMessages.operatorLessThanEquals();
+        case NotEqualTo:
+            return stringMessages.operatorNotEqualTo();
+        }
+        return null;
+    }
+
+    public static String format(TextOperator.Operators operator) {
+        switch (operator) {
+        case Contains:
+            return stringMessages.operatorContains();
+        case EndsWith:
+            return stringMessages.operatorEndsWith();
+        case Equals:
+            return stringMessages.operatorEquals();
         case NotContains:
             return stringMessages.operatorNotContains();
         case NotEqualTo:

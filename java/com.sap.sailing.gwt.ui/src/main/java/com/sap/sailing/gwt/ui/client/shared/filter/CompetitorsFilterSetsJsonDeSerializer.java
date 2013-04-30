@@ -5,10 +5,8 @@ import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
-import com.sap.sailing.domain.common.filter.Filter;
-import com.sap.sailing.domain.common.filter.FilterOperators;
 import com.sap.sailing.domain.common.filter.FilterSet;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.client.ValueFilterWithUI;
 import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
@@ -31,7 +29,7 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
         result.put(FIELD_FILTERSETS, filterSetArray);
         
         int i = 0;
-        for(FilterSet<CompetitorDTO> filterSet: filterSets.getFilterSets()) {
+        for(FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> filterSet: filterSets.getFilterSets()) {
             JSONObject filterSetObject = new JSONObject();
             filterSetArray.set(i++, filterSetObject);
 
@@ -40,13 +38,13 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
             JSONArray filterArray = new JSONArray();
             filterSetObject.put(FIELD_FILTERS, filterArray);
             int j = 0;
-            for(Filter<CompetitorDTO, ?> filter: filterSet.getFilters()) {
+            for(ValueFilterWithUI<CompetitorDTO, ?> filter: filterSet.getFilters()) {
                 JSONObject filterObject = new JSONObject();
                 filterArray.set(j++, filterObject);
 
                 filterObject.put(FIELD_FILTER_NAME, new JSONString(filter.getName()));
-                filterObject.put(FIELD_FILTER_OPERATOR, new JSONString(filter.getConfiguration().getA().name()));
-                filterObject.put(FIELD_FILTER_VALUE, new JSONString(filter.getConfiguration().getB().toString()));
+                filterObject.put(FIELD_FILTER_OPERATOR, new JSONString(filter.getOperator().getName()));
+                filterObject.put(FIELD_FILTER_VALUE, new JSONString(filter.getValue().toString()));
             }
         }
         
@@ -74,7 +72,7 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
                 JSONObject filterSetValue = (JSONObject) filterSetsArray.get(i);
                 JSONString filterSetNameValue = (JSONString) filterSetValue.get(FIELD_FILTERSET_NAME);
                 
-                FilterSetWithUI<CompetitorDTO> filterSet = new FilterSetWithUI<CompetitorDTO>(filterSetNameValue.stringValue());
+                FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> filterSet = new FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>>(filterSetNameValue.stringValue());
                 result.addFilterSet(filterSet);
 
                 JSONArray filterArray = (JSONArray) filterSetValue.get(FIELD_FILTERS); 
@@ -84,29 +82,16 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
                     JSONString filterOperatorValue = (JSONString) filterValue.get(FIELD_FILTER_OPERATOR);
                     JSONString filterValueValue = (JSONString) filterValue.get(FIELD_FILTER_VALUE);
                     
-                    Filter<CompetitorDTO, ?> filter = CompetitorsFilterFactory.getFilter(filterNameValue.stringValue());
-                    FilterOperators op = FilterOperators.valueOf(filterOperatorValue.stringValue());
+                    ValueFilterWithUI<CompetitorDTO, ?> filter = CompetitorsFilterFactory.getFilter(filterNameValue.stringValue(), 
+                            filterOperatorValue.stringValue(), filterValueValue.stringValue());
                     if (filter != null) {
-                        if (filter.getValueType().equals(Integer.class)) {
-                            @SuppressWarnings("unchecked") // TODO see bug 1356
-                            Filter<CompetitorDTO, Integer> intFilter = (Filter<CompetitorDTO, Integer>) filter;
-                            intFilter.setConfiguration(new Pair<FilterOperators, Integer>(op, Integer
-                                    .parseInt(filterValueValue.stringValue())));
-                            filterSet.addFilter(intFilter);
-                        }
-                        if (filter.getValueType().equals(String.class)) {
-                            @SuppressWarnings("unchecked") // TODO see bug 1356
-                            Filter<CompetitorDTO, String> stringFilter = (Filter<CompetitorDTO, String>) filter;
-                            stringFilter.setConfiguration(new Pair<FilterOperators, String>(op, filterValueValue
-                                    .stringValue()));
-                            filterSet.addFilter(stringFilter);
-                        }
+                        filterSet.addFilter(filter);
                     }
                 }
             }
             // finally set the active filter set
             if(activeFilterSetName != null) {
-                for(FilterSetWithUI<CompetitorDTO> filterSet: result.getFilterSets()) {
+                for(FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> filterSet: result.getFilterSets()) {
                     if(activeFilterSetName.equals(filterSet.getName())) {
                         result.setActiveFilterSet(filterSet);
                         break;

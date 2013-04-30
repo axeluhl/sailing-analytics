@@ -5,31 +5,30 @@ import java.util.Set;
 
 /**
  * A named set of filters.
- * Each of the filters has it's own configuration.
  * @author Frank
  *
  */
-public class FilterSet<FilterObjectType> {
+public class FilterSet<FilterObjectType, T extends Filter<FilterObjectType>> {
     /** the name of the filter set */
     private String name;
 
     /** the set of all filters */
-    private final Set<Filter<FilterObjectType, ?>> filters;
+    private final Set<T> filters;
 
     public FilterSet(String name) {
         this.name = name;
-        this.filters = new LinkedHashSet<Filter<FilterObjectType, ?>>();
+        this.filters = new LinkedHashSet<T>();
     }
 
-    public boolean addFilter(Filter<FilterObjectType, ?> filter) {
+    public boolean addFilter(T filter) {
         return filters.add(filter);
     }
 
-    public boolean removeFilter(Filter<FilterObjectType, ?> filter) {
+    public boolean removeFilter(T filter) {
         return filters.remove(filter);
     }
 
-    public Set<? extends Filter<FilterObjectType, ?>> getFilters() {
+    public Set<T> getFilters() {
         return filters;
     }
     

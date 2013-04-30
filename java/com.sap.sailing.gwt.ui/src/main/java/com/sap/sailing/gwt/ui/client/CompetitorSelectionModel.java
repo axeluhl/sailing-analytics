@@ -23,13 +23,13 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     private final ColorMap<CompetitorDTO> competitorsColorMap;
     
-    private FilterSet<CompetitorDTO> competitorsFilterSet; 
+    private FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> competitorsFilterSet; 
 
     public CompetitorSelectionModel(boolean hasMultiSelection) {
         this(hasMultiSelection, null);
     }
 
-    public CompetitorSelectionModel(boolean hasMultiSelection, FilterSet<CompetitorDTO> competitorsFilterSet) {
+    public CompetitorSelectionModel(boolean hasMultiSelection, FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> competitorsFilterSet) {
         super();
         this.hasMultiSelection = hasMultiSelection;
         this.competitorsFilterSet = competitorsFilterSet;
@@ -114,7 +114,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     public Collection<CompetitorDTO> getFilteredCompetitors() {
         Set<CompetitorDTO> currentFilteredList = new LinkedHashSet<CompetitorDTO>(allCompetitors);
         if (competitorsFilterSet != null) {
-            for (Filter<CompetitorDTO, ?> filter : competitorsFilterSet.getFilters()) {
+            for (Filter<CompetitorDTO> filter : competitorsFilterSet.getFilters()) {
                 for (Iterator<CompetitorDTO> i=currentFilteredList.iterator(); i.hasNext(); ) {
                     CompetitorDTO competitorDTO = i.next();
                     if (!filter.matches(competitorDTO)) {
@@ -224,12 +224,12 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     }
 
     @Override
-    public FilterSet<CompetitorDTO> getCompetitorsFilterSet() {
+    public FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> getCompetitorsFilterSet() {
         return competitorsFilterSet;
     }
 
     @Override
-    public void setCompetitorsFilterSet(FilterSet<CompetitorDTO> competitorsFilterSet) {
+    public void setCompetitorsFilterSet(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> competitorsFilterSet) {
         this.competitorsFilterSet = competitorsFilterSet;
         for (CompetitorSelectionChangeListener listener : listeners) {
             listener.competitorsListChanged(getAllCompetitors());

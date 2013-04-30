@@ -3,23 +3,22 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.filter.Filter;
-import com.sap.sailing.domain.common.filter.FilterOperators;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.filter.TextOperator;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.ValueFilterWithUI;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
-public class CompetitorNationalityFilter extends AbstractFilterWithUI<CompetitorDTO, String> {
+public class CompetitorNationalityFilter extends AbstractCompetitorTextFilterWithUI {
     public static final String FILTER_NAME = "CompetitorNationalityFilter";
 
     public CompetitorNationalityFilter() {
-        super(FilterOperators.Equals);
+        super(TextOperator.Operators.Equals);
         
-        supportedOperators.add(FilterOperators.Equals);
-        supportedOperators.add(FilterOperators.NotEqualTo);
-        supportedOperators.add(FilterOperators.Contains);
-        supportedOperators.add(FilterOperators.NotContains);
+        supportedOperators.add(TextOperator.Operators.Equals);
+        supportedOperators.add(TextOperator.Operators.NotEqualTo);
+        supportedOperators.add(TextOperator.Operators.Contains);
+        supportedOperators.add(TextOperator.Operators.NotContains);
     }
 
     public Class<String> getValueType() {
@@ -29,35 +28,31 @@ public class CompetitorNationalityFilter extends AbstractFilterWithUI<Competitor
     @Override
     public boolean matches(CompetitorDTO competitor) {
         boolean result = false;
-        if(filterValue != null && filterOperator != null) {
-            switch (filterOperator) {
+        if(value != null && operator != null) {
+            switch (operator.getOperator()) {
             case Contains:
             case Equals:
-                if(filterValue.length() == 2 && competitor.twoLetterIsoCountryCode != null && 
-                    competitor.twoLetterIsoCountryCode.equalsIgnoreCase(filterValue)) {
+                if(value.length() == 2 && competitor.twoLetterIsoCountryCode != null && 
+                    competitor.twoLetterIsoCountryCode.equalsIgnoreCase(value)) {
                     result = true;
-                } else if(filterValue.length() == 3 && competitor.threeLetterIocCountryCode != null && 
-                        competitor.threeLetterIocCountryCode.equalsIgnoreCase(filterValue)) {
+                } else if(value.length() == 3 && competitor.threeLetterIocCountryCode != null && 
+                        competitor.threeLetterIocCountryCode.equalsIgnoreCase(value)) {
                     result = true;
                 }
                 break;
             case NotContains:
             case NotEqualTo:
-                if(filterValue.length() == 2 && competitor.twoLetterIsoCountryCode != null && 
-                    !competitor.twoLetterIsoCountryCode.equalsIgnoreCase(filterValue)) {
+                if(value.length() == 2 && competitor.twoLetterIsoCountryCode != null && 
+                    !competitor.twoLetterIsoCountryCode.equalsIgnoreCase(value)) {
                     result = true;
-                } else if(filterValue.length() == 3 && competitor.threeLetterIocCountryCode != null && 
-                        !competitor.threeLetterIocCountryCode.equalsIgnoreCase(filterValue)) {
+                } else if(value.length() == 3 && competitor.threeLetterIocCountryCode != null && 
+                        !competitor.threeLetterIocCountryCode.equalsIgnoreCase(value)) {
                     result = true;
                 }
                 break;
             case EndsWith:
-            case GreaterThan:
-            case GreaterThanEquals:
-            case LessThan:
-            case LessThanEquals:
             case StartsWith:
-                throw new RuntimeException("Operator " + filterOperator.name() + " is not supported."); 
+                throw new RuntimeException("Operator " + operator.getOperator().name() + " is not supported."); 
             }
         }
         return result;
@@ -76,25 +71,27 @@ public class CompetitorNationalityFilter extends AbstractFilterWithUI<Competitor
     @Override
     public String validate(StringMessages stringMessages) {
         String errorMessage = null;
-        if(filterValue == null) {
+        if(value == null) {
             errorMessage = stringMessages.pleaseEnterAValue();
-        } else if (filterValue.length() != 2 && filterValue.length() != 3) {
+        } else if (value.length() != 2 && value.length() != 3) {
             errorMessage = stringMessages.nationalityMustBeISOorIOCcode(); 
         }
         return errorMessage;
     }
     
     @Override
-    public Filter<CompetitorDTO, String> createFilterFromWidgets(Widget valueInputWidget, Widget operatorSelectionWidget) {
-        Filter<CompetitorDTO, String> result = null;
+    public ValueFilterWithUI<CompetitorDTO, String> createFilterFromWidgets(Widget valueInputWidget, Widget operatorSelectionWidget) {
+        ValueFilterWithUI<CompetitorDTO, String> result = null;
         if(valueInputWidget instanceof TextBox && operatorSelectionWidget instanceof ListBox) {
             result = new CompetitorNationalityFilter();
 
             TextBox valueInputWidgetTextBox = (TextBox) valueInputWidget;
             ListBox operatorSelectionListBox = (ListBox) operatorSelectionWidget;
-            FilterOperators op = FilterOperators.valueOf(operatorSelectionListBox.getValue(operatorSelectionListBox.getSelectedIndex()));
+            TextOperator.Operators op = TextOperator.Operators.valueOf(operatorSelectionListBox.getValue(operatorSelectionListBox.getSelectedIndex()));
+            TextOperator textOperator = new TextOperator(op);
             String value = valueInputWidgetTextBox.getValue();
-            result.setConfiguration(new Pair<FilterOperators, String>(op, value));
+            result.setOperator(textOperator);
+            result.setValue(value);
         }
         
         return result;
@@ -102,7 +99,7 @@ public class CompetitorNationalityFilter extends AbstractFilterWithUI<Competitor
 
     @Override
     public Widget createValueInputWidget(DataEntryDialog<?> dataEntryDialog) {
-        TextBox valueInputWidget = dataEntryDialog.createTextBox(filterValue);
+        TextBox valueInputWidget = dataEntryDialog.createTextBox(value);
         valueInputWidget.setVisibleLength(20);
         valueInputWidget.setFocus(true);
         return valueInputWidget;

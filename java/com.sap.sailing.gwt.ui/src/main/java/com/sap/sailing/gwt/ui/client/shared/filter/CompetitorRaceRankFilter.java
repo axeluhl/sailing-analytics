@@ -3,31 +3,30 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.filter.Filter;
-import com.sap.sailing.domain.common.filter.FilterOperators;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.filter.BinaryOperator;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.ValueFilterWithUI;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
-public class CompetitorRaceRankFilter extends AbstractCompetitorInLeaderboardFilter<Integer> { 
+public class CompetitorRaceRankFilter extends AbstractCompetitorNumberFilterWithUI<Integer> { 
     public static final String FILTER_NAME = "CompetitorRaceRankFilter";
 
     private IntegerBox valueInputWidget;
     private ListBox operatorSelectionWidget;
 
     public CompetitorRaceRankFilter() {
-        super(FilterOperators.LessThanEquals);
+        super(BinaryOperator.Operators.LessThanEquals);
         
-        supportedOperators.add(FilterOperators.LessThanEquals);
-        supportedOperators.add(FilterOperators.GreaterThanEquals);
-        supportedOperators.add(FilterOperators.LessThan);
-        supportedOperators.add(FilterOperators.GreaterThan);
-        supportedOperators.add(FilterOperators.NotEqualTo);
-        supportedOperators.add(FilterOperators.Equals);
+        supportedOperators.add(BinaryOperator.Operators.LessThanEquals);
+        supportedOperators.add(BinaryOperator.Operators.GreaterThanEquals);
+        supportedOperators.add(BinaryOperator.Operators.LessThan);
+        supportedOperators.add(BinaryOperator.Operators.GreaterThan);
+        supportedOperators.add(BinaryOperator.Operators.NotEqualTo);
+        supportedOperators.add(BinaryOperator.Operators.Equals);
     }
 
     public Class<Integer> getValueType() {
@@ -38,7 +37,7 @@ public class CompetitorRaceRankFilter extends AbstractCompetitorInLeaderboardFil
     public boolean matches(CompetitorDTO competitorDTO) {
         boolean result = false;
         
-        if (filterValue > 0 && filterOperator != null && getLeaderboard() != null && getSelectedRace() != null) {
+        if (value != null && operator != null && getLeaderboard() != null && getSelectedRace() != null) {
             String raceColumnName = null;
             for(RaceColumnDTO raceColumnDTO: getLeaderboard().getRaceList()) {
                 if(raceColumnDTO.containsRace(getSelectedRace())) {
@@ -51,32 +50,7 @@ public class CompetitorRaceRankFilter extends AbstractCompetitorInLeaderboardFil
                 LeaderboardEntryDTO leaderboardEntryDTO = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
                 if(leaderboardEntryDTO.rank != null) {
                     int raceRank = leaderboardEntryDTO.rank;
-                    switch (filterOperator) {
-                        case LessThanEquals:
-                            result = raceRank <= filterValue;
-                            break;
-                        case Equals:
-                            result = raceRank == filterValue;
-                            break;
-                        case GreaterThanEquals:
-                            result = raceRank >= filterValue;
-                            break;
-                        case LessThan:
-                            result = raceRank < filterValue;
-                            break;
-                        case GreaterThan:
-                            result = raceRank > filterValue;
-                            break;
-                        case NotEqualTo:
-                            result = raceRank != filterValue;
-                            break;
-                        case NotContains:
-                        case StartsWith:
-                        case Contains:
-                        case EndsWith:
-                        default:
-                            throw new RuntimeException("Operator " + filterOperator.name() + " is not supported."); 
-                    }
+                    result = operator.matchValues(value, raceRank);
                 }
             }
         }
@@ -96,7 +70,7 @@ public class CompetitorRaceRankFilter extends AbstractCompetitorInLeaderboardFil
 
     @Override
     public Widget createValueInputWidget(DataEntryDialog<?> dataEntryDialog) {
-        valueInputWidget = dataEntryDialog.createIntegerBox(filterValue, 20);
+        valueInputWidget = dataEntryDialog.createIntegerBox(value, 20);
         valueInputWidget.setFocus(true);
         return valueInputWidget;
     }
@@ -104,8 +78,8 @@ public class CompetitorRaceRankFilter extends AbstractCompetitorInLeaderboardFil
     @Override
     public String validate(StringMessages stringMessages) {
         String errorMessage = null;
-        if(filterValue != null) {
-            Integer intfilterValue = (Integer) filterValue;
+        if(value != null) {
+            Integer intfilterValue = (Integer) value;
             if(intfilterValue <= 0) {
                 errorMessage = stringMessages.numberMustBePositive();
             }
@@ -122,16 +96,19 @@ public class CompetitorRaceRankFilter extends AbstractCompetitorInLeaderboardFil
     }
 
     @Override
-    public Filter<CompetitorDTO, Integer> createFilterFromWidgets(Widget valueInputWidget, Widget operatorSelectionWidget) {
-        Filter<CompetitorDTO, Integer> result = null;
+    public ValueFilterWithUI<CompetitorDTO, Integer> createFilterFromWidgets(Widget valueInputWidget, Widget operatorSelectionWidget) {
+        ValueFilterWithUI<CompetitorDTO, Integer> result = null;
         if(valueInputWidget instanceof IntegerBox && operatorSelectionWidget instanceof ListBox) {
             result = new CompetitorRaceRankFilter();
             IntegerBox valueInputIntegerBox = (IntegerBox) valueInputWidget;
             ListBox operatorSelectionListBox = (ListBox) operatorSelectionWidget;
 
-            FilterOperators op = FilterOperators.valueOf(operatorSelectionListBox.getValue(operatorSelectionListBox.getSelectedIndex()));
+            BinaryOperator.Operators op = BinaryOperator.Operators.valueOf(operatorSelectionListBox.getValue(operatorSelectionListBox.getSelectedIndex()));
+            BinaryOperator<Integer> binaryOperator = new BinaryOperator<Integer>(op);
+            
             Integer value = valueInputIntegerBox.getValue();
-            result.setConfiguration(new Pair<FilterOperators, Integer>(op, value));
+            result.setOperator(binaryOperator);
+            result.setValue(value);
         }
         return result;
     }

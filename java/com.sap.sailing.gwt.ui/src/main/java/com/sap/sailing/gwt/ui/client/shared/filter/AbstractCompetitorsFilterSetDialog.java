@@ -16,15 +16,16 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.filter.Filter;
+import com.sap.sailing.domain.common.filter.FilterSet;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
-import com.sap.sailing.gwt.ui.client.FilterWithUI;
+import com.sap.sailing.gwt.ui.client.ValueFilterWithUI;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
-public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog<FilterSetWithUI<CompetitorDTO>> {
-    private final FilterSetWithUI<CompetitorDTO> competitorsFilterSet;
+public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog<FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>>> {
+    private final FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> competitorsFilterSet;
     private final StringMessages stringMessages;
-    private final List<FilterWithUI<CompetitorDTO, ?>> availableCompetitorsFilter;
+    private final List<ValueFilterWithUI<CompetitorDTO, ?>> availableCompetitorsFilter;
 
     private ListBox filterListBox;
     private final Button addFilterButton;
@@ -39,7 +40,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
     private final List<String> filterNames;
     private final List<Button> filterDeleteButtons;
     
-    protected static class CompetitorsFilterSetValidator implements Validator<FilterSetWithUI<CompetitorDTO>> {
+    protected static class CompetitorsFilterSetValidator implements Validator<FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>>> {
         private final StringMessages stringMessages;
         private final List<String> existingFilterSetNames;
         
@@ -50,7 +51,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         }
 
         @Override
-        public String getErrorMessage(FilterSetWithUI<CompetitorDTO> competitorsFilterSet) {
+        public String getErrorMessage(FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> competitorsFilterSet) {
             String errorMessage = null;
 
             int filterCount = competitorsFilterSet.getFilters().size();
@@ -62,7 +63,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             } else if(filterCount < 1) {
                 errorMessage = stringMessages.addAtLeastOneFilterCriteria();
             } else {
-                for(FilterWithUI<CompetitorDTO, ?> filter: competitorsFilterSet.getFilters()) {
+                for(ValueFilterWithUI<CompetitorDTO, ?> filter: competitorsFilterSet.getFilters()) {
                     errorMessage = filter.validate(stringMessages);
                     if(errorMessage != null) {
                         break;
@@ -74,8 +75,8 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         }
     }
 
-    public AbstractCompetitorsFilterSetDialog(FilterSetWithUI<CompetitorDTO> competitorsFilterSet, List<FilterWithUI<CompetitorDTO, ?>> availableCompetitorsFilter, List<String> existingFilterSetNames, 
-            String dialogTitle, StringMessages stringMessages, DialogCallback<FilterSetWithUI<CompetitorDTO>> callback) {
+    public AbstractCompetitorsFilterSetDialog(FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> competitorsFilterSet, List<ValueFilterWithUI<CompetitorDTO, ?>> availableCompetitorsFilter, List<String> existingFilterSetNames, 
+            String dialogTitle, StringMessages stringMessages, DialogCallback<FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>>> callback) {
         super(dialogTitle, null, stringMessages.ok(), stringMessages.cancel(),
                 new CompetitorsFilterSetValidator(existingFilterSetNames, stringMessages), callback);
         this.competitorsFilterSet = competitorsFilterSet;
@@ -111,7 +112,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         });
 
         filterListBox.addItem(stringMessages.selectAFilterCriteria() + "...");
-        for(FilterWithUI<CompetitorDTO,?> filter: availableCompetitorsFilter) {
+        for(ValueFilterWithUI<CompetitorDTO,?> filter: availableCompetitorsFilter) {
             filterListBox.addItem(filter.getLocalizedName(stringMessages));
         }
         updateSelectedFilterInfo();
@@ -119,7 +120,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         addFilterButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                FilterWithUI<CompetitorDTO,?> selectedFilter = getSelectedFilter();
+                ValueFilterWithUI<CompetitorDTO,?> selectedFilter = getSelectedFilter();
                 if(selectedFilter != null) {
                     createFilterNameAndLabel(selectedFilter);
                     createFilterOperatorSelectionWidget(selectedFilter);
@@ -133,7 +134,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
        
         mainPanel.add(competitorsFiltersGrid);
         
-        for(FilterWithUI<CompetitorDTO, ?> filter: competitorsFilterSet.getFilters()) {
+        for(ValueFilterWithUI<CompetitorDTO, ?> filter: competitorsFilterSet.getFilters()) {
             createFilterNameAndLabel(filter);
             createFilterOperatorSelectionWidget(filter);
             createFilterValueInputWidget(filter);
@@ -151,26 +152,26 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         return mainPanel;
     }
 
-    private Label createFilterNameAndLabel(FilterWithUI<CompetitorDTO,?> filter) {
+    private Label createFilterNameAndLabel(ValueFilterWithUI<CompetitorDTO,?> filter) {
         Label filterNameLabel = new Label(filter.getLocalizedName(stringMessages) + ":"); 
         filterNameLabels.add(filterNameLabel);
         filterNames.add(filter.getName());
         return filterNameLabel; 
     }
 
-    private Widget createFilterOperatorSelectionWidget(FilterWithUI<CompetitorDTO,?> filter) {
+    private Widget createFilterOperatorSelectionWidget(ValueFilterWithUI<CompetitorDTO,?> filter) {
         Widget filterOperatorSelectionWidget = filter.createOperatorSelectionWidget(this);
         filterOperatorSelectionWidgets.add(filterOperatorSelectionWidget);
         return filterOperatorSelectionWidget;
     }
 
-    private Widget createFilterValueInputWidget(FilterWithUI<CompetitorDTO,?> filter) {
+    private Widget createFilterValueInputWidget(ValueFilterWithUI<CompetitorDTO,?> filter) {
         Widget filterValueWidget = filter.createValueInputWidget(this);
         filterValueInputWidgets.add(filterValueWidget);
         return filterValueWidget; 
     }
 
-    private Button createFilterDeleteButton(FilterWithUI<CompetitorDTO,?> filter) {
+    private Button createFilterDeleteButton(ValueFilterWithUI<CompetitorDTO,?> filter) {
         final Button filterDeleteBtn = new Button(stringMessages.delete()); 
         filterDeleteBtn.addStyleName("inlineButton");
         filterDeleteButtons.add(filterDeleteBtn);
@@ -197,7 +198,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
     }
     
     private void updateSelectedFilterInfo() {
-        Filter<CompetitorDTO,?> selectedFilter = getSelectedFilter();
+        Filter<CompetitorDTO> selectedFilter = getSelectedFilter();
         if(selectedFilter != null) {
             addFilterButton.setEnabled(true);
         } else {
@@ -206,23 +207,23 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
     }
 
     @Override
-    protected FilterSetWithUI<CompetitorDTO> getResult() {
-        FilterSetWithUI<CompetitorDTO> result = new FilterSetWithUI<CompetitorDTO>(filterSetNameTextBox.getText());
+    protected FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> getResult() {
+        FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> result = new FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>>(filterSetNameTextBox.getText());
         int filterCount = filterNameLabels.size();
         for (int i = 0; i < filterCount; i++) {
             String filterName = filterNames.get(i);
-            FilterWithUI<CompetitorDTO, ?> filter = CompetitorsFilterFactory.getFilter(filterName);
-            result.addFilter(filter.createFilterFromWidgets(filterValueInputWidgets.get(i), filterOperatorSelectionWidgets.get(i)));
+            ValueFilterWithUI<CompetitorDTO, ?> filter = CompetitorsFilterFactory.getFilter(filterName);
+            result.addFilter((ValueFilterWithUI<CompetitorDTO, ?>) filter.createFilterFromWidgets(filterValueInputWidgets.get(i), filterOperatorSelectionWidgets.get(i)));
         }
         return result;
     }
     
-    private FilterWithUI<CompetitorDTO,?> getSelectedFilter() {
-        FilterWithUI<CompetitorDTO,?> result = null;
+    private ValueFilterWithUI<CompetitorDTO,?> getSelectedFilter() {
+        ValueFilterWithUI<CompetitorDTO,?> result = null;
         int selectedIndex = filterListBox.getSelectedIndex();
         if(selectedIndex > 0) {
             String selectedItemValue = filterListBox.getValue(selectedIndex);
-            for(FilterWithUI<CompetitorDTO,?> filter: availableCompetitorsFilter) {
+            for(ValueFilterWithUI<CompetitorDTO,?> filter: availableCompetitorsFilter) {
                 if(selectedItemValue.equals(filter.getLocalizedName(stringMessages))) {
                     result = filter;
                     break;
