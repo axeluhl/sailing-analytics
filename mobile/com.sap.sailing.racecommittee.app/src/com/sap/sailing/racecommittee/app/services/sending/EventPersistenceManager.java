@@ -23,16 +23,16 @@ public class EventPersistenceManager {
     private final static String delayedEventFileName = "delayedEvents.txt";
 
     private Context context;
-    private String fileContent;
+    private List<String> persistedEvents;
 
     public EventPersistenceManager(Context context) {
         this.context = context;
-        fileContent = "";
-        initializeFile();
+        persistedEvents = new ArrayList<String>();
+        initializeFileAndPersistedEvents();
     }
 
     public boolean areIntentsDelayed() {
-        return !fileContent.isEmpty();
+        return !persistedEvents.isEmpty();
     }
 
     public void persistIntent(Intent intent) {
@@ -45,16 +45,19 @@ public class EventPersistenceManager {
     }
 
     private void persistEvent(String raceUuid, Serializable serializedEvent) {
-        String eventLine = String.format("%s;%s\n", raceUuid, serializedEvent);
+        String eventLine = getSerializedIntentForPersistence(raceUuid, serializedEvent);
         ExLog.i(TAG, String.format("Persisting event \"%s\" for race %s.", eventLine, raceUuid));
 
-        if (!fileContent.isEmpty()) {
-            if (fileContent.contains(eventLine)) {
-                ExLog.i(TAG, "The event already exists. Ignoring.");
-                return;
-            }
+        if (persistedEvents.contains(eventLine)) {
+            ExLog.i(TAG, "The event already exists. Ignoring.");
+            return;
         }
-        writeEventToFile(eventLine);
+        saveEvent(eventLine);
+    }
+
+    private String getSerializedIntentForPersistence(String raceUuid, Serializable serializedEvent) {
+        String eventLine = String.format("%s;%s", raceUuid, serializedEvent);
+        return eventLine;
     }
 
     public void removeIntent(Intent intent) {
@@ -67,57 +70,49 @@ public class EventPersistenceManager {
     }
 
     private void removeEvent(String raceUuid, String serializedEvent) {
-        if (fileContent.isEmpty())
+        if (persistedEvents.isEmpty())
             return;
 
         ExLog.i(TAG,  String.format("Removing event \"%s\" for race %s.", serializedEvent, raceUuid));
-        String eventLine = String.format("%s;%s\n", raceUuid, serializedEvent);
+        String eventLine = getSerializedIntentForPersistence(raceUuid, serializedEvent);
 
-        removeEntryInFileContent(eventLine);
-
+        removePersistedEvent(eventLine);
     }
 
     /**
      * @param eventLine
      */
-    private void removeEntryInFileContent(String eventLine) {
-        if (fileContent.contains(eventLine)) {
-            fileContent = fileContent.replace(eventLine, "");
-            writeFileContentToFile();
+    private void removePersistedEvent(String eventLine) {
+        if (persistedEvents.contains(eventLine)) {
+            persistedEvents.remove(eventLine);
+            writePersistedEventsToFile();
             ExLog.i(TAG, "Event removed.");
         }
     }
 
     public int getEventCount() {
-        if (fileContent.isEmpty()) {
-            return 0;
-        }
-        return fileContent.split("\n").length;
+        return persistedEvents.size();
     }
 
     public List<Intent> restoreEvents() {
         List<Intent> delayedIntents = new ArrayList<Intent>();
-      //These file entries may be too old. No appropriate race id has been found for this event.
-        List<String> fileEntriesToBeRemoved = new ArrayList<String>(); 
+        //These file entries may be too old. No appropriate race id has been found for this event.
+        List<String> entriesToBeRemoved = new ArrayList<String>(); 
 
-        if (!fileContent.isEmpty()) {
-            String[] eventLines = fileContent.split("\n");
-            for (String line : eventLines) {
-                if (!line.isEmpty()) {
-                    String[] lineParts = line.split(";");
+        for (String persistedEvent : persistedEvents) {
 
-                    Intent eventIntent = EventSendingService.createEventIntent(context, lineParts[0], lineParts[1]);
-                    if (eventIntent != null) {
-                        delayedIntents.add(eventIntent);
-                    } else {
-                        fileEntriesToBeRemoved.add(line);
-                    }
-                }
+            String[] lineParts = persistedEvent.split(";");
+
+            Intent eventIntent = EventSendingService.createEventIntent(context, lineParts[0], lineParts[1]);
+            if (eventIntent != null) {
+                delayedIntents.add(eventIntent);
+            } else {
+                entriesToBeRemoved.add(persistedEvent);
             }
         }
-        
-        for (String lineToBeRemoved : fileEntriesToBeRemoved) {
-            removeEntryInFileContent(lineToBeRemoved);
+
+        for (String entryToBeRemoved : entriesToBeRemoved) {
+            removePersistedEvent(entryToBeRemoved);
         }
 
         ExLog.i(TAG, "Restored " + delayedIntents.size() + " events");
@@ -142,30 +137,40 @@ public class EventPersistenceManager {
         return fileContent;
     }
 
-    private void writeEventToFile(String eventLine) {
-        fileContent += eventLine;
-        writeFileContentToFile();
+    private void saveEvent(String eventLine) {
+        persistedEvents.add(eventLine);
+        writePersistedEventsToFile();
         ExLog.i(TAG, "Wrote event to file: " + eventLine);
     }
 
-    private void writeFileContentToFile() {
-        writeToFile(fileContent, Context.MODE_PRIVATE);
-        ExLog.i(TAG, "Wrote file content to file: " + fileContent);
+    private void writePersistedEventsToFile() {
+        String newFileContent = "";
+        for (String persistedEvent : persistedEvents) {
+            newFileContent += persistedEvent + "\n";
+        }
+        writeToFile(newFileContent, Context.MODE_PRIVATE);
+        ExLog.i(TAG, "Wrote file content to file: " + newFileContent);
     }
 
-    private void initializeFile() {
+    private void initializeFileAndPersistedEvents() {
         try {
-            fileContent = getFileContent();
+            String fileContent = getFileContent();
+            String[] eventLines = fileContent.split("\n");
+            for (String eventLine : eventLines) {
+                if (!eventLine.isEmpty()) {
+                    persistedEvents.add(eventLine);
+                }
+            }
         } catch (FileNotFoundException e) {
             ExLog.w(TAG, "persistence file not found in internal storage. The file will be created.");
-            clearFileContent();
+            clearPersistedEvents();
         }
         ExLog.i(TAG, "Initialized file");
     }
 
-    private void clearFileContent() {
-        fileContent = "";
-        writeFileContentToFile();
+    private void clearPersistedEvents() {
+        persistedEvents.clear();
+        writePersistedEventsToFile();
     }
 
     private void writeToFile(String content, int mode) {
