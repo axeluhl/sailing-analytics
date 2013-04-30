@@ -65,6 +65,7 @@ public class MediaSynchControl {
         });
 
         lockToggle = new CheckBox("Locked");
+        lockToggle.addStyleName("raceBoardNavigation-standaloneElement");
         lockToggle
                 .setTitle("Uncheck to decouple video from race. Use video controls to adjust video/race synchronization. Re-check when finished.");
         lockToggle.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
