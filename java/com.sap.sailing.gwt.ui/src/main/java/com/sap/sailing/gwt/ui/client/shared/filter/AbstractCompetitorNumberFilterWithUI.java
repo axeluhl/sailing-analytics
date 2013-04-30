@@ -51,7 +51,7 @@ public abstract class AbstractCompetitorNumberFilterWithUI<T extends Number> ext
         int i = 0;
         for(BinaryOperator.Operators op: supportedOperators) {
             operatorsListBox.addItem(FilterOperatorsFormatter.format(op), op.name());
-            if(operator != null && operator.equals(op)) {
+            if(operator != null && operator.getName().equals(op.name())) {
                 operatorsListBox.setSelectedIndex(i);
             } else if (defaultOperator != null && defaultOperator.equals(op)) {
                 operatorsListBox.setSelectedIndex(i);
