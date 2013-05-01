@@ -80,7 +80,7 @@ public class PassAwareRaceLogImpl extends RaceLogImpl implements PassAwareRaceLo
             unlockAfterWrite();
         }
         if (isAdded) {
-            logger.info(String.format("%s (%s) was added to log.", event, event.getClass().getName()));
+            logger.finer(String.format("%s (%s) was added to log.", event, event.getClass().getName()));
             setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
             notifyListenersAboutReceive(event);
         } else {

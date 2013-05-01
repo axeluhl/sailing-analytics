@@ -43,7 +43,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             unlockAfterWrite();
         }
         if (isAdded) {
-            logger.info(String.format("%s (%s) was added to log.", event, event.getClass().getName()));
+            logger.finer(String.format("%s (%s) was added to log.", event, event.getClass().getName()));
             notifyListenersAboutReceive(event);
         } else {
             logger.warning(String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
