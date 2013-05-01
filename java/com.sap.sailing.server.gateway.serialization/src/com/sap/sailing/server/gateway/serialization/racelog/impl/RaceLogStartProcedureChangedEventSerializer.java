@@ -25,7 +25,7 @@ public class RaceLogStartProcedureChangedEventSerializer extends BaseRaceLogEven
     public JSONObject serialize(RaceLogEvent object) {
         RaceLogStartProcedureChangedEvent event = (RaceLogStartProcedureChangedEvent) object;
         JSONObject result = super.serialize(event);
-        result.put(FIELD_START_PROCEDURE_TYPE, event.getStartProcedureType().toString());
+        result.put(FIELD_START_PROCEDURE_TYPE, event.getStartProcedureType().name());
         return result;
     }
 

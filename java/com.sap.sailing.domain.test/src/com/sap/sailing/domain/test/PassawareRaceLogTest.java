@@ -29,7 +29,7 @@ public class PassawareRaceLogTest {
         RaceLogFlagEvent rcEvent1 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, UUID.randomUUID(), new ArrayList<Competitor>(), passId, Flags.CLASS, Flags.NONE, false);
         RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, UUID.randomUUID(), new ArrayList<Competitor>(), ++passId, Flags.CLASS, Flags.NONE, false);
         
-        RaceLog passAwareRaceLog = new PassAwareRaceLogImpl(raceLog);
+        RaceLog passAwareRaceLog = PassAwareRaceLogImpl.copy(raceLog);
         
         passAwareRaceLog.add(rcEvent1);
         passAwareRaceLog.add(rcEvent2);

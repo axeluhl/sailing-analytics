@@ -122,7 +122,7 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
     private void showPathFinderDialog() {
         FragmentManager fragmentManager = getFragmentManager();
         RaceDialogFragment fragment = new RaceChoosePathFinderDialog();
-        Bundle args = getParameterBundle();
+        Bundle args = getRecentArguments();
         fragment.setArguments(args);
         fragment.show(fragmentManager, null);
     }
@@ -130,7 +130,7 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
     private void showLineOpeningTimeDialog() {
         FragmentManager fragmentManager = getFragmentManager();
         RaceDialogFragment fragment = new RaceChooseLineOpeningTimeDialog();
-        Bundle args = getParameterBundle();
+        Bundle args = getRecentArguments();
         fragment.setArguments(args);
         fragment.show(fragmentManager, null);
     }
@@ -204,7 +204,7 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
 
         RaceDialogFragment fragment = new AbortModeSelectionDialog();
 
-        Bundle args = getParameterBundle();
+        Bundle args = getRecentArguments();
         args.putString(AppConstants.FLAG_KEY, Flags.AP.name());
         fragment.setArguments(args);
 

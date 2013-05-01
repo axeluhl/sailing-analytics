@@ -53,6 +53,7 @@ MAVEN_SETTINGS_PROXY=$PROJECT_HOME/configuration/maven-settings-proxy.xml
 
 p2PluginRepository=$PROJECT_HOME/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
 
+HAS_OVERWRITTEN_TARGET=0
 TARGET_SERVER_NAME=$active_branch
 
 gwtcompile=1
@@ -104,7 +105,8 @@ do
         m) MAVEN_SETTINGS=$OPTARG;;
         n) OSGI_BUNDLE_NAME=$OPTARG;;
         l) OSGI_TELNET_PORT=$OPTARG;;
-        s) TARGET_SERVER_NAME=$OPTARG;; 
+        s) TARGET_SERVER_NAME=$OPTARG
+           HAS_OVERWRITTEN_TARGET=1;;
         \?) echo "Invalid option"
             exit 2;;
     esac
@@ -331,27 +333,28 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     rm -rf $ACDIR/org.eclipse.*
     rm -rf $ACDIR/configuration/org.eclipse.*
 
-    rm -rf $ACDIR/start
-    rm -rf $ACDIR/stop
+    if [[ i$HAS_OVERWRITTEN_TARGET -eq 0 ]]; then
+        rm -rf $ACDIR/start
+        rm -rf $ACDIR/stop
 
-    cp -v $p2PluginRepository/configuration/config.ini configuration/
+        cp -v $p2PluginRepository/configuration/config.ini configuration/
+        mkdir -p configuration/jetty/etc
+        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
+        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
+        cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
+        cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
+        cp -v $PROJECT_HOME/java/target/start $ACDIR/
+        cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+    fi
+
     cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
     cp -v $p2PluginRepository/plugins/*.jar plugins/
 
-    mkdir -p configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
-
-    # Make sure mongodb configuration is active
-    cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
     cp -rv $PROJECT_HOME/configuration/native-libraries $ACDIR/
 
     # Make sure this script is up2date at least for the next run
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
-    cp -v $PROJECT_HOME/java/target/start $ACDIR/
-    cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
 
     echo "Installation complete. You may now start the server using ./start"
