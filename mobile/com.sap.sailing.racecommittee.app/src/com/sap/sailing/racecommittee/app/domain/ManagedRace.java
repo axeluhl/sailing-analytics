@@ -41,7 +41,6 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
          */
         public CourseBase getCourseDesign();
         
-        
         /**
          * returns the list of competitors for this race
          * @return list of competitors

@@ -8,11 +8,12 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureRaceStateChangedListener;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureListener;
 
-public interface RaceState extends StartProcedureRaceStateChangedListener {
+public interface RaceState extends StartProcedureListener {
 
     /**
      * Register a new listener on state changes.
@@ -34,6 +35,16 @@ public interface RaceState extends StartProcedureRaceStateChangedListener {
      * @return the log of the race.
      */
     RaceLog getRaceLog();
+    
+    /**
+     * @return the active or default start procedure type.
+     */
+    StartProcedureType getStartProcedureType();
+    
+    /**
+     * @return the start procedure of the race
+     */
+    StartProcedure getStartProcedure();
 
     /**
      * Gets the current race's start time.
@@ -76,7 +87,7 @@ public interface RaceState extends StartProcedureRaceStateChangedListener {
      * @param newStartTime
      *            to be set.
      */
-    void setStartTime(TimePoint newStartTime);
+    void setStartTime(TimePoint newStartTime, StartProcedureType startProcedureType);
     
     /**
      * Sets the current race's course design
@@ -109,11 +120,6 @@ public interface RaceState extends StartProcedureRaceStateChangedListener {
      * @return the status of the race.
      */
     RaceLogRaceStatus getStatus();
-    
-    /**
-     * @return the start procedure of the race
-     */
-    StartProcedure getStartProcedure();
 
     /**
      * @return the timepoint at which the individual recall was displayed or null when the individual recall is already removed

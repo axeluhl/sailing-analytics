@@ -10,32 +10,30 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartProcedure;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.impl.RaceStateImpl;
 
 public class ManagedRaceImpl implements ManagedRace {
     private static final long serialVersionUID = -4936566684992524001L;
 
-    //private static final String TAG = ManagedRace.class.getName();
+    // private static final String TAG = ManagedRace.class.getName();
 
-    private ManagedRaceIdentifier identifier;	
+    private ManagedRaceIdentifier identifier;
     private RaceState state;
     private Collection<Competitor> competitors;
     private CourseBase courseOnServer;
 
-    public ManagedRaceImpl(ManagedRaceIdentifier identifier, PassAwareRaceLog raceLog) {
-        //TODO To be changed when the start procedure for a regatta/leaderboard can be selected in the GWT Admin Console on backend side
-        this(identifier, new RaceStateImpl(raceLog, new GateStartProcedure(raceLog)));
+    public ManagedRaceImpl(ManagedRaceIdentifier identifier, StartProcedureType defaultStartProcedureType,
+            PassAwareRaceLog raceLog) {
+        this(identifier, new RaceStateImpl(defaultStartProcedureType, raceLog));
     }
 
-    public ManagedRaceImpl(
-            ManagedRaceIdentifier identifier,
-            RaceState state) {
+    public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceState state) {
         this.identifier = identifier;
         this.state = state;
         this.competitors = new ArrayList<Competitor>();
@@ -86,7 +84,7 @@ public class ManagedRaceImpl implements ManagedRace {
     public CourseBase getCourseDesign() {
         return state.getCourseDesign();
     }
-    
+
     @Override
     public Collection<Competitor> getCompetitors() {
         return competitors;

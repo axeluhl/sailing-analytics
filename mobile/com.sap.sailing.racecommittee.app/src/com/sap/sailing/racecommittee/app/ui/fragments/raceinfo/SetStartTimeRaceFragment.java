@@ -5,17 +5,23 @@ import java.util.Date;
 
 import android.app.FragmentManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -33,13 +39,14 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     }
 
     protected boolean isReset;
+    private StartProcedureType selectedStartProcedureType;
 
-    protected TimePicker startTimePicker;
-    protected Button setStartTimeButton;
-    protected TextView countdownView;
-    protected ImageButton abortRaceButton;
-
-    protected Date scheduledTime;
+    protected Spinner spinnerStartProcedure;
+    protected TimePicker pickerTime;
+    protected Button btSetDate;
+    protected Button btSetTime;
+    protected Button btPostpone;
+    protected TextView textInfoText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,100 +56,144 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         isReset = getArguments().getBoolean(AppConstants.RESET_TIME_FRAGMENT_IS_RESET);
 
-        startTimePicker = (TimePicker) getView().findViewById(R.id.timePicker);
-        setStartTimeButton = (Button) getView().findViewById(R.id.btnRescheduleTime);
-        countdownView = (TextView) getView().findViewById(R.id.time_below_picker);
-        abortRaceButton = (ImageButton) getView().findViewById(R.id.resetTimeAPButton);
+        spinnerStartProcedure = (Spinner) getView().findViewById(R.id.race_reset_time_spinner_procedure);
+        setupStartProcedureSpinner();
+        pickerTime = (TimePicker) getView().findViewById(R.id.race_reset_time_picker_time);
+        setupTimePicker();
+        btSetDate = (Button) getView().findViewById(R.id.race_reset_time_btn_date);
+        btSetTime = (Button) getView().findViewById(R.id.race_reset_time_btn_time);
+        btPostpone = (Button) getView().findViewById(R.id.race_reset_time_btn_postpone);
 
-        startTimePicker.setIs24HourView(true);
-        startTimePicker.setOnClickListener(new OnClickListener() {
+        btSetDate.setOnClickListener(new OnClickListener() {
+            @Override
             public void onClick(View view) {
-                refreshDifferenceTime();
+                Toast.makeText(getActivity(), "Not implemented yet.", Toast.LENGTH_SHORT).show();
             }
         });
-        setStartTimeButton.setText(isReset ? R.string.reset_time : R.string.set_time);
-        setStartTimeButton.setOnClickListener(new OnClickListener() {
+
+        btSetTime.setText(isReset ? R.string.reset_time : R.string.set_time);
+        btSetTime.setOnClickListener(new OnClickListener() {
+            @Override
             public void onClick(View view) {
                 setStartTime();
             }
         });
-        
-        abortRaceButton.setOnClickListener(new OnClickListener() {
 
+        btPostpone.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 ExLog.i(ExLog.RACE_SET_TIME_BUTTON_AP, getRace().getId().toString(), getActivity());
                 showAPModeDialog();
             }
-            
         });
 
-        // / TODO: click-listener for abort button
-
-        refreshTimePickerTime();
+        textInfoText = (TextView) getView().findViewById(R.id.race_reset_time_text_infotext);
     }
-    
+
+    private void setupTimePicker() {
+        pickerTime.setIs24HourView(true);
+
+        // In 10 minutes from now, but always a 5-minute-mark.
+        Calendar now = Calendar.getInstance();
+        now.add(Calendar.MINUTE, 10);
+        int hours = now.get(Calendar.HOUR_OF_DAY);
+        int minutes = now.get(Calendar.MINUTE);
+        minutes = (int) (Math.ceil((minutes / 5.0)) * 5.0);
+        if (minutes >= 60) {
+            hours++;
+        }
+
+        pickerTime.setCurrentHour(hours);
+        pickerTime.setCurrentMinute(minutes);
+    }
+
+    private void setupStartProcedureSpinner() {
+        ArrayAdapter<StartProcedureType> adapter = new ArrayAdapter<StartProcedureType>(getActivity(),
+                android.R.layout.simple_spinner_dropdown_item, StartProcedureType.values());
+        spinnerStartProcedure.setAdapter(adapter);
+        spinnerStartProcedure.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                selectedStartProcedureType = (StartProcedureType) adapterView.getItemAtPosition(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
+        StartProcedureType type = StartProcedureType.ESS;
+        boolean overrideStartProcedureType = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(
+                "overrideDefaultStartProcedureType", false);
+        if (overrideStartProcedureType) {
+            type = StartProcedureType.valueOf(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(
+                    "defaultStartProcedureType", StartProcedureType.ESS.name()));
+        } else {
+            type = getRace().getState().getStartProcedureType();
+        }
+        spinnerStartProcedure.setSelection(adapter.getPosition(type));
+    }
+
     @Override
     public void onStart() {
         super.onStart();
-        ExLog.w(SetStartTimeRaceFragment.class.getName(), String.format("Fragment %s is now shown", SetStartTimeRaceFragment.class.getName()));
+        ExLog.i(SetStartTimeRaceFragment.class.getName(),
+                String.format("Fragment %s is now shown", SetStartTimeRaceFragment.class.getName()));
     }
 
+    @Override
     public void notifyTick() {
-        refreshDifferenceTime();
+        super.notifyTick();
+
+        textInfoText.setText(String.format("Start %s", getTimeStringToStart()));
     }
 
-    private void refreshTimePickerTime() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, AppConstants.DefaultStartTimeMinuteOffset);
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
-        startTimePicker.setCurrentHour(hour);
-        startTimePicker.setCurrentMinute(minute);
-        refreshDifferenceTime();
+    private Date getStartTime() {
+        Calendar newStartTimeCal = Calendar.getInstance();
+        // newStartTimeCal.set(Calendar.YEAR, 0);
+        // newStartTimeCal.set(Calendar.MONTH, 0);
+        // newStartTimeCal.set(Calendar.DAY_OF_MONTH, 0);
+        newStartTimeCal.set(Calendar.HOUR_OF_DAY, pickerTime.getCurrentHour());
+        newStartTimeCal.set(Calendar.MINUTE, pickerTime.getCurrentMinute());
+        newStartTimeCal.set(Calendar.SECOND, 0);
+        newStartTimeCal.set(Calendar.MILLISECOND, 0);
+        Date newStartTime = newStartTimeCal.getTime();
+        return newStartTime;
     }
 
-    private void refreshDifferenceTime() {
-        // This method might be called by the ticker before initialization happens...
-        if (startTimePicker == null || countdownView == null) {
-            return;
+    private String getTimeStringToStart() {
+        Date startTime = getStartTime();
+        Date now = new Date();
+
+        long differenceInSeconds = (startTime.getTime() - now.getTime()) / 1000;
+        boolean isInPast = Math.signum(differenceInSeconds) < 0;
+        if (isInPast) {
+            differenceInSeconds = Math.abs(differenceInSeconds);
         }
 
-        // / TODO: Why is this method synchronized?
-        synchronized (this) {
-            int hourOfDay = startTimePicker.getCurrentHour();
-            int minute = startTimePicker.getCurrentMinute();
+        long diff[] = new long[] { 0, 0, 0, 0 };
+        /* sec */diff[3] = (differenceInSeconds >= 60 ? differenceInSeconds % 60 : differenceInSeconds);
+        /* min */diff[2] = (differenceInSeconds = (differenceInSeconds / 60)) >= 60 ? differenceInSeconds % 60
+                : differenceInSeconds;
+        /* hours */diff[1] = (differenceInSeconds = (differenceInSeconds / 60)) >= 24 ? differenceInSeconds % 24
+                : differenceInSeconds;
+        /* days */diff[0] = (differenceInSeconds = (differenceInSeconds / 24));
 
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(System.currentTimeMillis());
-            Date nowDate = calendar.getTime();
-
-            Date pickedDate = (Date) nowDate.clone();
-            pickedDate.setHours(hourOfDay);
-            pickedDate.setMinutes(minute);
-            pickedDate.setSeconds(0);
-
-            long nowTime = nowDate.getTime();
-            long pickedTime = pickedDate.getTime();
-            long diffTime = pickedTime - nowTime;
-            if (diffTime >= 0 && diffTime > 12 * 60 * 60 * 1000) {
-                diffTime -= (24 * 60 * 60 * 1000);
-            } else if (diffTime < 0 && diffTime < -(12 * 60 * 60 * 1000)) {
-                diffTime += (24 * 60 * 60 * 1000);
-            }
-
-            long diffHours = diffTime / 1000 / 60 / 60;
-            long diffMins = (diffTime / 1000 / 60) % 60;
-            long diffSecs = (diffTime / 1000) % 60;
-
-            String minusInd = (diffHours < 0 || diffMins < 0 || diffSecs < 0 ? "-" : "");
-
-            countdownView.setText(getString(R.string.time_until_start) + ": " + minusInd + Math.abs(diffHours) + "h "
-                    + Math.abs(diffMins) + "min " + Math.abs(diffSecs) + "sec");
+        String timeText = "";
+        if (diff[0] > 0) {
+            timeText += String.format("%d day%s, ", diff[0], diff[0] > 1 ? "s" : "");
         }
+        if (diff[1] > 0) {
+            timeText += String.format("%d hours%s, ", diff[1], diff[1] > 1 ? "s" : "");
+        }
+        if (diff[2] > 0) {
+            timeText += String.format("%d minute%s, ", diff[2], diff[2] > 1 ? "s" : "");
+        }
+        timeText += String.format("%d second%s", diff[3], diff[3] > 1 ? "s" : "");
+
+        return isInPast ? String.format("%s %s", timeText, "ago") : String.format("%s %s", "in", timeText);
     }
 
     protected void setStartTime() {
@@ -151,20 +202,13 @@ public class SetStartTimeRaceFragment extends RaceFragment {
         } else {
             ExLog.i(ExLog.RACE_SET_TIME, getRace().getId().toString(), getActivity());
         }
-
-        Calendar newStartTime = Calendar.getInstance();
-        newStartTime.set(Calendar.HOUR_OF_DAY, startTimePicker.getCurrentHour());
-        newStartTime.set(Calendar.MINUTE, startTimePicker.getCurrentMinute());
-        newStartTime.set(Calendar.SECOND, 0);
-        newStartTime.set(Calendar.MILLISECOND, 0);
-
-        setStartTime(newStartTime.getTime());
+        setStartTime(getStartTime());
 
         // TODO: start course designer activity!
     }
 
     private void setStartTime(Date newStartTime) {
-        getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime));
+        getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime), selectedStartProcedureType);
     }
 
     protected void showAPModeDialog() {
@@ -172,7 +216,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
 
         RaceDialogFragment fragment = new AbortModeSelectionDialog();
 
-        Bundle args = getParameterBundle();
+        Bundle args = getRecentArguments();
         args.putString(AppConstants.FLAG_KEY, Flags.AP.name());
         fragment.setArguments(args);
 
