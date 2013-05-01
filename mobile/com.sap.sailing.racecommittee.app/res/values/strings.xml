@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="settings_advanced_service_default">http://localhost:8888</string>
+	<string name="settings_advanced_service_default">http://192.168.56.1:8888</string>
 	
     <string name="intentActionRegisterRace">com.sap.sailing.racecommittee.app.action.registerRace</string>
     <!-- <string name="intentActionSaveIntent">com.sap.sailing.racecommittee.app.action.saveIntent</string> -->
