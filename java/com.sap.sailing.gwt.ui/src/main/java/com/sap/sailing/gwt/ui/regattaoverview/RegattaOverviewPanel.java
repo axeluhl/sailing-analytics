@@ -8,8 +8,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -47,9 +49,19 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
     private final Label eventNameLabel;
     private final Label venueNameLabel;
     private final Label timeLabel;
+    private final Button refreshNowButton;
     private final Button startStopUpdatingButton;
     
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
+    
+    private static final String STYLE_NAME_PREFIX = "RegattaOverview-";
+    private static final String STYLE_REFRESH_STOP_TIME = STYLE_NAME_PREFIX + "RefreshStopTime";
+    private static final String STYLE_FUNCTION_BAR = STYLE_NAME_PREFIX + "functionBar";
+    private static final String STYLE_CONTENT_WRAPPER = STYLE_NAME_PREFIX + "contentWrapper";
+    private static final String STYLE_TITLE_LABEL = STYLE_NAME_PREFIX + "TitleLabel";
+    private static final String STYLE_EVENT_LABEL = STYLE_NAME_PREFIX + "EventLabel";
+    private static final String STYLE_VENUE_LABEL = STYLE_NAME_PREFIX + "VenueLabel";
+    private static final String STYLE_CLOCK_LABEL = STYLE_NAME_PREFIX + "ClockLabel";
     
     public RegattaOverviewPanel(SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages, String eventIdAsString) {
         this.sailingService = sailingService;
@@ -60,27 +72,39 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
+        mainPanel.addStyleName(STYLE_CONTENT_WRAPPER);
         
-        eventNameLabel = new Label();
-        venueNameLabel = new Label();
+        Grid grid = new Grid(2, 2);
+        grid.setWidth("100%");
         
-        timeLabel = new Label();
+        Label courseDesignOverviewLabel = new Label("Course design overview");
+        courseDesignOverviewLabel.addStyleName(STYLE_TITLE_LABEL);
         
-        Grid grid = new Grid(1, 2);
+        Label raceOverviewLabel = new Label("Area overview");
+        raceOverviewLabel.addStyleName(STYLE_TITLE_LABEL);
+        
+        grid.setWidget(0, 0, courseDesignOverviewLabel);
+        grid.setWidget(0, 1, raceOverviewLabel);
         
         raceSelectionProvider = new RegattaOverviewRaceSelectionModel(false);
         raceSelectionProvider.addRegattaOverviewRaceSelectionChangeListener(this);
         
-        regattaOverviewTableComposite = new RegattaOverviewTableComposite(sailingService, errorReporter, stringMessages, eventIdAsString, raceSelectionProvider);
-        
         raceCourseDesignDetailsComposite = new CourseDesignTableComposite(sailingService, errorReporter, stringMessages);
-        grid.setWidget(0, 0, raceCourseDesignDetailsComposite);
+        grid.setWidget(1, 0, raceCourseDesignDetailsComposite);
         
-        grid.setWidget(0, 1, regattaOverviewTableComposite);
+        
+        regattaOverviewTableComposite = new RegattaOverviewTableComposite(sailingService, errorReporter, stringMessages, eventIdAsString, raceSelectionProvider);
+        grid.setWidget(1, 1, regattaOverviewTableComposite);
+        
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
+        grid.getRowFormatter().setVerticalAlign(1, HasVerticalAlignment.ALIGN_TOP);
+        grid.getColumnFormatter().setWidth(0, "20%");
+        grid.getColumnFormatter().setWidth(1, "80%");
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
+        grid.getColumnFormatter().getElement(1).getStyle().setPaddingLeft(20.0, Unit.PX);
         
-        Button refreshNowButton = new Button(stringMessages.refreshNow());
+        
+        this.refreshNowButton = new Button(stringMessages.refreshNow());
         refreshNowButton.addClickHandler(new ClickHandler() {
 
             @Override
@@ -105,6 +129,7 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
             }
             
         });
+        this.startStopUpdatingButton.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
         
         this.serverUpdateTimer = new Timer(PlayModes.Live, serverUpdateRate);
         this.serverUpdateTimer.addTimeListener(new TimeListener() {
@@ -126,19 +151,51 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         });
         this.uiUpdateTimer.play();
         
-        Grid gridTimeRefreshStop = new Grid(1, 4);
-        gridTimeRefreshStop.setWidget(0, 0, new Label(stringMessages.currentTime()));
-        gridTimeRefreshStop.setWidget(0, 1, timeLabel);
-        gridTimeRefreshStop.setWidget(0, 2, refreshNowButton);
-        gridTimeRefreshStop.setWidget(0, 3, startStopUpdatingButton);
+        eventNameLabel = new Label();
+        eventNameLabel.addStyleName(STYLE_EVENT_LABEL);
+        eventNameLabel.addStyleName(STYLE_TITLE_LABEL);
         
-        mainPanel.add(eventNameLabel);
-        mainPanel.add(venueNameLabel);
-        mainPanel.add(gridTimeRefreshStop);
+        venueNameLabel = new Label();
+        venueNameLabel.addStyleName(STYLE_TITLE_LABEL);
+        venueNameLabel.addStyleName(STYLE_VENUE_LABEL);
+        
+        timeLabel = new Label();
+        timeLabel.addStyleName(STYLE_TITLE_LABEL);
+        timeLabel.addStyleName(STYLE_CLOCK_LABEL);
+        
+        FlexTable flexTable = new FlexTable();
+        flexTable.setWidth("100%");
+        flexTable.addStyleName(STYLE_FUNCTION_BAR);
+        
+        Grid eventVenueGrid = new Grid(1, 2);
+        eventVenueGrid.setCellPadding(5);
+        eventVenueGrid.setWidget(0, 0, eventNameLabel);
+        eventVenueGrid.setWidget(0, 1, venueNameLabel);
+        
+        flexTable.setWidget(0, 0, eventVenueGrid);
+        flexTable.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+        
+        HorizontalPanel refreshStartStopClockPanel = getRefreshStartStopClockPanel();
+        
+        flexTable.setWidget(0, 1, refreshStartStopClockPanel);
+        
+        mainPanel.add(flexTable);
         mainPanel.add(grid);
         
         fillEventAndVenueName();
         onUpdateUI(new Date());
+    }
+
+    private HorizontalPanel getRefreshStartStopClockPanel() {
+        HorizontalPanel refreshStartStopClockPanel = new HorizontalPanel();
+        refreshStartStopClockPanel.setSpacing(5);
+        refreshStartStopClockPanel.setStyleName(STYLE_REFRESH_STOP_TIME);
+        refreshStartStopClockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        
+        refreshStartStopClockPanel.add(refreshNowButton);
+        refreshStartStopClockPanel.add(startStopUpdatingButton);
+        refreshStartStopClockPanel.add(timeLabel);
+        return refreshStartStopClockPanel;
     }
     
     public void onUpdateUI(Date time) {

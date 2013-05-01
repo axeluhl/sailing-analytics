@@ -107,3 +107,52 @@ table {
 	margin: 15px 0 0 0;
 }
 
+.RegattaOverview-TitleLabel {
+	font-size: 18px;
+	font-weight: 500;
+}
+
+.RegattaOverview-EventLabel {
+	font-weight:bold;
+}
+
+.RegattaOverview-VenueLabel {
+	margin-left:10px;
+}
+
+.RegattaOverview-ClockLabel {
+	margin-left:30px;
+	margin-right:10px;
+}
+
+.RegattaOverview-RefreshStopTime {
+	float:right;
+	margin-left:10px;
+}
+
+.RegattaOverview-functionBar {
+	height: 43px;
+	border: 1px solid #aaaaaa;
+	background: url(images/functionBar_bg.png) 0 0 repeat-x;
+	-moz-border-radius-topleft: 5px;
+	-webkit-border-top-left-radius: 5px;
+	border-top-left-radius: 5px;
+	-moz-border-radius-topright: 5px;
+	-webkit-border-top-right-radius: 5px;
+	border-top-right-radius: 5px;
+	-moz-border-radius-bottomleft: 5px;
+	-webkit-border-bottom-left-radius: 5px;
+	border-bottom-left-radius: 5px;
+	-moz-border-radius-bottomright: 5px;
+	-webkit-border-bottom-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+	margin: 0 0 15px 0;
+}
+
+.RegattaOverview-contentWrapper {
+	padding: 18px;
+}
+
+.RegattaOverview-wordWrap {
+	word-wrap: break-word;
+}
