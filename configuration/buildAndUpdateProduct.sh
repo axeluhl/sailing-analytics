@@ -333,7 +333,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     rm -rf $ACDIR/org.eclipse.*
     rm -rf $ACDIR/configuration/org.eclipse.*
 
-    if [[ i$HAS_OVERWRITTEN_TARGET -eq 0 ]]; then
+    if [[ $HAS_OVERWRITTEN_TARGET -eq 0 ]]; then
         rm -rf $ACDIR/start
         rm -rf $ACDIR/stop
 
