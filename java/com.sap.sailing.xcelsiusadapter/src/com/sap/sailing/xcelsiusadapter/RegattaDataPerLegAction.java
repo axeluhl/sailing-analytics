@@ -217,7 +217,7 @@ public class RegattaDataPerLegAction extends HttpAction {
                             int posGL = 0;
                             if (previousLeg != null) {
                                 posGL = rankAtWaypoint.get(competitor).get(trackedLeg.getLeg().getTo()) -
-                                        - rankAtWaypoint.get(competitor).get(trackedLeg.getLeg().getFrom());
+                                        rankAtWaypoint.get(competitor).get(trackedLeg.getLeg().getFrom());
                             }
 
                             final Element competitor_node = addNamedElement(competitor_data_node, "competitor");
