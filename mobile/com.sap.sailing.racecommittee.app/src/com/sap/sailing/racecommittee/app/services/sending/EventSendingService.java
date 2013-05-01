@@ -147,7 +147,9 @@ public class EventSendingService extends Service implements EventSendingListener
     }
 
     private void handleSendEvents(Intent intent) {
+        ExLog.i(TAG, String.format("Trying to send an event..."));
         if (!isConnected()) {
+            ExLog.i(TAG, String.format("Send aborted because there is no connection."));
             persistenceManager.persistIntent(intent);
             ConnectivityChangedReceiver.enable(this);
         } else {
@@ -156,16 +158,21 @@ public class EventSendingService extends Service implements EventSendingListener
     }
 
     private void handleDelayedEvents() {
+        ExLog.i(TAG, String.format("Trying to resend stored events..."));
+        
         isHandlerSet = false;
-        if (!isConnected())
+        if (!isConnected()) {
+            ExLog.i(TAG, String.format("Resend aborted because there is no connection."));
             return;
+        }
 
         sendDelayedEvents();
     }
 
     private void sendDelayedEvents() {
         List<Intent> delayedIntents = persistenceManager.restoreEvents();
-        ExLog.i(TAG, String.format("Trying to resend %d waiting events", delayedIntents.size()));
+        ExLog.i(TAG, String.format("Resending %d events...", delayedIntents.size()));
+        
         for (Intent intent : delayedIntents)
             sendEvent(intent);
     }
