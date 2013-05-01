@@ -14,6 +14,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -44,6 +45,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     protected Button btSetDate;
     protected Button btSetTime;
     protected Button btPostpone;
+    protected TextView textInfoText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -85,6 +87,8 @@ public class SetStartTimeRaceFragment extends RaceFragment {
                 showAPModeDialog();
             }
         });
+        
+        textInfoText = (TextView) getView().findViewById(R.id.race_reset_time_text_infotext);
     }
 
     private void setupTimePicker() {
@@ -128,6 +132,57 @@ public class SetStartTimeRaceFragment extends RaceFragment {
         ExLog.i(SetStartTimeRaceFragment.class.getName(),
                 String.format("Fragment %s is now shown", SetStartTimeRaceFragment.class.getName()));
     }
+    
+    @Override
+    public void notifyTick() {
+        super.notifyTick();
+        
+        textInfoText.setText(String.format("Start %s", getTimeStringToStart()));
+    }
+
+    private Date getStartTime() {
+        Calendar newStartTimeCal = Calendar.getInstance();
+        //newStartTimeCal.set(Calendar.YEAR, 0);
+        //newStartTimeCal.set(Calendar.MONTH, 0);
+        //newStartTimeCal.set(Calendar.DAY_OF_MONTH, 0);
+        newStartTimeCal.set(Calendar.HOUR_OF_DAY, pickerTime.getCurrentHour());
+        newStartTimeCal.set(Calendar.MINUTE, pickerTime.getCurrentMinute());
+        newStartTimeCal.set(Calendar.SECOND, 0);
+        newStartTimeCal.set(Calendar.MILLISECOND, 0);
+        Date newStartTime = newStartTimeCal.getTime();
+        return newStartTime;
+    }
+
+    private String getTimeStringToStart() {
+        Date startTime = getStartTime();
+        Date now = new Date();
+        
+        long differenceInSeconds = (startTime.getTime() - now.getTime()) / 1000;
+        boolean isInPast = Math.signum(differenceInSeconds) < 0;
+        if (isInPast) {
+            differenceInSeconds = Math.abs(differenceInSeconds);
+        }
+
+        long diff[] = new long[] { 0, 0, 0, 0 };
+        /* sec */diff[3] = (differenceInSeconds >= 60 ? differenceInSeconds % 60 : differenceInSeconds);
+        /* min */diff[2] = (differenceInSeconds = (differenceInSeconds / 60)) >= 60 ? differenceInSeconds % 60 : differenceInSeconds;
+        /* hours */diff[1] = (differenceInSeconds = (differenceInSeconds / 60)) >= 24 ? differenceInSeconds % 24 : differenceInSeconds;
+        /* days */diff[0] = (differenceInSeconds = (differenceInSeconds / 24));
+
+        String timeText = "";
+        if (diff[0] > 0) {
+            timeText += String.format("%d day%s, ", diff[0], diff[0] > 1 ? "s" : "");
+        }
+        if (diff[1] > 0) {
+            timeText += String.format("%d hours%s, ", diff[1], diff[1] > 1 ? "s" : "");
+        }
+        if (diff[2] > 0) {
+            timeText += String.format("%d minute%s, ", diff[2], diff[2] > 1 ? "s" : "");
+        }
+        timeText += String.format("%d second%s", diff[3], diff[3] > 1 ? "s" : "");
+        
+        return isInPast ? String.format("%s %s", timeText, "ago") : String.format("%s %s", "in", timeText);
+    }
 
     protected void setStartTime() {
         if (isReset) {
@@ -135,14 +190,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
         } else {
             ExLog.i(ExLog.RACE_SET_TIME, getRace().getId().toString(), getActivity());
         }
-
-        Calendar newStartTime = Calendar.getInstance();
-        newStartTime.set(Calendar.HOUR_OF_DAY, pickerTime.getCurrentHour());
-        newStartTime.set(Calendar.MINUTE, pickerTime.getCurrentMinute());
-        newStartTime.set(Calendar.SECOND, 0);
-        newStartTime.set(Calendar.MILLISECOND, 0);
-
-        setStartTime(newStartTime.getTime());
+        setStartTime(getStartTime());
 
         // TODO: start course designer activity!
     }
