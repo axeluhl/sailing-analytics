@@ -22,7 +22,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.RunningRaceEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartPhaseEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureRaceStateChangedListener;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RunningRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.EssStartPhaseFragment;
@@ -41,7 +41,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     
     private List<Long> startProcedureEventIntervals;
     private PassAwareRaceLog raceLog;
-    private StartProcedureRaceStateChangedListener raceStateChangedListener;
+    private StartProcedureListener raceStateChangedListener;
     private EssStartPhaseEventListener startPhaseEventListener;
     
     public ExtremeSailingSeriesStartProcedure(PassAwareRaceLog raceLog) {
@@ -90,10 +90,9 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     private void handleAPDown(TimePoint eventTime) {
-        TimePoint startPhaseTimePoint = eventTime.minus(1);
         
         if (raceStateChangedListener != null) {
-            raceStateChangedListener.onRaceStartphaseEntered(startPhaseTimePoint);
+            raceStateChangedListener.onRaceStartphaseEntered(eventTime);
         }
 
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
@@ -116,9 +115,8 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     private void handleEssTwoUpAndEssThreeDown(TimePoint eventTime) {
-        TimePoint essThreeDownTimePoint = eventTime.minus(1);
         
-        RaceLogEvent essThreeDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(essThreeDownTimePoint, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+        RaceLogEvent essThreeDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.ESSTHREE, Flags.NONE, /*isDisplayed*/false);
         raceLog.add(essThreeDownEvent);
         
@@ -132,9 +130,8 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     private void handleEssOneUpAndEssTwoDown(TimePoint eventTime) {
-        TimePoint essTwoDownTimePoint = eventTime.minus(1);
         
-        RaceLogEvent essTwoDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(essTwoDownTimePoint, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+        RaceLogEvent essTwoDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.ESSTWO, Flags.NONE, /*isDisplayed*/false);
         raceLog.add(essTwoDownEvent);
         
@@ -148,8 +145,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     private void handleEssOneDown(TimePoint eventTime) {
-        TimePoint essOneDownTimePoint = eventTime.minus(1);
-        RaceLogEvent essOneDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(essOneDownTimePoint, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+        RaceLogEvent essOneDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.ESSONE, Flags.NONE, /*isDisplayed*/false);
         raceLog.add(essOneDownEvent);
         
@@ -159,7 +155,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
     
     @Override
-    public void setRaceStateChangedListener(StartProcedureRaceStateChangedListener raceStateChangedListener) {
+    public void setChangeListener(StartProcedureListener raceStateChangedListener) {
         this.raceStateChangedListener = raceStateChangedListener;
     }
 
@@ -169,6 +165,8 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         TimePoint startPhaseStartTime = getStartPhaseStartTime(newEnteredStartTime);
         TimePoint resultTime;
         if (now.after(startPhaseStartTime)) {
+            // We do not want RaceStatusEvents with the same timestamp to ensure a reasonable ordering
+            // Therefore we guarantee that SCHEDULDED happens before STARTPHASE
             resultTime = startPhaseStartTime.minus(1);
         } else {
             resultTime = now;
@@ -179,8 +177,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
 
     @Override
     public void setFinishing(TimePoint eventTime) {
-        TimePoint blueFlagDisplayEventTime = eventTime.minus(1);
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(blueFlagDisplayEventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.BLUE, Flags.NONE, /*isDisplayed*/true);
         raceLog.add(event);
         
@@ -204,8 +201,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
 
     @Override
     public void setFinished(TimePoint eventTime) {
-        TimePoint blueFlagRemoveEventTime = eventTime.minus(1);
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(blueFlagRemoveEventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.BLUE, Flags.NONE, /*isDisplayed*/false);
         raceLog.add(event);
         
@@ -228,8 +224,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     private void handleAPUp(TimePoint eventTime, Flags lowerFlag) {
-        TimePoint apFlagDisplayEventTime = eventTime.minus(1);
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(apFlagDisplayEventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.AP, lowerFlag, /*isDisplayed*/true);
         raceLog.add(event);
         
@@ -252,8 +247,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     private void handleNovemberUp(TimePoint eventTime, Flags lowerFlag) {
-        TimePoint novemberFlagDisplayEventTime = eventTime.minus(1);
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(novemberFlagDisplayEventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.NOVEMBER, lowerFlag, /*isDisplayed*/true);
         raceLog.add(event);
         
@@ -264,8 +258,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
 
     @Override
     public void setGeneralRecall(TimePoint eventTime) {
-        TimePoint recallDisplayEventTime = eventTime.minus(1);
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(recallDisplayEventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.FIRSTSUBSTITUTE, Flags.NONE, /*isDisplayed*/true);
         raceLog.add(event);
         

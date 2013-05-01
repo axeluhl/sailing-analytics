@@ -4,9 +4,9 @@
     <PreferenceCategory android:title="@string/settings_category_general" >
 
         <EditTextPreference
+            android:key="courseAreasPref"
             android:name="@string/settings_general_manageareas_header"
             android:defaultValue="@string/settings_general_manageareas_default"
-            android:key="courseAreasPref"
             android:summary="@string/settings_general_manageareas_description"
             android:title="@string/settings_general_manageareas_header" />
     </PreferenceCategory>
@@ -19,6 +19,19 @@
             android:summary="Check the box if the Golf flag should be automatically removed in a gate start race"
             android:title="Remove Golf Automatically" />
 -->
+
+        <CheckBoxPreference
+            android:key="overrideDefaultStartProcedureType"
+            android:defaultValue="false"
+            android:summary="Check the box if races should use the start procedure type defined below as a default"
+            android:title="Override default start procedure type" />
+        
+        <ListPreference
+            android:key="defaultStartProcedureType"
+            android:title="Default start procedure type"
+            android:summary="Races will use selected start procedure type as a default. For this option to be active override checkbox has to be enabled."
+            />
+
         <EditTextPreference
             android:defaultValue="30"
             android:inputType="numberDecimal"

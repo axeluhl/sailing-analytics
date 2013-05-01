@@ -125,6 +125,7 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
+import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
@@ -620,7 +621,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     } catch (ExecutionException e) {
-                        throw new RuntimeException(e);
+                        // See also bug 1371: for stability reasons, don't let the exception percolate but rather accept null values.
+                        // If new evidence is provided, a re-calculation of the leaderboard will be triggered anyway. So this helps
+                        // robustness from a user's perspective.
+                        logger.log(Level.SEVERE, SailingServiceImpl.class.getName()+".computeLeaderboardByName("
+                                +leaderboard.getName()+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+
+                                "): exception during computing leaderboard entry for competitor "+competitor.getName()+
+                                " in race column "+raceColumnNameAndFuture.getKey()+". Leaving empty.", e);
                     }
                 }
                 result.rows.put(competitorDTO, row);
@@ -1139,7 +1146,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
 
-            PassAwareRaceLogImpl passAwareRaceLog = new PassAwareRaceLogImpl(raceLog);
+            PassAwareRaceLog passAwareRaceLog = PassAwareRaceLogImpl.copy(raceLog);
             StartTimeFinder startTimeFinder = new StartTimeFinder(passAwareRaceLog);
             if(startTimeFinder.getStartTime()!=null){
                 raceInfoDTO.startTime = startTimeFinder.getStartTime().asDate();
