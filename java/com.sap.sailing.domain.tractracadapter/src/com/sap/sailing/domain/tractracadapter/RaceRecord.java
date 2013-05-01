@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -85,11 +86,17 @@ public class RaceRecord {
         String technicalEventName = jsonURLAsString.substring(indexOfLastButOneSlash+1, indexOfLastSlash);
         paramURL = new URL(jsonURLAsString.substring(0, indexOfLastSlash)+"/clientparams.php?event="+
                 technicalEventName+"&race="+ID);
-        Map<String, String> paramURLContents = parseParams(paramURL);
-        String liveURIAsString = paramURLContents.get(LIVE_URI_PROPERTY);
-        liveURI = liveURIAsString == null ? null : new URI(liveURIAsString);
-        String storedURIAsString = paramURLContents.get(STORED_URI_PROPERTY);
-        storedURI = storedURIAsString == null ? null : new URI(storedURIAsString);
+        try {
+            Map<String, String> paramURLContents = parseParams(paramURL);
+            String liveURIAsString = paramURLContents.get(LIVE_URI_PROPERTY);
+            liveURI = liveURIAsString == null ? null : new URI(liveURIAsString);
+            String storedURIAsString = paramURLContents.get(STORED_URI_PROPERTY);
+            storedURI = storedURIAsString == null ? null : new URI(storedURIAsString);
+        } catch (Exception e) {
+            logger.info("Couldn't parse TracTrac paramURL " + paramURL + " for race record " + getName());
+            logger.log(Level.INFO, "The exception was:", e);
+            throw e;
+        }
     }
 
     private Map<String, String> parseParams(URL paramURL) throws IOException {
