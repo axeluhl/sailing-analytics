@@ -75,12 +75,11 @@ public class RegattaDataPerLegAction extends HttpAction {
         for (RaceColumn r : leaderboard.getRaceColumns()) {
             for (Fleet f : r.getFleets()) {
                 TrackedRace trackedRace = r.getTrackedRace(f);
-                Map<Competitor, Map<Waypoint, Integer>> rankAtWaypoint = getRankAtWaypoint(trackedRace);
                 // skip race if not tracked
                 if (trackedRace == null || !trackedRace.hasGPSData()) {
                     continue;
                 }
-                
+                Map<Competitor, Map<Waypoint, Integer>> rankAtWaypoint = getRankAtWaypoint(trackedRace);
                 RaceDefinition race = trackedRace.getRace();
                 
                 final Element race_node = addNamedElement(races_node, "race"); // add race node for the current race
@@ -218,7 +217,7 @@ public class RegattaDataPerLegAction extends HttpAction {
                             int posGL = 0;
                             if (previousLeg != null) {
                                 posGL = rankAtWaypoint.get(competitor).get(trackedLeg.getLeg().getTo()) -
-                                        - rankAtWaypoint.get(competitor).get(trackedLeg.getLeg().getFrom());
+                                        rankAtWaypoint.get(competitor).get(trackedLeg.getLeg().getFrom());
                             }
 
                             final Element competitor_node = addNamedElement(competitor_data_node, "competitor");

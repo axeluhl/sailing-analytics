@@ -177,8 +177,10 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
                         dialog.cancel();
                     }
                 });
-        AlertDialog alert = builder.create();
-        alert.show();
+        if (!isFinishing()) {
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
     }
 
     public void onRaceItemClicked(ManagedRace managedRace) {
