@@ -240,8 +240,8 @@ public class TVViewController implements RaceTimesInfoProviderListener {
 
             Date endOfRace = currentRaceTimes.endOfRace;
             long waitTimeAfterEndOfRace = 60 * 1000; // 1 min  
-            if (endOfRace != null && leaderboardTimer.getTime().getTime() > endOfRace.getTime() + waitTimeAfterEndOfRace
-                && leaderboardTimer.getPlayMode() == PlayModes.Live) {
+            if (endOfRace != null && raceboardTimer.getTime().getTime() > endOfRace.getTime() + waitTimeAfterEndOfRace
+                && raceboardTimer.getPlayMode() == PlayModes.Live) {
                 updateTvView(TVViews.Leaderboard);
             }
         } else {
