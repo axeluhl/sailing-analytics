@@ -154,9 +154,8 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     
     private void clearContentPanels() {
         int childWidgetCount = dockPanel.getWidgetCount();
-        for(int i = 0; i < childWidgetCount; i++) {
+        for(int i = childWidgetCount-1; i >=0; i--) {
             Widget widget = dockPanel.getWidget(i);
-            
             // don't remove the logoAndTitlePanel if exist
             if(logoAndTitlePanel == null || widget != logoAndTitlePanel) {
                 dockPanel.remove(widget);
