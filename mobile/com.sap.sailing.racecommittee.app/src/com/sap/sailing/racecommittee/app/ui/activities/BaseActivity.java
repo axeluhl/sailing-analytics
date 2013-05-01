@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import java.util.Date;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -130,8 +132,9 @@ public abstract class BaseActivity extends Activity {
         int errorCount = this.sendingService.getDelayedIntentsCount();
         if (errorCount > 0) {
             menuItemLive.setIcon(R.drawable.ic_menu_share_red);
+            Date lastSuccessfulSend = this.sendingService.getLastSuccessfulSend();
             sendingServiceStatus = String.format("Currently %d events waiting to be sent.\nLast successful sent was at %s", 
-                    errorCount, this.sendingService.getLastSuccessfulSend());
+                    errorCount, lastSuccessfulSend == null ? "never" : lastSuccessfulSend);
         } else {
             menuItemLive.setIcon(R.drawable.ic_menu_share_holo_light);
             sendingServiceStatus = String.format("Currently no event waiting to be sent.", errorCount);
