@@ -64,7 +64,7 @@ public class MediaSynchControl {
             }
         });
 
-        lockToggle = new CheckBox("Locked");
+        lockToggle = new CheckBox("Auto Playback");
         lockToggle.addStyleName("raceBoardNavigation-standaloneElement");
         lockToggle
                 .setTitle("Uncheck to decouple video from race. Use video controls to adjust video/race synchronization. Re-check when finished.");
@@ -73,6 +73,11 @@ public class MediaSynchControl {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 setLocked(isLocked());
+                if (isLocked()) {
+                    lockToggle.setText("Auto Playback");
+                } else {
+                    lockToggle.setText("Manual Playback");
+                }
             }
 
         });
