@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -141,6 +139,9 @@ public class LiveLeaderboardUpdater implements Runnable {
                         result = currentLiveLeaderboard;
                     }
                     if (result == null) {
+                        if (logger.isLoggable(Level.FINEST)) { 
+                            logger.finest("waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails);
+                        }
                         ensureRunning();
                         try {
                             this.wait();
@@ -149,6 +150,10 @@ public class LiveLeaderboardUpdater implements Runnable {
                         }
                         if (columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
                             result = currentLiveLeaderboard;
+                        }
+                    } else {
+                        if (logger.isLoggable(Level.FINEST)) { 
+                            logger.finest("leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" was provided in the meantime");
                         }
                     }
                     // now we either have a result (good, we're done), or the thread stopped running (then we need to renew the request)
@@ -217,12 +222,9 @@ public class LiveLeaderboardUpdater implements Runnable {
     @Override
     public void run() {
         assert running;
-        Timer interruptTimer = null;
-        TimerTask interruptTask = null;
         try {
             logger.info("Starting " + LiveLeaderboardUpdater.class.getSimpleName() + " thread for leaderboard "
                     + leaderboard.getName());
-            interruptTimer = new Timer("Interrupt timer for "+LiveLeaderboardUpdater.class.getSimpleName()+" for leaderboard "+leaderboard.getName());
             // interrupt the current thread if not producing a single result within the overall timeout
             while (true) {
                 MillisecondsTimePoint now = MillisecondsTimePoint.now();
@@ -239,19 +241,6 @@ public class LiveLeaderboardUpdater implements Runnable {
                 TimePoint timeLastUpdateWasStarted = now;
                 try {
                     final Set<String> namesOfRaceColumnsForWhichToLoadLegDetails = getColumnNamesForWhichToFetchDetails(timePoint);
-                    interruptTask = new TimerTask() {
-                        @Override
-                        public void run() {
-                            synchronized (LiveLeaderboardUpdater.this) {
-                                if (thread != null) {
-                                    logger.severe("Interrupting "+LiveLeaderboardUpdater.class.getSimpleName()+" thread "+thread+
-                                            " after not receiving an update in "+UPDATE_TIMEOUT_IN_MILLIS+"ms");
-                                    thread.interrupt();
-                                }
-                            }
-                        }
-                    };
-                    interruptTimer.schedule(interruptTask, UPDATE_TIMEOUT_IN_MILLIS);
                     LeaderboardDTO newCacheValue = sailingService.computeLeaderboardByName(leaderboard, timePoint,
                             namesOfRaceColumnsForWhichToLoadLegDetails, /* waitForLatestAnalyses */false);
                     updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, newCacheValue);
@@ -264,9 +253,6 @@ public class LiveLeaderboardUpdater implements Runnable {
                     } catch (InterruptedException e1) {
                         logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e1);
                     }
-                }
-                if (interruptTask != null) {
-                    interruptTask.cancel();
                 }
                 TimePoint computeLeaderboardByNameFinishedAt = MillisecondsTimePoint.now();
                 long millisToSleep = MINIMUM_TIME_BETWEEN_UPDATES
@@ -288,13 +274,6 @@ public class LiveLeaderboardUpdater implements Runnable {
             }
             logger.info("exception in "+LiveLeaderboardUpdater.class.getName()+".run(): "+e.getMessage());
             logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e);
-        } finally {
-            if (interruptTask != null) {
-                interruptTask.cancel();
-            }
-            if (interruptTimer != null) {
-                interruptTimer.cancel();
-            }
         }
     }
 
