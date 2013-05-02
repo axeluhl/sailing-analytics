@@ -188,6 +188,7 @@ public class EventSendingService extends Service implements EventSendingListener
         }
     }
 
+    @Override
     public void onResult(Intent intent, boolean success) {
         if (!success) {
             ExLog.w(TAG, "Error while posting intent to server. Will persist intent...");
