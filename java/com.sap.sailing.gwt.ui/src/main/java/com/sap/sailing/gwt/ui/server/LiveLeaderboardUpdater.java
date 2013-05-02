@@ -150,6 +150,13 @@ public class LiveLeaderboardUpdater implements Runnable {
                         }
                         if (columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
                             result = currentLiveLeaderboard;
+                            if (logger.isLoggable(Level.FINEST)) { 
+                                logger.finest("successfully waited for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails);
+                            }
+                        } else {
+                            if (logger.isLoggable(Level.FINEST)) { 
+                                logger.finest("waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" unsuccessful. Need to try again...");
+                            }
                         }
                     } else {
                         if (logger.isLoggable(Level.FINEST)) { 
