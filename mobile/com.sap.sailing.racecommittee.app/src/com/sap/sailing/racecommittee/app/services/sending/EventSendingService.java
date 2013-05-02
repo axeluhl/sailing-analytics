@@ -152,6 +152,7 @@ public class EventSendingService extends Service implements EventSendingListener
             ExLog.i(TAG, String.format("Send aborted because there is no connection."));
             persistenceManager.persistIntent(intent);
             ConnectivityChangedReceiver.enable(this);
+            serviceLogger.onEventSentFailed();
         } else {
             sendEvent(intent);
         }
@@ -163,10 +164,11 @@ public class EventSendingService extends Service implements EventSendingListener
         isHandlerSet = false;
         if (!isConnected()) {
             ExLog.i(TAG, String.format("Resend aborted because there is no connection."));
-            return;
+            ConnectivityChangedReceiver.enable(this);
+            serviceLogger.onEventSentFailed();
+        } else {
+            sendDelayedEvents();
         }
-
-        sendDelayedEvents();
     }
 
     private void sendDelayedEvents() {
@@ -186,6 +188,7 @@ public class EventSendingService extends Service implements EventSendingListener
         }
     }
 
+    @Override
     public void onResult(Intent intent, boolean success) {
         if (!success) {
             ExLog.w(TAG, "Error while posting intent to server. Will persist intent...");
