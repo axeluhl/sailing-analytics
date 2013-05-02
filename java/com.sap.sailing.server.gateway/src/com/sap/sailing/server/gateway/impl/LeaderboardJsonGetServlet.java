@@ -249,7 +249,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
             jsonCompetitor.put("sailID", competitor.getBoat().getSailID());
             Nationality nationality = competitor.getTeam().getNationality();
             jsonCompetitor.put("nationality", nationality != null ? nationality.getThreeLetterIOCAcronym(): null);
-            jsonCompetitor.put("countryCode", nationality != null ? nationality.getCountryCode().getTwoLetterISOCode(): null);
+            jsonCompetitor.put("countryCode", nationality != null ? (nationality.getCountryCode() != null ? nationality.getCountryCode().getTwoLetterISOCode(): null) : null);
             
             jsonCompetitor.put("rank", competitorsFromBestToWorstAccordingToTotalRank.indexOf(competitor) + 1);
             jsonCompetitor.put("carriedPoints", leaderboard.getCarriedPoints(competitor));
