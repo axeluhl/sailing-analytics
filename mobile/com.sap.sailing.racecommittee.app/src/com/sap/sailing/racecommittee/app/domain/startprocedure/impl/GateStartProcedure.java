@@ -19,7 +19,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.RunningRaceEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartPhaseEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureRaceStateChangedListener;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartRunningRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.GateStartPhaseFragment;
@@ -35,7 +35,7 @@ public class GateStartProcedure implements StartProcedure {
     
     private List<Long> startProcedureEventIntervals;
     private PassAwareRaceLog raceLog;
-    private StartProcedureRaceStateChangedListener raceStateChangedListener;
+    private StartProcedureListener raceStateChangedListener;
     private GateStartPhaseEventListener startPhaseEventListener;
     private GateStartRunningRaceEventListener runningRaceEventListener;
     
@@ -83,13 +83,13 @@ public class GateStartProcedure implements StartProcedure {
     }
 
     private void handleClassOverGolfUp(TimePoint eventTime) {
-        TimePoint startPhaseTimePoint = eventTime.minus(1);
+        TimePoint startPhaseTimePoint = eventTime;
         
         if (raceStateChangedListener != null) {
             raceStateChangedListener.onRaceStartphaseEntered(startPhaseTimePoint);
         }
 
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(startPhaseTimePoint, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.CLASS, Flags.GOLF, /*isDisplayed*/true);
         raceLog.add(event);
         
@@ -109,7 +109,7 @@ public class GateStartProcedure implements StartProcedure {
     }
 
     private void handlePapaDown(TimePoint eventTime) {
-        TimePoint papaDownTimepoint = eventTime.minus(1);
+        TimePoint papaDownTimepoint = eventTime;
         
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(papaDownTimepoint, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.PAPA, Flags.NONE, /*isDisplayed*/false);
@@ -121,7 +121,8 @@ public class GateStartProcedure implements StartProcedure {
     }
 
     private void handleClassOverGolfDown(TimePoint eventTime) {
-        TimePoint essOneDownTimePoint = eventTime.minus(1);
+        TimePoint essOneDownTimePoint = eventTime;
+        
         RaceLogEvent essOneDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(essOneDownTimePoint, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.CLASS, Flags.GOLF, /*isDisplayed*/false);
         raceLog.add(essOneDownEvent);
@@ -132,7 +133,7 @@ public class GateStartProcedure implements StartProcedure {
     }
     
     @Override
-    public void setRaceStateChangedListener(StartProcedureRaceStateChangedListener raceStateChangedListener) {
+    public void setChangeListener(StartProcedureListener raceStateChangedListener) {
         this.raceStateChangedListener = raceStateChangedListener;
     }
 
@@ -142,6 +143,8 @@ public class GateStartProcedure implements StartProcedure {
         TimePoint startPhaseStartTime = getStartPhaseStartTime(newEnteredStartTime);
         TimePoint resultTime;
         if (now.after(startPhaseStartTime)) {
+            // We do not want RaceStatusEvents with the same timestamp to ensure a reasonable ordering
+            // Therefore we guarantee that SCHEDULDED happens before STARTPHASE
             resultTime = startPhaseStartTime.minus(1);
         } else {
             resultTime = now;
@@ -152,8 +155,7 @@ public class GateStartProcedure implements StartProcedure {
 
     @Override
     public void setFinishing(TimePoint eventTime) {
-        TimePoint blueFlagDisplayEventTime = eventTime.minus(1);
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(blueFlagDisplayEventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.BLUE, Flags.NONE, /*isDisplayed*/true);
         raceLog.add(event);
         
@@ -169,8 +171,7 @@ public class GateStartProcedure implements StartProcedure {
 
     @Override
     public void setFinished(TimePoint eventTime) {
-        TimePoint blueFlagRemoveEventTime = eventTime.minus(1);
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(blueFlagRemoveEventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.BLUE, Flags.NONE, /*isDisplayed*/false);
         raceLog.add(event);
         
@@ -192,9 +193,8 @@ public class GateStartProcedure implements StartProcedure {
         }
     }
 
-    private void handleAPUp(TimePoint eventTime, Flags lowerFlag) {
-        TimePoint apFlagDisplayEventTime = eventTime.minus(1);
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(apFlagDisplayEventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+    private void handleAPUp(TimePoint eventTime, Flags lowerFlag) {        
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.AP, lowerFlag, /*isDisplayed*/true);
         raceLog.add(event);
         
@@ -217,8 +217,7 @@ public class GateStartProcedure implements StartProcedure {
     }
 
     private void handleNovemberUp(TimePoint eventTime, Flags lowerFlag) {
-        TimePoint novemberFlagDisplayEventTime = eventTime.minus(1);
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(novemberFlagDisplayEventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.NOVEMBER, lowerFlag, /*isDisplayed*/true);
         raceLog.add(event);
         
@@ -229,8 +228,7 @@ public class GateStartProcedure implements StartProcedure {
 
     @Override
     public void setGeneralRecall(TimePoint eventTime) {
-        TimePoint recallDisplayEventTime = eventTime.minus(1);
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(recallDisplayEventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.FIRSTSUBSTITUTE, Flags.NONE, /*isDisplayed*/true);
         raceLog.add(event);
         

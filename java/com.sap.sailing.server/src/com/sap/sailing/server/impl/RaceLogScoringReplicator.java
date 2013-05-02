@@ -32,7 +32,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     private static final long serialVersionUID = -5958519195756937338L;
     
     private final RacingEventService service;
-    private final static String CommentTextOnScoreCorrection = "Update triggered by Race Committee.";
+    private final static String COMMENT_TEXT_ON_SCORE_CORRECTION = "Update triggered by Race Committee.";
     
     public RaceLogScoringReplicator(RacingEventService service) {
         this.service = service;
@@ -142,7 +142,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
 
             //Since the metadata update is used by the Sailing suite to determine the final state of a race, it has to be triggered, even though 
             //no score correction was performed
-            applyMetadataUpdate(leaderboard, timePoint, CommentTextOnScoreCorrection);
+            applyMetadataUpdate(leaderboard, timePoint, COMMENT_TEXT_ON_SCORE_CORRECTION);
         }
     }
 

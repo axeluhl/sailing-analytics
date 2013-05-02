@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -24,9 +25,11 @@ public class CourseDesignTableComposite extends Composite {
     private final StringMessages stringMessages;
     
     private RegattaOverviewEntryDTO race;
-    
 
     private static RegattaOverviewTableResources tableRes = GWT.create(RegattaOverviewTableResources.class);
+    
+    private static final String STYLE_NAME_PREFIX = "RegattaOverview-";
+    private static final String STYLE_WORD_WRAP = STYLE_NAME_PREFIX + "wordWrap";
 
     public CourseDesignTableComposite(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final StringMessages stringMessages) {
@@ -38,6 +41,7 @@ public class CourseDesignTableComposite extends Composite {
         mainPanel = new SimplePanel();
         VerticalPanel panel = new VerticalPanel();
         mainPanel.setWidget(panel);
+        panel.setWidth("100%");
 
         waypointDataProvider = new ListDataProvider<WaypointDTO>();
         waypointTable = createCourseDesignTable();
@@ -56,19 +60,14 @@ public class CourseDesignTableComposite extends Composite {
         TextColumn<WaypointDTO> waypointNameColumn = new TextColumn<WaypointDTO>() {
             @Override
             public String getValue(WaypointDTO waypointDTO) {
-                return waypointDTO.name;
-            }
-        };
-        
-        TextColumn<WaypointDTO> waypointPassingSideColumn = new TextColumn<WaypointDTO>() {
-            @Override
-            public String getValue(WaypointDTO waypointDTO) {
-                return (waypointDTO.passingSide == null) ? "" : waypointDTO.passingSide.name();
+                String result = waypointDTO.name;
+                result += (waypointDTO.passingSide == null) ? "" : ", to " + getNauticalSideAsText(waypointDTO.passingSide);
+                return result;
             }
         };
 
-        table.addColumn(waypointNameColumn, stringMessages.waypoint());
-        table.addColumn(waypointPassingSideColumn, stringMessages.passingSide());
+        table.addColumn(waypointNameColumn, stringMessages.waypoints());
+        waypointNameColumn.setCellStyleNames(STYLE_WORD_WRAP);
 
         return table;
     }
@@ -82,6 +81,17 @@ public class CourseDesignTableComposite extends Composite {
         if (this.race != null && this.race.raceInfo.lastCourseDesign != null) {
             waypointDataProvider.getList().clear();
             waypointDataProvider.getList().addAll(this.race.raceInfo.lastCourseDesign.waypoints);
+        }
+    }
+    
+    private String getNauticalSideAsText(NauticalSide passingSide) {
+        switch (passingSide) {
+        case PORT:
+            return stringMessages.portSide();
+        case STARBOARD:
+            return stringMessages.starboardSide();
+        default:
+            return "";
         }
     }
 }

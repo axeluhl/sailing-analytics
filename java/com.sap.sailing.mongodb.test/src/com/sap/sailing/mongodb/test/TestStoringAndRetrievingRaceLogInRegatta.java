@@ -122,7 +122,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     
     @Test
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogStartProcedureChangedEvent() {        
-        RaceLogStartProcedureChangedEvent expectedEvent = RaceLogEventFactory.INSTANCE.createStartProcedureChangedEvent(now, 0, StartProcedureType.RRS26);
+        RaceLogStartProcedureChangedEvent expectedEvent = RaceLogEventFactory.INSTANCE.createStartProcedureChangedEvent(now, 0, StartProcedureType.ESS);
 
        addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
 

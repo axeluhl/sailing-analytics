@@ -19,6 +19,17 @@ public abstract class RaceFragment extends Fragment implements TickListener {
         return arguments;
     }
 
+    /**
+     * Creates a bundle that contains the race id as parameter for the next fragment
+     * 
+     * @return a bundle containing the race id
+     */
+    protected Bundle getRecentArguments() {
+        Bundle args = new Bundle();
+        args.putSerializable(AppConstants.RACE_ID_KEY, managedRace.getId());
+        return args;
+    }
+
     private ManagedRace managedRace;
 
     @Override
@@ -49,16 +60,10 @@ public abstract class RaceFragment extends Fragment implements TickListener {
     public ManagedRace getRace() {
         return managedRace;
     }
-
-    /**
-     * Creates a bundle that contains the race id as parameter for the next fragment
-     * 
-     * @return a bundle containing the race id
-     */
-    protected Bundle getParameterBundle() {
-        Bundle args = new Bundle();
-        args.putSerializable(AppConstants.RACE_ID_KEY, managedRace.getId());
-        return args;
+    
+    @Override
+    public void notifyTick() {
+        // may be overriden in subclasses.
     }
 
 }

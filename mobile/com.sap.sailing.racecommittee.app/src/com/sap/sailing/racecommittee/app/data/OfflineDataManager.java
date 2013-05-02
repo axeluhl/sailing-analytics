@@ -25,6 +25,7 @@ import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
@@ -88,7 +89,8 @@ public class OfflineDataManager extends DataManager {
                         "Q1", 
                         new FleetImpl("Default"), 
                         qualifying, 
-                        raceGroup), 
+                        raceGroup),
+                        StartProcedureType.ESS,
                         log);
 
         log = new PassAwareRaceLogImpl();
@@ -105,6 +107,7 @@ public class OfflineDataManager extends DataManager {
                         new FleetImpl("Default"), 
                         qualifying, 
                         raceGroup), 
+                        StartProcedureType.ESS,
                         log);
 
         log = new PassAwareRaceLogImpl();
@@ -118,6 +121,7 @@ public class OfflineDataManager extends DataManager {
                         new FleetImpl("Default"), 
                         qualifying, 
                         raceGroup), 
+                        StartProcedureType.ESS,
                         log);
         /*ManagedRace m1 = new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(

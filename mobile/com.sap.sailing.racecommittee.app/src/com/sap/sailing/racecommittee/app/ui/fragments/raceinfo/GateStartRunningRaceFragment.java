@@ -171,7 +171,7 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
 
         RaceDialogFragment fragment = new AbortTypeSelectionDialog();
 
-        Bundle args = getParameterBundle();
+        Bundle args = getRecentArguments();
         fragment.setArguments(args);
 
         fragment.show(fragmentManager, "dialogAPNovemberMode");
@@ -185,7 +185,7 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
     private void showPathFinderDialog() {
         FragmentManager fragmentManager = getFragmentManager();
         RaceDialogFragment fragment = new RaceChoosePathFinderDialog();
-        Bundle args = getParameterBundle();
+        Bundle args = getRecentArguments();
         fragment.setArguments(args);
         fragment.show(fragmentManager, null);
     }
@@ -193,7 +193,7 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
     private void showLineOpeningTimeDialog() {
         FragmentManager fragmentManager = getFragmentManager();
         RaceDialogFragment fragment = new RaceChooseLineOpeningTimeDialog();
-        Bundle args = getParameterBundle();
+        Bundle args = getRecentArguments();
         fragment.setArguments(args);
         fragment.show(fragmentManager, null);
     }

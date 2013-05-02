@@ -147,7 +147,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
 
         RaceDialogFragment fragment = new CourseDesignDialogFragment();
 
-        Bundle args = getParameterBundle();
+        Bundle args = getRecentArguments();
         fragment.setArguments(args);
 
         fragment.show(fragmentManager, "courseDesignDialogFragment");
