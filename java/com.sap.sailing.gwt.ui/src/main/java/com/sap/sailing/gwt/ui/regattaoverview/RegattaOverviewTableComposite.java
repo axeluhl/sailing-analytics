@@ -61,6 +61,7 @@ public class RegattaOverviewTableComposite extends Composite {
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
         mainPanel.setWidget(panel);
+        mainPanel.setWidth("100%");
 
         regattaOverviewDataProvider = new ListDataProvider<RegattaOverviewEntryDTO>();
         regattaOverviewTable = createRegattaTable();

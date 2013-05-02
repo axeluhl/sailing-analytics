@@ -12,8 +12,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class ConnectivityChangedReceiver extends BroadcastReceiver {
+    
+    private final static String TAG = ConnectivityChangedReceiver.class.getName();
 
     /* (non-Javadoc)
      * @see android.content.BroadcastReceiver#onReceive(android.content.Context, android.content.Intent)
@@ -37,6 +40,7 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
         ComponentName receiver = new ComponentName(context, ConnectivityChangedReceiver.class);
         PackageManager packageManager = context.getPackageManager();
         packageManager.setComponentEnabledSetting(receiver, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        ExLog.w(TAG, "Regained connectivity. ConnectivityChangedReceiver disabled");
     }
 
     /**
@@ -47,6 +51,7 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
         ComponentName receiver = new ComponentName(context, ConnectivityChangedReceiver.class);
         PackageManager packageManager = context.getPackageManager();
         packageManager.setComponentEnabledSetting(receiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+        ExLog.w(TAG, "Connectivity lost. ConnectivityChangedReceiver enabled");
     }
 
 }
