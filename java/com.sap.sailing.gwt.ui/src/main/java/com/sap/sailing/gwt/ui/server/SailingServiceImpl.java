@@ -330,7 +330,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      */
     private final Set<CacheInvalidationListener> cacheInvalidationListeners;
 
-    private final LeaderboardDTOCache leaderboardDTOCacheWaitingForLatestAnalysis;
+    private final LeaderboardDTOCache leaderboardDTOCache;
 
     private final DomainFactory tractracDomainFactory;
 
@@ -365,11 +365,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         leaderboardByNameLiveUpdaters = new HashMap<String, LiveLeaderboardUpdater>();
-        // The leaderboard cache is invalidated upon all competitor and mark position changes; some analyses
+        // The leaderboard cache is invalidated upon all competitor and mark position changes; some analyzes
         // are pretty expensive, such as the maneuver re-calculation. Waiting for the latest analysis after only a
         // single fix was updated is too expensive if users use the replay feature while a race is still running.
         // Therefore, using waitForLatestAnalyses==false seems appropriate here.
-        leaderboardDTOCacheWaitingForLatestAnalysis = new LeaderboardDTOCache(this, /* waitForLatestAnalyses */ false);
+        leaderboardDTOCache = new LeaderboardDTOCache(this, /* waitForLatestAnalyses */ false);
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
@@ -484,11 +484,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final TimePoint nowMinusDelay = leaderboard.getNowMinusDelay();
                 final TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
                 if (timePointOfLatestModification != null && !nowMinusDelay.before(timePointOfLatestModification)) {
+                    // if there hasn't been any modification to the leaderboard since nowMinusDelay, use non-live mode
+                    // and pull the result from the regular leaderboard cache:
                     timePoint = timePointOfLatestModification;
                 } else {
+                    // don't use the regular leaderboard cache; the race still seems to be on; use the live leaderboard updater instead:
                     timePoint = null;
-                    result = liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails,
-                            nowMinusDelay);
+                    result = liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails);
                 }
             } else {
                 timePoint = new MillisecondsTimePoint(date);
@@ -497,7 +499,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 // in replay we'd like up-to-date results; they are still cached
                 // which is OK because the cache is invalidated whenever any of the tracked races attached to the
                 // leaderboard changes.
-                result = leaderboardDTOCacheWaitingForLatestAnalysis.getLeaderboardByName(leaderboard, timePoint,
+                result = leaderboardDTOCache.getLeaderboardByName(leaderboard, timePoint,
                         namesOfRaceColumnsForWhichToLoadLegDetails);
             }
             logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
