@@ -139,12 +139,16 @@ public class LiveLeaderboardUpdater implements Runnable {
                 while (result == null) {
                     if (columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
                         result = currentLiveLeaderboard;
-                    } else {
+                    }
+                    if (result == null) {
                         ensureRunning();
                         try {
                             this.wait();
                         } catch (InterruptedException e) {
                             logger.log(Level.INFO, "interrupted while waiting for LiveLeaderboardCache update", e);
+                        }
+                        if (columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
+                            result = currentLiveLeaderboard;
                         }
                     }
                     // now we either have a result (good, we're done), or the thread stopped running (then we need to renew the request)
