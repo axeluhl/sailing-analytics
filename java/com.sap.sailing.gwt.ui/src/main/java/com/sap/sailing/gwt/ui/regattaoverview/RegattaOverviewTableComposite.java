@@ -186,6 +186,9 @@ public class RegattaOverviewTableComposite extends Composite {
     }
 
     protected void loadAndUpdateEventLog() {
+        if (eventIdAsString == null) {
+            return;
+        }
         sailingService.getRegattaOverviewEntriesForEvent(eventIdAsString,
                 new MarkedAsyncCallback<List<RegattaOverviewEntryDTO>>() {
 
