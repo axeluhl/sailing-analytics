@@ -42,7 +42,10 @@ public class EventSendingService extends Service implements EventSendingListener
     private EventPersistenceManager persistenceManager;
     private boolean isHandlerSet;
     
-    private EventSendingServiceLogger serviceLogger;
+    private EventSendingServiceLogger serviceLogger = new EventSendingServiceLogger() {
+        @Override public void onEventSentSuccessful() { }
+        @Override public void onEventSentFailed() { }
+    };
     
     public interface EventSendingServiceLogger {
         public void onEventSentSuccessful();
@@ -219,9 +222,9 @@ public class EventSendingService extends Service implements EventSendingListener
      */
     private boolean isConnected() {
         NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
-        if (activeNetwork == null)
+        if (activeNetwork == null) {
             return false;
-        boolean isConnected = activeNetwork.isConnected();
-        return isConnected;
+        }
+        return activeNetwork.isConnected();
     }
 }
