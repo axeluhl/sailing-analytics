@@ -139,8 +139,12 @@ public class EventPersistenceManager {
         try {
             RaceLogEventDeserializer deserializer = RaceLogEventDeserializer.create(DomainFactoryImpl.INSTANCE);
             RaceLogEvent event = deserializer.deserialize((JSONObject) new JSONParser().parse(serializedEvent));
-            store.getRace(raceId).getRaceLog().add(event);
-            ExLog.i(TAG, String.format("Event readded."));
+            boolean added = store.getRace(raceId).getRaceLog().add(event);
+            if (added) {
+                ExLog.i(TAG, String.format("Event readded: %s", serializedEvent));
+            } else {
+                ExLog.i(TAG, "Event didn't need to be readded. Same event already in the log");
+            }
         } catch (JsonDeserializationException e) {
             ExLog.w(TAG, String.format("Error readding event to race log: %s", e.toString()));
         } catch (ParseException e) {
