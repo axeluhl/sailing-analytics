@@ -125,6 +125,8 @@ public class RegattaOverviewTableComposite extends Composite {
     private Collection<? extends RegattaOverviewEntryDTO> filterAndSort(List<RegattaOverviewEntryDTO> raceList) {
         List<RegattaOverviewEntryDTO> reversedUnfilterted = new ArrayList<RegattaOverviewEntryDTO>(raceList);
 
+        // This has grown to an ugly hack. Consider moving this filtering to a better place and
+        // change the handling of alphanum-like race names!
         Collections.sort(reversedUnfilterted, new Comparator<RegattaOverviewEntryDTO>() {
             @Override
             public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
@@ -136,7 +138,15 @@ public class RegattaOverviewTableComposite extends Composite {
                     if (result == 0) {
                         result = left.raceInfo.fleet.compareTo(right.raceInfo.fleet);
                         if (result == 0) {
-                            result = right.raceInfo.raceName.compareTo(left.raceInfo.raceName);
+                            // Ok this is where it's getting worse. We want race "R10" to be on top of "R1".
+                            // Sorting just by the value of the race name would yield a wrong result. Therefore
+                            // we first sort by the length of the string (effectively pushing numbers with
+                            // more digits higher) and THEN by the value of the race name (i.e. sorting the
+                            // last digit).
+                            result = Integer.valueOf(right.raceInfo.raceName.length()).compareTo(Integer.valueOf(left.raceInfo.raceName.length()));
+                            if (result == 0) {
+                                result = right.raceInfo.raceName.compareTo(left.raceInfo.raceName);
+                            }
                         }
                     }
                 }
@@ -150,7 +160,7 @@ public class RegattaOverviewTableComposite extends Composite {
         }
 
         List<RegattaOverviewEntryDTO> filtered = new ArrayList<RegattaOverviewEntryDTO>();
-        int maxAddtionalRacesCount = 2;
+        int maxAddtionalRacesCount = 100;
         for (RegattaOverviewEntryDTO entry : reversedUnfilterted) {
             RaceLogRaceStatus status = entry.raceInfo.lastStatus;
             if (status != null && isRaceActive(status)) {
