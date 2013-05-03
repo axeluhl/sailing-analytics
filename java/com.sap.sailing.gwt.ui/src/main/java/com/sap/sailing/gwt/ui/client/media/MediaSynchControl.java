@@ -19,6 +19,7 @@ public class MediaSynchControl {
 
     private final FlowPanel mainPanel;
     private final FlowPanel buttonPanel;
+    private final FlowPanel offsetPanel;
     private final MediaSynchAdapter mediaSynchAdapter;
     private final TextBox offsetEdit;
     private final CheckBox lockToggle;
@@ -26,26 +27,29 @@ public class MediaSynchControl {
     public MediaSynchControl(MediaSynchAdapter mediaSynchListener) {
         this.mediaSynchAdapter = mediaSynchListener;
         mainPanel = new FlowPanel();
+        offsetPanel = new FlowPanel();
+        offsetPanel.addStyleName("offset-panel");
         buttonPanel = new FlowPanel();
-        Button fastRewindButton = new Button("<p>-1s &lt;&lt;</p>", new ClickHandler() {
+        buttonPanel.addStyleName("button-panel");
+        Button fastRewindButton = new Button("<p>-1s &#171;</p>", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 fastRewind();
             }
         });
-        Button slowRewindButton = new Button("<p>-0.1s &lt;</p>", new ClickHandler() {
+        Button slowRewindButton = new Button("<p>-0.1s &#8249;</p>", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 slowRewind();
             }
         });
-        Button slowForwardButton = new Button("<p>&gt; +0.1s</p>", new ClickHandler() {
+        Button slowForwardButton = new Button("<p>&#8250; +0.1s</p>", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 slowForward();
             }
         });
-        Button fastForwardButton = new Button("<p>&gt;&gt; + 1s</p>", new ClickHandler() {
+        Button fastForwardButton = new Button("<p>&#187; + 1s</p>", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 fastForward();
@@ -84,16 +88,23 @@ public class MediaSynchControl {
 
         offsetEdit = new TextBox();
 
-        buttonPanel.add(fastRewindButton);
-        buttonPanel.add(slowRewindButton);
-        buttonPanel.add(new Label("Offset:"));
-        buttonPanel.add(offsetEdit);
-        buttonPanel.add(slowForwardButton);
-        buttonPanel.add(fastForwardButton);
+        mainPanel.add(lockToggle);
+        offsetPanel.add(new Label("Offset:"));
+        offsetPanel.add(offsetEdit);
+
+        offsetPanel.add(fastRewindButton);
+        offsetPanel.add(slowRewindButton);
+
+        offsetPanel.add(slowForwardButton);
+        offsetPanel.add(fastForwardButton);
+        
+        buttonPanel.add(offsetPanel);
+        
         buttonPanel.add(saveButton);
         buttonPanel.add(discardButton);
+        
+        
         mainPanel.add(buttonPanel);
-        mainPanel.add(lockToggle);
 
         lockToggle.setValue(true);
         updateOffset();
