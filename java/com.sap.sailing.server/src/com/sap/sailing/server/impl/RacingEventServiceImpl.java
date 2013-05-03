@@ -12,7 +12,9 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,7 +28,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -56,6 +57,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -203,6 +205,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     private final RaceLogScoringReplicator raceLogScoringReplicator;
 
+    private MediaLibrary mediaLibrary;
+
     public RacingEventServiceImpl() {
         this(MongoFactory.INSTANCE.getDefaultDomainObjectFactory(), MongoFactory.INSTANCE.getDefaultMongoObjectFactory());
     }
@@ -241,6 +245,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         delayToLiveInMillis = TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS;
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
+        this.mediaLibrary = new MediaLibrary(this);
 
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
@@ -1598,6 +1603,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         oos.writeObject(leaderboardGroupsByName);
         logger.info("serializing leaderboardsByName");
         oos.writeObject(leaderboardsByName);
+        logger.info("serializing mediaLibrary");
+        mediaLibrary.serialize(oos);
     }
 
     @SuppressWarnings("unchecked") // the type-parameters in the casts of the de-serialized collection objects can't be checked
@@ -1649,6 +1656,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                     ((LeaderboardGroupMetaLeaderboard) leaderboard).registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards();
                 }
             }
+            logger.info("receiving mediaLibrary");
+            mediaLibrary.deserialize(ois);            
             logger.info("Done with initial replication on "+this);
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassloader);
@@ -1754,6 +1763,43 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             mongoObjectFactory.storeEvent(event);
         }
         return courseArea;
+    }
+
+    @Override
+    public void mediaTrackAdded(MediaTrack mediaTrack) {
+        mediaLibrary.addMediaTrack(mediaTrack);
+    }
+
+    @Override
+    public void mediaTracksAdded(Collection<MediaTrack> mediaTracks) {
+        mediaLibrary.addMediaTracks(mediaTracks);
+    }
+    
+    @Override
+    public void mediaTrackChanged(MediaTrack mediaTrack) {
+        mediaLibrary.applyChanges(mediaTrack);
+    }
+
+    @Override
+    public void mediaTrackDeleted(MediaTrack mediaTrack) {
+        mediaLibrary.deleteMediaTrack(mediaTrack);
+    }
+
+    @Override
+    public Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+        TrackedRace trackedRace = getExistingTrackedRace(regattaAndRaceIdentifier);
+        if (trackedRace != null) {
+            Date raceStart = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
+            Date raceEnd = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
+            return mediaLibrary.findMediaTracksInTimeRange(raceStart , raceEnd);
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public Collection<MediaTrack> getAllMediaTracks() {
+        return mediaLibrary.allTracks();
     }
 
 }

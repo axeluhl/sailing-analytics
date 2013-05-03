@@ -1,15 +1,16 @@
-package com.sap.sailing.gwt.ui.client.shared.media;
+package com.sap.sailing.domain.common.media;
 
+import java.io.Serializable;
 import java.util.Date;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * See http://my.opera.com/core/blog/2010/03/03/everything-you-need-to-know-about-html5-video-and-audio-2
  * @author D047974
  *
  */
-public class MediaTrack implements IsSerializable {
+public class MediaTrack implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
 
     public enum MimeType {
         
@@ -56,13 +57,6 @@ public class MediaTrack implements IsSerializable {
         }
     }
 
-    public class MediaSection implements IsSerializable {
-        public String title;
-        public long offsetInMillis;
-        public Date startTime;
-        public Date endTime;
-    }
-
     public String dbId;
     public String title;
     public String url;
@@ -72,11 +66,9 @@ public class MediaTrack implements IsSerializable {
     public Status status = Status.UNDEFINED;
 
     public MediaTrack() {
-        super();
     }
-
+    
     public MediaTrack(String dbId, String title, String url, Date startTime, int durationInMillis, MimeType mimeType) {
-        super();
         this.dbId = dbId;
         this.title = title;
         this.url = url;
@@ -88,6 +80,14 @@ public class MediaTrack implements IsSerializable {
     public String toString() {
         return title + " - " + url + " [" + typeToString() + ']' + startTime + " [" + durationInMillis + status + ']';  
     }
+    
+    public Date deriveEndTime() {
+        if (startTime != null) {
+            return new Date(startTime.getTime() + durationInMillis);
+        } else {
+            return null;
+        }
+    }
 
     public String typeToString() {
         return mimeType == null ? "undefined" : mimeType.toString();
@@ -95,6 +95,21 @@ public class MediaTrack implements IsSerializable {
     
     public boolean isYoutube() {
         return (mimeType != null) && MediaSubType.youtube.equals(mimeType.mediaSubType);
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof MediaTrack) {
+            MediaTrack mediaTrack = (MediaTrack) obj;
+            return this.dbId.equals(mediaTrack.dbId);
+        } else {
+            return false;
+        }
+    }
+    
+    @Override
+    public int hashCode() {
+        return this.dbId == null ? 0 : this.dbId.hashCode();
     }
 
 }
