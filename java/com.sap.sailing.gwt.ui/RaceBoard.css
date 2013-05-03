@@ -341,7 +341,7 @@ img.openColumn {
 }
 
 .gwt-extras-WindowBox .dialogMiddleCenterInner {
-	overflow:hidden;
+	overflow: auto;
 }
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-close {
@@ -393,6 +393,19 @@ img.openColumn {
     background: url(images/resize_arrow_left.png) center center no-repeat;
 }
 
+.media-synch-control {
+	background: #efefef;
+	padding: 10px;
+	margin: 10px 0 10px 0;
+}
+
+.gwt-extras-WindowBox .offset-panel {
+	margin: 10px 0;
+}
+
+.gwt-extras-WindowBox .offset-panel button {
+    margin: 0 0 0 5px;
+}
 /*******************************************************************************
  * End of CSS for WindowBox component.
  ******************************************************************************/
