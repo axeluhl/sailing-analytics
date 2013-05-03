@@ -160,7 +160,7 @@ public class RegattaOverviewTableComposite extends Composite {
         }
 
         List<RegattaOverviewEntryDTO> filtered = new ArrayList<RegattaOverviewEntryDTO>();
-        int maxAddtionalRacesCount = 100;
+        int maxAddtionalRacesCount = 2;
         for (RegattaOverviewEntryDTO entry : reversedUnfilterted) {
             RaceLogRaceStatus status = entry.raceInfo.lastStatus;
             if (status != null && isRaceActive(status)) {
