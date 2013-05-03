@@ -49,6 +49,7 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
     private final Label eventNameLabel;
     private final Label venueNameLabel;
     private final Label timeLabel;
+    private final Button filterButton;
     private final Button refreshNowButton;
     private final Button startStopUpdatingButton;
     
@@ -103,6 +104,16 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingLeft(20.0, Unit.PX);
         
+        this.filterButton = new Button(stringMessages.disableRaceFilter());
+        filterButton.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                boolean isFilterActive = regattaOverviewTableComposite.switchFilter();
+                filterButton.setText(isFilterActive ? 
+                        stringMessages.disableRaceFilter() : stringMessages.enableRaceFilter());
+            }
+        });
         
         this.refreshNowButton = new Button(stringMessages.refreshNow());
         refreshNowButton.addClickHandler(new ClickHandler() {
@@ -129,6 +140,8 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
             }
             
         });
+        
+        this.refreshNowButton.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
         this.startStopUpdatingButton.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
         
         this.serverUpdateTimer = new Timer(PlayModes.Live, serverUpdateRate);
@@ -192,6 +205,7 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         refreshStartStopClockPanel.setStyleName(STYLE_REFRESH_STOP_TIME);
         refreshStartStopClockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         
+        refreshStartStopClockPanel.add(filterButton);
         refreshStartStopClockPanel.add(refreshNowButton);
         refreshStartStopClockPanel.add(startStopUpdatingButton);
         refreshStartStopClockPanel.add(timeLabel);
