@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 public class RaceInfoDTO implements IsSerializable {
     public String raceName;
     public String fleet;
+    public boolean hasEvents;
     public Date startTime;
     public RaceLogRaceStatus lastStatus;
     public Flags lastUpperFlag;

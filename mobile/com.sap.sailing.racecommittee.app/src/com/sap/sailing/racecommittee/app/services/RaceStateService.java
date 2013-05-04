@@ -100,7 +100,14 @@ public class RaceStateService extends Service {
 
     @Override
     public void onDestroy() {
-        // Unregister all race listener...
+        unregisterAllRaces();
+        
+        // ... and remove from status bar!
+        stopForeground(true);
+        super.onDestroy();
+    }
+
+    private void unregisterAllRaces() {
         for (Entry<ManagedRace, RaceLogEventVisitor> entry : registeredLogListeners.entrySet()) {
             entry.getKey().getState().getRaceLog().removeListener(entry.getValue());
         }
@@ -113,10 +120,9 @@ public class RaceStateService extends Service {
                 alarmManager.cancel(intent);
             }
         }
+        managedIntents.clear();
         
-        // ... and remove from status bar!
-        stopForeground(true);
-        super.onDestroy();
+        ExLog.i(TAG, "All races unregistered.");
     }
 
     private void startForeground() {
@@ -143,6 +149,11 @@ public class RaceStateService extends Service {
     private void handleStartCommand(Intent intent) {
         String action = intent.getAction();
         ExLog.i(TAG, String.format("Command action '%s' received.", action));
+        
+        if (getString(R.string.intentActionClearRaces).equals(action)) {
+            handleClearRaces(intent);
+            return;
+        }
         
         if (getString(R.string.intentActionRegisterRace).equals(action)) {
             handleRegisterRace(intent);
@@ -178,8 +189,17 @@ public class RaceStateService extends Service {
         }
     }
 
+    private void handleClearRaces(Intent intent) {
+        unregisterAllRaces();
+        clearAllRaces();
+    }
+
+    private void clearAllRaces() {
+        dataManager.getDataStore().getRaces().clear();
+        ExLog.i(TAG, "Cleared all races.");
+    }
+
     private void handleRegisterRace(Intent intent) {
-        ExLog.i(TAG, "Registering race.");
         ManagedRace race = getRaceFromIntent(intent);
         if (race == null) {
             ExLog.i(TAG, "Intent did not carry valid race information.");
@@ -217,8 +237,10 @@ public class RaceStateService extends Service {
 
             this.registeredLogListeners.put(race, logListener);
             this.registeredStateListeners.put(race, stateListener);
+            
+            ExLog.i(TAG, "Race " + race.getId() + " registered.");
         } else {
-            ExLog.i(TAG, "Race " + race.getId() + " was already registered. Ignoring.");
+            ExLog.e(TAG, "Race " + race.getId() + " was already registered. Ignoring.");
         }
     }
 

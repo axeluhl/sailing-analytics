@@ -5,8 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -76,7 +75,7 @@ public class LiveLeaderboardUpdater implements Runnable {
     
     /**
      * For each String from <code>namesOfRaceColumnsForWhichToLoadLegDetails</code> passed to
-     * {@link #getLiveLeaderboard(Collection, TimePoint)}, records the validity time point of the last request here when the
+     * {@link #getLiveLeaderboard(Collection)}, records the validity time point of the last request here when the
      * {@link #currentLiveLeaderboard} has been updated with results containing this column details. This updater will
      * stop computing the details for that column if the validity time for the update calculation is more than
      * {@link #UPDATE_TIMEOUT_IN_MILLIS} milliseconds after the time point recorded here.
@@ -85,7 +84,7 @@ public class LiveLeaderboardUpdater implements Runnable {
     private final Map<String, TimePoint> timePointOfLastRequestForColumnDetails;
     
     /**
-     * As soon as the first {@link #getLiveLeaderboard(Collection, TimePoint)} request has been received, this field tells the
+     * As soon as the first {@link #getLiveLeaderboard(Collection)} request has been received, this field tells the
      * "validity time point" (as opposed to the request time point; so not when the request was received but for which
      * time point the request was asking the data) for which the last general request asked the leaderboard contents,
      * regardless the combination of column details requested. This is used to decide when to stop a thread running this
@@ -113,28 +112,67 @@ public class LiveLeaderboardUpdater implements Runnable {
         return leaderboard;
     }
     
-    public LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            TimePoint nowMinusDelay) throws NoWindException {
+    public LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails) throws NoWindException {
         LeaderboardDTO result = null;
-        updateRequestTimes(namesOfRaceColumnsForWhichToLoadLegDetails, nowMinusDelay);
+        updateRequestTimes(namesOfRaceColumnsForWhichToLoadLegDetails);
+        ensureRunning();
         synchronized (this) {
             if (running
                     && columnNamesForWhichCurrentLiveLeaderboardHasTheDetails
                             .containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
                 result = currentLiveLeaderboard;
-                lastRequest = nowMinusDelay;
                 if (result != null) {
                     cacheHitCount++;
                 }
             }
         }
-        if (result == null) { // current cache doesn't have the column details requested; re-calculate
+        if (result == null) { // current cache doesn't have the column details requested; "request" has been entered by
+            // updating the request times; now ensure the thread is running, then wait for the next result;
+            // The biggest challenge occurs when the thread is currently working on an update and takes longer than
+            // the UPDATE_TIMEOUT_IN_MILLIS for it. Then, all previous requests would be so far in the past that the
+            // thread is terminated and that in addition to that the original request would meanwhile have expired.
+            // We then need to renew the request.
             cacheMissCount++;
-            result = sailingService.computeLeaderboardByName(leaderboard, nowMinusDelay, namesOfRaceColumnsForWhichToLoadLegDetails,
-                    /* waitForLatestAnalyses */ false);
-            updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, result);
+            synchronized (this) {
+                while (result == null) {
+                    if (columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
+                        result = currentLiveLeaderboard;
+                    }
+                    if (result == null) {
+                        if (logger.isLoggable(Level.FINEST)) { 
+                            logger.finest("waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails);
+                        }
+                        ensureRunning();
+                        try {
+                            this.wait();
+                        } catch (InterruptedException e) {
+                            logger.log(Level.INFO, "interrupted while waiting for LiveLeaderboardCache update", e);
+                        }
+                        if (columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
+                            result = currentLiveLeaderboard;
+                            if (logger.isLoggable(Level.FINEST)) { 
+                                logger.finest("successfully waited for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails);
+                            }
+                        } else {
+                            if (logger.isLoggable(Level.FINEST)) { 
+                                logger.finest("waiting for leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" unsuccessful. Need to try again...");
+                            }
+                        }
+                    } else {
+                        if (logger.isLoggable(Level.FINEST)) { 
+                            logger.finest("leaderboard for "+namesOfRaceColumnsForWhichToLoadLegDetails+" was provided in the meantime");
+                        }
+                    }
+                    // now we either have a result (good, we're done), or the thread stopped running (then we need to renew the request)
+                    // or the thread still runs but the result may have expired and therefore be null (renew the request)
+                    if (result == null) {
+                        // need to renew the request
+                        updateRequestTimes(namesOfRaceColumnsForWhichToLoadLegDetails);
+                        ensureRunning();
+                    }
+                }
+            }
         }
-        ensureRunning();
         logger.info(""+LiveLeaderboardUpdater.class.getSimpleName()+" cache hits/misses: "+cacheHitCount+"/"+cacheMissCount);
         return result;
     }
@@ -162,24 +200,26 @@ public class LiveLeaderboardUpdater implements Runnable {
      * 
      * This method assumes that <code>namesOfRaceColumnsForWhichToLoadLegDetails</code> tells the column names for which
      * <code>result</code> has the details.
-     * 
-     * @param timePoint the validity time point for the request; not the wall clock time when the request was sent
      */
-    private synchronized void updateRequestTimes(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, TimePoint timePoint) {
-        lastRequest = timePoint;
+    private synchronized void updateRequestTimes(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails) {
+        lastRequest = getLeaderboard().getNowMinusDelay();
         for (String nameOfRaceColumn : namesOfRaceColumnsForWhichToLoadLegDetails) {
             if (!timePointOfLastRequestForColumnDetails.containsKey(nameOfRaceColumn) ||
-                    timePoint.after(timePointOfLastRequestForColumnDetails.get(nameOfRaceColumn))) {
-                timePointOfLastRequestForColumnDetails.put(nameOfRaceColumn, timePoint);
+                    lastRequest.after(timePointOfLastRequestForColumnDetails.get(nameOfRaceColumn))) {
+                timePointOfLastRequestForColumnDetails.put(nameOfRaceColumn, lastRequest);
             }
         }
     }
 
+    /**
+     * Updates the cache contents and notifies all waiters on this object.
+     */
     private synchronized void updateCacheContents(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
             LeaderboardDTO result) {
         columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.clear();
         columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.addAll(namesOfRaceColumnsForWhichToLoadLegDetails);
         currentLiveLeaderboard = result;
+        notifyAll();
     }
 
     /**
@@ -189,12 +229,9 @@ public class LiveLeaderboardUpdater implements Runnable {
     @Override
     public void run() {
         assert running;
-        Timer interruptTimer = null;
-        TimerTask interruptTask = null;
         try {
             logger.info("Starting " + LiveLeaderboardUpdater.class.getSimpleName() + " thread for leaderboard "
                     + leaderboard.getName());
-            interruptTimer = new Timer("Interrupt timer for "+LiveLeaderboardUpdater.class.getSimpleName()+" for leaderboard "+leaderboard.getName());
             // interrupt the current thread if not producing a single result within the overall timeout
             while (true) {
                 MillisecondsTimePoint now = MillisecondsTimePoint.now();
@@ -211,19 +248,6 @@ public class LiveLeaderboardUpdater implements Runnable {
                 TimePoint timeLastUpdateWasStarted = now;
                 try {
                     final Set<String> namesOfRaceColumnsForWhichToLoadLegDetails = getColumnNamesForWhichToFetchDetails(timePoint);
-                    interruptTask = new TimerTask() {
-                        @Override
-                        public void run() {
-                            synchronized (LiveLeaderboardUpdater.this) {
-                                if (thread != null) {
-                                    logger.severe("Interrupting "+LiveLeaderboardUpdater.class.getSimpleName()+" thread "+thread+
-                                            " after not receiving an update in "+UPDATE_TIMEOUT_IN_MILLIS+"ms");
-                                    thread.interrupt();
-                                }
-                            }
-                        }
-                    };
-                    interruptTimer.schedule(interruptTask, UPDATE_TIMEOUT_IN_MILLIS);
                     LeaderboardDTO newCacheValue = sailingService.computeLeaderboardByName(leaderboard, timePoint,
                             namesOfRaceColumnsForWhichToLoadLegDetails, /* waitForLatestAnalyses */false);
                     updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, newCacheValue);
@@ -236,9 +260,6 @@ public class LiveLeaderboardUpdater implements Runnable {
                     } catch (InterruptedException e1) {
                         logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e1);
                     }
-                }
-                if (interruptTask != null) {
-                    interruptTask.cancel();
                 }
                 TimePoint computeLeaderboardByNameFinishedAt = MillisecondsTimePoint.now();
                 long millisToSleep = MINIMUM_TIME_BETWEEN_UPDATES
@@ -260,13 +281,6 @@ public class LiveLeaderboardUpdater implements Runnable {
             }
             logger.info("exception in "+LiveLeaderboardUpdater.class.getName()+".run(): "+e.getMessage());
             logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e);
-        } finally {
-            if (interruptTask != null) {
-                interruptTask.cancel();
-            }
-            if (interruptTimer != null) {
-                interruptTimer.cancel();
-            }
         }
     }
 

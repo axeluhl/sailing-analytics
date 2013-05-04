@@ -1,0 +1,88 @@
+package com.sap.sailing.velum.resultimport.impl;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import com.sap.sailing.domain.common.RegattaScoreCorrections;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.resultimport.RegattaResults;
+import com.sap.sailing.resultimport.ResultDocumentProvider;
+import com.sap.sailing.resultimport.impl.AbstractDocumentBasedScoreCorrectionProvider;
+import com.sap.sailing.resultimport.impl.RegattaScoreCorrectionsImpl;
+import com.sap.sailing.velum.resultimport.CsvParser;
+import com.sap.sailing.velum.resultimport.CsvParserFactory;
+
+public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorrectionProvider {
+    private static final long serialVersionUID = 4767200739966995306L;
+
+    private static final String NAME = "Scores from Velum CSV exports"; 
+
+    private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
+
+    private final CsvParserFactory parserFactory;
+    
+    public ScoreCorrectionProviderImpl(ResultDocumentProvider documentProvider, CsvParserFactory parserFactory) {
+        super(documentProvider);
+        this.parserFactory = parserFactory;
+    }
+    
+    @Override
+    public String getName() {
+        return NAME;
+    }
+
+    @Override
+    public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception {
+        Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String, TimePoint>>>();
+        for (CsvParser parser : getAllRegattaResults()) {
+            try {
+                parser.parseResults();
+                String boatClass = parser.getBoatClass();
+                
+                result.put(/* use document name as "event" name */ parser.getFilename(),
+                        Collections.singleton(new Pair<String, TimePoint>(boatClass, parser.getLastModified())));
+
+            } catch (Exception e) {
+                logger.info("Parse error during CSV import. Ignoring document " + parser.toString());
+                logger.throwing(ScoreCorrectionProviderImpl.class.getName(), "getHasResultsForBoatClassFromDateByEventName", e);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
+            TimePoint timePointPublished) throws Exception {
+        for (CsvParser parser : getAllRegattaResults()) {
+            try {
+                RegattaResults regattaResult = parser.parseResults();
+                if ((boatClassName == null && parser.getBoatClass() == null) ||
+                        boatClassName.equals(parser.getBoatClass())) {
+                    return new RegattaScoreCorrectionsImpl(this, regattaResult);
+                }
+                
+            } catch (Exception e) {
+                logger.info("Parse error during CSV import. Ignoring document " + parser.toString());
+                logger.throwing(ScoreCorrectionProviderImpl.class.getName(), "getScoreCorrections", e);
+            }
+        }
+        return null;
+    }
+
+    private Iterable<CsvParser> getAllRegattaResults() throws Exception {
+        List<CsvParser> result = new ArrayList<>();
+        for (Triple<InputStream, String, TimePoint> is : getResultDocumentProvider().getDocumentsAndNamesAndLastModified()) {
+            CsvParser parser = parserFactory.createParser(is.getA(), is.getB(), is.getC());
+            result.add(parser);
+        }
+        return result;
+    }
+}

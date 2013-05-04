@@ -45,7 +45,7 @@ public class PassAwareRaceLogImpl extends RaceLogImpl implements PassAwareRaceLo
 
     public void setCurrentPassId(int newPassId) {
         if (newPassId != this.currentPassId) {
-            logger.info(String.format("Changing pass id to %d", newPassId));
+            logger.fine(String.format("Changing pass id to %d", newPassId));
             this.currentPassId = newPassId;
         }
     }

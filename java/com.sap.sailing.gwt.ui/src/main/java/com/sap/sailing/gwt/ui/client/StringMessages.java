@@ -578,4 +578,7 @@ public interface StringMessages extends Messages {
     String value();
     String nationalityMustBeISOorIOCcode();
     String raceRank();
+    String waypoints();
+    String disableRaceFilter();
+    String enableRaceFilter();
 }
