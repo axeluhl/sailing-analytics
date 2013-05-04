@@ -129,7 +129,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             Pair<List<Triple<String, Integer, Color>>, Boolean> seriesPair = new Pair<List<Triple<String, Integer, Color>>, Boolean>(fleets, seriesDTO.isMedal());
             seriesStructure.put(seriesDTO.name, seriesPair);
         }
-        sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, seriesStructure, true,
+        sailingService.createRegatta(newRegatta.name, newRegatta.boatClass==null?null:newRegatta.boatClass.name, seriesStructure, true,
                 newRegatta.scoringScheme, newRegatta.defaultCourseAreaIdAsString, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {

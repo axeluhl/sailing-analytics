@@ -66,7 +66,6 @@ import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
  * @author Axel Uhl (D043530)
  * 
  */
-// TODO: Do not inherit from FormPanel since the provided functionality is never used!
 public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private final ErrorReporter errorReporter;
     
@@ -641,16 +640,17 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private boolean checkBoatClassMatch(TracTracRaceRecordDTO tracTracRecord, RegattaDTO selectedRegatta) {
         Iterable<String> boatClassNames = tracTracRecord.boatClassNames;
         if (boatClassNames != null && Util.size(boatClassNames) > 0) {
-            String tracTracBoatClass = boatClassNames.iterator().next();
+            String tracTracBoatClassName = boatClassNames.iterator().next();
             if (selectedRegatta == null) {
                 // in case no regatta has been selected we check if there would be a matching regatta
                 for (RegattaDTO regatta : getAvailableRegattas()) {
-                    if (tracTracBoatClass.equalsIgnoreCase(regatta.boatClass.name)) {
+                    if ((tracTracBoatClassName == null && regatta.boatClass == null) ||
+                            (regatta.boatClass != null && tracTracBoatClassName.equalsIgnoreCase(regatta.boatClass.name))) {
                         return false;
                     }
                 }
             } else {
-                if (!tracTracBoatClass.equalsIgnoreCase(selectedRegatta.boatClass.name)) {
+                if (!tracTracBoatClassName.equalsIgnoreCase(selectedRegatta.boatClass.name)) {
                     return false;
                 }
             }
@@ -684,7 +684,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             StringBuilder builder = new StringBuilder(100 + racesWithNotMatchingBoatClasses.size() * 30);
             builder.append("WARNING\n");
             if (selectedRegatta != null) {
-                builder.append(this.stringMessages.boatClassDoesNotMatchSelectedRegatta(selectedRegatta.boatClass.name,
+                builder.append(this.stringMessages.boatClassDoesNotMatchSelectedRegatta(
+                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.name,
                         selectedRegatta.name));
             } else {
                 builder.append(this.stringMessages.regattaExistForSelectedBoatClass());
