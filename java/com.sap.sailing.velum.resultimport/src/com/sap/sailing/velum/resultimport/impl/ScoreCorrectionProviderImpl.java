@@ -47,7 +47,8 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
                 parser.parseResults();
                 String boatClass = parser.getBoatClass();
                 
-                result.put(boatClass, Collections.singleton(new Pair<String, TimePoint>(boatClass, parser.getLastModified())));
+                result.put(/* use document name as "event" name */ parser.getFilename(),
+                        Collections.singleton(new Pair<String, TimePoint>(boatClass, parser.getLastModified())));
 
             } catch (Exception e) {
                 logger.info("Parse error during CSV import. Ignoring document " + parser.toString());
