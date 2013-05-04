@@ -8,5 +8,7 @@ public interface CsvParser {
     
     String getBoatClass();
     
+    String getFilename();
+    
     TimePoint getLastModified();
 }

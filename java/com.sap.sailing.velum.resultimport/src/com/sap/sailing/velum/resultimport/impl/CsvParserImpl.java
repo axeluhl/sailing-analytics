@@ -33,6 +33,11 @@ public class CsvParserImpl implements CsvParser {
     }
 
     @Override
+    public String getFilename() {
+        return filename;
+    }
+    
+    @Override
     public String getBoatClass() {
         String result = STAR_BOAT_CLASS_NAME; 
         // we assume the boat class name is in the filename
@@ -62,7 +67,7 @@ public class CsvParserImpl implements CsvParser {
                 // ignore line
             } else if (firstSeparator > 0) {
                 String firstEntry = line.substring(0, firstSeparator);
-                if(firstEntry.startsWith("G-PL")) {
+                if(firstEntry.startsWith("G-PL") || firstEntry.startsWith("G-Pl")) {
                     // header line
                     // scan the number of races
                     String[] splittedHeadline = line.split(SEPARATOR);

@@ -67,8 +67,9 @@ public interface SailingServiceAsync {
 
     /**
      * The string returned in the callback's pair is the common event name
+     * @param listHiddenRaces 
      */
-    void listTracTracRacesInEvent(String eventJsonURL, AsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>> callback);
+    void listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces, AsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>> callback);
 
     /**
      * @param regattaToAddTo

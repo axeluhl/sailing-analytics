@@ -318,6 +318,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         
         layoutTable.setWidget(13, 0, tractracPasswordLabel);
         layoutTable.setWidget(13, 1, this.tractracPasswordTextBox);
+        
+        final CheckBox listHiddenRaces = new CheckBox("List HIDDEN races");
+        layoutTable.setWidget(14, 0, listHiddenRaces);
 
         // List Races
         Button listRacesButton = new Button(this.stringMessages.listRaces());
@@ -325,7 +328,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         listRacesButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                fillRaces(sailingService);
+                fillRaces(sailingService, listHiddenRaces.getValue());
             }
         });
 
@@ -442,6 +445,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             }
         };
         raceStartTrackingColumn.setSortable(true);
+        TextColumn<TracTracRaceRecordDTO> raceStatusColumn = new TextColumn<TracTracRaceRecordDTO>() {
+            @Override
+            public String getValue(TracTracRaceRecordDTO object) {
+                return object.raceStatus;
+            }
+        };
+        raceStartTrackingColumn.setSortable(true);
         
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         this.racesTable = new CellTable<TracTracRaceRecordDTO>(10000, tableResources);
@@ -450,6 +460,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         this.racesTable.addColumn(raceNameColumn, this.stringMessages.race());
         this.racesTable.addColumn(boatClassColumn, this.stringMessages.boatClass());
         this.racesTable.addColumn(raceStartTrackingColumn, this.stringMessages.startTime());
+        this.racesTable.addColumn(raceStatusColumn, this.stringMessages.raceStatusColumn());
         this.racesTable.addColumnSortHandler(getRaceTableColumnSortHandler(this.raceList.getList(), raceNameColumn,
                 boatClassColumn, raceStartTrackingColumn));
         this.racesTable.setSelectionModel(new MultiSelectionModel<TracTracRaceRecordDTO>());
@@ -571,7 +582,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         });
     }
 
-    private void fillRaces(final SailingServiceAsync sailingService) {
+    private void fillRaces(final SailingServiceAsync sailingService, boolean listHiddenRaces) {
         final String jsonURL = this.jsonURLTextBox.getValue();
         final String liveDataURI = this.liveURITextBox.getValue();
         final String storedDataURI = this.storedURITextBox.getValue();
@@ -579,7 +590,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         final String tractracUsername = this.tractracUsernameTextBox.getValue();
         final String tractracPassword = this.tractracPasswordTextBox.getValue();
 
-        sailingService.listTracTracRacesInEvent(jsonURL, new MarkedAsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>>() {
+        sailingService.listTracTracRacesInEvent(jsonURL, listHiddenRaces, new MarkedAsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>>() {
             @Override
             public void handleFailure(Throwable caught) {
                 reportError("Error trying to list races: " + caught.getMessage());
