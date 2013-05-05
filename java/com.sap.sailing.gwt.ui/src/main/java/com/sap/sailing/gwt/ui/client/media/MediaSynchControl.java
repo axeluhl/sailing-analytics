@@ -31,25 +31,25 @@ public class MediaSynchControl {
         offsetPanel.addStyleName("offset-panel");
         buttonPanel = new FlowPanel();
         buttonPanel.addStyleName("button-panel");
-        Button fastRewindButton = new Button("<p>-1s &#171;</p>", new ClickHandler() {
+        Button fastRewindButton = new Button("-1s &#171;", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 fastRewind();
             }
         });
-        Button slowRewindButton = new Button("<p>-0.1s &#8249;</p>", new ClickHandler() {
+        Button slowRewindButton = new Button("-0.1s &#8249;", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 slowRewind();
             }
         });
-        Button slowForwardButton = new Button("<p>&#8250; +0.1s</p>", new ClickHandler() {
+        Button slowForwardButton = new Button("&#8250; +0.1s", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 slowForward();
             }
         });
-        Button fastForwardButton = new Button("<p>&#187; + 1s</p>", new ClickHandler() {
+        Button fastForwardButton = new Button("&#187; + 1s", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 fastForward();
@@ -61,6 +61,7 @@ public class MediaSynchControl {
                 save();
             }
         });
+        saveButton.addStyleName("confirm-button");
         Button discardButton = new Button("Discard", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
