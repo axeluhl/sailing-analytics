@@ -450,7 +450,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 return object.raceStatus;
             }
         };
-        raceStartTrackingColumn.setSortable(true);
+        raceStatusColumn.setSortable(true);
         
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         this.racesTable = new CellTable<TracTracRaceRecordDTO>(10000, tableResources);
