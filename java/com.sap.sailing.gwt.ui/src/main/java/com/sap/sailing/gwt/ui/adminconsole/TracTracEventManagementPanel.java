@@ -89,10 +89,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private TextBox courseDesignUpdateURITextBox;
     private TextBox tractracUsernameTextBox;
     private TextBox tractracPasswordTextBox;
+    private Label loadingMessageLabel;
 
     private TextBox racesFilterTextBox;
     private CellTable<TracTracRaceRecordDTO> racesTable;
-
 
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
@@ -318,7 +318,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         layoutTable.setWidget(13, 0, tractracPasswordLabel);
         layoutTable.setWidget(13, 1, this.tractracPasswordTextBox);
         
-        final CheckBox listHiddenRaces = new CheckBox("List HIDDEN races");
+        final CheckBox listHiddenRaces = new CheckBox(stringMessages.showHiddenRaces());
         layoutTable.setWidget(14, 0, listHiddenRaces);
 
         // List Races
@@ -327,11 +327,14 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         listRacesButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                loadingMessageLabel.setText(stringMessages.loading());
                 fillRaces(sailingService, listHiddenRaces.getValue());
             }
         });
-
         layoutTable.setWidget(14, 1, listRacesButton);
+        
+        loadingMessageLabel = new Label();
+        layoutTable.setWidget(14, 2, loadingMessageLabel);
 
         connectionsPanel.setContentWidget(layoutTable);
 
@@ -613,6 +616,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 
                 TracTracEventManagementPanel.this.racesFilterTextBox.setText("");
                 TracTracEventManagementPanel.this.racesTable.setPageSize(races.size());
+                loadingMessageLabel.setText("");
                 
                 // store a successful configuration in the database for later retrieval
                 sailingService.storeTracTracConfiguration(eventName, jsonURL, liveDataURI, storedDataURI, courseDesignUpdateURI, tractracUsername, tractracPassword,
