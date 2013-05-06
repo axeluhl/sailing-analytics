@@ -329,8 +329,8 @@ img.openColumn {
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls {
   position: absolute;
-  top: -50px;
-  right: 2px;
+  top: 12px;
+  right: 19px;
 }
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls a {
@@ -405,6 +405,10 @@ img.openColumn {
 
 .gwt-extras-WindowBox .offset-panel button {
     margin: 0 0 0 5px;
+}
+
+.gwt-extras-WindowBox .confirm-button {
+	margin: 0 5px 0 0;
 }
 /*******************************************************************************
  * End of CSS for WindowBox component.
