@@ -8,13 +8,23 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.DataStore;
+import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.utils.FileHandlerUtils;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 
 public class EventPersistenceManager {
     
@@ -106,6 +116,8 @@ public class EventPersistenceManager {
             String url = lineParts[2];
             String raceId = lineParts[0];
             String serializedEvent = lineParts[1];
+            
+            addEventToLog(raceId, serializedEvent);
 
             Intent eventIntent = EventSendingService.createEventIntent(context, url, raceId, serializedEvent);
             if (eventIntent != null) {
@@ -115,6 +127,29 @@ public class EventPersistenceManager {
 
         ExLog.i(TAG, "Restored " + delayedIntents.size() + " events");
         return delayedIntents;
+    }
+
+    private void addEventToLog(String raceId, String serializedEvent) {
+        ExLog.i(TAG, String.format("Trying to readd event to race log of race %s.", raceId));
+        DataStore store = DataManager.create(this.context).getDataStore();
+        if (!store.hasRace(raceId)) {
+            ExLog.w(TAG, String.format("There is no race %s.", raceId));
+            return;
+        }
+        try {
+            RaceLogEventDeserializer deserializer = RaceLogEventDeserializer.create(DomainFactoryImpl.INSTANCE);
+            RaceLogEvent event = deserializer.deserialize((JSONObject) new JSONParser().parse(serializedEvent));
+            boolean added = store.getRace(raceId).getRaceLog().add(event);
+            if (added) {
+                ExLog.i(TAG, String.format("Event readded: %s", serializedEvent));
+            } else {
+                ExLog.i(TAG, "Event didn't need to be readded. Same event already in the log");
+            }
+        } catch (JsonDeserializationException e) {
+            ExLog.w(TAG, String.format("Error readding event to race log: %s", e.toString()));
+        } catch (ParseException e) {
+            ExLog.w(TAG, String.format("Error readding event to race log: %s", e.toString()));
+        }
     }
 
     /**

@@ -165,6 +165,7 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
+import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
@@ -1147,8 +1148,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
-
             PassAwareRaceLog passAwareRaceLog = PassAwareRaceLogImpl.copy(raceLog);
+            
+            try {
+                passAwareRaceLog.lockForRead();
+                raceInfoDTO.hasEvents = !Util.isEmpty(passAwareRaceLog.getRawFixes());
+            } finally {
+                passAwareRaceLog.unlockAfterRead();
+            }
+            
             StartTimeFinder startTimeFinder = new StartTimeFinder(passAwareRaceLog);
             if(startTimeFinder.getStartTime()!=null){
                 raceInfoDTO.startTime = startTimeFinder.getStartTime().asDate();
@@ -1266,16 +1274,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL) throws MalformedURLException, IOException,
-    ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+    public Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces) throws MalformedURLException, IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         com.sap.sailing.domain.common.impl.Util.Pair<String,List<RaceRecord>> raceRecords;
         raceRecords = getService().getTracTracRaceRecords(new URL(eventJsonURL));
         List<TracTracRaceRecordDTO> result = new ArrayList<TracTracRaceRecordDTO>();
         for (RaceRecord raceRecord : raceRecords.getB()) {
+            if (listHiddenRaces == false && raceRecord.getRaceStatus().equals(TracTracConnectionConstants.HIDDEN_STATUS)) {
+                continue;
+            }
+            
             result.add(new TracTracRaceRecordDTO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
                     raceRecord.getParamURL().toString(), raceRecord.getReplayURL(), raceRecord.getLiveURI().toString(),
                     raceRecord.getStoredURI().toString(), raceRecord.getTrackingStartTime().asDate(), raceRecord
-                    .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(), raceRecord.getBoatClassNames()));
+                    .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(), raceRecord.getBoatClassNames(),
+                    raceRecord.getRaceStatus()));
         }
         return new Pair<String, List<TracTracRaceRecordDTO>>(raceRecords.getA(), result);
     }

@@ -554,4 +554,9 @@ public interface StringMessages extends Messages {
     String distanceToStarboardEndOfStartlineWhenPassingStart();
     String distanceToStarboardEndOfStartlineWhenPassingStartTooltip();
     String waypoints();
+    String disableRaceFilter();
+    String enableRaceFilter();
+    String raceStatusColumn();
+    String loading();
+    String showHiddenRaces();
 }

@@ -340,7 +340,8 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
             if (selectedRegatta == null) {
                 // in case no regatta has been selected we check if there would be a matching regatta
                 for (RegattaDTO regatta : getAvailableRegattas()) {
-                    if (boatClassName.equalsIgnoreCase(regatta.boatClass.name)) {
+                    if ((boatClassName == null && regatta.boatClass == null) ||
+                            (regatta.boatClass != null && boatClassName.equalsIgnoreCase(regatta.boatClass.name))) {
                         return false;
                     }
                 }
@@ -373,7 +374,8 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         if (racesWithNotMatchingBoatClasses.size() > 0) {
             String warningText = "WARNING\n";
             if (selectedRegatta != null) {
-                warningText += stringMessages.boatClassDoesNotMatchSelectedRegatta(selectedRegatta.boatClass.name, selectedRegatta.name);
+                warningText += stringMessages.boatClassDoesNotMatchSelectedRegatta(
+                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.name, selectedRegatta.name);
             } else {
                 warningText += stringMessages.regattaExistForSelectedBoatClass();
             }
