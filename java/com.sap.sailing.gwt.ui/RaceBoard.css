@@ -229,23 +229,25 @@ img.openColumn {
 
 .raceBoardNavigation-standaloneElement {
     background: url("images/btn-cta-orangeleft.png") repeat-x scroll center 0 transparent;
-	color: #FFFFFF;
+    border-bottom-left-radius: 3px;
+    border-top-left-radius: 3px;
+    color: #FFFFFF;
     cursor: pointer;
     font-family: UbuntuBold,Verdana,Arial,sans-serif;
     font-size: 14px;
     margin: 0 0 0 0;
     padding: 2px 7px 2px 3px;
-    height: 23px; 
+    height: 18px; 
     display: inline-block;
     text-decoration: none;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
     -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-	border-radius: 5px 5px 5px 5px; 
-    -moz-border-radius: 5px 0 0 5px;
-    -webkit-border-radius: 5px 5px 5px 5px;
 }
 
 .raceBoardNavigation-standaloneElement:active {
@@ -313,6 +315,10 @@ img.openColumn {
  * Begin CSS for WindowBox component:
  ******************************************************************************/
 
+.gwt-extras-WindowBox {
+	clip: rect(auto auto auto auto);
+}
+
 .gwt-extras-WindowBox .dialogMiddleCenter {
   padding: 0px !important;
 }
@@ -323,8 +329,8 @@ img.openColumn {
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls {
   position: absolute;
-  top: -50px;
-  right: 2px;
+  top: 12px;
+  right: 19px;
 }
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls a {
@@ -332,6 +338,10 @@ img.openColumn {
   display: block;
   height: 18px;
   width: 17px;  
+}
+
+.gwt-extras-WindowBox .dialogMiddleCenterInner {
+	overflow: auto;
 }
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-close {
@@ -369,6 +379,30 @@ img.openColumn {
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-maximize:hover {
   background: transparent url(images/min-4panel.png) right bottom no-repeat;
+}
+
+.gwt-extras-WindowBox .dialogBottomRightInner {
+	width: 10px;
+	height: 10px;
+	background: url(images/resize_arrow.png) center center no-repeat;
+}
+
+.media-synch-control {
+	background: #efefef;
+	padding: 10px;
+	margin: 10px 0 10px 0;
+}
+
+.gwt-extras-WindowBox .offset-panel {
+	margin: 10px 0;
+}
+
+.gwt-extras-WindowBox .offset-panel button {
+    margin: 0 0 0 5px;
+}
+
+.gwt-extras-WindowBox .confirm-button {
+	margin: 0 5px 0 0;
 }
 /*******************************************************************************
  * End of CSS for WindowBox component.

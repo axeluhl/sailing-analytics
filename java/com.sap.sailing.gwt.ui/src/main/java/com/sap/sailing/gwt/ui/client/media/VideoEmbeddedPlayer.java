@@ -44,6 +44,7 @@ public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements 
         this.popupCloseListener = popCloseListener;
 
         FlowPanel rootPanel = new FlowPanel();
+        rootPanel.addStyleName("FUCK");
         if (mediaControl != null) {
             
             
@@ -51,14 +52,17 @@ public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements 
             // HTML("<iframe class=\"youtube-player\" type=\"text/html\" width=\"640\" height=\"385\" src=\"http://www.youtube.com/embed/dP15zlyra3c?html5=1\" frameborder=\"0\"></iframe>");
             //
             // SimplePanel videoFrameHolder = new SimplePanel();
-            // videoFrameHolder.add(videoFrame); 
-
-            if (showSynchControls) {
-                
+            // videoFrameHolder.add(videoFrame);
+            
+            rootPanel.add(mediaControl);
+            
+            if (showSynchControls) {                
                 mediaSynchControl = new MediaSynchControl(this);
+                mediaSynchControl.widget().addStyleName("media-synch-control");
+
                 rootPanel.add(mediaSynchControl.widget());
             }
-            rootPanel.add(mediaControl);
+            
         }
         this.dialogBox = new WindowBox(videoTrack.title, videoTrack.toString(), rootPanel, new WindowBox.PopoutHandler() {
             
