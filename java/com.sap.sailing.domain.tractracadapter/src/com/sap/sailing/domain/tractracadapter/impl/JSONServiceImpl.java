@@ -33,7 +33,8 @@ public class JSONServiceImpl implements JSONService {
                     (String) jsonRaceEntry.get("tracking_starttime"),
                     (String) jsonRaceEntry.get("tracking_endtime"),
                     (String) jsonRaceEntry.get("race_starttime"),
-                    (String) jsonRaceEntry.get("classes"));
+                    (String) jsonRaceEntry.get("classes"),
+                    (String) jsonRaceEntry.get("status"));
             raceRecords.add(raceRecord);
         }
     }
