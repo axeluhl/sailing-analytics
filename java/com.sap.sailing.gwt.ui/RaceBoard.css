@@ -381,16 +381,10 @@ img.openColumn {
   background: transparent url(images/min-4panel.png) right bottom no-repeat;
 }
 
-.gwt-extras-WindowBox .dialogBottomLeftInner, .gwt-extras-WindowBox .dialogBottomRightInner {
+.gwt-extras-WindowBox .dialogBottomRightInner {
 	width: 10px;
 	height: 10px;
-	background: url(images/resize_arrow_right.png) center center no-repeat;
-}
-
-.gwt-extras-WindowBox .dialogBottomLeftInner {
-    width: 10px;
-    height: 10px;
-    background: url(images/resize_arrow_left.png) center center no-repeat;
+	background: url(images/resize_arrow.png) center center no-repeat;
 }
 
 .media-synch-control {
