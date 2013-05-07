@@ -8,6 +8,7 @@ import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
+//TODO: Do not inherit from FormPanel since the provided functionality is never used!
 public abstract class AbstractRegattaPanel extends FormPanel implements RegattaDisplayer {
     protected final SailingServiceAsync sailingService;
     protected DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));

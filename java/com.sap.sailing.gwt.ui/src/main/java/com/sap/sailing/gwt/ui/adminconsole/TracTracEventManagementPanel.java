@@ -66,7 +66,6 @@ import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
  * @author Axel Uhl (D043530)
  * 
  */
-// TODO: Do not inherit from FormPanel since the provided functionality is never used!
 public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private final ErrorReporter errorReporter;
     
@@ -90,10 +89,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private TextBox courseDesignUpdateURITextBox;
     private TextBox tractracUsernameTextBox;
     private TextBox tractracPasswordTextBox;
+    private Label loadingMessageLabel;
 
     private TextBox racesFilterTextBox;
     private CellTable<TracTracRaceRecordDTO> racesTable;
-
 
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
@@ -319,7 +318,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         layoutTable.setWidget(13, 0, tractracPasswordLabel);
         layoutTable.setWidget(13, 1, this.tractracPasswordTextBox);
         
-        final CheckBox listHiddenRaces = new CheckBox("List HIDDEN races");
+        final CheckBox listHiddenRaces = new CheckBox(stringMessages.showHiddenRaces());
         layoutTable.setWidget(14, 0, listHiddenRaces);
 
         // List Races
@@ -328,11 +327,14 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         listRacesButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                loadingMessageLabel.setText(stringMessages.loading());
                 fillRaces(sailingService, listHiddenRaces.getValue());
             }
         });
-
         layoutTable.setWidget(14, 1, listRacesButton);
+        
+        loadingMessageLabel = new Label();
+        layoutTable.setWidget(14, 2, loadingMessageLabel);
 
         connectionsPanel.setContentWidget(layoutTable);
 
@@ -451,7 +453,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 return object.raceStatus;
             }
         };
-        raceStartTrackingColumn.setSortable(true);
+        raceStatusColumn.setSortable(true);
         
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         this.racesTable = new CellTable<TracTracRaceRecordDTO>(10000, tableResources);
@@ -462,7 +464,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         this.racesTable.addColumn(raceStartTrackingColumn, this.stringMessages.startTime());
         this.racesTable.addColumn(raceStatusColumn, this.stringMessages.raceStatusColumn());
         this.racesTable.addColumnSortHandler(getRaceTableColumnSortHandler(this.raceList.getList(), raceNameColumn,
-                boatClassColumn, raceStartTrackingColumn));
+                boatClassColumn, raceStartTrackingColumn, raceStatusColumn));
         this.racesTable.setSelectionModel(new MultiSelectionModel<TracTracRaceRecordDTO>());
         this.racesTable.setWidth("100%");
 
@@ -504,7 +506,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     
     private ListHandler<TracTracRaceRecordDTO> getRaceTableColumnSortHandler(List<TracTracRaceRecordDTO> raceRecords,
             Column<TracTracRaceRecordDTO, ?> nameColumn, Column<TracTracRaceRecordDTO, ?> boatClassColumn,
-            Column<TracTracRaceRecordDTO, ?> trackingStartColumn) {
+            Column<TracTracRaceRecordDTO, ?> trackingStartColumn, Column<TracTracRaceRecordDTO, ?> raceStatusColumn) {
         ListHandler<TracTracRaceRecordDTO> result = new ListHandler<TracTracRaceRecordDTO>(raceRecords);
         result.setComparator(nameColumn, new Comparator<TracTracRaceRecordDTO>() {
             @Override
@@ -523,6 +525,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             public int compare(TracTracRaceRecordDTO o1, TracTracRaceRecordDTO o2) {
                 return o1.trackingStartTime == null ? -1 : o2.trackingStartTime == null ? 1 : o1.trackingStartTime
                         .compareTo(o2.trackingStartTime);
+            }
+        });
+        result.setComparator(raceStatusColumn, new Comparator<TracTracRaceRecordDTO>() {
+            @Override
+            public int compare(TracTracRaceRecordDTO o1, TracTracRaceRecordDTO o2) {
+                return o1.raceStatus == null ? -1 : o2.raceStatus == null ? 1 : o1.raceStatus
+                        .compareTo(o2.raceStatus);
             }
         });
         return result;
@@ -614,6 +623,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 
                 TracTracEventManagementPanel.this.racesFilterTextBox.setText("");
                 TracTracEventManagementPanel.this.racesTable.setPageSize(races.size());
+                loadingMessageLabel.setText("");
                 
                 // store a successful configuration in the database for later retrieval
                 sailingService.storeTracTracConfiguration(eventName, jsonURL, liveDataURI, storedDataURI, courseDesignUpdateURI, tractracUsername, tractracPassword,
@@ -641,16 +651,17 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private boolean checkBoatClassMatch(TracTracRaceRecordDTO tracTracRecord, RegattaDTO selectedRegatta) {
         Iterable<String> boatClassNames = tracTracRecord.boatClassNames;
         if (boatClassNames != null && Util.size(boatClassNames) > 0) {
-            String tracTracBoatClass = boatClassNames.iterator().next();
+            String tracTracBoatClassName = boatClassNames.iterator().next();
             if (selectedRegatta == null) {
                 // in case no regatta has been selected we check if there would be a matching regatta
                 for (RegattaDTO regatta : getAvailableRegattas()) {
-                    if (tracTracBoatClass.equalsIgnoreCase(regatta.boatClass.name)) {
+                    if ((tracTracBoatClassName == null && regatta.boatClass == null) ||
+                            (regatta.boatClass != null && tracTracBoatClassName.equalsIgnoreCase(regatta.boatClass.name))) {
                         return false;
                     }
                 }
             } else {
-                if (!tracTracBoatClass.equalsIgnoreCase(selectedRegatta.boatClass.name)) {
+                if (!tracTracBoatClassName.equalsIgnoreCase(selectedRegatta.boatClass.name)) {
                     return false;
                 }
             }
@@ -684,7 +695,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             StringBuilder builder = new StringBuilder(100 + racesWithNotMatchingBoatClasses.size() * 30);
             builder.append("WARNING\n");
             if (selectedRegatta != null) {
-                builder.append(this.stringMessages.boatClassDoesNotMatchSelectedRegatta(selectedRegatta.boatClass.name,
+                builder.append(this.stringMessages.boatClassDoesNotMatchSelectedRegatta(
+                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.name,
                         selectedRegatta.name));
             } else {
                 builder.append(this.stringMessages.regattaExistForSelectedBoatClass());
