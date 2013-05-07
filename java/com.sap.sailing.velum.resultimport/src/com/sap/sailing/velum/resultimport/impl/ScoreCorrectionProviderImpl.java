@@ -63,12 +63,10 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
             TimePoint timePointPublished) throws Exception {
         for (CsvParser parser : getAllRegattaResults()) {
             try {
-                RegattaResults regattaResult = parser.parseResults();
-                if ((boatClassName == null && parser.getBoatClass() == null) ||
-                        boatClassName.equals(parser.getBoatClass())) {
+                if(parser.getFilename().equals(eventName)) {
+                    RegattaResults regattaResult = parser.parseResults();
                     return new RegattaScoreCorrectionsImpl(this, regattaResult);
                 }
-                
             } catch (Exception e) {
                 logger.info("Parse error during CSV import. Ignoring document " + parser.toString());
                 logger.throwing(ScoreCorrectionProviderImpl.class.getName(), "getScoreCorrections", e);
