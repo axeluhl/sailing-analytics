@@ -146,7 +146,6 @@ public class CsvParserImpl implements CsvParser {
             @Override
             public Map<String, String> getMetadata() {
                 Map<String, String> result = new HashMap<>();
-//                result.put(ScoreCorrectionProviderImpl.BOATCLASS_NAME_METADATA_PROPERTY, "505");
                 return result;
             }
             
