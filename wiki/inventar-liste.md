@@ -70,7 +70,7 @@ Edit this table by simply copying the contents to http://ckeditor.com/demo and a
 			<td style="width:241px">USB Internet stick</td>
 			<td style="width:129px">-</td>
 			<td style="width:176px">&nbsp;</td>
-			<td>1,00</td>
+			<td>2,00</td>
 			<td>WDF 04 F 3.36</td>
 			<td>Dennis</td>
 		</tr>
@@ -231,6 +231,26 @@ Edit this table by simply copying the contents to http://ckeditor.com/demo and a
 			<td style="width:129px">-</td>
 			<td style="width:176px">-</td>
 			<td>4,00</td>
+			<td>WDF 04 F 3.36</td>
+			<td>Dennis</td>
+		</tr>
+		<tr>
+			<td style="height:20px">22</td>
+			<td style="width:100px">Voltcraft</td>
+			<td style="width:241px">300W Inverter 12V to 230V</td>
+			<td style="width:129px">Schuko Socket + Spare Fuses</td>
+			<td style="width:176px">-</td>
+			<td>1,00</td>
+			<td>WDF 04 F 3.36</td>
+			<td>Dennis</td>
+		</tr>
+		<tr>
+			<td style="height:20px">23</td>
+			<td style="width:100px">T-Mobile</td>
+			<td style="width:241px">SAP SIM Cards</td>
+			<td style="width:129px">5GB/Month Data</td>
+			<td style="width:176px">-</td>
+			<td>26,00</td>
 			<td>WDF 04 F 3.36</td>
 			<td>Dennis</td>
 		</tr>
