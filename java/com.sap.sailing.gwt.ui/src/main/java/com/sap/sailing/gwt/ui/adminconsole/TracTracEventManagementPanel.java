@@ -464,7 +464,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         this.racesTable.addColumn(raceStartTrackingColumn, this.stringMessages.startTime());
         this.racesTable.addColumn(raceStatusColumn, this.stringMessages.raceStatusColumn());
         this.racesTable.addColumnSortHandler(getRaceTableColumnSortHandler(this.raceList.getList(), raceNameColumn,
-                boatClassColumn, raceStartTrackingColumn));
+                boatClassColumn, raceStartTrackingColumn, raceStatusColumn));
         this.racesTable.setSelectionModel(new MultiSelectionModel<TracTracRaceRecordDTO>());
         this.racesTable.setWidth("100%");
 
@@ -506,7 +506,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     
     private ListHandler<TracTracRaceRecordDTO> getRaceTableColumnSortHandler(List<TracTracRaceRecordDTO> raceRecords,
             Column<TracTracRaceRecordDTO, ?> nameColumn, Column<TracTracRaceRecordDTO, ?> boatClassColumn,
-            Column<TracTracRaceRecordDTO, ?> trackingStartColumn) {
+            Column<TracTracRaceRecordDTO, ?> trackingStartColumn, Column<TracTracRaceRecordDTO, ?> raceStatusColumn) {
         ListHandler<TracTracRaceRecordDTO> result = new ListHandler<TracTracRaceRecordDTO>(raceRecords);
         result.setComparator(nameColumn, new Comparator<TracTracRaceRecordDTO>() {
             @Override
@@ -525,6 +525,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             public int compare(TracTracRaceRecordDTO o1, TracTracRaceRecordDTO o2) {
                 return o1.trackingStartTime == null ? -1 : o2.trackingStartTime == null ? 1 : o1.trackingStartTime
                         .compareTo(o2.trackingStartTime);
+            }
+        });
+        result.setComparator(raceStatusColumn, new Comparator<TracTracRaceRecordDTO>() {
+            @Override
+            public int compare(TracTracRaceRecordDTO o1, TracTracRaceRecordDTO o2) {
+                return o1.raceStatus == null ? -1 : o2.raceStatus == null ? 1 : o1.raceStatus
+                        .compareTo(o2.raceStatus);
             }
         });
         return result;
