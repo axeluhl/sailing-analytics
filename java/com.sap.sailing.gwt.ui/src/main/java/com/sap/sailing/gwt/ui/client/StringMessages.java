@@ -557,4 +557,6 @@ public interface StringMessages extends Messages {
     String disableRaceFilter();
     String enableRaceFilter();
     String raceStatusColumn();
+    String loading();
+    String showHiddenRaces();
 }
