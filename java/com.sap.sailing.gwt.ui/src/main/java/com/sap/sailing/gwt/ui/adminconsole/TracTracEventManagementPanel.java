@@ -602,11 +602,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         sailingService.listTracTracRacesInEvent(jsonURL, listHiddenRaces, new MarkedAsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>>() {
             @Override
             public void handleFailure(Throwable caught) {
+                loadingMessageLabel.setText("");
                 reportError("Error trying to list races: " + caught.getMessage());
             }
 
             @Override
             public void handleSuccess(final Pair<String, List<TracTracRaceRecordDTO>> result) {
+                loadingMessageLabel.setText("Building resultset and saving configuration...");
                 TracTracEventManagementPanel.this.availableTracTracRaces.clear();
                 
                 final String eventName = result.getA();
