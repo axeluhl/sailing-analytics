@@ -56,6 +56,7 @@
 		        <module>com.sap.sailing.gwt.ui.RegattaOverview</module>
 		        <module>com.sap.sailing.gwt.ui.PolarSheets</module>
 		      </modules>
+		      <style>DETAILED</style>
 		      <gen>${basedir}/.generated</gen>
 		      <localWorkers>3</localWorkers>
 		      <webappDirectory>${basedir}</webappDirectory>
