@@ -6,7 +6,8 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.sap.sailing.domain.common.filter.FilterSet;
-import com.sap.sailing.gwt.ui.client.ValueFilterWithUI;
+import com.sap.sailing.domain.common.filter.ValueFilter;
+import com.sap.sailing.gwt.ui.client.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
@@ -15,9 +16,6 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
     public static final String FIELD_FILTERSETS = "filterSets";
     public static final String FIELD_FILTERSET_NAME = "name";
     public static final String FIELD_FILTERS = "filters";
-    public static final String FIELD_FILTER_NAME = "name";
-    public static final String FIELD_FILTER_OPERATOR = "operator";
-    public static final String FIELD_FILTER_VALUE = "value";
 
     @Override
     public JSONObject serialize(CompetitorsFilterSets filterSets) {
@@ -29,7 +27,7 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
         result.put(FIELD_FILTERSETS, filterSetArray);
         
         int i = 0;
-        for(FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> filterSet: filterSets.getFilterSets()) {
+        for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: filterSets.getFilterSets()) {
             JSONObject filterSetObject = new JSONObject();
             filterSetArray.set(i++, filterSetObject);
 
@@ -38,13 +36,12 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
             JSONArray filterArray = new JSONArray();
             filterSetObject.put(FIELD_FILTERS, filterArray);
             int j = 0;
-            for(ValueFilterWithUI<CompetitorDTO, ?> filter: filterSet.getFilters()) {
-                JSONObject filterObject = new JSONObject();
-                filterArray.set(j++, filterObject);
-
-                filterObject.put(FIELD_FILTER_NAME, new JSONString(filter.getName()));
-                filterObject.put(FIELD_FILTER_OPERATOR, new JSONString(filter.getOperator().getName()));
-                filterObject.put(FIELD_FILTER_VALUE, new JSONString(filter.getValue().toString()));
+            for(FilterWithUI<CompetitorDTO> filter: filterSet.getFilters()) {
+                if(filter instanceof ValueFilter<?,?>) {
+                    ValueFilter<?,?> valueFilter = (ValueFilter<?,?>) filter;
+                    JSONObject filterObject = ValueFilterJsonDeSerializerUtil.serialize(valueFilter);
+                    filterArray.set(j++, filterObject);
+                }
             }
         }
         
@@ -52,13 +49,12 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
     }
     
     @Override
-    public CompetitorsFilterSets deserialize(JSONValue filterSetsValue) {
+    public CompetitorsFilterSets deserialize(JSONObject rootObject) {
         CompetitorsFilterSets result = null;
         
-        if(filterSetsValue.isObject() != null) {
+        if(rootObject != null) {
             result = new CompetitorsFilterSets();
             
-            JSONObject rootObject = (JSONObject) filterSetsValue;
             JSONValue activeFilterSetValue = rootObject.get(FIELD_ACTIVE_FILTERSET);
             String activeFilterSetName;
             if(activeFilterSetValue.isNull() != null) {
@@ -72,26 +68,24 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
                 JSONObject filterSetValue = (JSONObject) filterSetsArray.get(i);
                 JSONString filterSetNameValue = (JSONString) filterSetValue.get(FIELD_FILTERSET_NAME);
                 
-                FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> filterSet = new FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>>(filterSetNameValue.stringValue());
+                FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet = new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(filterSetNameValue.stringValue());
                 result.addFilterSet(filterSet);
 
                 JSONArray filterArray = (JSONArray) filterSetValue.get(FIELD_FILTERS); 
                 for(int j = 0; j < filterArray.size(); j++) {
-                    JSONObject filterValue = (JSONObject) filterArray.get(j);
-                    JSONString filterNameValue = (JSONString) filterValue.get(FIELD_FILTER_NAME);
-                    JSONString filterOperatorValue = (JSONString) filterValue.get(FIELD_FILTER_OPERATOR);
-                    JSONString filterValueValue = (JSONString) filterValue.get(FIELD_FILTER_VALUE);
-                    
-                    ValueFilterWithUI<CompetitorDTO, ?> filter = CompetitorsFilterFactory.getFilter(filterNameValue.stringValue(), 
-                            filterOperatorValue.stringValue(), filterValueValue.stringValue());
-                    if (filter != null) {
-                        filterSet.addFilter(filter);
+                    JSONObject filterObject = (JSONObject) filterArray.get(j);
+                    JSONString filterType = (JSONString) filterObject.get(ValueFilterJsonDeSerializerUtil.FIELD_FILTER_TYPE);
+                    if(filterType != null && ValueFilterJsonDeSerializerUtil.VALUE_FILTER_TYPE.equals(filterType.stringValue())) {
+                        FilterWithUI<CompetitorDTO> filterWithUI = ValueFilterJsonDeSerializerUtil.deserialize(filterObject);
+                        if(filterWithUI != null) {
+                            filterSet.addFilter(filterWithUI);
+                        }
                     }
                 }
             }
             // finally set the active filter set
             if(activeFilterSetName != null) {
-                for(FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> filterSet: result.getFilterSets()) {
+                for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: result.getFilterSets()) {
                     if(activeFilterSetName.equals(filterSet.getName())) {
                         result.setActiveFilterSet(filterSet);
                         break;

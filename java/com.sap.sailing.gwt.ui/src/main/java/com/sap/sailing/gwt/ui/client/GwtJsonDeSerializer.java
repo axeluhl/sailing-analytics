@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 
 /**
  * Interface for a GWT specific serializer to Json.
@@ -19,5 +18,5 @@ public interface GwtJsonDeSerializer<T> {
      */
     JSONObject serialize(T object);
     
-    T deserialize(JSONValue object);
+    T deserialize(JSONObject object);
 }

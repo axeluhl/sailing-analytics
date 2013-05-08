@@ -15,8 +15,11 @@ public class FilterSet<FilterObjectType, T extends Filter<FilterObjectType>> {
     /** the set of all filters */
     private final Set<T> filters;
 
+    private boolean editable;
+    
     public FilterSet(String name) {
         this.name = name;
+        this.editable = true;
         this.filters = new LinkedHashSet<T>();
     }
 
@@ -38,5 +41,13 @@ public class FilterSet<FilterObjectType, T extends Filter<FilterObjectType>> {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isEditable() {
+        return editable;
+    }
+
+    public void setEditable(boolean editable) {
+        this.editable = editable;
     }
 }

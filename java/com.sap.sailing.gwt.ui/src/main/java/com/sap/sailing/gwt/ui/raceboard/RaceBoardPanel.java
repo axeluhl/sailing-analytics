@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.ValueFilterWithUI;
+import com.sap.sailing.gwt.ui.client.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -52,11 +52,14 @@ import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorInLeaderboardFilter;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorSelectionProviderFilterContext;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorTotalRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSetsJsonDeSerializer;
+import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFilterContext;
+import com.sap.sailing.gwt.ui.client.shared.filter.SelectedCompetitorsFilter;
+import com.sap.sailing.gwt.ui.client.shared.filter.SelectedRaceFilterContext;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
@@ -112,7 +115,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     private MultiChartPanel competitorChart;
     
     private CheckBox competitorsFilterCheckBox;
-    private FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> lastActiveCompetitorFilterSet;
+    private FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> lastActiveCompetitorFilterSet;
     
     /**
      * The component viewer in <code>ONESCREEN</code> view mode. <code>null</code> if in <code>CASCADE</code> view mode
@@ -153,15 +156,26 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         if(loadedCompetitorsFilterSets != null) {
             competitorsFilterSets = loadedCompetitorsFilterSets;
         } else {
-            // create a default Top N competitors filter as default filter
             competitorsFilterSets = new CompetitorsFilterSets();
             
-            FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> topNCompetitorsFilterSet = new FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>>("Top 50");
+            // create default competitors filter
+            // 1. Default Top N competitors
+            FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNCompetitorsFilterSet = new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>("Top 50");
             CompetitorTotalRankFilter rankFilter = new CompetitorTotalRankFilter();
             rankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
             rankFilter.setValue(50);
             topNCompetitorsFilterSet.addFilter(rankFilter);
             competitorsFilterSets.addFilterSet(topNCompetitorsFilterSet);
+
+            // 2. Filter selected competitors filter
+            FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> selectedCompetitorsFilterSet = new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>("Selected Competitors");
+            selectedCompetitorsFilterSet.setEditable(false);
+            SelectedCompetitorsFilter selectedCompetitorsFilter = new SelectedCompetitorsFilter();
+            selectedCompetitorsFilter.setCompetitorSelectionProvider(competitorSelectionModel);
+            selectedCompetitorsFilterSet.addFilter(selectedCompetitorsFilter);
+            competitorsFilterSets.addFilterSet(selectedCompetitorsFilterSet);
+
+            // set the default active filter
             competitorsFilterSets.setActiveFilterSet(topNCompetitorsFilterSet);
             
             storeCompetitorsFilterSets(competitorsFilterSets);
@@ -169,7 +183,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         
         // in case the URL configuration contains the name of a competitors filter set we try to activate it  
         if(raceboardViewConfiguration.getActiveCompetitorsFilterSetName() != null) {
-            for(FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> filterSet: competitorsFilterSets.getFilterSets()) {
+            for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: competitorsFilterSets.getFilterSets()) {
                 if(filterSet.getName().equals(raceboardViewConfiguration.getActiveCompetitorsFilterSetName())) {
                     competitorsFilterSets.setActiveFilterSet(filterSet);
                     break;
@@ -275,12 +289,16 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     }
 
     private void updateCompetitorsFilterContexts(CompetitorsFilterSets filterSets) {
-        for(FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> filterSet: filterSets.getFilterSets()) {
+        for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: filterSets.getFilterSets()) {
             for(Filter<CompetitorDTO> filter: filterSet.getFilters()) {
-               if(filter instanceof CompetitorInLeaderboardFilter) {
-                   CompetitorInLeaderboardFilter<?> competitorInLeaderboardFilter = (CompetitorInLeaderboardFilter<?>) filter; 
-                   competitorInLeaderboardFilter.setContextProvider(leaderboardPanel);
-                   competitorInLeaderboardFilter.setSelectedRace(selectedRaceIdentifier);
+               if(filter instanceof LeaderboardFilterContext) {
+                   ((LeaderboardFilterContext) filter).setLeaderboardFetcher(leaderboardPanel);
+               }
+               if(filter instanceof SelectedRaceFilterContext) {
+                   ((SelectedRaceFilterContext) filter).setSelectedRace(selectedRaceIdentifier);
+               }
+               if(filter instanceof CompetitorSelectionProviderFilterContext) {
+                   ((CompetitorSelectionProviderFilterContext) filter).setCompetitorSelectionProvider(competitorSelectionModel);
                }
             }
         }
@@ -288,7 +306,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
 
     private void updateCompetitorsFilterControlState(CompetitorsFilterSets filterSets) {
         String competitorsFilterTitle = stringMessages.competitorsFilter();
-        FilterSet<CompetitorDTO, ValueFilterWithUI<CompetitorDTO, ?>> activeFilterSet = filterSets.getActiveFilterSet();
+        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = filterSets.getActiveFilterSet();
         if(activeFilterSet != null) {
             lastActiveCompetitorFilterSet = activeFilterSet;
         } else {
@@ -308,6 +326,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     private void addCompetitorsFilterControl(Panel parentPanel) {
         String competitorsFilterTitle = stringMessages.competitorsFilter();
         competitorsFilterCheckBox = new CheckBox(competitorsFilterTitle);
+
         competitorsFilterCheckBox.getElement().getStyle().setFloat(Style.Float.LEFT);
 
         competitorsFilterCheckBox.setTitle(competitorsFilterTitle);
@@ -382,7 +401,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
             if(jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
                 CompetitorsFilterSetsJsonDeSerializer deserializer = new CompetitorsFilterSetsJsonDeSerializer();
                 JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
-                result = deserializer.deserialize(value);
+                if(value.isObject() != null) {
+                    result = deserializer.deserialize((JSONObject) value);
+                }
             }
         }
         return result;

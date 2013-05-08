@@ -1,22 +1,30 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.filter.BinaryOperator;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
-import com.sap.sailing.gwt.ui.client.ValueFilterWithUI;
+import com.sap.sailing.gwt.ui.client.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
-public class CompetitorRaceRankFilter extends AbstractCompetitorNumberFilterWithUI<Integer> { 
+public class CompetitorRaceRankFilter extends AbstractCompetitorNumberFilterWithUI<Integer>
+    implements LeaderboardFilterContext, SelectedRaceFilterContext { 
     public static final String FILTER_NAME = "CompetitorRaceRankFilter";
 
-    private IntegerBox valueInputWidget;
-    private ListBox operatorSelectionWidget;
+    private IntegerBox valueIntegerBox;
+    private ListBox operatorSelectionListBox;
+    
+    private LeaderboardFetcher leaderboardFetcher;
+    private RaceIdentifier selectedRace;
 
     public CompetitorRaceRankFilter() {
         super(BinaryOperator.Operators.LessThanEquals);
@@ -27,12 +35,19 @@ public class CompetitorRaceRankFilter extends AbstractCompetitorNumberFilterWith
         supportedOperators.add(BinaryOperator.Operators.GreaterThan);
         supportedOperators.add(BinaryOperator.Operators.NotEqualTo);
         supportedOperators.add(BinaryOperator.Operators.Equals);
+        
+        valueIntegerBox = null;
+        operatorSelectionListBox = null;
     }
 
     public Class<Integer> getValueType() {
         return Integer.class;
     }
 
+    private LeaderboardDTO getLeaderboard() {
+        return leaderboardFetcher != null ? leaderboardFetcher.getLeaderboard() : null;
+    }
+    
     @Override
     public boolean matches(CompetitorDTO competitorDTO) {
         boolean result = false;
@@ -68,11 +83,29 @@ public class CompetitorRaceRankFilter extends AbstractCompetitorNumberFilterWith
         return stringMessages.raceRank();
     }
 
-    @Override
-    public Widget createValueInputWidget(DataEntryDialog<?> dataEntryDialog) {
-        valueInputWidget = dataEntryDialog.createIntegerBox(value, 20);
-        valueInputWidget.setFocus(true);
-        return valueInputWidget;
+    @Override 
+    public Widget createFilterUIWidget(DataEntryDialog<?> dataEntryDialog) {
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.add(createOperatorSelectionWidget(dataEntryDialog));
+        hp.add(createValueInputWidget(dataEntryDialog));
+        hp.setSpacing(5);
+        
+        return hp;
+    }
+
+    private Widget createValueInputWidget(DataEntryDialog<?> dataEntryDialog) {
+        if(valueIntegerBox == null) {
+            valueIntegerBox = dataEntryDialog.createIntegerBox(value, 20);
+            valueIntegerBox.setFocus(true);
+        }
+        return valueIntegerBox;
+    }
+
+    private Widget createOperatorSelectionWidget(DataEntryDialog<?> dataEntryDialog) {
+        if(operatorSelectionListBox == null) {
+            operatorSelectionListBox = createOperatorSelectionListBox(dataEntryDialog);
+        }
+        return operatorSelectionListBox;
     }
 
     @Override
@@ -88,28 +121,48 @@ public class CompetitorRaceRankFilter extends AbstractCompetitorNumberFilterWith
         }
         return errorMessage;
     }
-    
+
     @Override
-    public Widget createOperatorSelectionWidget(DataEntryDialog<?> dataEntryDialog) {
-        operatorSelectionWidget = createOperatorSelectionListBox(dataEntryDialog);
-        return operatorSelectionWidget;
+    public FilterWithUI<CompetitorDTO> copy() {
+        CompetitorRaceRankFilter result = new CompetitorRaceRankFilter();
+        result.setValue(getValue());
+        result.setOperator(getOperator());
+        return result;
     }
 
     @Override
-    public ValueFilterWithUI<CompetitorDTO, Integer> createFilterFromWidgets(Widget valueInputWidget, Widget operatorSelectionWidget) {
-        ValueFilterWithUI<CompetitorDTO, Integer> result = null;
-        if(valueInputWidget instanceof IntegerBox && operatorSelectionWidget instanceof ListBox) {
+    public FilterWithUI<CompetitorDTO> createFilterFromUIWidget() {
+        CompetitorRaceRankFilter result = null;
+        if(valueIntegerBox != null && operatorSelectionListBox != null) {
             result = new CompetitorRaceRankFilter();
-            IntegerBox valueInputIntegerBox = (IntegerBox) valueInputWidget;
-            ListBox operatorSelectionListBox = (ListBox) operatorSelectionWidget;
 
             BinaryOperator.Operators op = BinaryOperator.Operators.valueOf(operatorSelectionListBox.getValue(operatorSelectionListBox.getSelectedIndex()));
             BinaryOperator<Integer> binaryOperator = new BinaryOperator<Integer>(op);
             
-            Integer value = valueInputIntegerBox.getValue();
+            Integer value = valueIntegerBox.getValue();
             result.setOperator(binaryOperator);
             result.setValue(value);
         }
         return result;
+    }
+
+    @Override
+    public LeaderboardFetcher getLeaderboardFetcher() {
+        return leaderboardFetcher;
+    }
+
+    @Override
+    public void setLeaderboardFetcher(LeaderboardFetcher leaderboardFetcher) {
+        this.leaderboardFetcher = leaderboardFetcher;
+    }
+
+    @Override
+    public RaceIdentifier getSelectedRace() {
+        return selectedRace;
+    }
+
+    @Override
+    public void setSelectedRace(RaceIdentifier selectedRace) {
+        this.selectedRace = selectedRace;
     }
 }
