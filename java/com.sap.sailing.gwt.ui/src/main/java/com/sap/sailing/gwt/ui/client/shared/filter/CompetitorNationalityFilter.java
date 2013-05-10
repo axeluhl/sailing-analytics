@@ -28,10 +28,6 @@ public class CompetitorNationalityFilter extends AbstractCompetitorTextFilterWit
         operatorSelectionListBox = null;
     }
 
-    public Class<String> getValueType() {
-        return String.class;
-    }
-
     @Override
     public boolean matches(CompetitorDTO competitor) {
         boolean result = false;
@@ -72,6 +68,11 @@ public class CompetitorNationalityFilter extends AbstractCompetitorTextFilterWit
 
     @Override
     public String getLocalizedName(StringMessages stringMessages) {
+        return stringMessages.nationality();
+    }
+
+    @Override
+    public String getLocalizedDescription(StringMessages stringMessages) {
         return stringMessages.nationality();
     }
 

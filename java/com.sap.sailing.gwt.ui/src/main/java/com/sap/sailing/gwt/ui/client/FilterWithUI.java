@@ -14,5 +14,7 @@ public interface FilterWithUI<FilterObjectType> extends Filter<FilterObjectType>
     FilterWithUI<FilterObjectType> copy();
     
     String validate(StringMessages stringMessages);
+    
     String getLocalizedName(StringMessages stringMessages);
+    String getLocalizedDescription(StringMessages stringMessages);
 }

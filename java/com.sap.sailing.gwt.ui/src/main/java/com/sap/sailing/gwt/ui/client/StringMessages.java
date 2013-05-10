@@ -584,4 +584,8 @@ public interface StringMessages extends Messages {
     String raceStatusColumn();
     String loading();
     String showHiddenRaces();
+    String selectedCompetitors();
+    String filterNothing();
+    String topNCompetitorsByRaceRank(int n);
+    String topNCompetitorsByTotalRank(int n);
 }

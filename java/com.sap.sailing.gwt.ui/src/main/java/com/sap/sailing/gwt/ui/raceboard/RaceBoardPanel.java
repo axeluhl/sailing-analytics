@@ -52,6 +52,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorSelectionProviderFilterContext;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorTotalRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorsFilterSets;
@@ -156,28 +157,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         if(loadedCompetitorsFilterSets != null) {
             competitorsFilterSets = loadedCompetitorsFilterSets;
         } else {
-            competitorsFilterSets = new CompetitorsFilterSets();
-            
-            // create default competitors filter
-            // 1. Default Top N competitors
-            FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNCompetitorsFilterSet = new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>("Top 50");
-            CompetitorTotalRankFilter rankFilter = new CompetitorTotalRankFilter();
-            rankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
-            rankFilter.setValue(50);
-            topNCompetitorsFilterSet.addFilter(rankFilter);
-            competitorsFilterSets.addFilterSet(topNCompetitorsFilterSet);
-
-            // 2. Filter selected competitors filter
-            FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> selectedCompetitorsFilterSet = new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>("Selected Competitors");
-            selectedCompetitorsFilterSet.setEditable(false);
-            SelectedCompetitorsFilter selectedCompetitorsFilter = new SelectedCompetitorsFilter();
-            selectedCompetitorsFilter.setCompetitorSelectionProvider(competitorSelectionModel);
-            selectedCompetitorsFilterSet.addFilter(selectedCompetitorsFilter);
-            competitorsFilterSets.addFilterSet(selectedCompetitorsFilterSet);
-
-            // set the default active filter
-            competitorsFilterSets.setActiveFilterSet(topNCompetitorsFilterSet);
-            
+            competitorsFilterSets = createAndAddDefaultCompetitorsFilter();
             storeCompetitorsFilterSets(competitorsFilterSets);
         }
         
@@ -254,6 +234,44 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         addMediaSelectorToNavigationMenu();   
     }
 
+    private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {
+        CompetitorsFilterSets filterSets = new CompetitorsFilterSets();
+        
+        // 1. Filter: selected competitors filter
+        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> selectedCompetitorsFilterSet = 
+                new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.selectedCompetitors());
+        selectedCompetitorsFilterSet.setEditable(false);
+        SelectedCompetitorsFilter selectedCompetitorsFilter = new SelectedCompetitorsFilter();
+        selectedCompetitorsFilter.setCompetitorSelectionProvider(competitorSelectionModel);
+        selectedCompetitorsFilterSet.addFilter(selectedCompetitorsFilter);
+        filterSets.addFilterSet(selectedCompetitorsFilterSet);
+
+        // 2. Top 50 competitors by race rank
+        int maxRaceRank = 50;
+        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNRaceRankCompetitorsFilterSet = 
+                new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.topNCompetitorsByRaceRank(maxRaceRank));
+        CompetitorRaceRankFilter raceRankFilter = new CompetitorRaceRankFilter();
+        raceRankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
+        raceRankFilter.setValue(maxRaceRank);
+        topNRaceRankCompetitorsFilterSet.addFilter(raceRankFilter);
+        filterSets.addFilterSet(topNRaceRankCompetitorsFilterSet);
+
+        // 3. Top 50 competitors by total rank
+        int maxTotalRank = 50;
+        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNTotalRankCompetitorsFilterSet =
+                new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.topNCompetitorsByTotalRank(maxTotalRank));
+        CompetitorTotalRankFilter totalRankFilter = new CompetitorTotalRankFilter();
+        totalRankFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.LessThanEquals));
+        totalRankFilter.setValue(50);
+        topNTotalRankCompetitorsFilterSet.addFilter(totalRankFilter);
+        filterSets.addFilterSet(topNTotalRankCompetitorsFilterSet);
+        
+        // set default active filter
+        filterSets.setActiveFilterSet(topNRaceRankCompetitorsFilterSet);
+        
+        return filterSets;
+    }
+    
     private void addMediaSelectorToNavigationMenu() {
         MediaSelector mediaSelector = new MediaSelector(errorReporter);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(mediaSelector);
@@ -397,13 +415,17 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         CompetitorsFilterSets result = null;
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if(localStorage != null) {
-            String jsonAsLocalStore = localStorage.getItem(localeStorageKey);
-            if(jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
-                CompetitorsFilterSetsJsonDeSerializer deserializer = new CompetitorsFilterSetsJsonDeSerializer();
-                JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
-                if(value.isObject() != null) {
-                    result = deserializer.deserialize((JSONObject) value);
+            try {
+                String jsonAsLocalStore = localStorage.getItem(localeStorageKey);
+                if(jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
+                    CompetitorsFilterSetsJsonDeSerializer deserializer = new CompetitorsFilterSetsJsonDeSerializer();
+                    JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
+                    if(value.isObject() != null) {
+                        result = deserializer.deserialize((JSONObject) value);
+                    }
                 }
+            } catch (Exception e) {
+                // exception during loading of competitor filters from local storage
             }
         }
         return result;

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -15,6 +16,7 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
     public static final String FIELD_ACTIVE_FILTERSET = "activeFilterSet";
     public static final String FIELD_FILTERSETS = "filterSets";
     public static final String FIELD_FILTERSET_NAME = "name";
+    public static final String FIELD_FILTERSET_ISEDITABLE = "isEditable";
     public static final String FIELD_FILTERS = "filters";
 
     @Override
@@ -32,6 +34,7 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
             filterSetArray.set(i++, filterSetObject);
 
             filterSetObject.put(FIELD_FILTERSET_NAME, new JSONString(filterSet.getName()));
+            filterSetObject.put(FIELD_FILTERSET_ISEDITABLE, JSONBoolean.getInstance(filterSet.isEditable()));
 
             JSONArray filterArray = new JSONArray();
             filterSetObject.put(FIELD_FILTERS, filterArray);
@@ -67,8 +70,10 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
             for(int i = 0; i < filterSetsArray.size(); i++) {
                 JSONObject filterSetValue = (JSONObject) filterSetsArray.get(i);
                 JSONString filterSetNameValue = (JSONString) filterSetValue.get(FIELD_FILTERSET_NAME);
+                JSONBoolean filterSetIsEditableValue = (JSONBoolean) filterSetValue.get(FIELD_FILTERSET_ISEDITABLE);
                 
                 FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet = new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(filterSetNameValue.stringValue());
+                filterSet.setEditable(filterSetIsEditableValue.booleanValue());
                 result.addFilterSet(filterSet);
 
                 JSONArray filterArray = (JSONArray) filterSetValue.get(FIELD_FILTERS); 

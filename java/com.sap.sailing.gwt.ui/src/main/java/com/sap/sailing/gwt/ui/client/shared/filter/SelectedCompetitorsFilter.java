@@ -30,10 +30,16 @@ public class SelectedCompetitorsFilter implements FilterWithUI<CompetitorDTO>, C
         return FILTER_NAME;
     }
 
+    @Override
     public String getLocalizedName(StringMessages stringMessages) {
-        return "Selected competitors";
+        return stringMessages.selectedCompetitors();
     }
 
+    @Override
+    public String getLocalizedDescription(StringMessages stringMessages) {
+        return stringMessages.selectedCompetitors();
+    }
+    
     @Override
     public CompetitorSelectionProvider getCompetitorSelectionProvider() {
         return competitorSelectionProvider;

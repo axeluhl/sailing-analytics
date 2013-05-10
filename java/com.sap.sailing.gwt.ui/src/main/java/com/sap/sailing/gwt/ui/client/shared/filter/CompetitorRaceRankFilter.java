@@ -40,10 +40,6 @@ public class CompetitorRaceRankFilter extends AbstractCompetitorNumberFilterWith
         operatorSelectionListBox = null;
     }
 
-    public Class<Integer> getValueType() {
-        return Integer.class;
-    }
-
     private LeaderboardDTO getLeaderboard() {
         return leaderboardFetcher != null ? leaderboardFetcher.getLeaderboard() : null;
     }
@@ -80,6 +76,11 @@ public class CompetitorRaceRankFilter extends AbstractCompetitorNumberFilterWith
 
     @Override
     public String getLocalizedName(StringMessages stringMessages) {
+        return stringMessages.raceRank();
+    }
+
+    @Override
+    public String getLocalizedDescription(StringMessages stringMessages) {
         return stringMessages.raceRank();
     }
 

@@ -38,7 +38,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
     private final List<Button> deleteFilterSetButtons;
     private final List<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>> filterSets;
     private final String ACTIVE_FILTERSET_RADIOBUTTON_GROUPNAME = "ActiveFilterSetRB"; 
-    private final String FILTER_NOTHING_FILTERSET = "Filter nothing";
+    private final String filterNothingFiltersetName;
     
     protected static class CompetitorsFilterSetsValidator implements Validator<CompetitorsFilterSets> {
         public CompetitorsFilterSetsValidator() {
@@ -52,10 +52,11 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
     }
 
     public CompetitorsFilterSetsDialog(CompetitorsFilterSets competitorsFilterSets, StringMessages stringMessages, DialogCallback<CompetitorsFilterSets> callback) {
-        super("Competitors filters", null, stringMessages.ok(), stringMessages.cancel(), new CompetitorsFilterSetsValidator(), callback);
+        super(stringMessages.competitorsFilter(), null, stringMessages.ok(), stringMessages.cancel(), new CompetitorsFilterSetsValidator(), callback);
         this.competitorsFilterSets = competitorsFilterSets;
         this.stringMessages = stringMessages; 
         
+        filterNothingFiltersetName = stringMessages.filterNothing();
         competitorsFilterSetsGrid = new Grid(0,0);
 
         activeFilterSetRadioButtons = new ArrayList<RadioButton>();
@@ -87,7 +88,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
         mainPanel.add(competitorsFilterSetsGrid);
         
         // create a dummy filter for the "filter nothing" option
-        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> noFilterSet = new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(FILTER_NOTHING_FILTERSET);
+        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> noFilterSet = new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(filterNothingFiltersetName);
         createActiveFilterSetRadioButton(noFilterSet, competitorsFilterSets.getActiveFilterSet() == null);
         Button noFilterSetEditBtn = createEditFilterSetButton(noFilterSet);
         Button noFilterSetDeleteBtn = createDeleteFilterSetButton(noFilterSet);
@@ -239,7 +240,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
             FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet = filterSets.get(i);
             boolean isActiveFilterSet = activeFilterSetRadioButtons.get(i).getValue(); 
             
-            if(!filterSet.getName().equals(FILTER_NOTHING_FILTERSET)) {
+            if(!filterSet.getName().equals(filterNothingFiltersetName)) {
                 result.addFilterSet(filterSet);
                 if(isActiveFilterSet) {
                     result.setActiveFilterSet(filterSet);

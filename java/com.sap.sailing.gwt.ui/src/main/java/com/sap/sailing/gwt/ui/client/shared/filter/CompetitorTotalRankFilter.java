@@ -34,10 +34,6 @@ public class CompetitorTotalRankFilter extends AbstractCompetitorNumberFilterWit
         operatorSelectionListBox = null;
     }
 
-    public Class<Integer> getValueType() {
-        return Integer.class;
-    }
-
     private LeaderboardDTO getLeaderboard() {
         return leaderboardFetcher != null ? leaderboardFetcher.getLeaderboard() : null;
     }
@@ -61,6 +57,11 @@ public class CompetitorTotalRankFilter extends AbstractCompetitorNumberFilterWit
 
     @Override
     public String getLocalizedName(StringMessages stringMessages) {
+        return stringMessages.totalRank();
+    }
+
+    @Override
+    public String getLocalizedDescription(StringMessages stringMessages) {
         return stringMessages.totalRank();
     }
 
