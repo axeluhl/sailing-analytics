@@ -180,12 +180,9 @@ public class RaceStateService extends Service {
             }
             managedIntents.get(race.getId()).remove(intent);
             return;
-        } else if (getString(R.string.intentActionIndividualRecallRemoval).equals(action)) {
-            race.getState().getStartProcedure().dispatchFiredIndividualRecallRemovalEvent(race.getState().getIndividualRecallDisplayedTime(), eventTime);
-        } else if (getString(R.string.intentActionAutomaticRaceEnd).equals(action)) {
-            race.getState().getStartProcedure().dispatchAutomaticRaceEndEvent(eventTime);
-        } else if (getString(R.string.intentActionAutomaticGateClose).equals(action)) {
-            race.getState().getStartProcedure().dispatchAutomaticGateClose(eventTime);
+        } else if (getString(R.string.intenStartProcedureSpecificAction).equals(action)) {
+            Integer eventId =intent.getExtras().getInt(AppConstants.STARTPROCEDURE_SPECIFIC_EVENT_ID);
+            race.getState().getStartProcedure().handleStartProcedureSpecificEvent(eventTime, eventId);
         }
     }
 
@@ -315,23 +312,7 @@ public class RaceStateService extends Service {
         clearAlarms(race.getId());
     }
 
-    public void handleIndividualRecall(ManagedRace race, TimePoint individualRecallRemovalFireTimePoint) {
-        String action = getString(R.string.intentActionIndividualRecallRemoval);
-        scheduleEventTime(action, race, individualRecallRemovalFireTimePoint);
+    public void handleStartProcedureSpecificEvent(ManagedRace race, TimePoint startProcedureSpecificEventTimePoint, Integer eventId) {
+        String action = getString(R.string.intenStartProcedureSpecificAction);
     }
-
-    public void handleIndividualRecallRemoved(ManagedRace race) {
-        clearAlarms(race.getId());
-    }
-
-    public void handleAutomaticRaceEnd(ManagedRace race, TimePoint automaticRaceEnd) {
-        String action = getString(R.string.intentActionAutomaticRaceEnd);
-        scheduleEventTime(action, race, automaticRaceEnd);
-    }
-
-    public void handleGateLineOpeningTimeChanged(ManagedRace race, TimePoint gateCloseTimePoint) {
-        String action = getString(R.string.intentActionAutomaticGateClose);
-        scheduleEventTime(action, race, gateCloseTimePoint);
-    }
-
 }

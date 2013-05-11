@@ -133,7 +133,7 @@ public class GateStartProcedure implements StartProcedure {
     }
     
     @Override
-    public void setChangeListener(StartProcedureListener raceStateChangedListener) {
+    public void setStartProcedureListener(StartProcedureListener raceStateChangedListener) {
         this.raceStateChangedListener = raceStateChangedListener;
     }
 
@@ -238,11 +238,6 @@ public class GateStartProcedure implements StartProcedure {
     }
 
     @Override
-    public void setIndividualRecallRemoval(TimePoint eventTime) {
-        
-    }
-
-    @Override
     public Class<? extends RaceFragment> getStartphaseFragment() {
         return GateStartPhaseFragment.class;
     }
@@ -277,17 +272,6 @@ public class GateStartProcedure implements StartProcedure {
         return result;
     }
 
-    @Override
-    public void setIndividualRecall(TimePoint eventTime) {
-        
-    }
-
-    @Override
-    public void dispatchFiredIndividualRecallRemovalEvent(TimePoint individualRecallDisplayedTime, TimePoint eventTime) {
-        
-    }
-
-    @Override
     public void dispatchAutomaticGateClose(TimePoint eventTime) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.GOLF, Flags.NONE, /*isDisplayed*/false);
@@ -296,6 +280,30 @@ public class GateStartProcedure implements StartProcedure {
         if (runningRaceEventListener != null) {
             runningRaceEventListener.onGolfDown();
         }
+    }
+    
+    public void setGateLineOpeningTime(Long gateLineOpeningTimeInMinutes){
+        //TODO
+    }
+    
+    public void setPathfinder(String sailingId){
+        //TODO
+    }
+
+    @Override
+    public void handleStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public String getPathfinder() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Long getGateLineOpeningTime() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

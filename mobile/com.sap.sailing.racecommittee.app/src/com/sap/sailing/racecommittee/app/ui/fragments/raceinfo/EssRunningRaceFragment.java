@@ -10,31 +10,30 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagFinder;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartProcedure;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartRunningRaceEventListener;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.EssRunningRaceEventListener;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.ExtremeSailingSeriesStartProcedure;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortTypeSelectionDialog;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseLineOpeningTimeDialog;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChoosePathFinderDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
-public class GateStartRunningRaceFragment extends RaceFragment implements GateStartRunningRaceEventListener {
+public class EssRunningRaceFragment extends RaceFragment implements EssRunningRaceEventListener {
     
     private TextView countUpTextView;
-    private ImageView displayedFlag;
-    private ImageView flagToBeDisplayed;
+    private ImageView individualRecallFlag;
+    private TextView individualRecallLabel;
     ImageButton abortingFlagButton;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.gate_start_race_running_view, container, false);
+        return inflater.inflate(R.layout.race_running_view, container, false);
     }
     
     @Override
@@ -42,6 +41,9 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
         super.onActivityCreated(savedInstanceState);
         
         countUpTextView = (TextView) getView().findViewById(R.id.raceCountUp);
+        
+        individualRecallFlag = (ImageView) getView().findViewById(R.id.xrayFlag);
+        individualRecallLabel = (TextView) getView().findViewById(R.id.individualRecallLabel);
         
         ImageButton blueFlagButton = (ImageButton) getView().findViewById(R.id.blueFlagButton);
         blueFlagButton.setOnClickListener(new OnClickListener() {
@@ -64,39 +66,21 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
             }
         });
         
-        displayedFlag = (ImageView) getView().findViewById(R.id.currentlyDisplayedFlag);
-        flagToBeDisplayed = (ImageView) getView().findViewById(R.id.flagToBeDisplayed);
-
-        boolean golfFlagTakenDown = false;
-        LastFlagFinder lastFlagFinder = new LastFlagFinder(getRace().getRaceLog());
-        if (lastFlagFinder.getLastFlagEvent() != null) {
-            golfFlagTakenDown = lastFlagFinder.getLastFlagEvent().getUpperFlag().equals(Flags.GOLF) && !lastFlagFinder.getLastFlagEvent().isDisplayed();
-        }
-        displayGolfFlag(!golfFlagTakenDown);
         
-        getRace().getState().getStartProcedure().setRunningRaceEventListener(this);
-        
-        if(getRace().getState().getStartProcedure() instanceof GateStartProcedure){
-            if(((GateStartProcedure) getRace().getState().getStartProcedure()).getPathfinder()==null){
-                showPathFinderDialog();
+        ImageButton individualRecallButton = (ImageButton) getView().findViewById(R.id.individualRecallButton);
+        individualRecallButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                TimePoint now = MillisecondsTimePoint.now();
+                if (getRace().getState().getStartProcedure() instanceof ExtremeSailingSeriesStartProcedure) {
+                    ExtremeSailingSeriesStartProcedure essStartProcedure = ((ExtremeSailingSeriesStartProcedure) getRace().getState().getStartProcedure());
+                    if (essStartProcedure.getIndividualRecallDisplayedTime() == null) {
+                        essStartProcedure.setIndividualRecall(now);
+                    } else {
+                        essStartProcedure.setIndividualRecallRemoval(now);
+                    }
+                }
             }
-            if(((GateStartProcedure) getRace().getState().getStartProcedure()).getGateLineOpeningTime()==null){
-                showLineOpeningTimeDialog();
-            }
-        }
-        
-        
-    }
-
-    private void displayGolfFlag(boolean golfFlagDisplayed) {
-        if(golfFlagDisplayed){
-        displayedFlag.setVisibility(View.VISIBLE);
-        flagToBeDisplayed.setVisibility(View.GONE);
-        }else{
-            displayedFlag.setVisibility(View.GONE);
-            flagToBeDisplayed.setVisibility(View.VISIBLE);
-        }
-        
+        });
     }
 
     private void showDisplayGeneralRecallDialog() {
@@ -142,7 +126,8 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
     @Override
     public void onStart() {
         super.onStart();
-        ExLog.w(GateStartRunningRaceFragment.class.getName(), String.format("Fragment %s is now shown", GateStartRunningRaceFragment.class.getName()));
+        getRace().getState().getStartProcedure().setRunningRaceEventListener(this);
+        ExLog.w(EssRunningRaceFragment.class.getName(), String.format("Fragment %s is now shown", EssRunningRaceFragment.class.getName()));
     }
     
     public void notifyTick() {
@@ -183,24 +168,41 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
     }
 
     @Override
-    public void onGolfDown() {
-        displayGolfFlag(false);
-    }
-    
-    private void showPathFinderDialog() {
-        FragmentManager fragmentManager = getFragmentManager();
-        RaceDialogFragment fragment = new RaceChoosePathFinderDialog();
-        Bundle args = getRecentArguments();
-        fragment.setArguments(args);
-        fragment.show(fragmentManager, null);
+    public void onIndividualRecallRemoval() {
+        setIndividualRecallRemovedInView();
     }
 
-    private void showLineOpeningTimeDialog() {
-        FragmentManager fragmentManager = getFragmentManager();
-        RaceDialogFragment fragment = new RaceChooseLineOpeningTimeDialog();
-        Bundle args = getRecentArguments();
-        fragment.setArguments(args);
-        fragment.show(fragmentManager, null);
+    @Override
+    public void onIndividualRecall() {
+        setIndividualRecallDisplayedInView();
+    }
+
+    private void setIndividualRecallDisplayedInView() {
+        moveImageUp(individualRecallFlag);
+        String unsetXray = getActivity().getResources().getString(R.string.choose_xray_flag_down);
+        individualRecallLabel.setText(unsetXray);
+    }
+    
+    private void setIndividualRecallRemovedInView() {
+        moveImageDown(individualRecallFlag);
+        //setXrayCountdownLabel();
+        String setIndividualRecallUp = getActivity().getResources().getString(R.string.choose_xray_flag_up);
+        individualRecallLabel.setText(setIndividualRecallUp);
+    }
+
+    protected void moveImageUp(ImageView image) {
+        moveImage(image, 1, 0);
+    }
+
+    protected void moveImageDown(ImageView image) {
+        moveImage(image, 0, 1);
+    }
+
+    protected void moveImage(ImageView image, int parentTop, int parentBottom) {
+        LayoutParams params = (RelativeLayout.LayoutParams) image.getLayoutParams();
+        params.addRule(RelativeLayout.ALIGN_PARENT_TOP, parentTop);
+        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, parentBottom);
+        image.setLayoutParams(params);
     }
 
 }

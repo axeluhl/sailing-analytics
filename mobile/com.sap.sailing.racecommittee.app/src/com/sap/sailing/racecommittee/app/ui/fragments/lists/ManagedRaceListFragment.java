@@ -229,38 +229,6 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         notifyDataChanged();
     }
 
-    @Override
-    public void onIndividualRecallDisplayed(TimePoint individualRecallRemovalFireTimePoint) {
-        notifyDataChanged();
-    }
-
-    @Override
-    public void onIndividualRecallRemoval() {
-        notifyDataChanged();
-    }
-
-    @Override
-    public void onAutomaticRaceEnd(TimePoint automaticRaceEnd) {
-        notifyDataChanged();
-        
-    }
-
-    @Override
-    public void onPathfinderSelected() {
-        // do nothing
-    }
-
-    @Override
-    public void onGateLineOpeningTimeChanged() {
-        notifyDataChanged();
-    }
-
-    @Override
-    public void onGateLineOpeningTimeTrigger(TimePoint gateCloseTimePoint) {
-        // do nothing
-        
-    }
-
     /*
      * 
      * public void notifyDataChanged() { List<RaceListDataType> list = adapter.getItems(); for (int i = 0; i <
