@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.racecommittee.app.R;
@@ -48,6 +49,8 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     private EssStartPhaseEventListener startPhaseEventListener;
     private EssRunningRaceEventListener runningRaceEventListener;
     
+    private IndividualRecallFinder individualRecallFinder;
+    
     public ExtremeSailingSeriesStartProcedure(PassAwareRaceLog raceLog) {
         this.raceLog = raceLog;
         startProcedureEventIntervals = new ArrayList<Long>();
@@ -60,6 +63,8 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         startProcedureEventIntervals.add(startPhaseESSTwoUpInterval);
         startProcedureEventIntervals.add(startPhaseESSOneUpInterval);
         startProcedureEventIntervals.add(startPhaseESSOneDownInterval);
+        
+        individualRecallFinder  = new IndividualRecallFinder(raceLog);
     }
 
     @Override
@@ -290,18 +295,28 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     public void setIndividualRecallRemoval(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
-                raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, /*isDisplayed*/false);
-        raceLog.add(event);
-        
-        if (runningRaceEventListener != null) {
-            runningRaceEventListener.onIndividualRecallRemoval();
+        if (this.getIndividualRecallDisplayed()) {
+            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
+                    Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, /* isDisplayed */
+                    false);
+            raceLog.add(event);
+
+            if (runningRaceEventListener != null) {
+                runningRaceEventListener.onIndividualRecallRemoval();
+            }
         }
     }
     
-    public Object getIndividualRecallDisplayedTime() {
-        // TODO Auto-generated method stub
-        return null;
+    public boolean getIndividualRecallDisplayed() {
+        if(this.individualRecallFinder.getIndividualRecallDisplayedTime()!=null){
+            if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime()!=null){
+                if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime().after(this.individualRecallFinder.getIndividualRecallDisplayedTime())){
+                    return false;
+                }
+            }
+            return true;
+        }
+        else return false;
     }
 
     @Override
