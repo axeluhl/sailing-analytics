@@ -224,4 +224,10 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         //do nothing
     }
 
+    @Override
+    public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

@@ -20,6 +20,7 @@ public class AppConstants {
     public final static String STARTPROCEDURE_SPECIFIC_EVENT_ID = "startProcedureSpecificEventId";
     public final static String EXTRAS_SERIALIZED_EVENT = "json";
     public final static String EXTRAS_URL = "url";
+    public final static String OPTIONAL_EXTRAS  = "optionalExtra";
     public final static String FLAG_KEY = "raceFlag";
 
     public final static String LogFolder = "/racecommittee";
@@ -37,6 +38,8 @@ public class AppConstants {
 
     public static String getServerBaseURL(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        if(sp.getString(PREFERENCE_SERVICE_URL, "").equals(""))
+            return "http://localhost:8889";
         return sp.getString(PREFERENCE_SERVICE_URL, "http://192.168.56.1:8888");
     }
 

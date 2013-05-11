@@ -289,16 +289,6 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         }
     }
 
-    public void dispatchFiredIndividualRecallRemovalEvent(TimePoint individualRecallDisplayedTime, TimePoint eventTime) {
-        if (individualRecallDisplayedTime != null) {
-            long interval = eventTime.asMillis() - individualRecallDisplayedTime.asMillis();
-            
-            if (interval == individualRecallRemovalInterval) {
-                setIndividualRecallRemoval(eventTime);
-            }
-        }
-    }
-
     public void setIndividualRecallRemoval(TimePoint eventTime) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, /*isDisplayed*/false);
@@ -354,7 +344,9 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
 
     @Override
     public void handleStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
-        // TODO Auto-generated method stub
+        if(eventId.equals(INDIVIDUAL_RECALL_REMOVAL_EVENT_ID)){
+            setIndividualRecallRemoval(eventTime);
+        }
         
     }
 }

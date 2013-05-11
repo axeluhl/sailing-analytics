@@ -268,7 +268,8 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     @Override
     public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
-        // TODO Auto-generated method stub
-        
+        for (RaceStateChangedListener listener : stateChangedListeners) {
+            listener.onStartProcedureSpecificEvent(eventTime, eventId);
+        }
     }
 }

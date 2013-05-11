@@ -30,4 +30,10 @@ public class RaceStateListener implements RaceStateChangedListener {
     public void onRaceAborted() {
         service.handleRaceAborted(race);
     }
+
+    @Override
+    public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
+        service.handleStartProcedureSpecificEvent(race, eventTime, eventId);
+        
+    }
 }

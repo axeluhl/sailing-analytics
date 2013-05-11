@@ -8,4 +8,6 @@ public interface RaceStateChangedListener {
     void onStartTimeChanged(TimePoint startTime);
     
     void onRaceAborted();
+    
+    void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId);
 }

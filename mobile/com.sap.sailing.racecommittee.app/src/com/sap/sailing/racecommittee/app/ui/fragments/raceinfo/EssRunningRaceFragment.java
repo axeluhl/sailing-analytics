@@ -33,7 +33,7 @@ public class EssRunningRaceFragment extends RaceFragment implements EssRunningRa
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.race_running_view, container, false);
+        return inflater.inflate(R.layout.ess_race_running_view, container, false);
     }
     
     @Override
