@@ -295,7 +295,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     public void setIndividualRecallRemoval(TimePoint eventTime) {
-        if (this.getIndividualRecallDisplayed()) {
+        if (this.isIndividualRecallDisplayed()) {
             RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
                     Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, /* isDisplayed */
                     false);
@@ -307,9 +307,9 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         }
     }
     
-    public boolean getIndividualRecallDisplayed() {
-        if(this.individualRecallFinder.getIndividualRecallDisplayedTime()!=null){
-            if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime()!=null){
+    public boolean isIndividualRecallDisplayed() {
+        if(this.individualRecallFinder.getIndividualRecallDisplayedTime() != null){
+            if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime() != null){
                 if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime().after(this.individualRecallFinder.getIndividualRecallDisplayedTime())){
                     return false;
                 }

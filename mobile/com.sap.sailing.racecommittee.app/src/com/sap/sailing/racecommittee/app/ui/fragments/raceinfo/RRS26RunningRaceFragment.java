@@ -73,7 +73,7 @@ public class RRS26RunningRaceFragment extends RaceFragment implements EssRunning
                 TimePoint now = MillisecondsTimePoint.now();
                 if (getRace().getState().getStartProcedure() instanceof ExtremeSailingSeriesStartProcedure) {
                     ExtremeSailingSeriesStartProcedure essStartProcedure = ((ExtremeSailingSeriesStartProcedure) getRace().getState().getStartProcedure());
-                    if (essStartProcedure.getIndividualRecallDisplayed()) {
+                    if (essStartProcedure.isIndividualRecallDisplayed()) {
                         essStartProcedure.setIndividualRecallRemoval(now);
                     } else {
                         essStartProcedure.setIndividualRecall(now);
