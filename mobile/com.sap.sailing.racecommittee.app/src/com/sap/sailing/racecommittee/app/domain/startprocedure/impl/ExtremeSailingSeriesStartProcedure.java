@@ -316,7 +316,18 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
             }
             return true;
         }
-        else return false;
+        return false;
+    }
+    
+    public boolean getIndividualRecallRemoved() {
+        if(this.individualRecallFinder.getIndividualRecallDisplayedTime()!=null){
+            if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime()!=null){
+                if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime().after(this.individualRecallFinder.getIndividualRecallDisplayedTime())){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

@@ -30,6 +30,7 @@ public class EssRunningRaceFragment extends RaceFragment implements EssRunningRa
     private ImageView individualRecallFlag;
     private TextView individualRecallLabel;
     ImageButton abortingFlagButton;
+    ImageButton individualRecallButton;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -67,7 +68,7 @@ public class EssRunningRaceFragment extends RaceFragment implements EssRunningRa
         });
         
         
-        ImageButton individualRecallButton = (ImageButton) getView().findViewById(R.id.individualRecallButton);
+        individualRecallButton = (ImageButton) getView().findViewById(R.id.individualRecallButton);
         individualRecallButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 TimePoint now = MillisecondsTimePoint.now();
@@ -81,6 +82,16 @@ public class EssRunningRaceFragment extends RaceFragment implements EssRunningRa
                 }
             }
         });
+
+        if (getRace().getState().getStartProcedure() instanceof ExtremeSailingSeriesStartProcedure) {
+            ExtremeSailingSeriesStartProcedure essStartProcedure = ((ExtremeSailingSeriesStartProcedure) getRace()
+                    .getState().getStartProcedure());
+            if (essStartProcedure.getIndividualRecallDisplayed()) {
+                setIndividualRecallDisplayedInView();
+            } else if(essStartProcedure.getIndividualRecallRemoved()){
+                setIndividualRecallRemovedInView();
+            }
+        }
     }
 
     private void showDisplayGeneralRecallDialog() {
@@ -186,8 +197,10 @@ public class EssRunningRaceFragment extends RaceFragment implements EssRunningRa
     private void setIndividualRecallRemovedInView() {
         moveImageDown(individualRecallFlag);
         //setXrayCountdownLabel();
-        String setIndividualRecallUp = getActivity().getResources().getString(R.string.choose_xray_flag_up);
-        individualRecallLabel.setText(setIndividualRecallUp);
+        //String setIndividualRecallUp = getActivity().getResources().getString(R.string.choose_xray_flag_up);
+        //individualRecallLabel.setText(setIndividualRecallUp);
+        individualRecallLabel.setVisibility(View.GONE);
+        individualRecallButton.setVisibility(View.GONE);
     }
 
     protected void moveImageUp(ImageView image) {
