@@ -319,7 +319,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         return false;
     }
     
-    public boolean getIndividualRecallRemoved() {
+    public boolean isIndividualRecallRemoved() {
         if(this.individualRecallFinder.getIndividualRecallDisplayedTime()!=null){
             if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime()!=null){
                 if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime().after(this.individualRecallFinder.getIndividualRecallDisplayedTime())){

@@ -86,9 +86,9 @@ public class EssRunningRaceFragment extends RaceFragment implements EssRunningRa
         if (getRace().getState().getStartProcedure() instanceof ExtremeSailingSeriesStartProcedure) {
             ExtremeSailingSeriesStartProcedure essStartProcedure = ((ExtremeSailingSeriesStartProcedure) getRace()
                     .getState().getStartProcedure());
-            if (essStartProcedure.getIndividualRecallDisplayed()) {
+            if (essStartProcedure.isIndividualRecallDisplayed()) {
                 setIndividualRecallDisplayedInView();
-            } else if(essStartProcedure.getIndividualRecallRemoved()){
+            } else if(essStartProcedure.isIndividualRecallRemoved()){
                 setIndividualRecallRemovedInView();
             }
         }
