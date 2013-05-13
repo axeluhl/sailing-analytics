@@ -2,14 +2,14 @@ package com.sap.sailing.racecommittee.app.ui.comparators;
 
 import java.util.Comparator;
 
-import com.sap.sailing.racecommittee.app.utils.AlphanumComparator;
+import com.sap.sailing.domain.common.impl.Util;
 
 public abstract class RaceNameComparator {
 	
 	private Comparator<String> comparator;
 
 	public RaceNameComparator() {
-		this.comparator = new AlphanumComparator();
+		this.comparator = new Util.NaturalComparator();
 	}
 
 	/**
