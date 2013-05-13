@@ -14,9 +14,9 @@ RaceLogCourseAreaChangedEvent {
 
     private Serializable courseAreaId;
 
-    public RaceLogCourseAreaChangeEventImpl(TimePoint pTimePoint,
-            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Serializable courseAreaId) {
-        super(pTimePoint, pId, pInvolvedBoats, pPassId);
+    public RaceLogCourseAreaChangeEventImpl(TimePoint createdAt,
+            TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Serializable courseAreaId) {
+        super(createdAt, pTimePoint, pId, pInvolvedBoats, pPassId);
         this.courseAreaId = courseAreaId;
     }
 

@@ -11,9 +11,9 @@ import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 public class RaceLogPassChangeEventImpl extends RaceLogEventImpl implements RaceLogPassChangeEvent {
     private static final long serialVersionUID = -3737606977320640630L;
 
-    public RaceLogPassChangeEventImpl(TimePoint pTimePoint, Serializable pId,
-            List<Competitor> pInvolvedBoats, int pPassId) {
-        super(pTimePoint, pId, pInvolvedBoats, pPassId);
+    public RaceLogPassChangeEventImpl(TimePoint createdAt, TimePoint pTimePoint,
+            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId) {
+        super(createdAt, pTimePoint, pId, pInvolvedBoats, pPassId);
     }
 
     @Override

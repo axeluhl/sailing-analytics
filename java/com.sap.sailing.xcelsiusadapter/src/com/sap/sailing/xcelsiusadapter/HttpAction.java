@@ -26,12 +26,11 @@ import org.jdom.output.DOMOutputter;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -90,7 +89,7 @@ public abstract class HttpAction {
         return regatta;
     }
     
-    public RegattaLeaderboard getRegattaLeaderboard() throws IOException {
+    public Leaderboard getLeaderboard() throws IOException {
         /*
          * Leaderboard name is always equal Regatta name
          */
@@ -100,11 +99,11 @@ public abstract class HttpAction {
             return null;
         }
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName); 
-        if (leaderboard == null || !(leaderboard instanceof RegattaLeaderboard)) {
-            say("Regatta " + leaderboardName + " not found.");
+        if (leaderboard == null) {
+            say("Leaderboard " + leaderboardName + " not found.");
             return null;
         }
-        return (RegattaLeaderboard)leaderboard;
+        return leaderboard;
     }
 
     public Regatta getEvent(String name) {

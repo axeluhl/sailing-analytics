@@ -1,4 +1,11 @@
+#!/bin/sh
+
+export TELNET_PORT=14886
+export SERVER_NAME=MASTER
+
+export JAVA_HOME=/home/trac/jdk1.7.0_02
 scriptdir=`dirname "$0"`
 LIB_DIR=`pwd`/native-libraries
 echo scriptdir is $scriptdir and LIB_DIR is $LIB_DIR
-"$JAVA_HOME/bin/java" -XX:+UseMembar -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx8192m -jar plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar -console -configuration ./ -clean
+nohup "$JAVA_HOME/bin/java" -XX:+UseMembar -D$SERVER_NAME -Dcom.sap.sailing.server.name=$SERVER_NAME -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx8192m -jar plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar -console $TELNET_PORT -configuration ./ -clean &
+echo "Started $SERVER_NAME on port $TELNET_PORT - use telnet localhost $TELNET_PORT to connect to the OSGi console"

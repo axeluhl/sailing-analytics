@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.raceboard;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.Window;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
 
 public abstract class PopupWindowPlayer extends AbstractMediaPlayer {
 

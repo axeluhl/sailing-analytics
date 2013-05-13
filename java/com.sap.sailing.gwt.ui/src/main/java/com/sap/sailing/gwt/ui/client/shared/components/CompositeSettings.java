@@ -1,0 +1,24 @@
+package com.sap.sailing.gwt.ui.client.shared.components;
+
+import com.sap.sailing.domain.common.impl.Util.Pair;
+
+public class CompositeSettings {
+    public static class ComponentAndSettingsPair<SettingsType> extends Pair<Component<SettingsType>, SettingsType> {
+        private static final long serialVersionUID = -569811233041583043L;
+
+        public ComponentAndSettingsPair(Component<SettingsType> a, SettingsType b) {
+            super(a, b);
+        }
+    }
+    
+    private final Iterable<ComponentAndSettingsPair<?>> settingsPerComponent;
+
+    public CompositeSettings(Iterable<ComponentAndSettingsPair<?>> settingsPerComponent) {
+        this.settingsPerComponent = settingsPerComponent;
+    }
+
+    public Iterable<ComponentAndSettingsPair<?>> getSettingsPerComponent() {
+        return settingsPerComponent;
+    }
+
+}

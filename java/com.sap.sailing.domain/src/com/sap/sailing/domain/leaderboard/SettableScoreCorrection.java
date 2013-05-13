@@ -38,8 +38,6 @@ public interface SettableScoreCorrection extends ScoreCorrection {
      */
     Double getExplicitScoreCorrection(Competitor competitor, RaceColumn raceColumn);
 
-    boolean hasCorrectionFor(RaceColumn raceInLeaderboard);
-
     void setTimePointOfLastCorrectionsValidity(TimePoint timePointOfLastCorrectionsValidity);
     
     void setComment(String scoreCorrectionComment);

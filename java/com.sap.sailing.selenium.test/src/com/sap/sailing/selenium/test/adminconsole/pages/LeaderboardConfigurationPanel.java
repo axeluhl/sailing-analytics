@@ -20,12 +20,9 @@ public class LeaderboardConfigurationPanel extends PageArea {
     
     public FlexibleLeaderboardCreationDialog startCreatingFlexibleLeaderboard() {
         this.createFlexibleLeaderboardButton.click();
-        
         // Wait, since we trigger an AJAX-request to get the available events
         waitForAjaxRequests();
-        
         WebElement dialog = findElementBySeleniumId(this.driver, "CreateFlexibleLeaderboardDialog");
-        
         return new FlexibleLeaderboardCreationDialog(this.driver, dialog);
     }
 }

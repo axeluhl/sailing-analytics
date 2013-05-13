@@ -1,9 +1,11 @@
 package com.sap.sailing.racecommittee.app.domain;
 
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.WithID;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 
 public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
@@ -31,4 +33,16 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
 	 */
 	public RaceLogRaceStatus getStatus();
 	
+	/**
+         * the current course of the race
+         * @return the course of the race
+         */
+        public CourseBase getCourseDesign();
+        
+        
+        /**
+         * returns the list of competitors for this race
+         * @return list of competitors
+         */
+        public Iterable<Competitor> getCompetitors();
 }

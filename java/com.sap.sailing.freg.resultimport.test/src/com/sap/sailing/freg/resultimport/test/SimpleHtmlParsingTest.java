@@ -17,8 +17,8 @@ import java.util.regex.Pattern;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.freg.resultimport.CompetitorRow;
-import com.sap.sailing.freg.resultimport.RegattaResults;
+import com.sap.sailing.resultimport.CompetitorRow;
+import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.freg.resultimport.impl.FregHtmlParser;
 
 public class SimpleHtmlParsingTest {
@@ -38,12 +38,12 @@ public class SimpleHtmlParsingTest {
         List<CompetitorRow> result = regattaResults.getCompetitorResults();
         assertFalse(result.isEmpty());
         assertEquals(57, result.size());
-        assertTrue(regattaResults.getMetadata().contains("PRE- WORLD \n      2012 - COUPE INTERNATIONALE DE FRANCE 505"));
+        assertTrue(regattaResults.getMetadata().get("info1").contains("PRE- WORLD \n      2012 - COUPE INTERNATIONALE DE FRANCE 505"));
         for (CompetitorRow row : result) {
             if (Util.contains(row.getNames(), "MARTIN Aline")) {
                 assertEquals("FRA 8716", row.getSailID());
                 assertEquals(111, row.getScoreAfterDiscarding(), 0.000000001);
-                assertEquals(230.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
+                assertEquals(230.00, row.getNetPointsBeforeDiscarding(), 0.000000001);
             }
         }
     }
@@ -59,7 +59,7 @@ public class SimpleHtmlParsingTest {
             if (Util.contains(row.getNames(), "NIEMINEN Jukka")) {
                 assertEquals("FIN 8768", row.getSailID());
                 assertEquals(118, row.getScoreAfterDiscarding(), 0.000000001);
-                assertEquals(118.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
+                assertEquals(118.00, row.getNetPointsBeforeDiscarding(), 0.000000001);
                 assertNull(Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getRank());
                 assertNull(Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getScore());
                 assertEquals(false, Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).isDiscarded());
@@ -69,7 +69,7 @@ public class SimpleHtmlParsingTest {
             } else if (Util.contains(row.getNames(), "HAGAN Douglas")) {
                 assertEquals("AUS 8817", row.getSailID());
                 assertEquals(235.00, row.getScoreAfterDiscarding(), 0.000000001);
-                assertEquals(235.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
+                assertEquals(235.00, row.getNetPointsBeforeDiscarding(), 0.000000001);
                 assertNull(Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getRank());
                 assertEquals("DNF", Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getMaxPointsReason());
                 assertEquals((double) 117.00, (double) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getScore(), 0.000000001);
@@ -118,14 +118,14 @@ public class SimpleHtmlParsingTest {
             if (Util.contains(row.getNames(), "HOLZAPFEL Alexander")) {
                 assertEquals("GER 8975", row.getSailID());
                 assertEquals(60.00, row.getScoreAfterDiscarding(), 0.000000001);
-                assertEquals(74.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
+                assertEquals(74.00, row.getNetPointsBeforeDiscarding(), 0.000000001);
                 assertEquals((int) 11, (int) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getRank());
                 assertEquals((double) 11, (double) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getScore(), 0.000000001);
                 assertEquals(false, Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).isDiscarded());
             } else if (Util.contains(row.getNames(), "BART Cedric")) {
                 assertEquals("SUI 8543", row.getSailID());
                 assertEquals(55.00, row.getScoreAfterDiscarding(), 0.000000001);
-                assertEquals(74.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
+                assertEquals(74.00, row.getNetPointsBeforeDiscarding(), 0.000000001);
                 assertEquals((int) 2, (int) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 2).getRank());
                 assertEquals((double) 2, (double) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 2).getScore(), 0.000000001);
                 assertEquals(false, Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 2).isDiscarded());
@@ -135,7 +135,7 @@ public class SimpleHtmlParsingTest {
             } else if (Util.contains(row.getNames(), "LEWNS Chris")) {
                 assertEquals("GBR 9057", row.getSailID());
                 assertEquals(64.00, row.getScoreAfterDiscarding(), 0.000000001);
-                assertEquals(140.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
+                assertEquals(140.00, row.getNetPointsBeforeDiscarding(), 0.000000001);
                 assertNull(Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 7).getRank());
                 assertEquals("DNF", Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 7).getMaxPointsReason());
                 assertEquals((double) 76, (double) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 7).getScore(), 0.000000001);
@@ -155,7 +155,7 @@ public class SimpleHtmlParsingTest {
             if (Util.contains(row.getNames(), "HOLSTE Kim (M1993)")) {
                 assertEquals("GER 1864", row.getSailID());
                 assertEquals(58.00, row.getScoreAfterDiscarding(), 0.000000001);
-                assertEquals(169.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
+                assertEquals(169.00, row.getNetPointsBeforeDiscarding(), 0.000000001);
                 assertEquals((int) 25, (int) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getRank());
                 assertEquals((double) 25, (double) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getScore(), 0.000000001);
                 assertEquals(false, Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).isDiscarded());

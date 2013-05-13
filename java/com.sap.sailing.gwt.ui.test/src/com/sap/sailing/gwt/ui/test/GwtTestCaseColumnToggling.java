@@ -37,7 +37,9 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     protected static final String tractracTunnelHost = "10.18.206.73"; // System.getProperty("tractrac.tunnel.host", "localhost");
     private final String JSON_URL= "http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/jsonservice.php";
     private final String TRACKED_RACE = "schwerttest";
-    
+    private final String COURSE_DESIGN_UPDATE_URI = "http://tracms.traclive.dk/update_course";
+    private final String TRACTRAC_USERNAME = "tracTest"; //only used for course update authentification
+    private final String TRACTRAC_PASSWORD = "tracTest"; //only used for course update authentification
     
     private LeaderboardDTO leaderboard;
     private TracTracRaceRecordDTO rrDao;
@@ -87,7 +89,9 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                 + TracTracConnectionConstants.PORT_TUNNEL_LIVE : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":"
                 + TracTracConnectionConstants.PORT_LIVE, tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
                 + TracTracConnectionConstants.PORT_TUNNEL_STORED : "tcp://" + TracTracConnectionConstants.HOST_NAME
-                + ":" + TracTracConnectionConstants.PORT_STORED, false, false, /* simulateWithStartTimeNow */ false, new AsyncCallback<Void>() {
+                + ":" + TracTracConnectionConstants.PORT_STORED, 
+                COURSE_DESIGN_UPDATE_URI, 
+                false, false, /* simulateWithStartTimeNow */ false, TRACTRAC_USERNAME, TRACTRAC_PASSWORD, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {

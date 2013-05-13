@@ -103,7 +103,12 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
 	
 	public void onLoadFailed(Exception reason) {
 		showProgressBar(false);
-		showLoadFailedDialog(reason.getMessage());
+		
+		String message = reason.getMessage();
+		if (message == null) {
+		    message = reason.toString();
+		}
+		showLoadFailedDialog(message);
 	}
 
 	private void showProgressBar(boolean visible) {

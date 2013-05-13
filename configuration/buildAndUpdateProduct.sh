@@ -89,6 +89,7 @@ fi
 
 echo PROJECT_HOME is $PROJECT_HOME
 echo SERVERS_HOME is $SERVERS_HOME
+echo BRANCH is $active_branch
 
 options=':gtocpm:n:l:'
 while getopts $options option
@@ -145,7 +146,7 @@ if [[ "$@" == "hot-deploy" ]]; then
         echo "WARNING: Bundle versions do not differ. Update not needed."
     fi
 
-    read -s -n1 -p "Do you really want to hot-deploy bundle $OSGI_BUNDLE_NAME to $PROJECT_HOME/$active_branch? (y/N): " answer
+    read -s -n1 -p "Do you really want to hot-deploy bundle $OSGI_BUNDLE_NAME to $SERVERS_HOME/$active_branch? (y/N): " answer
     case $answer in
     "Y" | "y") echo "Continuing";;
     *) echo "Aborting..."
@@ -214,7 +215,7 @@ if [[ "$@" == "hot-deploy" ]]; then
     exit
 fi
 
-echo "Starting $@ of server (maven configuration set to $MAVEN_SETTINGS)..."
+echo "Starting $@ of server..."
 
 if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	# yield build so that we get updated product
@@ -266,6 +267,13 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         exit
     fi
 
+    # secure current state so that it can be reused if something goes wrong
+    if [ -f "$ACDIR/backup-binaries.tar.gz" ]; then
+        rm -f $ACDIR/backup-binaries.tar.gz
+    fi
+
+    tar cvzf $ACDIR/backup-binaries.tar.gz $ACDIR/plugins $ACDIR/configuration
+
     if [ ! -d "$ACDIR/plugins" ]; then
         mkdir $ACDIR/plugins
     fi
@@ -287,6 +295,9 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     rm -rf $ACDIR/org.eclipse.*
     rm -rf $ACDIR/configuration/org.eclipse.*
 
+    rm -rf $ACDIR/start
+    rm -rf $ACDIR/stop
+
     cp -v $p2PluginRepository/configuration/config.ini configuration/
     cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
     cp -v $p2PluginRepository/plugins/*.jar plugins/
@@ -302,6 +313,9 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 
     # Make sure this script is up2date at least for the next run
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
+
+    cp -v $PROJECT_HOME/java/target/start $ACDIR/
+    cp -v $PROJECT_HOME/java/target/stop $ACDIR/
 
     echo "Installation complete. You may now start the server using ./start"
 fi

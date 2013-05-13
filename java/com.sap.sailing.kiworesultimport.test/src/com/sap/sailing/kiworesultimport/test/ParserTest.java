@@ -96,7 +96,7 @@ public class ParserTest {
         ResultList resultList = parser.parse(getSampleInputStream(), SAMPLE_INPUT_NAME);
         assertNotNull(resultList);
         assertEquals("D:\\Programme\\KWSailing\\eventlogos\\KielerWoche_Ergebnislistenkopf_2011.jpg", resultList.getImagePath());
-        assertEquals(new String(new byte[] { (byte) 160  /* non-breaking space */}), resultList.getLegend());
+        assertEquals(new String(new char[] { (char) 160  /* non-breaking space */}), resultList.getLegend());
         Iterable<Boat> boats = resultList.getBoats();
         assertFalse(Util.isEmpty(boats));
         assertEquals(48, Util.size(boats));

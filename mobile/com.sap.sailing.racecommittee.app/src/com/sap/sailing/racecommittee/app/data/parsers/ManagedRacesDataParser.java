@@ -8,17 +8,18 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
+import com.sap.sailing.domain.racelog.PassAwareRaceLog;
+import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
-import com.sap.sailing.racecommittee.app.domain.racelog.PassAwareRaceLog;
-import com.sap.sailing.racecommittee.app.domain.racelog.impl.PassAwareRaceLogImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
@@ -59,7 +60,8 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 							series, 
 							fleet, 
 							cell.getName(), 
-							log);
+							log,
+							cell.getCompetitors());
 					target.add(race);
 				}
 			}
@@ -67,11 +69,11 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 	}
 
 	private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesWithRows series,
-			Fleet fleet, String name, PassAwareRaceLog raceLog) {
+			Fleet fleet, String name, PassAwareRaceLog raceLog, Iterable<Competitor> competitors) {
 		return new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(name, 
 						new FleetIdentifierImpl(fleet, series, raceGroup)),
-				raceLog);
+				raceLog, competitors);
 		
 	}
 

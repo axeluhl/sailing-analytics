@@ -32,7 +32,7 @@
             android:id="@+id/textFinishedRaceStarted"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/blank"
+            android:text="@string/empty"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10" />
@@ -48,7 +48,7 @@
             android:id="@+id/textFirstBoatFinished"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/blank"
+            android:text="@string/empty"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10" />
@@ -64,7 +64,7 @@
             android:id="@+id/textFinishedRaceEnded"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/blank"
+            android:text="@string/empty"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10" />
@@ -80,7 +80,7 @@
             android:id="@+id/textTimeLimit"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/blank"
+            android:text="@string/empty"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10" />
@@ -96,11 +96,27 @@
             android:id="@+id/textProtestStartTime"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/blank"
+            android:text="@string/empty"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10"
             android:visibility="invisible" />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_weight="0.2"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/buttonPositioning"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Change positioning"
+            android:textSize="14pt"
+            android:gravity="center_vertical|center_horizontal"
+            android:ems="10" />
     </LinearLayout>
 
 </LinearLayout>

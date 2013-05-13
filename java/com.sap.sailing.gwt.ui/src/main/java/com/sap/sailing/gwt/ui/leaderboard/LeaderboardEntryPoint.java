@@ -288,7 +288,6 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     /**
      * Assembles a URL for a leaderboard that displays with the <code>settings</code> and <code>embedded</code> mode
      * as specified by the parameters.
-     * @param leaderboardDisplayName TODO
      */
     public static String getUrl(String leaderboardName, String leaderboardDisplayName, LeaderboardUrlSettings settings) {
         StringBuilder overallDetails = new StringBuilder();

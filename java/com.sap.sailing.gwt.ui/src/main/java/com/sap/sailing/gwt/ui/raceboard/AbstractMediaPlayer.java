@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.Date;
 
 import com.sap.sailing.gwt.ui.client.MediaPlayer;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
 
 public abstract class AbstractMediaPlayer implements MediaPlayer {
 

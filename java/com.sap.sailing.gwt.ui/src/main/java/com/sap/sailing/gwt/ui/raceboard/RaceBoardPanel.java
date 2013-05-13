@@ -16,9 +16,8 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.MenuBar;
-import com.google.gwt.user.client.ui.ToggleButton;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -37,6 +36,13 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomModel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiChartPanel;
+import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
+import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
+import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
@@ -44,16 +50,9 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
-import com.sap.sailing.gwt.ui.shared.charts.MultiChartPanel;
-import com.sap.sailing.gwt.ui.shared.charts.WindChart;
-import com.sap.sailing.gwt.ui.shared.charts.WindChartSettings;
-import com.sap.sailing.gwt.ui.shared.components.Component;
-import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
-import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.shared.racemap.RaceMap;
 
 /**
- * A panel showing a list of components visualizing a race from the regattas announced by calls to {@link #fillRegattas(List)}.
+ * A view showing a list of components visualizing a race from the regattas announced by calls to {@link #fillRegattas(List)}.
  * The race selection is provided by a {@link RaceSelectionProvider} for which this is a {@link RaceSelectionChangeListener listener}.
  * {@link RaceIdentifier}-based race selection changes are converted to {@link RaceDTO} objects using the {@link #racesByIdentifier}
  * map maintained during {@link #fillRegattas(List)}. The race selection provider is expected to be single selection only.
@@ -61,13 +60,13 @@ import com.sap.sailing.gwt.ui.shared.racemap.RaceMap;
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
-public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceSelectionChangeListener {
+public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, RaceSelectionChangeListener {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
+    private final RaceBoardViewConfiguration raceboardViewConfiguration;
     private String raceBoardName;
-    private RaceBoardViewModes viewMode;
     
     /**
      * Updated upon each {@link #fillRegattas(List)}
@@ -105,11 +104,12 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
 
     public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserDTO theUser, Timer timer,
             RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
-            ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentDetails userAgent,
-            RaceBoardViewModes viewMode, RaceTimesInfoProvider raceTimesInfoProvider) {
+            RaceBoardViewConfiguration raceboardViewConfiguration, ErrorReporter errorReporter, final StringMessages stringMessages, 
+            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
+        this.raceboardViewConfiguration = raceboardViewConfiguration;
         this.raceSelectionProvider = theRaceSelectionProvider;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.scrollOffset = 0;
@@ -119,7 +119,6 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         this.setRaceBoardName(selectedRaceIdentifier.getRaceName());
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
-        this.viewMode = viewMode;
         asyncActionsExecutor = new AsyncActionsExecutor();
         FlowPanel mainPanel = new FlowPanel();
         mainPanel.setSize("100%", "100%");
@@ -130,7 +129,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         componentsNavigationPanel = new FlowPanel();
         componentsNavigationPanel.addStyleName("raceBoardNavigation");
-        switch (this.viewMode) {
+        switch (getConfiguration().getViewMode()) {
             case ONESCREEN:
                 createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);                
                 getElement().getStyle().setMarginLeft(12, Unit.PX);
@@ -154,27 +153,27 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         List<Component<?>> components = new ArrayList<Component<?>>();
         competitorChart = new MultiChartPanel(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider,
                     timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
-        competitorChart.setVisible(false);
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(competitorChart);
         windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeRangeWithZoomModel, new WindChartSettings(),
                 stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
-        windChart.setVisible(false);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(windChart);
-        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components);  
+        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
         }
-
+        setLeaderboardVisible(getConfiguration().isShowLeaderboard());
+        setWindChartVisible(getConfiguration().isShowWindChart());
+        setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
+        
         addComponentToNavigationMenu(leaderboardAndMapViewer, leaderboardPanel, true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, windChart,  true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, competitorChart, true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, raceMap, false);
 
-        addMediaSelectorToNavigationMenu();
-        
+        addMediaSelectorToNavigationMenu();   
     }
 
     private void addMediaSelectorToNavigationMenu() {
@@ -212,11 +211,11 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
      }
 
     private <SettingsType> void addComponentToNavigationMenu(final ComponentViewer componentViewer,
-            final Component<SettingsType> component, boolean withCheckbox) {
+            final Component<SettingsType> component, boolean isToogleCheckboxEnabled) {
         final CheckBox checkBox= new CheckBox(component.getLocalizedShortName());
         checkBox.getElement().getStyle().setFloat(Style.Float.LEFT);
 
-        checkBox.setEnabled(withCheckbox);
+        checkBox.setEnabled(isToogleCheckboxEnabled);
         checkBox.setValue(component.isVisible());
         checkBox.setTitle(stringMessages.showHideComponent(component.getLocalizedShortName()));
         checkBox.addStyleName("raceBoardNavigation-innerElement");
@@ -255,39 +254,10 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
             
             componentsNavigationPanel.add(settingsButton);
         }
-
-    }
-    
-    public void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer,
-            final Component<?> component) {
-        final ToggleButton toggleButton = new ToggleButton(component.getLocalizedShortName(),
-                "\u2713 " + component.getLocalizedShortName());
-        toggleButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        toggleButton.setDown(component.isVisible());
-        toggleButton.setTitle(stringMessages.showHideComponent(component.getLocalizedShortName()));
-
-        toggleButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                // make the map invisible is this is not supported yet due to problems with disabling the center element
-                // of a DockPanel
-                if (component instanceof RaceMap)
-                    return;
-
-                boolean visible = toggleButton.isDown();
-                setComponentVisible(componentViewer, component, visible);
-
-                if (visible && component instanceof TimeListener) {
-                    // trigger the component to update its data
-                    ((TimeListener) component).timeChanged(timer.getTime());
-                }
-            }
-        });
-
-        componentsNavigationPanel.add(toggleButton);
     }
     
     private void setComponentVisible(ComponentViewer componentViewer, Component<?> component, boolean visible) {
-        component.setVisible(visible);
+        component.setVisible(visible);      
         componentViewer.forceLayout();
     }
     
@@ -300,7 +270,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
      * @param visible <code>true</code> if the leaderboard shall be open/visible
      */
     public void setLeaderboardVisible(boolean visible) {
-        switch (viewMode) {
+        switch (getConfiguration().getViewMode()) {
         case ONESCREEN:
             setComponentVisible(leaderboardAndMapViewer, leaderboardPanel, visible);
             break;
@@ -316,7 +286,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
      * @param visible <code>true</code> if the wind chart shall be open/visible
      */
     public void setWindChartVisible(boolean visible) {
-        switch (viewMode) {
+        switch (getConfiguration().getViewMode()) {
         case ONESCREEN:
             setComponentVisible(leaderboardAndMapViewer, windChart, visible);
             break;
@@ -332,7 +302,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
      * @param visible <code>true</code> if the competitor chart shall be open/visible
      */
     public void setCompetitorChartVisible(boolean visible) {
-        switch (viewMode) {
+        switch (getConfiguration().getViewMode()) {
         case ONESCREEN:
             setComponentVisible(leaderboardAndMapViewer, competitorChart, visible);
             break;
@@ -394,6 +364,10 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
 
     @Override
     public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
+    }
+
+    public RaceBoardViewConfiguration getConfiguration() {
+        return raceboardViewConfiguration;
     }
 }
 

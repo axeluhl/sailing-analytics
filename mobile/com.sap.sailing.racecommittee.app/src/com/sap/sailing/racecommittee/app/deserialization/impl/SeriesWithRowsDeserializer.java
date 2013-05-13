@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.serialization.impl.racegroup.RaceRowsOfSeriesWithRowsSerializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceRowsOfSeriesWithRowsSerializer;
 
 public class SeriesWithRowsDeserializer implements JsonDeserializer<SeriesWithRows> {
 

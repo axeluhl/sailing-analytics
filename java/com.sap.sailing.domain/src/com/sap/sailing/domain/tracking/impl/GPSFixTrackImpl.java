@@ -335,6 +335,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 return lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
             } else {
                 if (lastFixAtOrBefore == null && firstFixAtOrAfter != null) {
+                    // TODO shouldn't this extrapolate into the past if extrapolate==true?
                     return firstFixAtOrAfter.getPosition(); // asking for time point before first fix: return first fix's position
                 }
                 if (firstFixAtOrAfter == null && !extrapolate) {
@@ -342,6 +343,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 } else {
                     SpeedWithBearing estimatedSpeed = estimateSpeed(lastFixAtOrBefore, firstFixAtOrAfter);
                     if (estimatedSpeed == null) {
+                        // TODO even if extrapolation is requested, if there is no firstFixAtOrAfter, and the GPSFixes are without speed, shouldn't this at least return the position at the lastFixAtOrBefore instead of null?
                         return null;
                     } else {
                         if (lastFixAtOrBefore != null) {
@@ -351,6 +353,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                             return result;
                         } else {
                             // firstFixAtOrAfter can't be null because otherwise no speed could have been estimated
+                            // TODO shouldn't this extrapolate into the past if extrapolate==true?
                             return firstFixAtOrAfter.getPosition();
                         }
                     }
@@ -374,7 +377,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 return null;
             }
         } else if (fix2 == null) {
-            FixType lastBeforeFix1 = getLastRawFixBefore(fix1.getTimePoint());
+            FixType lastBeforeFix1 = getLastFixBefore(fix1.getTimePoint());
             if (lastBeforeFix1 != null) {
                 fix2 = fix1;
                 fix1 = lastBeforeFix1; // compute speed based on the last two fixes and assume constant speed

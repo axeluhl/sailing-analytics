@@ -293,36 +293,6 @@ public interface StringMessages extends Messages {
     String finishLine();
     String advantageLine();
     String courseMiddleLine();
-    /*Start of simulator related messages*/
-    String simulator();
-    String optionsBar();
-    String update();
-
-    String setup();
-    String strength();
-    String oscillation();
-    String oscillating();
-    String amplitude();
-    String frequency();
-    String noise();
-
-    String sailing();
-    String optimality();
-    String maximumTurns();
-    String raceDirection();
-    String upWind();
-    String downWind();
-    String strategies();
-    String omniscient();
-    String opportunistic();
-    String mixed();
-    String maps();
-    String startEnd();
-    String racecourse();
-    String summary();
-    String replay();
-    String display();
-    /*End of simulator related messages*/
     String messagingPortNumber();
     String servletPortNumber();
     String registeredAt(String string);
@@ -367,9 +337,6 @@ public interface StringMessages extends Messages {
     String addRegatta();
     String exchangeName();
     String course();
-    String simulatorPolarHeader();
-    String show();
-    String hide();
     String courseLayout();
     String buoy();
     String gate();
@@ -379,13 +346,13 @@ public interface StringMessages extends Messages {
     String boatTails();
     String maximalCount();
     String maxVisibleCompetitorsCountMustBePositive();
-    String fregResultImportUrls();
-    String errorRefreshingFregUrlList(String message);
-    String successfullyUpdatedFregUrls();
-    String errorRemovingFregUrls(String message);
+    String resultImportUrls();
+    String errorRefreshingResultImportUrlList(String message);
+    String successfullyUpdatedResultImportUrls();
+    String errorRemovingResultImportUrls(String message);
     String pleaseEnterNonEmptyUrl();
-    String addFragUrl();
-    String errorAddingFragUrl(String message);
+    String addResultImportUrl();
+    String errorAddingResultImportUrl(String message);
     String errorTryingToObtainLeaderboardContents(String message);
     String lastScoreUpdate();
     String warningBrowserUnsupported();
@@ -398,14 +365,6 @@ public interface StringMessages extends Messages {
     String errorTryingToObtainRaceCourse(String message);
     String insertWaypointBeforeSelected();
     String insertWaypointAfterSelected();
-    String leftWind();
-    String rightWind();
-    String strategyOption1();
-    String strategyOption2();
-    String strategyOption3();
-    String legLabel();
-    String raceLabel();
-    String competitorLabel();
     String scoringSchemeLowPointSystem();
     String scoringSchemeHighPointSystem();
     String scoringSchemeLowPointWinnerGetsZero();
@@ -555,6 +514,8 @@ public interface StringMessages extends Messages {
     String totalDistanceTraveledTooltip();
     String totalAverageSpeedOverGround();
     String totalAverageSpeedOverGroundTooltip();
+    String noStarttimeAnnouncedYet();
+    String lastFlag();
     String filterRegattasByName();
     String noRegattasYet();
     String cannotAddRacesToRegattaLeaderboardButOnlyToRegatta();
@@ -565,8 +526,12 @@ public interface StringMessages extends Messages {
     String timePointMustBeAfterStartOfTracking();
     String timePointMustBeBeforeEndOfTracking();
     String regattaUsedForTheTrackedRace();
-
-    String freemode();
-
-    String whatIfCourse();
+    String courseDesignUpdateUrl();
+    String passingSide();
+    String refreshNow();
+    String stopUpdating();
+    String startUpdating();
+    String currentTime();
+    String tractracUsername();
+    String tractracPassword();
 }

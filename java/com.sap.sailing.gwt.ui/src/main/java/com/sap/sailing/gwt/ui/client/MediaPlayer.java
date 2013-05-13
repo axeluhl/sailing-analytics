@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
 
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
+import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
 
 public interface MediaPlayer {
 

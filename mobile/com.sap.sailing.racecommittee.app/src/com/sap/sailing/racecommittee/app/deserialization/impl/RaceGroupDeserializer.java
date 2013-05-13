@@ -13,8 +13,8 @@ import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.serialization.impl.racegroup.RaceGroupJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racegroup.SeriesWithRowsOfRaceGroupSerializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceGroupJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.SeriesWithRowsOfRaceGroupSerializer;
 
 public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
 	

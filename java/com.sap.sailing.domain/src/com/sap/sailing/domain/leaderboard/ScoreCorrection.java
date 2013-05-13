@@ -57,6 +57,8 @@ public interface ScoreCorrection extends Serializable {
      */
     boolean isScoreCorrected(Competitor competitor, RaceColumn raceColumn);
 
+    boolean hasCorrectionFor(RaceColumn raceInLeaderboard);
+
     /**
      * Tells when the score correction was last updated. This should usually be the "validity time" and not the
      * "transaction time." In other words, if scores provided by the race committee are updated to this score correction

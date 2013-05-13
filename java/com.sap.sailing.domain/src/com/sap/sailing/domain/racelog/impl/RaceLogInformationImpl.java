@@ -7,7 +7,6 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 
-
 public class RaceLogInformationImpl implements RaceLogInformation {
 
     private final RaceLogStore store;

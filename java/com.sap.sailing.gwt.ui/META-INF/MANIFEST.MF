@@ -18,30 +18,16 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.tractracadapter.persistence,
  com.google.gwt.osgi;bundle-version="2.4.0",
  com.sap.sailing.domain.common,
+ com.sap.sailing.resultimport,
  org.moxieapps.gwt.highcharts;bundle-version="1.5.0",
  com.sap.sailing.geocoding,
  com.sap.sailing.server.replication,
  com.googlecode.java-diff-utils;bundle-version="1.3.0",
  com.sap.sailing.freg.resultimport,
- com.sap.sailing.domain.swisstimingreplayadapter,
- com.sap.sailing.simulator;bundle-version="1.0.0"
+ com.sap.sailing.domain.swisstimingreplayadapter
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
-Export-Package: com.sap.sailing.gwt.ui.shared.media,
- com.sap.sailing.gwt.ui.simulator;
-  uses:="com.google.gwt.maps.client,
-   com.sap.sailing.gwt.ui.shared.panels,
-   com.sap.sailing.gwt.ui.client,
-   com.sap.sailing.gwt.ui.shared.racemap,
-   com.sap.sailing.gwt.ui.shared.windpattern,
-   com.sap.sailing.gwt.ui.shared,
-   com.google.gwt.maps.client.geom,
-   com.sap.sailing.domain.common,
-   com.sap.sailing.simulator.util,
-   com.sap.sailing.gwt.ui.simulator.util,
-   com.google.gwt.maps.client.overlay,
-   com.google.gwt.user.client.ui",
- com.sap.sailing.gwt.ui.simulator.util
+Export-Package: com.sap.sailing.gwt.ui.client.shared.media
 Import-Package: javax.jms;version="1.1.0",
  javax.servlet;version="2.5.0",
  javax.servlet.http;version="2.5.0",

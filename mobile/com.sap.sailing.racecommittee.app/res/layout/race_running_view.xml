@@ -82,7 +82,7 @@
 
             <!-- END DISPLAY SECTION -->
 
-            <com.sap.sailing.racecommittee.app.utils.views.MyVerticalTextView
+            <com.sap.sailing.racecommittee.app.ui.views.VerticalTextView
                 android:id="@+id/flagsUpLable"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -92,7 +92,7 @@
                 android:text="@string/flags_up"
                 android:textAppearance="@style/TextAppearance.Welter.VeryBigTitleLabel" />
 
-            <com.sap.sailing.racecommittee.app.utils.views.MyVerticalTextView
+            <com.sap.sailing.racecommittee.app.ui.views.VerticalTextView
                 android:id="@+id/flagsDownLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -102,7 +102,8 @@
                 android:text="@string/flags_down"
                 android:textAppearance="@style/TextAppearance.Welter.VeryBigTitleLabel" />
         </RelativeLayout>
-
+
+
         <TextView
             android:layout_width="1dp"
             android:layout_height="match_parent"
@@ -120,7 +121,7 @@
             android:orientation="vertical" >
 
                     <ImageButton
-                        android:id="@+id/xrayButton"
+                        android:id="@+id/individualRecallButton"
                         android:layout_width="140dp"
                 		android:layout_height="80dp"
                         android:contentDescription="@string/choose_xray_flag_up"
@@ -129,7 +130,7 @@
                         android:visibility="gone" />
 
                     <TextView
-                        android:id="@+id/ChooseXrayLabel"
+                        android:id="@+id/individualRecallLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"
@@ -138,7 +139,7 @@
                         android:textAppearance="@style/TextAppearance.Welter.TitleLabel"
                         android:visibility="gone" />
                     
-                    <ImageButton
+                    <!-- <ImageButton
                         android:id="@+id/golfButton"
                         android:layout_width="140dp"
                 		android:layout_height="80dp"
@@ -155,7 +156,7 @@
                         android:layout_marginTop="2dp"
                         android:text="@string/choose_golf_flag_down"
                         android:textAppearance="@style/TextAppearance.Welter.TitleLabel"
-                        android:visibility="gone" />
+                        android:visibility="gone" />-->
 
                     <ImageButton
                         android:id="@+id/firstSubstituteButton"
@@ -192,7 +193,7 @@
                         android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
 
                     <ImageButton
-                        android:id="@+id/novemberButton"
+                        android:id="@+id/abortingFlagButton"
                         android:layout_width="140dp"
                 		android:layout_height="80dp"
                         android:contentDescription="@string/abort_running_race"
@@ -200,7 +201,7 @@
                         android:src="@drawable/ap_november_flag" />
 
                     <TextView
-                        android:id="@+id/novemberButtonLabel"
+                        android:id="@+id/abortingFlagButtonLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"

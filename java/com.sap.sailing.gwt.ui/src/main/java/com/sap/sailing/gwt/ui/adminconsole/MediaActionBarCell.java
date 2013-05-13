@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
 
 public class MediaActionBarCell extends ImagesBarCell {
 

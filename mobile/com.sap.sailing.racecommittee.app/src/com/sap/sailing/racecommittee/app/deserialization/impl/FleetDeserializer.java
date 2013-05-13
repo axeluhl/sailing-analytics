@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.serialization.impl.racegroup.FleetJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.FleetJsonSerializer;
 
 public class FleetDeserializer implements JsonDeserializer<Fleet> {
 

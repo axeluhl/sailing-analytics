@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
@@ -24,6 +24,7 @@ import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.RaceRowImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 
@@ -67,15 +68,22 @@ public class RaceGroupFactory {
     private Collection<RaceRow> getRows(Series series, List<RaceColumn> raceColumns) {
         Collection<RaceRow> rows = new ArrayList<>();
         for (Fleet fleet : series.getFleets()) {
-            rows.add(new RaceRowImpl(fleet, getCells(fleet, raceColumns)));
+            // We are taking the fleet name because there might be several "default fleet"
+            // objects when TrackedRaces are linked onto this Leaderboard
+            rows.add(new RaceRowImpl(fleet, getCells(fleet.getName(), raceColumns)));
         }
         return rows;
     }
 
-    private Collection<RaceCell> getCells(Fleet fleet, List<RaceColumn> raceColumns) {
+    private Collection<RaceCell> getCells(String fleetName, List<RaceColumn> raceColumns) {
         Collection<RaceCell> cells = new ArrayList<>();
         for (RaceColumn raceColumn : raceColumns) {
-            cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet)));
+            Fleet fleet = raceColumn.getFleetByName(fleetName);
+            Collection<Competitor> competitors = new ArrayList<Competitor>();
+            if (raceColumn.getRaceDefinition(fleet) != null) {
+                Util.addAll(raceColumn.getRaceDefinition(fleet).getCompetitors(), competitors);
+            }
+            cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet), competitors));
         }
         return cells;
     }
@@ -94,7 +102,7 @@ public class RaceGroupFactory {
                 insertSeriesIfNew(seriesToRaceColumns, raceColumnSeries).add(raceColumn);
             } else {
                 if (defaultSeries == null) {
-                    defaultSeries = createDefaultSeries();
+                    defaultSeries = createDefaultSeries(raceColumn.getFleets());
                     insertSeriesIfNew(seriesToRaceColumns, defaultSeries);
                 }
                 seriesToRaceColumns.get(defaultSeries).add(raceColumn);
@@ -103,10 +111,10 @@ public class RaceGroupFactory {
         return seriesToRaceColumns;
     }
 
-    private Series createDefaultSeries() {
+    private Series createDefaultSeries(Iterable<? extends Fleet> fleets) {
         Series defaultSeries;
         defaultSeries = new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME, false,
-                Collections.<Fleet> singleton(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)), Collections.<String> emptyList(), null);
+                fleets, Collections.<String> emptyList(), null);
         return defaultSeries;
     }
 

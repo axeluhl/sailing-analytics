@@ -111,7 +111,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            if a race definition is not received for a race of this event within this time, the race tracker for
      *            that race is stopped; use -1 to wait forever
      */
-    Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds)
+    Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, WindStore windStore, long timeoutInMilliseconds, 
+            String tracTracUsername, String tracTracPassword)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, IOException, ParseException,
             org.json.simple.parser.ParseException, Exception;
 
@@ -136,7 +137,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            if the race definition is not received for the race within this time, the race tracker for
      *            that race is stopped; use -1 to wait forever
      */
-    RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, RaceLogStore raceLogStore, WindStore windStore, long timeoutInMilliseconds)
+    RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, RaceLogStore raceLogStore, WindStore windStore, long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -151,9 +152,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
      */
-    RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI, URI storedURI,
+    RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint trackingStartTime, TimePoint trackingEndTime, RaceLogStore raceLogStore, WindStore windStore,
-            long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow)
+            long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow, String tracTracUsername, String tracTracPassword)
                     throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -375,6 +376,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     Regatta getOrCreateDefaultRegatta(String regattaBaseName, String boatClassName, Serializable id);
 
+    /**
+     * @param series the series must not have any {@link RaceColumn}s yet
+     */
     Regatta createRegatta(String regattaBaseName, String boatClassName, Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId);
 
     /**

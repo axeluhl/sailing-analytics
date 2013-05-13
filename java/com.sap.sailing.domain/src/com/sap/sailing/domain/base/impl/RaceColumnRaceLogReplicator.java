@@ -4,8 +4,11 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
+import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
+import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
@@ -52,6 +55,21 @@ public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Seriali
     
     @Override
     public void visit(RaceLogFlagEvent event) {
+        notifyOnAdd(event);
+    }
+
+    @Override
+    public void visit(RaceLogCourseDesignChangedEvent event) {
+        notifyOnAdd(event);
+    }
+
+    @Override
+    public void visit(RaceLogFinishPositioningListChangedEvent event) {
+        notifyOnAdd(event);
+    }
+
+    @Override
+    public void visit(RaceLogFinishPositioningConfirmedEvent event) {
         notifyOnAdd(event);
     }
 }
