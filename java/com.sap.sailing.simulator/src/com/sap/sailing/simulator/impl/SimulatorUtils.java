@@ -76,8 +76,11 @@ public class SimulatorUtils {
 
     public static RacesHandle loadRace(RacingEventServiceImpl service, URL paramURL, URI liveURI, URI storedURI,
             RaceLogStore raceLogStore, WindStore windStore, long timeoutInMilliseconds) throws Exception {
-        RacesHandle raceHandle = service.addTracTracRace(paramURL, liveURI, storedURI, raceLogStore, windStore,
-                timeoutInMilliseconds);
+        //TODO: TracTrac Username / Password
+        String tractracUsername = "";
+        String tractracPassword = "";
+        RacesHandle raceHandle = service.addTracTracRace(paramURL, liveURI, storedURI, null, raceLogStore, windStore,
+                timeoutInMilliseconds, tractracUsername, tractracPassword);
         return raceHandle;
     }
 

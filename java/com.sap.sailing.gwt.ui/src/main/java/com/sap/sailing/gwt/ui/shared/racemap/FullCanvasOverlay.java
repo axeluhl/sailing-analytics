@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.maps.client.geom.Point;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CanvasOverlay;
 
 /**
  * This class extends @CanvasOverlay to provide the functionality that the canvas always covers the

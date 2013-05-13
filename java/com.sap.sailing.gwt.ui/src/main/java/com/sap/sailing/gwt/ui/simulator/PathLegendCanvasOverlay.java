@@ -10,7 +10,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
-import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlay;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CanvasOverlay;
 
 /**
  * Class to draw the legend for the different paths on the map.

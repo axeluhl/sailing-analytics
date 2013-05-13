@@ -534,4 +534,50 @@ public interface StringMessages extends Messages {
     String currentTime();
     String tractracUsername();
     String tractracPassword();
+    /*Start of simulator related messages*/
+    String simulator();
+    String optionsBar();
+    String update();
+
+    String setup();
+    String strength();
+    String oscillation();
+    String oscillating();
+    String amplitude();
+    String frequency();
+    String noise();
+
+    String sailing();
+    String optimality();
+    String maximumTurns();
+    String raceDirection();
+    String upWind();
+    String downWind();
+    String strategies();
+    String omniscient();
+    String opportunistic();
+    String mixed();
+    String maps();
+    String startEnd();
+    String racecourse();
+    String summary();
+    String replay();
+    String display();
+
+    String simulatorPolarHeader();
+    String show();
+    String hide();
+
+    String leftWind();
+    String rightWind();
+    String strategyOption1();
+    String strategyOption2();
+    String strategyOption3();
+    String legLabel();
+    String raceLabel();
+    String competitorLabel();
+
+    String freemode();
+    String whatIfCourse();
+    /*End of simulator related messages*/
 }
