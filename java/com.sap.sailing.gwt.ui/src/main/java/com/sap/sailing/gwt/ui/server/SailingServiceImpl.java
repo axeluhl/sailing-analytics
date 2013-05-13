@@ -125,7 +125,6 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
-import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
@@ -134,7 +133,6 @@ import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFi
 import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -1147,30 +1145,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
-            PassAwareRaceLog passAwareRaceLog = PassAwareRaceLogImpl.copy(raceLog);
-            
             try {
-                passAwareRaceLog.lockForRead();
-                raceInfoDTO.hasEvents = !Util.isEmpty(passAwareRaceLog.getRawFixes());
+                raceLog.lockForRead();
+                raceInfoDTO.hasEvents = !Util.isEmpty(raceLog.getRawFixes());
             } finally {
-                passAwareRaceLog.unlockAfterRead();
+                raceLog.unlockAfterRead();
             }
             
-            StartTimeFinder startTimeFinder = new StartTimeFinder(passAwareRaceLog);
+            StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
             if(startTimeFinder.getStartTime()!=null){
                 raceInfoDTO.startTime = startTimeFinder.getStartTime().asDate();
             }
 
-            RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(passAwareRaceLog);
+            RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog);
             raceInfoDTO.lastStatus = raceStatusAnalyzer.getStatus();
 
-            PathfinderFinder pathfinderFinder = new PathfinderFinder(passAwareRaceLog);
+            PathfinderFinder pathfinderFinder = new PathfinderFinder(raceLog);
             raceInfoDTO.pathfinderId = pathfinderFinder.getPathfinderId();
 
-            GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(passAwareRaceLog);
+            GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
             raceInfoDTO.gateLineOpeningTime = gateLineOpeningTimeFinder.getGateLineOpeningTime();
 
-            LastFlagFinder lastFlagFinder = new LastFlagFinder(passAwareRaceLog);
+            LastFlagFinder lastFlagFinder = new LastFlagFinder(raceLog);
 
             RaceLogFlagEvent lastFlagEvent = lastFlagFinder.getLastFlagEvent();
             if (lastFlagEvent != null) {

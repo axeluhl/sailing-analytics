@@ -15,7 +15,6 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
-import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
@@ -38,7 +37,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private static final String TAG = RaceStateImpl.class.getSimpleName();
     
     protected StartProcedureType defaultStartProcedureType;
-    protected PassAwareRaceLog raceLog;
+    protected RaceLog raceLog;
     protected StartProcedure startProcedure;
     
     protected RaceLogRaceStatus status;
@@ -54,7 +53,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private FinishPositioningListFinder finishPositioningListFinder;
     private StartProcedureTypeAnalyzer startProcedureTypeAnalyzer;
 
-    public RaceStateImpl(StartProcedureType defaultStartProcedureType, PassAwareRaceLog raceLog) {
+    public RaceStateImpl(StartProcedureType defaultStartProcedureType, RaceLog raceLog) {
         this.defaultStartProcedureType = defaultStartProcedureType;
         this.raceLog = raceLog;
         

@@ -5,7 +5,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
+import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
@@ -20,7 +20,7 @@ public class RaceLogDeserializer implements JsonDeserializer<RaceLog> {
     }
     
     public RaceLog deserialize(JSONObject object) throws JsonDeserializationException {
-        RaceLog result = new PassAwareRaceLogImpl();
+        RaceLog result = new RaceLogImpl();
         
         if (object.get(RaceLogSerializer.FIELD_EVENTS) == null) {
             return result;

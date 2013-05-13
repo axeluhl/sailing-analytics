@@ -3,6 +3,7 @@ package com.sap.sailing.domain.racelog.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.HashSet;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,26 +12,53 @@ import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     private static final long serialVersionUID = -176745401321893502L;
+    private static final String DefaultLockName = RaceLogImpl.class.getName() + ".lock";
     private final static Logger logger = Logger.getLogger(RaceLogImpl.class.getName());
     
     private transient Set<RaceLogEventVisitor> listeners;
+    private int currentPassId;
+    
+    public static final int DefaultPassId = 0;
+    
+    /**
+     * Initializes a new {@link RaceLogImpl} with the default lock name.
+     */
+    public RaceLogImpl() {
+        this(DefaultLockName);
+    }
 
+    /**
+     * Initializes a new {@link RaceLogImpl}.
+     * @param nameForReadWriteLock name of lock.
+     */
     public RaceLogImpl(String nameForReadWriteLock) {
         super(new ArrayListNavigableSet<Timed>(RaceLogEventComparator.INSTANCE), nameForReadWriteLock);
-        listeners = new HashSet<RaceLogEventVisitor>();
+        
+        this.listeners = new HashSet<RaceLogEventVisitor>();
+        this.currentPassId = DefaultPassId;
+    }
+    
+    @Override
+    public int getCurrentPassId() {
+        return currentPassId;
     }
     
     /**
-     * When deserializing, needs to initialize empty set of listeners.
+     * Sets a new active pass id.
+     * Ignored if new and current are equal.
+     * @param newPassId to be set.
      */
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
-        listeners = new HashSet<RaceLogEventVisitor>();
+    public void setCurrentPassId(int newPassId) {
+        if (newPassId != this.currentPassId) {
+            logger.finer(String.format("Changing pass id to %d", newPassId));
+            this.currentPassId = newPassId;
+        }
     }
 
     @Override
@@ -44,6 +72,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         }
         if (isAdded) {
             logger.finer(String.format("%s (%s) was added to log.", event, event.getClass().getName()));
+            setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
             notifyListenersAboutReceive(event);
         } else {
             logger.warning(String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
@@ -76,6 +105,24 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         synchronized (listeners) {
             listeners.remove(listener);
         }
+    }
+    
+    @Override
+    protected NavigableSet<RaceLogEvent> getInternalFixes() {
+        return new PartialNavigableSetView<RaceLogEvent>(super.getInternalFixes()) {
+            @Override
+            protected boolean isValid(RaceLogEvent e) {
+                return e.getPassId() == getCurrentPassId();
+            }
+        };
+    }
+    
+    /**
+     * When deserializing, needs to initialize empty set of listeners.
+     */
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        listeners = new HashSet<RaceLogEventVisitor>();
     }
 
 }

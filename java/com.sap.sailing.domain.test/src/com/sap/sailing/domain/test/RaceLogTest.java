@@ -7,11 +7,14 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -21,7 +24,28 @@ import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 
 public class RaceLogTest {
-
+    
+    @Test
+    public void testAddingTwoEventsOfDifferentPassesButSameTimestamps() {
+        TimePoint t1 = MillisecondsTimePoint.now();
+        int passId = 0;
+        RaceLog raceLog = new RaceLogImpl("RaceLogTest");
+        
+        RaceLogFlagEvent rcEvent1 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, UUID.randomUUID(), new ArrayList<Competitor>(), passId, Flags.CLASS, Flags.NONE, false);
+        RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, UUID.randomUUID(), new ArrayList<Competitor>(), ++passId, Flags.CLASS, Flags.NONE, false);
+        
+        raceLog.add(rcEvent1);
+        raceLog.add(rcEvent2);
+        
+        raceLog.lockForRead();
+        try {
+            assertEquals(2, Util.size(raceLog.getRawFixes()));
+            assertEquals(1, Util.size(raceLog.getFixes()));
+        } finally {
+            raceLog.unlockAfterRead();
+        }
+    }
+    
     @Test
     public void testAddOfEvent() {
         RaceLog rcEventTrack = new RaceLogImpl("RaceLogTest");

@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.racelog.PassAwareRaceLog;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallFinder;
@@ -44,14 +44,14 @@ public class RRS26StartProcedure implements StartProcedure {
     private static final Integer INDIVIDUAL_RECALL_REMOVAL_EVENT_ID = 1;
     
     private List<Long> startProcedureEventIntervals;
-    private PassAwareRaceLog raceLog;
+    private RaceLog raceLog;
     private StartProcedureListener raceStateChangedListener;
     private EssStartPhaseEventListener startPhaseEventListener;
     private EssRunningRaceEventListener runningRaceEventListener;
     
     private IndividualRecallFinder individualRecallFinder;
     
-    public RRS26StartProcedure(PassAwareRaceLog raceLog) {
+    public RRS26StartProcedure(RaceLog raceLog) {
         this.raceLog = raceLog;
         startProcedureEventIntervals = new ArrayList<Long>();
         raceStateChangedListener = null;

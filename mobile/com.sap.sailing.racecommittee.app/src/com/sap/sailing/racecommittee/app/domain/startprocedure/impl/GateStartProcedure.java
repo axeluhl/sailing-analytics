@@ -12,7 +12,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.PassAwareRaceLog;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.racecommittee.app.R;
@@ -34,12 +34,12 @@ public class GateStartProcedure implements StartProcedure {
     public final static long startPhaseGolfDownStandardIntervalConstantSummand = 3 * 60 * 1000; // minutes * seconds * milliseconds
     
     private List<Long> startProcedureEventIntervals;
-    private PassAwareRaceLog raceLog;
+    private RaceLog raceLog;
     private StartProcedureListener raceStateChangedListener;
     private GateStartPhaseEventListener startPhaseEventListener;
     private GateStartRunningRaceEventListener runningRaceEventListener;
     
-    public GateStartProcedure(PassAwareRaceLog raceLog) {
+    public GateStartProcedure(RaceLog raceLog) {
         this.raceLog = raceLog;
         startProcedureEventIntervals = new ArrayList<Long>();
         raceStateChangedListener = null;
