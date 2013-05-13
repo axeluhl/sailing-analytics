@@ -7,6 +7,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import com.sap.sailing.domain.common.impl.Util.NaturalComparator;
+
 import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -138,15 +140,7 @@ public class RegattaOverviewTableComposite extends Composite {
                     if (result == 0) {
                         result = left.raceInfo.fleet.compareTo(right.raceInfo.fleet);
                         if (result == 0) {
-                            // Ok this is where it's getting worse. We want race "R10" to be on top of "R1".
-                            // Sorting just by the value of the race name would yield a wrong result. Therefore
-                            // we first sort by the length of the string (effectively pushing numbers with
-                            // more digits higher) and THEN by the value of the race name (i.e. sorting the
-                            // last digit).
-                            result = Integer.valueOf(right.raceInfo.raceName.length()).compareTo(Integer.valueOf(left.raceInfo.raceName.length()));
-                            if (result == 0) {
-                                result = right.raceInfo.raceName.compareTo(left.raceInfo.raceName);
-                            }
+                            result = new NaturalComparator().compare(right.raceInfo.raceName, left.raceInfo.raceName);
                         }
                     }
                 }
