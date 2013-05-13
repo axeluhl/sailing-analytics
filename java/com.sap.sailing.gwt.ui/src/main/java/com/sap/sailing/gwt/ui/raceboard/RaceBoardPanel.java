@@ -152,26 +152,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         componentViewers = new ArrayList<ComponentViewer>();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-        
-        CompetitorsFilterSets loadedCompetitorsFilterSets = loadCompetitorsFilterSets();
-        if(loadedCompetitorsFilterSets != null) {
-            competitorsFilterSets = loadedCompetitorsFilterSets;
-        } else {
-            competitorsFilterSets = createAndAddDefaultCompetitorsFilter();
-            storeCompetitorsFilterSets(competitorsFilterSets);
-        }
-        
-        // in case the URL configuration contains the name of a competitors filter set we try to activate it  
-        if(raceboardViewConfiguration.getActiveCompetitorsFilterSetName() != null) {
-            for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: competitorsFilterSets.getFilterSets()) {
-                if(filterSet.getName().equals(raceboardViewConfiguration.getActiveCompetitorsFilterSetName())) {
-                    competitorsFilterSets.setActiveFilterSet(filterSet);
-                    break;
-                }
-            }
-        }
-        competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
-        
+                
         toolbarPanel = new FlowPanel();
         toolbarPanel.setWidth("100%");
         mainPanel.add(toolbarPanel);
@@ -193,7 +174,34 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
             default:
                 leaderboardPanel = null;
         }
+        
+        CompetitorsFilterSets loadedCompetitorsFilterSets = loadCompetitorsFilterSets();
+        if(loadedCompetitorsFilterSets != null) {
+            competitorsFilterSets = loadedCompetitorsFilterSets;
+            
+            // check if the "selected competitors filter was the last active filter
+            FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> selectedCompetitorsFilter = competitorsFilterSets.findFilterSetByName(stringMessages.selectedCompetitors());
+            if(selectedCompetitorsFilter != null && competitorsFilterSets.getActiveFilterSet() == selectedCompetitorsFilter) {
+                competitorsFilterSets.setActiveFilterSet(null);
+            }
+        } else {
+            competitorsFilterSets = createAndAddDefaultCompetitorsFilter();
+            storeCompetitorsFilterSets(competitorsFilterSets);
+        }
+        
+        // in case the URL configuration contains the name of a competitors filter set we try to activate it  
+        if(raceboardViewConfiguration.getActiveCompetitorsFilterSetName() != null) {
+            for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: competitorsFilterSets.getFilterSets()) {
+                if(filterSet.getName().equals(raceboardViewConfiguration.getActiveCompetitorsFilterSetName())) {
+                    competitorsFilterSets.setActiveFilterSet(filterSet);
+                    break;
+                }
+            }
+        }
+        competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
         updateCompetitorsFilterContexts(competitorsFilterSets);
+        updateCompetitorsFilterControlState(competitorsFilterSets);
+
         timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider, raceboardViewConfiguration.isCanReplayDuringLiveRaces());
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
@@ -335,7 +343,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         competitorsFilterCheckBox.setValue(activeFilterSet != null, false /* fireChangeValue*/);
         
         if(lastActiveCompetitorFilterSet != null) {
-            competitorsFilterCheckBox.setText(competitorsFilterTitle + "(" + lastActiveCompetitorFilterSet.getName() + ")");
+            competitorsFilterCheckBox.setText(competitorsFilterTitle + " (" + lastActiveCompetitorFilterSet.getName() + ")");
         } else {
             competitorsFilterCheckBox.setText(competitorsFilterTitle);            
         }
@@ -384,7 +392,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         filterButton.setTitle(competitorsFilterTitle);
         
         parentPanel.add(filterButton);
-        updateCompetitorsFilterControlState(competitorsFilterSets);
     }
     
     private void showEditCompetitorsFiltersDialog() {
