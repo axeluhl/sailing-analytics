@@ -66,3 +66,19 @@ Sometimes different line endings get mixed. To display all lin endings for each 
 ### Finding Packages for Deployment in Target Platform
 
 Sometimes you want to add libraries to the target platform but you don't have correctly formatted JAR files. In this case you can find some files here: [Eclipse ORBIT](http://download.eclipse.org/tools/orbit/downloads/drops/R20130118183705/)
+
+### Debug Jetty
+
+To gather further information regarding this bug I finally got the sourcecode of org.eclipse.jetty.* imported that way that one can debug w/o touching the OSGi environment. It is a simple as this:
+
+- Add jetty.source package to target (already included in jetty.bundle location)
+- Add MANIFEST.MF based dependency to com.sap.sailing.server
+- Sourcecode is now available for debugging
+
+I now know why starting and stopping a second server destroy the web context of the first one. This happens because every JAR file that is registered as a context in Jetty is being extracted to java.io.tmpdir/jetty-<ip>-<port>/ and loaded from there. The code doing this is hidden in WebInfConfiguration and triggered by an instance of the DeploymentManager.
+
+I ran some load testing based on apache bench tool (ab) with 10000 requests (from which 1000 were concurrent) to /gwt/AdminConsole.html to check if this leads to a change in socket count or memory consumption. It didn't and therefore Jetty has no apparent leaks. I also tested with 404 (/gwt/ThisYieldsA404) because there had been comments about Jetty leaking with 404 but no negative results here either.
+
+I will update start scripts for each server to use $SERVER_DIR/tmp as temporary directory thus making sure that deployed binaries can not overwrite themselves.
+
+One can find more information about the Jetty architecture here: http://docs.codehaus.org/display/JETTY/Architecture
