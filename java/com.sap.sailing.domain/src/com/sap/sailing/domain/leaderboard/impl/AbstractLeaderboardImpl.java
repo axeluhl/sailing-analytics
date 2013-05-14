@@ -35,7 +35,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      * Cache for the combined competitors of this leaderboard; taken from the {@link TrackedRace#getRace() races of the
      * tracked races} associated with this leaderboard. Updated when the set of tracked races changes.
      */
-    private transient Iterable<Competitor> competitorsCache;
+    private transient Iterable<Competitor> allCompetitorsCache;
 
     /**
      * @param scoreCorrection must not be <code>null</code>
@@ -75,17 +75,19 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public synchronized Iterable<Competitor> getAllCompetitors() {
-        if (competitorsCache == null) {
+    public Iterable<Competitor> getAllCompetitors() {
+        if (allCompetitorsCache == null) {
             Set<Competitor> result = new HashSet<Competitor>();
-            for (TrackedRace r : getTrackedRaces()) {
-                for (Competitor c : r.getRace().getCompetitors()) {
-                    result.add(c);
+            synchronized (this) {
+                for (TrackedRace r : getTrackedRaces()) {
+                    for (Competitor c : r.getRace().getCompetitors()) {
+                        result.add(c);
+                    }
                 }
             }
-            competitorsCache = result;
+            allCompetitorsCache = result;
         }
-        return competitorsCache;
+        return allCompetitorsCache;
     }
     
     @Override
@@ -143,13 +145,13 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
 
     @Override
     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        competitorsCache = null;
+        allCompetitorsCache = null;
         super.trackedRaceLinked(raceColumn, fleet, trackedRace);
     }
 
     @Override
     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        competitorsCache = null;
+        allCompetitorsCache = null;
         super.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
     }
     

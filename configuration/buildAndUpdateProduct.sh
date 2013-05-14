@@ -48,12 +48,13 @@ cd $PROJECT_HOME
 active_branch=$(git symbolic-ref -q HEAD)
 active_branch=`basename $active_branch`
 
-ACDIR=$SERVERS_HOME/$active_branch
-
 MAVEN_SETTINGS=$PROJECT_HOME/configuration/maven-settings.xml
 MAVEN_SETTINGS_PROXY=$PROJECT_HOME/configuration/maven-settings-proxy.xml
 
 p2PluginRepository=$PROJECT_HOME/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
+
+HAS_OVERWRITTEN_TARGET=0
+TARGET_SERVER_NAME=$active_branch
 
 gwtcompile=1
 testing=1
@@ -74,6 +75,7 @@ if [ $# -eq 0 ]; then
     echo "-n <package name> Name of the bundle you want to hot deploy. Needs fully qualified name like"
     echo "                  com.sap.sailing.monitoring. Only works if there is a fully built server available."
     echo "-l <telnet port>  Telnet port the OSGi server is running. Optional but enables fully automatic hot-deploy."
+    echo "-s <target server> Name of server you want to use as target for install. This overrides default behaviour."
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo "install: installs product and configuration to $SERVERS_HOME/$active_branch. Overwrites any configuration by using config from branch."
@@ -91,7 +93,7 @@ echo PROJECT_HOME is $PROJECT_HOME
 echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 
-options=':gtocpm:n:l:'
+options=':gtocpm:n:l:s:'
 while getopts $options option
 do
     case $option in
@@ -103,10 +105,15 @@ do
         m) MAVEN_SETTINGS=$OPTARG;;
         n) OSGI_BUNDLE_NAME=$OPTARG;;
         l) OSGI_TELNET_PORT=$OPTARG;;
+        s) TARGET_SERVER_NAME=$OPTARG
+           HAS_OVERWRITTEN_TARGET=1;;
         \?) echo "Invalid option"
             exit 2;;
     esac
 done
+
+ACDIR=$SERVERS_HOME/$TARGET_SERVER_NAME
+echo INSTALL goes to $ACDIR
 
 shift $((OPTIND-1))
 
@@ -120,6 +127,16 @@ if [[ "$@" == "hot-deploy" ]]; then
     if [[ $OSGI_BUNDLE_NAME == "" ]]; then
         echo "You need to provide -n parameter with bundle name."
         exit 1
+    fi
+
+    if [ ! -d $p2PluginRepository/plugins ]; then
+        echo "Could not find source directory $p2PluginRepository!"
+        exit
+    fi
+
+    if [ ! -d $SERVERS_HOME/$active_branch/plugins ]; then
+        echo "Could not find target directory $SERVERS_HOME/$active_branch/plugins!"
+        exit
     fi
 
     # locate old bundle
@@ -160,6 +177,11 @@ if [[ "$@" == "hot-deploy" ]]; then
 
     # check telnet port connection
     TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$OSGI_TELNET_PORT"`
+    if [[ $TELNET_ACTIVE == "" ]]; then
+        # some BSD systems do not support -p
+        TELNET_ACTIVE=`netstat -an | grep ".$OSGI_TELNET_PORT"`
+    fi
+
     if [[ $OSGI_TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
         echo ""
         echo "ERROR: Could not find any process running on port $OSGI_TELNET_PORT. Make sure your server has been started with -console $OSGI_TELNET_PORT"
@@ -178,18 +200,26 @@ if [[ "$@" == "hot-deploy" ]]; then
     fi
 
     # first get bundle ID
+    echo -n "Connecting to OSGi server..."
     NC_CMD="nc -t 127.0.0.1 $OSGI_TELNET_PORT"
-    OLD_BUNDLE_INFORMATION=`echo -n ss | $NC_CMD | grep $OSGI_BUNDLE_NAME`
+    echo "OK"
+    OLD_BUNDLE_INFORMATION=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
     BUNDLE_ID=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 1`
     OLD_ACTIVATED_NAME=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 3`
     echo "Could identify bundle-id $BUNDLE_ID for $OLD_ACTIVATED_NAME"
+    read -s -n1 -p "I will now stop and reinstall the bundle mentioned in the line above. Is this right? (y/N): " answer
+    case $answer in
+    "Y" | "y") echo "Continuing";;
+    *) echo "Aborting..."
+       exit;;
+    esac
 
     # stop and uninstall
     echo -n stop $BUNDLE_ID | $NC_CMD > /dev/null
     echo -n uninstall $BUNDLE_ID | $NC_CMD > /dev/null
 
     # make sure bundle is removed
-    UNINSTALL_INFORMATION=`echo -n ss | $NC_CMD | grep $OSGI_BUNDLE_NAME`
+    UNINSTALL_INFORMATION=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
     if [[ $UNINSTALL_INFORMATION == "" ]]; then
         echo "Uninstall procedure sucessful!"
     else
@@ -199,13 +229,13 @@ if [[ "$@" == "hot-deploy" ]]; then
 
     # now reinstall bundle
     NEW_BUNDLE_ID=`echo -n install file://$SERVERS_HOME/$active_branch/plugins/deploy/${NEW_BUNDLE_BASENAME}.jar | $NC_CMD`
-    NEW_BUNDLE_INFORMATION=`echo -n ss | $NC_CMD | grep $OSGI_BUNDLE_NAME`
+    NEW_BUNDLE_INFORMATION=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
     NEW_BUNDLE_ID=`echo $NEW_BUNDLE_INFORMATION | cut -d " " -f 1`
     echo "Installed new bundle file://$SERVERS_HOME/$active_branch/plugins/deploy/${NEW_BUNDLE_BASENAME}.jar with id $NEW_BUNDLE_ID"
 
     # and start
     echo -n start $NEW_BUNDLE_ID | $NC_CMD > /dev/null && sleep 1
-    NEW_BUNDLE_STATUS=`echo -n ss | $NC_CMD | grep $OSGI_BUNDLE_NAME | grep ACTIVE`
+    NEW_BUNDLE_STATUS=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_ | grep ACTIVE`
     if [[ $NEW_BUNDLE_STATUS == "" ]]; then
         echo "ERROR: Something went wrong with start of bundle. Please check if everything went ok."
         exit
@@ -278,6 +308,14 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         mkdir $ACDIR/plugins
     fi
 
+    if [ ! -d "$ACDIR/logs" ]; then
+        mkdir $ACDIR/logs
+    fi
+
+    if [ ! -d "$ACDIR/tmp" ]; then
+        mkdir $ACDIR/tmp
+    fi
+
     if [ ! -d "$ACDIR/configuration" ]; then
         mkdir $ACDIR/configuration
     fi
@@ -295,27 +333,29 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     rm -rf $ACDIR/org.eclipse.*
     rm -rf $ACDIR/configuration/org.eclipse.*
 
-    rm -rf $ACDIR/start
-    rm -rf $ACDIR/stop
+    if [[ $HAS_OVERWRITTEN_TARGET -eq 0 ]]; then
+        rm -rf $ACDIR/start
+        rm -rf $ACDIR/stop
 
-    cp -v $p2PluginRepository/configuration/config.ini configuration/
+        cp -v $p2PluginRepository/configuration/config.ini configuration/
+        mkdir -p configuration/jetty/etc
+        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
+        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
+        cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
+        cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
+        cp -v $PROJECT_HOME/java/target/start $ACDIR/
+        cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+    fi
+
     cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
     cp -v $p2PluginRepository/plugins/*.jar plugins/
 
-    mkdir -p configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
-
-    # Make sure mongodb configuration is active
-    cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
     cp -rv $PROJECT_HOME/configuration/native-libraries $ACDIR/
 
     # Make sure this script is up2date at least for the next run
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
-    cp -v $PROJECT_HOME/java/target/start $ACDIR/
-    cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+    cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
 
     echo "Installation complete. You may now start the server using ./start"
 fi

@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 
 
 /**
@@ -30,10 +31,10 @@ public class LowPoint extends AbstractScoringSchemeImpl {
 
     @Override
     public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
-            Integer numberOfCompetitorsInRace, int numberOfCompetitorsInLeaderboard) {
+            Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
         Double result;
         if (numberOfCompetitorsInRace == null) {
-            result = (double) (numberOfCompetitorsInLeaderboard+1);
+            result = (double) (numberOfCompetitorsInLeaderboardFetcher.getNumberOfCompetitorsInLeaderboard()+1);
         } else {
             result = (double) (numberOfCompetitorsInRace+1);
         }

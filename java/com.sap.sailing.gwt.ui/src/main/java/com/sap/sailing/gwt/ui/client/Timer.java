@@ -147,7 +147,7 @@ public class Timer {
             }
         }
     }
-
+    
     public void setPlaySpeedFactor(double playSpeedFactor) {
         this.playSpeedFactor = playSpeedFactor;
         for (PlayStateListener playStateListener : playStateListeners) {
@@ -159,8 +159,8 @@ public class Timer {
         return playSpeedFactor;
     }
     
-    public void setRefreshInterval(long refreshInterval) {
-        this.refreshInterval = refreshInterval;
+    public void setRefreshInterval(long refreshIntervalInMillis) {
+        this.refreshInterval = refreshIntervalInMillis;
         if (playState == PlayStates.Playing) {
             refreshIntervalChanged = true;
         }

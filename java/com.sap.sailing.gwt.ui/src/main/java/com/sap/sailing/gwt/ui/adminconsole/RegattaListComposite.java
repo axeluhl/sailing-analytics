@@ -188,7 +188,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
                 for (String word : wordsToFilter) {
                     String textAsUppercase = word.toUpperCase().trim();
                     if (!regattaDTO.name.toUpperCase().contains(textAsUppercase)
-                            && !regattaDTO.boatClass.name.toUpperCase().contains(textAsUppercase)
+                            && (regattaDTO.boatClass == null || !regattaDTO.boatClass.name.toUpperCase().contains(textAsUppercase))
                             && !regattaDTO.name.toUpperCase().contains(textAsUppercase)) {
                         failed = true;
                         break;

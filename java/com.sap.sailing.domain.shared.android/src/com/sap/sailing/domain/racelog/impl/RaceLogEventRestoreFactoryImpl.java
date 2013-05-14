@@ -10,14 +10,18 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 
 public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl implements RaceLogEventRestoreFactory {
@@ -68,6 +72,24 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
     public RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint createdAt,
             TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId) {
         return new RaceLogFinishPositioningConfirmedEventImpl(createdAt, logicalTimePoint, id, competitors, passId);
+    }
+
+    @Override
+    public RaceLogPathfinderEvent createPathfinderEvent(TimePoint createdAt, TimePoint logicalTimePoint,
+            Serializable id, List<Competitor> competitors, int passId, String pathfinderId) {
+        return new RaceLogPathfinderEventImpl(createdAt, logicalTimePoint, id, competitors, passId, pathfinderId);
+    }
+
+    @Override
+    public RaceLogGateLineOpeningTimeEvent createGateLineOpeningTimeEvent(TimePoint createdAt, TimePoint logicalTimePoint,
+            Serializable id, List<Competitor> competitors, int passId, Long gateLineOpeningTime) {
+        return new RaceLogGateLineOpeningTimeEventImpl(createdAt, logicalTimePoint, id, competitors, passId, gateLineOpeningTime);
+    }
+
+    @Override
+    public RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint createdAt, TimePoint timePoint,
+            Serializable id, List<Competitor> competitors, int passId, StartProcedureType type) {
+        return new RaceLogStartProcedureChangedEventImpl(createdAt, timePoint, id, competitors, passId, type);
     }
 
 

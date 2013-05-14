@@ -104,6 +104,7 @@ To ensure availability and to be able to separate servers holding historical dat
 <th>MongoDB Path</th>
 <th>Replication Channel</th>
 <th>Expedition UDP Port</th>
+<th>OSGi Telnet Port</th>
 </tr>
 <tr>
 <td>DEV</td>
@@ -112,6 +113,7 @@ To ensure availability and to be able to separate servers holding historical dat
 <td>/opt/mongodb/data/mongodb-dev</td>
 <td>sapsailinganalytics-dev</td>
 <td>2010</td>
+<td>14886</td>
 </tr>
 <tr>
 <td>TEST</td>
@@ -120,6 +122,7 @@ To ensure availability and to be able to separate servers holding historical dat
 <td>/opt/mongodb/data/mongodb-test</td>
 <td>sapsailinganalytics-test</td>
 <td>2011</td>
+<td>14887</td>
 </tr>
 <tr>
 <td>PROD1</td>
@@ -128,6 +131,7 @@ To ensure availability and to be able to separate servers holding historical dat
 <td>/opt/mongodb/data/mongodb-prod</td>
 <td>sapsailinganalytics-prod1</td>
 <td>2013</td>
+<td>14888</td>
 </tr>
 <tr>
 <td>PROD2</td>
@@ -136,6 +140,7 @@ To ensure availability and to be able to separate servers holding historical dat
 <td>/opt/mongodb/data/mongodb-prod</td>
 <td>sapsailinganalytics-prod2</td>
 <td>2014</td>
+<td>14889</td>
 </tr>
 </table>
 

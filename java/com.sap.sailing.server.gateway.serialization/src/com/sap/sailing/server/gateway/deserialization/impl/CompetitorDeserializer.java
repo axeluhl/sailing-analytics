@@ -21,7 +21,7 @@ public class CompetitorDeserializer implements JsonDeserializer<Competitor> {
     @Override
     public Competitor deserialize(JSONObject object) throws JsonDeserializationException {
         Serializable competitorId = (Serializable) object.get(CompetitorJsonSerializer.FIELD_ID);
-        competitorId = Helpers.tryUuidConversion(competitorId.toString());
+        competitorId = Helpers.tryUuidConversion(competitorId);
         String name = (String) object.get(CompetitorJsonSerializer.FIELD_NAME);
         Competitor competitor = factory.getOrCreateCompetitor(competitorId, name, null, null);
         return competitor;

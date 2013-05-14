@@ -267,7 +267,7 @@ public class SimulatorMainPanel extends SimplePanel {
         timer.setPlaySpeedFactor(secondsTimeStep);
         timer.setAutoAdvance(true);
 
-        timePanel = new TimePanel<TimePanelSettings>(timer, timeRangeProvider, stringMessages);
+        timePanel = new TimePanel<TimePanelSettings>(timer, timeRangeProvider, stringMessages, false);
 
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         // LogoAndTitlePanel logoAndTitlePanel = new

@@ -61,8 +61,10 @@ public class RaceLogTest {
         
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventOne.getId()).thenReturn("a");
         when(eventTwo.getPassId()).thenReturn(1);
         when(eventTwo.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventTwo.getId()).thenReturn("b");
         
         assertTrue(raceLog.add(eventOne));
         assertTrue(raceLog.add(eventTwo));
@@ -74,14 +76,37 @@ public class RaceLogTest {
     }
     
     @Test
-    public void testWontAddEventSamePassSameTimePoint() {
+    public void testAddEventSamePassSameTimePointDifferentId() {
         RaceLogEvent eventOne = mock(RaceLogEvent.class);
         RaceLogEvent eventTwo = mock(RaceLogEvent.class);
         
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventOne.getId()).thenReturn("a");
         when(eventTwo.getPassId()).thenReturn(0);
         when(eventTwo.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventTwo.getId()).thenReturn("b");
+        
+        assertTrue(raceLog.add(eventOne));
+        assertTrue(raceLog.add(eventTwo));
+        
+        raceLog.lockForRead();
+        assertTrue(Util.contains(raceLog.getRawFixes(), eventOne));
+        assertTrue(Util.contains(raceLog.getRawFixes(), eventTwo));
+        raceLog.unlockAfterRead();
+    }
+    
+    @Test
+    public void testWontAddEventSamePassSameTimePointSameId() {
+        RaceLogEvent eventOne = mock(RaceLogEvent.class);
+        RaceLogEvent eventTwo = mock(RaceLogEvent.class);
+        
+        when(eventOne.getPassId()).thenReturn(0);
+        when(eventOne.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventOne.getId()).thenReturn("a");
+        when(eventTwo.getPassId()).thenReturn(0);
+        when(eventTwo.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventTwo.getId()).thenReturn("a");
         
         assertTrue(raceLog.add(eventOne));
         assertFalse(raceLog.add(eventTwo));

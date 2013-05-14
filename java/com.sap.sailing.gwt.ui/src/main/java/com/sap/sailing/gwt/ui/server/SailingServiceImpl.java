@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
@@ -33,6 +34,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -123,10 +125,13 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
+import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
@@ -160,6 +165,7 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
+import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
@@ -325,7 +331,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      */
     private final Set<CacheInvalidationListener> cacheInvalidationListeners;
 
-    private final LeaderboardDTOCache leaderboardDTOCacheWaitingForLatestAnalysis;
+    private final LeaderboardDTOCache leaderboardDTOCache;
 
     private final DomainFactory tractracDomainFactory;
 
@@ -350,17 +356,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
-        executor = new ThreadPoolExecutor(/* corePoolSize */ 0,
-                /* maximumPoolSize */ Runtime.getRuntime().availableProcessors(),
+        // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
+        // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
+        // core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
+        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
+        executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
+                /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         leaderboardByNameLiveUpdaters = new HashMap<String, LiveLeaderboardUpdater>();
-        // The leaderboard cache is invalidated upon all competitor and mark position changes; some analyses
+        // The leaderboard cache is invalidated upon all competitor and mark position changes; some analyzes
         // are pretty expensive, such as the maneuver re-calculation. Waiting for the latest analysis after only a
         // single fix was updated is too expensive if users use the replay feature while a race is still running.
         // Therefore, using waitForLatestAnalyses==false seems appropriate here.
-        leaderboardDTOCacheWaitingForLatestAnalysis = new LeaderboardDTOCache(this, /* waitForLatestAnalyses */ false);
+        leaderboardDTOCache = new LeaderboardDTOCache(this, /* waitForLatestAnalyses */ false);
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
@@ -475,11 +485,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final TimePoint nowMinusDelay = leaderboard.getNowMinusDelay();
                 final TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
                 if (timePointOfLatestModification != null && !nowMinusDelay.before(timePointOfLatestModification)) {
+                    // if there hasn't been any modification to the leaderboard since nowMinusDelay, use non-live mode
+                    // and pull the result from the regular leaderboard cache:
                     timePoint = timePointOfLatestModification;
                 } else {
+                    // don't use the regular leaderboard cache; the race still seems to be on; use the live leaderboard updater instead:
                     timePoint = null;
-                    result = liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails,
-                            nowMinusDelay);
+                    result = liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails);
                 }
             } else {
                 timePoint = new MillisecondsTimePoint(date);
@@ -488,7 +500,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 // in replay we'd like up-to-date results; they are still cached
                 // which is OK because the cache is invalidated whenever any of the tracked races attached to the
                 // leaderboard changes.
-                result = leaderboardDTOCacheWaitingForLatestAnalysis.getLeaderboardByName(leaderboard, timePoint,
+                result = leaderboardDTOCache.getLeaderboardByName(leaderboard, timePoint,
                         namesOfRaceColumnsForWhichToLoadLegDetails);
             }
             logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
@@ -612,7 +624,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     } catch (ExecutionException e) {
-                        throw new RuntimeException(e);
+                        // See also bug 1371: for stability reasons, don't let the exception percolate but rather accept null values.
+                        // If new evidence is provided, a re-calculation of the leaderboard will be triggered anyway. So this helps
+                        // robustness from a user's perspective.
+                        logger.log(Level.SEVERE, SailingServiceImpl.class.getName()+".computeLeaderboardByName("
+                                +leaderboard.getName()+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+
+                                "): exception during computing leaderboard entry for competitor "+competitor.getName()+
+                                " in race column "+raceColumnNameAndFuture.getKey()+". Leaving empty.", e);
                     }
                 }
                 result.rows.put(competitorDTO, row);
@@ -679,6 +697,32 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         : raceDetails.getWindwardDistanceToOverallLeader().getMeters();
                 entryDTO.averageCrossTrackErrorInMeters = raceDetails.getAverageCrossTrackError() == null ? null
                         : raceDetails.getAverageCrossTrackError().getMeters();
+                final TimePoint startOfRace = trackedRace.getStartOfRace();
+                if (startOfRace != null) {
+                    Distance distanceToStartLineAtStartOfRace = trackedRace.getDistanceToStartLine(competitor,
+                            startOfRace);
+                    entryDTO.distanceToStartLineAtStartOfRaceInMeters = distanceToStartLineAtStartOfRace == null ? null
+                            : distanceToStartLineAtStartOfRace.getMeters();
+                    Speed speedAtStartTime = trackedRace.getTrack(competitor).getEstimatedSpeed(startOfRace);
+                    entryDTO.speedOverGroundAtStartOfRaceInKnots = speedAtStartTime == null ? null : speedAtStartTime.getKnots();
+                    NavigableSet<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
+                    trackedRace.lockForRead(competitorMarkPassings);
+                    try {
+                        if (!competitorMarkPassings.isEmpty()) {
+                            TimePoint competitorStartTime = competitorMarkPassings.iterator().next().getTimePoint();
+                            Speed competitorSpeedWhenPassingStart = trackedRace.getTrack(competitor).getEstimatedSpeed(
+                                    competitorStartTime);
+                            entryDTO.speedOverGroundAtPassingStartWaypointInKnots = competitorSpeedWhenPassingStart == null ? null
+                                    : competitorSpeedWhenPassingStart.getKnots();
+                            entryDTO.startTack = trackedRace.getTack(competitor, competitorStartTime);
+                            Distance distanceFromStarboardSideOfStartLineWhenPassingStart = trackedRace.getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor);
+                            entryDTO.distanceToStarboardSideOfStartLineInMeters = distanceFromStarboardSideOfStartLineWhenPassingStart == null ? null :
+                                distanceFromStarboardSideOfStartLineWhenPassingStart.getMeters();
+                        }
+                    } finally {
+                        trackedRace.unlockAfterRead(competitorMarkPassings);
+                    }
+                }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             } catch (ExecutionException e) {
@@ -750,7 +794,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             end = trackedRace.getEndOfTracking();
                         }
                         return calculateRaceDetails(trackedRace, competitor, end,
-                                /* waitForLatestManeuverAnalysis */ true /* because this is done only once after end of tracking */, legRanksCache);
+                                // TODO see bug 1358: for now, use waitForLatest==false until we've switched to optimistic locking for the course read lock
+                                /* TODO old comment when it was still true: "because this is done only once after end of tracking" */
+                                /* waitForLatestAnalyses (maneuver and cross track error) */ false,
+                                legRanksCache);
                     }
                 });
                 raceDetailsExecutor.execute(raceDetails);
@@ -860,7 +907,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 LegEntryDTO legEntry;
                 // We loop over a copy of the course's legs; during a course change, legs may become "stale," even with
                 // regard to the leg/trackedLeg structures inside the tracked race which is updated by the course change
-                // immediately. Make sure we're tolerant against disappearing legs! See bug 794.
+                // immediately. That's why we've acquired a read lock for the course above.
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
                 if (trackedLeg != null && trackedLeg.hasStartedLeg(timePoint)) {
                     legEntry = createLegEntry(trackedLeg, timePoint, waitForLatestAnalyses, legRanksCache);
@@ -1101,19 +1148,38 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
-            PassAwareRaceLogImpl passAwareRaceLog = new PassAwareRaceLogImpl(raceLog);
+            PassAwareRaceLog passAwareRaceLog = PassAwareRaceLogImpl.copy(raceLog);
+            
+            try {
+                passAwareRaceLog.lockForRead();
+                raceInfoDTO.hasEvents = !Util.isEmpty(passAwareRaceLog.getRawFixes());
+            } finally {
+                passAwareRaceLog.unlockAfterRead();
+            }
+            
             StartTimeFinder startTimeFinder = new StartTimeFinder(passAwareRaceLog);
-            if (startTimeFinder.getStartTime() != null) {
+            if(startTimeFinder.getStartTime()!=null){
                 raceInfoDTO.startTime = startTimeFinder.getStartTime().asDate();
             }
+
             RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(passAwareRaceLog);
             raceInfoDTO.lastStatus = raceStatusAnalyzer.getStatus();
-            for(RaceLogEvent event : passAwareRaceLog.getFixes()){
-                if(event instanceof RaceLogFlagEvent){
-                    raceInfoDTO.lastFlag = ((RaceLogFlagEvent) event).getUpperFlag();
-                    raceInfoDTO.displayed = ((RaceLogFlagEvent) event).isDisplayed();
-                }
+
+            PathfinderFinder pathfinderFinder = new PathfinderFinder(passAwareRaceLog);
+            raceInfoDTO.pathfinderId = pathfinderFinder.getPathfinderId();
+
+            GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(passAwareRaceLog);
+            raceInfoDTO.gateLineOpeningTime = gateLineOpeningTimeFinder.getGateLineOpeningTime();
+
+            LastFlagFinder lastFlagFinder = new LastFlagFinder(passAwareRaceLog);
+
+            RaceLogFlagEvent lastFlagEvent = lastFlagFinder.getLastFlagEvent();
+            if (lastFlagEvent != null) {
+                raceInfoDTO.lastUpperFlag = lastFlagEvent.getUpperFlag();
+                raceInfoDTO.lastLowerFlag = lastFlagEvent.getLowerFlag();
+                raceInfoDTO.displayed = lastFlagEvent.isDisplayed();
             }
+
             LastPublishedCourseDesignFinder courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
             raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(courseDesignFinder.getLastCourseDesign());
         }
@@ -1208,16 +1274,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL) throws MalformedURLException, IOException,
-    ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+    public Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces) throws MalformedURLException, IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         com.sap.sailing.domain.common.impl.Util.Pair<String,List<RaceRecord>> raceRecords;
         raceRecords = getService().getTracTracRaceRecords(new URL(eventJsonURL));
         List<TracTracRaceRecordDTO> result = new ArrayList<TracTracRaceRecordDTO>();
         for (RaceRecord raceRecord : raceRecords.getB()) {
+            if (listHiddenRaces == false && raceRecord.getRaceStatus().equals(TracTracConnectionConstants.HIDDEN_STATUS)) {
+                continue;
+            }
+            
             result.add(new TracTracRaceRecordDTO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
                     raceRecord.getParamURL().toString(), raceRecord.getReplayURL(), raceRecord.getLiveURI().toString(),
                     raceRecord.getStoredURI().toString(), raceRecord.getTrackingStartTime().asDate(), raceRecord
-                    .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(), raceRecord.getBoatClassNames()));
+                    .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(), raceRecord.getBoatClassNames(),
+                    raceRecord.getRaceStatus()));
         }
         return new Pair<String, List<TracTracRaceRecordDTO>>(raceRecords.getA(), result);
     }
@@ -2667,48 +2737,70 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
-            long stepSizeInMs, DetailType detailType, String leaderboardGroupName, String leaderboardName) throws NoWindException {
+            final long stepSizeInMs, final DetailType detailType, final String leaderboardGroupName, final String leaderboardName) throws NoWindException {
         CompetitorsRaceDataDTO result = null;
-        TrackedRace trackedRace = getExistingTrackedRace(race);
+        final TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
-            TimePoint startTime = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
-            TimePoint endTime = (to == null || to.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(to);
+            final TimePoint startTime = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
+            final TimePoint endTime = (to == null || to.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(to);
             result = new CompetitorsRaceDataDTO(detailType, startTime==null?null:startTime.asDate(), endTime==null?null:endTime.asDate());
 
-            for (CompetitorDTO competitorDTO : competitors) {
-                // TODO parallelize across competitors
-                Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(), competitorDTO.id);
-                ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
-                ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
-                // Filling the mark passings
-                Set<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
-                if (competitorMarkPassings != null) {
-                    trackedRace.lockForRead(competitorMarkPassings);
-                    try {
-                        for (MarkPassing markPassing : competitorMarkPassings) {
-                            MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
-                            Double competitorMarkPassingsData = getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time, leaderboardGroupName, leaderboardName);
-                            if (competitorMarkPassingsData != null) {
-                                markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint()
-                                        .getName(), time.asDate(), competitorMarkPassingsData));
+            Map<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>> resultFutures = new HashMap<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>>();
+            for (final CompetitorDTO competitorDTO : competitors) {
+                FutureTask<CompetitorRaceDataDTO> future = new FutureTask<CompetitorRaceDataDTO>(new Callable<CompetitorRaceDataDTO>() {
+                    @Override
+                            public CompetitorRaceDataDTO call() throws NoWindException {
+                                Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(),
+                                        competitorDTO.id);
+                                ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
+                                ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
+                                // Filling the mark passings
+                                Set<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
+                                if (competitorMarkPassings != null) {
+                                    trackedRace.lockForRead(competitorMarkPassings);
+                                    try {
+                                        for (MarkPassing markPassing : competitorMarkPassings) {
+                                            MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
+                                            Double competitorMarkPassingsData = getCompetitorRaceDataEntry(detailType,
+                                                    trackedRace, competitor, time, leaderboardGroupName, leaderboardName);
+                                            if (competitorMarkPassingsData != null) {
+                                                markPassingsData.add(new Triple<String, Date, Double>(markPassing
+                                                        .getWaypoint().getName(), time.asDate(), competitorMarkPassingsData));
+                                            }
+                                        }
+                                    } finally {
+                                        trackedRace.unlockAfterRead(competitorMarkPassings);
+                                    }
+                                }
+                                if (startTime != null && endTime != null) {
+                                    for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += stepSizeInMs) {
+                                        MillisecondsTimePoint time = new MillisecondsTimePoint(i);
+                                        Double competitorRaceData = getCompetitorRaceDataEntry(detailType, trackedRace,
+                                                competitor, time, leaderboardGroupName, leaderboardName);
+                                        if (competitorRaceData != null) {
+                                            raceData.add(new Pair<Date, Double>(time.asDate(), competitorRaceData));
+                                        }
+                                    }
+                                }
+                                return new CompetitorRaceDataDTO(competitorDTO, detailType, markPassingsData, raceData);
                             }
-                        }
-                    } finally {
-                        trackedRace.unlockAfterRead(competitorMarkPassings);
-                    }
+                        });
+                resultFutures.put(competitorDTO, future);
+                executor.execute(future);
+            }
+            for (Map.Entry<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>> e : resultFutures.entrySet()) {
+                CompetitorRaceDataDTO competitorData;
+                try {
+                    competitorData = e.getValue().get();
+                } catch (InterruptedException e1) {
+                    competitorData = null;
+                    logger.log(Level.SEVERE, "Exception while trying to compute competitor data "+detailType+" for competitor "+e.getKey().name, e1);
+                } catch (ExecutionException e1) {
+                    competitorData = null;
+                    logger.log(Level.SEVERE, "Exception while trying to compute competitor data "+detailType+" for competitor "+e.getKey().name, e1);
                 }
-                if (startTime != null && endTime != null) {
-                    for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += stepSizeInMs) {
-                        // TODO parallelize across time points
-                        MillisecondsTimePoint time = new MillisecondsTimePoint(i);
-                        Double competitorRaceData = getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time, leaderboardGroupName, leaderboardName);
-                        if (competitorRaceData != null) {
-                            raceData.add(new Pair<Date, Double>(time.asDate(), competitorRaceData));
-                        }
-                    }
-                }
-                result.setCompetitorData(competitorDTO, new CompetitorRaceDataDTO(competitorDTO, detailType, markPassingsData, raceData));
+                result.setCompetitorData(e.getKey(), competitorData);
             }
         }
         return result;

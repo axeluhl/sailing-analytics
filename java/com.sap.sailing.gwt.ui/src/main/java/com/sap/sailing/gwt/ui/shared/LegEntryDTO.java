@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.ManeuverType;
-import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.NauticalSide;
 
 /**
  * Holds data about one competitor's performance in one leg of one race represented in the
@@ -20,7 +20,7 @@ public class LegEntryDTO implements IsSerializable {
     public int rank;
     public Double gapToLeaderInSeconds;
     public Double gapChangeSinceLegStartInSeconds;
-    public Tack sideToWhichMarkAtLegStartWasRounded;
+    public NauticalSide sideToWhichMarkAtLegStartWasRounded;
     public Double estimatedTimeToNextWaypointInSeconds;
 
     /**

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,14 +37,17 @@ public class RaceRecord {
     private final URI liveURI;
     private final URI storedURI;
     private final List<String> boatClassNames;
+    private final String raceStatus;
     
     public RaceRecord(URL jsonURL, String regattaName, String name, String replayURL, String ID,
-            String trackingstarttime, String trackingendtime, String racestarttime, String commaSeparatedBoatClassNames)
+            String trackingstarttime, String trackingendtime, String racestarttime, String commaSeparatedBoatClassNames,
+            String status)
             throws URISyntaxException, IOException {
         super();
         this.regattaName = regattaName;
         this.name = name;
         this.replayURL = replayURL;
+        this.raceStatus = status;
         this.ID = ID;
         this.boatClassNames = new ArrayList<String>();
         if (commaSeparatedBoatClassNames != null) {
@@ -85,11 +89,17 @@ public class RaceRecord {
         String technicalEventName = jsonURLAsString.substring(indexOfLastButOneSlash+1, indexOfLastSlash);
         paramURL = new URL(jsonURLAsString.substring(0, indexOfLastSlash)+"/clientparams.php?event="+
                 technicalEventName+"&race="+ID);
-        Map<String, String> paramURLContents = parseParams(paramURL);
-        String liveURIAsString = paramURLContents.get(LIVE_URI_PROPERTY);
-        liveURI = liveURIAsString == null ? null : new URI(liveURIAsString);
-        String storedURIAsString = paramURLContents.get(STORED_URI_PROPERTY);
-        storedURI = storedURIAsString == null ? null : new URI(storedURIAsString);
+        try {
+            Map<String, String> paramURLContents = parseParams(paramURL);
+            String liveURIAsString = paramURLContents.get(LIVE_URI_PROPERTY);
+            liveURI = liveURIAsString == null ? null : new URI(liveURIAsString);
+            String storedURIAsString = paramURLContents.get(STORED_URI_PROPERTY);
+            storedURI = storedURIAsString == null ? null : new URI(storedURIAsString);
+        } catch (Exception e) {
+            logger.info("Couldn't parse TracTrac paramURL " + paramURL + " for race record " + getName());
+            logger.log(Level.INFO, "The exception was:", e);
+            throw e;
+        }
     }
 
     private Map<String, String> parseParams(URL paramURL) throws IOException {
@@ -148,6 +158,10 @@ public class RaceRecord {
 
     public TimePoint getRaceStartTime() {
         return racestarttime;
+    }
+    
+    public String getRaceStatus() {
+        return raceStatus;
     }
     
 }

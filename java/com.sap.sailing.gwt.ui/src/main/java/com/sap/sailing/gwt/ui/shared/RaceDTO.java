@@ -45,4 +45,35 @@ public class RaceDTO extends NamedDTO implements IsSerializable {
     public String getRegattaName() {
         return regattaName;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((boatClass == null) ? 0 : boatClass.hashCode());
+        result = prime * result + ((regattaName == null) ? 0 : regattaName.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RaceDTO other = (RaceDTO) obj;
+        if (boatClass == null) {
+            if (other.boatClass != null)
+                return false;
+        } else if (!boatClass.equals(other.boatClass))
+            return false;
+        if (regattaName == null) {
+            if (other.regattaName != null)
+                return false;
+        } else if (!regattaName.equals(other.regattaName))
+            return false;
+        return true;
+    }
 }

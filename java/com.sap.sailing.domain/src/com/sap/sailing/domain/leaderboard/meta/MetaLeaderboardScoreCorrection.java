@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 
 public class MetaLeaderboardScoreCorrection extends ScoreCorrectionImpl {
@@ -21,7 +22,7 @@ public class MetaLeaderboardScoreCorrection extends ScoreCorrectionImpl {
     
     @Override
     protected Integer getNumberOfCompetitorsInRace(RaceColumn raceColumn, Competitor competitor,
-            int numberOfCompetitorsInLeaderboard) {
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
         MetaLeaderboardColumn metaLeaderboardColumn = (MetaLeaderboardColumn) raceColumn;
         return Util.size(metaLeaderboardColumn.getLeaderboard().getCompetitors());
     }

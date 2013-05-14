@@ -156,7 +156,7 @@ public class RunningRaceFragment extends RaceFragment implements IndividualRecal
 
         RaceDialogFragment fragment = new AbortTypeSelectionDialog();
 
-        Bundle args = getParameterBundle();
+        Bundle args = getRecentArguments();
         fragment.setArguments(args);
 
         fragment.show(fragmentManager, "dialogAPNovemberMode");

@@ -62,7 +62,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void listRacesInEvent(){
-        service.listTracTracRacesInEvent(JSON_URL, new AsyncCallback<Pair<String,List<TracTracRaceRecordDTO>>>() {
+        service.listTracTracRacesInEvent(JSON_URL, false, new AsyncCallback<Pair<String,List<TracTracRaceRecordDTO>>>() {
 
             @Override
             public void onFailure(Throwable caught) {

@@ -15,12 +15,10 @@ import com.sap.sailing.domain.tracking.impl.TrackImpl;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
-
     private static final long serialVersionUID = -176745401321893502L;
-
-    private transient Set<RaceLogEventVisitor> listeners;
-
     private final static Logger logger = Logger.getLogger(RaceLogImpl.class.getName());
+    
+    private transient Set<RaceLogEventVisitor> listeners;
 
     public RaceLogImpl(String nameForReadWriteLock) {
         super(new ArrayListNavigableSet<Timed>(RaceLogEventComparator.INSTANCE), nameForReadWriteLock);
@@ -45,7 +43,10 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             unlockAfterWrite();
         }
         if (isAdded) {
+            logger.finer(String.format("%s (%s) was added to log.", event, event.getClass().getName()));
             notifyListenersAboutReceive(event);
+        } else {
+            logger.warning(String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
         }
         return isAdded;
     }

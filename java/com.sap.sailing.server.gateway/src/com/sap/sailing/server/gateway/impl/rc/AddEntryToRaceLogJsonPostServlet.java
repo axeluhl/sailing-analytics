@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.impl.rc;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -19,7 +20,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.deserialization.impl.RaceLogEventDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 
 public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 7704668926551060433L;
@@ -27,6 +28,8 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
     public static final String PARAMS_LEADERBOARD_NAME = "leaderboard";
     public static final String PARAMS_RACE_COLUMN_NAME = "raceColumn";
     public static final String PARAMS_RACE_FLEET_NAME = "fleet";
+    
+    private final static Logger logger = Logger.getLogger(AddEntryToRaceLogJsonPostServlet.class.getName());
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
@@ -76,12 +79,15 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
         JsonDeserializer<RaceLogEvent> deserializer = RaceLogEventDeserializer.create(DomainFactory.INSTANCE);
 
         try {
+            logger.fine("Post issued for " + leaderboardName + ", " + raceColumnName + ", " + fleetName + " to add a race log event");
             Object requestBody = JSONValue.parseWithException(request.getReader());
             JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
+            logger.fine("JSON requestObject is: " + requestObject.toString());
 
             RaceLogEvent logEvent = deserializer.deserialize(requestObject);
+            logger.fine("JSON is deserialized to a RaceLogEvent");
             raceColumn.getRaceLog(fleet).add(logEvent);
-
+            
         } catch (ParseException pe) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                     String.format("Invalid JSON in request body:\n%s", pe));

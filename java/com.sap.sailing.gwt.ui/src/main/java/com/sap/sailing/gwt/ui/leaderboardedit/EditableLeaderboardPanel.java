@@ -157,8 +157,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         @Override
         public void render(Context context, CompetitorDTO object, SafeHtmlBuilder sb) {
             ImageResourceRenderer renderer = new ImageResourceRenderer();
-            ImageResource flagImageResource = FlagImageResolver
-                    .getFlagImageResource(object.twoLetterIsoCountryCode);
+            final String twoLetterIsoCountryCode = object.twoLetterIsoCountryCode;
+            final ImageResource flagImageResource;
+            if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
+                flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+            } else {
+                flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+            }
             if (flagImageResource != null) {
                 sb.append(renderer.render(flagImageResource));
                 sb.appendHtmlConstant("&nbsp;");

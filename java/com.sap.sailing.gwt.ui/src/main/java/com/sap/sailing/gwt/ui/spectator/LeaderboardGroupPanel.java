@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.client.shared.panels.WelcomeWidget;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
@@ -98,12 +99,15 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
     private Widget welcomeWidget = null;
     private final boolean isEmbedded;
     private final boolean showRaceDetails;
+    private final boolean canReplayDuringLiveRaces;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
-            ErrorReporter errorReporter, final String groupName, String root, String viewMode, boolean embedded, boolean showRaceDetails) {
+            ErrorReporter errorReporter, final String groupName, String root, String viewMode, boolean embedded,
+            boolean showRaceDetails, boolean canReplayDuringLiveRaces) {
         super();
         this.isEmbedded = embedded;
         this.showRaceDetails = showRaceDetails;
+        this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
         this.sailingService = sailingService;
         this.stringMessages = stringConstants;
         this.errorReporter = errorReporter;
@@ -355,6 +359,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
             String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboardName
                     + "&raceName=" + raceIdentifier.getRaceName() + "&root=" + root
+                    + (canReplayDuringLiveRaces ? "&"+RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES+"=true" : "")
                     + "&regattaName=" + raceIdentifier.getRegattaName() + "&leaderboardGroupName=" + leaderboardGroup.name);
             if (debugParam != null && !debugParam.isEmpty()) {
                 link += "&gwt.codesvr=" + debugParam;

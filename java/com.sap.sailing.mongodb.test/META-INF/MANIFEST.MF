@@ -6,8 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Fragment-Host: com.sap.sailing.mongodb
-Require-Bundle: org.eclipse.osgi,
- com.sap.sailing.domain,
+Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.domain.test,
  com.tractrac.clientmodule;bundle-version="2.0.0",

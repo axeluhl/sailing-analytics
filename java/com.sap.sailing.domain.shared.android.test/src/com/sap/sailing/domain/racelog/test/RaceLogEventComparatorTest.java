@@ -30,20 +30,36 @@ public class RaceLogEventComparatorTest {
     @Test
     public void testEqualsOnSame() {
         when(eventOne.getTimePoint()).thenReturn(new MillisecondsTimePoint(1));
+        when(eventOne.getId()).thenReturn("a");
         
         int result = comparator.compare(eventOne, eventOne);
         assertEquals(0, result);
     }
     
     @Test
-    public void testSamePassAndSameTime() {
+    public void testSamePassAndSameTimeSameId() {
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventOne.getId()).thenReturn("a");
         when(eventTwo.getPassId()).thenReturn(0);
         when(eventTwo.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventTwo.getId()).thenReturn("a");
         
         int result = comparator.compare(eventOne, eventTwo);
         assertEquals(0, result);
+    }
+    
+    @Test
+    public void testSamePassAndSameTimeDifferentId() {
+        when(eventOne.getPassId()).thenReturn(0);
+        when(eventOne.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventOne.getId()).thenReturn("a");
+        when(eventTwo.getPassId()).thenReturn(0);
+        when(eventTwo.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventTwo.getId()).thenReturn("b");
+        
+        int result = comparator.compare(eventOne, eventTwo);
+        assertTrue(result < 0);
     }
     
     @Test

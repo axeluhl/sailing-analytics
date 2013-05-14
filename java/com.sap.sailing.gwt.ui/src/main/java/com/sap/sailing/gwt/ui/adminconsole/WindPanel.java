@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -14,6 +15,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -24,6 +26,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -31,6 +34,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -74,6 +78,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
     private final Label windSourceLabel;
     private final ListDataProvider<WindDTO> rawWindFixesDataProvider;
     private final CellTable<WindDTO> rawWindFixesTable;
+    private final VerticalPanel windFixPanel;
     
     public WindPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
@@ -125,7 +130,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         });
         windFixesDisplayPanel.add(addWindFixButton);
 
-        VerticalPanel windSourcesPanel = new VerticalPanel();
+        final VerticalPanel windSourcesPanel = new VerticalPanel();
         windSourcesPanel.setSpacing(10);
         tabPanel.add(windSourcesPanel, stringMessages.windSourcesUsed());
         tabPanel.add(windFixesDisplayPanel, "Wind fixes");
@@ -141,6 +146,9 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
                 setRaceIsKnownToStartUpwind();
             }
         });
+        
+        windFixPanel = new VerticalPanel();
+        windSourcesPanel.add(windFixPanel);
         
         windSourceLabel = new Label();
         windFixesDisplayPanel.add(windSourceLabel);
@@ -368,6 +376,48 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
     private void clearWindFixes() {
     }
     
+    private void showWindFixesList(RegattaAndRaceIdentifier selectedRace, RaceDTO raceDTO) {
+        List<String> windSourceTypeNames = new ArrayList<String>();
+        windSourceTypeNames.add(WindSourceType.COMBINED.name());
+        sailingService.getAveragedWindInfo(selectedRace, raceDTO.startOfRace, 30000L, 100, windSourceTypeNames, new AsyncCallback<WindInfoForRaceDTO>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(WindInfoForRaceDTO result) {
+                windFixPanel.clear();
+                
+                for (WindSourceType input : new WindSourceType[]{WindSourceType.COMBINED}) {
+                    windFixPanel.add(new HTML("&nbsp;"));
+                    windFixPanel.add(new Label(stringMessages.windFixListingDescription() + " " + input.name()));
+                    WindTrackInfoDTO windTrackInfo = result.windTrackInfoByWindSource.get(new WindSourceImpl(input));
+                    if (windTrackInfo != null && windTrackInfo.windFixes.size()>=7) {
+                        NumberFormat formatter = NumberFormat.getFormat(".##");
+                        for (WindDTO windFix : windTrackInfo.windFixes.subList(0, 3)) {
+                            windFixPanel.add(new Label(""+formatter.format(windFix.trueWindFromDeg)+" (deg) "+
+                                    formatter.format(windFix.trueWindSpeedInKnots)+" (kt) "+
+                                    formatter.format(windFix.position.latDeg) + " (lat) "+
+                                    formatter.format(windFix.position.lngDeg) + " (lng) " +
+                                    new Date(windFix.measureTimepoint)));
+                        }
+                        // These fixes must not necessarily be the real last ones. This especially holds for long races.
+                        for (WindDTO windFix : windTrackInfo.windFixes.subList(windTrackInfo.windFixes.size()-4, windTrackInfo.windFixes.size()-1)) {
+                            windFixPanel.add(new Label(""+formatter.format(windFix.trueWindFromDeg)+" (deg) "+
+                                    formatter.format(windFix.trueWindSpeedInKnots)+" (kt) "+
+                                    formatter.format(windFix.position.latDeg) + " (lat) "+
+                                    formatter.format(windFix.position.lngDeg) + " (lng) " +
+                                    new Date(windFix.measureTimepoint)));
+                        }
+                    } else {
+                        windFixPanel.add(new Label(stringMessages.noWindFixesAvailable()));
+                    }
+                }
+            }
+        });
+    }
+    
     private void updateWindDisplay() {
         RegattaAndRaceIdentifier selectedRace = getSelectedRace();
         RaceDTO raceDTO = selectedRace != null ? trackedRacesListComposite.getRaceByIdentifier(selectedRace) : null;
@@ -377,6 +427,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
             windCaptionPanel.setCaptionText(stringMessages.wind() + ": " + selectedRace.getRaceName());
 
             showWind(selectedRace);
+            showWindFixesList(selectedRace, raceDTO);
         } else {
             windCaptionPanel.setVisible(false);
             windCaptionPanel.setCaptionText(stringMessages.wind());
@@ -384,6 +435,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
             clearWindSources();
             clearWindFixes();
         }
+        
     }
 
     @Override

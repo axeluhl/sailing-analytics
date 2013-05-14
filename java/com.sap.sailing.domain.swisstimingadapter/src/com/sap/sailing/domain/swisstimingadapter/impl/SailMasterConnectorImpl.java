@@ -186,6 +186,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 i++;
                 notifyListenersStoredDataProgress(raceID, ((double) i)/(double) messages.size());
             }
+            notifyListenersStoredDataProgress(raceID, 1.0);
             // now process the buffered messages one by one:
             SailMasterMessage bufferedMessage;
             do {

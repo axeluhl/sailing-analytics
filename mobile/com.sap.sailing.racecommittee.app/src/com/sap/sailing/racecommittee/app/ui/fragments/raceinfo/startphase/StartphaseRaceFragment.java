@@ -92,7 +92,7 @@ public class StartphaseRaceFragment extends RaceFragment {
 
         RaceDialogFragment fragment = new AbortModeSelectionDialog();
 
-        Bundle args = getParameterBundle();
+        Bundle args = getRecentArguments();
         args.putString(AppConstants.FLAG_KEY, Flags.AP.name());
         fragment.setArguments(args);
 

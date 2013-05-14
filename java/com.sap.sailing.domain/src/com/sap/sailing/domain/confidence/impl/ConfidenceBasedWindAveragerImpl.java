@@ -47,6 +47,7 @@ public class ConfidenceBasedWindAveragerImpl<RelativeTo> extends
             for (HasConfidenceAndIsScalable<ScalableWind, Wind, RelativeTo> next : values) {
                 double relativeWeight = (getWeigher() == null ? 1.0 : getWeigher().getConfidence(next.getRelativeTo(), at)) * next.getConfidence();
                 ScalableWind weightedNext = next.getScalableValue().multiply(relativeWeight).getValue();
+                double weighedNextKnots = next.getObject().getKnots() * relativeWeight;
                 if (numerator == null) {
                     numerator = weightedNext;
                 } else {
@@ -57,7 +58,7 @@ public class ConfidenceBasedWindAveragerImpl<RelativeTo> extends
                 if (weightedNext.useSpeed()) {
                     atLeastOneFixWasMarkedToUseSpeed = true;
                     speedConfidenceSum += relativeWeight;
-                    knotSum += weightedNext.divide(1.0).getKnots();
+                    knotSum += weighedNextKnots;
                 }
             }
             // TODO consider greater variance to reduce the confidence

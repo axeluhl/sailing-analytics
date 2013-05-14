@@ -15,6 +15,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ListView;
@@ -38,6 +39,7 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.RoundingDirection;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementListAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.DraggableCourseElementListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.MarkGridAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NamedComparator;
@@ -50,7 +52,7 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
     private MarkGridAdapter gridAdapter;
     private List<CourseListDataElement> courseElements;
     private List<CourseListDataElement> previousCourseElements;
-    private CourseElementListAdapter courseElementAdapter;
+    private DraggableCourseElementListAdapter courseElementAdapter;
     private CourseElementListAdapter previousCourseElementAdapter;
     private DragSortListView newCourseListView;
     private ListView previousCourseListView;
@@ -106,10 +108,11 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         previousCourseElements = new ArrayList<CourseListDataElement>();
 
         gridAdapter = new MarkGridAdapter(getActivity(), R.layout.welter_one_row_no_image, aMarkList);
-        courseElementAdapter = new CourseElementListAdapter(getActivity(), R.layout.welter_draggable_waypoint_item, courseElements);
+        courseElementAdapter = new DraggableCourseElementListAdapter(getActivity(), R.layout.welter_draggable_waypoint_item, courseElements);
         previousCourseElementAdapter = new CourseElementListAdapter(getActivity(), R.layout.welter_one_row_three_columns, previousCourseElements);
         
         loadMarks();
+        loadCourseOnServer();
 
         GridView gridView = (GridView) getView().findViewById(R.id.gridViewAssets);
         gridView.setAdapter(gridAdapter);
@@ -147,6 +150,16 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
             }
         });
         
+        newCourseListView.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+            @Override
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+                CourseListDataElement courseElement = courseElementAdapter.getItem(position);
+                createRoundingDirectionDialog(courseElement);
+                return true;
+            }
+        });
+        
         dragSortController = buildDragSortController(newCourseListView);
         newCourseListView.setFloatViewManager(dragSortController);
         newCourseListView.setOnTouchListener(dragSortController);
@@ -158,10 +171,6 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
 
         previousCourseListView = (ListView) getView().findViewById(R.id.listViewPreviousCourse);
         previousCourseListView.setAdapter(previousCourseElementAdapter);
-
-        if(InMemoryDataStore.INSTANCE.getLastPublishedCourseDesign() != null){
-            fillPreviousCourseElementsInList();
-        }
 
         takePreviousButton = (Button) getView().findViewById(R.id.takePreviousCourseDesignButton);
         takePreviousButton.setOnClickListener(new OnClickListener() {
@@ -188,7 +197,12 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
                     CourseBase courseData = convertCourseElementsToACourseData();
                     sendCourseDataAndDismiss(courseData);
                 } catch (IllegalStateException ex) {
-                    Toast.makeText(getActivity(), "A right buoy is missing for a gate. Please select the right buoy.", Toast.LENGTH_LONG).show();
+                    if (ex.getMessage().equals("Gate has no right buoy")) {
+                        Toast.makeText(getActivity(), "A right buoy is missing for a gate. Please select the right buoy.", Toast.LENGTH_LONG).show();
+                    } else if (ex.getMessage().equals("Each waypoints needs a passing side")) {
+                        Toast.makeText(getActivity(), "A waypoint has no passing side. Please select the passing side by clicking long on the waypoint.", Toast.LENGTH_LONG).show();
+                    }
+                    
                 } catch (IllegalArgumentException ex) {
                     Toast.makeText(getActivity(), "The course design has to have at least one waypoint.", Toast.LENGTH_LONG).show();
                 }
@@ -229,6 +243,34 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         super.onResume();
         onLoadMarksSucceeded(hostActivity.getDataManager().getDataStore().getMarks());
     }
+    
+    private void loadCourseOnServer() {
+        hostActivity.getDataManager().loadCourse(getRace(), new LoadClient<CourseBase>() {
+
+            @Override
+            public void onLoadFailed(Exception reason) {
+                fillPreviousCourseElementsWithLastPublishedCourseDesign();
+            }
+
+            @Override
+            public void onLoadSucceded(CourseBase data) {
+                if (Util.size(data.getWaypoints()) > 0) {
+                    fillPreviousCourseElementsInList(data);
+                } else {
+                    fillPreviousCourseElementsWithLastPublishedCourseDesign();
+                }
+                
+            }
+            
+        });
+    }
+    
+    private void fillPreviousCourseElementsWithLastPublishedCourseDesign() {
+        CourseBase lastPublishedCourseDesign = InMemoryDataStore.INSTANCE.getLastPublishedCourseDesign();
+        if(lastPublishedCourseDesign != null) {
+            fillPreviousCourseElementsInList(lastPublishedCourseDesign);
+        }
+    }
 
     private void loadMarks() {
         hostActivity.getDataManager().loadMarks(getRace(), new LoadClient<Collection<Mark>>() {
@@ -252,8 +294,7 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         gridAdapter.notifyDataSetChanged();
     }
 
-    private void fillPreviousCourseElementsInList() {
-        CourseBase previousCourseData = InMemoryDataStore.INSTANCE.getLastPublishedCourseDesign();
+    private void fillPreviousCourseElementsInList(CourseBase previousCourseData) {
         if (previousCourseData != null) {
             previousCourseElements.clear();
             previousCourseElements.addAll(convertCourseDesignToCourseElements(previousCourseData));
@@ -321,6 +362,8 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
                 waypoints.add(waypoint);
             } else if (courseElement.getRoundingDirection().equals(RoundingDirection.Gate) && courseElement.getRightMark() == null) {
                 throw new IllegalStateException("Gate has no right buoy");
+            } else if (courseElement.getRoundingDirection().equals(RoundingDirection.None)) {
+                throw new IllegalStateException("Each waypoints needs a passing side");
             } else {
                 Waypoint waypoint = new WaypointImpl(courseElement.getLeftMark(), getNauticalSide(courseElement.getRoundingDirection()));
                 
@@ -352,7 +395,9 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
     
     private RoundingDirection getRoundingDirection(NauticalSide passingSide) {
         RoundingDirection direction = null;
-        if (passingSide.name().equalsIgnoreCase(RoundingDirection.Port.name())) {
+        if (passingSide == null) {
+            direction = RoundingDirection.None;
+        } else if (passingSide.name().equalsIgnoreCase(RoundingDirection.Port.name())) {
             direction = RoundingDirection.Port;
         } else if (passingSide.name().equalsIgnoreCase(RoundingDirection.Starboard.name())){
             direction = RoundingDirection.Starboard;
@@ -394,9 +439,9 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         if (courseElements.isEmpty()) {
             addNewCourseElementToList(mark);
         } else {
-            CourseListDataElement lastCourseElement = courseElements.get(courseElements.size() - 1);
-            if (lastCourseElement.getRoundingDirection().equals(RoundingDirection.Gate) && lastCourseElement.getRightMark() == null) {
-                lastCourseElement.setRightMark(mark);
+            CourseListDataElement gateCourseElement = getFirstGateCourseElementWithoutRightMark();
+            if (gateCourseElement != null) {
+                gateCourseElement.setRightMark(mark);
                 courseElementAdapter.notifyDataSetChanged();
             } else {
                 addNewCourseElementToList(mark);
@@ -404,6 +449,15 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         }
     }
     
+    private CourseListDataElement getFirstGateCourseElementWithoutRightMark() {
+        for (CourseListDataElement courseElement : courseElements) {
+            if (courseElement.getRoundingDirection().equals(RoundingDirection.Gate) && courseElement.getRightMark() == null) {
+                return courseElement;
+            }
+        }
+        return null;
+    }
+
     private void addNewCourseElementToList(Mark mark) {
         CourseListDataElement courseElement = new CourseListDataElement();
         courseElement.setLeftMark(mark);
@@ -430,7 +484,9 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
 
     protected void onRoundingDirectionPicked(CourseListDataElement courseElement, RoundingDirection pickedDirection) {
         courseElement.setRoundingDirection(pickedDirection);
-        courseElements.add(courseElement);
+        if (!courseElements.contains(courseElement)) {
+            courseElements.add(courseElement);
+        }
         courseElementAdapter.notifyDataSetChanged();
     }
 

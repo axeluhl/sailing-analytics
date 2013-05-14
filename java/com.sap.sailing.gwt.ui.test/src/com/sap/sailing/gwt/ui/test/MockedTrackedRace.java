@@ -765,4 +765,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         
     }
 
+    @Override
+    public Distance getDistanceToStartLine(Competitor competitor, TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
