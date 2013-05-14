@@ -35,3 +35,4 @@ Like businesses, sailors need the latest information to make strategic decisions
 * [Maven Repository Browser](http://maven.sapsailing.com/maven/)
 * [Main Sailing Website](http://www.sapsailing.com)
 * [Visitor Statistics](http://analysis.sapsailing.com/)
+* [Traffic and CPU for app01](http://mrtg.sapsailing.com/)
