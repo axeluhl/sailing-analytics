@@ -556,4 +556,7 @@ public interface StringMessages extends Messages {
     String waypoints();
     String disableRaceFilter();
     String enableRaceFilter();
+    String raceStatusColumn();
+    String loading();
+    String showHiddenRaces();
 }

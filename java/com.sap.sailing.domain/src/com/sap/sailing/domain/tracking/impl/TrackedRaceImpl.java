@@ -71,6 +71,8 @@ import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.confidence.impl.HyperbolicTimeDifferenceWeigher;
 import com.sap.sailing.domain.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -2339,6 +2341,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public void attachRaceLog(RaceLog raceLog) {
         this.attachedRaceLog = raceLog;
         attachedRaceLog.addListener(raceLogListener);
+        // set start time for race, if there is one valid in the log
+        StartTimeFinder startTimeFinder = new StartTimeFinder(PassAwareRaceLogImpl.copy(raceLog));
+        if (startTimeFinder.getStartTime() != null) {
+            setStartTimeReceived(startTimeFinder.getStartTime());
+        }
     }
 
     @Override

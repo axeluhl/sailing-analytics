@@ -30,7 +30,9 @@ import com.sap.sailing.velum.resultimport.CsvParserFactory;
 import com.sap.sailing.velum.resultimport.impl.ScoreCorrectionProviderImpl;
 
 public class ParserTest {
-    private static final String SAMPLE_INPUT_NAME = "HVR2012.csv";
+    private static final String SAMPLE_INPUT_NAME_NIXDORF_POKAL_4WF = "Star_HNVPokal4WF.csv";
+    private static final String SAMPLE_INPUT_NAME_NIXDORF_POKAL_FINAL = "Star_HNVPokalFinal.csv";
+    private static final String SAMPLE_INPUT_NAME_STARIDM_4WF = "Star_IDM2013n4WF.csv";
     private static final String RESOURCES = "resources/";
 
     private InputStream getInputStream(String filename) throws FileNotFoundException, IOException {
@@ -48,7 +50,9 @@ public class ParserTest {
                 try {
                     List<Triple<InputStream, String, TimePoint>> result = new ArrayList<>();
                     TimePoint now = MillisecondsTimePoint.now();
-                    result.add(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME), SAMPLE_INPUT_NAME, now));
+                    result.add(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_NIXDORF_POKAL_4WF), SAMPLE_INPUT_NAME_NIXDORF_POKAL_4WF, now));
+                    result.add(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_NIXDORF_POKAL_FINAL), SAMPLE_INPUT_NAME_NIXDORF_POKAL_FINAL, now));
+                    result.add(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_STARIDM_4WF), SAMPLE_INPUT_NAME_STARIDM_4WF, now));
                     return result;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -58,32 +62,48 @@ public class ParserTest {
     }
 
     @Test
-    public void testSimpleParsingSomeSampleDocument() throws Exception {
-        RegattaResults parseResults = CsvParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME), SAMPLE_INPUT_NAME, MillisecondsTimePoint.now()).parseResults();
+    public void testParsingNixdorfPokal4RacesDocument() throws Exception {
+        RegattaResults parseResults = CsvParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_NIXDORF_POKAL_4WF),
+                SAMPLE_INPUT_NAME_NIXDORF_POKAL_4WF, MillisecondsTimePoint.now()).parseResults();
         assertNotNull(parseResults);
     }
 
     @Test
-    public void testScoreCorrectionProvider() throws Exception {
+    public void testParsingNixdorfPokalFinalDocument() throws Exception {
+        RegattaResults parseResults = CsvParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_NIXDORF_POKAL_FINAL),
+                SAMPLE_INPUT_NAME_NIXDORF_POKAL_FINAL, MillisecondsTimePoint.now()).parseResults();
+        assertNotNull(parseResults);
+    }
+
+    @Test
+    public void testParsingStarIDM4RacesDocument() throws Exception {
+        RegattaResults parseResults = CsvParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_STARIDM_4WF), 
+                SAMPLE_INPUT_NAME_STARIDM_4WF, MillisecondsTimePoint.now()).parseResults();
+        assertNotNull(parseResults);
+    }
+
+    @Test
+    public void testScoreCorrectionProviderNixdorfFinal() throws Exception {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 CsvParserFactory.INSTANCE);
         Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
-        RegattaScoreCorrections starResult = scoreCorrectionProvider.getScoreCorrections("Star", "Star", hasResultsFor.get("Star").iterator().next().getB());
+        RegattaScoreCorrections starResult = scoreCorrectionProvider.getScoreCorrections(SAMPLE_INPUT_NAME_NIXDORF_POKAL_FINAL,
+                "Star", hasResultsFor.get(SAMPLE_INPUT_NAME_NIXDORF_POKAL_FINAL).iterator().next().getB());
         assertNotNull(starResult);
         Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces = starResult.getScoreCorrectionsForRaces();
         assertNotNull(scoreCorrectionsForRaces);
-        assertEquals(7, Util.size(scoreCorrectionsForRaces)); // 7 races
+        assertEquals(5, Util.size(scoreCorrectionsForRaces)); // 5 races
         {
-            final ScoreCorrectionsForRace resultsForR3 = Util.get(scoreCorrectionsForRaces, 2);
-            assertEquals(38, resultsForR3.getScoreCorrectionForCompetitor("GER1009").getPoints(), 0.00000001);
-            assertSame(MaxPointsReason.OCS, resultsForR3.getScoreCorrectionForCompetitor("GER1009").getMaxPointsReason());
-            assertEquals("Matthiesen, Ulrich+Imbeck, Torsten+Imbeck, Anton",
-                    resultsForR3.getScoreCorrectionForCompetitor("GER1009").getCompetitorName());
+            final ScoreCorrectionsForRace resultsForR2 = Util.get(scoreCorrectionsForRaces, 1);
+            assertEquals(40, resultsForR2.getScoreCorrectionForCompetitor("ITA8400").getPoints(), 0.00000001);
+            assertSame(MaxPointsReason.DNF, resultsForR2.getScoreCorrectionForCompetitor("ITA8400").getMaxPointsReason());
+            assertEquals("Müllejans, Christian+Morf, Karsten",
+                    resultsForR2.getScoreCorrectionForCompetitor("ITA8400").getCompetitorName());
         }
         {
             final ScoreCorrectionsForRace resultsForR2 = Util.get(scoreCorrectionsForRaces, 1);
-            assertEquals(10, resultsForR2.getScoreCorrectionForCompetitor("GER938").getPoints(), 0.00000001);
-            assertSame(null, resultsForR2.getScoreCorrectionForCompetitor("GER938").getMaxPointsReason());
+            assertEquals(11, resultsForR2.getScoreCorrectionForCompetitor("GER8055").getPoints(), 0.00000001);
+            assertSame(null, resultsForR2.getScoreCorrectionForCompetitor("GER8055").getMaxPointsReason());
         }
     }
 }
