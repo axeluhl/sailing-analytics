@@ -82,3 +82,7 @@ I ran some load testing based on apache bench tool (ab) with 10000 requests (fro
 I will update start scripts for each server to use $SERVER_DIR/tmp as temporary directory thus making sure that deployed binaries can not overwrite themselves.
 
 One can find more information about the Jetty architecture here: http://docs.codehaus.org/display/JETTY/Architecture
+
+### Ignore GIT line endings during merge
+
+Following http://stackoverflow.com/questions/861995/is-it-possible-for-git-merge-to-ignore-line-ending-differences one can use `git config merge.renormalize true`
