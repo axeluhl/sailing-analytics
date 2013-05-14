@@ -9,7 +9,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.domain.common.impl.Util.Quadruple;
+import com.sap.sailing.simulator.BoatClassProperties;
+import com.sap.sailing.simulator.RaceProperties;
 
 public enum ConfigurationManager {
 
@@ -21,8 +22,8 @@ public enum ConfigurationManager {
     private static final String CONFIG_FILE_LOCATION = "resources/STG_configuration.csv";
     private static final String RACES_FILE_LOCATION = "resources/races.csv";
 
-    private List<Quadruple<String, Double, String, Integer>> _boatClassesInfo = new ArrayList<Quadruple<String, Double, String, Integer>>();
-    private List<Quadruple<String, String, String, Integer>> _racesInfo = new ArrayList<Quadruple<String, String, String, Integer>>();
+    private List<BoatClassProperties> _boatClassesInfo = new ArrayList<BoatClassProperties>();
+    private List<RaceProperties> _racesInfo = new ArrayList<RaceProperties>();
 
     private ReadingConfigurationFileStatus status = ReadingConfigurationFileStatus.SUCCESS;
     private String errorMessage = "";
@@ -72,9 +73,9 @@ public enum ConfigurationManager {
 
                 if (polarDiagramConfig) {
                     this._boatClassesInfo
-                    .add(new Quadruple<String, Double, String, Integer>(elements[0], Double.parseDouble(elements[1]), elements[2], index++));
+                    .add(new BoatClassPropertiesImpl(elements[0], Double.parseDouble(elements[1]), elements[2], index++));
                 } else {
-                    this._racesInfo.add(new Quadruple<String, String, String, Integer>(elements[0], elements[1], elements[2], index++));
+                    this._racesInfo.add(new RacePropertiesImpl(elements[0], elements[1], elements[2], index++));
                 }
             }
 
@@ -88,11 +89,11 @@ public enum ConfigurationManager {
         }
     }
 
-    public List<Quadruple<String, Double, String, Integer>> getBoatClassesInfo() {
+    public List<BoatClassProperties> getBoatClassesInfo() {
         return this._boatClassesInfo;
     }
 
-    public List<Quadruple<String, String, String, Integer>> getRacesInfo() {
+    public List<RaceProperties> getRacesInfo() {
         return this._racesInfo;
     }
 
@@ -105,11 +106,11 @@ public enum ConfigurationManager {
     }
 
     public String getRaceURL(int index) {
-        return this._racesInfo.get(index).getC();
+        return this._racesInfo.get(index).getURL();
     }
 
     public String getPolarDiagramFileLocation(int index) {
-        return this._boatClassesInfo.get(index).getC();
+        return this._boatClassesInfo.get(index).getPolar();
     }
 
     public ReadingConfigurationFileStatus getStatus() {

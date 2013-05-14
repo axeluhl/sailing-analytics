@@ -13,9 +13,9 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Quadruple;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
+import com.sap.sailing.simulator.RaceProperties;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.SimulatorUISelection;
@@ -334,8 +334,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         List<String> racesNames = new ArrayList<String>();
 
-        for (Quadruple<String, String, String, Integer> raceInfo : ConfigurationManager.INSTANCE.getRacesInfo()) {
-            racesNames.add(raceInfo.getA());
+        for (RaceProperties raceInfo : ConfigurationManager.INSTANCE.getRacesInfo()) {
+            racesNames.add(raceInfo.getName());
         }
 
         return racesNames;

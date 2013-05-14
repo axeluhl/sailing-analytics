@@ -23,7 +23,6 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Quadruple;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
@@ -54,6 +53,7 @@ import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternNotFoundException;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
+import com.sap.sailing.simulator.BoatClassProperties;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SailingSimulator;
@@ -317,8 +317,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             result.setNotificationMessage(config.getErrorMessage());
         }
 
-        for (Quadruple<String, Double, String, Integer> tuple : ConfigurationManager.INSTANCE.getBoatClassesInfo()) {
-            boatClassesDTOs.add(new BoatClassDTO(tuple.getA(), tuple.getB()));
+        for (BoatClassProperties tuple : ConfigurationManager.INSTANCE.getBoatClassesInfo()) {
+            boatClassesDTOs.add(new BoatClassDTO(tuple.getName(), tuple.getLength()));
         }
 
         result.setBoatClassDTOs(boatClassesDTOs.toArray(new BoatClassDTO[boatClassesDTOs.size()]));
