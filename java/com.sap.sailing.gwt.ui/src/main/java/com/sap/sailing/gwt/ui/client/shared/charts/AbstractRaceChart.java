@@ -25,7 +25,7 @@ import com.sap.sailing.gwt.ui.client.TimeZoomChangeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 
-public abstract class RaceChart extends SimplePanel implements RaceSelectionChangeListener,
+public abstract class AbstractRaceChart extends SimplePanel implements RaceSelectionChangeListener,
     TimeListener, TimeZoomChangeListener, TimeRangeChangeListener {
     protected Chart chart;
 
@@ -50,7 +50,7 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
 
     private boolean ignoreNextClickEvent;
     
-    public RaceChart(SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages, 
+    public AbstractRaceChart(SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages, 
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
         this.sailingService = sailingService;
         this.timer = timer;

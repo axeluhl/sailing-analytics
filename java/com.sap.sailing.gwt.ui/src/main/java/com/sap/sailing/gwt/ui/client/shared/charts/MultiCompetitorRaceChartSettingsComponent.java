@@ -13,13 +13,13 @@ import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 
-public class MultiChartSettingsComponent extends AbstractChartSettingsComponent<MultiChartSettings> implements
-        SettingsDialogComponent<MultiChartSettings> {
+public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSettingsComponent<MultiCompetitorRaceChartSettings> implements
+        SettingsDialogComponent<MultiCompetitorRaceChartSettings> {
     private ListBox chartTypeSelectionListBox;
     private final DetailType initialDetailType;
     private final List<DetailType> availableDetailsTypes;    
     
-    public MultiChartSettingsComponent(MultiChartSettings settings, StringMessages stringMessages) {
+    public MultiCompetitorRaceChartSettingsComponent(MultiCompetitorRaceChartSettings settings, StringMessages stringMessages) {
         super(settings, stringMessages);
         this.initialDetailType = settings.getDetailType();
         
@@ -60,7 +60,7 @@ public class MultiChartSettingsComponent extends AbstractChartSettingsComponent<
     }
 
     @Override
-    public MultiChartSettings getResult() {
+    public MultiCompetitorRaceChartSettings getResult() {
         DetailType newDetailType = null;
         int selectedIndex = chartTypeSelectionListBox.getSelectedIndex();
         String selectedDetailType = chartTypeSelectionListBox.getValue(selectedIndex);
@@ -70,7 +70,7 @@ public class MultiChartSettingsComponent extends AbstractChartSettingsComponent<
                 break;
             }
         }
-        return new MultiChartSettings(getAbstractResult(), newDetailType);
+        return new MultiCompetitorRaceChartSettings(getAbstractResult(), newDetailType);
     }
 
 }

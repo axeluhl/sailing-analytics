@@ -36,7 +36,7 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomModel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
-import com.sap.sailing.gwt.ui.client.shared.charts.MultiChartPanel;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
@@ -91,7 +91,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
 
     private LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
-    private MultiChartPanel competitorChart;
+    private MultiCompetitorRaceChart competitorChart;
     
     /**
      * The component viewer in <code>ONESCREEN</code> view mode. <code>null</code> if in <code>CASCADE</code> view mode
@@ -151,7 +151,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         List<Component<?>> components = new ArrayList<Component<?>>();
-        competitorChart = new MultiChartPanel(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider,
+        competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider,
                     timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(competitorChart);

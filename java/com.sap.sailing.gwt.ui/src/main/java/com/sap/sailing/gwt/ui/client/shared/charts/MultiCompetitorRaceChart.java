@@ -24,9 +24,9 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
  * @author Benjamin Ebling (D056866), Axel Uhl (d043530)
  * 
  */
-public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> implements Component<MultiChartSettings> {
+public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiCompetitorRaceChartSettings> implements Component<MultiCompetitorRaceChartSettings> {
     
-    public MultiChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    public MultiCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust) {
@@ -34,7 +34,7 @@ public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> impl
                 timeRangeWithZoomProvider, stringMessages, errorReporter, compactChart, allowTimeAdjust, null, null);
     }
     
-    public MultiChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    public MultiCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
@@ -44,12 +44,12 @@ public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> impl
     }
 
     @Override
-    public SettingsDialogComponent<MultiChartSettings> getSettingsDialogComponent() {
-        return new MultiChartSettingsComponent(new MultiChartSettings(getAbstractSettings(), getSelectedDetailType()), getStringMessages());
+    public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent() {
+        return new MultiCompetitorRaceChartSettingsComponent(new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedDetailType()), getStringMessages());
     }
 
     @Override
-    public void updateSettings(MultiChartSettings newSettings) {
+    public void updateSettings(MultiCompetitorRaceChartSettings newSettings) {
         boolean settingsChanged = updateSettingsOnly(newSettings);
         boolean selectedDetailTypeChanged = setSelectedDetailType(newSettings.getDetailType());
         if (selectedDetailTypeChanged || settingsChanged) {
@@ -59,7 +59,7 @@ public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> impl
     }
 
     @Override
-    protected Component<MultiChartSettings> getComponent() {
+    protected Component<MultiCompetitorRaceChartSettings> getComponent() {
         return this;
     }
 
