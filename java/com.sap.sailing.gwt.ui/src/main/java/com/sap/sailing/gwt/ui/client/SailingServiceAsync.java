@@ -311,8 +311,8 @@ public interface SailingServiceAsync {
     void setWindSourcesToExclude(RegattaAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude,
             AsyncCallback<Void> callback);
 
-    void getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from,
-            Map<CompetitorDTO, Date> to, boolean extrapolate, AsyncCallback<CompactRaceMapDataDTO> callback);
+    void getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date, Map<String, Date> fromPerCompetitorIdAsString,
+            Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate, AsyncCallback<CompactRaceMapDataDTO> callback);
 
     void getReplicaInfo(AsyncCallback<ReplicationStateDTO> callback);
 

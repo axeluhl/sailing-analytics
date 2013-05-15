@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.actions;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -44,6 +45,15 @@ public class GetRaceMapDataAction extends DefaultAsyncAction<RaceMapDataDTO> {
                 wrapperCallback.onSuccess(result.getRaceMapDataDTO(from.keySet()));
             }
         };
-        sailingService.getRaceMapData(raceIdentifier, date, from, to, extrapolate, uncompactingCallback);
+        Map<String, Date> fromByCompetitorIdAsString = new HashMap<String, Date>();
+        for (Map.Entry<CompetitorDTO, Date> fromEntry : from.entrySet()) {
+            fromByCompetitorIdAsString.put(fromEntry.getKey().idAsString, fromEntry.getValue());
+        }
+        Map<String, Date> toByCompetitorIdAsString = new HashMap<String, Date>();
+        for (Map.Entry<CompetitorDTO, Date> toEntry : to.entrySet()) {
+            toByCompetitorIdAsString.put(toEntry.getKey().idAsString, toEntry.getValue());
+        }
+        sailingService.getRaceMapData(raceIdentifier, date, fromByCompetitorIdAsString, toByCompetitorIdAsString,
+                extrapolate, uncompactingCallback);
     }
 }

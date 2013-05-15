@@ -100,8 +100,8 @@ public interface SailingService extends RemoteService {
     WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSources) throws NoWindException;
 
-    CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
-            boolean extrapolate) throws NoWindException;
+    CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date, Map<String, Date> fromPerCompetitorIdAsString,
+            Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate) throws NoWindException;
     
     RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier);
     
