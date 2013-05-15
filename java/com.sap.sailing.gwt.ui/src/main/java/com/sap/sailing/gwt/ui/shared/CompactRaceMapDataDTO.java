@@ -1,0 +1,59 @@
+package com.sap.sailing.gwt.ui.shared;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+
+/**
+ * A compact representation of a {@link RaceMapDataDTO} that represents competitors by their ID only instead of a
+ * complete {@link CompetitorDTO} object. This way, a caller of the
+ * {@link SailingServiceAsync#getRaceMapData(com.sap.sailing.domain.common.RegattaAndRaceIdentifier, java.util.Date, Map, Map, boolean, com.google.gwt.user.client.rpc.AsyncCallback)}
+ * method that has to provide the IDs of all competitors already will already know all those {@link CompetitorDTO}
+ * objects already. There is no need to serialize the {@link CompetitorDTO}s either way.
+ * 
+ * @author Axel Uhl (d043530)
+ * 
+ */
+public class CompactRaceMapDataDTO implements IsSerializable {
+    private Map<String, List<GPSFixDTO>> boatPositionsByCompetitorIdAsString;
+    private CoursePositionsDTO coursePositions;
+    private List<CompactQuickRankDTO> quickRanks;
+    
+    CompactRaceMapDataDTO() {}
+
+    public CompactRaceMapDataDTO(Map<CompetitorDTO, List<GPSFixDTO>> boatPositions, CoursePositionsDTO coursePositions,
+            List<QuickRankDTO> quickRanks) {
+        this.boatPositionsByCompetitorIdAsString = new HashMap<String, List<GPSFixDTO>>();
+        for (Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : boatPositions.entrySet()) {
+            this.boatPositionsByCompetitorIdAsString.put(e.getKey().idAsString, e.getValue());
+        }
+        this.quickRanks = new ArrayList<CompactQuickRankDTO>(quickRanks.size());
+        for (QuickRankDTO quickRank : quickRanks) {
+            this.quickRanks.add(new CompactQuickRankDTO(quickRank.competitor.idAsString, quickRank.rank, quickRank.legNumber));
+        }
+        this.coursePositions = coursePositions;
+    }
+    
+    public RaceMapDataDTO getRaceMapDataDTO(Iterable<CompetitorDTO> competitors) {
+        Map<String, CompetitorDTO> competitorsByIdAsString = new HashMap<String, CompetitorDTO>();
+        for (CompetitorDTO competitor : competitors) {
+            competitorsByIdAsString.put(competitor.idAsString, competitor);
+        }
+        RaceMapDataDTO result = new RaceMapDataDTO();
+        result.quickRanks = new ArrayList<QuickRankDTO>(this.quickRanks.size());
+        for (CompactQuickRankDTO compactQuickRank : this.quickRanks) {
+            result.quickRanks.add(new QuickRankDTO(competitorsByIdAsString.get(compactQuickRank
+                    .getCompetitorIdAsString()), compactQuickRank.getRank(), compactQuickRank.getLegNumber()));
+        }
+        result.coursePositions = coursePositions;
+        result.boatPositions = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
+        for (Map.Entry<String, List<GPSFixDTO>> e : boatPositionsByCompetitorIdAsString.entrySet()) {
+            result.boatPositions.put(competitorsByIdAsString.get(e.getKey()), e.getValue());
+        }
+        return result;
+    }
+}

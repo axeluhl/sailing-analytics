@@ -52,7 +52,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -71,11 +70,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
-import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -1025,7 +1024,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private void showCompetitorInfoWindow(final CompetitorDTO competitorDTO, LatLng where) {
         GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime()); 
-        //TODO find closed fixed where the mouse was (where) BUG 470
+        // TODO find close fix where the mouse was; see BUG 470
         InfoWindowContent infoWindowContent = new InfoWindowContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor));
         map.getInfoWindow().open(where, infoWindowContent);
     }
@@ -1102,10 +1101,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.speed(),
                 NumberFormatterFactory.getDecimalFormat(1).format(lastFix.speedWithBearing.speedInKnots) + " "+stringMessages.knotsUnit()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.bearing(), (int) lastFix.speedWithBearing.bearingInDegrees + " "+stringMessages.degreesShort()));
-        if (lastFix.wind != null) {
-            vPanel.add(createInfoWindowLabelAndValue(stringMessages.degreesBoatToTheWind(), (int) Math.abs(
-                    new DegreeBearingImpl(lastFix.speedWithBearing.bearingInDegrees).getDifferenceTo(
-                    new DegreeBearingImpl(lastFix.wind.dampenedTrueWindFromDeg)).getDegrees()) + " "+stringMessages.degreesShort()));
+        if (lastFix.degreesBoatToTheWind != null) {
+            vPanel.add(createInfoWindowLabelAndValue(stringMessages.degreesBoatToTheWind(),
+                    (int) Math.abs(lastFix.degreesBoatToTheWind) + " " + stringMessages.degreesShort()));
         }
         if (!selectedRaces.isEmpty()) {
             RegattaAndRaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
@@ -1162,15 +1160,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         Iterable<CompetitorDTO> result;
         Iterable<CompetitorDTO> selection = competitorSelection.getSelectedCompetitors();
         if (!settings.isShowOnlySelectedCompetitors() || Util.isEmpty(selection)) {
-            if(settings.isShowAllCompetitors()) {
+            if (settings.isShowAllCompetitors()) {
                 result = competitorSelection.getAllCompetitors();
             } else {
                 int visibleCompetitorsCount = settings.getMaxVisibleCompetitorsCount();
-                if(quickRanks != null && quickRanks.size() >= visibleCompetitorsCount) {
+                if (quickRanks != null && quickRanks.size() >= visibleCompetitorsCount) {
                     Set<CompetitorDTO> competitorList = new HashSet<CompetitorDTO>();
                     int i = 1;
-                    for(QuickRankDTO quickRank: quickRanks) {
-                        if(i++ <= visibleCompetitorsCount) {
+                    for (QuickRankDTO quickRank: quickRanks) {
+                        if (i++ <= visibleCompetitorsCount) {
                             competitorList.add(quickRank.competitor);
                         } else {
                             break;
