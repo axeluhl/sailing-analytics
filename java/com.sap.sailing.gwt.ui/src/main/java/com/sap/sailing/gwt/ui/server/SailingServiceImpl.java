@@ -170,6 +170,7 @@ import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
+import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
@@ -1668,20 +1669,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public RaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
+    public CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
             boolean extrapolate) throws NoWindException {
         RaceMapDataDTO raceMapDataDTO = new RaceMapDataDTO();
-
         raceMapDataDTO.boatPositions = getBoatPositions(raceIdentifier, from, to, extrapolate);
         raceMapDataDTO.coursePositions = getCoursePositions(raceIdentifier, date); 
         raceMapDataDTO.quickRanks = getQuickRanks(raceIdentifier, date);
-
-        return raceMapDataDTO;
+        return new CompactRaceMapDataDTO(getBoatPositions(raceIdentifier, from, to, extrapolate), getCoursePositions(raceIdentifier, date),
+                getQuickRanks(raceIdentifier, date));
     }    
 
-    @Override
-    public Map<CompetitorDTO, List<GPSFixDTO>> getBoatPositions(RegattaAndRaceIdentifier raceIdentifier,
+    /**
+     * @param from
+     *            for the list of competitors provided as keys of this map, requests the GPS fixes starting with the
+     *            date provided as value
+     * @param to
+     *            for the list of competitors provided as keys (expected to be equal to the set of competitors used as
+     *            keys in the <code>from</code> parameter, requests the GPS fixes up to but excluding the date provided
+     *            as value
+     * @param extrapolate
+     *            if <code>true</code> and no position is known for <code>date</code>, the last entry returned in the
+     *            list of GPS fixes will be obtained by extrapolating from the competitors last known position before
+     *            <code>date</code> and the estimated speed.
+     * @return a map where for each competitor participating in the race the list of GPS fixes in increasing
+     *         chronological order is provided. The last one is the last position at or before <code>date</code>.
+     */
+    private Map<CompetitorDTO, List<GPSFixDTO>> getBoatPositions(RegattaAndRaceIdentifier raceIdentifier,
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
             boolean extrapolate) throws NoWindException {
         Map<CompetitorDTO, List<GPSFixDTO>> result = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
@@ -2036,8 +2050,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return startMarkPositions;
     }
 
-    @Override
-    public List<QuickRankDTO> getQuickRanks(RegattaAndRaceIdentifier raceIdentifier, Date date) throws NoWindException {
+    private List<QuickRankDTO> getQuickRanks(RegattaAndRaceIdentifier raceIdentifier, Date date) throws NoWindException {
         List<QuickRankDTO> result = new ArrayList<QuickRankDTO>();
         if (date != null) {
             TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
@@ -2752,7 +2765,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     @Override
                             public CompetitorRaceDataDTO call() throws NoWindException {
                                 Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(),
-                                        competitorDTO.id);
+                                        competitorDTO.idAsString);
                                 ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
                                 ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
                                 // Filling the mark passings

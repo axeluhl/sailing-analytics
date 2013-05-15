@@ -6,6 +6,7 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 
@@ -30,7 +31,19 @@ public class GetRaceMapDataAction extends DefaultAsyncAction<RaceMapDataDTO> {
     }
     
     @Override
-    public void execute(AsyncActionsExecutor asyncActionsExecutor) {
-        sailingService.getRaceMapData(raceIdentifier, date, from, to, extrapolate, (AsyncCallback<RaceMapDataDTO>) getWrapperCallback(asyncActionsExecutor));
+    public void execute(final AsyncActionsExecutor asyncActionsExecutor) {
+        final AsyncCallback<RaceMapDataDTO> wrapperCallback = (AsyncCallback<RaceMapDataDTO>) getWrapperCallback(asyncActionsExecutor);
+        AsyncCallback<CompactRaceMapDataDTO> uncompactingCallback = new AsyncCallback<CompactRaceMapDataDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                wrapperCallback.onFailure(caught);
+            }
+
+            @Override
+            public void onSuccess(CompactRaceMapDataDTO result) {
+                wrapperCallback.onSuccess(result.getRaceMapDataDTO(from.keySet()));
+            }
+        };
+        sailingService.getRaceMapData(raceIdentifier, date, from, to, extrapolate, uncompactingCallback);
     }
 }
