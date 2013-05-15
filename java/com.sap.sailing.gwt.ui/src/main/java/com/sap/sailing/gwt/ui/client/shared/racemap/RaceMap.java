@@ -1101,8 +1101,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.speed(),
                 NumberFormatterFactory.getDecimalFormat(1).format(lastFix.speedWithBearing.speedInKnots) + " "+stringMessages.knotsUnit()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.bearing(), (int) lastFix.speedWithBearing.bearingInDegrees + " "+stringMessages.degreesShort()));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.degreesBoatToTheWind(), (int) Math.abs(lastFix.degreesBoatToTheWind)
-                    + " "+stringMessages.degreesShort()));
+        if (lastFix.degreesBoatToTheWind != null) {
+            vPanel.add(createInfoWindowLabelAndValue(stringMessages.degreesBoatToTheWind(),
+                    (int) Math.abs(lastFix.degreesBoatToTheWind) + " " + stringMessages.degreesShort()));
+        }
         if (!selectedRaces.isEmpty()) {
             RegattaAndRaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
             if (race != null) {

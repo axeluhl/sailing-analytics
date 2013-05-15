@@ -19,9 +19,11 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
  * 
  */
 public class CompactRaceMapDataDTO implements IsSerializable {
-    private final Map<String, List<GPSFixDTO>> boatPositionsByCompetitorIdAsString;
-    private final CoursePositionsDTO coursePositions;
-    private final List<CompactQuickRankDTO> quickRanks;
+    private Map<String, List<GPSFixDTO>> boatPositionsByCompetitorIdAsString;
+    private CoursePositionsDTO coursePositions;
+    private List<CompactQuickRankDTO> quickRanks;
+    
+    CompactRaceMapDataDTO() {}
 
     public CompactRaceMapDataDTO(Map<CompetitorDTO, List<GPSFixDTO>> boatPositions, CoursePositionsDTO coursePositions,
             List<QuickRankDTO> quickRanks) {

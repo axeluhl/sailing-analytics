@@ -10,9 +10,11 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  *
  */
 public class CompactQuickRankDTO implements IsSerializable {
-    private final String competitorIdAsString;
-    private final int rank;
-    private final int legNumber;
+    private String competitorIdAsString;
+    private int rank;
+    private int legNumber;
+    
+    CompactQuickRankDTO() {}
     
     public CompactQuickRankDTO(String competitorIdAsString, int rank, int legNumber) {
         super();

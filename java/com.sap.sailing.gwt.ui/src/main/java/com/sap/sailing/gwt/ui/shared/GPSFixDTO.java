@@ -34,7 +34,7 @@ public class GPSFixDTO implements IsSerializable {
     /**
      * degrees between boat's course over ground and the dampened true wind direction (from)
      */
-    public double degreesBoatToTheWind;
+    public Double degreesBoatToTheWind;
     
     public GPSFixDTO() {}
 
@@ -47,8 +47,9 @@ public class GPSFixDTO implements IsSerializable {
         this.tack = tack;
         this.legType = legType;
         this.extrapolated = extrapolated;
-        this.degreesBoatToTheWind = 
-                new DegreeBearingImpl(speedWithBearing.bearingInDegrees).getDifferenceTo(
-                new DegreeBearingImpl(wind.dampenedTrueWindFromDeg)).getDegrees();
+        if (speedWithBearing != null && wind != null) {
+            this.degreesBoatToTheWind = new DegreeBearingImpl(speedWithBearing.bearingInDegrees).getDifferenceTo(
+                    new DegreeBearingImpl(wind.dampenedTrueWindFromDeg)).getDegrees();
+        }
     }
 }
