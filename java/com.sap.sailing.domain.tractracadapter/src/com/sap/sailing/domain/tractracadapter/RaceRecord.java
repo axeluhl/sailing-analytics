@@ -37,14 +37,17 @@ public class RaceRecord {
     private final URI liveURI;
     private final URI storedURI;
     private final List<String> boatClassNames;
+    private final String raceStatus;
     
     public RaceRecord(URL jsonURL, String regattaName, String name, String replayURL, String ID,
-            String trackingstarttime, String trackingendtime, String racestarttime, String commaSeparatedBoatClassNames)
+            String trackingstarttime, String trackingendtime, String racestarttime, String commaSeparatedBoatClassNames,
+            String status)
             throws URISyntaxException, IOException {
         super();
         this.regattaName = regattaName;
         this.name = name;
         this.replayURL = replayURL;
+        this.raceStatus = status;
         this.ID = ID;
         this.boatClassNames = new ArrayList<String>();
         if (commaSeparatedBoatClassNames != null) {
@@ -155,6 +158,10 @@ public class RaceRecord {
 
     public TimePoint getRaceStartTime() {
         return racestarttime;
+    }
+    
+    public String getRaceStatus() {
+        return raceStatus;
     }
     
 }

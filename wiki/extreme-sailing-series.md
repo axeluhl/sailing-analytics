@@ -15,6 +15,26 @@ Usually not more than 8 competitors race against each other. One of the competit
 * [Analytics Homepage](http://ess40-2013.sapsailing.com/)
 * [Youtube Channel](http://www.youtube.com/user/ExtremeSailingSeries)
 
+## Equipment Needed
+
+* **From WDF**
+  * 1x Smartphone
+  * 5x SIM Cards
+  * 1x World Adapter
+  * 1x Plug Strip
+* **In Container**
+ * 1x Toughbook
+ * 2x Samsung Tablet
+ * 1x iPad
+ * Expedition Wind Kit
+* **In Container (after Qingdao)**
+ * 1x TFT
+ * 1x USB-Keyboard
+ * 1x USB-Mouse
+ * 2x Switch (8 Port)
+ * 1x Router (TP-Link)
+ * 3x CAT6 Network Cable
+
 ## Notice of Race
 The current notice of race can be downloaded by using the link below. It is worth to mention that the NOR lacks the information about the fact that the last race breaks tie break.
 
