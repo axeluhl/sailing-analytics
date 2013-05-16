@@ -6,5 +6,6 @@
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.sap.sailing.domain.common"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.sap.sailing.server.gateway.serialization"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.sap.sailing.domain.shared.android"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
