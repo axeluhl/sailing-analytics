@@ -49,6 +49,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         // Maybe we need to reset the status of the old race somehow? There might be no new
         // TrackedRace to be linked...
         // Maybe something like this is needed:
+        // TODO:
         // ??? trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0));
         raceLog.removeListener(this);
     }
