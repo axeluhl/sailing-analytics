@@ -57,8 +57,7 @@ public class RegattaOverviewTableComposite extends Composite {
     private static RegattaOverviewTableResources tableRes = GWT.create(RegattaOverviewTableResources.class);
 
     public RegattaOverviewTableComposite(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            final StringMessages stringMessages, final String eventIdAsString,
-            final RegattaOverviewRaceSelectionProvider raceSelectionProvider) {
+            final StringMessages stringMessages, final String eventIdAsString, final RegattaOverviewRaceSelectionProvider raceSelectionProvider) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.eventIdAsString = eventIdAsString;
@@ -119,11 +118,12 @@ public class RegattaOverviewTableComposite extends Composite {
     private void updateTable(List<RegattaOverviewEntryDTO> newEntries) {
         allEntries = newEntries;
         regattaOverviewDataProvider.getList().clear();
-        regattaOverviewDataProvider.getList().addAll(filterAndSort(allEntries));
+        regattaOverviewDataProvider.getList().addAll(allEntries);
         // now sort again according to selected criterion
         ColumnSortEvent.fire(regattaOverviewTable, regattaOverviewTable.getColumnSortList());
     }
 
+    //TODO: Change all of this using a filter model
     private Collection<? extends RegattaOverviewEntryDTO> filterAndSort(List<RegattaOverviewEntryDTO> raceList) {
         List<RegattaOverviewEntryDTO> reversedUnfilterted = new ArrayList<RegattaOverviewEntryDTO>(raceList);
 
@@ -356,7 +356,7 @@ public class RegattaOverviewTableComposite extends Composite {
             }
         };
 
-        TextColumn<RegattaOverviewEntryDTO> raceAddditionalInformationColumn = new TextColumn<RegattaOverviewEntryDTO>() {
+        TextColumn<RegattaOverviewEntryDTO> raceAdditionalInformationColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
                 StringBuffer additionalInformation = new StringBuffer();
@@ -377,6 +377,8 @@ public class RegattaOverviewTableComposite extends Composite {
                 return additionalInformation.toString();
             }
         };
+        
+        //TODO add a link to a raceboard when a trackedrace is available for a given race column
 
         table.addColumn(courseAreaColumn, stringMessages.courseArea());
         table.addColumn(regattaNameColumn, stringMessages.boatClass()); // For sailors the boat class also contains
@@ -389,7 +391,7 @@ public class RegattaOverviewTableComposite extends Composite {
         table.addColumn(lastUpperFlagColumn, stringMessages.lastUpperFlag());
         table.addColumn(lastLowerFlagColumn, stringMessages.lastLowerFlag());
         table.addColumn(lastFlagDirectionColumn, stringMessages.flagStatus());
-        table.addColumn(raceAddditionalInformationColumn, stringMessages.additionalInformation());
+        table.addColumn(raceAdditionalInformationColumn, stringMessages.additionalInformation());
         table.addColumnSortHandler(regattaOverviewListHandler);
 
         return table;

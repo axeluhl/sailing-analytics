@@ -36,8 +36,6 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
     
     private final SailingServiceAsync sailingService;
     protected final StringMessages stringMessages;
-    @SuppressWarnings("unused")
-    private final ErrorReporter errorReporter;
     
     private final String eventIdAsString;
     
@@ -66,7 +64,6 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
     
     public RegattaOverviewPanel(SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages, String eventIdAsString) {
         this.sailingService = sailingService;
-        this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.eventIdAsString = eventIdAsString;
         
@@ -78,9 +75,11 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         Grid grid = new Grid(2, 2);
         grid.setWidth("100%");
         
+        //TODO: i8n
         Label courseDesignOverviewLabel = new Label("Course design overview");
         courseDesignOverviewLabel.addStyleName(STYLE_TITLE_LABEL);
         
+        //TODO: i8n
         Label raceOverviewLabel = new Label("Area overview");
         raceOverviewLabel.addStyleName(STYLE_TITLE_LABEL);
         
@@ -104,6 +103,7 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingLeft(20.0, Unit.PX);
         
+        //TODO: change filter button
         this.filterButton = new Button(stringMessages.disableRaceFilter());
         filterButton.addClickHandler(new ClickHandler() {
             
