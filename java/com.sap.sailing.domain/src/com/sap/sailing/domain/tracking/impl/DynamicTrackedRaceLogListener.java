@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
@@ -12,75 +15,132 @@ import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 
 public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     private DynamicTrackedRace trackedRace;
 
+    private StartTimeFinder startTimeFinder;
+
+    private RaceStatusAnalyzer statusAnalyzer;
+
+    private LastPublishedCourseDesignFinder courseDesignFinder;
+
     public DynamicTrackedRaceLogListener(DynamicTrackedRace trackedRace) {
         this.trackedRace = trackedRace;
     }
 
-    public void detach() {
-        // TODO Auto-generated method stub
-        
+    public void addTo(RaceLog raceLog) {
+        raceLog.addListener(this);
+
+        startTimeFinder = new StartTimeFinder(raceLog);
+        courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
+        statusAnalyzer = new RaceStatusAnalyzer(raceLog);
+
+        analyzeEverything();
     }
 
-    @Override
-    public void visit(RaceLogFlagEvent event) {
-        //do nothing
+    public void removeFrom(RaceLog raceLog) {
+        // Gets called whenever a RaceColumn was already linked to a TrackedRace on linkage.
+        // Maybe we need to reset the status of the old race somehow? There might be no new
+        // TrackedRace to be linked...
+        // Maybe something like this is needed:
+        // ??? trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0));
+        raceLog.removeListener(this);
     }
 
-    @Override
-    public void visit(RaceLogPassChangeEvent event) {
-        //do nothing
+    private void analyzeEverything() {
+        analyzeStartTime();
+        analyzeStatus();
+        analyzeCourseDesign();
     }
 
-    @Override
-    public void visit(RaceLogRaceStatusEvent event) {
-        // TODO Auto-generated method stub
+    private void analyzeStartTime() {
+        TimePoint startTime = startTimeFinder.getStartTime();
 
+        // Because this code can be triggered by an obsolete (delayed) event...
+        // ... the current pass's start time might be null
+        if (startTime != null) {
+            // ... or setStartTimeReceived(TimePoint) might be called twice with the same start time.
+            trackedRace.setStartTimeReceived(startTime);
+        }
+    }
+
+    private void analyzeStatus() {
+        /* RaceLogRaceStatus newStatus = */statusAnalyzer.getStatus();
+
+        // TODO: What can we do with the status? Should we use DynamicTrackedRace.setStatus?
+    }
+
+    private void analyzeCourseDesign() {
+        CourseBase courseDesign = courseDesignFinder.getLastCourseDesign();
+
+        // On the initial analyze step after attaching the RaceLog there might be no course design.
+        if (courseDesign != null) {
+            // Because this code can be triggered by an obsolete (delayed) event...
+            // ... onCourseDesignChangedByRaceCommittee() might be called twice.
+            trackedRace.onCourseDesignChangedByRaceCommittee(courseDesign);
+        }
     }
 
     @Override
     public void visit(RaceLogStartTimeEvent event) {
-        trackedRace.setStartTimeReceived(event.getStartTime());
+        analyzeStartTime();
+        analyzeStatus();
     }
 
     @Override
-    public void visit(RaceLogCourseAreaChangedEvent event) {
-        //do nothing
+    public void visit(RaceLogRaceStatusEvent event) {
+        analyzeStatus();
     }
 
     @Override
     public void visit(RaceLogCourseDesignChangedEvent event) {
-        trackedRace.onCourseDesignChangedByRaceCommittee(event.getCourseDesign());
+        analyzeCourseDesign();
+    }
+
+    @Override
+    public void visit(RaceLogFlagEvent event) {
+
+    }
+
+    @Override
+    public void visit(RaceLogPassChangeEvent event) {
+
+    }
+
+    @Override
+    public void visit(RaceLogCourseAreaChangedEvent event) {
+
     }
 
     @Override
     public void visit(RaceLogFinishPositioningListChangedEvent event) {
-        // do nothing (wait for RaceLogFinishPositioningConfirmedEvent to perform score corrections)
+        // score correction is handled by the leaderboard
     }
 
     @Override
     public void visit(RaceLogFinishPositioningConfirmedEvent event) {
-     // do nothing score correction is handled by the leaderboard
+        // score correction is handled by the leaderboard
     }
 
     @Override
     public void visit(RaceLogPathfinderEvent event) {
-        // do nothing
+
     }
 
     @Override
     public void visit(RaceLogGateLineOpeningTimeEvent event) {
-        // do nothing
+
     }
 
     @Override
     public void visit(RaceLogStartProcedureChangedEvent event) {
-        // do nothing
+
     }
 
 }
