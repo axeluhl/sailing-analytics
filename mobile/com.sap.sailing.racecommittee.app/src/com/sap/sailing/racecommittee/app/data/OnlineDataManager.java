@@ -31,17 +31,6 @@ import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
-import com.sap.sailing.racecommittee.app.deserialization.impl.BoatClassJsonDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.ColorDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.CourseAreaJsonDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.EventBaseJsonDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.FleetDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.RaceCellDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.RaceGroupDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.RaceLogDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.RaceRowDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.SeriesWithRowsDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
@@ -51,7 +40,18 @@ import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseData
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.ColorDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.FleetDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceCellDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceRowDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racegroup.impl.SeriesWithRowsDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 
 /**
