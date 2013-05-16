@@ -18,6 +18,10 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
   
     private final JsonSerializer<Team> teamJsonSerializer;
 
+    public CompetitorJsonSerializer() {
+        this(null);
+    }
+
     public CompetitorJsonSerializer(JsonSerializer<Team> teamJsonSerializer) {
         this.teamJsonSerializer = teamJsonSerializer;
     }
@@ -33,7 +37,9 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         CountryCode countryCode = competitor.getTeam().getNationality().getCountryCode();
         result.put(FIELD_NATIONALITY_ISO2, countryCode == null ? "" : countryCode.getTwoLetterISOCode());
         result.put(FIELD_NATIONALITY_ISO3, countryCode == null ? "" : countryCode.getThreeLetterISOCode());
-        result.put(FIELD_TEAM, teamJsonSerializer.serialize(competitor.getTeam()));
+        if(teamJsonSerializer != null) {
+            result.put(FIELD_TEAM, teamJsonSerializer.serialize(competitor.getTeam()));
+        }
 
         return result;
     }
