@@ -97,6 +97,21 @@ public class MediaTrack implements Serializable {
         return (mimeType != null) && MediaSubType.youtube.equals(mimeType.mediaSubType);
     }
     
+    /**
+     * Checks for overlap of this start time and duration with the given startTime and endTime, excluding boundaries!
+     * Behaviour for given endTime being earlier than given startTime is not specified.
+     * endTime being null represents "open end". Open beginning is not allow, though!
+     * @param startTime Must not be null.
+     * @param endTime May be null representing "open end".
+     */
+    public boolean overlapsWith(Date startTime, Date endTime) {
+        if (this.startTime == null) {
+            return false;
+        } else {
+            return this.deriveEndTime().getTime() > startTime.getTime() && (endTime == null || this.startTime.getTime() < endTime.getTime());
+        }
+    }
+    
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof MediaTrack) {
