@@ -170,6 +170,7 @@ import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
+import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
@@ -199,7 +200,6 @@ import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
-import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceStatusDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
@@ -1682,33 +1682,43 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public RaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
-            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
+    public CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
+            Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate) throws NoWindException {
-        RaceMapDataDTO raceMapDataDTO = new RaceMapDataDTO();
-
-        raceMapDataDTO.boatPositions = getBoatPositions(raceIdentifier, from, to, extrapolate);
-        raceMapDataDTO.coursePositions = getCoursePositions(raceIdentifier, date); 
-        raceMapDataDTO.quickRanks = getQuickRanks(raceIdentifier, date);
-
-        return raceMapDataDTO;
+        return new CompactRaceMapDataDTO(getBoatPositions(raceIdentifier, fromPerCompetitorIdAsString,
+                toPerCompetitorIdAsString, extrapolate), getCoursePositions(raceIdentifier, date), getQuickRanks(
+                raceIdentifier, date));
     }    
 
-    @Override
-    public Map<CompetitorDTO, List<GPSFixDTO>> getBoatPositions(RegattaAndRaceIdentifier raceIdentifier,
-            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
+    /**
+     * @param from
+     *            for the list of competitors provided as keys of this map, requests the GPS fixes starting with the
+     *            date provided as value
+     * @param to
+     *            for the list of competitors provided as keys (expected to be equal to the set of competitors used as
+     *            keys in the <code>from</code> parameter, requests the GPS fixes up to but excluding the date provided
+     *            as value
+     * @param extrapolate
+     *            if <code>true</code> and no position is known for <code>date</code>, the last entry returned in the
+     *            list of GPS fixes will be obtained by extrapolating from the competitors last known position before
+     *            <code>date</code> and the estimated speed.
+     * @return a map where for each competitor participating in the race the list of GPS fixes in increasing
+     *         chronological order is provided. The last one is the last position at or before <code>date</code>.
+     */
+    private Map<CompetitorDTO, List<GPSFixDTO>> getBoatPositions(RegattaAndRaceIdentifier raceIdentifier,
+            Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate) throws NoWindException {
         Map<CompetitorDTO, List<GPSFixDTO>> result = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                CompetitorDTO competitorDTO = convertToCompetitorDTO(competitor);
-                if (from.containsKey(competitorDTO)) {
+                if (fromPerCompetitorIdAsString.containsKey(competitor.getId().toString())) {
+                    CompetitorDTO competitorDTO = convertToCompetitorDTO(competitor);
                     List<GPSFixDTO> fixesForCompetitor = new ArrayList<GPSFixDTO>();
                     result.put(competitorDTO, fixesForCompetitor);
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                    TimePoint fromTimePoint = new MillisecondsTimePoint(from.get(competitorDTO));
-                    TimePoint toTimePointExcluding = new MillisecondsTimePoint(to.get(competitorDTO));
+                    TimePoint fromTimePoint = new MillisecondsTimePoint(fromPerCompetitorIdAsString.get(competitorDTO.idAsString));
+                    TimePoint toTimePointExcluding = new MillisecondsTimePoint(toPerCompetitorIdAsString.get(competitorDTO.idAsString));
                     // copy the fixes into a list while holding the monitor; then release the monitor to avoid deadlocks
                     // during wind estimations required for tack determination
                     List<GPSFixMoving> fixes = new ArrayList<GPSFixMoving>();
@@ -1765,7 +1775,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                     Wind wind2 = trackedRace.getWind(position, toTimePointExcluding);
                                     WindDTO windDTO2 = createWindDTOFromAlreadyAveraged(wind2, trackedRace.getOrCreateWindTrack(windSource), toTimePointExcluding);
                                     GPSFixDTO extrapolated = new GPSFixDTO(
-                                            to.get(competitorDTO),
+                                            toPerCompetitorIdAsString.get(competitorDTO.idAsString),
                                             position==null?null:new PositionDTO(position.getLatDeg(), position.getLngDeg()),
                                                     speedWithBearing==null?null:createSpeedWithBearingDTO(speedWithBearing), windDTO2,
                                                             tack2, legType2, /* extrapolated */ true);
@@ -2050,8 +2060,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return startMarkPositions;
     }
 
-    @Override
-    public List<QuickRankDTO> getQuickRanks(RegattaAndRaceIdentifier raceIdentifier, Date date) throws NoWindException {
+    private List<QuickRankDTO> getQuickRanks(RegattaAndRaceIdentifier raceIdentifier, Date date) throws NoWindException {
         List<QuickRankDTO> result = new ArrayList<QuickRankDTO>();
         if (date != null) {
             TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
@@ -2766,7 +2775,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     @Override
                             public CompetitorRaceDataDTO call() throws NoWindException {
                                 Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(),
-                                        competitorDTO.id);
+                                        competitorDTO.idAsString);
                                 ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
                                 ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
                                 // Filling the mark passings
