@@ -41,7 +41,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
         statusAnalyzer = new RaceStatusAnalyzer(raceLog);
 
-        analyzeEverything();
+        analyze();
     }
 
     public void removeFrom(RaceLog raceLog) {
@@ -54,7 +54,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         raceLog.removeListener(this);
     }
 
-    private void analyzeEverything() {
+    private void analyze() {
         analyzeStartTime();
         analyzeStatus();
         analyzeCourseDesign();
@@ -63,11 +63,13 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     private void analyzeStartTime() {
         TimePoint startTime = startTimeFinder.getStartTime();
 
-        // Because this code can be triggered by an obsolete (delayed) event...
+        // Because this code can be triggered by an obsolete (delayed) event or on an empty pass...
         // ... the current pass's start time might be null
         if (startTime != null) {
-            // ... or setStartTimeReceived(TimePoint) might be called twice with the same start time.
+            // ... or setStartTimeReceived(TimePoint) might be called more than once with the same start time.
             trackedRace.setStartTimeReceived(startTime);
+        } else {
+            // TODO: Can we somehow withdraw a previously set start time?
         }
     }
 
@@ -83,9 +85,15 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         // On the initial analyze step after attaching the RaceLog there might be no course design.
         if (courseDesign != null) {
             // Because this code can be triggered by an obsolete (delayed) event...
-            // ... onCourseDesignChangedByRaceCommittee() might be called twice.
+            // ... onCourseDesignChangedByRaceCommittee() might be called more than once.
             trackedRace.onCourseDesignChangedByRaceCommittee(courseDesign);
         }
+    }
+
+    @Override
+    public void visit(RaceLogPassChangeEvent event) {
+        analyzeStartTime();
+        analyzeStatus();
     }
 
     @Override
@@ -106,11 +114,6 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogFlagEvent event) {
-
-    }
-
-    @Override
-    public void visit(RaceLogPassChangeEvent event) {
 
     }
 
