@@ -224,7 +224,7 @@ public class RaceStateService extends Service {
             registerAlarms(race, state);
 
             // Register on event additions...
-            JsonSerializer<RaceLogEvent> eventSerializer = RaceLogEventSerializer.create(new CompetitorJsonSerializer(null));
+            JsonSerializer<RaceLogEvent> eventSerializer = RaceLogEventSerializer.create(new CompetitorJsonSerializer());
             RaceEventSender sender = new RaceEventSender(this, eventSerializer, race);
             RaceLogChangedVisitor logListener = new RaceLogChangedVisitor(sender);
             state.getRaceLog().addListener(logListener);
