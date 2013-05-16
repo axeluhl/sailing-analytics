@@ -34,7 +34,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.ColorDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.CourseAreaJsonDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.EventDataJsonDeserializer;
+import com.sap.sailing.racecommittee.app.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.FleetDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.RaceCellDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.RaceGroupDeserializer;
@@ -86,7 +86,7 @@ public class OnlineDataManager extends DataManager {
     }
 
     protected void reloadEvents(LoadClient<Collection<EventBase>> client) {
-        DataParser<Collection<EventBase>> parser = new EventsDataParser(new EventDataJsonDeserializer(
+        DataParser<Collection<EventBase>> parser = new EventsDataParser(new EventBaseJsonDeserializer(
                 new VenueJsonDeserializer(new CourseAreaJsonDeserializer())));
         DataHandler<Collection<EventBase>> handler = new EventsDataHandler(this, client);
 
