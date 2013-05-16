@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.deserialization.impl;
 
+import java.io.Serializable;
+
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.CourseArea;
@@ -14,7 +16,7 @@ public class CourseAreaJsonDeserializer implements JsonDeserializer<CourseArea> 
 	public CourseArea deserialize(JSONObject object)
 			throws JsonDeserializationException {
 		String name = object.get(CourseAreaJsonSerializer.FIELD_NAME).toString();
-		String id = object.get(CourseAreaJsonSerializer.FIELD_ID).toString();
+		Serializable id = (Serializable) object.get(CourseAreaJsonSerializer.FIELD_ID);
 		
 		return new CourseAreaImpl(name, Helpers.tryUuidConversion(id));
 	}

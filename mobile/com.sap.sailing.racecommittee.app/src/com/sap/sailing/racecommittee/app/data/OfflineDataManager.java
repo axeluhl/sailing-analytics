@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -24,6 +25,7 @@ import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
@@ -87,8 +89,9 @@ public class OfflineDataManager extends DataManager {
                         "Q1", 
                         new FleetImpl("Default"), 
                         qualifying, 
-                        raceGroup), 
-                        log, competitors);
+                        raceGroup),
+                        StartProcedureType.ESS,
+                        log);
 
         log = new PassAwareRaceLogImpl();
         /*log.add(factory.createStartTimeEvent(
@@ -104,7 +107,8 @@ public class OfflineDataManager extends DataManager {
                         new FleetImpl("Default"), 
                         qualifying, 
                         raceGroup), 
-                        log, competitors);
+                        StartProcedureType.ESS,
+                        log);
 
         log = new PassAwareRaceLogImpl();
         /*log.add(factory.createRaceStatusEvent(
@@ -117,7 +121,8 @@ public class OfflineDataManager extends DataManager {
                         new FleetImpl("Default"), 
                         qualifying, 
                         raceGroup), 
-                        log, competitors);
+                        StartProcedureType.ESS,
+                        log);
         /*ManagedRace m1 = new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(
 						"M1", 
@@ -156,6 +161,16 @@ public class OfflineDataManager extends DataManager {
     @Override
     public void loadMarks(ManagedRace managedRace, LoadClient<Collection<Mark>> client) {
         client.onLoadSucceded(dataStore.getMarks());
+    }
+
+    @Override
+    public void loadCourse(ManagedRace managedRace, LoadClient<CourseBase> client) {
+        client.onLoadSucceded(managedRace.getCourseOnServer());
+    }
+
+    @Override
+    public void loadCompetitors(ManagedRace managedRace, LoadClient<Collection<Competitor>> client) {
+        client.onLoadSucceded((Collection<Competitor>) managedRace.getCompetitors());
     }
 
 }

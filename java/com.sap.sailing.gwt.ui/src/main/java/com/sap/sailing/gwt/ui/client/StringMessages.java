@@ -515,7 +515,8 @@ public interface StringMessages extends Messages {
     String totalAverageSpeedOverGround();
     String totalAverageSpeedOverGroundTooltip();
     String noStarttimeAnnouncedYet();
-    String lastFlag();
+    String lastUpperFlag();
+    String lastLowerFlag();
     String filterRegattasByName();
     String noRegattasYet();
     String cannotAddRacesToRegattaLeaderboardButOnlyToRegatta();
@@ -534,4 +535,28 @@ public interface StringMessages extends Messages {
     String currentTime();
     String tractracUsername();
     String tractracPassword();
+    String distanceToLineAtRaceStart();
+    String speedOverGroundAtRaceStart();
+    String speedOverGroundWhenPassingStart();
+    String distanceToLineAtRaceStartTooltip();
+    String speedOverGroundAtRaceStartTooltip();
+    String speedOverGroundWhenPassingStartTooltip();
+    String startTack();
+    String startTackTooltip();
+    String portTack();
+    String starboardTack();
+    String portSide();
+    String starboardSide();
+    String flagStatus();
+    String additionalInformation();
+    String windFixListingDescription();
+    String noWindFixesAvailable();
+    String distanceToStarboardEndOfStartlineWhenPassingStart();
+    String distanceToStarboardEndOfStartlineWhenPassingStartTooltip();
+    String waypoints();
+    String disableRaceFilter();
+    String enableRaceFilter();
+    String raceStatusColumn();
+    String loading();
+    String showHiddenRaces();
 }

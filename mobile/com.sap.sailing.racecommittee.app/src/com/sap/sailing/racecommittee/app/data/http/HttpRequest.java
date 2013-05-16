@@ -43,8 +43,11 @@ public abstract class HttpRequest {
         ExLog.i(TAG, String.format("Executing HTTP request on %s.", connection.getURL()));
 
         connection.setConnectTimeout(5000);
+        connection.setReadTimeout(15000);
 
         InputStream stream = execute(connection);
+        
+        ExLog.i(TAG, String.format("HTTP request executed. Validating response..."));
         validateHttpResponse(connection);
         return stream;
     }

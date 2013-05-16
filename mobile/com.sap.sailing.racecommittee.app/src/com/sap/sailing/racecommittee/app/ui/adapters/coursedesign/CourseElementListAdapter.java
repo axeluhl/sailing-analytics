@@ -26,20 +26,20 @@ public class CourseElementListAdapter extends ArrayAdapter<CourseListDataElement
         if (convertView == null) {
 
             LayoutInflater li = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
-            view = li.inflate(R.layout.welter_draggable_waypoint_item, null);
+            view = li.inflate(R.layout.welter_one_row_three_columns, null);
         }
 
         CourseListDataElement courseElement = getItem(position);
 
         TextView leftMarkText = (TextView) view
-                .findViewById(R.id.Welter_Cell_Draggable_Waypoint_Item_columnOne_txtLeftMark);
+                .findViewById(R.id.Welter_Cell_OneRowThreeColumns_columnOne_txtLeftMark);
         TextView roundingDirectionText = (TextView) view
-                .findViewById(R.id.Welter_Cell_Draggable_Waypoint_Item_txtRoundingDirection);
+                .findViewById(R.id.Welter_Cell_OneRowThreeColumns_txtRoundingDirection);
         TextView rightMarkText = (TextView) view
-                .findViewById(R.id.Welter_Cell_Draggable_Waypoint_Item_columnThree_txtRightMark);
+                .findViewById(R.id.Welter_Cell_OneRowThreeColumns_columnThree_txtRightMark);
 
-        ImageView leftMarkImage = (ImageView) view.findViewById(R.id.Welter_Cell_Draggable_Waypoint_Item_columnOne_imgImage);
-        ImageView rightMarkImage = (ImageView) view.findViewById(R.id.Welter_Cell_Draggable_Waypoint_Item_columnThree_imgImage);
+        ImageView leftMarkImage = (ImageView) view.findViewById(R.id.Welter_Cell_OneRowThreeColumns_columnOne_imgImage);
+        ImageView rightMarkImage = (ImageView) view.findViewById(R.id.Welter_Cell_OneRowThreeColumns_columnThree_imgImage);
 
         leftMarkText.setText(courseElement.getLeftMark().getName());
         leftMarkImage.setVisibility(View.INVISIBLE);

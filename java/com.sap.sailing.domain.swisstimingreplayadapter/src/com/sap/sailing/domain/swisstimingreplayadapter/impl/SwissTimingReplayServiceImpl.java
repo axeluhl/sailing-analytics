@@ -121,9 +121,13 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
     
     @Override
     public void loadRaceData(String link, SwissTimingReplayListener replayListener) {
-        URL raceDataUrl;
+        final URL raceDataUrl;
         try {
-            raceDataUrl = new URL("http://" + link);
+            if (link.contains("://")) {
+                raceDataUrl = new URL(link);
+            } else {
+                raceDataUrl = new URL("http://" + link);
+            }
             InputStream urlInputStream = (InputStream) raceDataUrl.getContent();
             ByteArrayOutputStreamWithVisibleBuffer bos = new ByteArrayOutputStreamWithVisibleBuffer();
             byte[] buf = new byte[8192];

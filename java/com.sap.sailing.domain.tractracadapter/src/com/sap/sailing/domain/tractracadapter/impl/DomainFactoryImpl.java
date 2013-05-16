@@ -84,9 +84,9 @@ public class DomainFactoryImpl implements DomainFactory {
     private final Map<TracTracControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
         new HashMap<TracTracControlPoint, com.sap.sailing.domain.base.ControlPoint>();
     
-    private final Map<String, Person> personCache = new HashMap<String, Person>();
+    private final Map<Pair<String, UUID>, Person> personCache = new HashMap<>();
     
-    private final Map<String, Team> teamCache = new HashMap<String, Team>();
+    private final Map<Serializable, Team> teamCache = new HashMap<>();
     
     /**
      * Caches regattas by their name and their boat class's name
@@ -163,11 +163,13 @@ public class DomainFactoryImpl implements DomainFactory {
                     String shape2 = controlPointMetadata.get("P2.Shape");
                     String pattern1 = controlPointMetadata.get("P1.Pattern");
                     String pattern2 = controlPointMetadata.get("P2.Pattern");
+                    String mark1UUID = controlPointMetadata.get("P1.UUID");
+                    String mark2UUID = controlPointMetadata.get("P2.UUID");
                     final String name1 = controlPointName + " (1)";
-                    final Serializable id1 = name1; // TODO bug 1184; need to obtain mark ID through TTCM
+                    final Serializable id1 = mark1UUID == null ? name1 : UUID.fromString(mark1UUID);
                     Mark mark1 = baseDomainFactory.getOrCreateMark(id1, name1, type1, color1, shape1, pattern1);
                     final String name2 = controlPointName + " (2)";
-                    final Serializable id2 = name2; // TODO bug 1184; need to obtain mark ID through TTCM
+                    final Serializable id2 = mark2UUID == null ? name2 : UUID.fromString(mark2UUID);
                     Mark mark2 = baseDomainFactory.getOrCreateMark(id2, name2, type2, color2, shape2, pattern2);
                     domainControlPoint = baseDomainFactory.createGate(controlPoint.getId(), mark1, mark2, controlPointName);
                 } else {
@@ -228,7 +230,7 @@ public class DomainFactoryImpl implements DomainFactory {
         if (result == null) {
             BoatClass boatClass = getOrCreateBoatClass(competitor.getCompetitorClass());
             Nationality nationality = getOrCreateNationality(competitor.getNationality());
-            Team team = getOrCreateTeam(competitor.getName(), nationality);
+            Team team = getOrCreateTeam(competitor.getName(), nationality, competitor.getId());
             Boat boat = new BoatImpl(competitor.getShortName(), boatClass, competitor.getShortName());
             result = baseDomainFactory.createCompetitor(competitor.getId(), competitor.getName(), team, boat);
         }
@@ -236,29 +238,30 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Team getOrCreateTeam(String name, Nationality nationality) {
+    public Team getOrCreateTeam(String name, Nationality nationality, UUID competitorId) {
         synchronized (teamCache) {
-            Team result = teamCache.get(name);
+            Team result = teamCache.get(competitorId);
             if (result == null) {
                 String[] sailorNames = name.split("\\b*\\+\\b*");
                 List<Person> sailors = new ArrayList<Person>();
                 for (String sailorName : sailorNames) {
-                    sailors.add(getOrCreatePerson(sailorName.trim(), nationality));
+                    sailors.add(getOrCreatePerson(sailorName.trim(), nationality, competitorId));
                 }
                 result = new TeamImpl(name, sailors, /* TODO coach not known */null);
-                teamCache.put(name, result);
+                teamCache.put(competitorId, result);
             }
             return result;
         }
     }
 
     @Override
-    public Person getOrCreatePerson(String name, Nationality nationality) {
+    public Person getOrCreatePerson(String name, Nationality nationality, UUID competitorId) {
         synchronized (personCache) {
-            Person result = personCache.get(name);
+            Pair<String, UUID> key = new Pair<String, UUID>(name, competitorId);
+            Person result = personCache.get(key);
             if (result == null) {
                 result = new PersonImpl(name, nationality, /* date of birth unknown */null, /* description */"");
-                personCache.put(name, result);
+                personCache.put(key, result);
             }
             return result;
         }

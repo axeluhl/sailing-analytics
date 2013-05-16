@@ -14,4 +14,11 @@ public interface RaceStateChangedListener {
     void onIndividualRecallRemoval();
 
     void onAutomaticRaceEnd(TimePoint automaticRaceEnd);
+    
+    void onPathfinderSelected();
+
+    void onGateLineOpeningTimeChanged();
+    
+    void onGateLineOpeningTimeTrigger(TimePoint gateCloseTimePoint);
+
 }

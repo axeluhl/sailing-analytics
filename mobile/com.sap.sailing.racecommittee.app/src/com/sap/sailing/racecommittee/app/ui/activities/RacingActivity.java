@@ -78,6 +78,8 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
         }
 
         setupTitle(courseArea);
+        // unload and unregister from aaaaaaall races here!
+        unloadAllRaces();
         loadRaces(courseArea);
         // StaticVibrator.prepareVibrator(this);
     }
@@ -121,6 +123,11 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
     private void setupTitle(CourseArea courseArea) {
         TextView label = (TextView) findViewById(R.id.textListHeader);
         label.setText(String.format(getString(R.string.racingview_header), courseArea.getName()));
+    }
+
+    private void unloadAllRaces() {
+        Intent intent = new Intent(getString(R.string.intentActionClearRaces));
+        this.startService(intent);
     }
 
     private void loadRaces(final CourseArea courseArea) {
@@ -177,8 +184,10 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
                         dialog.cancel();
                     }
                 });
-        AlertDialog alert = builder.create();
-        alert.show();
+        if (!isFinishing()) {
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
     }
 
     public void onRaceItemClicked(ManagedRace managedRace) {

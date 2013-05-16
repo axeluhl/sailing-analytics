@@ -94,6 +94,7 @@ public class EssStartPhaseFragment extends RaceFragment implements EssStartPhase
         log.lockForRead();
         try {
             RaceLogEvent lastEvent = log.getLastFixAtOrBefore(MillisecondsTimePoint.now());
+            // TODO: better analysis of state. only flagevents... sort by timestamp...
             if (lastEvent instanceof RaceLogFlagEvent) {
                 RaceLogFlagEvent flagEvent = (RaceLogFlagEvent) lastEvent;
                 Flags flag = flagEvent.getUpperFlag();
@@ -102,9 +103,11 @@ public class EssStartPhaseFragment extends RaceFragment implements EssStartPhase
                     onAPDown();
                 } else if (flagEvent.isDisplayed() && flag.equals(Flags.ESSTHREE)) {
                     onEssThreeUp();
-                } else if (flagEvent.isDisplayed() && flag.equals(Flags.ESSTWO)) {
+                } else if ((!flagEvent.isDisplayed() && flag.equals(Flags.ESSTHREE)) || 
+                        (flagEvent.isDisplayed() && flag.equals(Flags.ESSTWO))) {
                     onEssTwoUp(); 
-                } else if (flagEvent.isDisplayed() && flag.equals(Flags.ESSONE)) {
+                } else if ((!flagEvent.isDisplayed() && flag.equals(Flags.ESSTWO)) ||
+                        (flagEvent.isDisplayed() && flag.equals(Flags.ESSONE))) {
                     onEssOneUp();
                 }
             }
@@ -117,7 +120,7 @@ public class EssStartPhaseFragment extends RaceFragment implements EssStartPhase
     public void onStart() {
         super.onStart();
         
-        getRace().getState().getStartProcedure().setEssStartPhaseEventListener(this);
+        getRace().getState().getStartProcedure().setStartPhaseEventListener(this);
         ExLog.w(EssStartPhaseFragment.class.getName(), String.format("Fragment %s is now shown", EssStartPhaseFragment.class.getName()));
     }
     
@@ -126,7 +129,7 @@ public class EssStartPhaseFragment extends RaceFragment implements EssStartPhase
     public void onStop() {
         super.onStop();
         
-        getRace().getState().getStartProcedure().setEssStartPhaseEventListener(null);
+        getRace().getState().getStartProcedure().setStartPhaseEventListener(null);
     }
 
     @Override
@@ -159,7 +162,7 @@ public class EssStartPhaseFragment extends RaceFragment implements EssStartPhase
 
         RaceDialogFragment fragment = new AbortModeSelectionDialog();
 
-        Bundle args = getParameterBundle();
+        Bundle args = getRecentArguments();
         args.putString(AppConstants.FLAG_KEY, Flags.AP.name());
         fragment.setArguments(args);
 

@@ -45,13 +45,13 @@ public class Helpers {
         return (JSONArray) childObject;
     }
 
-    public static Serializable tryUuidConversion(String id) {
+    public static Serializable tryUuidConversion(Serializable serializableId) {
         try {
-            return UUID.fromString(id);
+            return UUID.fromString(serializableId.toString());
         } catch (IllegalArgumentException iae) {
             // / TODO: insert warning of non-uuid id.
         }
-        return id;
+        return serializableId;
     }
 
 }

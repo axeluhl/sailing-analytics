@@ -2,6 +2,9 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import android.app.AlertDialog;
@@ -21,13 +24,17 @@ import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorPositioningListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorsAdapter;
+import com.sap.sailing.racecommittee.app.ui.comparators.NamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
 public class PositioningFragment extends RaceDialogFragment {
@@ -41,6 +48,7 @@ public class PositioningFragment extends RaceDialogFragment {
     
     protected List<Competitor> competitors;
     protected List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors;
+    protected Comparator<Named> competitorComparator;
     
     private int dragStartMode = DragSortController.ON_DRAG;
     private boolean removeEnabled = true;
@@ -55,7 +63,7 @@ public class PositioningFragment extends RaceDialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (isDialog()) {
-            getDialog().setTitle("Change positioning");
+            getDialog().setTitle("Set positionings");
         }
         return inflater.inflate(R.layout.race_positioning_view, container, false);
     }
@@ -78,7 +86,11 @@ public class PositioningFragment extends RaceDialogFragment {
         
         competitors = new ArrayList<Competitor>();
         Util.addAll(getRace().getCompetitors(), competitors);
+        competitorComparator = new NamedComparator();
+        Collections.sort(competitors, competitorComparator);
         competitorsAdapter = new CompetitorsAdapter(getActivity(), R.layout.welter_grid_competitor_cell, competitors);
+        
+        loadCompetitors();
         
         positionedCompetitors = initializeFinishPositioningList();
         deletePositionedCompetitorsFromUnpositionedList();
@@ -134,6 +146,12 @@ public class PositioningFragment extends RaceDialogFragment {
         });
     }
     
+    @Override
+    public void onResume() {
+        super.onResume();
+        onLoadCompetitorsSucceeded(getRace().getCompetitors());
+    }
+    
     /**
      * Creates a DragSortController and thereby defines the behaviour of the drag sort list
      */
@@ -148,7 +166,32 @@ public class PositioningFragment extends RaceDialogFragment {
         controller.setBackgroundColor(getActivity().getResources().getColor(R.color.welter_medium_blue));
         return controller;
     }
-    
+
+    private void loadCompetitors() {
+
+        OnlineDataManager.create(getActivity()).loadCompetitors(getRace(), new LoadClient<Collection<Competitor>>() {
+
+            @Override
+            public void onLoadFailed(Exception reason) {
+                onLoadCompetitorsSucceeded(getRace().getCompetitors());
+            }
+
+            @Override
+            public void onLoadSucceded(Collection<Competitor> data) {
+                onLoadCompetitorsSucceeded(data);
+            }
+
+        });
+    }
+
+    protected void onLoadCompetitorsSucceeded(Collection<Competitor> data) {
+        competitors.clear();
+        competitors.addAll(data);
+        Collections.sort(competitors, competitorComparator);
+        deletePositionedCompetitorsFromUnpositionedList();
+        competitorsAdapter.notifyDataSetChanged();
+    }
+
     private void deletePositionedCompetitorsFromUnpositionedList() {
         for (Triple<Serializable, String, MaxPointsReason> positionedItem : positionedCompetitors) {
             Competitor competitor = DomainFactoryImpl.INSTANCE.getExistingCompetitorById(positionedItem.getA());
@@ -223,6 +266,7 @@ public class PositioningFragment extends RaceDialogFragment {
 
     protected void removeCompetitorFromGrid(Competitor competitor) {
         competitors.remove(competitor);
+        Collections.sort(competitors, competitorComparator);
         competitorsAdapter.notifyDataSetChanged();
     }
 
@@ -241,6 +285,7 @@ public class PositioningFragment extends RaceDialogFragment {
     
     private void addNewCompetitorToCompetitorList(Competitor competitor) {
         competitors.add(competitor);
+        Collections.sort(competitors, competitorComparator);
         competitorsAdapter.notifyDataSetChanged();
     }
     

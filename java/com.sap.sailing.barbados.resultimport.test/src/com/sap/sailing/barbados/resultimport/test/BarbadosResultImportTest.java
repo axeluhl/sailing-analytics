@@ -33,6 +33,7 @@ import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 
 public class BarbadosResultImportTest {
+    private static final MillisecondsTimePoint NOW = MillisecondsTimePoint.now();
     private static final String SAMPLE_INPUT_NAME_EMPTY_RESULTS = "RESULTS-505Barbados.xlsx";
     private static final String SAMPLE_INPUT_NAME_SOME_RESULTS = "RESULTS2.xlsx";
     private static final String RESOURCES = "resources/";
@@ -54,7 +55,7 @@ public class BarbadosResultImportTest {
             @Override
             public Iterable<Triple<InputStream, String, TimePoint>> getDocumentsAndNamesAndLastModified() throws IOException {
                 return Collections.singleton(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_EMPTY_RESULTS),
-                        SAMPLE_INPUT_NAME_EMPTY_RESULTS, MillisecondsTimePoint.now()));
+                        SAMPLE_INPUT_NAME_EMPTY_RESULTS, NOW));
             }
         });
     }
@@ -73,7 +74,7 @@ public class BarbadosResultImportTest {
         assertNotNull(hasResultsFor);
         assertEquals(1, hasResultsFor.size());
         Entry<String, Set<Pair<String, TimePoint>>> entry = hasResultsFor.entrySet().iterator().next();
-        assertEquals("505", entry.getKey());
+        assertEquals("505", entry.getValue().iterator().next().getA());
     }
 
     @Test
@@ -115,7 +116,7 @@ public class BarbadosResultImportTest {
             @Override
             public Iterable<Triple<InputStream, String, TimePoint>> getDocumentsAndNamesAndLastModified() throws IOException {
                 return Collections.singleton(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_SOME_RESULTS),
-                        SAMPLE_INPUT_NAME_SOME_RESULTS, MillisecondsTimePoint.now()));
+                        SAMPLE_INPUT_NAME_SOME_RESULTS, NOW));
             }
         });
         Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scp2.getHasResultsForBoatClassFromDateByEventName();

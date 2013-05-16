@@ -14,6 +14,8 @@ import com.sap.sailing.racecommittee.app.data.http.HttpRequest;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class EventSenderTask extends AsyncTask<Intent, Void, Pair<Intent, Integer>> {
+    
+    private static String TAG = EventSenderTask.class.getName();
 
     public interface EventSendingListener {
         public void onResult(Intent intent, boolean success);
@@ -34,22 +36,23 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Pair<Intent, Intege
         }
 
         Bundle extras = intent.getExtras();
-        Serializable serializedEvent = extras.getSerializable(AppConstants.EXTRAS_JSON_KEY);
+        Serializable serializedEvent = extras.getSerializable(AppConstants.EXTRAS_SERIALIZED_EVENT);
         String url = extras.getString(AppConstants.EXTRAS_URL);
         if (serializedEvent == null || url == null) {
             return Pair.create(intent, -1);
         }
 
         try {
+            ExLog.i(TAG, "Posting event: " + serializedEvent);
             HttpRequest post = new HttpJsonPostRequest(URI.create(url), serializedEvent.toString());
             try {
                 post.execute().close();
             } finally {
                 post.disconnect();
             }
-            ExLog.i(getClass().getName(), "Post request issued for the following Event: " + serializedEvent);
+            ExLog.i(TAG, "Post successful for the following event: " + serializedEvent);
         } catch (Exception e) {
-            ExLog.e(getClass().getName(), e.toString());
+            ExLog.e(TAG, String.format("Post not successful, exception occured: ", e.toString()));
             return Pair.create(intent, -1);
         }
         return Pair.create(intent, 0);

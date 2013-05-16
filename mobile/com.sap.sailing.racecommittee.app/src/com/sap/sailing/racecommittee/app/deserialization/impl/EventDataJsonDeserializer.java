@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.deserialization.impl;
 
+import java.io.Serializable;
+
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.EventBase;
@@ -18,7 +20,7 @@ public class EventDataJsonDeserializer implements JsonDeserializer<EventBase> {
 	}
 	
 	public EventBase deserialize(JSONObject object) throws JsonDeserializationException {
-		String id = object.get(EventDataJsonSerializer.FIELD_ID).toString();
+		Serializable id = (Serializable) object.get(EventDataJsonSerializer.FIELD_ID);
 		String name = object.get(EventDataJsonSerializer.FIELD_NAME).toString();
 		String publicationUrl = object.get(EventDataJsonSerializer.FIELD_PUBLICATION_URL).toString();
 		

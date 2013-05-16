@@ -113,7 +113,7 @@
             android:id="@+id/buttonPositioning"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Change positioning"
+            android:text="Set positionings"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10" />

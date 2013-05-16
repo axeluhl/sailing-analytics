@@ -73,13 +73,13 @@ public interface DomainFactory {
 
     GPSFixMoving createGPSFixMoving(Position position);
 
-    Person getOrCreatePerson(String name, Nationality nationality);
+    Person getOrCreatePerson(String name, Nationality nationality, UUID id);
 
     /**
      * If a team called <code>name</code> already is known by this domain factory, it is returned. Otherwise, the team name
      * is split along "+" signs with one {@link Person} object created for each part.
      */
-    Team getOrCreateTeam(String name, Nationality nationality);
+    Team getOrCreateTeam(String name, Nationality nationality, UUID competitorId);
 
     /**
      * Fetch a race definition previously created by a call to {@link #getOrCreateRaceDefinitionAndTrackedRace}. If no such

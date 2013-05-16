@@ -3,6 +3,7 @@ package com.sap.sailing.domain.swisstimingreplayadapter.test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +16,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
@@ -182,6 +184,20 @@ public class SwissTimingReplayAdapterServiceTest {
         TrackedRace trackedRace = trackedRaces.iterator().next();
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             assertEquals(Util.size(trackedRace.getRace().getCourse().getWaypoints()), Util.size(trackedRace.getMarkPassings(competitor)));
+        }
+    }
+
+    @Test
+    public void testStartPerformanceDetection() throws Exception {
+        SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, DomainFactory.INSTANCE,
+                new DummyTrackedRegattaRegistry());
+        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), replayListener);
+        Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
+        TrackedRace trackedRace = trackedRaces.iterator().next();
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            Distance distanceToLineAtStart = trackedRace.getDistanceToStartLine(competitor, trackedRace.getStartOfRace());
+            assertTrue(distanceToLineAtStart.getMeters() > 0);
+            assertTrue(distanceToLineAtStart.getMeters() < 8.5);
         }
     }
 
