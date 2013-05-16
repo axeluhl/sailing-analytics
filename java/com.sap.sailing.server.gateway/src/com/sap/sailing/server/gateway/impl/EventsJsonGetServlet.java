@@ -12,7 +12,7 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.EventDataJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.EventJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 
 public class EventsJsonGetServlet extends AbstractJsonHttpServlet {
@@ -20,13 +20,12 @@ public class EventsJsonGetServlet extends AbstractJsonHttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        JsonSerializer<EventBase> eventSerializer = new EventDataJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()));
+        JsonSerializer<EventBase> eventSerializer = new EventJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()));
         JSONArray result = new JSONArray();
         for (EventBase event : getService().getAllEvents()) {
             result.add(eventSerializer.serialize(event));
         }
         setJsonResponseHeader(response);
         result.writeJSONString(response.getWriter());
-        response.setContentType("application/json");
     }
 }
