@@ -26,18 +26,17 @@ public class BinaryOperator<T extends Number & Comparable<T>> implements FilterO
     }
 
     public void setOperator(Operators operator) {
-        if(operator != null) {
+        if (operator != null) {
             this.operator = operator;
         }
     }
-    
+
     @Override
     public boolean matchValues(T filterValue, T valueToMatch) {
         boolean result = false;
-    
-        if(operator != null) {
+        if (operator != null) {
             int compareResult = numberComparator.compare(valueToMatch, filterValue);
-            switch(operator) {
+            switch (operator) {
             case LessThanEquals:
                 result = compareResult < 0 || compareResult == 0;
                 break;

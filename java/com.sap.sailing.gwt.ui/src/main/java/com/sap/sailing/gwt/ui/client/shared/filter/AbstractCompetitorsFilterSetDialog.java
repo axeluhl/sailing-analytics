@@ -26,7 +26,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>> {
     private final FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> competitorsFilterSet;
     private final StringMessages stringMessages;
-    private final List<FilterWithUI<CompetitorDTO>> availableCompetitorsFilter;
+    private final List<FilterWithUI<CompetitorDTO>> availableCompetitorFilters;
 
     private ListBox filterListBox;
     private final Button addFilterButton;
@@ -78,12 +78,12 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         }
     }
 
-    public AbstractCompetitorsFilterSetDialog(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> competitorsFilterSet, List<FilterWithUI<CompetitorDTO>> availableCompetitorsFilter, List<String> existingFilterSetNames, 
+    public AbstractCompetitorsFilterSetDialog(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> competitorsFilterSet, List<FilterWithUI<CompetitorDTO>> availableCompetitorFilters, List<String> existingFilterSetNames, 
             String dialogTitle, StringMessages stringMessages, DialogCallback<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>> callback) {
         super(dialogTitle, null, stringMessages.ok(), stringMessages.cancel(),
                 new CompetitorsFilterSetValidator(existingFilterSetNames, stringMessages), callback);
         this.competitorsFilterSet = competitorsFilterSet;
-        this.availableCompetitorsFilter = availableCompetitorsFilter;
+        this.availableCompetitorFilters = availableCompetitorFilters;
         this.stringMessages = stringMessages; 
         
         competitorsFiltersGrid = new Grid(0,0);
@@ -117,7 +117,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
         });
 
         filterListBox.addItem(stringMessages.selectAFilterCriteria() + "...");
-        for(FilterWithUI<CompetitorDTO> filter: availableCompetitorsFilter) {
+        for(FilterWithUI<CompetitorDTO> filter: availableCompetitorFilters) {
             filterListBox.addItem(filter.getLocalizedName(stringMessages));
         }
         updateSelectedFilterInfo();
@@ -126,7 +126,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             @Override
             public void onClick(ClickEvent event) {
                 FilterWithUI<CompetitorDTO> selectedFilter = getSelectedFilter();
-                if(selectedFilter != null) {
+                if (selectedFilter != null) {
                     FilterWithUI<CompetitorDTO> newFilter = selectedFilter.copy();
                     filters.add(newFilter);
                     
@@ -213,7 +213,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
     @Override
     protected FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> getResult() {
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> result = new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(filterSetNameTextBox.getText());
-        for (FilterWithUI<CompetitorDTO> filter: filters) {
+        for (FilterWithUI<CompetitorDTO> filter : filters) {
             result.addFilter(filter.createFilterFromUIWidget());
         }
         return result;
@@ -222,10 +222,10 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
     private FilterWithUI<CompetitorDTO> getSelectedFilter() {
         FilterWithUI<CompetitorDTO> result = null;
         int selectedIndex = filterListBox.getSelectedIndex();
-        if(selectedIndex > 0) {
+        if (selectedIndex > 0) {
             String selectedItemValue = filterListBox.getValue(selectedIndex);
-            for(FilterWithUI<CompetitorDTO> filter: availableCompetitorsFilter) {
-                if(selectedItemValue.equals(filter.getLocalizedName(stringMessages))) {
+            for (FilterWithUI<CompetitorDTO> filter : availableCompetitorFilters) {
+                if (selectedItemValue.equals(filter.getLocalizedName(stringMessages))) {
                     result = filter;
                     break;
                 }

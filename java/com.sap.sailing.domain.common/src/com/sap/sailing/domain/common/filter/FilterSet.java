@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.filter;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -31,8 +32,11 @@ public class FilterSet<FilterObjectType, T extends Filter<FilterObjectType>> {
         return filters.remove(filter);
     }
 
+    /**
+     * The unmodifiable set of filters
+     */
     public Set<T> getFilters() {
-        return filters;
+        return Collections.unmodifiableSet(filters);
     }
     
     public String getName() {
