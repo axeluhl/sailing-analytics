@@ -5,11 +5,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.After;
@@ -55,7 +57,20 @@ public class ActivelyConnectingStoreAndForwardTest {
         sailMasterDummyListenerThread = new Thread("ActivelyConnectingStoreAndForwardTest-Listener") {
             public void run() {
                 try {
-                    ServerSocket ss = new ServerSocket(RECEIVE_PORT);
+                    ServerSocket ss = null;
+                    for (int numberOfTries=0; numberOfTries<3 && ss == null; numberOfTries++) {
+                        try {
+                            ss = new ServerSocket(RECEIVE_PORT);
+                        } catch (BindException be) {
+                            logger.log(Level.INFO, "Couldn't bind server socket in StoreAndForward"+
+                               (numberOfTries<3?". Trying again...":""), be);
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
                     synchronized (ActivelyConnectingStoreAndForwardTest.this) {
                         sendingSocket = ss.accept();
                         logger.info("ActivelyConnectingStoreAndForwardTest-Listener accepted socket connect request on port "+RECEIVE_PORT);
