@@ -1,10 +1,10 @@
 # AirMAX vs. MikroTik
 
-Use-Case: Transmit data to a local network by using an outdoor wireless setup. The setup has to be very simple and must cover at least 4nm. The offshore antenna must be very small and must operate on OSI layer 3.
+Use-Case: Transmit data to a local network by using an outdoor wireless setup. The setup has to be very simple (PtP OSI Layer 2, PtMP not required) and must cover at least 4nm. The offshore antenna must be very small and must be able to provide functionality defined in OSI layer 3.
 
 ## AirMAX
 
-Specifications from here http://www.ubnt.com/downloads/datasheets/bulletm/bm_ds_web.pdf
+Specifications from here http://www.ubnt.com/downloads/datasheets/bulletm/bm_ds_web.pdf. 
 
 <table border="1" cellpadding="1" cellspacing="1" style="width:100%">
 	<thead>
