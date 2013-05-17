@@ -4,7 +4,7 @@ Use-Case: Transmit data to a local network by using an outdoor wireless setup. T
 
 ## AirMAX
 
-Specifications from here http://www.ubnt.com/downloads/datasheets/bulletm/bm_ds_web.pdf. 
+Specifications from here http://www.ubnt.com/downloads/datasheets/bulletm/bm_ds_web.pdf. Transmission based on TDMA (http://en.wikipedia.org/wiki/Time_division_multiple_access).
 
 <table border="1" cellpadding="1" cellspacing="1" style="width:100%">
 	<thead>
