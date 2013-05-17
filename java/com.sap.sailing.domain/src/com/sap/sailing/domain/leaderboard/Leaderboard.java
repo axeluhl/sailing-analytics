@@ -389,4 +389,16 @@ public interface Leaderboard extends Named {
      * @return the default {@link CourseArea} for all races of this leaderboard.
      */
     CourseArea getDefaultCourseArea();
+
+    /**
+     * Must be called when the leaderboard is removed from its server, becoming in accessible. This will give the leaderboard
+     * a chance to release all its resources that won't be collected or freed automatically. In particular, a leaderboard may
+     * hold on to listeners which in turn are registered with {@link TrackedRace}s and therefore won't be released to the garbage
+     * collector unless the tracked race becomes unreferenced. This may take long because the tracked race can generally
+     * be referenced by more than one leaderboard. For example, a test leaderboard may additionally reference a tracked
+     * race already referenced by an "official" leaderboard. When the test leaderboard is removed, its listeners would not
+     * be released and avoid garbage-collecting the test leaderboard. When calling this method, the leaderboard will cleanly
+     * unregister its listeners from the tracked races and therefore become eligible for garbage collection.
+     */
+    void destroy();
 }

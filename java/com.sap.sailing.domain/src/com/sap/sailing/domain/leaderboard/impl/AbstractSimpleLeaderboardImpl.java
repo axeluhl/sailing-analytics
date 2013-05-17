@@ -245,6 +245,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             this.competitor = competitor;
         }
 
+        public TrackedRace getTrackedRace() {
+            return trackedRace;
+        }
+
         public void removeFromTrackedRace() {
             trackedRace.removeListener(this);
         }
@@ -334,9 +338,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
     }
 
-    public void finalize() {
-        // FIXME this won't work because the leaderboard won't be finalized as the CacheInvalidationListener objects have it as their enclosing instance, and therefore the TrackedRace indirectly references the leaderboard
-        // The cycle of leaderboard, listener and tracked race can only be GCed together. We should detach the listener when the tracked race is unlinked from the leaderboard
+    @Override
+    public void destroy() {
         for (CacheInvalidationListener cacheInvalidationListener : cacheInvalidationListeners) {
             cacheInvalidationListener.removeFromTrackedRace();
         }
@@ -652,6 +655,21 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+        // It's generally possible that a leaderboard links to the same tracked race in multiple columns / fleets;
+        // only if it no longer references the trackedRace currently unlinked from one column/fleet, also unlink
+        // all cache invalidation listeners for said trackedRace
+        if (!Util.contains(getTrackedRaces(), trackedRace)) {
+            synchronized (cacheInvalidationListeners) {
+                for (Iterator<CacheInvalidationListener> cacheInvalidationListenerIter=cacheInvalidationListeners.iterator();
+                        cacheInvalidationListenerIter.hasNext(); ) {
+                    CacheInvalidationListener cacheInvalidationListener = cacheInvalidationListenerIter.next();
+                    if (cacheInvalidationListener.getTrackedRace() == trackedRace) {
+                        cacheInvalidationListener.removeFromTrackedRace();
+                        cacheInvalidationListenerIter.remove();
+                    }
+                }
+            }
+        }
     }
     
     @Override
