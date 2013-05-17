@@ -334,6 +334,14 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
     }
 
+    public void finalize() {
+        // FIXME this won't work because the leaderboard won't be finalized as the CacheInvalidationListener objects have it as their enclosing instance, and therefore the TrackedRace indirectly references the leaderboard
+        // The cycle of leaderboard, listener and tracked race can only be GCed together. We should detach the listener when the tracked race is unlinked from the leaderboard
+        for (CacheInvalidationListener cacheInvalidationListener : cacheInvalidationListeners) {
+            cacheInvalidationListener.removeFromTrackedRace();
+        }
+    }
+
     @Override
     public SettableScoreCorrection getScoreCorrection() {
         return scoreCorrection;
