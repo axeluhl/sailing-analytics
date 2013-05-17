@@ -163,4 +163,8 @@
 	<string name="choose_blue_flag_finishing">Finish race</string>
 	<string name="drag_handle_description">Drag handle</string>
 	
+	<string name="settings_advanced_mail_default">lukas.niemeier@sap.com</string>
+	<string name="settings_advanced_mail_description">Mail recipient used for positiong list images.</string>
+	<string name="settings_advanced_mail_header">Positioning mail recipient</string>
+	
 </resources>

@@ -48,6 +48,13 @@
             android:key="webserviceUrlPref"
             android:summary="@string/settings_advanced_service_description"
             android:title="@string/settings_advanced_service_header" />
+        
+        <EditTextPreference
+            android:name="@string/settings_advanced_mail_header"
+            android:defaultValue="@string/settings_advanced_mail_default"
+            android:key="mailRecipientPreference"
+            android:summary="@string/settings_advanced_mail_description"
+            android:title="@string/settings_advanced_mail_header" />
     </PreferenceCategory>
 
 </PreferenceScreen>

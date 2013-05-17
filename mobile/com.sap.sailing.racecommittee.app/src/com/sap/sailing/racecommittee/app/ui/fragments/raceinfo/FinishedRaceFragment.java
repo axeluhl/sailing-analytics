@@ -8,9 +8,11 @@ import java.util.Date;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -95,7 +97,9 @@ public class FinishedRaceFragment extends RaceFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == FINISHER_IMAGE_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                MailHelper.send(new String[] { "lukas.niemeier@student.hpi.uni-potsdam.de" },
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                String recipient = preferences.getString("mailRecipientPreference", getString(R.string.settings_advanced_mail_default));
+                MailHelper.send(new String[] { recipient },
                         String.format("[Race Committee] %s", getRace().getId()),
                         String.format("Results for race %s are attached.", getRace().getId()),
                         Uri.fromFile(finisherImageFile), getActivity());
