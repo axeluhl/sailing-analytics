@@ -2,8 +2,6 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
-import com.google.gwt.i18n.client.NumberFormat;
-
 public class PositionDTO implements Serializable {
     private static final long serialVersionUID = -8799012230990258044L;
     public double latDeg;
@@ -19,11 +17,6 @@ public class PositionDTO implements Serializable {
     @Override
     public String toString() {
         return "("+latDeg+", "+lngDeg+")";
-    }
-
-    public String toFormattedString() {
-        NumberFormat fmt = NumberFormat.getFormat("#.###");
-        return fmt.format(latDeg)+", "+fmt.format(lngDeg);
     }
 
     @Override
