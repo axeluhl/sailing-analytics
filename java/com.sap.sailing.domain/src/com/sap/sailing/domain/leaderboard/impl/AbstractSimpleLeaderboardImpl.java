@@ -353,11 +353,6 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
-        // The leaderboard cache is invalidated upon all competitor and mark position changes; some analyzes
-        // are pretty expensive, such as the maneuver re-calculation. Waiting for the latest analysis after only a
-        // single fix was updated is too expensive if users use the replay feature while a race is still running.
-        // Therefore, using waitForLatestAnalyses==false seems appropriate here.
-        this.leaderboardDTOCache = new LeaderboardDTOCache(/* waitForLatestAnalyses */false, this);
     }
 
     @Override
@@ -1471,6 +1466,24 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return result;
     }
     
+    private LeaderboardDTOCache getLeaderboardDTOCache() {
+        LeaderboardDTOCache result = this.leaderboardDTOCache;
+        if (result == null) {
+            synchronized (this) {
+                result = this.leaderboardDTOCache;
+                if (result == null) {
+                    // The leaderboard cache is invalidated upon all competitor and mark position changes; some analyzes
+                    // are pretty expensive, such as the maneuver re-calculation. Waiting for the latest analysis after only a
+                    // single fix was updated is too expensive if users use the replay feature while a race is still running.
+                    // Therefore, using waitForLatestAnalyses==false seems appropriate here.
+                    this.leaderboardDTOCache = new LeaderboardDTOCache(/* waitForLatestAnalyses */false, this);
+                    result = this.leaderboardDTOCache;
+                }
+            }
+        }
+        return result;
+    }
+    
     @Override
     public LeaderboardDTO getLeaderboardDTO(TimePoint timePoint, Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
             TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException, InterruptedException, ExecutionException {
@@ -1496,7 +1509,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             // in replay we'd like up-to-date results; they are still cached
             // which is OK because the cache is invalidated whenever any of the tracked races attached to the
             // leaderboard changes.
-            result = leaderboardDTOCache.getLeaderboardByName(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails,
+            result = getLeaderboardDTOCache().getLeaderboardByName(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails,
                     baseDomainFactory, trackedRegattaRegistry);
         }
         return result;
