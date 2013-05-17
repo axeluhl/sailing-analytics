@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.server;
+package com.sap.sailing.domain.leaderboard.caching;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,11 +8,13 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 /**
  * Computing a leaderboard live, particularly when the fleet tracked is large, requires considerable resources.
@@ -53,8 +55,6 @@ public class LiveLeaderboardUpdater implements Runnable {
     private static final long MINIMUM_TIME_BETWEEN_UPDATES = 1000l;
     
     private final Leaderboard leaderboard;
-    
-    private final SailingServiceImpl sailingService;
     
     /**
      * Live leaderboard results containing column details for all column names in
@@ -100,10 +100,15 @@ public class LiveLeaderboardUpdater implements Runnable {
      * takes longer than {@link #UPDATE_TIMEOUT_IN_MILLIS} milliseconds.
      */
     private Thread thread;
+
+    private TrackedRegattaRegistry trackedRegattaRegistry;
+
+    private DomainFactory baseDomainFactory;
     
-    public LiveLeaderboardUpdater(Leaderboard leaderboard, SailingServiceImpl sailingService) {
+    public LiveLeaderboardUpdater(Leaderboard leaderboard, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) {
         this.leaderboard = leaderboard;
-        this.sailingService = sailingService;
+        this.trackedRegattaRegistry = trackedRegattaRegistry;
+        this.baseDomainFactory = baseDomainFactory;
         this.timePointOfLastRequestForColumnDetails = new HashMap<String, TimePoint>();
         this.columnNamesForWhichCurrentLiveLeaderboardHasTheDetails = new HashSet<String>();
     }
@@ -248,8 +253,9 @@ public class LiveLeaderboardUpdater implements Runnable {
                 TimePoint timeLastUpdateWasStarted = now;
                 try {
                     final Set<String> namesOfRaceColumnsForWhichToLoadLegDetails = getColumnNamesForWhichToFetchDetails(timePoint);
-                    LeaderboardDTO newCacheValue = sailingService.computeLeaderboardByName(leaderboard, timePoint,
-                            namesOfRaceColumnsForWhichToLoadLegDetails, /* waitForLatestAnalyses */false);
+                    LeaderboardDTO newCacheValue = leaderboard.computeDTO(timePoint,
+                            namesOfRaceColumnsForWhichToLoadLegDetails, /* waitForLatestAnalyses */false,
+                            trackedRegattaRegistry, baseDomainFactory);
                     updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, newCacheValue);
                 } catch (NoWindException e) {
                     logger.info("Unable to update cached leaderboard results for leaderboard " + leaderboard.getName() + ": "

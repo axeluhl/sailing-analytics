@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public class TotalTimeColumn extends FormattedDoubleDetailTypeColumn {
 

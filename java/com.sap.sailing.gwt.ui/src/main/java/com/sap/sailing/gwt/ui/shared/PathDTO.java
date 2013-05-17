@@ -2,10 +2,10 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.List;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.dto.NamedDTO;
 
-public class PathDTO extends NamedDTO implements IsSerializable {
-
+public class PathDTO extends NamedDTO {
+    private static final long serialVersionUID = 2381814072763342186L;
     private List<SimulatorWindDTO> points;
 
     public PathDTO() {

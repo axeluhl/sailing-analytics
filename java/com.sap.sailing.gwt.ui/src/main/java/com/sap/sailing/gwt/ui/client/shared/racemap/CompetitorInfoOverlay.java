@@ -6,7 +6,7 @@ import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
-import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 
 /**

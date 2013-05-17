@@ -19,7 +19,7 @@
 //import com.sap.sailing.domain.common.Position;
 //import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 //import com.sap.sailing.domain.common.TimePoint;
-//import com.sap.sailing.domain.common.impl.DegreePosition;
+//import com.sap.sailing.domain.common.dto.PositionDTO;
 //import com.sap.sailing.domain.tracking.GPSFixMoving;
 //import com.sap.sailing.domain.tracking.GPSFixTrack;
 //import com.sap.sailing.domain.tracking.MarkPassing;

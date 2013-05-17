@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.dto.PositionDTO;
 
 public class RequestTotalTimeDTO implements IsSerializable {
 

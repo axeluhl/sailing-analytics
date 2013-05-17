@@ -1,9 +1,7 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.domain.common.dto;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
-public class PlacemarkDTO extends NamedDTO implements IsSerializable {
-
+public class PlacemarkDTO extends NamedDTO {
+    private static final long serialVersionUID = -6734956459060435983L;
     private String countryCode;
     private PositionDTO position;
     private long population;

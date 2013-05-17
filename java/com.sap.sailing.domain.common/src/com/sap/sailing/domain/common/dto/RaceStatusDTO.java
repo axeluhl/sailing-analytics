@@ -1,9 +1,11 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.domain.common.dto;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
+
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 
-public class RaceStatusDTO implements IsSerializable {
+public class RaceStatusDTO implements Serializable {
+    private static final long serialVersionUID = -5665104615048232751L;
     public TrackedRaceStatusEnum status;
     public double loadingProgress;
     

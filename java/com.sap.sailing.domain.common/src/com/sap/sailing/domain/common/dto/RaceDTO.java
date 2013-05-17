@@ -1,12 +1,13 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.domain.common.dto;
 
 import java.util.Date;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 
-public class RaceDTO extends NamedDTO implements IsSerializable {
+public class RaceDTO extends NamedDTO {
+    private static final long serialVersionUID = 2613189982608149975L;
+
     /**
      * Tells if this race is currently being tracked, meaning that a {@link RaceTracker} is
      * listening for incoming GPS fixes, mark passings etc., to update a {@link TrackedRace} object

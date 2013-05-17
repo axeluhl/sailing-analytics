@@ -228,8 +228,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port, boolean canSendRequests)
             throws InterruptedException, UnknownHostException, IOException, ParseException;
 
-    boolean isRaceBeingTracked(RaceDefinition r);
-
     /**
      * Creates a new leaderboard with the <code>name</code> specified.
      * @param discardThresholds

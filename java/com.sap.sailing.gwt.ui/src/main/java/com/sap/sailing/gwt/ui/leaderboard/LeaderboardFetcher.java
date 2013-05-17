@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 
 public interface LeaderboardFetcher {
     LeaderboardDTO getLeaderboard();

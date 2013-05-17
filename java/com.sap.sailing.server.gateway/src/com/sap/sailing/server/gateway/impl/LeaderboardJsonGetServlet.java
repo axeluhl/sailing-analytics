@@ -29,9 +29,9 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.LeaderboardCache;
 import com.sap.sailing.domain.leaderboard.LeaderboardCacheManager;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardCache;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
@@ -190,7 +190,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                     JSONObject jsonLeaderboard;
                     if (resultTimePoint != null) {
                         Pair<TimePoint, ResultStates> resultStateAndTimePoint = new Pair<>(resultTimePoint, resultState);
-                        if(useCache) {
+                        if (useCache) {
                             jsonLeaderboard = getLeaderboardJsonFromCacheOrCompute(leaderboard, resultStateAndTimePoint, requestTimePoint);
                         } else {
                             jsonLeaderboard = computeLeaderboardJson(leaderboard, resultStateAndTimePoint);
@@ -199,7 +199,6 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                         jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint);
                     }
                     jsonLeaderboard.put("requestTimepoint", requestTimePoint.toString());
-                    
                     setJsonResponseHeader(resp);
                     jsonLeaderboard.writeJSONString(resp.getWriter());
                 } catch (NoWindException e) {
