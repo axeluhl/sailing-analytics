@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -27,6 +29,7 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
@@ -45,6 +48,20 @@ public class SailingEventManagementPanel extends SimplePanel {
     private SingleSelectionModel<EventDTO> eventSelectionModel;
     private ListDataProvider<EventDTO> eventProvider;
 
+    public static class AnchorCell extends AbstractCell<SafeHtml> {
+        @Override
+        public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
+            sb.append(safeHtml);
+        }
+    }
+
+    interface AnchorTemplates extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
+        SafeHtml cell(String url, String displayName);
+    }
+
+    private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
+    
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
     public SailingEventManagementPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
@@ -72,10 +89,14 @@ public class SailingEventManagementPanel extends SimplePanel {
         eventsPanel.add(createEventBtn);
 
         // sailing events table
-        TextColumn<EventDTO> eventNameColumn = new TextColumn<EventDTO>() {
+        AnchorCell anchorCell = new AnchorCell();
+        Column<EventDTO, SafeHtml> eventNameColumn = new Column<EventDTO, SafeHtml>(anchorCell) {
             @Override
-            public String getValue(EventDTO event) {
-                return event.name;
+            public SafeHtml getValue(EventDTO event) {
+                String debugParam = Window.Location.getParameter("gwt.codesvr");
+                String link = URLEncoder.encode("/gwt/RegattaOverview.html?event=" + event.id
+                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                return ANCHORTEMPLATE.cell(link, event.name);
             }
         };
 
