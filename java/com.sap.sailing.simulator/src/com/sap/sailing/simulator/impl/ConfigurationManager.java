@@ -19,8 +19,8 @@ public enum ConfigurationManager {
     private static final String ENVIRONMENT_VARIABLE_NAME = "STG_CONFIG";
     private static final String ENVIRONMENT_RACES_VARIABLE_NAME = "STG_CONFIG";
 
-    private static final String CONFIG_FILE_LOCATION = "resources/STG_configuration.csv";
-    private static final String RACES_FILE_LOCATION = "resources/races.csv";
+    private static final String CONFIG_FILE_LOCATION = "STG_configuration.csv";
+    private static final String RACES_FILE_LOCATION = "races.csv";
 
     private List<BoatClassProperties> _boatClassesInfo = new ArrayList<BoatClassProperties>();
     private List<RaceProperties> _racesInfo = new ArrayList<RaceProperties>();
@@ -29,9 +29,7 @@ public enum ConfigurationManager {
     private String errorMessage = "";
 
     private ConfigurationManager() {
-
         this.initFromResources(ConfigurationManager.ENVIRONMENT_VARIABLE_NAME, ConfigurationManager.CONFIG_FILE_LOCATION, true);
-
         this.initFromResources(ConfigurationManager.ENVIRONMENT_RACES_VARIABLE_NAME, ConfigurationManager.RACES_FILE_LOCATION, false);
     }
 
