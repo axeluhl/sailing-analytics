@@ -6,6 +6,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.io.File;
 import java.util.Date;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.utils.MailHelper;
 
 public class FinishedRaceFragment extends RaceFragment {
 
@@ -34,7 +36,8 @@ public class FinishedRaceFragment extends RaceFragment {
     TextView timeLimitView;
     TextView protestStartTimeView;
 
-    File imageFile;
+    File finisherImageFile;
+    static int FINISHER_IMAGE_REQUEST_CODE = 1337;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -44,10 +47,8 @@ public class FinishedRaceFragment extends RaceFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        
-        File imageDirectory = new File(Environment.getExternalStorageDirectory() + AppConstants.ApplicationFolder);
-        imageDirectory.mkdirs();
-        imageFile = new File(imageDirectory, "image.jpg");
+
+        createFinisherImageFile();
 
         headerView = (TextView) getView().findViewById(R.id.textFinishedRace);
         startTimeView = (TextView) getView().findViewById(R.id.textFinishedRaceStarted);
@@ -78,22 +79,27 @@ public class FinishedRaceFragment extends RaceFragment {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(imageFile));
-                startActivityForResult(intent, 1337);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(finisherImageFile));
+                startActivityForResult(intent, FINISHER_IMAGE_REQUEST_CODE);
             }
         });
     }
-    
+
+    private void createFinisherImageFile() {
+        File imageDirectory = new File(Environment.getExternalStorageDirectory() + AppConstants.ApplicationFolder);
+        imageDirectory.mkdirs();
+        finisherImageFile = new File(imageDirectory, "image.jpg");
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1337) {
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("message/rfc822");
-            intent.putExtra(Intent.EXTRA_EMAIL, new String[] { "lukas.niemeier@student.hpi.uni-potsdam.de" });
-            intent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
-            intent.putExtra(Intent.EXTRA_TEXT, "I'm email body.");
-            intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(imageFile));
-            startActivity(Intent.createChooser(intent, "Send mail..."));
+        if (requestCode == FINISHER_IMAGE_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                MailHelper.send(new String[] { "lukas.niemeier@student.hpi.uni-potsdam.de" },
+                        String.format("[Race Committee] %s", getRace().getId()),
+                        String.format("Results for race %s are attached.", getRace().getId()),
+                        Uri.fromFile(finisherImageFile), getActivity());
+            }
         }
     }
 
@@ -157,11 +163,6 @@ public class FinishedRaceFragment extends RaceFragment {
 
     private String getFormattedTimePart(int timePart) {
         return (timePart < 10) ? "0" + timePart : String.valueOf(timePart);
-    }
-
-    @Override
-    public void notifyTick() {
-
     }
 
     @Override

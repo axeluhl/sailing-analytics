@@ -111,21 +111,21 @@
 
         <Button
             android:id="@+id/buttonPositioning"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="0.2"
             android:text="Confirm positionings"
             android:textSize="14pt"
-            android:gravity="center_vertical|center_horizontal"
             android:ems="10" />
         
         <ImageButton
             android:id="@+id/buttonCamera"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="0.8"
             android:text="Snap"
             android:src="@drawable/ic_menu_camera"
             android:textSize="14pt"
-            android:gravity="center_vertical|center_horizontal"
             android:ems="10" />
     </LinearLayout>
 
