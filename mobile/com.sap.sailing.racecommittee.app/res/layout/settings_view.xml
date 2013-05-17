@@ -28,7 +28,7 @@
         
         <ListPreference
             android:key="defaultStartProcedureType"
-            android:title="Default start procedure type"
+            android:title="Overwrite default start procedure type"
             android:summary="Races will use selected start procedure type as a default. For this option to be active override checkbox has to be enabled."
             />
 
