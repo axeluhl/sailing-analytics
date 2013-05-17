@@ -60,3 +60,67 @@ Specifications from here http://www.ubnt.com/downloads/datasheets/bulletm/bm_ds_
 		</tr>
 	</tbody>
 </table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<thead>
+		<tr>
+			<th scope="col">&nbsp;</th>
+			<th scope="col">AirOS</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Wireless Modes</td>
+			<td>
+			<ul>
+				<li>Access Point</li>
+				<li>Station/Client</li>
+				<li>AP-Repeater</li>
+			</ul>
+			</td>
+		</tr>
+		<tr>
+			<td>Network Modes</td>
+			<td>
+			<ul>
+				<li>Transparent Layer 2 Bridge</li>
+				<li>Router</li>
+				<li>SOHO Router</li>
+			</ul>
+			</td>
+		</tr>
+		<tr>
+			<td>Wifi Configuration</td>
+			<td>
+			<ul>
+				<li>WPA, WPA2, WEP</li>
+				<li>Trasnmit Power Control</li>
+				<li>Channel Shifting</li>
+			</ul>
+			</td>
+		</tr>
+		<tr>
+			<td>Network Configuration</td>
+			<td>
+			<ul>
+				<li>DHCP</li>
+				<li>PPoE</li>
+				<li>Routing</li>
+				<li>Firewall</li>
+			</ul>
+			</td>
+		</tr>
+		<tr>
+			<td>Device Configuration</td>
+			<td>
+			<ul>
+				<li>SSH, Telnet, Web</li>
+				<li>Performance Reporting</li>
+				<li>Location Sensor</li>
+				<li>Ping Watchdog</li>
+				<li>dDNS</li>
+			</ul>
+			</td>
+		</tr>
+	</tbody>
+</table>
