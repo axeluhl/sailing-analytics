@@ -27,11 +27,11 @@ public class PolarDiagramCSVTest {
     private static double BEARING_STEP = 10.0;
     private static double VELOCITY_STEP = 1.0;
 
-    private static String POLAR_DIAGRAM_49_CSV_FILE_PATH = "resources/PolarDiagram49.csv";
-    private static String POLAR_DIAGRAM_49_BETHWAITE_CSV_FILE_PATH = "resources/PolarDiagram49Bethwaite.csv";
-    private static String POLAR_DIAGRAM_49_ORC_CSV_FILE_PATH = "resources/PolarDiagram49ORC.csv";
-    private static String POLAR_DIAGRAM_49_STG_CSV_FILE_PATH = "resources/PolarDiagram49STG.csv";
-    private static String POLAR_DIAGRAM_505_STG_CSV_FILE_PATH = "resources/PolarDiagram505STG.csv";
+    private static String POLAR_DIAGRAM_49_CSV_FILE_PATH = "PolarDiagram49.csv";
+    private static String POLAR_DIAGRAM_49_BETHWAITE_CSV_FILE_PATH = "PolarDiagram49Bethwaite.csv";
+    private static String POLAR_DIAGRAM_49_ORC_CSV_FILE_PATH = "PolarDiagram49ORC.csv";
+    private static String POLAR_DIAGRAM_49_STG_CSV_FILE_PATH = "PolarDiagram49STG.csv";
+    private static String POLAR_DIAGRAM_505_STG_CSV_FILE_PATH = "PolarDiagram505STG.csv";
 
     @Test
     public void test_PolarDiagram49_internals() throws IOException {
