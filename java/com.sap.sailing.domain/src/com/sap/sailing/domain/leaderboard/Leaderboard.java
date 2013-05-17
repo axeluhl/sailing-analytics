@@ -401,4 +401,6 @@ public interface Leaderboard extends Named {
      * unregister its listeners from the tracked races and therefore become eligible for garbage collection.
      */
     void destroy();
+
+    LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException;
 }

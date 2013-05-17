@@ -292,15 +292,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final Executor executor;
 
-    /**
-     * {@link #getLeaderboardByName(String, Date, Collection)} is the application's bottleneck. When two clients ask the
-     * same data for the same leaderboard with their <code>waitForLatestAnalyses</code> parameters set to
-     * <code>false</code>, expansion state and (quantized) time stamp, no two computations should be spawned for the two
-     * clients. Instead, if the computation is still running, all clients asking the same wait for the single result.
-     * Results are cached in this LRU-based evicting cache.
-     */
-    private final Map<String, LiveLeaderboardUpdater> leaderboardByNameLiveUpdaters;
-
     private final LeaderboardDTOCache leaderboardDTOCache;
 
     private final DomainFactory tractracDomainFactory;
@@ -331,7 +322,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
-        leaderboardByNameLiveUpdaters = new HashMap<String, LiveLeaderboardUpdater>();
         // The leaderboard cache is invalidated upon all competitor and mark position changes; some analyzes
         // are pretty expensive, such as the maneuver re-calculation. Waiting for the latest analysis after only a
         // single fix was updated is too expensive if users use the replay feature while a race is still running.
@@ -415,8 +405,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * which will be used as live leaderboard cache update.
      * <p>
      * 
-     * Otherwise, the leaderboard is {@link #computeLeaderboardByName(String, Date, Collection, boolean) computed}
-     * synchronously on the fly.
+     * Otherwise, the leaderboard is computed synchronously on the fly.
      */
     @Override
     public LeaderboardDTO getLeaderboardByName(final String leaderboardName, final Date date,
@@ -425,7 +414,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDTO result = null;
         TimePoint timePoint;
-        LiveLeaderboardUpdater liveLeaderboardUpdater;
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             if (date == null) {
@@ -433,14 +421,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 // corrections, don't use the live leaderboard updater which would keep re-calculating over and over again, but map
                 // this to a usual non-live call which uses the regular LeaderboardDTOCache which is invalidated properly
                 // when the tracked race associations or score corrections or tracked race contents changes:
-                // TODO see bug 929: use lock instead of synchronized to increase concurrency
-                synchronized (leaderboardByNameLiveUpdaters) {
-                    liveLeaderboardUpdater = leaderboardByNameLiveUpdaters.get(leaderboardName);
-                    if (liveLeaderboardUpdater == null) {
-                        liveLeaderboardUpdater = new LiveLeaderboardUpdater(leaderboard, this.getService(), baseDomainFactory);
-                        leaderboardByNameLiveUpdaters.put(leaderboardName, liveLeaderboardUpdater);
-                    }
-                }
                 final TimePoint nowMinusDelay = leaderboard.getNowMinusDelay();
                 final TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
                 if (timePointOfLatestModification != null && !nowMinusDelay.before(timePointOfLatestModification)) {
@@ -450,7 +430,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 } else {
                     // don't use the regular leaderboard cache; the race still seems to be on; use the live leaderboard updater instead:
                     timePoint = null;
-                    result = liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails);
+                    result = leaderboard.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails, getService(), baseDomainFactory);
                 }
             } else {
                 timePoint = new MillisecondsTimePoint(date);

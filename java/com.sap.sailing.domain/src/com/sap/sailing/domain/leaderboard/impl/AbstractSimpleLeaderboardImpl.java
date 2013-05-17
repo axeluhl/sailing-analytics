@@ -60,6 +60,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
+import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -137,6 +138,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     private final Set<CacheInvalidationListener> cacheInvalidationListeners;
 
     private final ThreadPoolExecutor executor;
+
+    private LiveLeaderboardUpdater liveLeaderboardUpdater;
     
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
@@ -1425,6 +1428,29 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         } finally {
             course.unlockAfterRead();
         }
+    }
+
+    @Override
+    public LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
+            TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException {
+        LiveLeaderboardUpdater liveLeaderboardUpdater = getLiveLeaderboardUpdater(trackedRegattaRegistry,
+                baseDomainFactory);
+        return liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails);
+    }
+
+    private LiveLeaderboardUpdater getLiveLeaderboardUpdater(TrackedRegattaRegistry trackedRegattaRegistry,
+            DomainFactory baseDomainFactory) {
+        LiveLeaderboardUpdater result = this.liveLeaderboardUpdater;
+        if (result == null) {
+            synchronized (this) {
+                result = this.liveLeaderboardUpdater;
+                if (result == null) {
+                    this.liveLeaderboardUpdater = new LiveLeaderboardUpdater(this, trackedRegattaRegistry, baseDomainFactory);
+                    result = this.liveLeaderboardUpdater;
+                }
+            }
+        }
+        return result;
     }
 
 }
