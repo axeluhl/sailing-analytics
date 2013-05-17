@@ -19,5 +19,4 @@ public class CourseAreaJsonSerializer implements JsonSerializer<CourseArea> {
 
         return result;
     }
-
 }
