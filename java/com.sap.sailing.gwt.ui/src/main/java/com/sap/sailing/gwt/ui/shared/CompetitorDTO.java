@@ -7,19 +7,19 @@ public class CompetitorDTO extends NamedDTO implements IsSerializable {
     public String threeLetterIocCountryCode;
     public String countryName;
     public String sailID;
-    public String id;
+    public String idAsString;
     public BoatClassDTO boatClass;
     
     CompetitorDTO() {}
     
     public CompetitorDTO(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
-            String countryName, String sailID, String id, BoatClassDTO boatClass) {
+            String countryName, String sailID, String idAsString, BoatClassDTO boatClass) {
         super(name);
         this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
         this.threeLetterIocCountryCode = threeLetterIocCountryCode;
         this.countryName = countryName;
         this.sailID = sailID;
-        this.id = id;
+        this.idAsString = idAsString;
         this.boatClass = boatClass;
     }
 
@@ -27,7 +27,7 @@ public class CompetitorDTO extends NamedDTO implements IsSerializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * id.hashCode();
+        result = prime * idAsString.hashCode();
         return result;
     }
 
@@ -40,10 +40,10 @@ public class CompetitorDTO extends NamedDTO implements IsSerializable {
         if (getClass() != obj.getClass())
             return false;
         CompetitorDTO other = (CompetitorDTO) obj;
-        if (id == null) {
-            if (other.id != null)
+        if (idAsString == null) {
+            if (other.idAsString != null)
                 return false;
-        } else if (!id.equals(other.id))
+        } else if (!idAsString.equals(other.idAsString))
             return false;
         return true;
     }

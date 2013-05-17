@@ -9,10 +9,9 @@ public class BoatClassJsonSerializer implements JsonSerializer<BoatClass> {
     public static final String FIELD_NAME = "name";
 
     @Override
-    public JSONObject serialize(BoatClass object) {
+    public JSONObject serialize(BoatClass boatClass) {
         JSONObject result = new JSONObject();
-        result.put(FIELD_NAME, object.getName());
+        result.put(FIELD_NAME, boatClass.getName());
         return result;
     }
-
 }
