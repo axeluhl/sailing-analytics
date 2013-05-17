@@ -68,6 +68,14 @@ public class MediaTrack implements Serializable {
     public MediaTrack() {
     }
     
+    public MediaTrack(String title, String url, Date startTime, int durationInMillis, MimeType mimeType) {
+        this.title = title;
+        this.url = url;
+        this.startTime = startTime;
+        this.durationInMillis = durationInMillis;
+        this.mimeType = mimeType;
+    }
+    
     public MediaTrack(String dbId, String title, String url, Date startTime, int durationInMillis, MimeType mimeType) {
         this.dbId = dbId;
         this.title = title;
@@ -116,7 +124,7 @@ public class MediaTrack implements Serializable {
     public boolean equals(Object obj) {
         if (obj instanceof MediaTrack) {
             MediaTrack mediaTrack = (MediaTrack) obj;
-            return this.dbId.equals(mediaTrack.dbId);
+            return this.dbId == null? mediaTrack.dbId == null : this.dbId.equals(mediaTrack.dbId);
         } else {
             return false;
         }

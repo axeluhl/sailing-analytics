@@ -22,6 +22,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaUtil;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -218,13 +219,22 @@ public class MediaPanel extends FlowPanel {
         startTimeColumn.setSortable(true);
         sortHandler.setComparator(startTimeColumn, new Comparator<MediaTrack>() {
             public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
-                return mediaTrack1.startTime.compareTo(mediaTrack2.startTime);
+                return MediaUtil.compareDatesAllowingNull(mediaTrack1.startTime, mediaTrack2.startTime);
             }
         });
         startTimeColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
             public void update(int index, MediaTrack mediaTrack, String newStartTime) {
                 // Called when the user changes the value.
-                mediaTrack.startTime = TimeFormatUtil.DATETIME_FORMAT.parse(newStartTime);
+                newStartTime = newStartTime.trim();
+                if ("".equals(newStartTime)) {
+                    mediaTrack.startTime = null;
+                } else {
+                    try {
+                        mediaTrack.startTime = TimeFormatUtil.DATETIME_FORMAT.parse(newStartTime);
+                    } catch (IllegalArgumentException e) {
+                        errorReporter.reportError(stringMessages.mediaDateFormatError(TimeFormatUtil.DATETIME_FORMAT.toString()));
+                    }
+                }
                 mediaService.updateStartTime(mediaTrack, new AsyncCallback<Void>() {
 
                     @Override

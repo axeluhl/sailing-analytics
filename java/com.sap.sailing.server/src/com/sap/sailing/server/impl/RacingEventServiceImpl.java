@@ -58,6 +58,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -75,6 +76,9 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
+import com.sap.sailing.domain.persistence.media.DBMediaTrack;
+import com.sap.sailing.domain.persistence.media.MediaDB;
+import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
@@ -113,6 +117,7 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
+import com.sap.sailing.server.operationaltransformation.AddMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
@@ -122,11 +127,16 @@ import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
+import com.sap.sailing.server.operationaltransformation.RemoveMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
+import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackDurationOperation;
+import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackStartTimeOperation;
+import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackTitleOperation;
+import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackUrlOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
@@ -205,24 +215,26 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     private final RaceLogScoringReplicator raceLogScoringReplicator;
 
-    private MediaLibrary mediaLibrary;
+    private final MediaDB mediaDB;
+    
+    private final MediaLibrary mediaLibrary;
 
     public RacingEventServiceImpl() {
-        this(MongoFactory.INSTANCE.getDefaultDomainObjectFactory(), MongoFactory.INSTANCE.getDefaultMongoObjectFactory());
+        this(MongoFactory.INSTANCE.getDefaultDomainObjectFactory(), MongoFactory.INSTANCE.getDefaultMongoObjectFactory(), MediaDBFactory.INSTANCE.getDefaultMediaDB());
     }
 
     /**
      * Uses the default factories for the tracking adapters
      */
-    private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
+    private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, MediaDB mediaDB) {
         this(domainObjectFactory, mongoObjectFactory, SwissTimingFactory.INSTANCE,
-                com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE, DomainFactory.INSTANCE);
+                com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE, DomainFactory.INSTANCE, mediaDB);
     }
 
     private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
             SwissTimingFactory swissTimingFactory,
             com.sap.sailing.domain.swisstimingadapter.DomainFactory swissTimingDomainFactory,
-            DomainFactory tractracDomainFactory) {
+            DomainFactory tractracDomainFactory, MediaDB mediaDb) {
         assert swissTimingDomainFactory.getBaseDomainFactory() == tractracDomainFactory.getBaseDomainFactory();
         logger.info("Created " + this);
         this.tractracDomainFactory = tractracDomainFactory;
@@ -245,6 +257,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         delayToLiveInMillis = TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS;
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
+        this.mediaDB = mediaDb;
         this.mediaLibrary = new MediaLibrary();
 
         // Add one default leaderboard that aggregates all races currently tracked by this service.
@@ -255,17 +268,18 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
         loadStoredEvents();
+        loadMediaLibary();
     }
 
     public RacingEventServiceImpl(MongoDBService mongoDBService) {
-        this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE.getMongoObjectFactory(mongoDBService));
+        this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE.getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService));
     }
 
     public RacingEventServiceImpl(MongoDBService mongoDBService, SwissTimingFactory swissTimingFactory,
             com.sap.sailing.domain.swisstimingadapter.DomainFactory swissTimingDomainFactory,
-            DomainFactory tractracDomainFactory) {
+            DomainFactory tractracDomainFactory, MediaDB mediaDB) {
         this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE.getMongoObjectFactory(mongoDBService),
-                swissTimingFactory, swissTimingDomainFactory, tractracDomainFactory);
+                swissTimingFactory, swissTimingDomainFactory, tractracDomainFactory, mediaDB);
     }
 
     @Override
@@ -300,7 +314,25 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
         }
     }
-
+    
+    /**
+     * Collects media track references from the configured sources (mongo DB by default, ftp folder yet to be implemented).
+     * The method is expected to be called initially blocking the API until finished.
+     * 
+     * Subsequent calls (assumed to be triggered from the admin console or in scheduled intervals) don't need to block. In that case,
+     * the API will simply serve the current state.
+     * 
+     */
+    private void loadMediaLibary() {
+        Collection<DBMediaTrack> allDBMediaTracks = mediaDB.loadAllMediaTracks();
+        Collection<MediaTrack> allMediaTracks = new ArrayList<MediaTrack>(allDBMediaTracks.size());
+        for (DBMediaTrack dbMediaTrack : allDBMediaTracks) {
+            MimeType mimeType = dbMediaTrack.mimeType != null ? MimeType.valueOf(dbMediaTrack.mimeType) : null;
+            MediaTrack mediaTrack = new MediaTrack(dbMediaTrack.dbId, dbMediaTrack.title, dbMediaTrack.url, dbMediaTrack.startTime, dbMediaTrack.durationInMillis, mimeType);
+            allMediaTracks.add(mediaTrack );
+        }
+    }
+    
     @Override
     public void addLeaderboard(Leaderboard leaderboard) {
         synchronized (leaderboardsByName) {
@@ -1630,6 +1662,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             leaderboardGroupsByName.clear();
             leaderboardsByName.clear();
             eventsById.clear();
+            mediaLibrary.clear();
             logger.info("receiving eventsById");
             eventsById.putAll((Map<Serializable, Event>) ois.readObject());
             logger.info("Recieved " + eventsById.size() + " NEW events");
@@ -1767,7 +1800,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public void mediaTrackAdded(MediaTrack mediaTrack) {
+        String mimeType = mediaTrack.mimeType != null ? mediaTrack.mimeType.name() : null;
+        if (mediaTrack.dbId == null) {
+            mediaTrack.dbId = mediaDB.insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime, mediaTrack.durationInMillis, mimeType);
+        }
         mediaLibrary.addMediaTrack(mediaTrack);
+        replicate(new AddMediaTrackOperation(mediaTrack));
     }
 
     @Override
@@ -1776,13 +1814,38 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     @Override
-    public void mediaTrackChanged(MediaTrack mediaTrack) {
-        mediaLibrary.applyChanges(mediaTrack);
+    public void mediaTrackTitleChanged(MediaTrack mediaTrack) {
+        mediaDB.updateTitle(mediaTrack.dbId, mediaTrack.title);
+        mediaLibrary.titleChanged(mediaTrack);
+        replicate(new UpdateMediaTrackTitleOperation(mediaTrack));
+    }
+
+    @Override
+    public void mediaTrackUrlChanged(MediaTrack mediaTrack) {
+        mediaDB.updateUrl(mediaTrack.dbId, mediaTrack.url);
+        mediaLibrary.urlChanged(mediaTrack);
+        replicate(new UpdateMediaTrackUrlOperation(mediaTrack));
+    }
+
+    @Override
+    public void mediaTrackStartTimeChanged(MediaTrack mediaTrack) {
+        mediaDB.updateStartTime(mediaTrack.dbId, mediaTrack.startTime);
+        mediaLibrary.startTimeChanged(mediaTrack);
+        replicate(new UpdateMediaTrackStartTimeOperation(mediaTrack));
+    }
+
+    @Override
+    public void mediaTrackDurationChanged(MediaTrack mediaTrack) {
+        mediaDB.updateDuration(mediaTrack.dbId, mediaTrack.durationInMillis);
+        mediaLibrary.durationChanged(mediaTrack);
+        replicate(new UpdateMediaTrackDurationOperation(mediaTrack));
     }
 
     @Override
     public void mediaTrackDeleted(MediaTrack mediaTrack) {
+        mediaDB.deleteMediaTrack(mediaTrack.dbId);
         mediaLibrary.deleteMediaTrack(mediaTrack);
+        replicate(new RemoveMediaTrackOperation(mediaTrack));
     }
 
     @Override

@@ -20,6 +20,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaUtil;
 
 class MediaLibrary {
 
@@ -39,8 +40,8 @@ class MediaLibrary {
                 return true;
             } else if (obj instanceof Interval) {
                 Interval interval = (Interval) obj;
-                return equalsDatesAllowingNull(this.begin, interval.begin)
-                        && equalsDatesAllowingNull(this.end, interval.end);
+                return MediaUtil.equalsDatesAllowingNull(this.begin, interval.begin)
+                        && MediaUtil.equalsDatesAllowingNull(this.end, interval.end);
             } else {
                 return false;
             }
@@ -87,26 +88,6 @@ class MediaLibrary {
 //        }
 //
 //    };
-
-    static int compareDatesAllowingNull(Date date1, Date date2) {
-        if (date1 == null) {
-            return date2 == null ? 0 : -1;
-        } else if (date2 == null) {
-            return 1;
-        } else {
-            return date1.compareTo(date2);
-        }
-    }
-
-    static boolean equalsDatesAllowingNull(Date date1, Date date2) {
-        if (date1 == null) {
-            return date2 == null;
-        } else if (date2 == null) {
-            return false;
-        } else {
-            return date1.equals(date2);
-        }
-    }
 
     /**
      * NOTE: The implementation of this lookup using simple linear search is a trade off between development effort and
@@ -175,7 +156,7 @@ class MediaLibrary {
         try {
             for (MediaTrack mediaTrack : mediaTracks) {
                 this.mediaTracksByDbId.put(mediaTrack, mediaTrack);
-                updateCache_Adding(mediaTrack);
+                updateCache_Add(mediaTrack);
             }
         } finally {
             writeLock.unlock();
@@ -186,34 +167,68 @@ class MediaLibrary {
         writeLock.lock();
         try {
             MediaTrack deletedMediaTrack = mediaTracksByDbId.remove(mediaTrack);
-            updateCache_Removing(deletedMediaTrack);
+            updateCache_Remove(deletedMediaTrack);
         } finally {
             writeLock.unlock();
         }
     }
 
-    void applyChanges(MediaTrack changedMediaTrack) {
+    void titleChanged(MediaTrack changedMediaTrack) {
         writeLock.lock();
         try {
-
             MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
             if (mediaTrack != null) {
-                if (mediaTrack != changedMediaTrack) {
-                    mediaTrack.title = changedMediaTrack.title;
-                    mediaTrack.url = changedMediaTrack.url;
-                    mediaTrack.mimeType = changedMediaTrack.mimeType;
-                    
-                    Date oldStartTime = mediaTrack.startTime;
-                    Date oldEndTime = mediaTrack.deriveEndTime();
-                    mediaTrack.startTime = changedMediaTrack.startTime;
-                    mediaTrack.durationInMillis = changedMediaTrack.durationInMillis;
-                    if (!equalsDatesAllowingNull(oldStartTime, mediaTrack.startTime) || !(equalsDatesAllowingNull(oldEndTime, mediaTrack.deriveEndTime()))) {
-                        updateCache_Changing(mediaTrack);
-                    }
-                } else {
-                    updateCache_Changing(mediaTrack);
-                }
-                
+                mediaTrack.title = changedMediaTrack.title;
+            }
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    void urlChanged(MediaTrack changedMediaTrack) {
+        writeLock.lock();
+        try {
+            MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
+            if (mediaTrack != null) {
+                mediaTrack.url = changedMediaTrack.url;
+            }
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    void mimeTypeChanged(MediaTrack changedMediaTrack) {
+        writeLock.lock();
+        try {
+            MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
+            if (mediaTrack != null) {
+                mediaTrack.mimeType = changedMediaTrack.mimeType;
+            }
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    void startTimeChanged(MediaTrack changedMediaTrack) {
+        writeLock.lock();
+        try {
+            MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
+            if (mediaTrack != null) {
+                mediaTrack.startTime = changedMediaTrack.startTime;
+                updateCache_Change(mediaTrack);
+            }
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    void durationChanged(MediaTrack changedMediaTrack) {
+        writeLock.lock();
+        try {
+            MediaTrack mediaTrack = mediaTracksByDbId.get(changedMediaTrack);
+            if (mediaTrack != null) {
+                mediaTrack.durationInMillis = changedMediaTrack.durationInMillis;
+                updateCache_Change(mediaTrack);
             }
         } finally {
             writeLock.unlock();
@@ -223,7 +238,7 @@ class MediaLibrary {
     /**
      * To be called only under write lock!
      */
-    private void updateCache_Adding(MediaTrack mediaTrack) {
+    private void updateCache_Add(MediaTrack mediaTrack) {
         for (Entry<Interval, Set<MediaTrack>> cacheEntry : cacheByInterval.entrySet()) {
             Interval interval = cacheEntry.getKey();
             if (mediaTrack.overlapsWith(interval.begin, interval.end)) {
@@ -235,7 +250,7 @@ class MediaLibrary {
     /**
      * To be called only under write lock!
      */
-    private void updateCache_Changing(MediaTrack mediaTrack) {
+    private void updateCache_Change(MediaTrack mediaTrack) {
         for (Entry<Interval, Set<MediaTrack>> cacheEntry : cacheByInterval.entrySet()) {
             cacheEntry.getValue().remove(mediaTrack);
             Interval interval = cacheEntry.getKey();
@@ -248,7 +263,7 @@ class MediaLibrary {
     /**
      * To be called only under write lock!
      */
-    private void updateCache_Removing(MediaTrack mediaTrack) {
+    private void updateCache_Remove(MediaTrack mediaTrack) {
         for (Entry<Interval, Set<MediaTrack>> cacheEntry : cacheByInterval.entrySet()) {
             cacheEntry.getValue().remove(mediaTrack);
         }
@@ -266,7 +281,7 @@ class MediaLibrary {
     void serialize(ObjectOutputStream stream) throws IOException {
         readLock.lock();
         try {
-            stream.writeObject(mediaTracksByDbId.values());
+            stream.writeObject(new ArrayList<MediaTrack>(mediaTracksByDbId.values()));
         } finally {
             readLock.unlock();
         }
@@ -275,6 +290,16 @@ class MediaLibrary {
     @SuppressWarnings("unchecked")
     void deserialize(ObjectInputStream stream) throws ClassNotFoundException, IOException {
         addMediaTracks((Collection<MediaTrack>) stream.readObject());
+    }
+
+    public void clear() {
+        writeLock.lock();
+        try {
+            mediaTracksByDbId.clear();
+            cacheByInterval.clear();
+        } finally {
+            writeLock.unlock();
+        }
     }
 
 }

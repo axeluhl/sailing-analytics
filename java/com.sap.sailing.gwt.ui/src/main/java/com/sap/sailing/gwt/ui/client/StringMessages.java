@@ -559,4 +559,5 @@ public interface StringMessages extends Messages {
     String raceStatusColumn();
     String loading();
     String showHiddenRaces();
+    String mediaDateFormatError(String expectedTimeFormat);
 }

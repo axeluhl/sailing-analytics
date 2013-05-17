@@ -3,7 +3,9 @@ package com.sap.sailing.server.replication.test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.hamcrest.core.Is.is;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -103,14 +105,12 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         assertNull(replica.getLeaderboardGroupByName(leaderBoardGroupName));
         
         /* Media Library */
-        String dbId = "1234";
-        String title = "title";
-        String url = "url";
-        Date startTime = new Date();
-        int durationInMillis = 1;
-        MimeType mimeType = MimeType.mp4;
-        MediaTrack mediaTrack = new MediaTrack(dbId, title, url, startTime, durationInMillis, mimeType);
-        master.mediaTrackAdded(mediaTrack);
+        MediaTrack mediaTrack1 = new MediaTrack("title-1", "url", new Date(), 1, MimeType.mp4);
+        master.mediaTrackAdded(mediaTrack1);
+        MediaTrack mediaTrack2 = new MediaTrack("title-2", "url", new Date(), 1, MimeType.ogv);
+        master.mediaTrackAdded(mediaTrack2);
+        MediaTrack mediaTrack3 = new MediaTrack("title-3", "url", new Date(), 1, MimeType.mp4);
+        master.mediaTrackAdded(mediaTrack3);
         
         /* fire up replication */
         performReplicationSetup();
@@ -129,7 +129,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         assertNotNull(replica.getLeaderboardGroupByName(leaderBoardGroupName));
         assertNotNull(replica.getLeaderboardByName(leaderboardName));
         assertTrue(replica.getAllRegattas().iterator().hasNext());
-        assertTrue(replica.getAllMediaTracks().iterator().hasNext());
+        assertThat(replica.getAllMediaTracks().size(), is(3));
     }
 
     @Test

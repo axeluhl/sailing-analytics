@@ -176,7 +176,7 @@ public class MediaLibaryTest {
         changedMediaTrack.dbId = "a";
         changedMediaTrack.startTime = new Date(originalMediaTrack.startTime.getTime() + 101);
         changedMediaTrack.durationInMillis = 100;
-        mediaLibary.applyChanges(changedMediaTrack);
+        mediaLibary.startTimeChanged(changedMediaTrack);
         
         Set<MediaTrack> secondQueryResult = mediaLibary.findMediaTracksInTimeRange(queryStartTime, queryEndTime);
         assertThat(secondQueryResult.size(), is(0));
@@ -264,76 +264,6 @@ public class MediaLibaryTest {
         
         Collection<MediaTrack> mediaTracks = mediaLibary.findMediaTracksInTimeRange(rangeStart, rangeEnd);
         assertThat(mediaTracks.size(), is(0));
-    }
-    
-    @Test
-    public void testCompareDatesAllNull() throws Exception {
-        Date date1 = null;
-        Date date2 = null;
-        assertTrue(MediaLibrary.compareDatesAllowingNull(date1, date2) == 0);
-    }
-    
-    @Test
-    public void testCompareDatesFirstNull() throws Exception {
-        Date date1 = null;
-        Date date2 = new Date();
-        assertTrue(MediaLibrary.compareDatesAllowingNull(date1, date2) < 0);
-    }
-    
-    @Test
-    public void testCompareDatesSecondNull() throws Exception {
-        Date date1 = new Date();
-        Date date2 = null;
-        assertTrue(MediaLibrary.compareDatesAllowingNull(date1, date2) > 0);
-    }
-    
-    @Test
-    public void testCompareDatesFirstGreaterSecond() throws Exception {
-        Date date1 = new Date();
-        Date date2 = new Date(date1.getTime() - 1);
-        assertTrue(MediaLibrary.compareDatesAllowingNull(date1, date2) > 0);
-    }
-    
-    @Test
-    public void testCompareDatesSecondGreaterFirst() throws Exception {
-        Date date1 = new Date();
-        Date date2 = new Date(date1.getTime() + 1);
-        assertTrue(MediaLibrary.compareDatesAllowingNull(date1, date2) < 0);
-    }
-    
-    @Test
-    public void testEqualsDatesAllNull() throws Exception {
-        Date date1 = null;
-        Date date2 = null;
-        assertTrue(MediaLibrary.equalsDatesAllowingNull(date1, date2));
-    }
-    
-    @Test
-    public void testEqualsDatesFirstNull() throws Exception {
-        Date date1 = null;
-        Date date2 = new Date();
-        assertFalse(MediaLibrary.equalsDatesAllowingNull(date1, date2));
-    }
-    
-    @Test
-    public void testEqualsDatesSecondNull() throws Exception {
-        Date date1 = new Date();
-        Date date2 = null;
-        assertFalse(MediaLibrary.equalsDatesAllowingNull(date1, date2));
-    }
-    
-    @Test
-    public void testEqualsDatesBothEqual() throws Exception {
-        Date date1 = new Date();
-        Date date2 = new Date(date1.getTime());
-        assertTrue(MediaLibrary.equalsDatesAllowingNull(date1, date2));
-    }
-    
-    @Test
-    public void testEqualsDatesNotEqual() throws Exception {
-        Date date1 = new Date();
-        Date date2 = new Date(date1.getTime() + 1);
-        assertFalse(MediaLibrary.equalsDatesAllowingNull(date1, date2));
     }
     
     @Test
