@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.dto.PositionDTO;
 
 public class Response1TurnerDTO implements IsSerializable {
 

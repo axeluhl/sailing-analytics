@@ -1,8 +1,8 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.domain.common.dto;
 
+import java.io.Serializable;
 import java.util.List;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
@@ -15,7 +15,9 @@ import com.sap.sailing.domain.common.Tack;
  * @author Axel Uhl (D043530)
  *
  */
-public class LeaderboardEntryDTO implements IsSerializable {
+public class LeaderboardEntryDTO implements Serializable {
+    private static final long serialVersionUID = -4678693781217869837L;
+
     /**
      * Identifies the race in which the competitor achieved this score. This makes it possible to find out in which
      * fleet the competitor started in this column.
@@ -54,8 +56,8 @@ public class LeaderboardEntryDTO implements IsSerializable {
 
     /**
      * If <code>null</code>, no leg details are known yet, the race is not being tracked or the details
-     * haven't been requested from the server yet. Otherwise, the list holds one entry per {@link Leg} of the
-     * {@link Course} being sailed in the race for which this object holds the scoring details.
+     * haven't been requested from the server yet. Otherwise, the list holds one entry per <code>Leg</code> of the
+     * <code>Course</code> being sailed in the race for which this object holds the scoring details.
      */
     public List<LegEntryDTO> legDetails;
 

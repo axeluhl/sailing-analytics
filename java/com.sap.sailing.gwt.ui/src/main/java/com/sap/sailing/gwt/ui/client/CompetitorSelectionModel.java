@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     private final Set<CompetitorDTO> allCompetitors;

@@ -11,8 +11,8 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 
 /**
  * Computing a leaderboard live, particularly when the fleet tracked is large, requires considerable resources.

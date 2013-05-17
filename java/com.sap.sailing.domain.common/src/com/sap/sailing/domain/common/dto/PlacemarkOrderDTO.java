@@ -1,14 +1,12 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.domain.common.dto;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
-public class PlacemarkOrderDTO extends NamedDTO implements IsSerializable {
-    
+public class PlacemarkOrderDTO extends NamedDTO {
+    private static final long serialVersionUID = -4981887843843495494L;
     private List<PlacemarkDTO> placemarks;
     
     public PlacemarkOrderDTO() {

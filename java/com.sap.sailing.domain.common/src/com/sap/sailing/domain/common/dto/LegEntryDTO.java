@@ -1,8 +1,8 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.domain.common.dto;
 
+import java.io.Serializable;
 import java.util.Map;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 
@@ -14,7 +14,8 @@ import com.sap.sailing.domain.common.NauticalSide;
  * @author Axel Uhl (D043530)
  *
  */
-public class LegEntryDTO implements IsSerializable {
+public class LegEntryDTO implements Serializable {
+    private static final long serialVersionUID = -1236734337344886025L;
     public Double distanceTraveledInMeters;
     public Double averageSpeedOverGroundInKnots;
     public int rank;

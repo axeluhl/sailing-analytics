@@ -1,8 +1,9 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.domain.common.dto;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
-public class CompetitorDTO extends NamedDTO implements IsSerializable {
+public class CompetitorDTO extends NamedDTO implements Serializable {
+    private static final long serialVersionUID = -4997852354821083154L;
     public String twoLetterIsoCountryCode;
     public String threeLetterIocCountryCode;
     public String countryName;

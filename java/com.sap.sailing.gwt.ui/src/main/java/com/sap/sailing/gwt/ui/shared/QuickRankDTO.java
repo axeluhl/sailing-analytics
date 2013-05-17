@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public class QuickRankDTO implements IsSerializable {
     public CompetitorDTO competitor;

@@ -1,9 +1,8 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.domain.common.dto;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Holds data about one competitor and all races represented by the owning {@link LeaderboardDTO leaderboard}.
@@ -11,7 +10,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author Axel Uhl (D043530)
  *
  */
-public class LeaderboardRowDTO implements IsSerializable {
+public class LeaderboardRowDTO implements Serializable {
+    private static final long serialVersionUID = -5421934148931661900L;
     public CompetitorDTO competitor;
     public Map<String, LeaderboardEntryDTO> fieldsByRaceColumnName;
     public Double carriedPoints;

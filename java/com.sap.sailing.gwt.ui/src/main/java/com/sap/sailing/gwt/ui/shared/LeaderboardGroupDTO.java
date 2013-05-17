@@ -5,13 +5,17 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sailing.domain.common.dto.PlacemarkDTO;
+import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 
-public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
-
+public class LeaderboardGroupDTO extends NamedDTO {
+    private static final long serialVersionUID = -2923229069598593687L;
     public String description;
     public List<StrippedLeaderboardDTO> leaderboards;
     public boolean displayLeaderboardsInReverseOrder;

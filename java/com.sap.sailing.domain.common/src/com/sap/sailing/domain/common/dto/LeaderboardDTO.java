@@ -1,13 +1,12 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.domain.common.dto;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Captures the serializable properties of a leaderboard which in particular has the competitors, any optional display
@@ -17,7 +16,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author Axel Uhl (d043530)
  *  
  */
-public class LeaderboardDTO extends AbstractLeaderboardDTO implements IsSerializable {
+public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializable {
+    private static final long serialVersionUID = -520930809792750648L;
+
     /**
      * The competitor list, ordered ascending by total rank
      */

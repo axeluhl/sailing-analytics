@@ -1,5 +1,6 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.domain.common.dto;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -8,13 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 
-public abstract class AbstractLeaderboardDTO implements IsSerializable {
+public abstract class AbstractLeaderboardDTO implements Serializable {
+    private static final long serialVersionUID = -205106531931903527L;
+
     public String name;
 
     private List<RaceColumnDTO> races;

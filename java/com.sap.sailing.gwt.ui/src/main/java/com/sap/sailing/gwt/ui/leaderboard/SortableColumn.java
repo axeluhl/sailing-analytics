@@ -5,7 +5,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 
 public abstract class SortableColumn<T, C> extends Column<T, C> {
     private SortingOrder preferredSortingOrder;
