@@ -30,7 +30,6 @@ public class AppConstants {
 
     private final static String PREFERENCE_SERVICE_URL = "webserviceUrlPref";
     private final static String PREFERENCE_SENDING_ACTIVE = "sendingActivePref";
-    private final static String PREFERENCE_RACE_FINISHING_TIME_FRAME = "edittextRaceTimeFrameAfterFinish";
 
     public static final String RESET_TIME_FRAGMENT_IS_RESET = SetStartTimeRaceFragment.class.getName() + ".isReset";
 
@@ -51,13 +50,6 @@ public class AppConstants {
     public static void setSendingActive(Context context, boolean activate) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().putBoolean(PREFERENCE_SENDING_ACTIVE, activate).apply();
-    }
-
-    public static long getRaceFinishingTimeFrame(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String result = sp.getString(PREFERENCE_RACE_FINISHING_TIME_FRAME, "30");
-        long resultLong = Long.parseLong(result);
-        return (resultLong <= 0 ? 0 : resultLong * 60 * 1000);
     }
 
 }
