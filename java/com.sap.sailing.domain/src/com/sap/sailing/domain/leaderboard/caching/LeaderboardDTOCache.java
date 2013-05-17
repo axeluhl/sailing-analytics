@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.server;
+package com.sap.sailing.domain.leaderboard.caching;
 
 import java.util.Collection;
 import java.util.Date;
@@ -26,7 +26,6 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardCacheManager;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
-import com.sap.sailing.domain.leaderboard.caching.LeaderboardCache;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.LockUtil;

@@ -122,6 +122,8 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
+import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -435,7 +437,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 synchronized (leaderboardByNameLiveUpdaters) {
                     liveLeaderboardUpdater = leaderboardByNameLiveUpdaters.get(leaderboardName);
                     if (liveLeaderboardUpdater == null) {
-                        liveLeaderboardUpdater = new LiveLeaderboardUpdater(leaderboard, this);
+                        liveLeaderboardUpdater = new LiveLeaderboardUpdater(leaderboard, this.getService(), baseDomainFactory);
                         leaderboardByNameLiveUpdaters.put(leaderboardName, liveLeaderboardUpdater);
                     }
                 }
