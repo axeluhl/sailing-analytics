@@ -63,7 +63,10 @@ public class ActivelyConnectingStoreAndForwardTest {
                             ss = new ServerSocket(RECEIVE_PORT);
                         } catch (BindException be) {
                             logger.log(Level.INFO, "Couldn't bind server socket in StoreAndForward"+
-                               (numberOfTries<3?". Trying again...":""), be);
+                               (numberOfTries<2?". Trying again...":""), be);
+                            if (numberOfTries == 2) {
+                                throw be;
+                            }
                             try {
                                 Thread.sleep(100);
                             } catch (InterruptedException e) {

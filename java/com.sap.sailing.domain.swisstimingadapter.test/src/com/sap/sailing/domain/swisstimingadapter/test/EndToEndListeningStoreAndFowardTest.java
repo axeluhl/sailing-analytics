@@ -96,7 +96,10 @@ public class EndToEndListeningStoreAndFowardTest {
                         swissTimingAdapterPersistence, mongoDBService);
             } catch (BindException be) {
                 logger.log(Level.INFO, "Couldn't bind server socket in StoreAndForward"+
-                   (numberOfTries<3?". Trying again...":""), be);
+                   (numberOfTries<2?". Trying again...":""), be);
+                if (numberOfTries == 2) {
+                    throw be;
+                }
                 Thread.sleep(100);
             }
         }
