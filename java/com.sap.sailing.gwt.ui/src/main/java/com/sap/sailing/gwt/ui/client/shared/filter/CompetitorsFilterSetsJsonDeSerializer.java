@@ -30,20 +30,24 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
         
         int i = 0;
         for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: filterSets.getFilterSets()) {
-            JSONObject filterSetObject = new JSONObject();
-            filterSetArray.set(i++, filterSetObject);
+            // only editable filter sets are stored
+            if(filterSet.isEditable()) {
+                JSONObject filterSetObject = new JSONObject();
+                filterSetArray.set(i++, filterSetObject);
 
-            filterSetObject.put(FIELD_FILTERSET_NAME, new JSONString(filterSet.getName()));
-            filterSetObject.put(FIELD_FILTERSET_ISEDITABLE, JSONBoolean.getInstance(filterSet.isEditable()));
+                filterSetObject.put(FIELD_FILTERSET_NAME, new JSONString(filterSet.getName()));
+                filterSetObject.put(FIELD_FILTERSET_ISEDITABLE, JSONBoolean.getInstance(filterSet.isEditable()));
 
-            JSONArray filterArray = new JSONArray();
-            filterSetObject.put(FIELD_FILTERS, filterArray);
-            int j = 0;
-            for(FilterWithUI<CompetitorDTO> filter: filterSet.getFilters()) {
-                if(filter instanceof ValueFilter<?,?>) {
-                    ValueFilter<?,?> valueFilter = (ValueFilter<?,?>) filter;
-                    JSONObject filterObject = ValueFilterJsonDeSerializerUtil.serialize(valueFilter);
-                    filterArray.set(j++, filterObject);
+                JSONArray filterArray = new JSONArray();
+                filterSetObject.put(FIELD_FILTERS, filterArray);
+                int j = 0;
+                for(FilterWithUI<CompetitorDTO> filter: filterSet.getFilters()) {
+                    // Remark: other filter types than ValueFilter's are not stored right now
+                    if(filter instanceof ValueFilter<?,?>) {
+                        ValueFilter<?,?> valueFilter = (ValueFilter<?,?>) filter;
+                        JSONObject filterObject = ValueFilterJsonDeSerializerUtil.serialize(valueFilter);
+                        filterArray.set(j++, filterObject);
+                    }
                 }
             }
         }

@@ -126,6 +126,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     private final AsyncActionsExecutor asyncActionsExecutor;
     
     private final RaceTimesInfoProvider raceTimesInfoProvider;
+    
+    private final static String LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.competitorsFilterSets";
 
     public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserDTO theUser, Timer timer,
             RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
@@ -178,12 +180,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         CompetitorsFilterSets loadedCompetitorsFilterSets = loadCompetitorsFilterSets();
         if(loadedCompetitorsFilterSets != null) {
             competitorsFilterSets = loadedCompetitorsFilterSets;
-            
-            // check if the "selected competitors filter was the last active filter
-            FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> selectedCompetitorsFilter = competitorsFilterSets.findFilterSetByName(stringMessages.selectedCompetitors());
-            if(selectedCompetitorsFilter != null && competitorsFilterSets.getActiveFilterSet() == selectedCompetitorsFilter) {
-                competitorsFilterSets.setActiveFilterSet(null);
-            }
+            insertSelectedCompetitorsFilter(competitorsFilterSets);
         } else {
             competitorsFilterSets = createAndAddDefaultCompetitorsFilter();
             storeCompetitorsFilterSets(competitorsFilterSets);
@@ -241,19 +238,13 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
 
         addMediaSelectorToNavigationMenu();   
     }
-
+ 
     private CompetitorsFilterSets createAndAddDefaultCompetitorsFilter() {
         CompetitorsFilterSets filterSets = new CompetitorsFilterSets();
         
-        // 1. Filter: selected competitors filter
-        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> selectedCompetitorsFilterSet = 
-                new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.selectedCompetitors());
-        selectedCompetitorsFilterSet.setEditable(false);
-        SelectedCompetitorsFilter selectedCompetitorsFilter = new SelectedCompetitorsFilter();
-        selectedCompetitorsFilter.setCompetitorSelectionProvider(competitorSelectionModel);
-        selectedCompetitorsFilterSet.addFilter(selectedCompetitorsFilter);
-        filterSets.addFilterSet(selectedCompetitorsFilterSet);
-
+        // 1. selected competitors filter
+        insertSelectedCompetitorsFilter(filterSets);
+        
         // 2. Top 50 competitors by race rank
         int maxRaceRank = 50;
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> topNRaceRankCompetitorsFilterSet = 
@@ -417,13 +408,24 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         competitorsFilterSetsDialog .show();
     }
 
+    private void insertSelectedCompetitorsFilter(CompetitorsFilterSets filterSet) {
+        // selected competitors filter
+        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> selectedCompetitorsFilterSet = 
+                new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.selectedCompetitors());
+        selectedCompetitorsFilterSet.setEditable(false);
+        SelectedCompetitorsFilter selectedCompetitorsFilter = new SelectedCompetitorsFilter();
+        selectedCompetitorsFilter.setCompetitorSelectionProvider(competitorSelectionModel);
+        selectedCompetitorsFilterSet.addFilter(selectedCompetitorsFilter);
+        
+        filterSet.addFilterSet(0, selectedCompetitorsFilterSet);
+    }
+    
     private CompetitorsFilterSets loadCompetitorsFilterSets() {
-        String localeStorageKey = "sailingAnalytics.raceBoard.competitorsFilterSets";
         CompetitorsFilterSets result = null;
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if(localStorage != null) {
             try {
-                String jsonAsLocalStore = localStorage.getItem(localeStorageKey);
+                String jsonAsLocalStore = localStorage.getItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY);
                 if(jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
                     CompetitorsFilterSetsJsonDeSerializer deserializer = new CompetitorsFilterSetsJsonDeSerializer();
                     JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
@@ -439,16 +441,15 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     }
 
     private void storeCompetitorsFilterSets(CompetitorsFilterSets newCompetitorsFilterSets) {
-        String localeStorageKey = "sailingAnalytics.raceBoard.competitorsFilterSets";
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if(localStorage != null) {
             // delete old value
-            localStorage.removeItem(localeStorageKey);
+            localStorage.removeItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY);
             
             // store the competiors filter set 
             CompetitorsFilterSetsJsonDeSerializer serializer = new CompetitorsFilterSetsJsonDeSerializer();
             JSONObject jsonObject = serializer.serialize(newCompetitorsFilterSets);
-            localStorage.setItem(localeStorageKey, jsonObject.toString());
+            localStorage.setItem(LOCAL_STORAGE_COMPETITORS_FILTER_SETS_KEY, jsonObject.toString());
         }
     }
     

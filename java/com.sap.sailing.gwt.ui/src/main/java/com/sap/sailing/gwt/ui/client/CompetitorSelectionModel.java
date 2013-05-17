@@ -232,7 +232,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     public void setCompetitorsFilterSet(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> competitorsFilterSet) {
         this.competitorsFilterSet = competitorsFilterSet;
         for (CompetitorSelectionChangeListener listener : listeners) {
-            listener.competitorsListChanged(getAllCompetitors());
+            listener.filteredCompetitorsListChanged(getFilteredCompetitors());
         }
     }
 }

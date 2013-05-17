@@ -1,19 +1,19 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.sap.sailing.domain.common.filter.FilterSet;
 import com.sap.sailing.gwt.ui.client.FilterWithUI;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public class CompetitorsFilterSets {
-    private Set<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>> filterSets;
+    private List<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>> filterSets;
     
     private FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet;
 
     public CompetitorsFilterSets() {
-        filterSets = new LinkedHashSet<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>>();
+        filterSets = new ArrayList<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>>();
         activeFilterSet = null;
     }
     
@@ -42,6 +42,10 @@ public class CompetitorsFilterSets {
         }
     }
 
+    public void addFilterSet(int position, FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet) {
+        filterSets.add(position, filterSet);
+    }
+
     public boolean addFilterSet(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet) {
         return filterSets.add(filterSet);
     }
@@ -54,7 +58,7 @@ public class CompetitorsFilterSets {
         return filterSets.remove(filterSet);
     }
     
-    public Set<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>> getFilterSets() {
+    public List<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>> getFilterSets() {
         return filterSets;
     }
 }

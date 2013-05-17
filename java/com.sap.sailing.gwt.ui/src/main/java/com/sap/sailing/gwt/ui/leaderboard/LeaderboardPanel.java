@@ -1415,8 +1415,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 for (LeaderboardRowDTO row : getSelectedRows()) {
                     selection.add(row.competitor);
                 }
-                LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection,
-                /* listenersNotToNotify */LeaderboardPanel.this);
+                LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection, /* listenersNotToNotify */LeaderboardPanel.this);
+                updateLeaderboard(getLeaderboard());
             }
         });
         leaderboardTable.setSelectionModel(leaderboardSelectionModel);
@@ -2538,6 +2538,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         timeChanged(timer.getTime());
     }
 
+    @Override
+    public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
+        updateLeaderboard(getLeaderboard());
+    }
+    
     public RaceColumnSelection getRaceColumnSelection() {
         return raceColumnSelection;
     }
