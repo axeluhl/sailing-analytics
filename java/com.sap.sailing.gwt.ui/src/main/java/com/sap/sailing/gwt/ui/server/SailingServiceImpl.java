@@ -308,21 +308,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      */
     private final Map<String, LiveLeaderboardUpdater> leaderboardByNameLiveUpdaters;
 
-    /**
-     * This executor needs to be a different one than {@link #executor} because the tasks run by {@link #executor}
-     * can depend on the results of the tasks run by {@link #raceDetailsExecutor}, and an {@link Executor} doesn't
-     * move a task that is blocked by waiting for another {@link FutureTask} to the side but blocks permanently,
-     * ending in a deadlock (one that cannot easily be detected by the Eclipse debugger either).
-     */
-    private final Executor raceDetailsExecutor;
-
-    private final Map<Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>> raceDetailsAtEndOfTrackingCache;
-
-    /**
-     * Used to remove all these listeners from their tracked races when this servlet is {@link #destroy() destroyed}.
-     */
-    private final Set<CacheInvalidationListener> cacheInvalidationListeners;
-
     private final LeaderboardDTOCache leaderboardDTOCache;
 
     private final DomainFactory tractracDomainFactory;
@@ -335,8 +320,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         BundleContext context = Activator.getDefault();
         tractracDomainFactory = DomainFactory.INSTANCE;
         baseDomainFactory = tractracDomainFactory.getBaseDomainFactory();
-        raceDetailsAtEndOfTrackingCache = new HashMap<Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>>();
-        cacheInvalidationListeners = new HashSet<CacheInvalidationListener>();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
         scoreCorrectionProviderServiceTracker = createAndOpenScoreCorrectionProviderServiceTracker(context);
@@ -355,13 +338,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
-        raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         leaderboardByNameLiveUpdaters = new HashMap<String, LiveLeaderboardUpdater>();
         // The leaderboard cache is invalidated upon all competitor and mark position changes; some analyzes
         // are pretty expensive, such as the maneuver re-calculation. Waiting for the latest analysis after only a
         // single fix was updated is too expensive if users use the replay feature while a race is still running.
         // Therefore, using waitForLatestAnalyses==false seems appropriate here.
-        leaderboardDTOCache = new LeaderboardDTOCache(this, /* waitForLatestAnalyses */ false);
+        leaderboardDTOCache = new LeaderboardDTOCache(/* waitForLatestAnalyses */ false);
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
@@ -492,106 +474,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 // which is OK because the cache is invalidated whenever any of the tracked races attached to the
                 // leaderboard changes.
                 result = leaderboardDTOCache.getLeaderboardByName(leaderboard, timePoint,
-                        namesOfRaceColumnsForWhichToLoadLegDetails);
+                        namesOfRaceColumnsForWhichToLoadLegDetails, baseDomainFactory, getService());
             }
             logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
                     + namesOfRaceColumnsForWhichToLoadLegDetails + ") took "
                     + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
         }
         return result;
-    }
-
-    private List<CompetitorDTO> getCompetitorDTOList(List<Competitor> competitors) {
-        List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
-        for (Competitor competitor : competitors) {
-            result.add(convertToCompetitorDTO(competitor));
-        }
-        return result;
-    }
-
-    /**
-     * Handles the invalidation of the {@link SailingServiceImpl#raceDetailsAtEndOfTrackingCache} entries if the tracked race
-     * changes in any way.
-     * 
-     * @author Axel Uhl (D043530)
-     *
-     */
-    private class CacheInvalidationListener implements RaceChangeListener {
-        private final TrackedRace trackedRace;
-        private final Competitor competitor;
-
-        public CacheInvalidationListener(TrackedRace trackedRace, Competitor competitor) {
-            this.trackedRace = trackedRace;
-            this.competitor = competitor;
-        }
-
-        public void removeFromTrackedRace() {
-            trackedRace.removeListener(this);
-        }
-
-        private void invalidateCacheAndRemoveThisListenerFromTrackedRace() {
-            synchronized (raceDetailsAtEndOfTrackingCache) {
-                raceDetailsAtEndOfTrackingCache.remove(new Pair<TrackedRace, Competitor>(trackedRace, competitor));
-                removeFromTrackedRace();
-            }
-        }
-
-        @Override
-        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void statusChanged(TrackedRaceStatus newStatus) {
-            // when the status changes away from LOADING, calculations may start or resume, making it necessary to clear the cache
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void markPositionChanged(GPSFix fix, Mark mark) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
-                Iterable<MarkPassing> markPassings) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void windDataReceived(Wind wind, WindSource windSource) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void windDataRemoved(Wind wind, WindSource windSource) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void delayToLiveChanged(long delayToLiveInMillis) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
-
-        @Override
-        public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
-            invalidateCacheAndRemoveThisListenerFromTrackedRace();
-        }
     }
 
     @Override
@@ -644,7 +533,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private SeriesDTO convertToSeriesDTO(Series series) {
         List<FleetDTO> fleets = new ArrayList<FleetDTO>();
         for (Fleet fleet : series.getFleets()) {
-            fleets.add(convertToFleetDTO(series, fleet));
+            fleets.add(baseDomainFactory.convertToFleetDTO(series, fleet));
         }
         List<RaceColumnDTO> raceColumns = new ArrayList<RaceColumnDTO>();
         for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
@@ -719,18 +608,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result = new RaceCourseDTO(waypointDTOs);
         }
         return result;
-    }
-
-    private FleetDTO convertToFleetDTO(Series series, Fleet fleet) {
-        return new FleetDTO(fleet.getName(), series.getName(), fleet.getOrdering(), fleet.getColor());
-    }
-
-    private FleetDTO convertToFleetDTO(RaceColumn raceColumn, Fleet fleet) {
-        String seriesNameOfFleet = null;
-        if (raceColumn instanceof RaceColumnInSeries) {
-            seriesNameOfFleet = ((RaceColumnInSeries) raceColumn).getSeries().getName();
-        }            
-        return new FleetDTO(fleet.getName(), seriesNameOfFleet, fleet.getOrdering(), fleet.getColor());
     }
 
     private List<RaceWithCompetitorsDTO> convertToRaceDTOs(Regatta regatta) {
@@ -1198,7 +1075,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (trackedRace != null) {
             for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                 if (fromPerCompetitorIdAsString.containsKey(competitor.getId().toString())) {
-                    CompetitorDTO competitorDTO = convertToCompetitorDTO(competitor);
+                    CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
                     List<GPSFixDTO> fixesForCompetitor = new ArrayList<GPSFixDTO>();
                     result.put(competitorDTO, fixesForCompetitor);
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
@@ -1557,7 +1434,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, dateAsTimePoint);
                     if (trackedLeg != null) {
                         int legNumber = race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
-                        QuickRankDTO quickRankDTO = new QuickRankDTO(convertToCompetitorDTO(competitor), rank, legNumber);
+                        QuickRankDTO quickRankDTO = new QuickRankDTO(baseDomainFactory.convertToCompetitorDTO(competitor), rank, legNumber);
                         result.add(quickRankDTO);
                     }
                 }
@@ -1782,7 +1659,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         delayToLiveInMillisForLatestRace = trackedRace.getDelayToLiveInMillis();
                     }
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
-                    raceDTO = createRaceDTO(withGeoLocationData, raceIdentifier, trackedRace);
+                    raceDTO = baseDomainFactory.createRaceDTO(getService(), withGeoLocationData, raceIdentifier, trackedRace);
                     if (trackedRace.hasStarted(now) && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
                         TimePoint liveTimePointForTrackedRace = now;
                         final TimePoint endOfRace = trackedRace.getEndOfRace();
@@ -1792,7 +1669,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = liveTimePointForTrackedRace;
                     }
                 }    
-                final FleetDTO fleetDTO = convertToFleetDTO(raceColumn, fleet);
+                final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(raceColumn, fleet);
                 RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
                 if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive != null) {
@@ -1801,91 +1678,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return leaderboardDTO;
-    }
-
-    private RaceDTO createRaceDTO(boolean withGeoLocationData, RegattaAndRaceIdentifier raceIdentifier, TrackedRace trackedRace) {
-        // Optional: Getting the places of the race
-        PlacemarkOrderDTO racePlaces = withGeoLocationData ? getRacePlaces(trackedRace) : null;
-        TrackedRaceDTO trackedRaceDTO = new TrackedRaceDTO();
-        trackedRaceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
-        trackedRaceDTO.hasWindData = trackedRace.hasWindData();
-        trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
-        RaceDTO raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO, getService().isRaceBeingTracked(trackedRace.getRace()));
-        raceDTO.places = racePlaces;
-        raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
-        raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
-        return raceDTO;
-    }
-
-    private PlacemarkOrderDTO getRacePlaces(TrackedRace trackedRace) {
-        Pair<Placemark, Placemark> startAndFinish = getStartFinishPlacemarksForTrackedRace(trackedRace);
-        PlacemarkOrderDTO racePlaces = new PlacemarkOrderDTO();
-        if (startAndFinish.getA() != null) {
-            racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getA()));
-        }
-        if (startAndFinish.getB() != null) {
-            racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getB()));
-        }
-        if (racePlaces.isEmpty()) {
-            racePlaces = null;
-        }
-        return racePlaces;
-    }
-
-    private Pair<Placemark, Placemark> getStartFinishPlacemarksForTrackedRace(TrackedRace race) {
-        double radiusCalculationFactor = 10.0;
-        Placemark startBest = null;
-        Placemark finishBest = null;
-
-        // Get start postition
-        Iterator<Mark> startMarks = race.getRace().getCourse().getFirstWaypoint().getMarks().iterator();
-        GPSFix startMarkFix = startMarks.hasNext() ? race.getOrCreateTrack(startMarks.next()).getLastRawFix() : null;
-        Position startPosition = startMarkFix != null ? startMarkFix.getPosition() : null;
-        if (startPosition != null) {
-            try {
-                // Get distance to nearest placemark and calculate the search radius
-                Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
-                if (startNearest != null) {
-                    Distance startNearestDistance = startNearest.distanceFrom(startPosition);
-                    double startRadius = startNearestDistance.getKilometers() * radiusCalculationFactor;
-
-                    // Get the estimated best start place
-                    startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
-                            new Placemark.ByPopulationDistanceRatio(startPosition));
-                }
-            } catch (IOException e) {
-                logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-            } catch (org.json.simple.parser.ParseException e) {
-                logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-            }
-        }
-
-        // Get finish position
-        Iterator<Mark> finishMarks = race.getRace().getCourse().getFirstWaypoint().getMarks().iterator();
-        GPSFix finishMarkFix = finishMarks.hasNext() ? race.getOrCreateTrack(finishMarks.next()).getLastRawFix() : null;
-        Position finishPosition = finishMarkFix != null ? finishMarkFix.getPosition() : null;
-        if (startPosition != null && finishPosition != null) {
-            if (startPosition.getDistance(finishPosition).getKilometers() <= ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
-                finishBest = startBest;
-            } else {
-                try {
-                    // Get distance to nearest placemark and calculate the search radius
-                    Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
-                    Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
-                    double finishRadius = finishNearestDistance.getKilometers() * radiusCalculationFactor;
-
-                    // Get the estimated best finish place
-                    finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
-                            new Placemark.ByPopulationDistanceRatio(finishPosition));
-                } catch (IOException e) {
-                    logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-                } catch (org.json.simple.parser.ParseException e) {
-                    logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-                }
-            }
-        }
-        Pair<Placemark, Placemark> placemarks = new Pair<Placemark, Placemark>(startBest, finishBest);
-        return placemarks;
     }
 
     @Override
@@ -2324,7 +2116,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final WindSource windSource = new WindSourceImpl(WindSourceType.COMBINED);
             MeterDistance maxDistance = new MeterDistance(meters);
             for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                CompetitorDTO competitorDTO = convertToCompetitorDTO(competitor);
+                CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
                 if (from.containsKey(competitorDTO)) {
                     // get Track of competitor
                     GPSFixTrack<Competitor, GPSFixMoving> gpsFixTrack = trackedRace.getTrack(competitor);
@@ -2370,7 +2162,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (trackedRace != null) {
             Map<CompetitorDTO, Future<List<ManeuverDTO>>> futures = new HashMap<CompetitorDTO, Future<List<ManeuverDTO>>>();
             for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                CompetitorDTO competitorDTO = convertToCompetitorDTO(competitor);
+                CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
                 if (from.containsKey(competitorDTO)) {
                     final TimePoint timePointFrom = new MillisecondsTimePoint(from.get(competitorDTO));
                     final TimePoint timePointTo = new MillisecondsTimePoint(to.get(competitorDTO));
@@ -2508,12 +2300,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return groupDTO;
     }
 
-
-    private PlacemarkDTO convertToPlacemarkDTO(Placemark placemark) {
-        Position position = placemark.getPosition();
-        return new PlacemarkDTO(placemark.getName(), placemark.getCountryCode(), new PositionDTO(position.getLatDeg(),
-                position.getLngDeg()), placemark.getPopulation());
-    }
 
     @Override
     public void renameLeaderboardGroup(String oldName, String newName) {
@@ -2884,7 +2670,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 .getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(timePoint);
         List<Pair<String, List<CompetitorDTO>>> result = new ArrayList<Util.Pair<String,List<CompetitorDTO>>>();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            List<CompetitorDTO> competitorList = getCompetitorDTOList(preResult.get(raceColumn));
+            List<CompetitorDTO> competitorList = baseDomainFactory.getCompetitorDTOList(preResult.get(raceColumn));
             result.add(new Pair<String, List<CompetitorDTO>>(raceColumn.getName(), competitorList));
         }
         return result;
@@ -3030,5 +2816,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
 
         return histogramData;
+    }
+
+    protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
+        return baseDomainFactory;
     }
 }

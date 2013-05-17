@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -21,6 +22,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 /**
  * A leaderboard is used to display the results of one or more {@link TrackedRace races}. It manages the competitors'
@@ -64,7 +66,7 @@ public interface Leaderboard extends Named {
     }
     
     LeaderboardDTO computeDTO(final TimePoint timePoint,
-            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses)
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory)
             throws NoWindException;
 
     /**

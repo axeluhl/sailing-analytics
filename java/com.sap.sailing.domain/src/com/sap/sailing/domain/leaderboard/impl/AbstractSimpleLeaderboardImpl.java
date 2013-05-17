@@ -14,19 +14,27 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -38,6 +46,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -50,12 +59,12 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
-import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -64,8 +73,9 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.gwt.ui.server.SailingServiceImpl.CacheInvalidationListener;
-import com.sap.sailing.gwt.ui.server.SailingServiceImpl.RaceDetails;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 
 /**
@@ -110,6 +120,23 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      * A synchronized set that manages the difference between {@link #getCompetitors()} and {@link #getAllCompetitors()}.
      */
     private final Set<Competitor> suppressedCompetitors;
+
+    private final Map<Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>> raceDetailsAtEndOfTrackingCache;
+
+    /**
+     * This executor needs to be a different one than {@link #executor} because the tasks run by {@link #executor}
+     * can depend on the results of the tasks run by {@link #raceDetailsExecutor}, and an {@link Executor} doesn't
+     * move a task that is blocked by waiting for another {@link FutureTask} to the side but blocks permanently,
+     * ending in a deadlock (one that cannot easily be detected by the Eclipse debugger either).
+     */
+    private final Executor raceDetailsExecutor;
+
+    /**
+     * Used to remove all these listeners from their tracked races when this servlet is {@link #destroy() destroyed}.
+     */
+    private final Set<CacheInvalidationListener> cacheInvalidationListeners;
+
+    private final ThreadPoolExecutor executor;
     
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
@@ -202,13 +229,109 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
     }
 
+    /**
+     * Handles the invalidation of the {@link SailingServiceImpl#raceDetailsAtEndOfTrackingCache} entries if the tracked race
+     * changes in any way.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private class CacheInvalidationListener implements RaceChangeListener {
+        private final TrackedRace trackedRace;
+        private final Competitor competitor;
+
+        public CacheInvalidationListener(TrackedRace trackedRace, Competitor competitor) {
+            this.trackedRace = trackedRace;
+            this.competitor = competitor;
+        }
+
+        public void removeFromTrackedRace() {
+            trackedRace.removeListener(this);
+        }
+
+        private void invalidateCacheAndRemoveThisListenerFromTrackedRace() {
+            synchronized (raceDetailsAtEndOfTrackingCache) {
+                raceDetailsAtEndOfTrackingCache.remove(new Pair<TrackedRace, Competitor>(trackedRace, competitor));
+                removeFromTrackedRace();
+            }
+        }
+
+        @Override
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void statusChanged(TrackedRaceStatus newStatus) {
+            // when the status changes away from LOADING, calculations may start or resume, making it necessary to clear the cache
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void markPositionChanged(GPSFix fix, Mark mark) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
+                Iterable<MarkPassing> markPassings) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void windDataReceived(Wind wind, WindSource windSource) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void windDataRemoved(Wind wind, WindSource windSource) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void delayToLiveChanged(long delayToLiveInMillis) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+    }
+
     public AbstractSimpleLeaderboardImpl(SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         this.carriedPoints = new HashMap<Competitor, Double>();
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
         this.resultDiscardingRule = resultDiscardingRule;
         this.suppressedCompetitors = Collections.synchronizedSet(new HashSet<Competitor>());
-        raceColumnListeners = new RaceColumnListeners();
+        this.raceColumnListeners = new RaceColumnListeners();
+        this.raceDetailsAtEndOfTrackingCache = new HashMap<Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>>();
+        this.raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        this.cacheInvalidationListeners = new HashSet<CacheInvalidationListener>();
+        // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
+        // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
+        // core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
+        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
+        executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
+                /* maximumPoolSize */ THREAD_POOL_SIZE,
+                /* keepAliveTime */ 60, TimeUnit.SECONDS,
+                /* workQueue */ new LinkedBlockingQueue<Runnable>());
     }
 
     @Override
@@ -803,8 +926,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public LeaderboardDTO computeDTO(final TimePoint timePoint,
-            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses)
-                    throws NoWindException {
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses,
+            TrackedRegattaRegistry trackedRegattaRegistry, final DomainFactory baseDomainFactory)
+            throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDTO result = null;
             result = new LeaderboardDTO(this.getScoreCorrection().getTimePointOfLastCorrectionsValidity()==null ?
@@ -815,22 +939,22 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result.name = this.getName();
             result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
             for (Competitor suppressedCompetitor : this.getSuppressedCompetitors()) {
-                result.setSuppressed(convertToCompetitorDTO(suppressedCompetitor), true);
+                result.setSuppressed(baseDomainFactory.convertToCompetitorDTO(suppressedCompetitor), true);
             }
             for (RaceColumn raceColumn : this.getRaceColumns()) {
                 RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
-                        this.getScoringScheme().isValidInTotalScore(leaderboard, raceColumn, timePoint));
+                        this.getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint));
                 for (Fleet fleet : raceColumn.getFleets()) {
                     TimePoint latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = null;
                     RegattaAndRaceIdentifier raceIdentifier = null;
                     RaceDTO race = null;
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                     
-                    final FleetDTO fleetDTO = convertToFleetDTO(raceColumn, fleet);
+                    final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(raceColumn, fleet);
                     if (trackedRace != null) {
                         raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta()
                                 .getName(), trackedRace.getRace().getName());
-                        race = createRaceDTO(false, raceIdentifier, trackedRace);
+                        race = baseDomainFactory.createRaceDTO(trackedRegattaRegistry, false, raceIdentifier, trackedRace);
                         if (trackedRace.hasStarted(timePoint) && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
                             TimePoint liveTimePointForTrackedRace = timePoint;
                             final TimePoint endOfRace = trackedRace.getEndOfRace();
@@ -849,7 +973,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         raceColumnDTO.setWhenLastTrackedRaceWasLive(fleetDTO, latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive.asDate());
                     }
                 }
-                result.setCompetitorsFromBestToWorst(raceColumnDTO, getCompetitorDTOList(this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
+                result.setCompetitorsFromBestToWorst(raceColumnDTO, baseDomainFactory.getCompetitorDTOList(this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
             }
             result.setDelayToLiveInMillisForLatestRace(this.getDelayToLiveInMillis());
             result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
@@ -880,7 +1004,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 }
             }
             for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint)) {
-                CompetitorDTO competitorDTO = convertToCompetitorDTO(competitor);
+                CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
                 LeaderboardRowDTO row = new LeaderboardRowDTO();
                 row.competitor = competitorDTO;
                 row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
@@ -897,11 +1021,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                 return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint,
                                         namesOfRaceColumnsForWhichToLoadLegDetails != null
                                         && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName()),
-                                        waitForLatestAnalyses, legRanksCache);
+                                        waitForLatestAnalyses, legRanksCache, baseDomainFactory);
                             } catch (NoWindException e) {
                                 logger.info("Exception trying to compute leaderboard entry for competitor "+competitor.getName()+
                                         " in race column "+raceColumn.getName()+": "+e.getMessage());
-                                logger.throwing(SailingServiceImpl.class.getName(), "computeLeaderboardByName.future.call()", e);
+                                logger.throwing(AbstractSimpleLeaderboardImpl.class.getName(), "computeLeaderboardByName.future.call()", e);
                                 throw new NoWindError(e);
                             }
                         }
@@ -959,10 +1083,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that
      *            may not reflect all data already received; otherwise, the method will always block for the latest
      *            cache updates to have happened before returning.
+     * @param baseDomainFactory TODO
      */
     private LeaderboardEntryDTO getLeaderboardEntryDTO(Entry entry, RaceColumn raceColumn, Competitor competitor,
             TimePoint timePoint, boolean addLegDetails, boolean waitForLatestAnalyses,
-            Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache) throws NoWindException {
+            Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache, DomainFactory baseDomainFactory) throws NoWindException {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
         TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
@@ -1012,7 +1137,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             }
         }
         final Fleet fleet = entry.getFleet();
-        entryDTO.fleet = fleet == null ? null : convertToFleetDTO(raceColumn, fleet);
+        entryDTO.fleet = fleet == null ? null : baseDomainFactory.convertToFleetDTO(raceColumn, fleet);
         return entryDTO;
     }
 
@@ -1084,8 +1209,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 });
                 raceDetailsExecutor.execute(raceDetails);
                 raceDetailsAtEndOfTrackingCache.put(key, raceDetails);
-                final CacheInvalidationListener cacheInvalidationListener = new CacheInvalidationListener(trackedRace,
-                        competitor);
+                final CacheInvalidationListener cacheInvalidationListener = new CacheInvalidationListener(trackedRace, competitor);
                 trackedRace.addListener(cacheInvalidationListener);
                 cacheInvalidationListeners.add(cacheInvalidationListener);
             }

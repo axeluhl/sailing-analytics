@@ -248,8 +248,8 @@ public class LiveLeaderboardUpdater implements Runnable {
                 TimePoint timeLastUpdateWasStarted = now;
                 try {
                     final Set<String> namesOfRaceColumnsForWhichToLoadLegDetails = getColumnNamesForWhichToFetchDetails(timePoint);
-                    LeaderboardDTO newCacheValue = sailingService.computeLeaderboardByName(leaderboard, timePoint,
-                            namesOfRaceColumnsForWhichToLoadLegDetails, /* waitForLatestAnalyses */false);
+                    LeaderboardDTO newCacheValue = leaderboard.computeDTO(timePoint,
+                            namesOfRaceColumnsForWhichToLoadLegDetails, /* waitForLatestAnalyses */false, sailingService.getService(), sailingService.getBaseDomainFactory());
                     updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, newCacheValue);
                 } catch (NoWindException e) {
                     logger.info("Unable to update cached leaderboard results for leaderboard " + leaderboard.getName() + ": "
