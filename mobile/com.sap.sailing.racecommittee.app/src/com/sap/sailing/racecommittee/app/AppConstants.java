@@ -23,7 +23,7 @@ public class AppConstants {
     public final static String OPTIONAL_EXTRAS  = "optionalExtra";
     public final static String FLAG_KEY = "raceFlag";
 
-    public final static String LogFolder = "/racecommittee";
+    public final static String ApplicationFolder = "/racecommittee";
 
     // Login activity
     public final static String EventIdTag = "EventId";
