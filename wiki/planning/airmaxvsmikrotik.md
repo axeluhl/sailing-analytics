@@ -2,7 +2,7 @@
 
 Use-Case: Transmit data to a local network by using an outdoor wireless setup. The setup has to be very simple (PtP OSI Layer 2, PtMP not required) and must cover at least 4nm. The offshore antenna must be very small and must be able to provide functionality defined in OSI layer 3.
 
-## Comparison
+## Comparison of hardware
 
 Specifications from http://www.ubnt.com/downloads/datasheets/bulletm/bm_ds_web.pdf, http://i.mt.lv/routerboard/files/Groove-ug.pdf and here http://i.mt.lv/routerboard/files/metal-52.pdf. Transmission based on TDMA (http://en.wikipedia.org/wiki/Time_division_multiple_access).
 
@@ -111,17 +111,25 @@ Specifications from http://www.ubnt.com/downloads/datasheets/bulletm/bm_ds_web.p
 	</tbody>
 </table>
 
+## Comparison of software
+
 <table border="1" cellpadding="1" cellspacing="1" style="width:100%">
 	<thead>
 		<tr>
 			<th scope="col">&nbsp;</th>
-			<th scope="col">AirOS</th>
+			<th scope="col"><span style="font-weight:normal">AirOS</span></th>
+			<th scope="col"><span style="font-weight:normal">RouterOS</span></th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr>
+			<td>URL</td>
+			<td style="text-align: center;">http://www.ubnt.com/airos</td>
+			<td style="text-align: center;">http://www.mikrotik.com/software.html&nbsp;(http://demo.mt.lv/webfig/)</td>
+		</tr>
+		<tr>
 			<td>Wireless Modes</td>
-			<td>
+			<td colspan="2" rowspan="1">
 			<ul>
 				<li>Access Point</li>
 				<li>Station/Client</li>
@@ -131,7 +139,7 @@ Specifications from http://www.ubnt.com/downloads/datasheets/bulletm/bm_ds_web.p
 		</tr>
 		<tr>
 			<td>Network Modes</td>
-			<td>
+			<td colspan="2" rowspan="1">
 			<ul>
 				<li>Transparent Layer 2 Bridge</li>
 				<li>Router</li>
@@ -141,7 +149,7 @@ Specifications from http://www.ubnt.com/downloads/datasheets/bulletm/bm_ds_web.p
 		</tr>
 		<tr>
 			<td>Wifi Configuration</td>
-			<td>
+			<td colspan="2" rowspan="1">
 			<ul>
 				<li>WPA, WPA2, WEP</li>
 				<li>Trasnmit Power Control</li>
@@ -151,7 +159,7 @@ Specifications from http://www.ubnt.com/downloads/datasheets/bulletm/bm_ds_web.p
 		</tr>
 		<tr>
 			<td>Network Configuration</td>
-			<td>
+			<td colspan="2" rowspan="1">
 			<ul>
 				<li>DHCP</li>
 				<li>PPoE</li>
@@ -162,11 +170,10 @@ Specifications from http://www.ubnt.com/downloads/datasheets/bulletm/bm_ds_web.p
 		</tr>
 		<tr>
 			<td>Device Configuration</td>
-			<td>
+			<td colspan="2" rowspan="1">
 			<ul>
 				<li>SSH, Telnet, Web</li>
 				<li>Performance Reporting</li>
-				<li>Location Sensor</li>
 				<li>Ping Watchdog</li>
 				<li>dDNS</li>
 			</ul>
