@@ -97,6 +97,7 @@ public class EndToEndListeningStoreAndFowardTest {
             } catch (BindException be) {
                 logger.log(Level.INFO, "Couldn't bind server socket in StoreAndForward"+
                    (numberOfTries<3?". Trying again...":""), be);
+                Thread.sleep(100);
             }
         }
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
