@@ -122,7 +122,6 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
@@ -292,8 +291,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final Executor executor;
 
-    private final LeaderboardDTOCache leaderboardDTOCache;
-
     private final DomainFactory tractracDomainFactory;
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
@@ -322,11 +319,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
-        // The leaderboard cache is invalidated upon all competitor and mark position changes; some analyzes
-        // are pretty expensive, such as the maneuver re-calculation. Waiting for the latest analysis after only a
-        // single fix was updated is too expensive if users use the replay feature while a race is still running.
-        // Therefore, using waitForLatestAnalyses==false seems appropriate here.
-        leaderboardDTOCache = new LeaderboardDTOCache(/* waitForLatestAnalyses */ false);
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
@@ -413,35 +405,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     throws NoWindException, InterruptedException, ExecutionException {
         long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDTO result = null;
-        TimePoint timePoint;
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
+            TimePoint timePoint;
             if (date == null) {
-                // date==null means live mode; however, if we're after the end of all races and after all score
-                // corrections, don't use the live leaderboard updater which would keep re-calculating over and over again, but map
-                // this to a usual non-live call which uses the regular LeaderboardDTOCache which is invalidated properly
-                // when the tracked race associations or score corrections or tracked race contents changes:
-                final TimePoint nowMinusDelay = leaderboard.getNowMinusDelay();
-                final TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
-                if (timePointOfLatestModification != null && !nowMinusDelay.before(timePointOfLatestModification)) {
-                    // if there hasn't been any modification to the leaderboard since nowMinusDelay, use non-live mode
-                    // and pull the result from the regular leaderboard cache:
-                    timePoint = timePointOfLatestModification;
-                } else {
-                    // don't use the regular leaderboard cache; the race still seems to be on; use the live leaderboard updater instead:
-                    timePoint = null;
-                    result = leaderboard.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails, getService(), baseDomainFactory);
-                }
+                timePoint = null;
             } else {
                 timePoint = new MillisecondsTimePoint(date);
             }
-            if (timePoint != null) {
-                // in replay we'd like up-to-date results; they are still cached
-                // which is OK because the cache is invalidated whenever any of the tracked races attached to the
-                // leaderboard changes.
-                result = leaderboardDTOCache.getLeaderboardByName(leaderboard, timePoint,
-                        namesOfRaceColumnsForWhichToLoadLegDetails, baseDomainFactory, getService());
-            }
+            result = leaderboard.getLeaderboardDTO(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails, getService(), baseDomainFactory);
             logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
                     + namesOfRaceColumnsForWhichToLoadLegDetails + ") took "
                     + (System.currentTimeMillis() - startOfRequestHandling) + "ms");

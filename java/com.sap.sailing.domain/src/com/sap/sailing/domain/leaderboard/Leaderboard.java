@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -402,5 +403,8 @@ public interface Leaderboard extends Named {
      */
     void destroy();
 
-    LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException;
+    LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
+            Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
+            TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException,
+            InterruptedException, ExecutionException;
 }

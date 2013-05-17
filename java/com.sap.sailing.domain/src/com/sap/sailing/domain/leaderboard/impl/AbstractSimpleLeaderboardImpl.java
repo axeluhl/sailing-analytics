@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -60,9 +62,10 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
-import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
+import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -130,16 +133,18 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      * move a task that is blocked by waiting for another {@link FutureTask} to the side but blocks permanently,
      * ending in a deadlock (one that cannot easily be detected by the Eclipse debugger either).
      */
-    private final Executor raceDetailsExecutor;
+    private transient Executor raceDetailsExecutor;
 
     /**
      * Used to remove all these listeners from their tracked races when this servlet is {@link #destroy() destroyed}.
      */
-    private final Set<CacheInvalidationListener> cacheInvalidationListeners;
+    private transient Set<CacheInvalidationListener> cacheInvalidationListeners;
 
-    private final ThreadPoolExecutor executor;
+    private transient ThreadPoolExecutor executor;
 
-    private LiveLeaderboardUpdater liveLeaderboardUpdater;
+    private transient LiveLeaderboardUpdater liveLeaderboardUpdater;
+
+    private transient LeaderboardDTOCache leaderboardDTOCache;
     
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
@@ -329,6 +334,15 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         this.suppressedCompetitors = Collections.synchronizedSet(new HashSet<Competitor>());
         this.raceColumnListeners = new RaceColumnListeners();
         this.raceDetailsAtEndOfTrackingCache = new HashMap<Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>>();
+        initTransientFields();
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        initTransientFields();
+    }
+
+    private void initTransientFields() {
         this.raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         this.cacheInvalidationListeners = new HashSet<CacheInvalidationListener>();
         // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
@@ -339,6 +353,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
+        // The leaderboard cache is invalidated upon all competitor and mark position changes; some analyzes
+        // are pretty expensive, such as the maneuver re-calculation. Waiting for the latest analysis after only a
+        // single fix was updated is too expensive if users use the replay feature while a race is still running.
+        // Therefore, using waitForLatestAnalyses==false seems appropriate here.
+        this.leaderboardDTOCache = new LeaderboardDTOCache(/* waitForLatestAnalyses */false, this);
     }
 
     @Override
@@ -1430,8 +1449,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
     }
 
-    @Override
-    public LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
+    private LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
             TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException {
         LiveLeaderboardUpdater liveLeaderboardUpdater = getLiveLeaderboardUpdater(trackedRegattaRegistry,
                 baseDomainFactory);
@@ -1449,6 +1467,37 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                     result = this.liveLeaderboardUpdater;
                 }
             }
+        }
+        return result;
+    }
+    
+    @Override
+    public LeaderboardDTO getLeaderboardDTO(TimePoint timePoint, Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
+            TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException, InterruptedException, ExecutionException {
+        LeaderboardDTO result = null;
+        if (timePoint == null) {
+            // date==null means live mode; however, if we're after the end of all races and after all score
+            // corrections, don't use the live leaderboard updater which would keep re-calculating over and over again, but map
+            // this to a usual non-live call which uses the regular LeaderboardDTOCache which is invalidated properly
+            // when the tracked race associations or score corrections or tracked race contents changes:
+            final TimePoint nowMinusDelay = this.getNowMinusDelay();
+            final TimePoint timePointOfLatestModification = this.getTimePointOfLatestModification();
+            if (timePointOfLatestModification != null && !nowMinusDelay.before(timePointOfLatestModification)) {
+                // if there hasn't been any modification to the leaderboard since nowMinusDelay, use non-live mode
+                // and pull the result from the regular leaderboard cache:
+                timePoint = timePointOfLatestModification;
+            } else {
+                // don't use the regular leaderboard cache; the race still seems to be on; use the live leaderboard updater instead:
+                timePoint = null;
+                result = this.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails, trackedRegattaRegistry, baseDomainFactory);
+            }
+        }
+        if (timePoint != null) {
+            // in replay we'd like up-to-date results; they are still cached
+            // which is OK because the cache is invalidated whenever any of the tracked races attached to the
+            // leaderboard changes.
+            result = leaderboardDTOCache.getLeaderboardByName(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails,
+                    baseDomainFactory, trackedRegattaRegistry);
         }
         return result;
     }
