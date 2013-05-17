@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -403,6 +404,28 @@ public interface Leaderboard extends Named {
      */
     void destroy();
 
+    /**
+     * Returns a data transfer object (DTO) that has the leaderboard's data for the race columns with basic information
+     * for all columns, and with detailed information for those columns whose names are provided in
+     * <code>namesOfRaceColumnsForWhichToLoadLegDetails</code>. The leaderboard is evaluated at <code>timePoint</code>,
+     * or, if <code>timePoint</code> is <code>null</code>, for the "live" time point (now - delay).
+     * <p>
+     * 
+     * The implementation uses different approaches for caching the results. For "live" requests, a
+     * {@link LiveLeaderboardUpdater} is used to keep refreshing the cached results. Other queries are managed by a
+     * {@link LeaderboardDTOCache} which remembers a number of results before it starts evicting the least frequently
+     * used ones.
+     * 
+     * @param timePoint
+     *            <code>null</code> for "live" results for the time point "now" - delay; otherwise, the explicit time
+     *            point at which to evaluate the leaderboard status
+     * @param namesOfRaceColumnsForWhichToLoadLegDetails
+     *            the names of the race columns of which to expand the details in the result
+     * @param trackedRegattaRegistry
+     *            used to determine which of the races are still being tracked and which ones are not
+     * @param baseDomainFactory
+     *            required as factory and cache for various DTO types
+     */
     LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
             TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException,
