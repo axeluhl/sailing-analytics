@@ -159,7 +159,7 @@ public class DomainFactoryImpl implements DomainFactory {
         com.sap.sailing.domain.base.Course domainCourse = new CourseImpl("Course", waypoints);
         BoatClass boatClass = getOrCreateBoatClassFromRaceID(raceID);
         logger.info("Creating RaceDefinitionImpl for race "+raceID);
-        RaceDefinition result = new RaceDefinitionImpl(raceID, domainCourse, boatClass, competitors);
+        RaceDefinition result = new RaceDefinitionImpl(regatta.getId().toString()+"/"+raceID, domainCourse, boatClass, competitors);
         regatta.addRace(result);
         return result;
     }
