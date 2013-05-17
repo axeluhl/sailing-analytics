@@ -22,7 +22,6 @@ public class PolarDiagramCSV extends PolarDiagramBase {
     private static final long serialVersionUID = -9219705955440602679L;
 
     public PolarDiagramCSV(String inputFile) throws IOException {
-
         ClassLoader cl = this.getClass().getClassLoader();
         InputStream csvFile = cl.getResourceAsStream(inputFile);
         InputStreamReader isr = new InputStreamReader(csvFile);
