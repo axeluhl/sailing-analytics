@@ -9,6 +9,7 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.MarkPassing;
 
@@ -81,5 +82,7 @@ public interface DomainFactory extends SharedDomainFactory {
     ObjectInputStreamResolvingAgainstDomainFactory createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException;
     
     ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType);
+
+    CompetitorDTO convertToCompetitorDTO(Competitor c);
 
 }

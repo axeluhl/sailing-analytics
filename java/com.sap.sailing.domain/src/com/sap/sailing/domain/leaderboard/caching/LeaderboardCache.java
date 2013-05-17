@@ -1,4 +1,7 @@
-package com.sap.sailing.domain.leaderboard;
+package com.sap.sailing.domain.leaderboard.caching;
+
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardCacheManager;
 
 /**
  * Interface for leaderboard state cache management. When passed to a {@link LeaderboardCacheManager}, leaderboards

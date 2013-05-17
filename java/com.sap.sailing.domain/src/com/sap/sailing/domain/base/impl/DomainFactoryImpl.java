@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.base.Boat;
@@ -24,11 +25,14 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
@@ -68,6 +72,8 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final ReferenceQueue<Waypoint> waypointCacheReferenceQueue;
     
+    private final WeakHashMap<Competitor, CompetitorDTO> weakCompetitorDTOCache;
+
     /**
      * Weak references to {@link Waypoint} objects of this type are registered with
      * {@link DomainFactoryImpl#waypointCacheReferenceQueue} upon construction so that when their referents are no
@@ -94,6 +100,7 @@ public class DomainFactoryImpl implements DomainFactory {
     private final Set<String> mayStartWithNoUpwindLeg;
     
     public DomainFactoryImpl() {
+        weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
         waypointCacheReferenceQueue = new ReferenceQueue<Waypoint>();
         nationalityCache = new HashMap<String, Nationality>();
         markCache = new HashMap<Serializable, Mark>();
@@ -294,4 +301,21 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
     }
+
+    @Override
+    public CompetitorDTO convertToCompetitorDTO(Competitor c) {
+        CompetitorDTO competitorDTO = weakCompetitorDTOCache.get(c);
+        if (competitorDTO == null) {
+            CountryCode countryCode = c.getTeam().getNationality().getCountryCode();
+            competitorDTO = new CompetitorDTO(c.getName(), countryCode == null ? ""
+                    : countryCode.getTwoLetterISOCode(),
+                    countryCode == null ? "" : countryCode.getThreeLetterIOCCode(), countryCode == null ? ""
+                            : countryCode.getName(), c.getBoat().getSailID(), c.getId().toString(),
+                            new BoatClassDTO(c.getBoat().getBoatClass().getName(), c.getBoat().getBoatClass().getHullLength()
+                                    .getMeters()));
+            weakCompetitorDTOCache.put(c, competitorDTO);
+        }
+        return competitorDTO;
+    }
+
 }

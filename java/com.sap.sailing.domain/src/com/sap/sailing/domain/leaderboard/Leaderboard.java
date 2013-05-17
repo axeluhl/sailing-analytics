@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.leaderboard;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -61,6 +63,10 @@ public interface Leaderboard extends Named {
         Fleet getFleet();
     }
     
+    LeaderboardDTO computeDTO(final TimePoint timePoint,
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses)
+            throws NoWindException;
+
     /**
      * Obtains the unique set of {@link Competitor} objects from all {@link TrackedRace}s currently linked to this
      * leaderboard, with suppressed competitors removed. See also {@link #getAllCompetitors()} which also returns
