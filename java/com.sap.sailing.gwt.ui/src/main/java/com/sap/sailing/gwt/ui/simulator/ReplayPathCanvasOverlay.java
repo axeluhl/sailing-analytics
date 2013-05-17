@@ -46,14 +46,14 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
     }
 
     @Override
-    public int stop() {
+    public boolean shallStop() {
         if (!isVisible() || windDTOToDraw == null || wl == null) {
-            return 0;
+            return true;
         }
         if (windDTOToDraw.size() == wl.getMatrix().size()) {
-            return 0;
+            return true;
         } else {
-            return 1;
+            return false;
         }
     }
 }

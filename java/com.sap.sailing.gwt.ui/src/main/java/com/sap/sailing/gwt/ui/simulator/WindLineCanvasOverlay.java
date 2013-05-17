@@ -17,7 +17,6 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
-import com.sap.sailing.gwt.ui.client.TimeListenerWithStoppingCriteria;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindLinesDTO;
@@ -75,13 +74,13 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
 
     @Override
-    public int stop() {
+    public boolean shallStop() {
         final Map<PositionDTO, SortedMap<Long, List<PositionDTO>>> positionTimePointPositionDTOMap = windLinesDTO
                 .getWindLinesMap();
 
         if (!this.isVisible() || positionTimePointPositionDTOMap == null || timer == null
                 || positionTimePointPositionDTOMap.isEmpty()) {
-            return 0;
+            return true;
         }
         final Set<PositionDTO> positions = positionTimePointPositionDTOMap.keySet();
         if (positions != null && !positions.isEmpty()) {
@@ -91,13 +90,12 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
             final SortedMap<Long, List<PositionDTO>> timePointPositionDTOMap = positionTimePointPositionDTOMap.get(positions
                     .iterator().next());
             if (timePointPositionDTOMap.lastKey() < timer.getTime().getTime()) {
-                return 0;
+                return true;
             } else {
-                return 1;
+                return false;
             }
         }
-
-        return 0;
+        return true;
     }
 
     @Override

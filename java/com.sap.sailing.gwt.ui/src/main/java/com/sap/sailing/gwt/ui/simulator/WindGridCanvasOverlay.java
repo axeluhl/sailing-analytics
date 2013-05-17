@@ -20,7 +20,6 @@ import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.client.TimeListenerWithStoppingCriteria;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
@@ -186,14 +185,14 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
 
     @Override
-    public int stop() {
+    public boolean shallStop() {
         if (!this.isVisible() || timePointWindDTOMap == null || timer == null || timePointWindDTOMap.isEmpty()) {
-            return 0;
+            return true;
         }
         if (timePointWindDTOMap.lastKey() < timer.getTime().getTime()) {
-            return 0;
+            return true;
         } else {
-            return 1;
+            return false;
         }
     }
 
