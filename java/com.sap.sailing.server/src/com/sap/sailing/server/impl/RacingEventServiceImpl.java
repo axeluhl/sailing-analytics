@@ -325,11 +325,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      */
     private void loadMediaLibary() {
         Collection<DBMediaTrack> allDBMediaTracks = mediaDB.loadAllMediaTracks();
-        Collection<MediaTrack> allMediaTracks = new ArrayList<MediaTrack>(allDBMediaTracks.size());
         for (DBMediaTrack dbMediaTrack : allDBMediaTracks) {
             MimeType mimeType = dbMediaTrack.mimeType != null ? MimeType.valueOf(dbMediaTrack.mimeType) : null;
             MediaTrack mediaTrack = new MediaTrack(dbMediaTrack.dbId, dbMediaTrack.title, dbMediaTrack.url, dbMediaTrack.startTime, dbMediaTrack.durationInMillis, mimeType);
-            allMediaTracks.add(mediaTrack );
+            mediaTrackAdded(mediaTrack);
         }
     }
     
