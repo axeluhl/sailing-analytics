@@ -4,4 +4,4 @@ When we want to offer our live leader board and race board with the "2D Tracking
 
 We then need to run the server on multiple hosts, making sure that the state across these nodes is at least eventually consistent. We have a prototypical replication feature that works under "lab conditions" that now needs to be matured to work in production environments.
 
-See bug 523 (http://sapcoe-app01.pironet-ndh.com/bugzilla/show_bug.cgi?id=523). 
+See bug 523 (http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=523). 
