@@ -15,3 +15,5 @@
 [[AirMAX vs. MikroTik|/wiki/planning/AirMAXvsMikroTik]]
 
 [[User Management|wiki/planning/usermanagement]]
+
+[[Scaling by Server Replication|wiki/planning/scalebyreplication]]
