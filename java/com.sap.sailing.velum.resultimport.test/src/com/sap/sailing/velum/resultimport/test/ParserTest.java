@@ -97,7 +97,7 @@ public class ParserTest {
             final ScoreCorrectionsForRace resultsForR2 = Util.get(scoreCorrectionsForRaces, 1);
             assertEquals(40, resultsForR2.getScoreCorrectionForCompetitor("ITA8400").getPoints(), 0.00000001);
             assertSame(MaxPointsReason.DNF, resultsForR2.getScoreCorrectionForCompetitor("ITA8400").getMaxPointsReason());
-            assertEquals("Müllejans, Christian+Morf, Karsten",
+            assertEquals("MÃ¼llejans, Christian+Morf, Karsten",
                     resultsForR2.getScoreCorrectionForCompetitor("ITA8400").getCompetitorName());
         }
         {

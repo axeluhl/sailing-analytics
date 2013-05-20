@@ -5,6 +5,7 @@ import java.util.Date;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
 public class GPSFixDTO implements IsSerializable {

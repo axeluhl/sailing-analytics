@@ -2,9 +2,12 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.List;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 
-public class SeriesDTO extends NamedDTO implements IsSerializable {
+public class SeriesDTO extends NamedDTO {
+    private static final long serialVersionUID = -3813445377426310687L;
     private List<FleetDTO> fleets;
     private List<RaceColumnDTO> raceColumns;
     private boolean isMedal;

@@ -3,9 +3,9 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
 public abstract class AbstractRaceColumnSelection implements RaceColumnSelection {
     @Override

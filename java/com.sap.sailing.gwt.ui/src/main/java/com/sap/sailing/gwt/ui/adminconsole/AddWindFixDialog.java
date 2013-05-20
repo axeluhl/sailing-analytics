@@ -8,11 +8,11 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
+import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
-import com.sap.sailing.gwt.ui.shared.PositionDTO;
-import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 
 public class AddWindFixDialog extends DataEntryDialog<WindDTO> {

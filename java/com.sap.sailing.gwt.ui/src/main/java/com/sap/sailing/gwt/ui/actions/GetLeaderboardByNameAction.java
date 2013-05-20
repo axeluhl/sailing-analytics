@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 
 public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDTO> {
     private final SailingServiceAsync sailingService;

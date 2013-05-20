@@ -12,13 +12,13 @@ import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
+import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
-import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
 
 public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue {
     private final StringMessages stringMessages;
