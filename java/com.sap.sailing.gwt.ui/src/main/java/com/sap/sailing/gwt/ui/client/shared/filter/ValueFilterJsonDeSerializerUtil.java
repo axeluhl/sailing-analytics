@@ -3,9 +3,10 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.sap.sailing.domain.common.filter.BinaryOperator;
+import com.sap.sailing.domain.common.filter.NumberFilter;
+import com.sap.sailing.domain.common.filter.TextFilter;
 import com.sap.sailing.domain.common.filter.TextOperator;
 import com.sap.sailing.domain.common.filter.ValueFilter;
-import com.sap.sailing.gwt.ui.client.FilterWithUI;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public class ValueFilterJsonDeSerializerUtil {
@@ -36,35 +37,20 @@ public class ValueFilterJsonDeSerializerUtil {
         String operator = filterOperatorValue.stringValue();
         String value = filterValueValue.stringValue();
         
-        if (filterName.equals(CompetitorTotalRankFilter.FILTER_NAME)) {
-            CompetitorTotalRankFilter filter = new CompetitorTotalRankFilter();
-            if(operator != null && value != null) {
-                filter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.valueOf(operator)));
-                filter.setValue(Integer.valueOf(value));
+        FilterWithUI<CompetitorDTO> filter = CompetitorFilterWithUIFactory.createFilter(filterName);
+        if(filter != null && operator != null && value != null) {
+            if(filter instanceof NumberFilter<?,?>) {
+                @SuppressWarnings("unchecked")
+                NumberFilter<CompetitorDTO, Integer> numberFilter = (NumberFilter<CompetitorDTO, Integer>) filter;
+                numberFilter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.valueOf(operator)));
+                numberFilter.setValue(Integer.valueOf(value));
+            } else if(filter instanceof TextFilter<?>) {
+                @SuppressWarnings("unchecked")
+                TextFilter<CompetitorDTO> textFilter = (TextFilter<CompetitorDTO>) filter;
+                textFilter.setOperator(new TextOperator(TextOperator.Operators.valueOf(operator)));
+                textFilter.setValue(value);
             }
-            return filter;
-        } else if (filterName.equals(CompetitorNationalityFilter.FILTER_NAME)) {
-            CompetitorNationalityFilter filter = new CompetitorNationalityFilter();
-            if(operator != null && value != null) {
-                filter.setOperator(new TextOperator(TextOperator.Operators.valueOf(operator)));
-                filter.setValue(value);
-            }
-            return filter;
-        } else if (filterName.equals(CompetitorRaceRankFilter.FILTER_NAME)) {
-            CompetitorRaceRankFilter filter = new CompetitorRaceRankFilter();
-            if(operator != null && value != null) {
-                filter.setOperator(new BinaryOperator<Integer>(BinaryOperator.Operators.valueOf(operator)));
-                filter.setValue(Integer.valueOf(value));
-            }
-            return filter;
-        } else if (filterName.equals(CompetitorSailNumbersFilter.FILTER_NAME)) {
-            CompetitorSailNumbersFilter filter = new CompetitorSailNumbersFilter();
-            if(operator != null && value != null) {
-                filter.setOperator(new TextOperator(TextOperator.Operators.valueOf(operator)));
-                filter.setValue(value);
-            }
-            return filter;
-        } 
-        return null;
+        }
+        return filter;
     }
 }

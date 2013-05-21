@@ -4,19 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.ListBox;
-import com.sap.sailing.domain.common.filter.AbstractNumberFilter;
 import com.sap.sailing.domain.common.filter.BinaryOperator;
+import com.sap.sailing.domain.common.filter.NumberFilter;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
-import com.sap.sailing.gwt.ui.client.FilterWithUI;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
-public abstract class AbstractCompetitorNumberFilterWithUI<T extends Number> extends AbstractNumberFilter<CompetitorDTO, T> 
-    implements FilterWithUI<CompetitorDTO> {
-    
+public abstract class AbstractCompetitorNumberFilterUIFactory<T extends Number> implements FilterUIFactory<CompetitorDTO> {  
     protected List<BinaryOperator.Operators> supportedOperators;
     protected BinaryOperator.Operators defaultOperator;
+    protected NumberFilter<CompetitorDTO, T> competitorNumberFilter;
     
-    public AbstractCompetitorNumberFilterWithUI(BinaryOperator.Operators defaultOperator) {
+    public AbstractCompetitorNumberFilterUIFactory(NumberFilter<CompetitorDTO, T> competitorNumberFilter, 
+            BinaryOperator.Operators defaultOperator) {
+        this.competitorNumberFilter = competitorNumberFilter;
         this.defaultOperator = defaultOperator;
         supportedOperators = new ArrayList<BinaryOperator.Operators>();
     }
@@ -26,7 +26,7 @@ public abstract class AbstractCompetitorNumberFilterWithUI<T extends Number> ext
         int i = 0;
         for(BinaryOperator.Operators op: supportedOperators) {
             operatorsListBox.addItem(FilterOperatorsFormatter.format(op), op.name());
-            if(operator != null && operator.getName().equals(op.name())) {
+            if(competitorNumberFilter.getOperator() != null && competitorNumberFilter.getOperator().equals(op.name())) {
                 operatorsListBox.setSelectedIndex(i);
             } else if (defaultOperator != null && defaultOperator.equals(op)) {
                 operatorsListBox.setSelectedIndex(i);

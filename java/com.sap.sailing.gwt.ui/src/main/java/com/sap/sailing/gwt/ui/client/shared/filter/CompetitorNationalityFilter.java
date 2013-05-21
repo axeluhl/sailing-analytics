@@ -1,31 +1,18 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.filter.TextOperator;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
-import com.sap.sailing.gwt.ui.client.FilterWithUI;
+import com.sap.sailing.domain.common.filter.AbstractTextFilter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
-public class CompetitorNationalityFilter extends AbstractCompetitorTextFilterWithUI {
+/**
+ * A filter filtering competitors by their nationality
+ * @author Frank
+ *
+ */
+public class CompetitorNationalityFilter extends AbstractTextFilter<CompetitorDTO> implements FilterWithUI<CompetitorDTO> {
     public static final String FILTER_NAME = "CompetitorNationalityFilter";
 
-    private TextBox valueTextBox;
-    private ListBox operatorSelectionListBox;
-
     public CompetitorNationalityFilter() {
-        super(TextOperator.Operators.Equals);
-        
-        supportedOperators.add(TextOperator.Operators.Equals);
-        supportedOperators.add(TextOperator.Operators.NotEqualTo);
-        supportedOperators.add(TextOperator.Operators.Contains);
-        supportedOperators.add(TextOperator.Operators.NotContains);
-        
-        valueTextBox = null;
-        operatorSelectionListBox = null;
     }
 
     @Override
@@ -87,51 +74,16 @@ public class CompetitorNationalityFilter extends AbstractCompetitorTextFilterWit
         return errorMessage;
     }
     
-    @Override 
-    public Widget createFilterUIWidget(DataEntryDialog<?> dataEntryDialog) {
-        HorizontalPanel hp = new HorizontalPanel();
-        hp.add(createOperatorSelectionWidget(dataEntryDialog));
-        hp.add(createValueInputWidget(dataEntryDialog));
-        hp.setSpacing(5);
-        return hp;
-    }
-
-    private Widget createValueInputWidget(DataEntryDialog<?> dataEntryDialog) {
-        if(valueTextBox == null) {
-            valueTextBox = dataEntryDialog.createTextBox(value);
-            valueTextBox.setVisibleLength(20);
-            valueTextBox.setFocus(true);
-        }
-        return valueTextBox;
-    }
-
-    private Widget createOperatorSelectionWidget(DataEntryDialog<?> dataEntryDialog) {
-        if(operatorSelectionListBox == null) {
-            operatorSelectionListBox = createOperatorSelectionListBox(dataEntryDialog);
-        }
-        return operatorSelectionListBox;
-    }
-
     @Override
-    public FilterWithUI<CompetitorDTO> copy() {
+    public CompetitorNationalityFilter copy() {
         CompetitorNationalityFilter result = new CompetitorNationalityFilter();
         result.setValue(getValue());
         result.setOperator(getOperator());
         return result;
     }
-    
+
     @Override
-    public FilterWithUI<CompetitorDTO> createFilterFromUIWidget() {
-        CompetitorNationalityFilter result = null;
-
-        if(valueTextBox != null && operatorSelectionListBox != null) {
-            result = new CompetitorNationalityFilter();
-
-            TextOperator.Operators op = TextOperator.Operators.valueOf(operatorSelectionListBox.getValue(operatorSelectionListBox.getSelectedIndex()));
-            TextOperator textOperator = new TextOperator(op);
-            result.setOperator(textOperator);
-            result.setValue(valueTextBox.getValue());
-        }
-        return result;
+    public FilterUIFactory<CompetitorDTO> createUIFactory() {
+        return new CompetitorNationalityFilterUIFactory(this);
     }
 }

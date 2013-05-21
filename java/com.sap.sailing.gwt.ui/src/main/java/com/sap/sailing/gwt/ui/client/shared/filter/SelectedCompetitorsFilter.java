@@ -1,9 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
-import com.sap.sailing.gwt.ui.client.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
@@ -56,12 +53,7 @@ public class SelectedCompetitorsFilter implements FilterWithUI<CompetitorDTO>, C
     }
 
     @Override
-    public Widget createFilterUIWidget(DataEntryDialog<?> dataEntryDialog) {
-        return null;
-    }
-
-    @Override
-    public FilterWithUI<CompetitorDTO> createFilterFromUIWidget() {
+    public FilterUIFactory<CompetitorDTO> createUIFactory() {
         return null;
     }
 

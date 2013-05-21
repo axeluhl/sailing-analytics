@@ -1,29 +1,18 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.filter.TextOperator;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.domain.common.filter.AbstractTextFilter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.FilterWithUI;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
-public class CompetitorSailNumbersFilter extends AbstractCompetitorTextFilterWithUI {
+/**
+ * A filter filtering competitors by their sail number
+ * @author Frank
+ *
+ */
+public class CompetitorSailNumbersFilter extends AbstractTextFilter<CompetitorDTO> implements FilterWithUI<CompetitorDTO> {
     public static final String FILTER_NAME = "CompetitorSailNumbersFilter";
 
-    private TextBox valueTextBox;
-    private ListBox operatorSelectionListBox;
-
     public CompetitorSailNumbersFilter() {
-        super(TextOperator.Operators.Contains);
-        
-        supportedOperators.add(TextOperator.Operators.Contains);
-        supportedOperators.add(TextOperator.Operators.NotContains);
-        
-        valueTextBox = null;
-        operatorSelectionListBox = null;
     }
 
     @Override
@@ -60,32 +49,6 @@ public class CompetitorSailNumbersFilter extends AbstractCompetitorTextFilterWit
         return stringMessages.sailNumber();
     }
 
-    @Override 
-    public Widget createFilterUIWidget(DataEntryDialog<?> dataEntryDialog) {
-        HorizontalPanel hp = new HorizontalPanel();
-        hp.add(createOperatorSelectionWidget(dataEntryDialog));
-        hp.add(createValueInputWidget(dataEntryDialog));
-        hp.setSpacing(5);
-        
-        return hp;
-    }
-
-    private Widget createValueInputWidget(DataEntryDialog<?> dataEntryDialog) {
-        if(valueTextBox == null) {
-            valueTextBox = dataEntryDialog.createTextBox(value);
-            valueTextBox.setVisibleLength(20);
-            valueTextBox.setFocus(true);
-        }
-        return valueTextBox;
-    }
-
-    private Widget createOperatorSelectionWidget(DataEntryDialog<?> dataEntryDialog) {
-        if(operatorSelectionListBox == null) {
-            operatorSelectionListBox = createOperatorSelectionListBox(dataEntryDialog);
-        }
-        return operatorSelectionListBox;
-    }
-    
     @Override
     public String validate(StringMessages stringMessages) {
         String errorMessage = null;
@@ -96,25 +59,15 @@ public class CompetitorSailNumbersFilter extends AbstractCompetitorTextFilterWit
     }
 
     @Override
-    public FilterWithUI<CompetitorDTO> copy() {
+    public CompetitorSailNumbersFilter copy() {
         CompetitorSailNumbersFilter result = new CompetitorSailNumbersFilter();
         result.setValue(getValue());
         result.setOperator(getOperator());
         return result;
     }
-    
+
     @Override
-    public FilterWithUI<CompetitorDTO> createFilterFromUIWidget() {
-        CompetitorSailNumbersFilter result = null;
-
-        if(valueTextBox != null && operatorSelectionListBox != null) {
-            result = new CompetitorSailNumbersFilter();
-
-            TextOperator.Operators op = TextOperator.Operators.valueOf(operatorSelectionListBox.getValue(operatorSelectionListBox.getSelectedIndex()));
-            TextOperator textOperator = new TextOperator(op);
-            result.setOperator(textOperator);
-            result.setValue(valueTextBox.getValue());
-        }
-        return result;
+    public FilterUIFactory<CompetitorDTO> createUIFactory() {
+        return new CompetitorSailNumbersFilterUIFactory(this);
     }
 }

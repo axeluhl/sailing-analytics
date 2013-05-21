@@ -4,19 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.ListBox;
-import com.sap.sailing.domain.common.filter.AbstractTextFilter;
+import com.sap.sailing.domain.common.filter.TextFilter;
 import com.sap.sailing.domain.common.filter.TextOperator;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
-import com.sap.sailing.gwt.ui.client.FilterWithUI;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
-public abstract class AbstractCompetitorTextFilterWithUI extends AbstractTextFilter<CompetitorDTO> 
-    implements FilterWithUI<CompetitorDTO> {
+public abstract class AbstractCompetitorTextFilterUIFactory implements FilterUIFactory<CompetitorDTO> {
     
     protected List<TextOperator.Operators> supportedOperators;
     protected TextOperator.Operators defaultOperator;
+    protected TextFilter<CompetitorDTO> competitorTextFilter;
 
-    public AbstractCompetitorTextFilterWithUI(TextOperator.Operators defaultOperator) {
+    public AbstractCompetitorTextFilterUIFactory(TextFilter<CompetitorDTO> competitorTextFilter, TextOperator.Operators defaultOperator) {
+        this.competitorTextFilter = competitorTextFilter;
         this.defaultOperator = defaultOperator;
         supportedOperators = new ArrayList<TextOperator.Operators>();
     }
@@ -26,7 +26,7 @@ public abstract class AbstractCompetitorTextFilterWithUI extends AbstractTextFil
         int i = 0;
         for(TextOperator.Operators op: supportedOperators) {
             operatorsListBox.addItem(FilterOperatorsFormatter.format(op), op.name());
-            if(operator != null && operator.getName().equals(op.name())) {
+            if(competitorTextFilter.getOperator() != null && competitorTextFilter.getOperator().getName().equals(op.name())) {
                 operatorsListBox.setSelectedIndex(i);
             } else if (defaultOperator != null && defaultOperator.equals(op)) {
                 operatorsListBox.setSelectedIndex(i);

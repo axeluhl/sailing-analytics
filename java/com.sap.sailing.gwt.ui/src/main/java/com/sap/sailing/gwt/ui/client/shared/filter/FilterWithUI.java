@@ -1,20 +1,19 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.filter.Filter;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
- * A specialized filter creating a UI input widget for the filter  
+ * A specialized filter which can create a UI factory for making a filter editable  
  * @author Frank
  */
 public interface FilterWithUI<FilterObjectType> extends Filter<FilterObjectType> {
-    Widget createFilterUIWidget(DataEntryDialog<?> dataEntryDialog);
-
-    FilterWithUI<FilterObjectType> createFilterFromUIWidget();
-    FilterWithUI<FilterObjectType> copy();
-    
     String validate(StringMessages stringMessages);
     
     String getLocalizedName(StringMessages stringMessages);
     String getLocalizedDescription(StringMessages stringMessages);
+    
+    FilterWithUI<FilterObjectType> copy();
+    
+    FilterUIFactory<FilterObjectType> createUIFactory();
 }

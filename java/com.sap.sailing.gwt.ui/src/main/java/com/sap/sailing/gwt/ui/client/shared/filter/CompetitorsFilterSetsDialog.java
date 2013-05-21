@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.filter.FilterSet;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
-import com.sap.sailing.gwt.ui.client.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
@@ -31,7 +30,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
     private Grid competitorsFilterSetsGrid;
     private VerticalPanel mainPanel;
     
-    private final List<FilterWithUI<CompetitorDTO>> availableCompetitorFilters;
+    private final List<String> availableCompetitorFilterNames;
     
     private final List<RadioButton> activeFilterSetRadioButtons;
     private final List<Button> editFilterSetButtons;
@@ -66,11 +65,11 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
         
         addFilterSetButton = new Button(stringMessages.actionAddFilter());
         
-        availableCompetitorFilters = new ArrayList<FilterWithUI<CompetitorDTO>>();
-        availableCompetitorFilters.add(new CompetitorTotalRankFilter());
-        availableCompetitorFilters.add(new CompetitorRaceRankFilter());
-        availableCompetitorFilters.add(new CompetitorNationalityFilter());
-        availableCompetitorFilters.add(new CompetitorSailNumbersFilter());
+        availableCompetitorFilterNames = new ArrayList<String>();
+        availableCompetitorFilterNames.add(CompetitorTotalRankFilter.FILTER_NAME);
+        availableCompetitorFilterNames.add(CompetitorRaceRankFilter.FILTER_NAME);
+        availableCompetitorFilterNames.add(CompetitorNationalityFilter.FILTER_NAME);
+        availableCompetitorFilterNames.add(CompetitorSailNumbersFilter.FILTER_NAME);
     }
     
     @Override
@@ -115,7 +114,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
                 }
                 
                 CreateCompetitorsFilterSetDialog dialog = new CreateCompetitorsFilterSetDialog(existingFilterSetNames,
-                        availableCompetitorFilters, stringMessages, new DialogCallback<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>>() {
+                        availableCompetitorFilterNames, stringMessages, new DialogCallback<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>>() {
                     @Override
                     public void ok(final FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet) {
                         createActiveFilterSetRadioButton(filterSet, false);
@@ -161,7 +160,7 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
                     }
                 }
                 
-                EditCompetitorsFilterSetDialog dialog = new EditCompetitorsFilterSetDialog(filterSetToEdit, availableCompetitorFilters, 
+                EditCompetitorsFilterSetDialog dialog = new EditCompetitorsFilterSetDialog(filterSetToEdit, availableCompetitorFilterNames, 
                         existingFilterSetNames, stringMessages, new DialogCallback<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>>() {
                     @Override
                     public void ok(final FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> changedFilterSet) {
