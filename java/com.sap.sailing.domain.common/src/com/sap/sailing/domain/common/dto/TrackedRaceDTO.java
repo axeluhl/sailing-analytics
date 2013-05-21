@@ -1,10 +1,11 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.domain.common.dto;
 
+import java.io.Serializable;
 import java.util.Date;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+public class TrackedRaceDTO implements Serializable {
+    private static final long serialVersionUID = -9040930745014670924L;
 
-public class TrackedRaceDTO implements IsSerializable {
     /**
      * Default constructor for GWT-Serialization
      */

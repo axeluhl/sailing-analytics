@@ -1,10 +1,9 @@
-package com.sap.sailing.gwt.ui.server;
+package com.sap.sailing.domain.leaderboard.caching;
 
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -15,18 +14,19 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.LeaderboardCache;
 import com.sap.sailing.domain.leaderboard.LeaderboardCacheManager;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.LockUtil;
 
 /**
@@ -45,13 +45,13 @@ public class LeaderboardDTOCache implements LeaderboardCache {
     private static final Logger logger = Logger.getLogger(LeaderboardDTOCache.class.getName());
     
     /**
-     * In live operations, {@link #getLeaderboardByName(String, Date, Collection)} is the application's
+     * In live operations, {@link #getLeaderboardByName(Date, Collection, DomainFactory, TrackedRegattaRegistry)} is the application's
      * bottleneck. When two clients ask the same data for the same leaderboard with their
      * <code>waitForLatestAnalyses</code> parameters set to <code>false</code>, expansion state and (quantized) time
      * stamp, no two computations should be spawned for the two clients. Instead, if the computation is still running,
      * all clients asking the same wait for the single result. Results are cached in this LRU-based evicting cache.
      */
-    private final WeakHashMap<Leaderboard, Map<Util.Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>> leaderboardCache;
+    private final Map<Util.Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>> leaderboardCache;
     private int leaderboardByNameCacheHitCount;
     private int leaderboardByNameCacheMissCount;
     
@@ -62,50 +62,44 @@ public class LeaderboardDTOCache implements LeaderboardCache {
      */
     private final boolean waitForLatestAnalyses;
     
-    private final SailingServiceImpl sailingService;
-    
+    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
     /**
      * A multi-threaded executor for the currently running leaderboard requests, executing the {@link Future}s currently
      * pending.
      */
-    private final Executor computeLeadearboardByNameExecutor;
+    private static final Executor computeLeadearboardByNameExecutor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
+            /* maximumPoolSize */ THREAD_POOL_SIZE,
+            /* keepAliveTime */ 60, TimeUnit.SECONDS,
+            /* workQueue */ new LinkedBlockingQueue<Runnable>());
 
     private final LeaderboardCacheManager leaderboardCacheManager;
     
-    public LeaderboardDTOCache(SailingServiceImpl sailingService, boolean waitForLatestAnalyses) {
-        this.sailingService = sailingService;
+    private final Leaderboard leaderboard;
+    
+    public LeaderboardDTOCache(boolean waitForLatestAnalyses, Leaderboard leaderboard) {
+        this.leaderboard = leaderboard;
         this.waitForLatestAnalyses = waitForLatestAnalyses;
         // if the leaderboard becomes weakly referenced and eventually GCed, then so can the cached results for it
-        this.leaderboardCache = new WeakHashMap<Leaderboard, Map<Util.Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>>();
-        this.leaderboardCacheManager = new LeaderboardCacheManager(this);
-        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
-        this.computeLeadearboardByNameExecutor =
-                new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
-                /* maximumPoolSize */ THREAD_POOL_SIZE,
-                /* keepAliveTime */ 60, TimeUnit.SECONDS,
-                /* workQueue */ new LinkedBlockingQueue<Runnable>());
-    }
-    
-    @Override
-    public void invalidate(Leaderboard leaderboard) {
-        synchronized (leaderboardCache) {
-            leaderboardCache.remove(leaderboard);
-        }
-    }
-    
-    @Override
-    public void add(Leaderboard leaderboard) {
-        LinkedHashMap<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>> map = new LinkedHashMap<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>() {
+        this.leaderboardCache = new LinkedHashMap<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>() {
             private static final long serialVersionUID = 7287916997229815039L;
             @Override
             protected boolean removeEldestEntry(Map.Entry<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>> e) {
                 return size() > 10; // remember 10 LeaderboardDTOs per leaderborad
             }
         };
+        this.leaderboardCacheManager = new LeaderboardCacheManager(this);
+        this.leaderboardCacheManager.add(leaderboard);
+    }
+    
+    @Override
+    public void invalidate(Leaderboard leaderboard) {
         synchronized (leaderboardCache) {
-            leaderboardCache.put(leaderboard, map);
+            leaderboardCache.clear();
         }
     }
+    
+    @Override
+    public void add(Leaderboard leaderboard) {}
     
     /**
      * If the cache holds entries for the <code>leaderboard</code> requested, compare <code>timePoint</code> to the
@@ -119,9 +113,9 @@ public class LeaderboardDTOCache implements LeaderboardCache {
      * {@link SailingServiceImpl#computeLeaderboardByName(Leaderboard, TimePoint, Collection, boolean)} if a new cache
      * entry needs to be computed. Caching distinguished between
      */
-    public LeaderboardDTO getLeaderboardByName(final Leaderboard leaderboard, final TimePoint timePoint,
-            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails)
-            throws NoWindException, InterruptedException, ExecutionException {
+    public LeaderboardDTO getLeaderboardByName(final TimePoint timePoint, final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
+            final DomainFactory baseDomainFactory, final TrackedRegattaRegistry trackedRegattaRegistry) throws NoWindException, InterruptedException,
+            ExecutionException {
         long startOfRequestHandling = System.currentTimeMillis();
         final TimePoint adjustedTimePoint;
         TimePoint timePointOfLastModification = leaderboard.getTimePointOfLatestModification();
@@ -134,50 +128,40 @@ public class LeaderboardDTOCache implements LeaderboardCache {
         Util.Pair<TimePoint, Collection<String>> key = new Util.Pair<TimePoint, Collection<String>>(adjustedTimePoint,
                 namesOfRaceColumnsForWhichToLoadLegDetails);
         FutureTask<LeaderboardDTO> future = null;
-        Map<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>> map = null;
         boolean cacheHit = false;
-        synchronized (leaderboardCache) {
-            map = leaderboardCache.get(leaderboard);
-            if (map == null) {
-                future = null;
-                leaderboardCacheManager.add(leaderboard); // adds it to leaderboardCache by calling back our add(Leaderboard) method
-                map = leaderboardCache.get(leaderboard);
-            } else {
-                /*
-                 * Waiting for latest analyzes results largely regards wind estimation and maneuver cache; see
-                 * SmartFutureCache. Even if waitForLatestAnalysis is requested, it is OK to cache. The cache would be
-                 * invalidated when the race changes, forcing a new re-calculation based on the latest analysis results.
-                 * Once the race stabilizes, the latest analysis results for maneuvers and wind estimation will no
-                 * longer change and can quickly be obtained from the respective SmartFutureCache. At the same time, if
-                 * a LeaderboardDTOCache entry is found, that was based on the latest analysis results at the time. If
-                 * new evidence is received, that would also invalidate the LeaderboardDTOCache. Therefore, it's okay to
-                 * re-use the LeaderboardDTOCache match even if the latest analysis results are requested.
-                 */
-                future = map.get(key);
-            }
-            if (future == null) {
-                final Thread callerThread = Thread.currentThread();
-                future = new FutureTask<LeaderboardDTO>(new Callable<LeaderboardDTO>() {
-                    @Override
-                    public LeaderboardDTO call() throws Exception {
-                        // The outer getLeaderboardByName(...) method will always wait for this future's completion.
-                        // Therefore, it's safe to propagate the calling thread's locks to this one:
-                        LockUtil.propagateLockSetFrom(callerThread);
-                        try {
-                            LeaderboardDTO result = sailingService.computeLeaderboardByName(leaderboard,
-                                    adjustedTimePoint, namesOfRaceColumnsForWhichToLoadLegDetails,
-                                    waitForLatestAnalyses);
-                            return result;
-                        } finally {
-                            LockUtil.unpropagateLockSetFrom(callerThread);
-                        }
+        /*
+         * Waiting for latest analyzes results largely regards wind estimation and maneuver cache; see SmartFutureCache.
+         * Even if waitForLatestAnalysis is requested, it is OK to cache. The cache would be invalidated when the race
+         * changes, forcing a new re-calculation based on the latest analysis results. Once the race stabilizes, the
+         * latest analysis results for maneuvers and wind estimation will no longer change and can quickly be obtained
+         * from the respective SmartFutureCache. At the same time, if a LeaderboardDTOCache entry is found, that was
+         * based on the latest analysis results at the time. If new evidence is received, that would also invalidate the
+         * LeaderboardDTOCache. Therefore, it's okay to re-use the LeaderboardDTOCache match even if the latest analysis
+         * results are requested.
+         */
+        future = leaderboardCache.get(key);
+        if (future == null) {
+            final Thread callerThread = Thread.currentThread();
+            future = new FutureTask<LeaderboardDTO>(new Callable<LeaderboardDTO>() {
+                @Override
+                public LeaderboardDTO call() throws Exception {
+                    // The outer getLeaderboardByName(...) method will always wait for this future's completion.
+                    // Therefore, it's safe to propagate the calling thread's locks to this one:
+                    LockUtil.propagateLockSetFrom(callerThread);
+                    try {
+                        LeaderboardDTO result = leaderboard.computeDTO(adjustedTimePoint,
+                                namesOfRaceColumnsForWhichToLoadLegDetails, waitForLatestAnalyses,
+                                trackedRegattaRegistry, baseDomainFactory);
+                        return result;
+                    } finally {
+                        LockUtil.unpropagateLockSetFrom(callerThread);
                     }
-                });
-                computeLeadearboardByNameExecutor.execute(future);
-                map.put(key, future);
-            } else {
-                cacheHit = true;
-            }
+                }
+            });
+            computeLeadearboardByNameExecutor.execute(future);
+            leaderboardCache.put(key, future);
+        } else {
+            cacheHit = true;
         }
         if (cacheHit) {
             leaderboardByNameCacheHitCount++;

@@ -5,7 +5,7 @@ import java.util.Comparator;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 
 /**
  * Renders the values and the percentage bar of the {@link DetailTypeColumn} and {@link ManeuverCountRaceColumn}.

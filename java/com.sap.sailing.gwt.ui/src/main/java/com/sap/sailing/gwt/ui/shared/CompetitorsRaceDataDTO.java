@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public class CompetitorsRaceDataDTO implements IsSerializable {
     
