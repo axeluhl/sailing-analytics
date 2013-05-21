@@ -637,4 +637,9 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
         timeChanged(timer.getTime());
     }
+    
+    @Override
+    public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
+        timeChanged(timer.getTime());
+    }
 }

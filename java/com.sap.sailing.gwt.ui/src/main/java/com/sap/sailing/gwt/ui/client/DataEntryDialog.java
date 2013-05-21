@@ -263,7 +263,7 @@ public abstract class DataEntryDialog<T> {
      * 
      * @param initialValue initial value to show in the integer box; <code>null</code> is permissible
      */
-    public IntegerBox createIntegerBox(int initialValue, int visibleLength) {
+    public IntegerBox createIntegerBox(Integer initialValue, int visibleLength) {
         IntegerBox intBox = new IntegerBox();
         intBox.setVisibleLength(visibleLength);
         intBox.setValue(initialValue);
