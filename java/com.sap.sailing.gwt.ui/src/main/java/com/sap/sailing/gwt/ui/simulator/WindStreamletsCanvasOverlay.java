@@ -17,7 +17,6 @@ import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.gwt.ui.client.TimeListenerWithStoppingCriteria;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
@@ -230,7 +229,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         if (drawHead) {
             drawHead(x1, y1, theta, hLength, weight);
         }
-        //String text = "P" + index;// + NumberFormat.getFormat("0.00").format(windDTO.trueWindBearingDeg) + "°";
+        //String text = "P" + index;// + NumberFormat.getFormat("0.00").format(windDTO.trueWindBearingDeg) + "ï¿½";
         //drawPointWithText(x, y, text);
         //drawPoint(x, y);
         
@@ -280,14 +279,14 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     }
 
     @Override
-    public int stop() {
+    public boolean shallStop() {
         if (!this.isVisible() || timePointWindDTOMap == null || timer == null   || timePointWindDTOMap.isEmpty()) {
-            return 0;
+            return true;
         }
         if (timePointWindDTOMap.lastKey() < timer.getTime().getTime()) {
-            return 0;
+            return true;
         } else {
-            return 1;
+            return false;
         }
     }
 

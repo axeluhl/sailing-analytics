@@ -12,10 +12,10 @@ public class ColorJsonSerializer implements JsonSerializer<Color> {
     public static final String FIELD_BLUE = "b";
 
     @Override
-    public JSONObject serialize(Color object) {
+    public JSONObject serialize(Color color) {
         JSONObject result = new JSONObject();
 
-        Triple<Integer, Integer, Integer> rgb = object.getAsRGB();
+        Triple<Integer, Integer, Integer> rgb = color.getAsRGB();
         result.put(FIELD_RED, rgb.getA());
         result.put(FIELD_GREEN, rgb.getB());
         result.put(FIELD_BLUE, rgb.getC());

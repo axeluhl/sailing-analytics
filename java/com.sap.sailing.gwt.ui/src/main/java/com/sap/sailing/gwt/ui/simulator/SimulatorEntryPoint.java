@@ -15,9 +15,7 @@ import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 
 public class SimulatorEntryPoint extends AbstractEntryPoint {
 
-    private String titleName;
-    //private String rightLabelName;
-    private SimulatorViewModes viewMode;
+    private final String titleName = "Strategy Simulator";
 
     private final SimulatorServiceAsync simulatorSvc = GWT.create(SimulatorService.class);
     private int xRes = 40;
@@ -34,18 +32,12 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private static Logger logger = Logger.getLogger(SimulatorEntryPoint.class.getName());
 
     @Override
-    public void onModuleLoad() {
-        super.onModuleLoad();
-        titleName = "Strategy Simulator";
-        //rightLabelName = "My Race";
-        viewMode = SimulatorViewModes.ONESCREEN;
-        
+    protected void doOnModuleLoad() {
+        super.doOnModuleLoad();
         checkUrlParameters();
-
     }
 
     private void checkUrlParameters() {
-
         String horizontalRes = Window.Location.getParameter("horizontalRes");
         if (horizontalRes == null || horizontalRes.isEmpty()) {
            logger.config("Using default horizontal resolution " + xRes);
@@ -109,13 +101,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         }
         SimulatorMainPanel mainPanel = new SimulatorMainPanel(simulatorSvc, stringMessages, this, xRes, yRes,
                 autoUpdate, mode, showGrid, showLines, seedLines, showArrows, showStreamlets);
-
-        switch (viewMode) {
-        case ONESCREEN:
-            createRaceBoardInOneScreenMode(mainPanel);
-            break;
-        }
-        
+        createRaceBoardInOneScreenMode(mainPanel);
     }
 
     private FlowPanel createLogoAndTitlePanel(SimulatorMainPanel simulatorPanel) {

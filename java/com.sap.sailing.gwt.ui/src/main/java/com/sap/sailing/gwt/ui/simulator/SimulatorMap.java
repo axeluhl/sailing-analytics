@@ -22,7 +22,6 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeListenerWithStoppingCriteria;
 import com.sap.sailing.gwt.ui.client.TimePanel;
 import com.sap.sailing.gwt.ui.client.TimePanelSettings;
 import com.sap.sailing.gwt.ui.client.Timer;
@@ -693,19 +692,19 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     @Override
     public void timeChanged(Date date) {
-        if (this.stop() == 0) {
+        if (this.shallStop()) {
             LOGGER.info("Stopping the timer");
             this.timer.stop();
         }
     }
 
     @Override
-    public int stop() {
-        int value = 0;
+    public boolean shallStop() {
+        boolean shallStop = false;
         for (TimeListenerWithStoppingCriteria t : this.timeListeners) {
-            value += t.stop();
+            shallStop |= t.shallStop();
         }
-        return value;
+        return shallStop;
     }
 
     private PathPolyline createPathPolyline(PathDTO pathDTO) {
