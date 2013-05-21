@@ -1,3 +1,5 @@
+# TracTrac Race Lifecycle
+
 There is a lifecycle that every event manager should apply when working with the TracTrac console. It is VERY important that these rules are implemented during an event. One simple rule: After each day of racing set all races that has not been used to state HIDDEN!
 
 1) When races are created they are by default given the status 'OFFLINE'
