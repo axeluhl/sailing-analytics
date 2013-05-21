@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 
 /**
  * This interface helps to get the String or the Double values of a {@link LeaderboardRowDTO}.

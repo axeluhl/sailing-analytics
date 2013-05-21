@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.polarsheets;
 
-import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.domain.common.dto.RaceDTO;
 
 public class RaceFilter {
     

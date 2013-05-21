@@ -52,6 +52,8 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -75,13 +77,11 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
-import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
-import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -1160,25 +1160,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         Iterable<CompetitorDTO> result;
         Iterable<CompetitorDTO> selection = competitorSelection.getSelectedCompetitors();
         if (!settings.isShowOnlySelectedCompetitors() || Util.isEmpty(selection)) {
-            if (settings.isShowAllCompetitors()) {
-                result = competitorSelection.getAllCompetitors();
-            } else {
-                int visibleCompetitorsCount = settings.getMaxVisibleCompetitorsCount();
-                if (quickRanks != null && quickRanks.size() >= visibleCompetitorsCount) {
-                    Set<CompetitorDTO> competitorList = new HashSet<CompetitorDTO>();
-                    int i = 1;
-                    for (QuickRankDTO quickRank: quickRanks) {
-                        if (i++ <= visibleCompetitorsCount) {
-                            competitorList.add(quickRank.competitor);
-                        } else {
-                            break;
-                        }
-                    }
-                    result = competitorList;
-                } else {
-                    result = competitorSelection.getAllCompetitors();
-                }
-            }
+            result = competitorSelection.getFilteredCompetitors();
         } else {
             result = selection;
         }
@@ -1653,12 +1635,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             settings.setHelpLinesSettings(newSettings.getHelpLinesSettings());
             requiredRedraw = true;
         }
-        if (newSettings.isShowAllCompetitors() != settings.isShowAllCompetitors() ||
-                newSettings.getMaxVisibleCompetitorsCount() != settings.getMaxVisibleCompetitorsCount()) {
-            settings.setShowAllCompetitors(newSettings.isShowAllCompetitors());
-            settings.setMaxVisibleCompetitorsCount(newSettings.getMaxVisibleCompetitorsCount());
-            requiredRedraw = true;
-        }
         if (requiredRedraw) {
             redraw();
         }
@@ -1787,6 +1763,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+        timeChanged(timer.getTime());
+    }
+    
+    @Override
+    public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
         timeChanged(timer.getTime());
     }
 }
