@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public class SelectedCompetitorsFilter implements FilterWithUI<CompetitorDTO>, CompetitorSelectionProviderFilterContext {
     public static final String FILTER_NAME = "SelectedCompetitorsFilter";

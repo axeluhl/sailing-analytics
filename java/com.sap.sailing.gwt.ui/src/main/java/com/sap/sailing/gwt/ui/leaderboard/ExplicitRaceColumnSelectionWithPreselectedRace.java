@@ -4,8 +4,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 
 /**
  * A variant of {@link ExplicitRaceColumnSelection} which has a pre-selected race. As opposed to the base class,

@@ -8,8 +8,8 @@ import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.geom.Size;
 import com.google.gwt.maps.client.overlay.Overlay;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
-import com.sap.sailing.gwt.ui.shared.PositionDTO;
 
 /**
  * A google map overlay based on a HTML5 canvas for drawing course marks (images) and the buoy zone if the mark is a buoy.

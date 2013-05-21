@@ -155,6 +155,10 @@ public class Timer {
         }
     }
     
+    public double getPlaySpeedFactor() {
+        return playSpeedFactor;
+    }
+    
     public void setRefreshInterval(long refreshIntervalInMillis) {
         this.refreshInterval = refreshIntervalInMillis;
         if (playState == PlayStates.Playing) {

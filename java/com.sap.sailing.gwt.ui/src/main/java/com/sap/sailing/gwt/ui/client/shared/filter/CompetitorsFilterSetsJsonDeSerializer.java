@@ -6,10 +6,10 @@ import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.filter.FilterSet;
 import com.sap.sailing.domain.common.filter.ValueFilter;
 import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
-import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<CompetitorsFilterSets> {
     public static final String FIELD_ACTIVE_FILTERSET = "activeFilterSet";

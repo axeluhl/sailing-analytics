@@ -211,7 +211,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         playSpeedBox.setVisibleLength(3);
         playSpeedBox.setWidth("25px");
         playSpeedBox.setHeight("14px");
-        playSpeedBox.setValue(1);
+        playSpeedBox.setValue((int)timer.getPlaySpeedFactor()); // Christopher: initialize play speed box according to play speed factor
         playSpeedBox.setTitle(stringMessages.playSpeedHelp());
         playSpeedBox.addValueChangeHandler(new ValueChangeHandler<Integer>() {
             @Override
@@ -338,9 +338,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         if (!min.equals(timeRangeProvider.getFromTime())) {
             changed = true;
             timeSlider.setMinValue(new Double(min.getTime()), fireEvent);
-            if (timeSlider.getCurrentValue() == null) {
-                timeSlider.setCurrentValue(new Double(min.getTime()), fireEvent);
-            }
         }
         if (changed) {
             if(!timeRangeProvider.isZoomed()) {
@@ -352,6 +349,11 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
                 timeSlider.setStepSize(numSteps, fireEvent);
             } else {
                 timeSlider.setStepSize(1000, fireEvent);
+            }
+
+            // Christopher: following setCurrentValue requires stepsize to be set <> 0 (otherwise division by zero; NaN)
+            if (timeSlider.getCurrentValue() == null) {
+                timeSlider.setCurrentValue(new Double(min.getTime()), fireEvent);
             }
         }
     }

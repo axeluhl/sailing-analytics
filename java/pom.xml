@@ -48,8 +48,8 @@
 		<module>com.sap.sailing.www</module>
 		<module>com.sap.sailing.www.events</module>
 		<module>com.sap.sailing.xcelsiusadapter</module>
-	    <module>com.sap.sailing.gwt.ui</module>
-       	<module>com.sap.sailing.gwt.ui.test</module>
+	        <module>com.sap.sailing.gwt.ui</module>
+       	        <module>com.sap.sailing.gwt.ui.test</module>
 		<module>com.google.gwt.osgi</module>
 		<module>com.sap.sailing.server.test</module>
 		<module>com.sap.sailing.mongodb</module>
@@ -85,6 +85,10 @@
 		<module>com.sap.sailing.nmeaconnector.test</module>
 		<module>net.sf.marineapi</module>
 		<module>net.sf.marineapi.test</module>
+		<module>com.sap.sailing.simulator</module>
+<!-- While simulator tests fail massively, this remains commented out
+		<module>com.sap.sailing.simulator.test</module>
+-->
 	</modules>
 	
 	<properties>

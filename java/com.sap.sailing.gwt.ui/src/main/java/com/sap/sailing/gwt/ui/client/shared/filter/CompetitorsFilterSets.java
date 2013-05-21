@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.filter.FilterSet;
-import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public class CompetitorsFilterSets {
     private List<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>> filterSets;

@@ -407,6 +407,12 @@ public class StoreAndForward implements Runnable {
                     }
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "Exception in StoreAndForward", e);
+                    try {
+                        Thread.sleep(100); // if the exception persists, wait a little, hoping something may recover
+                    } catch (InterruptedException e1) {
+                        logger.log(Level.INFO, "StoreAndForward.run interrupted; setting stopped=true", e1);
+                        stopped = true;
+                    } 
                 }
             }
             logger.info("StoreAndForward is closing receiving server socket");

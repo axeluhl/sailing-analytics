@@ -29,6 +29,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker.Symbol;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -38,7 +39,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public class LeaderboardRankChart extends SimplePanel implements RequiresResize, TimeListener {
     private static final int LINE_WIDTH = 1;

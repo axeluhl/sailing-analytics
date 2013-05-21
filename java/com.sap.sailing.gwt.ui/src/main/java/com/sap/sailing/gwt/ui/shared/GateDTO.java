@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Arrays;
 
 public class GateDTO extends ControlPointDTO {
+    private static final long serialVersionUID = 3436355049412041735L;
     private MarkDTO left;
     private MarkDTO right;
     
