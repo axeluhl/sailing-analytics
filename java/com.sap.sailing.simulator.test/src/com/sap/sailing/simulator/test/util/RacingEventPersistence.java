@@ -24,7 +24,7 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.impl.SimulatorUtils;
 
 @SuppressWarnings("restriction")
-public class TestRacingEventPersistence {
+public class RacingEventPersistence {
 
     static RacingEventServiceImpl service;
     static RacesHandle raceHandle;

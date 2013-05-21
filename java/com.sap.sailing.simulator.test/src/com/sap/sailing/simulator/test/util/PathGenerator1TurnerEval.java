@@ -23,7 +23,7 @@ import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
-public class PathGenerator1TurnerTest {
+public class PathGenerator1TurnerEval {
 
     private static final String RESOURCES = "resources/";
 

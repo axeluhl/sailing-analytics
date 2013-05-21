@@ -33,7 +33,7 @@ import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.PathImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
 
-public class TestTimeComparison {
+public class TimeComparison {
 
     private static final String RESOURCES = "resources/";
 
