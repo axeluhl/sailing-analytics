@@ -1,6 +1,5 @@
-package com.sap.sailing.simulator.test;
+package com.sap.sailing.simulator.test.util;
 
-import com.sap.sailing.simulator.test.util.TracTracWriter;
 
 public class TestTracTracWriter {
 

@@ -21,9 +21,9 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.impl.SimulatorUtils;
 
 @SuppressWarnings("restriction")
-public class RaceDataAccessTest {
+public class RaceDataAccessEval {
 
-    private static final Logger logger = Logger.getLogger(RaceDataAccessTest.class.getName());
+    private static final Logger logger = Logger.getLogger(RaceDataAccessEval.class.getName());
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private static URL paramUrl;
