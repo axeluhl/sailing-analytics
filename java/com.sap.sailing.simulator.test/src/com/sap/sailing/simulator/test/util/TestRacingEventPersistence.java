@@ -1,4 +1,4 @@
-package com.sap.sailing.simulator.test.analysis;
+package com.sap.sailing.simulator.test.util;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -28,20 +26,20 @@ import com.sap.sailing.simulator.impl.SimulatorUtils;
 @SuppressWarnings("restriction")
 public class TestRacingEventPersistence {
 
-    RacingEventServiceImpl service;
-    private RacesHandle raceHandle;
-    String paramURLStr = "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=d1f521fa-ec52-11e0-a523-406186cbf87c";
+    static RacingEventServiceImpl service;
+    static RacesHandle raceHandle;
+    static String paramURLStr = "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=d1f521fa-ec52-11e0-a523-406186cbf87c";
     // proxy
-    String liveURIStr = "tcp://10.18.22.156:1520";
-    String storedURIStr = "tcp://10.18.22.156:1521";
+    static String liveURIStr = "tcp://10.18.22.156:1520";
+    static String storedURIStr = "tcp://10.18.22.156:1521";
 
     // non-proxy
     // String liveURIStr = "tcp://germanmaster.traclive.dk:4400";
     // String storedURIStr = "tcp://germanmaster.traclive.dk:4401";
 
     @SuppressWarnings("unchecked")
-    @Test
-    public void test() throws Exception {
+    public static void main(String[] args) throws Exception {
+        System.out.println("Save race data to .data-files");
 
         System.setProperty("mongo.port", "10200");
         System.setProperty("http.proxyHost", "proxy.wdf.sap.corp");

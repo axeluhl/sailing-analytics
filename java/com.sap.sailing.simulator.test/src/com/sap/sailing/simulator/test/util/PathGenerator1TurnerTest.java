@@ -1,6 +1,7 @@
-package com.sap.sailing.simulator.test;
+package com.sap.sailing.simulator.test.util;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,9 +9,6 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 
 import junit.framework.Assert;
-
-import org.junit.Before;
-import org.junit.Test;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
@@ -27,6 +25,8 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 public class PathGenerator1TurnerTest {
 
+    private static final String RESOURCES = "resources/";
+
     // private static final String POLAR_DIAGRAM_49_CSV_FILE_PATH = "resources/PolarDiagram49.csv";
     // private static final String POLAR_DIAGRAM_49_BETHWAITE_CSV_FILE_PATH = "resources/PolarDiagram49Bethwaite.csv";
     // private static final String POLAR_DIAGRAM_49_ORC_CSV_FILE_PATH = "resources/PolarDiagram49ORC.csv";
@@ -38,17 +38,19 @@ public class PathGenerator1TurnerTest {
     private WindFieldGenerator _windField = null;
     private PathGenerator1Turner _pathGenerator = null;
 
-    @Before
+    public static void main(String[] args) throws IOException {
+        System.out.println("Collection of test methods for evaluating path segments.");
+    }
+    
     public void initialize() throws IOException, ClassNotFoundException {
 
         this._polarDiagram = new PolarDiagramCSV(POLAR_DIAGRAM_49_STG_CSV_FILE_PATH);
         this._simulationParameters = new SimulationParametersImpl(null, this._polarDiagram, null, SailingSimulatorUtil.measured);
         this._pathGenerator = new PathGenerator1Turner(this._simulationParameters);
 
-        this._windField = readWindFieldGeneratorFromExternalFile("C:\\java\\workspace\\sapsailingcapture\\java\\com.sap.sailing.simulator\\src\\resources\\windField.dat");
+        this._windField = readWindFieldGeneratorFromExternalFile("windField.dat");
     }
 
-    @Test
     public void test_get1Turner_allCourse() {
 
         Position start = new DegreePosition(53.97207883355604, 10.890463283282314);
@@ -74,7 +76,6 @@ public class PathGenerator1TurnerTest {
         Assert.assertEquals(1360533820118L, result.getTimePoint().asMillis());
     }
 
-    @Test
     public void test_get1Turner_segment1() {
 
         Position start = new DegreePosition(53.97042597845473, 10.895004272460938);
@@ -100,7 +101,6 @@ public class PathGenerator1TurnerTest {
         Assert.assertEquals(1317552764000L, result.getTimePoint().asMillis());
     }
 
-    @Test
     public void test_get1Turner_segment2() {
 
         Position start = new DegreePosition(53.969066999999995, 10.893665);
@@ -127,11 +127,11 @@ public class PathGenerator1TurnerTest {
         Assert.assertEquals(1317552752000L, result.getTimePoint().asMillis());
     }
 
-    public static WindFieldGenerator readWindFieldGeneratorFromExternalFile(final String fileName) {
+    public WindFieldGenerator readWindFieldGeneratorFromExternalFile(final String fileName) {
         WindFieldGenerator result = null;
 
         try {
-            final InputStream file = new FileInputStream(fileName);
+            final InputStream file = new FileInputStream(getFile(fileName));
             final InputStream buffer = new BufferedInputStream(file);
             final ObjectInput input = new ObjectInputStream(buffer);
 
@@ -152,4 +152,9 @@ public class PathGenerator1TurnerTest {
 
         return result;
     }
+    
+    private File getFile(String fileName) {
+        return new File(RESOURCES + fileName);
+    }
+
 }

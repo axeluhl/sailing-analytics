@@ -1,11 +1,9 @@
-package com.sap.sailing.simulator.test;
+package com.sap.sailing.simulator.test.util;
 
+import java.io.IOException;
 import java.util.List;
 
 import junit.framework.Assert;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
@@ -27,7 +25,10 @@ public class PathGeneratorTracTracTest {
 
     private static PathGeneratorTracTrac pathGenerator = null;
 
-    @BeforeClass
+    public static void main(String[] args) throws IOException {
+        System.out.println("Collection of test methods for evaluating tractrac race access.");
+    }    
+
     public static void initialize() {
 
         System.setProperty("mongo.port", "10200");
@@ -38,7 +39,6 @@ public class PathGeneratorTracTracTest {
         PathGeneratorTracTracTest.pathGenerator.setEvaluationParameters(RACE_URL, LIVE_URI, STORED_URI, WIND_SCALE);
     }
 
-    @Test
     public void testGetLeg() {
 
         PathGeneratorTracTracTest.pathGenerator.setSelectionParameters(0, 0);
@@ -58,7 +58,6 @@ public class PathGeneratorTracTracTest {
         Assert.assertEquals(98, leg3.getPathPoints().size());
     }
 
-    @Test
     public void testGetLegPolyline() {
 
         Distance maxDistance = new MeterDistance(4.88);
@@ -80,7 +79,6 @@ public class PathGeneratorTracTracTest {
         Assert.assertEquals(7, legPolyline3.getPathPoints().size());
     }
 
-    @Test
     public void testGetLegsNames() {
 
         List<String> legsNames = PathGeneratorTracTracTest.pathGenerator.getLegsNames();

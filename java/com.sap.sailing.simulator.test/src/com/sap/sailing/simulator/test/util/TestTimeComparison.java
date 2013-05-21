@@ -1,4 +1,4 @@
-package com.sap.sailing.simulator.test.analysis;
+package com.sap.sailing.simulator.test.util;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -9,9 +9,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import org.junit.Before;
-import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -35,10 +32,10 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.PathImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
-import com.sap.sailing.simulator.test.util.TracTracReader;
-import com.sap.sailing.simulator.test.util.TracTracReaderFromFiles;
 
 public class TestTimeComparison {
+
+    private static final String RESOURCES = "resources/";
 
     private List<PositionDTO> turnPoints = null;
     private List<SimulatorWindDTO> allPoints = null;
@@ -48,7 +45,10 @@ public class TestTimeComparison {
     // private List<Integer> timeStepMillisecondsSizes = null;
     private Integer timeStepMilliseconds = 1000;
 
-    @Before
+    public static void main(String[] args) throws Exception {
+        System.out.println("Collection of test methods for evaluating simulator race times for calibration.");  
+    }
+    
     public void initialize() {
 
         this.boatClassesIndexes = new HashMap<Integer, String>();
@@ -70,10 +70,9 @@ public class TestTimeComparison {
          */
     }
 
-    @Test
     public void runSimulation() throws Exception {
 
-        File dir = new File("C:\\Users\\i059829\\workspace\\sapsailingcapture\\java\\com.sap.sailing.simulator.test");
+        File dir = getFile("");
         String[] flist = dir.list(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String filename) {
@@ -88,7 +87,7 @@ public class TestTimeComparison {
         // List<String> csvRows = new ArrayList<String>();
 
         BufferedWriter outputCSV = new BufferedWriter(new FileWriter(
-                "src\\com\\sap\\sailing\\simulator\\test\\analysis\\Resources\\test.csv"));
+                getFile("test.csv")));
         String header = "Event, Race, Competitor, Leg#, Leg, GPS time";
 
         for (String pd : boatClassesIndexes.values()) {
@@ -247,6 +246,10 @@ public class TestTimeComparison {
 
         return result;
 
+    }
+
+    private File getFile(String fileName) {
+        return new File(RESOURCES + fileName);
     }
 
 }
