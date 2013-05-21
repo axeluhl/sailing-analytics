@@ -101,6 +101,9 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -398,10 +401,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * <p>
      * 
      * Otherwise, the leaderboard is computed synchronously on the fly.
+     * 
+     * @param previousLeaderboardId
+     *            if <code>null</code> or no leaderboard with that {@link LeaderboardDTO#getId() ID} is known, a
+     *            {@link FullLeaderboardDTO} will be computed; otherwise, an {@link IncrementalLeaderboardDTO} will be
+     *            computed as the difference between the new, resulting leaderboard and the previous leaderboard.
      */
     @Override
-    public LeaderboardDTO getLeaderboardByName(final String leaderboardName, final Date date,
-            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails)
+    public IncrementalOrFullLeaderboardDTO getLeaderboardByName(final String leaderboardName, final Date date,
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, String previousLeaderboardId)
                     throws NoWindException, InterruptedException, ExecutionException {
         long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDTO result = null;
@@ -418,7 +426,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     + namesOfRaceColumnsForWhichToLoadLegDetails + ") took "
                     + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
         }
-        return result;
+        return new FullLeaderboardDTO(result);
     }
 
     @Override

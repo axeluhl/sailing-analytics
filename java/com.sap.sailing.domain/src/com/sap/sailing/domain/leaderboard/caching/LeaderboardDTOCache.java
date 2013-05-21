@@ -80,7 +80,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
         this.leaderboard = leaderboard;
         this.waitForLatestAnalyses = waitForLatestAnalyses;
         // if the leaderboard becomes weakly referenced and eventually GCed, then so can the cached results for it
-        this.leaderboardCache = new LinkedHashMap<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>() {
+        this.leaderboardCache = new LinkedHashMap<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>(16, 0.75f, /* access-based eviction */ true) {
             private static final long serialVersionUID = 7287916997229815039L;
             @Override
             protected boolean removeEldestEntry(Map.Entry<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>> e) {

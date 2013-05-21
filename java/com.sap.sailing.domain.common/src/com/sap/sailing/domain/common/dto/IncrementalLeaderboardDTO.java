@@ -8,8 +8,8 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
     private static final long serialVersionUID = -7011986430671280594L;
     private static final Logger logger = Logger.getLogger(IncrementalLeaderboardDTO.class.getName());
     
-    public IncrementalLeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment, boolean higherScoreIsBetter) {
-        super(timePointOfLastCorrectionsValidity, comment, higherScoreIsBetter);
+    public IncrementalLeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator) {
+        super(timePointOfLastCorrectionsValidity, comment, higherScoreIsBetter, uuidGenerator);
     }
     
     @Override

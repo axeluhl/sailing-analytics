@@ -16,8 +16,23 @@ import java.util.Set;
  * @author Axel Uhl (d043530)
  *  
  */
-public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializable {
+public class LeaderboardDTO extends AbstractLeaderboardDTO implements Cloneable, Serializable {
     private static final long serialVersionUID = -520930809792750648L;
+    
+    public interface UUIDGenerator {
+        String generateRandomUUID();
+    }
+    
+    /**
+     * A unique ID, obtained by applying <code>toString</code> to an object of type <code>java.util.UUID</code>.
+     * When {@link #clone} is called on this object, a new ID is generated for the result.
+     */
+    private String id;
+    
+    /**
+     * If the object is to support the {@link #clone()} operation, it needs to have a non-<code>null</code> UUID generator set.
+     */
+    private UUIDGenerator uuidGenerator;
 
     /**
      * The competitor list, ordered ascending by total rank
@@ -31,7 +46,7 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
     private Date timePointOfLastCorrectionsValidity;
 
     private String comment;
-
+    
     /**
      * Taken from the scoring scheme. Shall be used by the race columns to control their initial sort order.
      */
@@ -39,12 +54,29 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
 
     LeaderboardDTO() {} // for serialization
 
-    public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment, boolean higherScoreIsBetter) {
+    /**
+     * @param uuidGenerator used to provide the {@link #id ID} for this object (see also {@link #getId()}) and for any clones produced
+     * from it by the {@link #clone()} operation.
+     */
+    public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator) {
+        this.uuidGenerator = uuidGenerator;
+        id = uuidGenerator.generateRandomUUID();
         this.timePointOfLastCorrectionsValidity = timePointOfLastCorrectionsValidity;
         this.comment = comment;
         competitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>();
         this.suppressedCompetitors = new HashSet<CompetitorDTO>();
         this.higherScoresIsBetter = higherScoreIsBetter;
+    }
+    
+    @Override
+    protected LeaderboardDTO clone() throws CloneNotSupportedException {
+        LeaderboardDTO result = (LeaderboardDTO) super.clone();
+        result.id = uuidGenerator.generateRandomUUID();
+        return result;
+    }
+    
+    public String getId() {
+        return id;
     }
 
     public Iterable<CompetitorDTO> getSuppressedCompetitors() {

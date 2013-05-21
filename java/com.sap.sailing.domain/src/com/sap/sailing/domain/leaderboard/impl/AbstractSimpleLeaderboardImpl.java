@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -323,6 +324,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         @Override
         public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
             invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+    }
+    
+    private static class UUIDGenerator implements LeaderboardDTO.UUIDGenerator {
+        @Override
+        public String generateRandomUUID() {
+            return UUID.randomUUID().toString();
         }
     }
 
@@ -977,7 +985,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result = new LeaderboardDTO(this.getScoreCorrection().getTimePointOfLastCorrectionsValidity()==null ?
                     null : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(),
                     this.getScoreCorrection()==null?null:this.getScoreCorrection().getComment(),
-                            this.getScoringScheme().isHigherBetter());
+                            this.getScoringScheme().isHigherBetter(), new UUIDGenerator());
             result.competitors = new ArrayList<CompetitorDTO>();
             result.name = this.getName();
             result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
