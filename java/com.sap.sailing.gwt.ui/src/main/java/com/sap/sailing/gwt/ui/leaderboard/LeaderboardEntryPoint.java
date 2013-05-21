@@ -14,12 +14,14 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -45,8 +47,8 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_AUTO_EXPAND_LAST_RACE_COLUMN = "autoExpandLastRaceColumn";
     private static final String PARAM_REGATTA_NAME = "regattaName";
     private static final String PARAM_REFRESH_INTERVAL_MILLIS = "refreshIntervalMillis";
-    private static final String PARAM_SHOW_OVERALL_LEADERBOARDS_ON_SAME_PAGE = "showOverallLeaderboardsOnSamePage";
     private static final String PARAM_DELAY_TO_LIVE_MILLIS = "delayToLiveMillis";
+    private static final String PARAM_SHOW_RANK_CHART = "showRankChart";
     
     /**
      * Parameter to support scaling the complete page by a given factor. This works by either using the
@@ -64,6 +66,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_NAME_LAST_N = "lastN";
     private String leaderboardName;
     private String leaderboardGroupName;
+    private LeaderboardType leaderboardType;
     private GlobalNavigationPanel globalNavigationPanel;
     
     @Override
@@ -75,28 +78,34 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 && Window.Location.getParameter(PARAM_EMBEDDED).equalsIgnoreCase("true");
         final long delayToLiveMillis = Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS) != null ?
                 Long.valueOf(Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS)) : 5000l; // default 5s
-        sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
-            @Override
-            public void onSuccess(List<String> leaderboardNames) {
-                leaderboardName = Window.Location.getParameter("name");
-                leaderboardGroupName = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
-                if (leaderboardNames.contains(leaderboardName)) {
-                    createUI(showRaceDetails, embedded, delayToLiveMillis);
-                } else {
-                    RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
-                }
-                
-                final String zoomTo = Window.Location.getParameter(PARAM_ZOOM_TO);
-                if (zoomTo != null) {
-                    RootPanel.getBodyElement().setAttribute("style", "zoom: "+zoomTo+";-moz-transform: scale("+zoomTo+");-moz-transform-origin: 0 0;-o-transform: scale("+zoomTo+");-o-transform-origin: 0 0;-webkit-transform: scale("+zoomTo+");-webkit-transform-origin: 0 0;");
-                }
-            }
 
-            @Override
-            public void onFailure(Throwable t) {
-                reportError("Error trying to obtain list of leaderboard names: " + t.getMessage());
-            }
-        });
+        leaderboardName = Window.Location.getParameter("name");
+        leaderboardGroupName = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
+
+        if(leaderboardName != null) {
+            sailingService.checkLeaderboardName(leaderboardName, new AsyncCallback<Pair<String, LeaderboardType>>() {
+                @Override
+                public void onSuccess(Pair<String, LeaderboardType> leaderboardNameAndType) {
+                    if (leaderboardNameAndType != null && leaderboardName.equals(leaderboardNameAndType.getA())) {
+                        leaderboardType = leaderboardNameAndType.getB();
+                        createUI(showRaceDetails, embedded, delayToLiveMillis);
+                    } else {
+                        RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    reportError("Error trying to obtain list of leaderboard names: " + t.getMessage());
+                }
+            });
+        } else {
+            RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
+        }
+        final String zoomTo = Window.Location.getParameter(PARAM_ZOOM_TO);
+        if (zoomTo != null) {
+            RootPanel.getBodyElement().setAttribute("style", "zoom: "+zoomTo+";-moz-transform: scale("+zoomTo+");-moz-transform-origin: 0 0;-o-transform: scale("+zoomTo+");-o-transform-origin: 0 0;-webkit-transform: scale("+zoomTo+");-webkit-transform-origin: 0 0;");
+        }
     }
     
     private void createUI(boolean showRaceDetails, boolean embedded, long delayToLiveMillis) {
@@ -136,17 +145,28 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
             timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, always goes "live"
         }
-        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(),
-                leaderboardSettings,
-                    preselectedRace, new CompetitorSelectionModel(
-                        /* hasMultiSelection */true), timer, leaderboardGroupName, leaderboardName,
-                    LeaderboardEntryPoint.this, stringMessages, userAgent, showRaceDetails, /* raceTimesInfoProvider */ null, Window.Location.getParameterMap().containsKey(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN) ?
-                                    Boolean.valueOf(Window.Location.getParameterMap().get(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN).get(0)) : false);
-        leaderboardPanel.addStyleName(LeaderboardPanel.LEADERBOARD_MARGIN_STYLE);
-        contentScrollPanel.setWidget(leaderboardPanel);
-
-        mainPanel.add(contentScrollPanel);
-    }
+        
+        boolean autoExpandLastRaceColumn = Window.Location.getParameterMap().containsKey(
+                PARAM_AUTO_EXPAND_LAST_RACE_COLUMN) ? Boolean.valueOf(Window.Location.getParameterMap()
+                .get(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN).get(0)) : false;
+        boolean showRankChart = Window.Location.getParameterMap().containsKey(
+                PARAM_SHOW_RANK_CHART) ? Boolean.valueOf(Window.Location.getParameterMap()
+                .get(PARAM_SHOW_RANK_CHART).get(0)) : false;  
+                
+        Widget leaderboardViewer;
+        if(leaderboardType.isMetaLeaderboard()) {
+            leaderboardViewer = new MetaLeaderboardViewer(delayToLiveMillis, sailingService, new AsyncActionsExecutor(),
+                    leaderboardSettings, null, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages, userAgent,
+                    showRaceDetails, autoExpandLastRaceColumn, showRankChart);
+        } else {
+            leaderboardViewer = new LeaderboardViewer(delayToLiveMillis, sailingService, new AsyncActionsExecutor(),
+                    leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages, userAgent,
+                    showRaceDetails, autoExpandLastRaceColumn, showRankChart);
+        }
+        
+         contentScrollPanel.setWidget(leaderboardViewer);
+         mainPanel.add(contentScrollPanel);
+}
     
     private RaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
         RaceIdentifier result;
@@ -178,9 +198,6 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         } else {
             numberOfLastRacesToShow = null;
         }
-        boolean showOverallLeaderboardsOnSamePage = parameterMap.containsKey(PARAM_SHOW_OVERALL_LEADERBOARDS_ON_SAME_PAGE) ?
-                Boolean.valueOf(parameterMap.get(PARAM_SHOW_OVERALL_LEADERBOARDS_ON_SAME_PAGE).get(0)) :
-                    false;
         if (parameterMap.containsKey(PARAM_RACE_NAME) || parameterMap.containsKey(PARAM_RACE_DETAIL) ||
                 parameterMap.containsKey(PARAM_LEG_DETAIL) || parameterMap.containsKey(PARAM_MANEUVER_DETAIL) ||
                 parameterMap.containsKey(PARAM_OVERALL_DETAIL)) {
@@ -199,13 +216,13 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                             /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
                                             namesOfRacesToShow.get(0) : null, /* ascending */ true,
                                     /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
-                                    raceColumnSelectionStrategy, showOverallLeaderboardsOnSamePage);
+                                    raceColumnSelectionStrategy);
         } else {
             final List<DetailType> overallDetails = Collections.emptyList();
             result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null,
                     /* overallDetails */ overallDetails, null,
                     /* autoExpandFirstRace */false, refreshIntervalMillis, numberOfLastRacesToShow,
-                    raceColumnSelectionStrategy, showOverallLeaderboardsOnSamePage);
+                    raceColumnSelectionStrategy);
         }
         return result;
     }
@@ -323,7 +340,6 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 + (settings.isShowRaceDetails() ? "&"+PARAM_SHOW_RACE_DETAILS+"=true" : "")
                 + (leaderboardDisplayName != null ? "&displayName="+leaderboardDisplayName : "")
                 + (settings.isEmbedded() ? "&"+PARAM_EMBEDDED+"=true" : "")
-                + (settings.getLeaderboardSettings().isShowOverallLeaderboardsOnSamePage() ? "&"+PARAM_SHOW_OVERALL_LEADERBOARDS_ON_SAME_PAGE+"=true" : "")
                 + (settings.getLeaderboardSettings().getDelayInMilliseconds() == null &&
                    settings.getLeaderboardSettings().getDelayInMilliseconds() != 0 ? "" :
                     "&"+PARAM_DELAY_TO_LIVE_MILLIS+"="+settings.getLeaderboardSettings().getDelayInMilliseconds())

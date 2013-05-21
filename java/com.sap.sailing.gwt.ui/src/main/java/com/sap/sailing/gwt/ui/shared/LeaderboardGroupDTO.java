@@ -15,12 +15,13 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     public String description;
     public List<StrippedLeaderboardDTO> leaderboards;
     public boolean displayLeaderboardsInReverseOrder;
-    
+
     private int[] overallLeaderboardDiscardThresholds;
     private ScoringSchemeType overallLeaderboardScoringSchemeType;
-    
+
     /**
-     * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for the leaderboards.<br />
+     * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for
+     * the leaderboards.<br />
      * The additional data (start dates and places for the races) will be initialized but empty.
      */
     public LeaderboardGroupDTO() {
@@ -37,11 +38,11 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         this.description = description;
         this.leaderboards = leaderboards;
     }
-    
+
     public boolean hasOverallLeaderboard() {
         return getOverallLeaderboardScoringSchemeType() != null;
     }
-    
+
     public int[] getOverallLeaderboardDiscardThresholds() {
         return overallLeaderboardDiscardThresholds;
     }
@@ -57,17 +58,17 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     public void setOverallLeaderboardScoringSchemeType(ScoringSchemeType overallLeaderboardScoringSchemeType) {
         this.overallLeaderboardScoringSchemeType = overallLeaderboardScoringSchemeType;
     }
-    
+
     public List<StrippedLeaderboardDTO> getLeaderboardsInReverseOrder() {
         List<StrippedLeaderboardDTO> leaderboardsInReverseOrder = new ArrayList<StrippedLeaderboardDTO>(leaderboards);
         Collections.reverse(leaderboardsInReverseOrder);
         return Collections.unmodifiableList(leaderboardsInReverseOrder);
     }
-    
+
     public boolean containsRegattaLeaderboard() {
         boolean result = false;
         for (StrippedLeaderboardDTO leaderboard : leaderboards) {
-            if(leaderboard.isRegattaLeaderboard) {
+            if (leaderboard.type.isRegattaLeaderboard()) {
                 result = true;
                 break;
             }
@@ -77,8 +78,7 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
 
     public boolean containsRace(RaceIdentifier race) {
         boolean containsRace = false;
-        leaderboardsLoop:
-        for (StrippedLeaderboardDTO leaderboard : leaderboards) {
+        leaderboardsLoop: for (StrippedLeaderboardDTO leaderboard : leaderboards) {
             for (RaceColumnDTO raceInLeaderboard : leaderboard.getRaceList()) {
                 for (FleetDTO fleet : raceInLeaderboard.getFleets()) {
                     final RegattaAndRaceIdentifier raceIdentifierForFleet = raceInLeaderboard.getRaceIdentifier(fleet);
@@ -91,9 +91,10 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         }
         return containsRace;
     }
-    
+
     /**
-     * @return The earliest date in the start dates of the leaderboards, or <code>null</code> if no start dates are contained
+     * @return The earliest date in the start dates of the leaderboards, or <code>null</code> if no start dates are
+     *         contained
      */
     public Date getGroupStartDate() {
         Date groupStart = null;
@@ -108,7 +109,7 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         }
         return groupStart;
     }
-    
+
     /**
      * Uses {@link LeaderboardGroupDTO#getLeaderboardPlaces(leaderboard) LeaderboardGroupDTO.getLeaderboardPlaces} to
      * create the {@link PlacemarkOrderDTO places} for all contained leaderboards and returns them as a list.
@@ -126,7 +127,7 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         }
         return places;
     }
-    
+
     /**
      * @return <code>true</code> if the group contains a race which is live.
      */
@@ -138,7 +139,7 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         }
         return false;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -173,5 +174,5 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     public List<StrippedLeaderboardDTO> getLeaderboards() {
         return leaderboards;
     }
-    
+
 }

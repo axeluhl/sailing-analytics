@@ -156,7 +156,6 @@ public interface StringMessages extends Messages {
     String in();
     String secondsUnit();
     String metersUnit();
-    String failedToLoadRaceData();
     String close();
     String compareCompetitors();
     String description();
@@ -437,11 +436,14 @@ public interface StringMessages extends Messages {
     String legend();
     String live();
     String swissTimingArchiveConnector();
-    String errorFetchingRankingChartData(String message);
+    String errorFetchingChartData(String message);
     String loadingCompetitorData();
-    String rankNAfterRace(long l, String string);
-    String afterRace();
+    String competitorRegattaDataAfterRaceN(String detailType, String raceColumnName);
     String showRankChart();
+    String rankChart();
+    String totalPoints();
+    String raceTotalPointsTooltip();
+    String regattaTotalPointsTooltip();
     String overallLeaderboardSelection();
     String showOverallLeaderboardOnSamePage();
     String errorTryingToObtainOverallLeaderboards(String message);

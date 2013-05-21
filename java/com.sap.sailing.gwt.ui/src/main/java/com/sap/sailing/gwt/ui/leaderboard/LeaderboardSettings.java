@@ -30,7 +30,6 @@ public class LeaderboardSettings {
     private final Long delayBetweenAutoAdvancesInMilliseconds;
     private final Long delayInMilliseconds;
     private final boolean updateUponPlayStateChange;
-    private final boolean showOverallLeaderboardsOnSamePage;
     
     /**
      * There are two ways to select race columns.
@@ -54,7 +53,7 @@ public class LeaderboardSettings {
             List<String> namesOfRaceColumnsToShow, List<String> namesOfRacesToShow, Integer numberOfLastRacesToShow,
             boolean autoExpandPreSelectedRace, Long delayBetweenAutoAdvancesInMilliseconds, Long delayInMilliseconds,
             String nameOfRaceToSort, boolean sortAscending, boolean updateUponPlayStateChange,
-            RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy, boolean showOverallLeaderboardsOnSamePage) {
+            RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy) {
         if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
             throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
         }
@@ -72,7 +71,6 @@ public class LeaderboardSettings {
         this.nameOfRaceToSort = nameOfRaceToSort;
         this.sortAscending = sortAscending;
         this.updateUponPlayStateChange = updateUponPlayStateChange;
-        this.showOverallLeaderboardsOnSamePage = showOverallLeaderboardsOnSamePage;
     }
   
     public List<DetailType> getManeuverDetailsToShow() {
@@ -152,9 +150,5 @@ public class LeaderboardSettings {
 
     public RaceColumnSelectionStrategies getActiveRaceColumnSelectionStrategy() {
         return activeRaceColumnSelectionStrategy;
-    }
-
-    public boolean isShowOverallLeaderboardsOnSamePage() {
-        return showOverallLeaderboardsOnSamePage;
     }
 }

@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 
 /**
- * MultiChartPanel is a GWT panel that can show competitor data (e.g. current speed over ground, windward distance to
+ * MultiCompetitorRaceChart is a GWT panel that can show competitor data (e.g. current speed over ground, windward distance to
  * leader) for different races in a chart. The chart type can be selected from the settings.
  * 
  * When calling the constructor a chart is created that creates a final amount of series (so the maximum number of

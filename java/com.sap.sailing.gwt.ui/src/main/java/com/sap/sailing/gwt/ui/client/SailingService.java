@@ -12,6 +12,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
@@ -119,7 +120,7 @@ public interface SailingService extends RemoteService {
 
     void removeWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO);
 
-    public List<String> getLeaderboardNames() throws Exception;
+    public List<String> getLeaderboardNames();
     
     LeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails) throws Exception;
@@ -282,7 +283,8 @@ public interface SailingService extends RemoteService {
 
     List<SwissTimingReplayRaceDTO> listSwissTiminigReplayRaces(String swissTimingUrl);
 
-    List<Pair<String, List<CompetitorDTO>>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date) throws NoWindException;
+    List<Triple<String, List<CompetitorDTO>, List<Double>>> getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName,
+            Date date, DetailType detailType) throws Exception;
 
     List<String> getOverallLeaderboardNamesContaining(String leaderboardName);
 
@@ -303,4 +305,8 @@ public interface SailingService extends RemoteService {
     List<RegattaOverviewEntryDTO> getRegattaOverviewEntriesForEvent(String eventIdAsString);
     
     EventDTO getEventByIdAsString(String eventIdAsString);
+    
+    List<Pair<String, String>> getLeaderboardsNamesOfMetaleaderboard(String metaLeaderboardName);
+
+    Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName);
 }

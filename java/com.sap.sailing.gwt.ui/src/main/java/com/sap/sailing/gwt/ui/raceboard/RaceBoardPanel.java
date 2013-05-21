@@ -78,7 +78,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
      */
     private int scrollOffset;
 
-    private final List<ComponentViewer> componentViewers;
     private FlowPanel componentsNavigationPanel;
     private FlowPanel settingsPanel;
     private RaceTimePanel timePanel;
@@ -125,17 +124,14 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         setWidget(mainPanel);
         this.timer = timer;
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
-        componentViewers = new ArrayList<ComponentViewer>();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         componentsNavigationPanel = new FlowPanel();
         componentsNavigationPanel.addStyleName("raceBoardNavigation");
-        switch (getConfiguration().getViewMode()) {
-            case ONESCREEN:
-                createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);                
-                getElement().getStyle().setMarginLeft(12, Unit.PX);
-                getElement().getStyle().setMarginRight(12, Unit.PX);
-                break;
-        }
+        
+        createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);                
+        getElement().getStyle().setMarginLeft(12, Unit.PX);
+        getElement().getStyle().setMarginRight(12, Unit.PX);
+
         timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider, canReplayWhileLiveIsPossible);
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
@@ -146,7 +142,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {
         // create the default leaderboard and select the right race
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
-        leaderboardPanel.addStyleName(LeaderboardPanel.LEADERBOARD_MARGIN_STYLE);
+        leaderboardPanel.getElement().getStyle().setMargin(5, Unit.PX);
         RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel, stringMessages);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
@@ -160,10 +156,10 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(windChart);
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components);
-        componentViewers.add(leaderboardAndMapViewer);
-        for (ComponentViewer componentViewer : componentViewers) {
-            mainPanel.add(componentViewer.getViewerWidget());
-        }
+        mainPanel.add(leaderboardAndMapViewer.getViewerWidget());
+        mainPanel.add(windChart);
+        mainPanel.add(competitorChart);
+
         setLeaderboardVisible(getConfiguration().isShowLeaderboard());
         setWindChartVisible(getConfiguration().isShowWindChart());
         setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
@@ -203,8 +199,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
                 .createNewSettingsForPlayMode(timer.getPlayMode(),
                         /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(),
                         /* nameOfRaceColumnToShow */ null, /* nameOfRaceToShow */ selectedRaceIdentifier.getRaceName(),
-                        new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier),
-                        /* showOverallLeaderboardsOnSamePage */ false);
+                        new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier));
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier,
                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
                 userAgent, /* showRaceDetails */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false);
@@ -262,51 +257,35 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     }
     
     /**
-     * Sets the collapsable panel for the leaderboard open or close, if in <code>CASCADE</code> view mode.<br />
-     * Displays or hides the leaderboard, if in <code>ONESCREEN</code> view mode.<br /><br />
+     * Displays or hides the leaderboard.<br /><br />
      * 
      * The race board should be completely rendered before this method is called, or a few exceptions could be thrown.
      * 
      * @param visible <code>true</code> if the leaderboard shall be open/visible
      */
     public void setLeaderboardVisible(boolean visible) {
-        switch (getConfiguration().getViewMode()) {
-        case ONESCREEN:
-            setComponentVisible(leaderboardAndMapViewer, leaderboardPanel, visible);
-            break;
-        }
+        setComponentVisible(leaderboardAndMapViewer, leaderboardPanel, visible);
     }
 
     /**
-     * Sets the collapsable panel for the wind chart open or close, if in <code>CASCADE</code> view mode.<br />
-     * Displays or hides the wind chart, if in <code>ONESCREEN</code> view mode.<br /><br />
-     * 
+     * Displays or hides the wind chart.<br /><br />
      * The race board should be completely rendered before this method is called, or a few exceptions could be thrown.
      * 
      * @param visible <code>true</code> if the wind chart shall be open/visible
      */
     public void setWindChartVisible(boolean visible) {
-        switch (getConfiguration().getViewMode()) {
-        case ONESCREEN:
-            setComponentVisible(leaderboardAndMapViewer, windChart, visible);
-            break;
-        }
+        setComponentVisible(leaderboardAndMapViewer, windChart, visible);
     }
 
     /**
-     * Sets the collapsable panel for the competitor chart open or close, if in <code>CASCADE</code> view mode.<br />
-     * Displays or hides the competitor chart, if in <code>ONESCREEN</code> view mode.<br /><br />
+     * Displays or hides the competitor chart.<br /><br />
      * 
      * The race board should be completely rendered before this method is called, or a few exceptions could be thrown.
      * 
      * @param visible <code>true</code> if the competitor chart shall be open/visible
      */
     public void setCompetitorChartVisible(boolean visible) {
-        switch (getConfiguration().getViewMode()) {
-        case ONESCREEN:
-            setComponentVisible(leaderboardAndMapViewer, competitorChart, visible);
-            break;
-        }
+        setComponentVisible(leaderboardAndMapViewer, competitorChart, visible);
     }
     
     public Widget getNavigationWidget() {

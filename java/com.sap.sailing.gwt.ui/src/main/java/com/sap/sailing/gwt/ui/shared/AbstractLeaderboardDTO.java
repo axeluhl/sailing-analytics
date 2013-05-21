@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -27,8 +28,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public String defaultCourseAreaIdAsString;
     public String defaultCourseAreaName;
     public ScoringSchemeType scoringScheme;
-    public boolean isMetaLeaderboard;
-    public boolean isRegattaLeaderboard;
+    public LeaderboardType type;
 
     private Long delayToLiveInMillisForLatestRace;
 
@@ -329,7 +329,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
             return false;
         if (hasCarriedPoints != other.hasCarriedPoints)
             return false;
-        if (isMetaLeaderboard != other.isMetaLeaderboard)
+        if (type != other.type)
             return false;
         if (scoringScheme != other.scoringScheme)
             return false;

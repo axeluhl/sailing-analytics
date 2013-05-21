@@ -46,7 +46,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private LongBox refreshIntervalInSecondsBox;
     private LongBox delayInSecondsBox;
     private final boolean autoExpandPreSelectedRace;
-    private final boolean showOverallLeaderboardOnSamePage;
     private final long delayBetweenAutoAdvancesInMilliseconds;
     private final long delayInMilliseconds;
     private final Integer numberOfLastRacesToShow;
@@ -54,14 +53,13 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private RadioButton explicitRaceColumnSelectionRadioBtn;
     private RadioButton lastNRacesColumnSelectionRadioBtn;
     private IntegerBox numberOfLastRacesToShowBox;
-    private CheckBox showOverallLeaderboardOnSamePageCheckbox;
     
     public LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection,
             List<DetailType> overallDetailSelection, List<RaceColumnDTO> raceAllRaceColumns,
             Iterable<RaceColumnDTO> raceColumnSelection, RaceColumnSelection raceColumnSelectionStrategy,
-            boolean autoExpandPreSelectedRace, boolean showOverallLeaderboardOnSamePage,
-            long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds, StringMessages stringMessages) {
+            boolean autoExpandPreSelectedRace, long delayBetweenAutoAdvancesInMilliseconds,
+            long delayInMilliseconds, StringMessages stringMessages) {
         this.raceAllRaceColumns = raceAllRaceColumns;
         this.numberOfLastRacesToShow = raceColumnSelectionStrategy.getNumberOfLastRaceColumnsToShow();
         this.activeRaceColumnSelectionStrategy = raceColumnSelectionStrategy.getType();
@@ -79,14 +77,12 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;
-        this.showOverallLeaderboardOnSamePage = showOverallLeaderboardOnSamePage;
     }
 
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         FlowPanel dialogPanel = new FlowPanel();
         dialogPanel.add(createSelectedRacesPanel(dialog));
-        dialogPanel.add(createOverallLeaderboardSelectionPanel(dialog));
         dialogPanel.add(createOverallDetailPanel(dialog));
         dialogPanel.add(createRaceDetailPanel(dialog));
         dialogPanel.add(createLegDetailsPanel(dialog));
@@ -290,19 +286,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         return selectedRacesPanel;
     }
 
-    private FlowPanel createOverallLeaderboardSelectionPanel(DataEntryDialog<?> dialog) {
-        FlowPanel overallLeaderboardSelectionPanel = new FlowPanel();
-        overallLeaderboardSelectionPanel.addStyleName("SettingsDialogComponent");
-        overallLeaderboardSelectionPanel.add(dialog.createHeadline(stringMessages.overallLeaderboardSelection(), true));
-        FlowPanel overallLeaderboardSelectionContent = new FlowPanel();
-        overallLeaderboardSelectionContent.addStyleName("dialogInnerContent");
-        overallLeaderboardSelectionPanel.add(overallLeaderboardSelectionContent);
-        showOverallLeaderboardOnSamePageCheckbox = dialog.createCheckbox(stringMessages.showOverallLeaderboardOnSamePage());
-        showOverallLeaderboardOnSamePageCheckbox.setValue(showOverallLeaderboardOnSamePage);
-        overallLeaderboardSelectionContent.add(showOverallLeaderboardOnSamePageCheckbox);
-        return overallLeaderboardSelectionPanel;
-    }
-
     @Override
     public LeaderboardSettings getResult() {
         List<DetailType> maneuverDetailsToShow = new ArrayList<DetailType>();
@@ -347,8 +330,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 lastNRacesToShowValue,
                 autoExpandPreSelectedRace, 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
                 1000 * (delayInSecondsValue == null ? 0 : delayInSecondsValue.longValue()),
-                null, true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy,
-                showOverallLeaderboardOnSamePageCheckbox.getValue());
+                null, true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy);
     }
 
     @Override

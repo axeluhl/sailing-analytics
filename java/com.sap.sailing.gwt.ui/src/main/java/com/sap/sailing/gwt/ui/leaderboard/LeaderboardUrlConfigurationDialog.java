@@ -93,13 +93,12 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             }
             LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                     namesOfRaceColumnsToShow, /* namesOfRacesToShow */null, /* nameOfRaceToSort */null, /* autoExpandPreSelectedRace */
-                    false, /* showMetaLeaderboardsOnSamePage */ false);
+                    false);
             List<DetailType> overallDetailsToShow = Collections.emptyList();
             leaderboardSettingsDialogComponent = new LeaderboardSettingsDialogComponent(settings.getManeuverDetailsToShow(),
                 settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), overallDetailsToShow, raceList, 
                 /* select all races by default */ raceList, new ExplicitRaceColumnSelection(),
                 /* autoExpandPreSelectedRace */ false,
-                /* showOverallLeaderboardOnSamePage */ false,
                 /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, /* delayInMilliseconds */ 3000l, stringMessages);
         }
 

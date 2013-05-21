@@ -76,6 +76,7 @@ import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -2143,8 +2144,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<String> getLeaderboardNames() throws Exception {
+    public List<String> getLeaderboardNames() {
         return new ArrayList<String>(getService().getLeaderboards().keySet());
+    }
+
+    @Override
+    public Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName) {
+        Pair<String, LeaderboardType> result = null;
+
+        if(getService().getLeaderboards().containsKey(leaderboardName)) {
+            Leaderboard leaderboard = getService().getLeaderboards().get(leaderboardName);
+            boolean isMetaLeaderboard = leaderboard instanceof MetaLeaderboard ? true : false;
+            boolean isRegattaLeaderboard = leaderboard instanceof RegattaLeaderboard ? true : false;
+            LeaderboardType type;
+            if(isMetaLeaderboard) {
+                type = isRegattaLeaderboard ? LeaderboardType.RegattaMetaLeaderboard : LeaderboardType.FlexibleMetaLeaderboard;
+            } else {
+                type = isRegattaLeaderboard ? LeaderboardType.RegattaLeaderboard : LeaderboardType.FlexibleLeaderboard;
+            }
+            result = new Pair<String, LeaderboardType>(leaderboard.getName(), type);
+        }
+        
+        return result;
     }
 
     @Override
@@ -2245,15 +2266,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         leaderboardDTO.name = leaderboard.getName();
         leaderboardDTO.displayName = leaderboard.getDisplayName();
         leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
-        leaderboardDTO.isMetaLeaderboard = leaderboard instanceof MetaLeaderboard ? true : false;
         if (leaderboard instanceof RegattaLeaderboard) {
             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
             Regatta regatta = regattaLeaderboard.getRegatta();
             leaderboardDTO.regattaName = regatta.getName(); 
-            leaderboardDTO.isRegattaLeaderboard = true;
+            leaderboardDTO.type = leaderboard instanceof MetaLeaderboard ? LeaderboardType.RegattaMetaLeaderboard : LeaderboardType.RegattaLeaderboard;
             leaderboardDTO.scoringScheme = regatta.getScoringScheme().getType();
         } else {
-            leaderboardDTO.isRegattaLeaderboard = false;
+            leaderboardDTO.type = leaderboard instanceof MetaLeaderboard ? LeaderboardType.FlexibleMetaLeaderboard : LeaderboardType.FlexibleLeaderboard;
             leaderboardDTO.scoringScheme = leaderboard.getScoringScheme().getType();
         }
         if (leaderboard.getDefaultCourseArea() != null) {
@@ -2802,6 +2822,68 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 result.setCompetitorData(e.getKey(), competitorData);
             }
+        }
+        return result;
+    }
+
+    private Triple<String, List<CompetitorDTO>, List<Double>> getLeaderboardDataEntriesForRaceColumn(DetailType detailType,
+            LeaderboardDTO leaderboard, RaceColumnDTO raceColumn) throws NoWindException {
+        List<Double> values = new ArrayList<Double>();
+        List<CompetitorDTO> competitorDTOs = new ArrayList<CompetitorDTO>();
+        if(detailType != null) {
+            switch (detailType) {
+            case RACE_TOTAL_POINTS:
+                for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> entry : leaderboard.rows.entrySet()) {
+                    LeaderboardEntryDTO leaderboardEntryDTO = entry.getValue().fieldsByRaceColumnName.get(raceColumn.name);
+                    values.add(leaderboardEntryDTO != null ? leaderboardEntryDTO.totalPoints : null);
+                    competitorDTOs.add(entry.getKey());
+                }
+                
+                break;
+            case REGATTA_RANK:
+                List<CompetitorDTO> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(raceColumn);
+                int rank = 1;
+                for(CompetitorDTO competitor: competitorsFromBestToWorst) {
+                    values.add(new Double(rank));
+                    competitorDTOs.add(competitor);
+                    rank++;
+                }
+                break;
+            default:
+                break;
+            }
+        }
+        return new Triple<String, List<CompetitorDTO>, List<Double>>(raceColumn.name, competitorDTOs, values);
+    }
+
+    @Override
+    public List<Triple<String, List<CompetitorDTO>, List<Double>>> getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, 
+            Date date, DetailType detailType) throws Exception {
+        List<Triple<String, List<CompetitorDTO>, List<Double>>> result = new ArrayList<Util.Triple<String,List<CompetitorDTO>,List<Double>>>();
+
+        // Attention: The reason why we read the data from the LeaderboardDTO and not from the leaderboard directly is to ensure
+        // the use of the leaderboard cache and the reuse of all the logic in the getLeaderboardByName method
+        LeaderboardDTO leaderboardDTO = getLeaderboardByName(leaderboardName, date, Collections.<String> emptyList());
+        for (RaceColumnDTO raceColumnDTO : leaderboardDTO.getRaceList()) {
+            result.add(getLeaderboardDataEntriesForRaceColumn(detailType, leaderboardDTO, raceColumnDTO));
+        }
+        return result;
+    }
+
+    @Override
+    public List<Pair<String, String>> getLeaderboardsNamesOfMetaleaderboard(String metaLeaderboardName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(metaLeaderboardName);
+        if (leaderboard == null) {
+            throw new IllegalArgumentException("Couldn't find leaderboard named "+metaLeaderboardName);
+        }
+        if(!(leaderboard instanceof MetaLeaderboard)) {
+            throw new IllegalArgumentException("The leaderboard "+metaLeaderboardName + " is not a metaleaderboard");
+        }
+        List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
+        MetaLeaderboard metaLeaderboard = (MetaLeaderboard) leaderboard;
+        for(Leaderboard containedLeaderboard: metaLeaderboard.getLeaderboards()) {
+            result.add(new Pair<String, String>(containedLeaderboard.getName(),
+                    containedLeaderboard.getDisplayName() != null ? containedLeaderboard.getDisplayName() : containedLeaderboard.getName()));
         }
         return result;
     }
@@ -3356,31 +3438,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         	urlBasedScoreCorrectionProvider.registerResultUrl(new URL(url));
         }
     }    
-
-    @Override
-    public List<Pair<String, List<CompetitorDTO>>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date) throws NoWindException {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        final TimePoint timePoint;
-        if (date == null) {
-            final TimePoint nowMinusDelay = leaderboard.getNowMinusDelay();
-            final TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
-            if (timePointOfLatestModification != null && !nowMinusDelay.before(timePointOfLatestModification)) {
-                timePoint = timePointOfLatestModification;
-            } else {
-                timePoint = nowMinusDelay;
-            }
-        } else {
-            timePoint = new MillisecondsTimePoint(date);
-        }
-        Map<RaceColumn, List<Competitor>> preResult = leaderboard
-                .getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(timePoint);
-        List<Pair<String, List<CompetitorDTO>>> result = new ArrayList<Util.Pair<String,List<CompetitorDTO>>>();
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            List<CompetitorDTO> competitorList = getCompetitorDTOList(preResult.get(raceColumn));
-            result.add(new Pair<String, List<CompetitorDTO>>(raceColumn.getName(), competitorList));
-        }
-        return result;
-    }
 
     @Override
     public List<String> getOverallLeaderboardNamesContaining(String leaderboardName) {

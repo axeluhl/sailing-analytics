@@ -58,7 +58,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 
 /**
- * ChartPanel is a GWT panel that can show one sort of competitor data (e.g. current speed over ground, windward
+ * AbstractCompetitorChart is a chart that can show one sort of competitor data (e.g. current speed over ground, windward
  * distance to leader) for different races in a chart.
  * 
  * When calling the constructor a chart is created that creates a final amount of series (so the maximum number of
@@ -126,12 +126,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     /**
-     * Creates a new chart for the given {@link DetailType} <code>dataToShow</code> and also clears the
-     * {@link #chartData}, the {@link #dataSeriesByCompetitor} and the {@link #markPassingSeriesByCompetitor}.
-     * 
-     * @param detailType
-     *            The detail type for the new chart.
-     * @return A chart for the given detail Type
+     * Creates a new chart.
+     * Attention: We can't reuse the old chart when the detail changes because HighChart does not support the inverting of the Y-Axis  
      */
     private Chart createChart() {
         Chart chart = new Chart().setZoomType(Chart.ZoomType.X)
@@ -242,10 +238,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError(
-                                getStringMessages().failedToLoadRaceData() + ": " + caught.toString(),
-                                timer.getPlayMode() == PlayModes.Live);
                         hideLoading();
+                        errorReporter.reportError(stringMessages.errorFetchingChartData(caught.getMessage()),
+                                timer.getPlayMode() == PlayModes.Live);
                     }
                 });
         asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
@@ -469,10 +464,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     protected DetailType getSelectedDetailType() {
         return this.selectedDetailType;
     }
-
-    private boolean hasReversedYAxis(DetailType detailType) {
-        return detailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || detailType == DetailType.GAP_TO_LEADER_IN_SECONDS;
-    }
     
     /**
      * Updates the {@link #selectedDetailType} field, clears the chart for the new <code>selectedDetailType</code> and
@@ -528,12 +519,16 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         return hasDetailTypeChanged;
     }
 
-    private boolean isYAxisReversed() {
+    private boolean hasReversedYAxis(DetailType detailType) {
         return selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER ||
-               selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS ||
-               selectedDetailType == DetailType.RACE_RANK ||
-               selectedDetailType == DetailType.REGATTA_RANK ||
-               selectedDetailType == DetailType.OVERALL_RANK;
+                selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS ||
+                selectedDetailType == DetailType.RACE_RANK ||
+                selectedDetailType == DetailType.REGATTA_RANK ||
+                selectedDetailType == DetailType.OVERALL_RANK;
+    }
+    
+    private boolean isYAxisReversed() {
+        return hasReversedYAxis(selectedDetailType);
     }
 
     @Override

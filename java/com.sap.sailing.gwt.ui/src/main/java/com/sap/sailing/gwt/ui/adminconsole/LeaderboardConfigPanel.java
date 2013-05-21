@@ -228,11 +228,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         TextColumn<StrippedLeaderboardDTO> leaderboardTypeColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
             public String getValue(StrippedLeaderboardDTO leaderboard) {
-                String result = leaderboard.isRegattaLeaderboard ? "Regatta" : "Flexible";
-                if(leaderboard.isMetaLeaderboard) {
-                    result += " , Meta"; 
-                }
-                return result;
+                return leaderboard.type.toString();
             }
         };
 
@@ -264,10 +260,11 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                     List<StrippedLeaderboardDTO> otherExistingLeaderboard = new ArrayList<StrippedLeaderboardDTO>();
                     otherExistingLeaderboard.addAll(availableLeaderboardList);
                     otherExistingLeaderboard.remove(leaderboardDTO);
-                    if (leaderboardDTO.isMetaLeaderboard) {
+                    if (leaderboardDTO.type.isMetaLeaderboard()) {
                         Window.alert("This is a meta leaderboard. It can't be changed here.");
                     } else {
-                        if (leaderboardDTO.isRegattaLeaderboard) {
+                        if (leaderboardDTO.type.isRegattaLeaderboard()) {
+
                             LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, 
                                     leaderboardDTO.displayName, null, leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, leaderboardDTO.defaultCourseAreaIdAsString);
                             AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
@@ -411,7 +408,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 new DisablableCheckboxCell(new IsEnabled() {
                     @Override
                     public boolean isEnabled() {
-                        return getSelectedLeaderboard() != null && !getSelectedLeaderboard().isRegattaLeaderboard;
+                        return getSelectedLeaderboard() != null && !getSelectedLeaderboard().type.isRegattaLeaderboard();
                     }
                 })) {
             @Override
@@ -480,7 +477,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         addRaceColumnsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (getSelectedLeaderboard().isRegattaLeaderboard) {
+                if (getSelectedLeaderboard().type.isRegattaLeaderboard()) {
                     Window.alert(stringMessages.cannotAddRacesToRegattaLeaderboardButOnlyToRegatta());
                 } else {
                     addRaceColumnsToLeaderboard();
@@ -771,7 +768,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         }
         existingRacesWithoutThisRace.remove(raceColumnWithFleet.getA());
         final RaceColumnInLeaderboardDialog raceDialog = new RaceColumnInLeaderboardDialog(existingRacesWithoutThisRace,
-                raceColumnWithFleet.getA(), getSelectedLeaderboard().isRegattaLeaderboard, stringMessages, new DialogCallback<RaceColumnDescriptor>() {
+                raceColumnWithFleet.getA(), getSelectedLeaderboard().type.isRegattaLeaderboard(), stringMessages, new DialogCallback<RaceColumnDescriptor>() {
             @Override
             public void cancel() {
             }
@@ -906,12 +903,12 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             }
             selectedLeaderBoardPanel.setVisible(true);
             selectedLeaderBoardPanel.setCaptionText("Details of leaderboard '" + getSelectedLeaderboard().name + "'");
-            if (!getSelectedLeaderboard().isMetaLeaderboard) {
+            if (!getSelectedLeaderboard().type.isMetaLeaderboard()) {
                 trackedRacesCaptionPanel.setVisible(true);
             }
-            addRaceColumnsButton.setVisible(!getSelectedLeaderboard().isRegattaLeaderboard);
-            columnMoveUpButton.setVisible(!getSelectedLeaderboard().isRegattaLeaderboard);
-            columnMoveDownButton.setVisible(!getSelectedLeaderboard().isRegattaLeaderboard);
+            addRaceColumnsButton.setVisible(!getSelectedLeaderboard().type.isRegattaLeaderboard());
+            columnMoveUpButton.setVisible(!getSelectedLeaderboard().type.isRegattaLeaderboard());
+            columnMoveDownButton.setVisible(!getSelectedLeaderboard().type.isRegattaLeaderboard());
         } else {
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);

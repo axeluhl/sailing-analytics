@@ -11,6 +11,7 @@ import java.util.Set;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
@@ -428,9 +429,6 @@ public interface SailingServiceAsync {
 
     void listSwissTiminigReplayRaces(String swissTimingUrl, AsyncCallback<List<SwissTimingReplayRaceDTO>> asyncCallback);
 
-    void getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date,
-            AsyncCallback<List<Pair<String, List<CompetitorDTO>>>> callback);
-
     void getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
             long stepSize, DetailType detailType, String leaderboarGroupName, String leaderboardName, AsyncCallback<CompetitorsRaceDataDTO> callback);
 
@@ -456,6 +454,14 @@ public interface SailingServiceAsync {
     void getRegattaOverviewEntriesForEvent(String eventIdAsString, AsyncCallback<List<RegattaOverviewEntryDTO>> asyncCallback);
     
     void getEventByIdAsString(String eventIdAsString, AsyncCallback<EventDTO> asyncCallback);
+
+    void getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, Date date, DetailType detailType,
+            AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>> callback);
+
+    void getLeaderboardsNamesOfMetaleaderboard(String metaLeaderboardName,
+            AsyncCallback<List<Pair<String, String>>> callback);
+
+    void checkLeaderboardName(String leaderboardName, AsyncCallback<Pair<String, LeaderboardType>> callback);
     
 }
 
