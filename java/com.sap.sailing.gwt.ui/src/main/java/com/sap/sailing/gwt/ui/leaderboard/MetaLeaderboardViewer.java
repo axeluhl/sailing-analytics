@@ -1,12 +1,9 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -16,7 +13,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -32,34 +28,24 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewerViewModes;
+import com.sap.sailing.gwt.ui.client.shared.components.LazyComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 
 public class MetaLeaderboardViewer extends SimplePanel {    
     private final StringMessages stringMessages;
-    private final ErrorReporter errorReporter;
     private final SailingServiceAsync sailingService;
     private final CompetitorSelectionModel competitorSelectionProvider;
 
     private FlowPanel componentsNavigationPanel;
 
     private final LeaderboardPanel metaLeaderboardPanel;
-    private LeaderboardPanel selectedLeaderboardPanel;
+    private final MultiLeaderboardPanel multiLeaderboardPanel;
     private final MultiCompetitorLeaderboardChart multiCompetitorChart;
 
-    private String selectedLeaderboardName;
-    
-    private final AsyncActionsExecutor asyncActionsExecutor;
     private final String metaLeaderboardName;
-    private final String leaderboardGroupName;
-    private final UserAgentDetails userAgent;
-    private final boolean showRaceDetails;
     private final Timer timer;
-    private final ComponentViewerViewModes viewMode;
     
     private final FlowPanel mainPanel;
-    private final List<String> leaderboards;
-    private ListBox leaderboardSelectionListBox;
     
     private final static String STYLE_VIEWER_TOOLBAR = "viewerToolbar";
     private final static String STYLE_VIEWER_TOOLBAR_INNERELEMENT = "viewerToolbar-innerElement";
@@ -70,18 +56,8 @@ public class MetaLeaderboardViewer extends SimplePanel {
             String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn, boolean showRankChart) {
         this.stringMessages = stringMessages;
-        this.errorReporter = errorReporter;
         this.sailingService = sailingService;
-        this.asyncActionsExecutor = asyncActionsExecutor;
-        
-        asyncActionsExecutor = new AsyncActionsExecutor();
         this.metaLeaderboardName = metaLeaderboardName;
-        this.leaderboardGroupName = leaderboardGroupName;
-        this.userAgent = userAgent;
-        this.showRaceDetails = showRaceDetails;
-        this.selectedLeaderboardName = preselectedLeaderboardName;
-        
-        viewMode = ComponentViewerViewModes.WEB_VIEW;
 
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */true);
 
@@ -106,39 +82,27 @@ public class MetaLeaderboardViewer extends SimplePanel {
                 leaderboardSettings, preselectedRace, competitorSelectionProvider, timer,
                 leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages, userAgent,
                 showRaceDetails, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn);
-        
+
         multiCompetitorChart = new MultiCompetitorLeaderboardChart(sailingService, asyncActionsExecutor, metaLeaderboardName, DetailType.REGATTA_RANK, competitorSelectionProvider, timer,
                 stringMessages, errorReporter);
         multiCompetitorChart.setVisible(showRankChart); 
         multiCompetitorChart.getElement().getStyle().setMarginTop(10, Unit.PX);
         multiCompetitorChart.getElement().getStyle().setMarginBottom(10, Unit.PX);
         
+        multiLeaderboardPanel = new MultiLeaderboardPanel(sailingService, asyncActionsExecutor, timer,
+                leaderboardSettings, preselectedLeaderboardName, preselectedRace, errorReporter, stringMessages,
+                userAgent, showRaceDetails, autoExpandLastRaceColumn);
+        multiLeaderboardPanel.setVisible(false);
+        
         mainPanel.add(metaLeaderboardPanel);
         mainPanel.add(multiCompetitorChart);
+        mainPanel.add(multiLeaderboardPanel);
 
         addComponentToNavigationMenu(metaLeaderboardPanel, false, "Series Leaderboard");
         addComponentToNavigationMenu(multiCompetitorChart, true, null);
-        addComponentToNavigationMenu(selectedLeaderboardPanel, false, "Act Leaderboard");
-    
-        leaderboards = new ArrayList<String>();
-        leaderboardSelectionListBox = new ListBox();
-        leaderboardSelectionListBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                int selIndex =leaderboardSelectionListBox.getSelectedIndex();
-                if(selIndex >= 0) {
-                    updateSelectedLeaderboard(leaderboardSelectionListBox.getItemText(selIndex));
-                }
-            }
-        });
-        leaderboardSelectionListBox.setVisible(false);
-        mainPanel.add(leaderboardSelectionListBox);
-        
+        addComponentToNavigationMenu(multiLeaderboardPanel, true, "Act Leaderboards");
+            
         updateLeaderboardsOfMetaleaderboard();
-        
-        if (selectedLeaderboardName != null) {
-            updateSelectedLeaderboard(selectedLeaderboardName);
-        }
     }
 
     private void updateLeaderboardsOfMetaleaderboard() {
@@ -146,18 +110,7 @@ public class MetaLeaderboardViewer extends SimplePanel {
             
             @Override
             public void onSuccess(List<Pair<String, String>> leaderboardNamesAndDisplayNames) {
-                leaderboardSelectionListBox.clear();
-                
-                int index = 0;
-                for (Pair<String, String> leaderboardNameAndDisplayName : leaderboardNamesAndDisplayNames) {
-                    leaderboardSelectionListBox.addItem(leaderboardNameAndDisplayName.getB(), leaderboardNameAndDisplayName.getA());
-                    if(selectedLeaderboardName != null && selectedLeaderboardName.equals(leaderboardNameAndDisplayName.getA())) {
-                        leaderboardSelectionListBox.setSelectedIndex(index);
-                    }
-                    index++;
-                }
-                
-                leaderboardSelectionListBox.setVisible(leaderboardNamesAndDisplayNames.size() > 0);
+                multiLeaderboardPanel.setLeaderboardNames(leaderboardNamesAndDisplayNames);
             }
             
             @Override
@@ -210,22 +163,4 @@ public class MetaLeaderboardViewer extends SimplePanel {
         
         componentsNavigationPanel.add(settingsButton);
     }
-    
-    private void updateSelectedLeaderboard(String selectedLeaderboardName) {
-        if(selectedLeaderboardName != null) {
-            if(selectedLeaderboardPanel == null) {
-                LeaderboardSettings newDefaultSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, false);
-                selectedLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                        newDefaultSettings, /* preselectedRace*/ null, competitorSelectionProvider, timer,
-                        leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages, userAgent,
-                        showRaceDetails, /* raceTimesInfoProvider */null, false);              
-            }
-        } else {
-            if(selectedLeaderboardPanel != null) {
-                remove(selectedLeaderboardPanel);
-                selectedLeaderboardPanel = null;
-            }
-        }
-    }
-
 }
