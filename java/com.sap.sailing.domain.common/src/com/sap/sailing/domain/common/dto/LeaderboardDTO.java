@@ -16,7 +16,7 @@ import java.util.Set;
  * @author Axel Uhl (d043530)
  *  
  */
-public class LeaderboardDTO extends AbstractLeaderboardDTO implements Cloneable, Serializable {
+public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializable {
     private static final long serialVersionUID = -520930809792750648L;
     
     public interface UUIDGenerator {
@@ -29,11 +29,6 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Cloneable,
      */
     private String id;
     
-    /**
-     * If the object is to support the {@link #clone()} operation, it needs to have a non-<code>null</code> UUID generator set.
-     */
-    private UUIDGenerator uuidGenerator;
-
     /**
      * The competitor list, ordered ascending by total rank
      */
@@ -59,20 +54,12 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Cloneable,
      * from it by the {@link #clone()} operation.
      */
     public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator) {
-        this.uuidGenerator = uuidGenerator;
         id = uuidGenerator.generateRandomUUID();
         this.timePointOfLastCorrectionsValidity = timePointOfLastCorrectionsValidity;
         this.comment = comment;
         competitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>();
         this.suppressedCompetitors = new HashSet<CompetitorDTO>();
         this.higherScoresIsBetter = higherScoreIsBetter;
-    }
-    
-    @Override
-    protected LeaderboardDTO clone() throws CloneNotSupportedException {
-        LeaderboardDTO result = (LeaderboardDTO) super.clone();
-        result.id = uuidGenerator.generateRandomUUID();
-        return result;
     }
     
     public String getId() {
