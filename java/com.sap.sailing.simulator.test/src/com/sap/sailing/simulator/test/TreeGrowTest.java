@@ -16,7 +16,6 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
-import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.PathGeneratorTreeGrowTarget;
 import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
@@ -63,11 +62,11 @@ public class TreeGrowTest {
 
         Path path = treeGrow.getPath();
 
-        for(TimedPositionWithSpeed pos : path.getPathPoints()) {
+        System.out.println("tree-grow path points: "+path.getPathPoints().size());
 
-            System.out.println(""+pos.getPosition().getLatDeg()+", "+pos.getPosition().getLngDeg());
-
-        }
+        //for(TimedPositionWithSpeed pos : path.getPathPoints()) {
+        //    System.out.println(""+pos.getPosition().getLatDeg()+", "+pos.getPosition().getLngDeg());
+        //}
     }
 
 }

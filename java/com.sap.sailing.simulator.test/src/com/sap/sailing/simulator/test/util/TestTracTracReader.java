@@ -1,4 +1,4 @@
-package com.sap.sailing.simulator.test;
+package com.sap.sailing.simulator.test.util;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -8,8 +8,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.simulator.test.util.TracTracReader;
-import com.sap.sailing.simulator.test.util.TracTracReaderFromFiles;
 
 public class TestTracTracReader {
 
