@@ -38,6 +38,8 @@ public class LeaderboardEntryDTO implements Serializable {
     
     public Double totalPoints;
     
+    public Integer rank;
+    
     public boolean discarded;
     
     public Double windwardDistanceToOverallLeaderInMeters;

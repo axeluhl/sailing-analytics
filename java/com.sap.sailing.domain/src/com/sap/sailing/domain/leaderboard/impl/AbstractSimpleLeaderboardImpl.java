@@ -1097,6 +1097,15 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                     result.competitorDisplayNames.put(competitorDTO, displayName);
                 }
             }
+            // set race ranks for all LeaderboardEntryDTO's
+            for(RaceColumnDTO raceColumnDTO: result.getRaceList()) {
+                int raceRank = 1;
+                for(CompetitorDTO competitorDTO: result.getCompetitorsFromBestToWorst(raceColumnDTO)) {
+                    LeaderboardRowDTO leaderboardRowDTO = result.rows.get(competitorDTO);
+                    LeaderboardEntryDTO leaderboardEntryDTO = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnDTO.name);
+                    leaderboardEntryDTO.rank = raceRank++;
+                }
+            }
         logger.info("computeLeaderboardByName("+this.getName()+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;

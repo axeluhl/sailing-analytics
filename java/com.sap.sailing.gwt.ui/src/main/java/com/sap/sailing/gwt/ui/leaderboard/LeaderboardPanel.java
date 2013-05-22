@@ -1415,8 +1415,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 for (LeaderboardRowDTO row : getSelectedRows()) {
                     selection.add(row.competitor);
                 }
-                LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection,
-                /* listenersNotToNotify */LeaderboardPanel.this);
+                LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection, /* listenersNotToNotify */LeaderboardPanel.this);
+                updateLeaderboard(getLeaderboard());
             }
         });
         leaderboardTable.setSelectionModel(leaderboardSelectionModel);
@@ -1968,12 +1968,19 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      */
     private Collection<LeaderboardRowDTO> getRowsToDisplay(LeaderboardDTO leaderboard) {
         Collection<LeaderboardRowDTO> result;
+        Iterable<CompetitorDTO> allFilteredCompetitors = competitorSelectionProvider.getFilteredCompetitors();
+        result = new ArrayList<LeaderboardRowDTO>();
         if (preSelectedRace == null) {
-            result = leaderboard.rows.values();
+            for (CompetitorDTO competitor : leaderboard.rows.keySet()) {
+                if(Util.contains(allFilteredCompetitors, competitor)) {
+                    result.add(leaderboard.rows.get(competitor));
+                }
+            }
         } else {
-            result = new ArrayList<LeaderboardRowDTO>();
             for (CompetitorDTO competitorInPreSelectedRace : getCompetitors(preSelectedRace)) {
-                result.add(leaderboard.rows.get(competitorInPreSelectedRace));
+                if(Util.contains(allFilteredCompetitors, competitorInPreSelectedRace)) {
+                    result.add(leaderboard.rows.get(competitorInPreSelectedRace));
+                }
             }
         }
         return result;
@@ -2531,6 +2538,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         timeChanged(timer.getTime());
     }
 
+    @Override
+    public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
+        updateLeaderboard(getLeaderboard());
+    }
+    
     public RaceColumnSelection getRaceColumnSelection() {
         return raceColumnSelection;
     }
