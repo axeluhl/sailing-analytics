@@ -344,8 +344,6 @@ public interface StringMessages extends Messages {
     String waypoint();
     String showAllCompetitors();
     String boatTails();
-    String maximalCount();
-    String maxVisibleCompetitorsCountMustBePositive();
     String resultImportUrls();
     String errorRefreshingResultImportUrlList(String message);
     String successfullyUpdatedResultImportUrls();
@@ -535,6 +533,18 @@ public interface StringMessages extends Messages {
     String currentTime();
     String tractracUsername();
     String tractracPassword();
+    String operatorEquals();
+    String operatorNotEqualTo();
+    String operatorLessThan();
+    String operatorLessThanEquals();
+    String operatorGreaterThan();
+    String operatorGreaterThanEquals();
+    String operatorContains();
+    String operatorNotContains();
+    String operatorStartsWith();
+    String operatorEndsWith();
+    String nationality();
+    String numberMustBePositive();
     String distanceToLineAtRaceStart();
     String speedOverGroundAtRaceStart();
     String speedOverGroundWhenPassingStart();
@@ -547,18 +557,38 @@ public interface StringMessages extends Messages {
     String starboardTack();
     String portSide();
     String starboardSide();
+    String pleaseEnterANumber();
+    String competitorsFilter();
     String flagStatus();
     String additionalInformation();
+    String actionAddFilter();
+    String actionEditFilter();
+    String availableFilters();
+    String createFilterHint();
     String windFixListingDescription();
     String noWindFixesAvailable();
     String distanceToStarboardEndOfStartlineWhenPassingStart();
     String distanceToStarboardEndOfStartlineWhenPassingStartTooltip();
+    String filterThisNameAlreadyExists();
+    String addAtLeastOneFilterCriteria();
+    String filterCriteria();
+    String selectAFilterCriteria();
+    String filterName();
+    String operator();
+    String value();
+    String nationalityMustBeISOorIOCcode();
+    String raceRank();
     String waypoints();
     String disableRaceFilter();
     String enableRaceFilter();
     String raceStatusColumn();
     String loading();
     String showHiddenRaces();
+    String selectedCompetitors();
+    String filterNothing();
+    String topNCompetitorsByRaceRank(int n);
+    String topNCompetitorsByTotalRank(int n);
+
     /*Start of simulator related messages*/
     String simulator();
     String optionsBar();
@@ -605,5 +635,4 @@ public interface StringMessages extends Messages {
     String freemode();
     String whatIfCourse();
     /*End of simulator related messages*/
-
 }

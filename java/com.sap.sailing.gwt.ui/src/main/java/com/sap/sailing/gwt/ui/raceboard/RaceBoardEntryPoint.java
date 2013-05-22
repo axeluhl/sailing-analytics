@@ -9,6 +9,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -76,11 +77,13 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         } else {
             viewMode = RaceBoardViewConfiguration.ViewModes.ONESCREEN;
         }
-        final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_LEADERBOARD, true /* default*/);
-        final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default*/);
-        final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default*/);
+        boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_LEADERBOARD, true /* default*/);
+        boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default*/);
+        boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default*/);
+        String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
-        raceboardViewConfig = new RaceBoardViewConfiguration(viewMode, showLeaderboard, showWindChart, showCompetitorsChart);
+        raceboardViewConfig = new RaceBoardViewConfiguration(viewMode, activeCompetitorsFilterSetName, showLeaderboard,
+                showWindChart, showCompetitorsChart, canReplayWhileLiveIsPossible);
         
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
         final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();  
@@ -147,7 +150,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         raceSelectionModel.setSelection(singletonList);
         Timer timer = new Timer(PlayModes.Replay, 1000l);
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, this, singletonList, 5000l /* requestInterval*/);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, user, timer, canReplayWhileLiveIsPossible, raceSelectionModel, leaderboardName,
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, user, timer, raceSelectionModel, leaderboardName,
                 leaderboardGroupName, raceboardViewConfig, RaceBoardEntryPoint.this, stringMessages, userAgent, raceTimesInfoProvider);
         raceBoardPanel.fillRegattas(regattas);
 
@@ -174,7 +177,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private FlowPanel createTimePanel(RaceBoardPanel raceBoardPanel) {
         FlowPanel timeLineInnerBgPanel = new FlowPanel();
         timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
-        timeLineInnerBgPanel.add(raceBoardPanel.getTimeWidget());
+        timeLineInnerBgPanel.add(raceBoardPanel.getTimePanel());
         
         FlowPanel timeLineInnerPanel = new FlowPanel();
         timeLineInnerPanel.add(timeLineInnerBgPanel);
@@ -210,8 +213,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel) {
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
-        FlowPanel toolbarPanel = new FlowPanel();
-        toolbarPanel.add(raceBoardPanel.getNavigationWidget());
+        Panel toolbarPanel = raceBoardPanel.getToolbarPanel();
         if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
             HTML lbl = new HTML(stringMessages.warningBrowserUnsupported());
             lbl.setStyleName("browserOptimizedMessage");

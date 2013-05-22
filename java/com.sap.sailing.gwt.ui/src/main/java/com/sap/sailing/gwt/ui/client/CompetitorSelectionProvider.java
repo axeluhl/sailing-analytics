@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
+import com.sap.sailing.domain.common.filter.Filter;
+import com.sap.sailing.domain.common.filter.FilterSet;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public interface CompetitorSelectionProvider {
@@ -11,7 +13,16 @@ public interface CompetitorSelectionProvider {
      */
     Iterable<CompetitorDTO> getSelectedCompetitors();
     
+    /**
+     * @return a non-<code>null</code> sequence of all competitors which may be empty.
+     */
     Iterable<CompetitorDTO> getAllCompetitors();
+
+    /**
+     * @return a non-<code>null</code> sequence of all competitors filtered by the applied
+     * {@link #getCompetitorsFilterSet() filter set} (which may be null).
+     */
+    Iterable<CompetitorDTO> getFilteredCompetitors();
 
     /**
      * Updates the selection state of <code>competitor</code> if contained in {@link #getAllCompetitors()}. If this
@@ -48,4 +59,8 @@ public interface CompetitorSelectionProvider {
     void addCompetitorSelectionChangeListener(CompetitorSelectionChangeListener listener);
 
     void removeCompetitorSelectionChangeListener(CompetitorSelectionChangeListener listener);
+    
+    public FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> getCompetitorsFilterSet();
+
+    public void setCompetitorsFilterSet(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> competitorsFilterSet);
 }
