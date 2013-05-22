@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
@@ -30,7 +29,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.controls.slider.SliderBar;
 import com.sap.sailing.gwt.ui.client.shared.controls.slider.TimeSlider;
 
-public class TimePanel<T extends TimePanelSettings> extends FormPanel implements Component<T>, TimeListener, TimeZoomChangeListener,
+public class TimePanel<T extends TimePanelSettings> extends SimplePanel implements Component<T>, TimeListener, TimeZoomChangeListener,
     TimeRangeChangeListener, PlayStateListener, RequiresResize {
     protected final Timer timer;
     protected final TimeRangeWithZoomProvider timeRangeProvider;
@@ -212,7 +211,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playSpeedBox.setVisibleLength(3);
         playSpeedBox.setWidth("25px");
         playSpeedBox.setHeight("14px");
-        playSpeedBox.setValue(1);
+        playSpeedBox.setValue((int)timer.getPlaySpeedFactor()); // Christopher: initialize play speed box according to play speed factor
         playSpeedBox.setTitle(stringMessages.playSpeedHelp());
         playSpeedBox.addValueChangeHandler(new ValueChangeHandler<Integer>() {
             @Override
@@ -339,9 +338,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         if (!min.equals(timeRangeProvider.getFromTime())) {
             changed = true;
             timeSlider.setMinValue(new Double(min.getTime()), fireEvent);
-            if (timeSlider.getCurrentValue() == null) {
-                timeSlider.setCurrentValue(new Double(min.getTime()), fireEvent);
-            }
         }
         if (changed) {
             if(!timeRangeProvider.isZoomed()) {
@@ -353,6 +349,11 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
                 timeSlider.setStepSize(numSteps, fireEvent);
             } else {
                 timeSlider.setStepSize(1000, fireEvent);
+            }
+
+            // Christopher: following setCurrentValue requires stepsize to be set <> 0 (otherwise division by zero; NaN)
+            if (timeSlider.getCurrentValue() == null) {
+                timeSlider.setCurrentValue(new Double(min.getTime()), fireEvent);
             }
         }
     }

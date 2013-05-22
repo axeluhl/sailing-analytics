@@ -96,6 +96,14 @@
 		<servlet-name>RegattasJsonGetServlet</servlet-name>
 		<url-pattern>/regattas</url-pattern>
 	</servlet-mapping>
+	<servlet>
+		<servlet-name>RegattaJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.RegattaJsonGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RegattaJsonGetServlet</servlet-name>
+		<url-pattern>/regatta</url-pattern>
+	</servlet-mapping>
 	
 	<servlet>
 		<servlet-name>LeaderboardsJsonGetServlet</servlet-name>

@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.dto.NamedDTO;
 
 public class EventDTO extends NamedDTO implements IsSerializable {
+    private static final long serialVersionUID = -7100030301376959817L;
     public List<RegattaDTO> regattas;
     public VenueDTO venue;
     public String publicationUrl;

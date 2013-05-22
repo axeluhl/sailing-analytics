@@ -5,9 +5,9 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
 public class GetLeaderboardDataEntriesAction extends DefaultAsyncAction<List<Triple<String, List<CompetitorDTO>, List<Double>>>> {
     private final SailingServiceAsync sailingService;

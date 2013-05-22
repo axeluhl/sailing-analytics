@@ -151,5 +151,4 @@ public class LeaderboardViewer extends SimplePanel {
             timer.removeTimeListener(multiCompetitorChart);
         }
     }
-
 }

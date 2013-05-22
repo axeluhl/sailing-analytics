@@ -116,8 +116,9 @@ public class MetaLeaderboardViewer extends SimplePanel {
         mainPanel.add(metaLeaderboardPanel);
         mainPanel.add(multiCompetitorChart);
 
-        addComponentToNavigationMenu(metaLeaderboardPanel, false, stringMessages.overallStandings());
+        addComponentToNavigationMenu(metaLeaderboardPanel, false, "Series Leaderboard");
         addComponentToNavigationMenu(multiCompetitorChart, true, null);
+        addComponentToNavigationMenu(selectedLeaderboardPanel, false, "Act Leaderboard");
     
         leaderboards = new ArrayList<String>();
         leaderboardSelectionListBox = new ListBox();
@@ -227,24 +228,4 @@ public class MetaLeaderboardViewer extends SimplePanel {
         }
     }
 
-    /**
-     * Fetches from the server the list of overall ("meta") leaderboard descriptions in which this main leaderboard occurs and
-     * creates one {@link LeaderboardPanel} for each such overall leaderboard. Those panels are then added to
-     * {@link #overallLeaderboardPanels}, registered with the {@link #timer} for common timing with the main leaderboard panel,
-     * and the panels are made visible by adding them to the {@link #overallLeaderboardsPanel} panel.
-     */
-    private void updateOverallLeaderboardsAndAddToPanel() {
-        sailingService.getOverallLeaderboardNamesContaining(metaLeaderboardName, new AsyncCallback<List<String>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorTryingToObtainOverallLeaderboards(caught.getMessage()));
-            }
-
-            @Override
-            public void onSuccess(List<String> overallLeaderboardNames) {
-                for (String overallLeaderboardName : overallLeaderboardNames) {
-                }
-            }
-        });
-    }
 }

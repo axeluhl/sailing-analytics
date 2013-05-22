@@ -48,6 +48,12 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -66,12 +72,6 @@ import com.sap.sailing.gwt.ui.leaderboard.CompetitorFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
-import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
-import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 
 /**
@@ -96,7 +96,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, String>() {
                 @Override
                 public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
-                    getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.id,
+                    getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.idAsString,
                             value == null || value.length() == 0 ? null : Double.valueOf(value.trim()),
                                     new AsyncCallback<Void>() {
                         @Override
@@ -211,7 +211,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         return new FieldUpdater<LeaderboardRowDTO, String>() {
             @Override
             public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
-                getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.id,
+                getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.idAsString,
                         value == null || value.length() == 0 ? null : value.trim(),
                                 new AsyncCallback<Void>() {
                     @Override
@@ -329,7 +329,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     getBusyIndicator().setBusy(true);
-                    getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.id,
+                    getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.idAsString,
                             raceColumnName, value == null || value.trim().length() == 0 ? null : MaxPointsReason.valueOf(value.trim()),
                                     getLeaderboardDisplayDate(), new AsyncCallback<Triple<Double, Double, Boolean>>() {
                         @Override
@@ -425,7 +425,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     getBusyIndicator().setBusy(true);
-                    getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.id, raceColumnName,
+                    getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.idAsString, raceColumnName,
                             value == null || value.trim().length() == 0 ? null : Double.valueOf(value.trim()), getLeaderboardDisplayDate(),
                                     new AsyncCallback<Triple<Double, Double, Boolean>>() {
                         @Override
@@ -503,7 +503,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         @Override
                         public void ok(final Pair<MaxPointsReason, Double> editedObject) {
                             getBusyIndicator().setBusy(true);
-                            getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.id, raceColumnName,
+                            getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.idAsString, raceColumnName,
                                     editedObject.getB(), getLeaderboardDisplayDate(),
                                             new AsyncCallback<Triple<Double, Double, Boolean>>() {
                                 @Override
@@ -517,7 +517,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                                 @Override
                                 public void onSuccess(Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
-                                    getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.id, raceColumnName,
+                                    getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.idAsString, raceColumnName,
                                             editedObject.getA(), getLeaderboardDisplayDate(),
                                                     new AsyncCallback<Triple<Double, Double, Boolean>>() {
                                         @Override
@@ -652,7 +652,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         unsuppressButtonColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
             @Override
             public void update(int index, final CompetitorDTO object, String value) {
-                getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), object.id,
+                getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), object.idAsString,
                         /* suppressed */ false, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -786,7 +786,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 return new FieldUpdater<LeaderboardRowDTO, String>() {
                     @Override
                     public void update(int index, final LeaderboardRowDTO row, String value) {
-                        getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), row.competitor.id,
+                        getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), row.competitor.idAsString,
                                 /* suppressed */ true,
                                 new AsyncCallback<Void>() {
                             @Override

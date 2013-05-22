@@ -12,6 +12,9 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -30,9 +33,6 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
-import com.sap.sailing.gwt.ui.shared.FleetDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 public class TVViewController implements RaceTimesInfoProviderListener {
@@ -146,8 +146,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, null, raceboardTimer,
-                /* canReplayWhileLiveIsPossible */ false, raceSelectionModel, leaderboardName,
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, null, raceboardTimer, raceSelectionModel, leaderboardName,
                 null, raceboardViewConfig, errorReporter, stringMessages, userAgent, raceTimesInfoProvider);
         return raceBoardPanel;
     }
@@ -190,7 +189,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
             }
             if (showNavigationPanel) {
                 FlowPanel toolbarPanel = new FlowPanel();
-                toolbarPanel.add(raceBoardPanel.getNavigationWidget());
+                toolbarPanel.add(raceBoardPanel.getComponentControlsPanel());
                 dockPanel.addNorth(toolbarPanel, 40);
             }
             FlowPanel timePanel = createTimePanel(raceBoardPanel);
@@ -208,7 +207,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     private FlowPanel createTimePanel(RaceBoardPanel raceBoardPanel) {
         FlowPanel timeLineInnerBgPanel = new FlowPanel();
         timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
-        timeLineInnerBgPanel.add(raceBoardPanel.getTimeWidget());
+        timeLineInnerBgPanel.add(raceBoardPanel.getTimePanel());
         
         FlowPanel timeLineInnerPanel = new FlowPanel();
         timeLineInnerPanel.add(timeLineInnerBgPanel);

@@ -13,7 +13,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.EventDataJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.EventJsonSerializer;
 
 public class EventDataJsonSerializerTest {
 
@@ -22,7 +22,7 @@ public class EventDataJsonSerializerTest {
     protected final String expectedPublicationUrl = "cd";
 
     protected JsonSerializer<Venue> venueSerializer;
-    protected EventDataJsonSerializer serializer;
+    protected EventJsonSerializer serializer;
     protected EventBase event;
 
     // see https://groups.google.com/forum/?fromgroups=#!topic/mockito/iMumB0_bpdo
@@ -37,7 +37,7 @@ public class EventDataJsonSerializerTest {
 
         // ... and the serializer itself.		
         venueSerializer = mock(JsonSerializer.class);
-        serializer = new EventDataJsonSerializer(venueSerializer);
+        serializer = new EventJsonSerializer(venueSerializer);
     }
 
     @Test
@@ -46,13 +46,13 @@ public class EventDataJsonSerializerTest {
 
         assertEquals(
                 expectedId,
-                UUID.fromString(result.get(EventDataJsonSerializer.FIELD_ID).toString()));
+                UUID.fromString(result.get(EventJsonSerializer.FIELD_ID).toString()));
         assertEquals(
                 expectedName,
-                result.get(EventDataJsonSerializer.FIELD_NAME));
+                result.get(EventJsonSerializer.FIELD_NAME));
         assertEquals(
                 expectedPublicationUrl,
-                result.get(EventDataJsonSerializer.FIELD_PUBLICATION_URL));
+                result.get(EventJsonSerializer.FIELD_PUBLICATION_URL));
     }
 
     @Test
@@ -68,7 +68,7 @@ public class EventDataJsonSerializerTest {
 
         assertEquals(
                 expectedVenue,
-                result.get(EventDataJsonSerializer.FIELD_VENUE));
+                result.get(EventJsonSerializer.FIELD_VENUE));
     }
 
 }

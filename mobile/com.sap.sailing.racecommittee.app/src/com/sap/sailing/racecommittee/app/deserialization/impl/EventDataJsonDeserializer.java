@@ -10,7 +10,7 @@ import com.sap.sailing.domain.base.impl.EventBaseImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.serialization.impl.EventDataJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.EventJsonSerializer;
 
 public class EventDataJsonDeserializer implements JsonDeserializer<EventBase> {
 	private JsonDeserializer<Venue> venueDeserializer;
@@ -20,13 +20,13 @@ public class EventDataJsonDeserializer implements JsonDeserializer<EventBase> {
 	}
 	
 	public EventBase deserialize(JSONObject object) throws JsonDeserializationException {
-		Serializable id = (Serializable) object.get(EventDataJsonSerializer.FIELD_ID);
-		String name = object.get(EventDataJsonSerializer.FIELD_NAME).toString();
-		String publicationUrl = object.get(EventDataJsonSerializer.FIELD_PUBLICATION_URL).toString();
+		Serializable id = (Serializable) object.get(EventJsonSerializer.FIELD_ID);
+		String name = object.get(EventJsonSerializer.FIELD_NAME).toString();
+		String publicationUrl = object.get(EventJsonSerializer.FIELD_PUBLICATION_URL).toString();
 		
 		JSONObject venueObject = Helpers.getNestedObjectSafe(
 				object, 
-				EventDataJsonSerializer.FIELD_VENUE);
+				EventJsonSerializer.FIELD_VENUE);
 		Venue venue = venueDeserializer.deserialize(venueObject);
 		
 		return new EventBaseImpl(

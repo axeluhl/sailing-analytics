@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import com.google.gwt.cell.client.TextCell;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public class SideToWhichMarkAtLegStartWasRoundedColumn extends DetailTypeColumn<NauticalSide, String> {
     private final StringMessages stringMessages;
