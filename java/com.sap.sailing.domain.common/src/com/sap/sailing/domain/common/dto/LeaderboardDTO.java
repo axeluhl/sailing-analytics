@@ -54,14 +54,23 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
      * from it by the {@link #clone()} operation.
      */
     public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator) {
+        initCollections();
         id = uuidGenerator.generateRandomUUID();
         this.timePointOfLastCorrectionsValidity = timePointOfLastCorrectionsValidity;
         this.comment = comment;
-        competitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>();
-        this.suppressedCompetitors = new HashSet<CompetitorDTO>();
         this.higherScoresIsBetter = higherScoreIsBetter;
     }
+
+    private void initCollections() {
+        competitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>();
+        this.suppressedCompetitors = new HashSet<CompetitorDTO>();
+    }
     
+    public LeaderboardDTO(String id) {
+        initCollections();
+        this.id = id;
+    }
+
     public String getId() {
         return id;
     }

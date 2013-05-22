@@ -40,7 +40,8 @@ public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDT
         final AsyncCallback<LeaderboardDTO> wrapperCallback = getWrapperCallback(asyncActionsExecutor);
         sailingService
                 .getLeaderboardByName(leaderboardName, date, namesOfRacesForWhichToLoadLegDetails,
-                        previousLeaderboard.getId(), new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
+                        previousLeaderboard==null?null:previousLeaderboard.getId(),
+                        new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 wrapperCallback.onFailure(caught);

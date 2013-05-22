@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -298,7 +299,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
-    private final Map<String,PolarSheetGenerationWorker> polarSheetGenerationWorkers = new HashMap<String, PolarSheetGenerationWorker>();
+    private final Map<String,PolarSheetGenerationWorker> polarSheetGenerationWorkers;
+    
+    private static final int LEADERBOARD_BY_NAME_RESULTS_CACHE_BY_ID_SIZE = 100;
+    
+    private final LinkedHashMap<String, LeaderboardDTO> leaderboardByNameResultsCacheById;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
@@ -314,6 +319,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
+        polarSheetGenerationWorkers = new HashMap<String, PolarSheetGenerationWorker>();
+        leaderboardByNameResultsCacheById = new LinkedHashMap<String, LeaderboardDTO>(LEADERBOARD_BY_NAME_RESULTS_CACHE_BY_ID_SIZE, 0.75f, /* accessOrder */ true) {
+            private static final long serialVersionUID = 3775119859130148488L;
+            @Override
+            protected boolean removeEldestEntry(Entry<String, LeaderboardDTO> eldest) {
+                return this.size() > LEADERBOARD_BY_NAME_RESULTS_CACHE_BY_ID_SIZE;
+            }
+        };
         // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
         // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
         // core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
@@ -410,9 +423,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public IncrementalOrFullLeaderboardDTO getLeaderboardByName(final String leaderboardName, final Date date,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, String previousLeaderboardId)
-                    throws NoWindException, InterruptedException, ExecutionException {
+                    throws NoWindException, InterruptedException, ExecutionException, IllegalArgumentException, IllegalAccessException {
         long startOfRequestHandling = System.currentTimeMillis();
-        LeaderboardDTO result = null;
+        IncrementalOrFullLeaderboardDTO result = null;
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             TimePoint timePoint;
@@ -421,12 +434,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 timePoint = new MillisecondsTimePoint(date);
             }
-            result = leaderboard.getLeaderboardDTO(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails, getService(), baseDomainFactory);
+            LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails, getService(), baseDomainFactory);
+            LeaderboardDTO previousLeaderboardDTO = null;
+            synchronized (leaderboardByNameResultsCacheById) {
+                leaderboardByNameResultsCacheById.put(leaderboardDTO.getId(), leaderboardDTO);
+                if (previousLeaderboardId != null) {
+                    previousLeaderboardDTO = leaderboardByNameResultsCacheById.get(previousLeaderboardId);
+                }
+            }
+            if (previousLeaderboardDTO == null) {
+                result = new FullLeaderboardDTO(leaderboardDTO);
+            } else {
+                result = new IncrementalLeaderboardDTOCloner().clone(leaderboardDTO).strip(previousLeaderboardDTO);
+            }
             logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
                     + namesOfRaceColumnsForWhichToLoadLegDetails + ") took "
                     + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
         }
-        return new FullLeaderboardDTO(result);
+        return result;
     }
 
     @Override
