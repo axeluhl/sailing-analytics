@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.impl.Util;
@@ -171,6 +172,21 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
             }
         }
         setCompetitorOrderingPerRace(competitorOrderingPerRace);
+        // now clone the rows map to enable stripping the LeaderboardEntryDTOs inside
+        HashMap<CompetitorDTO, LeaderboardRowDTO> newRows = new HashMap<CompetitorDTO, LeaderboardRowDTO>(rows);
+        for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : rows.entrySet()) {
+            LeaderboardRowDTO newRowDTO = new LeaderboardRowDTO();
+            Util.clone(e.getValue(), newRowDTO);
+            newRows.put(e.getKey(), newRowDTO);
+            HashMap<String, LeaderboardEntryDTO> newFieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
+            for (Map.Entry<String, LeaderboardEntryDTO> ee : newRowDTO.fieldsByRaceColumnName.entrySet()) {
+                LeaderboardEntryDTO newLeaderboardEntryDTO = new LeaderboardEntryDTO();
+                Util.clone(ee.getValue(), newLeaderboardEntryDTO);
+                newFieldsByRaceColumnName.put(ee.getKey(), newLeaderboardEntryDTO);
+                // TODO incrementalize LeaderboardEntryDTO and the contained LegEntryDTO, probably also by creating an "incremental"-enabled subclass that is used for cloning here
+            }
+            newRowDTO.fieldsByRaceColumnName = newFieldsByRaceColumnName;
+        }
         // TODO remove those field values from this which are equal to previousVersion, set ...Unchanged flags accordingly
         return this;
     }

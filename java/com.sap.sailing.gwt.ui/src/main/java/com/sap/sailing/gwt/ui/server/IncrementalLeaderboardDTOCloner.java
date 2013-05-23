@@ -1,10 +1,8 @@
 package com.sap.sailing.gwt.ui.server;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.impl.Util;
 
 /**
  * Uses reflection to clone all properties of a {@link LeaderboardDTO} into a new instance of type {@link IncrementalLeaderboardDTO}.
@@ -14,19 +12,9 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
  */
 public class IncrementalLeaderboardDTOCloner {
 
-    public IncrementalLeaderboardDTO clone(LeaderboardDTO leaderboardDTO) throws IllegalArgumentException, IllegalAccessException {
+    public IncrementalLeaderboardDTO clone(LeaderboardDTO leaderboardDTO) {
         IncrementalLeaderboardDTO result = new IncrementalLeaderboardDTO(leaderboardDTO.getId());
-        Class<?> c = leaderboardDTO.getClass();
-        while (c != null) {
-            for (Field field : c.getDeclaredFields()) {
-                if ((field.getModifiers() & Modifier.FINAL) == 0) {
-                    field.setAccessible(true);
-                    Object value = field.get(leaderboardDTO);
-                    field.set(result, value);
-                }
-            }
-            c = c.getSuperclass();
-        }
+        Util.clone(leaderboardDTO, result);
         return result;
     }
     

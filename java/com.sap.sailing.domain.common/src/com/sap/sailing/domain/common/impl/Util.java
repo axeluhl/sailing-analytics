@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.common.impl;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -245,4 +247,24 @@ public class Util {
         return result;
     }
 
+    public static void clone(Object from, Object to) {
+        try {
+            Class<?> c = from.getClass();
+            while (c != null) {
+                for (Field field : c.getDeclaredFields()) {
+                    if ((field.getModifiers() & Modifier.FINAL) == 0) {
+                        field.setAccessible(true);
+                        Object value;
+                        value = field.get(from);
+                        field.set(to, value);
+                    }
+                }
+                c = c.getSuperclass();
+            }
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
