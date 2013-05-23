@@ -76,30 +76,29 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         grid.setWidth("100%");
         
         //TODO: i8n
-        Label courseDesignOverviewLabel = new Label("Course design overview");
-        courseDesignOverviewLabel.addStyleName(STYLE_TITLE_LABEL);
-        
-        //TODO: i8n
         Label raceOverviewLabel = new Label("Area overview");
         raceOverviewLabel.addStyleName(STYLE_TITLE_LABEL);
         
-        grid.setWidget(0, 0, courseDesignOverviewLabel);
-        grid.setWidget(0, 1, raceOverviewLabel);
+        //TODO: i8n
+        Label courseDesignOverviewLabel = new Label("Course design overview");
+        courseDesignOverviewLabel.addStyleName(STYLE_TITLE_LABEL);
+        
+        grid.setWidget(0, 0, raceOverviewLabel);
+        grid.setWidget(0, 1, courseDesignOverviewLabel);
         
         raceSelectionProvider = new RegattaOverviewRaceSelectionModel(false);
         raceSelectionProvider.addRegattaOverviewRaceSelectionChangeListener(this);
         
-        raceCourseDesignDetailsComposite = new CourseDesignTableComposite(sailingService, errorReporter, stringMessages);
-        grid.setWidget(1, 0, raceCourseDesignDetailsComposite);
-        
-        
         regattaOverviewTableComposite = new RegattaOverviewTableComposite(sailingService, errorReporter, stringMessages, eventIdAsString, raceSelectionProvider);
-        grid.setWidget(1, 1, regattaOverviewTableComposite);
+        grid.setWidget(1, 0, regattaOverviewTableComposite);
+        
+        raceCourseDesignDetailsComposite = new CourseDesignTableComposite(sailingService, errorReporter, stringMessages);
+        grid.setWidget(1, 1, raceCourseDesignDetailsComposite);
         
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getRowFormatter().setVerticalAlign(1, HasVerticalAlignment.ALIGN_TOP);
-        grid.getColumnFormatter().setWidth(0, "20%");
-        grid.getColumnFormatter().setWidth(1, "80%");
+        grid.getColumnFormatter().setWidth(0, "80%");
+        grid.getColumnFormatter().setWidth(1, "20%");
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingLeft(20.0, Unit.PX);
         
