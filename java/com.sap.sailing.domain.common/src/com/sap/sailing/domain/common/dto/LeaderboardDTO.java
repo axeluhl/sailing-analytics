@@ -98,11 +98,15 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
     public void setCompetitorsFromBestToWorst(RaceColumnDTO raceColumn, List<CompetitorDTO> orderedCompetitors) {
         competitorOrderingPerRace.put(raceColumn, orderedCompetitors);
     }
-
-    protected List<CompetitorDTO> removeCompetitorsFromBestToWorst(RaceColumnDTO raceColumn) {
-        return competitorOrderingPerRace.remove(raceColumn);
+    
+    protected void setCompetitorOrderingPerRace(Map<RaceColumnDTO, List<CompetitorDTO>> competitorOrderingPerRace) {
+        this.competitorOrderingPerRace = competitorOrderingPerRace;
     }
 
+    protected Map<RaceColumnDTO, List<CompetitorDTO>> getCompetitorOrderingPerRace() {
+        return competitorOrderingPerRace;
+    }
+    
     public List<CompetitorDTO> getCompetitorsFromBestToWorst(RaceColumnDTO raceColumn) {
         return competitorOrderingPerRace.get(raceColumn);
     }

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.dto;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -94,14 +95,17 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
             competitorDisplayNamesUnchanged = true;
             competitorDisplayNames = null;
         }
+        raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged = new HashSet<String>();
+        final HashMap<RaceColumnDTO, List<CompetitorDTO>> competitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>(getCompetitorOrderingPerRace());
         for (RaceColumnDTO raceColumn : this.getRaceList()) {
             List<CompetitorDTO> competitorsFromBestToWorstForRaceColumn = getCompetitorsFromBestToWorst(raceColumn);
             List<CompetitorDTO> previousCompetitorsFrombestToWorstForRaceColumn = previousVersion.getCompetitorsFromBestToWorst(raceColumn);
             if (Util.equalsWithNull(competitorsFromBestToWorstForRaceColumn, previousCompetitorsFrombestToWorstForRaceColumn)) {
                 raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged.add(raceColumn.name);
-                removeCompetitorsFromBestToWorst(raceColumn);
+                competitorOrderingPerRace.remove(raceColumn);
             }
         }
+        setCompetitorOrderingPerRace(competitorOrderingPerRace);
         // TODO remove those field values from this which are equal to previousVersion, set ...Unchanged flags accordingly
         return this;
     }
