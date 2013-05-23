@@ -114,10 +114,13 @@ public class SmartFutureCacheDeadlockTest {
         // in suspended mode, the following will trigger a re-calculation immediately,
         // and the locks from the readerThread will be propagated to the computing thread
         reader.performAndWait(Command.GET_LATEST_FROM_CACHE);
-        assertNotNull(computingThread);
-        reader.performAndWait(Command.UNLOCK_AFTER_READ); // this shall unblock the writer
-        writer.performAndWait(Command.UNLOCK_AFTER_WRITE);
-        assertTrue(System.currentTimeMillis()-start < 5000); // must not take longer than 5s, otherwise a locking conflict must have occurred;
+        try {
+            assertNotNull(computingThread);
+        } finally {
+            reader.performAndWait(Command.UNLOCK_AFTER_READ); // this shall unblock the writer
+            writer.performAndWait(Command.UNLOCK_AFTER_WRITE);
+            assertTrue(System.currentTimeMillis()-start < 5000); // must not take longer than 5s, otherwise a locking conflict must have occurred;
+        }
         // see also LockUtil.NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK
     }
     
@@ -267,6 +270,7 @@ public class SmartFutureCacheDeadlockTest {
             } finally {
                 running = false;
             }
+            logger.info("Took and processed command "+Command.EXIT.name()+" in thread "+Thread.currentThread().getName());
         }
     }
 
