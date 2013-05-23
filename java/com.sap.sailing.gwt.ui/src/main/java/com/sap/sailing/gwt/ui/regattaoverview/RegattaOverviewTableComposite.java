@@ -381,7 +381,7 @@ public class RegattaOverviewTableComposite extends Composite {
         //TODO add a link to a raceboard when a trackedrace is available for a given race column
 
         table.addColumn(courseAreaColumn, stringMessages.courseArea());
-        table.addColumn(regattaNameColumn, stringMessages.boatClass()); // For sailors the boat class also contains
+        table.addColumn(regattaNameColumn, stringMessages.regatta()); // For sailors the boat class also contains
                                                                         // additional infos such as woman/man, e.g.
                                                                         // Laser Radial Woman or Laser Radial Men
         table.addColumn(fleetNameColumn, stringMessages.fleet());

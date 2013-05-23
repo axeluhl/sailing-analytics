@@ -2421,9 +2421,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private String getRegattaNameFromLeaderboard(Leaderboard leaderboard) {
         String regattaName;
         if (leaderboard instanceof RegattaLeaderboard) {
-            regattaName = ((RegattaLeaderboard) leaderboard).getRegatta().getName();
+            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+            if (regattaLeaderboard.getDisplayName() != null) {
+                regattaName = regattaLeaderboard.getDisplayName();
+            } else {
+                regattaName = regattaLeaderboard.getRegatta().getName();
+            }
         } else {
-            regattaName = leaderboard.getDisplayName();
+            if (leaderboard.getDisplayName() != null) {
+                regattaName = leaderboard.getDisplayName();
+            } else {
+                regattaName = leaderboard.getName();
+            }
         }
         return regattaName;
     }
