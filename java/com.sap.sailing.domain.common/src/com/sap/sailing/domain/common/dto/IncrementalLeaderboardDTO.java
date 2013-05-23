@@ -17,6 +17,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
     private boolean commentUnchanged;
     private boolean competitorsUnchanged;
     private boolean suppressedCompetitorsUnchanged;
+    private boolean competitorDisplayNamesUnchanged;
     private Set<String> raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged;
     
     IncrementalLeaderboardDTO() {}
@@ -58,6 +59,9 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
                 Util.addAll(previousVersion.getSuppressedCompetitors(), suppressedCompetitors);
                 setSuppressedCompetitors(suppressedCompetitors);
             }
+            if (competitorDisplayNamesUnchanged) {
+                competitorDisplayNames = previousVersion.competitorDisplayNames;
+            }
             // TODO ensure that the races collection has all the necessary RaceColumnDTO objects before looking them up by name
             for (String raceColumnNameForWhichCompetitorOrderingPerRaceUnchanged : raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged) {
                 RaceColumnDTO raceColumn = getRaceColumnByName(raceColumnNameForWhichCompetitorOrderingPerRaceUnchanged);
@@ -85,6 +89,10 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
         if (Util.equalsWithNull(getSuppressedCompetitors(), previousVersion.getSuppressedCompetitors())) {
             suppressedCompetitorsUnchanged = true;
             setSuppressedCompetitors(null);
+        }
+        if (Util.equalsWithNull(competitorDisplayNames, previousVersion.competitorDisplayNames)) {
+            competitorDisplayNamesUnchanged = true;
+            competitorDisplayNames = null;
         }
         for (RaceColumnDTO raceColumn : this.getRaceList()) {
             List<CompetitorDTO> competitorsFromBestToWorstForRaceColumn = getCompetitorsFromBestToWorst(raceColumn);
