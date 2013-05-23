@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -17,10 +18,12 @@ public class IncrementalLeaderboardDTOCloner {
         IncrementalLeaderboardDTO result = new IncrementalLeaderboardDTO(leaderboardDTO.getId());
         Class<?> c = leaderboardDTO.getClass();
         while (c != null) {
-            for (Field field : leaderboardDTO.getClass().getFields()) {
-                field.setAccessible(true);
-                Object value = field.get(leaderboardDTO);
-                field.set(result, value);
+            for (Field field : c.getDeclaredFields()) {
+                if ((field.getModifiers() & Modifier.FINAL) == 0) {
+                    field.setAccessible(true);
+                    Object value = field.get(leaderboardDTO);
+                    field.set(result, value);
+                }
             }
             c = c.getSuperclass();
         }
