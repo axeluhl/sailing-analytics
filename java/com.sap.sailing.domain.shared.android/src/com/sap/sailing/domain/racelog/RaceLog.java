@@ -41,5 +41,9 @@ public interface RaceLog extends Track<RaceLogEvent> {
      * Remove a listener.
      */
     void removeListener(RaceLogEventVisitor listener);
-
+    
+    /**
+     * Checks if the race log is empty.
+     */
+    boolean isEmpty();
 }

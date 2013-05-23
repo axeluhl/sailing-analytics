@@ -94,6 +94,11 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     }
 
     @Override
+    public boolean isEmpty() {
+        return getFirstRawFix() == null;
+    }
+
+    @Override
     public void addListener(RaceLogEventVisitor listener) {
         synchronized (listeners) {
             listeners.add(listener);
@@ -124,5 +129,4 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         ois.defaultReadObject();
         listeners = new HashSet<RaceLogEventVisitor>();
     }
-
 }
