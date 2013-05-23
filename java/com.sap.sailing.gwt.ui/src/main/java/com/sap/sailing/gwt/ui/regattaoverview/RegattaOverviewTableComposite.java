@@ -251,9 +251,10 @@ public class RegattaOverviewTableComposite extends Composite {
         TextColumn<RegattaOverviewEntryDTO> fleetNameColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
-                return entryDTO.raceInfo.fleet;
+                return entryDTO.raceInfo.fleet.equals("Default") ? "-" : entryDTO.raceInfo.fleet;
             }
         };
+        fleetNameColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         fleetNameColumn.setSortable(true);
         regattaOverviewListHandler.setComparator(fleetNameColumn, new Comparator<RegattaOverviewEntryDTO>() {
 
