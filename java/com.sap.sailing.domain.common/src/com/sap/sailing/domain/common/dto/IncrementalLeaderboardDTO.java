@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.common.dto;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -16,7 +18,17 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
     private LeaderboardDTO updatedFromPreviousVersion;
 
     private boolean commentUnchanged;
-    private boolean competitorsUnchanged;
+    
+    /**
+     * If <code>null</code>, {@link #competitors} is filled and must not be touched; otherwise, the size of the array tells the new size
+     * of {@link #competitors}, and for each index it either tells the index of the {@link CompetitorDTO} object to use in the previous
+     * leaderboard's {@link #competitors} list, or holds -1, meaning that the next {@link CompetitorDTO} object is to be used from
+     * {@link #addedCompetitors} which only needs to hold a valid collection if at least one new competitor exists.
+     */
+    private int[] competitorIndexesInPreviousCompetitorsList;
+    
+    private List<CompetitorDTO> addedCompetitors;
+    
     private boolean suppressedCompetitorsUnchanged;
     private boolean competitorDisplayNamesUnchanged;
     private Set<String> raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged;
@@ -52,8 +64,19 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
             if (this.commentUnchanged) {
                 this.setComment(previousVersion.getComment());
             }
-            if (this.competitorsUnchanged) {
-                this.competitors = previousVersion.competitors;
+            if (this.competitorIndexesInPreviousCompetitorsList != null) {
+                this.competitors = new ArrayList<CompetitorDTO>(competitorIndexesInPreviousCompetitorsList.length);
+                Iterator<CompetitorDTO> addedCompetitorsIter = null;
+                for (int i=0; i<competitorIndexesInPreviousCompetitorsList.length; i++) {
+                    if (competitorIndexesInPreviousCompetitorsList[i] == -1) {
+                        if (addedCompetitorsIter==null) {
+                            addedCompetitorsIter = addedCompetitors.iterator();
+                        }
+                        this.competitors.add(addedCompetitorsIter.next());
+                    } else {
+                        this.competitors.add(previousVersion.competitors.get(competitorIndexesInPreviousCompetitorsList[i]));
+                    }
+                }
             }
             if (suppressedCompetitorsUnchanged) {
                 Set<CompetitorDTO> suppressedCompetitors = new HashSet<CompetitorDTO>();
@@ -83,10 +106,19 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
             this.setComment(null);
             this.commentUnchanged = true;
         }
-        if (Util.equalsWithNull(competitors, previousVersion.competitors)) {
-            competitorsUnchanged = true;
-            competitors = null;
+        competitorIndexesInPreviousCompetitorsList = new int[competitors.size()];
+        int i=0;
+        for (CompetitorDTO competitor : competitors) {
+            int indexInPrevious = previousVersion.competitors.indexOf(competitor);
+            competitorIndexesInPreviousCompetitorsList[i++] = indexInPrevious;
+            if (indexInPrevious == -1) {
+                if (addedCompetitors == null) {
+                    addedCompetitors = new ArrayList<CompetitorDTO>();
+                }
+                addedCompetitors.add(competitor);
+            }
         }
+        competitors = null;
         if (Util.equalsWithNull(getSuppressedCompetitors(), previousVersion.getSuppressedCompetitors())) {
             suppressedCompetitorsUnchanged = true;
             setSuppressedCompetitors(null);
