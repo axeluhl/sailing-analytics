@@ -635,4 +635,7 @@ public interface StringMessages extends Messages {
     String freemode();
     String whatIfCourse();
     /*End of simulator related messages*/
+    
+    String courseAreaOverview();
+    String courseDesignOverview();
 }

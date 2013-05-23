@@ -75,12 +75,10 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         Grid grid = new Grid(2, 2);
         grid.setWidth("100%");
         
-        //TODO: i8n
-        Label raceOverviewLabel = new Label("Area overview");
+        Label raceOverviewLabel = new Label(stringMessages.courseAreaOverview());
         raceOverviewLabel.addStyleName(STYLE_TITLE_LABEL);
         
-        //TODO: i8n
-        Label courseDesignOverviewLabel = new Label("Course design overview");
+        Label courseDesignOverviewLabel = new Label(stringMessages.courseDesignOverview());
         courseDesignOverviewLabel.addStyleName(STYLE_TITLE_LABEL);
         
         grid.setWidget(0, 0, raceOverviewLabel);
