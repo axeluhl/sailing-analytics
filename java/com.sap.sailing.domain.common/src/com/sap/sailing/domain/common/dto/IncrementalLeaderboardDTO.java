@@ -31,6 +31,11 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
     
     private boolean suppressedCompetitorsUnchanged;
     private boolean competitorDisplayNamesUnchanged;
+    private boolean regattaNameUnchanged;
+    private boolean displayNameUnchanged;
+    private boolean defaultCourseAreaIdAsStringUnchanged;
+    private boolean defaultCourseAreaNameUnchanged;
+
     private Set<String> raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged;
     
     IncrementalLeaderboardDTO() {}
@@ -63,6 +68,18 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
             this.updatedFromPreviousVersion = previousVersion;
             if (this.commentUnchanged) {
                 this.setComment(previousVersion.getComment());
+            }
+            if (this.defaultCourseAreaIdAsStringUnchanged) {
+                this.defaultCourseAreaIdAsString = previousVersion.defaultCourseAreaIdAsString;
+            }
+            if (this.defaultCourseAreaNameUnchanged) {
+                this.defaultCourseAreaName = previousVersion.defaultCourseAreaName;
+            }
+            if (this.displayNameUnchanged) {
+                this.displayName = previousVersion.displayName;
+            }
+            if (this.regattaNameUnchanged) {
+                this.regattaName = previousVersion.regattaName;
             }
             if (this.competitorIndexesInPreviousCompetitorsList != null) {
                 this.competitors = new ArrayList<CompetitorDTO>(competitorIndexesInPreviousCompetitorsList.length);
@@ -105,6 +122,22 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
         if (Util.equalsWithNull(this.getComment(), previousVersion.getComment())) {
             this.setComment(null);
             this.commentUnchanged = true;
+        }
+        if (Util.equalsWithNull(this.regattaName, previousVersion.regattaName)) {
+            this.regattaName = null;
+            this.regattaNameUnchanged = true;
+        }
+        if (Util.equalsWithNull(this.displayName, previousVersion.displayName)) {
+            this.displayName = null;
+            this.displayNameUnchanged = true;
+        }
+        if (Util.equalsWithNull(this.defaultCourseAreaIdAsString, previousVersion.defaultCourseAreaIdAsString)) {
+            this.defaultCourseAreaIdAsString = null;
+            this.defaultCourseAreaIdAsStringUnchanged = true;
+        }
+        if (Util.equalsWithNull(this.defaultCourseAreaName, previousVersion.defaultCourseAreaName)) {
+            this.defaultCourseAreaName = null;
+            this.defaultCourseAreaNameUnchanged = true;
         }
         competitorIndexesInPreviousCompetitorsList = new int[competitors.size()];
         int i=0;
