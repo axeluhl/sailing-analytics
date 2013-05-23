@@ -231,4 +231,18 @@ public class Util {
         }
     }
 
+    public static boolean equalsWithNull(Object o1, Object o2) {
+        final boolean result;
+        if (o1 == null) {
+            result = (o2 == null);
+        } else {
+            if (o2 == null) {
+                result = false;
+            } else {
+                result = o1.equals(o2);
+            }
+        }
+        return result;
+    }
+
 }

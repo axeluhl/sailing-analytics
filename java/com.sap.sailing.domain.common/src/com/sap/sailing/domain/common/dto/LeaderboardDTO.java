@@ -78,6 +78,10 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
     public Iterable<CompetitorDTO> getSuppressedCompetitors() {
         return suppressedCompetitors;
     }
+    
+    protected void setSuppressedCompetitors(Set<CompetitorDTO> suppressedCompetitors) {
+        this.suppressedCompetitors = suppressedCompetitors;
+    }
 
     public void setSuppressed(CompetitorDTO competitor, boolean suppressed) {
         if (suppressed) {
@@ -93,6 +97,10 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
 
     public void setCompetitorsFromBestToWorst(RaceColumnDTO raceColumn, List<CompetitorDTO> orderedCompetitors) {
         competitorOrderingPerRace.put(raceColumn, orderedCompetitors);
+    }
+
+    protected List<CompetitorDTO> removeCompetitorsFromBestToWorst(RaceColumnDTO raceColumn) {
+        return competitorOrderingPerRace.remove(raceColumn);
     }
 
     public List<CompetitorDTO> getCompetitorsFromBestToWorst(RaceColumnDTO raceColumn) {

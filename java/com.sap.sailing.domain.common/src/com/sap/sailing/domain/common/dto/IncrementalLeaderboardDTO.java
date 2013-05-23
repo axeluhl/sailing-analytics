@@ -1,6 +1,10 @@
 package com.sap.sailing.domain.common.dto;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import com.sap.sailing.domain.common.impl.Util;
 
 /**
  * 
@@ -11,6 +15,8 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
     private LeaderboardDTO updatedFromPreviousVersion;
 
     private boolean commentUnchanged;
+    private boolean competitorsUnchanged;
+    private boolean suppressedCompetitorsUnchanged;
     private Set<String> raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged;
     
     IncrementalLeaderboardDTO() {}
@@ -41,6 +47,24 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
                         " although the diff was meant to be applied to a leaderboard DTO with ID "+isDiffToLeaderboardDTOWithId);
             }
             this.updatedFromPreviousVersion = previousVersion;
+            if (this.commentUnchanged) {
+                this.setComment(previousVersion.getComment());
+            }
+            if (this.competitorsUnchanged) {
+                this.competitors = previousVersion.competitors;
+            }
+            if (suppressedCompetitorsUnchanged) {
+                Set<CompetitorDTO> suppressedCompetitors = new HashSet<CompetitorDTO>();
+                Util.addAll(previousVersion.getSuppressedCompetitors(), suppressedCompetitors);
+                setSuppressedCompetitors(suppressedCompetitors);
+            }
+            // TODO ensure that the races collection has all the necessary RaceColumnDTO objects before looking them up by name
+            for (String raceColumnNameForWhichCompetitorOrderingPerRaceUnchanged : raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged) {
+                RaceColumnDTO raceColumn = getRaceColumnByName(raceColumnNameForWhichCompetitorOrderingPerRaceUnchanged);
+                // be on the safe side regarding the equals/hashCode implementation of RaceColumnDTO and look it up by name for old and new version
+                RaceColumnDTO previousRaceColumn = previousVersion.getRaceColumnByName(raceColumnNameForWhichCompetitorOrderingPerRaceUnchanged);
+                setCompetitorsFromBestToWorst(raceColumn, previousVersion.getCompetitorsFromBestToWorst(previousRaceColumn));
+            }
             // TODO copy all elements marked as UNCHANGED from the previousVersion to this object
         }
     }
@@ -50,6 +74,26 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
      */
     public IncrementalLeaderboardDTO strip(LeaderboardDTO previousVersion) {
         isDiffToLeaderboardDTOWithId = previousVersion.getId();
+        if (Util.equalsWithNull(this.getComment(), previousVersion.getComment())) {
+            this.setComment(null);
+            this.commentUnchanged = true;
+        }
+        if (Util.equalsWithNull(competitors, previousVersion.competitors)) {
+            competitorsUnchanged = true;
+            competitors = null;
+        }
+        if (Util.equalsWithNull(getSuppressedCompetitors(), previousVersion.getSuppressedCompetitors())) {
+            suppressedCompetitorsUnchanged = true;
+            setSuppressedCompetitors(null);
+        }
+        for (RaceColumnDTO raceColumn : this.getRaceList()) {
+            List<CompetitorDTO> competitorsFromBestToWorstForRaceColumn = getCompetitorsFromBestToWorst(raceColumn);
+            List<CompetitorDTO> previousCompetitorsFrombestToWorstForRaceColumn = previousVersion.getCompetitorsFromBestToWorst(raceColumn);
+            if (Util.equalsWithNull(competitorsFromBestToWorstForRaceColumn, previousCompetitorsFrombestToWorstForRaceColumn)) {
+                raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged.add(raceColumn.name);
+                removeCompetitorsFromBestToWorst(raceColumn);
+            }
+        }
         // TODO remove those field values from this which are equal to previousVersion, set ...Unchanged flags accordingly
         return this;
     }
