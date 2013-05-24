@@ -5,12 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.moxieapps.gwt.highcharts.client.Point;
+import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEventHandler;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -58,6 +62,8 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
     private Map<String,String> idNameMapping;
     private Map<String,String> nameIdMapping;
 
+    private ListBox nameListBox;
+
     public PolarSheetsPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages, PolarSheetsEntryPoint polarSheetsEntryPoint) {
         this.polarSheetsEntryPoint = polarSheetsEntryPoint;
@@ -83,15 +89,98 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         histogramPanel = new PolarSheetsHistogramPanel(stringMessages);
         histogramPanel.getElement().setAttribute("align", "top");
         rightPanel.add(histogramPanel);
-        ListBox nameListBox = new ListBox();
+        nameListBox = new ListBox();
         rightPanel.add(nameListBox);
         Button exportButton = new Button("Export");
+        setExportButtonListener(exportButton);
+        rightPanel.add(exportButton);
         mainPanel.add(splitPanel);
 
         asyncActionsExecutor = new AsyncActionsExecutor();
         setEventListenersForPolarSheetChart();
     }
 
+    private void setExportButtonListener(Button exportButton) {
+        ClickHandler handler = new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                String name = nameListBox.getItemText(nameListBox.getSelectedIndex());
+                if (name!=null && !name.isEmpty()) {
+                    StringBuffer exportData = new StringBuffer();
+                    exportData.append(name + "\n");
+                    Series[] seriesPerWindspeed = chartPanel.getSeriesPerWindspeedForName(name);
+                    for (Series series : seriesPerWindspeed) {
+                        if (series == null) {
+                            continue;
+                        }
+                        String nameOfSeries = chartPanel.getNameForSeries(series);
+                        String[] split = nameOfSeries.split("-");
+                        int windSpeed = Integer.parseInt(split[2]);
+                        Point[] points = series.getPoints();
+                        if (windSpeed == 4) {
+                            int[] degs = {0,50,60,110,130,180};
+                            exportData.append("4 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 6) {
+                            int[] degs = {0,47,60,110,135,180};
+                            exportData.append("6 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 8) {
+                            int[] degs = {0,43,60,110,135,180};
+                            exportData.append("8 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 10) {
+                            int[] degs = {0,41,60,110,140,180};
+                            exportData.append("10 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 12) {
+                            int[] degs = {0,40,60,110,145,180};
+                            exportData.append("12 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 14) {
+                            int[] degs = {0,39,60,110,155,180};
+                            exportData.append("14 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 16) {
+                            int[] degs = {0,38,60,110,155,180};
+                            exportData.append("16 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 20) {
+                            int[] degs = {0,38,60,110,160,180};
+                            exportData.append("20 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 25) {
+                            int[] degs = {0,39,60,110,168,180};
+                            exportData.append("25 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 30) {
+                            int[] degs = {0,41,60,110,157,180};
+                            exportData.append("30 " + createStringForDegrees(points, degs) + "\n");
+                        }
+                        
+                    }
+                    
+                    Window.alert(exportData.toString());
+                }
+                
+            }
+        };
+        
+        exportButton.addClickHandler(handler);
+        
+    }
+
+    private String createStringForDegrees(Point[] points, int[] degrees) {
+        StringBuffer buffer = new StringBuffer();
+        for (int i = 0; i < degrees.length; i++) {
+            int deg = degrees[i];
+            double average;
+            if (deg > 0 && deg < 180) {
+                double windRight = points[deg].getY().doubleValue();
+                double windLeft = points[360 - deg].getY().doubleValue();
+                average = (windRight + windLeft) / 2;
+            } else {
+                average = points[deg].getY().doubleValue();
+            }
+            NumberFormat fmt = NumberFormat.getDecimalFormat();
+            fmt.overrideFractionDigits(2);
+            buffer.append(deg + " " + fmt.format(average) + " ");
+        }
+        return buffer.toString();
+    }
+    
     private void setEventListenersForPolarSheetChart() {
         PointMouseOverEventHandler pointMouseOverHandler = new PointMouseOverEventHandler() {
 
@@ -206,6 +295,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
             index++;
             name = boatClassName + "-" + index;
         } while (nameIdMapping.containsKey(name));
+        nameListBox.addItem(name);
         idNameMapping.put(result.getId(), name);
         nameIdMapping.put(name, result.getId());
     }

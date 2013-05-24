@@ -25,6 +25,8 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
     private StringMessages stringMessages;
     private Chart chart;
     private Map<String, Series[]> seriesMap;
+    
+    private Map<Series, String> nameForSeries = new HashMap<Series, String>();
 
     public PolarSheetsChartPanel(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -43,9 +45,9 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
         return polarSheetChart;
     }
 
-    private void newSeriesArray(String name) {
+    private void newSeriesArray(String name, int steppingCount) {
         if (!seriesMap.containsKey(name)) {
-            Series[] seriesPerWindSpeed = new Series[13];
+            Series[] seriesPerWindSpeed = new Series[steppingCount];
             seriesMap.put(name, seriesPerWindSpeed);
         } else {
             // TODO exception handling
@@ -56,7 +58,9 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
         Series[] seriesPerWindSpeed = seriesMap.get(name);
         Number[] forEachDeg = initializeDataForNewSeries();
         seriesPerWindSpeed[windSpeedLevel] = chart.createSeries().setPoints(forEachDeg);
-        seriesPerWindSpeed[windSpeedLevel].setName(name + "-" + windSpeed);
+        String actualSeriesName = name + "-" + windSpeed;
+        seriesPerWindSpeed[windSpeedLevel].setName(actualSeriesName);
+        nameForSeries.put(seriesPerWindSpeed[windSpeedLevel],actualSeriesName);
         chart.addSeries(seriesPerWindSpeed[windSpeedLevel]);
     }
 
@@ -153,7 +157,7 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
             return;
         }
         if (!seriesMap.containsKey(id)) {
-            newSeriesArray(id);
+            newSeriesArray(id, result.getStepping().length);
         }
         addValuesToSeries(id, result);
         chart.redraw();
@@ -167,6 +171,14 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
     public void onResize() {
         chart.setSizeToMatchContainer();
         chart.redraw();
+    }
+
+    public Series[] getSeriesPerWindspeedForName(String name) {
+        return seriesMap.get(name);
+    }
+    
+    public String getNameForSeries(Series series) {
+        return nameForSeries.get(series);
     }
 
 }
