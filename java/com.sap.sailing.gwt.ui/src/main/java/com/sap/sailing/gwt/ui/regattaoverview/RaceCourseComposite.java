@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 
-public class CourseDesignTableComposite extends Composite {
+public class RaceCourseComposite extends Composite {
 
     private final CellTable<WaypointDTO> waypointTable;
     private ListDataProvider<WaypointDTO> waypointDataProvider;
@@ -26,12 +26,12 @@ public class CourseDesignTableComposite extends Composite {
     
     private RegattaOverviewEntryDTO race;
 
-    private static RegattaOverviewTableResources tableRes = GWT.create(RegattaOverviewTableResources.class);
+    private static RegattaRaceStatesTableResources tableRes = GWT.create(RegattaRaceStatesTableResources.class);
     
     private static final String STYLE_NAME_PREFIX = "RegattaOverview-";
     private static final String STYLE_WORD_WRAP = STYLE_NAME_PREFIX + "wordWrap";
 
-    public CourseDesignTableComposite(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public RaceCourseComposite(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;

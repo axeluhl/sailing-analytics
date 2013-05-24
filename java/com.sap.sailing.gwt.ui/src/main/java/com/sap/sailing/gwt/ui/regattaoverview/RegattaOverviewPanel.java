@@ -23,13 +23,14 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
 public class RegattaOverviewPanel extends SimplePanel implements RegattaOverviewRaceSelectionChangeListener {
     
-    private final long serverUpdateRate = 10000;
-    private final long uiUpdateRate = 1000;
+    private final long serverUpdateRateInMs = 10000;
+    private final long uiUpdateRateInMs = 1000;
     
     private final Timer serverUpdateTimer;
     private final Timer uiUpdateTimer;
@@ -41,13 +42,14 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
     
     private RegattaOverviewRaceSelectionModel raceSelectionProvider;
     
-    private RegattaOverviewTableComposite regattaOverviewTableComposite;
-    private CourseDesignTableComposite raceCourseDesignDetailsComposite;
+    private RegattaRaceStatesComponent regattaRaceStatesComponent;
+    private RaceCourseComposite raceCourseComposite;
     
     private final Label eventNameLabel;
     private final Label venueNameLabel;
     private final Label timeLabel;
-    private final Button filterButton;
+//    private final Button filterButton;
+    private final Button settingsButton;
     private final Button refreshNowButton;
     private final Button startStopUpdatingButton;
     
@@ -87,11 +89,11 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         raceSelectionProvider = new RegattaOverviewRaceSelectionModel(false);
         raceSelectionProvider.addRegattaOverviewRaceSelectionChangeListener(this);
         
-        regattaOverviewTableComposite = new RegattaOverviewTableComposite(sailingService, errorReporter, stringMessages, eventIdAsString, raceSelectionProvider);
-        grid.setWidget(1, 0, regattaOverviewTableComposite);
+        regattaRaceStatesComponent = new RegattaRaceStatesComponent(sailingService, errorReporter, stringMessages, eventIdAsString, raceSelectionProvider);
+        grid.setWidget(1, 0, regattaRaceStatesComponent);
         
-        raceCourseDesignDetailsComposite = new CourseDesignTableComposite(sailingService, errorReporter, stringMessages);
-        grid.setWidget(1, 1, raceCourseDesignDetailsComposite);
+        raceCourseComposite = new RaceCourseComposite(sailingService, errorReporter, stringMessages);
+        grid.setWidget(1, 1, raceCourseComposite);
         
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getRowFormatter().setVerticalAlign(1, HasVerticalAlignment.ALIGN_TOP);
@@ -101,29 +103,39 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingLeft(20.0, Unit.PX);
         
         //TODO: change filter button
-        this.filterButton = new Button(stringMessages.disableRaceFilter());
-        filterButton.addClickHandler(new ClickHandler() {
-            
-            @Override
-            public void onClick(ClickEvent event) {
-                boolean isFilterActive = regattaOverviewTableComposite.switchFilter();
-                filterButton.setText(isFilterActive ? 
-                        stringMessages.disableRaceFilter() : stringMessages.enableRaceFilter());
-            }
-        });
+//        filterButton = new Button(stringMessages.disableRaceFilter());
+//        filterButton.addClickHandler(new ClickHandler() {
+//            
+//            @Override
+//            public void onClick(ClickEvent event) {
+//                boolean isFilterActive = regattaRaceStatesComponent.switchFilter();
+//                filterButton.setText(isFilterActive ? 
+//                        stringMessages.disableRaceFilter() : stringMessages.enableRaceFilter());
+//            }
+//        });
         
-        this.refreshNowButton = new Button(stringMessages.refreshNow());
+        refreshNowButton = new Button(stringMessages.refreshNow());
         refreshNowButton.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                regattaOverviewTableComposite.loadAndUpdateEventLog();
+                regattaRaceStatesComponent.loadAndUpdateEventLog();
             }
             
         });
         
-        this.startStopUpdatingButton = new Button(stringMessages.stopUpdating());
-        this.startStopUpdatingButton.addClickHandler(new ClickHandler() {
+        
+        settingsButton = new Button(stringMessages.settings());
+        settingsButton.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                new SettingsDialog<RegattaRaceStatesSettings>(regattaRaceStatesComponent, stringMessages).show();
+            }            
+        });
+        
+        startStopUpdatingButton = new Button(stringMessages.stopUpdating());
+        startStopUpdatingButton.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -141,17 +153,17 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         this.refreshNowButton.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
         this.startStopUpdatingButton.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
         
-        this.serverUpdateTimer = new Timer(PlayModes.Live, serverUpdateRate);
+        this.serverUpdateTimer = new Timer(PlayModes.Live, serverUpdateRateInMs);
         this.serverUpdateTimer.addTimeListener(new TimeListener() {
 
             @Override
             public void timeChanged(Date date) {
-                regattaOverviewTableComposite.onUpdateServer(date);
+                regattaRaceStatesComponent.onUpdateServer(date);
             }
         });
         this.serverUpdateTimer.play();
 
-        this.uiUpdateTimer = new Timer(PlayModes.Live, uiUpdateRate);
+        this.uiUpdateTimer = new Timer(PlayModes.Live, uiUpdateRateInMs);
         this.uiUpdateTimer.addTimeListener(new TimeListener() {
 
             @Override
@@ -202,7 +214,8 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         refreshStartStopClockPanel.setStyleName(STYLE_REFRESH_STOP_TIME);
         refreshStartStopClockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         
-        refreshStartStopClockPanel.add(filterButton);
+//        refreshStartStopClockPanel.add(filterButton);
+        refreshStartStopClockPanel.add(settingsButton);
         refreshStartStopClockPanel.add(refreshNowButton);
         refreshStartStopClockPanel.add(startStopUpdatingButton);
         refreshStartStopClockPanel.add(timeLabel);
@@ -218,16 +231,16 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         final RegattaOverviewEntryDTO selectedRegattaOverviewEntry;
         if (selectedRegattaOverviewEntries.iterator().hasNext()) {
             selectedRegattaOverviewEntry = selectedRegattaOverviewEntries.iterator().next();
-        if (selectedRegattaOverviewEntry != null && regattaOverviewTableComposite.getAllRaces() != null) {
-            for(RegattaOverviewEntryDTO regattaOverviewEntryDTO: regattaOverviewTableComposite.getAllRaces()) {
+        if (selectedRegattaOverviewEntry != null && regattaRaceStatesComponent.getAllRaces() != null) {
+            for(RegattaOverviewEntryDTO regattaOverviewEntryDTO: regattaRaceStatesComponent.getAllRaces()) {
                 if(regattaOverviewEntryDTO.equals(selectedRegattaOverviewEntry)) {
-                    raceCourseDesignDetailsComposite.setRace(regattaOverviewEntryDTO);
+                    raceCourseComposite.setRace(regattaOverviewEntryDTO);
                     break;
                 }
             }
         }
         } else {
-            raceCourseDesignDetailsComposite.setRace(null);
+            raceCourseComposite.setRace(null);
         }
     }
     

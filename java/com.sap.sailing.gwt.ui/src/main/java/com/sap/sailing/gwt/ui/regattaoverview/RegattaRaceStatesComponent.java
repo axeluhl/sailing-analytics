@@ -7,8 +7,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import com.sap.sailing.domain.common.impl.Util.NaturalComparator;
-
 import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -18,33 +16,34 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.impl.Util.NaturalComparator;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
-public class RegattaOverviewTableComposite extends Composite {
+public class RegattaRaceStatesComponent extends SimplePanel implements Component<RegattaRaceStatesSettings> {
 
     private List<RegattaOverviewEntryDTO> allEntries;
-    private boolean isFilterActive;
 
     private final SelectionModel<RegattaOverviewEntryDTO> raceSelectionModel;
     private final CellTable<RegattaOverviewEntryDTO> regattaOverviewTable;
     private ListDataProvider<RegattaOverviewEntryDTO> regattaOverviewDataProvider;
-    private final SimplePanel mainPanel;
-    private final VerticalPanel panel;
+    private final VerticalPanel mainPanel;
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
 
     private final SailingServiceAsync sailingService;
@@ -54,9 +53,11 @@ public class RegattaOverviewTableComposite extends Composite {
 
     private final FlagImageResolver flagImageResolver;
 
-    private static RegattaOverviewTableResources tableRes = GWT.create(RegattaOverviewTableResources.class);
+    private RegattaRaceStatesSettings settings; 
+    
+    private static RegattaRaceStatesTableResources tableRes = GWT.create(RegattaRaceStatesTableResources.class);
 
-    public RegattaOverviewTableComposite(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public RegattaRaceStatesComponent(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final StringMessages stringMessages, final String eventIdAsString, final RegattaOverviewRaceSelectionProvider raceSelectionProvider) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -64,12 +65,10 @@ public class RegattaOverviewTableComposite extends Composite {
         this.raceSelectionProvider = raceSelectionProvider;
         this.flagImageResolver = new FlagImageResolver();
 
-        this.isFilterActive = true;
-
-        mainPanel = new SimplePanel();
-        panel = new VerticalPanel();
-        mainPanel.setWidget(panel);
-        mainPanel.setWidth("100%");
+        settings = new RegattaRaceStatesSettings();
+        
+        mainPanel = new VerticalPanel();
+        setWidth("100%");
 
         regattaOverviewDataProvider = new ListDataProvider<RegattaOverviewEntryDTO>();
         regattaOverviewTable = createRegattaTable();
@@ -86,9 +85,8 @@ public class RegattaOverviewTableComposite extends Composite {
 
         regattaOverviewTable.setSelectionModel(raceSelectionModel);
 
-        panel.add(regattaOverviewTable);
-
-        initWidget(mainPanel);
+        mainPanel.add(regattaOverviewTable);
+        setWidget(mainPanel);
 
         loadAndUpdateEventLog();
     }
@@ -107,12 +105,6 @@ public class RegattaOverviewTableComposite extends Composite {
 
     public void onUpdateServer(Date time) {
         loadAndUpdateEventLog();
-    }
-
-    public boolean switchFilter() {
-        this.isFilterActive = !isFilterActive;
-        updateTable(allEntries);
-        return isFilterActive;
     }
 
     private void updateTable(List<RegattaOverviewEntryDTO> newEntries) {
@@ -147,11 +139,6 @@ public class RegattaOverviewTableComposite extends Composite {
                 return result;
             }
         });
-
-        // And now we are going to filter
-        if (!isFilterActive) {
-            return reversedUnfilterted;
-        }
 
         List<RegattaOverviewEntryDTO> filtered = new ArrayList<RegattaOverviewEntryDTO>();
         int maxAddtionalRacesCount = 2;
@@ -404,7 +391,7 @@ public class RegattaOverviewTableComposite extends Composite {
 
     private void showSelectedRaces() {
         List<RegattaOverviewEntryDTO> selectedRaces = getSelectedRaces();
-        RegattaOverviewTableComposite.this.raceSelectionProvider.setSelection(selectedRaces);
+        RegattaRaceStatesComponent.this.raceSelectionProvider.setSelection(selectedRaces);
     }
 
     private String getStatusText(RaceInfoDTO raceInfo) {
@@ -437,5 +424,31 @@ public class RegattaOverviewTableComposite extends Composite {
             statusText = "Start abandoned";
         }
         return statusText;
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return true;
+    }
+
+    @Override
+    public SettingsDialogComponent<RegattaRaceStatesSettings> getSettingsDialogComponent() {
+        return new RegattaRaceStatesSettingsDialogComponent(settings, stringMessages);
+    }
+
+    @Override
+    public void updateSettings(RegattaRaceStatesSettings newSettings) {
+        // TODO: update the settings here
+        updateTable(allEntries);
+    }
+
+    @Override
+    public String getLocalizedShortName() {
+        return "Regatta Overview";
+    }
+
+    @Override
+    public Widget getEntryWidget() {
+        return this;
     }
 }

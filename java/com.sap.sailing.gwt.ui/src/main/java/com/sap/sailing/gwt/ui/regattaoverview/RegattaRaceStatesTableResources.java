@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.regattaoverview;
 
 import com.google.gwt.user.cellview.client.CellTable;
 
-public interface RegattaOverviewTableResources extends CellTable.Resources {
+public interface RegattaRaceStatesTableResources extends CellTable.Resources {
     interface AdminConsoleTableStyle extends CellTable.Style {
         /**
          * Applied to header cells of race columns
@@ -17,6 +17,6 @@ public interface RegattaOverviewTableResources extends CellTable.Resources {
     }
 
     @Override
-    @Source({ CellTable.Style.DEFAULT_CSS, "RegattaOverviewTable.css" })
+    @Source({ CellTable.Style.DEFAULT_CSS, "RegattaRaceStatesTable.css" })
     AdminConsoleTableStyle cellTableStyle();
 }
