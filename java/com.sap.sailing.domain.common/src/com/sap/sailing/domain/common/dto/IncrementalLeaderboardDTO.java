@@ -277,31 +277,43 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
                     LeaderboardEntryDTO newLeaderboardEntryDTO = new LeaderboardEntryDTO();
                     cloner.clone(raceColumnNameAndLeaderboardEntry.getValue(), newLeaderboardEntryDTO);
                     newFieldsByRaceColumnName.put(raceColumnNameAndLeaderboardEntry.getKey(), newLeaderboardEntryDTO);
-                    for (int legDetailsIndex=0; legDetailsIndex<newLeaderboardEntryDTO.legDetails.size(); legDetailsIndex++) {
-                        LegEntryDTO legDetails = newLeaderboardEntryDTO.legDetails.get(legDetailsIndex);
-                        if (previousEntryDTO != null && previousEntryDTO.legDetails != null && Util.equalsWithNull(legDetails, previousEntryDTO.legDetails.get(legDetailsIndex))) {
-                            if (legDetailsUnchanged == null) {
-                                legDetailsUnchanged = new HashSet<Triple<Integer, String, Integer>>();
-                            }
-                            final Pair<String, Integer> key = new Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(), legDetailsIndex);
-                            Set<CompetitorDTO> legDetailsUnchangedForCompetitors = unchangedLegDetailsForCompetitorsByColumnNameAndLegDetailsIndex.get(key);
-                            legDetailsUnchanged.add(new Triple<Integer, String, Integer>(competitorIndexInPrevious, raceColumnNameAndLeaderboardEntry.getKey(), legDetailsIndex));
-                            if (legDetailsUnchangedForCompetitors == null) {
-                                legDetailsUnchangedForCompetitors = new HashSet<CompetitorDTO>();
-                                unchangedLegDetailsForCompetitorsByColumnNameAndLegDetailsIndex.put(key, legDetailsUnchangedForCompetitors);
-                            }
-                            legDetailsUnchangedForCompetitors.add(competitorAndRow.getKey());
-                            if (legDetailsUnchangedForCompetitors.equals(rows.keySet())) {
-                                // leg details for the current leg unchanged for all competitors; replace individual entries by one entry with null as the competitor index
-                                for (Iterator<Triple<Integer, String, Integer>> legDetailsUnchangedIter=legDetailsUnchanged.iterator(); legDetailsUnchangedIter.hasNext(); ) {
-                                    Triple<Integer, String, Integer> triple = legDetailsUnchangedIter.next();
-                                    if (triple.getB().equals(raceColumnNameAndLeaderboardEntry.getKey()) && triple.getC() == legDetailsIndex) {
-                                        legDetailsUnchangedIter.remove();
-                                    }
+                    if (newLeaderboardEntryDTO.legDetails != null) {
+                        for (int legDetailsIndex = 0; legDetailsIndex < newLeaderboardEntryDTO.legDetails.size(); legDetailsIndex++) {
+                            LegEntryDTO legDetails = newLeaderboardEntryDTO.legDetails.get(legDetailsIndex);
+                            if (previousEntryDTO != null
+                                    && previousEntryDTO.legDetails != null
+                                    && Util.equalsWithNull(legDetails, previousEntryDTO.legDetails.get(legDetailsIndex))) {
+                                if (legDetailsUnchanged == null) {
+                                    legDetailsUnchanged = new HashSet<Triple<Integer, String, Integer>>();
                                 }
-                                legDetailsUnchanged.add(new Triple<Integer, String, Integer>(null, raceColumnNameAndLeaderboardEntry.getKey(), legDetailsIndex));
+                                final Pair<String, Integer> key = new Pair<String, Integer>(
+                                        raceColumnNameAndLeaderboardEntry.getKey(), legDetailsIndex);
+                                Set<CompetitorDTO> legDetailsUnchangedForCompetitors = unchangedLegDetailsForCompetitorsByColumnNameAndLegDetailsIndex
+                                        .get(key);
+                                legDetailsUnchanged.add(new Triple<Integer, String, Integer>(competitorIndexInPrevious,
+                                        raceColumnNameAndLeaderboardEntry.getKey(), legDetailsIndex));
+                                if (legDetailsUnchangedForCompetitors == null) {
+                                    legDetailsUnchangedForCompetitors = new HashSet<CompetitorDTO>();
+                                    unchangedLegDetailsForCompetitorsByColumnNameAndLegDetailsIndex.put(key,
+                                            legDetailsUnchangedForCompetitors);
+                                }
+                                legDetailsUnchangedForCompetitors.add(competitorAndRow.getKey());
+                                if (legDetailsUnchangedForCompetitors.equals(rows.keySet())) {
+                                    // leg details for the current leg unchanged for all competitors; replace individual
+                                    // entries by one entry with null as the competitor index
+                                    for (Iterator<Triple<Integer, String, Integer>> legDetailsUnchangedIter = legDetailsUnchanged
+                                            .iterator(); legDetailsUnchangedIter.hasNext();) {
+                                        Triple<Integer, String, Integer> triple = legDetailsUnchangedIter.next();
+                                        if (triple.getB().equals(raceColumnNameAndLeaderboardEntry.getKey())
+                                                && triple.getC() == legDetailsIndex) {
+                                            legDetailsUnchangedIter.remove();
+                                        }
+                                    }
+                                    legDetailsUnchanged.add(new Triple<Integer, String, Integer>(null,
+                                            raceColumnNameAndLeaderboardEntry.getKey(), legDetailsIndex));
+                                }
+                                newLeaderboardEntryDTO.legDetails.set(legDetailsIndex, null);
                             }
-                            newLeaderboardEntryDTO.legDetails.set(legDetailsIndex, null);
                         }
                     }
                 }
