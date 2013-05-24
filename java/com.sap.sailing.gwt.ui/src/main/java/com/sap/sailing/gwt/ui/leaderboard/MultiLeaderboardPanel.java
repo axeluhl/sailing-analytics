@@ -46,6 +46,8 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     private final List<Pair<String, String>> leaderboardNamesAndDisplayNames;
     private ListBox leaderboardSelectionListBox;
 
+    private LeaderboardSettings selectedLeaderboardSettings; 
+    
     public MultiLeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, Timer timer,
             LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RaceIdentifier preselectedRace, 
             ErrorReporter errorReporter, StringMessages stringMessages,
@@ -60,6 +62,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         this.preselectedLeaderboardName = preselectedLeaderboardName;
         
         leaderboardNamesAndDisplayNames = new ArrayList<Pair<String, String>>();
+        selectedLeaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, false);
     }
 
     @Override
@@ -71,7 +74,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         leaderboardSelectionListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                int selIndex =leaderboardSelectionListBox.getSelectedIndex();
+                int selIndex = leaderboardSelectionListBox.getSelectedIndex();
                 if(selIndex >= 0) {
                     updateSelectedLeaderboard(leaderboardSelectionListBox.getItemText(selIndex));
                 }
@@ -97,14 +100,12 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
 
     @Override
     public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
-        // TODO Auto-generated method stub
-        return null;
+        return selectedLeaderboardPanel.getSettingsDialogComponent();
     }
 
     @Override
     public void updateSettings(LeaderboardSettings newSettings) {
-        // TODO Auto-generated method stub
-        
+        selectedLeaderboardPanel.updateSettings(newSettings);
     }
 
     public void setLeaderboardNames(List<Pair<String, String>> newLeaderboardNamesAndDisplayNames) {
@@ -133,16 +134,19 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
 
     private void updateSelectedLeaderboard(String selectedLeaderboardName) {
         if(selectedLeaderboardName != null) {
-            if(selectedLeaderboardPanel == null) {
-                LeaderboardSettings newDefaultSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, false);
-                selectedLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                        newDefaultSettings, /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
-                        "leaderboardGroupName", selectedLeaderboardName, errorReporter, stringMessages, userAgent,
-                        showRaceDetails, /* raceTimesInfoProvider */null, false);              
+            if(selectedLeaderboardPanel != null) {
+                mainPanel.remove(selectedLeaderboardPanel);
+                selectedLeaderboardPanel = null;
             }
+            
+            selectedLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
+                    selectedLeaderboardSettings, /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
+                    "leaderboardGroupName", selectedLeaderboardName, errorReporter, stringMessages, userAgent,
+                    showRaceDetails, /* raceTimesInfoProvider */null, false);
+            mainPanel.add(selectedLeaderboardPanel);
         } else {
             if(selectedLeaderboardPanel != null) {
-                remove(selectedLeaderboardPanel);
+                mainPanel.remove(selectedLeaderboardPanel);
                 selectedLeaderboardPanel = null;
             }
         }
