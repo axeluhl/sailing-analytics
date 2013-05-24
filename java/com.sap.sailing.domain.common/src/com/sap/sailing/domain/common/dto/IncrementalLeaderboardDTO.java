@@ -11,6 +11,7 @@ import java.util.Set;
 import com.sap.sailing.domain.common.Cloner;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 
 /**
  * 
@@ -40,15 +41,27 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
     private boolean defaultCourseAreaNameUnchanged;
     
     /**
-     * If a {@link LeaderboardEntryDTO} in {@link LeaderboardRowDTO#fieldsByRaceColumnName} is unchanged, this field holds a valid
-     * set which contains the position of the competitor in the previous leaderboard's {@link LeaderboardDTO#competitors} list
-     * and the race column name for which the entry is unchanged.
+     * If a {@link LeaderboardEntryDTO} in {@link LeaderboardRowDTO#fieldsByRaceColumnName} is unchanged, this field
+     * holds a valid set which contains the position of the competitor in the previous leaderboard's
+     * {@link LeaderboardDTO#competitors} list and the race column name for which the entry is unchanged. If the
+     * {@link LeaderboardEntryDTO}s are unchanged for <em>all</em> competitors in a column and the previous version has
+     * entries for the same set of competitors as the new version, a single entry with <code>null</code> as the
+     * {@link Integer} is provided. In this case, the {@link #applyThisToPreviousVersionByUpdatingThis(LeaderboardDTO)} method
+     * can simply copy all {@link LeaderboardEntryDTO}s for the entire column from the previous version.
      */
     private Set<Pair<Integer, String>> unchangedLeaderboardEntryDTOsByCompetitorIndexInPreviousLeaderboardAndRaceColumnName;
 
     private Set<String> raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged;
     
     private transient Cloner cloner;
+    
+    /**
+     * If a {@link LegEntryDTO} is unchanged in an otherwise modified {@link LeaderboardEntryDTO}, the triple of
+     * competitor index in the previous leaderboard's competitors list, the name of the race column, and the
+     * index of the {@link LegEntryDTO} in the {@link LeaderboardEntryDTO#legDetails} list is recorded here.
+     * Note that this field can be <code>null</code>, meaning that there are no such leg details.
+     */
+    private Set<Triple<Integer, String, Integer>> legDetailsUnchanged;
     
     IncrementalLeaderboardDTO() {}
 
@@ -124,9 +137,28 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
                 setCompetitorsFromBestToWorst(raceColumn, previousVersion.getCompetitorsFromBestToWorst(previousRaceColumn));
             }
             for (Pair<Integer, String> competitorIndexAndColumnName : unchangedLeaderboardEntryDTOsByCompetitorIndexInPreviousLeaderboardAndRaceColumnName) {
-                CompetitorDTO previousCompetitor = previousVersion.competitors.get(competitorIndexAndColumnName.getA());
-                LeaderboardEntryDTO previousEntry = previousVersion.rows.get(previousCompetitor).fieldsByRaceColumnName.get(competitorIndexAndColumnName.getB());
-                rows.get(previousCompetitor).fieldsByRaceColumnName.put(competitorIndexAndColumnName.getB(), previousEntry);
+                if (competitorIndexAndColumnName.getA() == null) {
+                    // this means that all entries remained unchanged compared to the previous version for this column
+                    for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : rows.entrySet()) {
+                        LeaderboardEntryDTO previousEntry = previousVersion.rows.get(e.getKey()).fieldsByRaceColumnName.get(competitorIndexAndColumnName.getB());
+                        e.getValue().fieldsByRaceColumnName.put(competitorIndexAndColumnName.getB(), previousEntry);
+                    }
+                } else {
+                    CompetitorDTO previousCompetitor = previousVersion.competitors.get(competitorIndexAndColumnName.getA());
+                    LeaderboardEntryDTO previousEntry = previousVersion.rows.get(previousCompetitor).fieldsByRaceColumnName
+                            .get(competitorIndexAndColumnName.getB());
+                    rows.get(previousCompetitor).fieldsByRaceColumnName.put(competitorIndexAndColumnName.getB(),previousEntry);
+                }
+            }
+            if (legDetailsUnchanged != null) {
+                for (Triple<Integer, String, Integer> competitorIndexInPreviosAndColumnNameAndLegDetailsIndex : legDetailsUnchanged) {
+                    CompetitorDTO previousCompetitor = previousVersion.competitors.get(competitorIndexInPreviosAndColumnNameAndLegDetailsIndex.getA());
+                    LeaderboardEntryDTO leaderboardEntry = rows.get(previousCompetitor).fieldsByRaceColumnName.get(competitorIndexInPreviosAndColumnNameAndLegDetailsIndex.getB());
+                    leaderboardEntry.legDetails.set(competitorIndexInPreviosAndColumnNameAndLegDetailsIndex.getC(),
+                            previousVersion.rows.get(previousCompetitor).fieldsByRaceColumnName
+                                    .get(competitorIndexInPreviosAndColumnNameAndLegDetailsIndex.getB()).legDetails
+                                    .get(competitorIndexInPreviosAndColumnNameAndLegDetailsIndex.getC()));
+                }
             }
             // TODO copy all elements marked as UNCHANGED from the previousVersion to this object
         }
@@ -191,7 +223,9 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
         setCompetitorOrderingPerRace(competitorOrderingPerRace);
         // now clone the rows map to enable stripping the LeaderboardEntryDTOs inside
         HashMap<CompetitorDTO, LeaderboardRowDTO> newRows = new HashMap<CompetitorDTO, LeaderboardRowDTO>(rows);
+        Map<String, Set<CompetitorDTO>> unchangedLeaderboardEntriesForCompetitorsByColumnName = new HashMap<String, Set<CompetitorDTO>>();
         for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> competitorAndRow : rows.entrySet()) {
+            final int competitorIndexInPrevious = previousVersion.competitors.indexOf(competitorAndRow.getKey());
             LeaderboardRowDTO previousRowDTO = previousVersion.rows.get(competitorAndRow.getKey());
             LeaderboardRowDTO newRowDTO = new LeaderboardRowDTO();
             cloner.clone(competitorAndRow.getValue(), newRowDTO);
@@ -203,21 +237,51 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
                     previousEntryDTO = previousRowDTO.fieldsByRaceColumnName.get(raceColumnNameAndLeaderboardEntry.getKey());
                 }
                 if (previousEntryDTO != null && Util.equalsWithNull(raceColumnNameAndLeaderboardEntry.getValue(), previousEntryDTO)) {
-                    if (unchangedLeaderboardEntryDTOsByCompetitorIndexInPreviousLeaderboardAndRaceColumnName == null) {
-                        unchangedLeaderboardEntryDTOsByCompetitorIndexInPreviousLeaderboardAndRaceColumnName = new HashSet<Util.Pair<Integer, String>>();
+                    Set<CompetitorDTO> competitorsForWhichEntryForColumnIsUnchanged = unchangedLeaderboardEntriesForCompetitorsByColumnName.get(raceColumnNameAndLeaderboardEntry.getKey());
+                    if (competitorsForWhichEntryForColumnIsUnchanged == null) {
+                        competitorsForWhichEntryForColumnIsUnchanged = new HashSet<CompetitorDTO>();
+                        unchangedLeaderboardEntriesForCompetitorsByColumnName.put(raceColumnNameAndLeaderboardEntry.getKey(), competitorsForWhichEntryForColumnIsUnchanged);
                     }
-                    unchangedLeaderboardEntryDTOsByCompetitorIndexInPreviousLeaderboardAndRaceColumnName
-                            .add(new Pair<Integer, String>(previousVersion.competitors.indexOf(competitorAndRow.getKey()),
-                                    raceColumnNameAndLeaderboardEntry.getKey()));
+                    competitorsForWhichEntryForColumnIsUnchanged.add(competitorAndRow.getKey());
+                    if (competitorsForWhichEntryForColumnIsUnchanged.equals(rows.keySet())) {
+                        // entries for current column unchanged for all competitors; replace the many individual entries by a global one with null as competitor index
+                        for (Iterator<Pair<Integer, String>> iter=unchangedLeaderboardEntryDTOsByCompetitorIndexInPreviousLeaderboardAndRaceColumnName.iterator();
+                                iter.hasNext(); ) {
+                            Pair<Integer, String> entry = iter.next();
+                            if (entry.getB().equals(raceColumnNameAndLeaderboardEntry.getKey())) {
+                                iter.remove();
+                            }
+                        }
+                        unchangedLeaderboardEntryDTOsByCompetitorIndexInPreviousLeaderboardAndRaceColumnName.add(new Pair<Integer, String>(null, raceColumnNameAndLeaderboardEntry.getKey()));
+                    } else {
+                        // add a single entry for the competitor/column where the leaderboard entry remained unchanged
+                        if (unchangedLeaderboardEntryDTOsByCompetitorIndexInPreviousLeaderboardAndRaceColumnName == null) {
+                            unchangedLeaderboardEntryDTOsByCompetitorIndexInPreviousLeaderboardAndRaceColumnName = new HashSet<Util.Pair<Integer, String>>();
+                        }
+                        unchangedLeaderboardEntryDTOsByCompetitorIndexInPreviousLeaderboardAndRaceColumnName
+                                .add(new Pair<Integer, String>(competitorIndexInPrevious,
+                                        raceColumnNameAndLeaderboardEntry.getKey()));
+                    }
                 } else {
                     LeaderboardEntryDTO newLeaderboardEntryDTO = new LeaderboardEntryDTO();
                     cloner.clone(raceColumnNameAndLeaderboardEntry.getValue(), newLeaderboardEntryDTO);
                     newFieldsByRaceColumnName.put(raceColumnNameAndLeaderboardEntry.getKey(), newLeaderboardEntryDTO);
+                    for (int legDetailsIndex=0; legDetailsIndex<newLeaderboardEntryDTO.legDetails.size(); legDetailsIndex++) {
+                        LegEntryDTO legDetails = newLeaderboardEntryDTO.legDetails.get(legDetailsIndex);
+                        if (previousEntryDTO != null && Util.equalsWithNull(legDetails, previousEntryDTO.legDetails.get(legDetailsIndex))) {
+                            if (legDetailsUnchanged == null) {
+                                legDetailsUnchanged = new HashSet<Triple<Integer, String, Integer>>();
+                            }
+                            legDetailsUnchanged.add(new Triple<Integer, String, Integer>(competitorIndexInPrevious, raceColumnNameAndLeaderboardEntry.getKey(), legDetailsIndex));
+                            newLeaderboardEntryDTO.legDetails.set(legDetailsIndex, null);
+                        }
+                    }
                 }
                 // TODO incrementalize LeaderboardEntryDTO and the contained LegEntryDTO, probably also by creating an "incremental"-enabled subclass that is used for cloning here
             }
             newRowDTO.fieldsByRaceColumnName = newFieldsByRaceColumnName;
         }
+        rows = newRows;
         // TODO remove those field values from this which are equal to previousVersion, set ...Unchanged flags accordingly
         return this;
     }
