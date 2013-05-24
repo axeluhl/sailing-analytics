@@ -283,9 +283,14 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
                             if (legDetailsUnchanged == null) {
                                 legDetailsUnchanged = new HashSet<Triple<Integer, String, Integer>>();
                             }
-                            Set<CompetitorDTO> legDetailsUnchangedForCompetitors = unchangedLegDetailsForCompetitorsByColumnNameAndLegDetailsIndex
-                                    .get(new Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(), legDetailsIndex));
+                            final Pair<String, Integer> key = new Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(), legDetailsIndex);
+                            Set<CompetitorDTO> legDetailsUnchangedForCompetitors = unchangedLegDetailsForCompetitorsByColumnNameAndLegDetailsIndex.get(key);
                             legDetailsUnchanged.add(new Triple<Integer, String, Integer>(competitorIndexInPrevious, raceColumnNameAndLeaderboardEntry.getKey(), legDetailsIndex));
+                            if (legDetailsUnchangedForCompetitors == null) {
+                                legDetailsUnchangedForCompetitors = new HashSet<CompetitorDTO>();
+                                unchangedLegDetailsForCompetitorsByColumnNameAndLegDetailsIndex.put(key, legDetailsUnchangedForCompetitors);
+                            }
+                            legDetailsUnchangedForCompetitors.add(competitorAndRow.getKey());
                             if (legDetailsUnchangedForCompetitors.equals(rows.keySet())) {
                                 // leg details for the current leg unchanged for all competitors; replace individual entries by one entry with null as the competitor index
                                 for (Iterator<Triple<Integer, String, Integer>> legDetailsUnchangedIter=legDetailsUnchanged.iterator(); legDetailsUnchangedIter.hasNext(); ) {
