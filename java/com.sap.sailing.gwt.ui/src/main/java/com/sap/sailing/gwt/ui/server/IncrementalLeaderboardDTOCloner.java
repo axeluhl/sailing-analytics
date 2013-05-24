@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.server;
 
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.util.ClonerImpl;
 
 /**
  * Uses reflection to clone all properties of a {@link LeaderboardDTO} into a new instance of type {@link IncrementalLeaderboardDTO}.
@@ -11,11 +11,9 @@ import com.sap.sailing.domain.common.impl.Util;
  *
  */
 public class IncrementalLeaderboardDTOCloner {
-
     public IncrementalLeaderboardDTO clone(LeaderboardDTO leaderboardDTO) {
-        IncrementalLeaderboardDTO result = new IncrementalLeaderboardDTO(leaderboardDTO.getId());
-        Util.clone(leaderboardDTO, result);
+        IncrementalLeaderboardDTO result = new IncrementalLeaderboardDTO(leaderboardDTO.getId(), new ClonerImpl());
+        new ClonerImpl().clone(leaderboardDTO, result);
         return result;
     }
-    
 }
