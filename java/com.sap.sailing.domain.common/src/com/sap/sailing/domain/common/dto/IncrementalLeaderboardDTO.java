@@ -279,7 +279,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
                     newFieldsByRaceColumnName.put(raceColumnNameAndLeaderboardEntry.getKey(), newLeaderboardEntryDTO);
                     for (int legDetailsIndex=0; legDetailsIndex<newLeaderboardEntryDTO.legDetails.size(); legDetailsIndex++) {
                         LegEntryDTO legDetails = newLeaderboardEntryDTO.legDetails.get(legDetailsIndex);
-                        if (previousEntryDTO != null && legDetails != null && Util.equalsWithNull(legDetails, previousEntryDTO.legDetails.get(legDetailsIndex))) {
+                        if (previousEntryDTO != null && previousEntryDTO.legDetails != null && Util.equalsWithNull(legDetails, previousEntryDTO.legDetails.get(legDetailsIndex))) {
                             if (legDetailsUnchanged == null) {
                                 legDetailsUnchanged = new HashSet<Triple<Integer, String, Integer>>();
                             }
