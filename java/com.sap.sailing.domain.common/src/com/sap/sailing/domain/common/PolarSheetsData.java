@@ -12,4 +12,6 @@ public interface PolarSheetsData extends Serializable {
 
     Integer[] getDataCountPerAngleForWindspeed(int beaufort);
 
+    Integer[] getStepping();
+
 }
