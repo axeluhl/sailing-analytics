@@ -130,6 +130,7 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
+import com.sap.sailing.domain.polarsheets.PolarSheetsWindStepping;
 import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
@@ -2689,6 +2690,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (httpServletRequest != null) {
                     HttpSession session = httpServletRequest.getSession();
                     session.setAttribute(id, worker.getCompleteData());
+                    session.setAttribute("stepping", worker.getStepping());
                 }       
             }
         } else {
@@ -2713,11 +2715,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             //TODO exception handling
             return null;
         }
+        
+        PolarSheetsWindStepping stepping = (PolarSheetsWindStepping) session.getAttribute("stepping");
 
         List<Double> dataForAngleAndWindSpeed = new ArrayList<Double>();
+        int windSpeedLevel = stepping.getLevelForValue(windSpeed);
 
         for (BoatAndWindSpeed dataPoint: dataForAngle) {
-            if (((int) dataPoint.getWindSpeed().getBeaufort()) == windSpeed) {
+            if ((stepping.getLevelForValue(dataPoint.getWindSpeed().getKnots()) == windSpeedLevel)) {
                 dataForAngleAndWindSpeed.add(dataPoint.getBoatSpeed().getKnots());
             }
         }

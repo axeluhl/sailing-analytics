@@ -12,10 +12,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
 import com.sap.sailing.domain.common.PolarSheetsData;
@@ -81,6 +83,9 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         histogramPanel = new PolarSheetsHistogramPanel(stringMessages);
         histogramPanel.getElement().setAttribute("align", "top");
         rightPanel.add(histogramPanel);
+        ListBox nameListBox = new ListBox();
+        rightPanel.add(nameListBox);
+        Button exportButton = new Button("Export");
         mainPanel.add(splitPanel);
 
         asyncActionsExecutor = new AsyncActionsExecutor();

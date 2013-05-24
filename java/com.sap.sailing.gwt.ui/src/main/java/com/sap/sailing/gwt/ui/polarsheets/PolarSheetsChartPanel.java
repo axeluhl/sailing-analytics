@@ -52,12 +52,12 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
         }
     }
 
-    private void createSeriesForWindspeed(String name, int windSpeed) {
+    private void createSeriesForWindspeed(String name, int windSpeedLevel, int windSpeed) {
         Series[] seriesPerWindSpeed = seriesMap.get(name);
         Number[] forEachDeg = initializeDataForNewSeries();
-        seriesPerWindSpeed[windSpeed] = chart.createSeries().setPoints(forEachDeg);
-        seriesPerWindSpeed[windSpeed].setName(name + "-" + (windSpeed));
-        chart.addSeries(seriesPerWindSpeed[windSpeed]);
+        seriesPerWindSpeed[windSpeedLevel] = chart.createSeries().setPoints(forEachDeg);
+        seriesPerWindSpeed[windSpeedLevel].setName(name + "-" + windSpeed);
+        chart.addSeries(seriesPerWindSpeed[windSpeedLevel]);
     }
 
     private Number[] initializeDataForNewSeries() {
@@ -66,11 +66,12 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
     }
 
     private void addValuesToSeries(String seriesId, PolarSheetsData result) {
+        int stepCount = result.getStepping().length;
         if (seriesMap.containsKey(seriesId)) {
-            for (int i = 0; i < 13; i++) {
+            for (int i = 0; i < stepCount; i++) {
                 if (hasSufficientDataForWindspeed(result.getDataCountPerAngleForWindspeed(i), result.getDataCount())) {
                     if (seriesMap.get(seriesId)[i] == null) {
-                        createSeriesForWindspeed(seriesId, i);
+                        createSeriesForWindspeed(seriesId, i, result.getStepping()[i]);
                     }
                     Series series = seriesMap.get(seriesId)[i];
                     series.setPoints(result.getAveragedPolarDataByWindSpeed()[i], false);
