@@ -411,7 +411,7 @@ public interface SailingServiceAsync {
 
     void getPolarSheetsGenerationResults(String id, AsyncCallback<PolarSheetsData> asyncCallback);
 
-    void getPolarSheetData(String polarSheetId, int angle, int windSpeed, AsyncCallback<PolarSheetsHistogramData> wrapperCallback);
+    void getPolarSheetData(String polarSheetId, int angle, int windSpeedLevel, AsyncCallback<PolarSheetsHistogramData> wrapperCallback);
     
     void getRegattaOverviewEntriesForEvent(String eventIdAsString, AsyncCallback<List<RegattaOverviewEntryDTO>> asyncCallback);
     

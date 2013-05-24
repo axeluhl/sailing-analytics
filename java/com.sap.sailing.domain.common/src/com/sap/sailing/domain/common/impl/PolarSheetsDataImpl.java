@@ -13,17 +13,20 @@ public class PolarSheetsDataImpl implements PolarSheetsData {
     private boolean complete;
     
     private int dataCount;
+    
+    private Integer[] stepping;
 
     private Map<Integer,Integer[]> dataCountPerAngleForWindspeed;
     
     //For GWT Serialization
     PolarSheetsDataImpl() {};
    
-    public PolarSheetsDataImpl(Number[][] averagedPolarDataByWindSpeed, boolean complete, int dataCount, Map<Integer,Integer[]> dataCountPerAngleForWindspeed) {
+    public PolarSheetsDataImpl(Number[][] averagedPolarDataByWindSpeed, boolean complete, int dataCount, Map<Integer,Integer[]> dataCountPerAngleForWindspeed, Integer[] stepping) {
         this.averagedPolarDataByWindSpeed = averagedPolarDataByWindSpeed;
         this.complete = complete;
         this.dataCount = dataCount;
         this.dataCountPerAngleForWindspeed = dataCountPerAngleForWindspeed;
+        this.stepping = stepping;
     }
 
     @Override
@@ -45,6 +48,11 @@ public class PolarSheetsDataImpl implements PolarSheetsData {
     @Override
     public Integer[] getDataCountPerAngleForWindspeed(int beaufort) {
         return dataCountPerAngleForWindspeed.get(beaufort);
+    }
+    
+    @Override
+    public Integer[] getStepping() {
+        return stepping;
     }
 
 }
