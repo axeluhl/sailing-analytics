@@ -32,16 +32,12 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
     public boolean matches(CompetitorDTO competitorDTO) {
         boolean result = false;
         if (value != null && operator != null && getLeaderboard() != null && getSelectedRace() != null) {
-            String raceColumnName = null;
             for (RaceColumnDTO raceColumnDTO : getLeaderboard().getRaceList()) {
                 if (raceColumnDTO.containsRace(getSelectedRace())) {
-                    raceColumnName = raceColumnDTO.name;
+                    int raceRank = getLeaderboard().getCompetitorsFromBestToWorst(raceColumnDTO).indexOf(competitorDTO)+1;
+                    result = operator.matchValues(value, raceRank);
                     break;
                 }
-            }
-            if (raceColumnName != null) {
-                int raceRank = getLeaderboard().getRank(competitorDTO);
-                result = operator.matchValues(value, raceRank);
             }
         }
         return result;
