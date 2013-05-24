@@ -13,6 +13,7 @@ Like businesses, sailors need the latest information to make strategic decisions
 * Production Environment
   * [[PIRONET (Hosting Provider, Emergency Procedures)|wiki/prionet-related-information]]
   * [[Production Environment|wiki/production-environment]]
+  * [[TracTrac Lifecycle for Event Managers|wiki/tractrac-lifecycle]]
 * Information for Developers
   * [[Cook Book|wiki/cook-book]]
   * [[OnBoarding Information|wiki/onboarding]]
