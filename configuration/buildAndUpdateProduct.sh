@@ -75,7 +75,7 @@ if [ $# -eq 0 ]; then
     echo "-n <package name> Name of the bundle you want to hot deploy. Needs fully qualified name like"
     echo "                  com.sap.sailing.monitoring. Only works if there is a fully built server available."
     echo "-l <telnet port>  Telnet port the OSGi server is running. Optional but enables fully automatic hot-deploy."
-    echo "-s <target server> Name of server you want to use as target for install. This overrides default behaviour."
+    echo "-s <target server> Name of server you want to use as target for install or hot-deploy. This overrides default behaviour."
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo "install: installs product and configuration to $SERVERS_HOME/$active_branch. Overwrites any configuration by using config from branch."
@@ -137,6 +137,10 @@ if [[ "$@" == "hot-deploy" ]]; then
     if [ ! -d $SERVERS_HOME/$active_branch/plugins ]; then
         echo "Could not find target directory $SERVERS_HOME/$active_branch/plugins!"
         exit
+    fi
+
+    if [[ $HAS_OVERWRITTEN_TARGET -eq 1 ]]; then
+        active_branch=$TARGET_SERVER_NAME
     fi
 
     # locate old bundle
