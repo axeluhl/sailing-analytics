@@ -2398,6 +2398,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<RegattaOverviewEntryDTO> getRegattaOverviewEntriesForEvent(String eventIdAsString) {
         List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
         Event event = getService().getEvent(convertIdentifierStringToUuid(eventIdAsString));
+        
         if (event != null) {
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
                 for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
@@ -2407,6 +2408,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             for (Fleet fleet : raceColumn.getFleets()) {
                                 RegattaOverviewEntryDTO entry = new RegattaOverviewEntryDTO();
                                 entry.courseAreaName = courseArea.getName();
+                                entry.courseAreaIdAsString = courseArea.getId().toString();
                                 entry.regattaName = regattaName;
                                 entry.raceInfo = createRaceInfoDTO(raceColumn, fleet);
                                 result.add(entry);

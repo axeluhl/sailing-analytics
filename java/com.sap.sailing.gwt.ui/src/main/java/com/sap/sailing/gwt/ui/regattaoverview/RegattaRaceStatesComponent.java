@@ -112,10 +112,28 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private void updateTable(List<RegattaOverviewEntryDTO> newEntries) {
         allEntries = newEntries;
+        List<RegattaOverviewEntryDTO> filteredEntries = getFilteredEntries(allEntries);
         regattaOverviewDataProvider.getList().clear();
         regattaOverviewDataProvider.getList().addAll(allEntries);
         // now sort again according to selected criterion
         ColumnSortEvent.fire(regattaOverviewTable, regattaOverviewTable.getColumnSortList());
+    }
+
+    private List<RegattaOverviewEntryDTO> getFilteredEntries(List<RegattaOverviewEntryDTO> raceList) {
+        List<RegattaOverviewEntryDTO> filteredEntries = new ArrayList<RegattaOverviewEntryDTO>(raceList);
+        
+        for (RegattaOverviewEntryDTO entry : raceList) {
+            if (!settings.getVisibleCourseAreas().contains(entry.courseAreaIdAsString)) {
+                filteredEntries.remove(entry);
+                continue;
+            }
+            if (!settings.getVisibleRegattas().contains(entry.regattaName)) {
+                filteredEntries.remove(entry);
+                continue;
+            }
+        }
+        
+        return filteredEntries;
     }
 
     //TODO: Change all of this using a filter model
@@ -453,7 +471,23 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     @Override
     public void updateSettings(RegattaRaceStatesSettings newSettings) {
-        // TODO: update the settings here
+        if (!settings.getVisibleCourseAreas().containsAll(newSettings.getVisibleCourseAreas())) {
+            settings.getVisibleCourseAreas().clear();
+            settings.getVisibleCourseAreas().addAll(newSettings.getVisibleCourseAreas());
+        }
+        
+        if (!settings.getVisibleRegattas().containsAll(newSettings.getVisibleRegattas())) {
+            settings.getVisibleRegattas().clear();
+            settings.getVisibleRegattas().addAll(newSettings.getVisibleRegattas());
+        }
+        
+        if (settings.isShowOnlyRacesOfSameDay() == newSettings.isShowOnlyRacesOfSameDay()) {
+            settings.setShowOnlyRaceOfSameDay(newSettings.isShowOnlyRacesOfSameDay());
+        }
+        
+        if (settings.isShowOnlyCurrentlyRunningRaces() == newSettings.isShowOnlyCurrentlyRunningRaces()) {
+            settings.setShowOnlyCurrentlyRunningRaces(newSettings.isShowOnlyCurrentlyRunningRaces());
+        }
         updateTable(allEntries);
     }
 

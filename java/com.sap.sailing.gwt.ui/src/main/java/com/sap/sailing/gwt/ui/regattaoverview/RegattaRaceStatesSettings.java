@@ -28,7 +28,7 @@ public class RegattaRaceStatesSettings {
     public List<String> getVisibleCourseAreas() {
         return visibleCourseAreas;
     }
-
+    
     public List<String> getVisibleRegattas() {
         return visibleRegattas;
     }
@@ -37,7 +37,15 @@ public class RegattaRaceStatesSettings {
         return showOnlyRacesOfSameDay;
     }
     
+    public void setShowOnlyRaceOfSameDay(boolean newValue) {
+        showOnlyRacesOfSameDay = newValue;
+    }
+    
     public boolean isShowOnlyCurrentlyRunningRaces() {
         return showOnlyCurrentlyRunningRaces;
+    }
+    
+    public void setShowOnlyCurrentlyRunningRaces(boolean newValue) {
+        showOnlyCurrentlyRunningRaces = newValue;
     }
 }
