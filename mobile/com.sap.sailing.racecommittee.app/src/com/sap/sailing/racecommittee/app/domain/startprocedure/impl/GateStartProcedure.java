@@ -258,16 +258,21 @@ public class GateStartProcedure implements StartProcedure {
     }
 
     @Override
-    public Pair<String, Long> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart) {
-        Pair<String, Long> result;
+    public Pair<String, List<Object>> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart) {
+        Pair<String, List<Object>> result;
+        List<Object> milisecondsList = new ArrayList<Object>();
         if (millisecondsTillStart < startPhasePapaDownInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_gate_class_over_golf_removed), millisecondsTillStart);
+            milisecondsList.add(millisecondsTillStart);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_gate_class_over_golf_removed), milisecondsList);
         } else if (millisecondsTillStart < startPhasePapaUpInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_gate_papa_removed), millisecondsTillStart - startPhasePapaDownInterval);
+            milisecondsList.add(millisecondsTillStart - startPhasePapaDownInterval);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_gate_papa_removed), milisecondsList);
         } else if (millisecondsTillStart < startPhaseClassOverGolfUpIntervall) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_gate_papa_display), millisecondsTillStart - startPhasePapaUpInterval);
+            milisecondsList.add(millisecondsTillStart - startPhasePapaUpInterval);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_gate_papa_display), milisecondsList);
         } else {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_gate_class_over_golf_display), millisecondsTillStart - startPhaseClassOverGolfUpIntervall);
+            milisecondsList.add(millisecondsTillStart - startPhaseClassOverGolfUpIntervall);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_gate_class_over_golf_display), milisecondsList);
         }
         return result;
     }

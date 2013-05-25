@@ -48,7 +48,7 @@ public interface StartProcedure {
     
     void setStartPhaseEventListener(StartPhaseEventListener listener);
     
-    Pair<String, Long> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart);
+    Pair<String, List<Object>> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart);
 
     void handleStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId);
 

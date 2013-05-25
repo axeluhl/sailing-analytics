@@ -17,14 +17,14 @@ import android.widget.TextView;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.EssRunningRaceEventListener;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.ExtremeSailingSeriesStartProcedure;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.RRS26RunningRaceEventListener;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.RRS26StartProcedure;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortTypeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
-public class RRS26RunningRaceFragment extends RaceFragment implements EssRunningRaceEventListener {
+public class RRS26RunningRaceFragment extends RaceFragment implements RRS26RunningRaceEventListener {
     
     private TextView countUpTextView;
     private ImageView individualRecallFlag;
@@ -71,12 +71,12 @@ public class RRS26RunningRaceFragment extends RaceFragment implements EssRunning
         individualRecallButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 TimePoint now = MillisecondsTimePoint.now();
-                if (getRace().getState().getStartProcedure() instanceof ExtremeSailingSeriesStartProcedure) {
-                    ExtremeSailingSeriesStartProcedure essStartProcedure = ((ExtremeSailingSeriesStartProcedure) getRace().getState().getStartProcedure());
-                    if (essStartProcedure.isIndividualRecallDisplayed()) {
-                        essStartProcedure.setIndividualRecallRemoval(now);
+                if (getRace().getState().getStartProcedure() instanceof RRS26StartProcedure) {
+                    RRS26StartProcedure rrs26StartProcedure = ((RRS26StartProcedure) getRace().getState().getStartProcedure());
+                    if (rrs26StartProcedure.isIndividualRecallDisplayed()) {
+                        rrs26StartProcedure.setIndividualRecallRemoval(now);
                     } else {
-                        essStartProcedure.setIndividualRecall(now);
+                        rrs26StartProcedure.setIndividualRecall(now);
                     }
                 }
             }
