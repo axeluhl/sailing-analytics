@@ -255,6 +255,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPoin
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrectionMetadata;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
+import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationFactory;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
@@ -2440,6 +2441,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         raceColumnInSeriesDTO.name = raceColumnInSeries.getName();
         raceColumnInSeriesDTO.setMedalRace(raceColumnInSeries.isMedalRace());
         return raceColumnInSeriesDTO;
+    }
+
+    @Override
+    public void updateRegatta(RegattaIdentifier regattaName, String defaultCourseAreaId) {
+        UUID courseAreaUuid = convertIdentifierStringToUuid(defaultCourseAreaId);
+        getService().apply(new UpdateSpecificRegatta(regattaName, courseAreaUuid));
     }
 
     @Override

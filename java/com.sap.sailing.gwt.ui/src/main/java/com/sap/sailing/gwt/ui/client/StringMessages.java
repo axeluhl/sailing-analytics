@@ -588,6 +588,10 @@ public interface StringMessages extends Messages {
     String filterNothing();
     String topNCompetitorsByRaceRank(int n);
     String topNCompetitorsByTotalRank(int n);
+    
+    String editRegatta();
+    String selectSailingEvent();
+    String selectCourseArea();
 
     /*Start of simulator related messages*/
     String simulator();
