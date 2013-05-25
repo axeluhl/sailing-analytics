@@ -3,32 +3,26 @@ package com.sap.sailing.gwt.ui.regattaoverview;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-
 public class RegattaRaceStatesSettings {
-    private List<RaceLogRaceStatus> visibleRaceStates;
     private List<String> visibleCourseAreas;
     private List<String> visibleRegattas;
     
     private boolean showOnlyRacesOfSameDay;
+    private boolean showOnlyCurrentlyRunningRaces;
 
     public RegattaRaceStatesSettings() {
-        this.visibleRaceStates = new ArrayList<RaceLogRaceStatus>();
         this.visibleCourseAreas = new ArrayList<String>();
         this.visibleRegattas = new ArrayList<String>();
         this.showOnlyRacesOfSameDay = false;
+        this.showOnlyCurrentlyRunningRaces = false;
     }
 
-    public RegattaRaceStatesSettings(List<RaceLogRaceStatus> visibleRaceStates, List<String> visibleCourseAreas,
-            List<String> visibleRegattas, boolean showOnlyRacesOfSameDay) {
-        this.visibleRaceStates = visibleRaceStates;
+    public RegattaRaceStatesSettings(List<String> visibleCourseAreas, List<String> visibleRegattas, 
+            boolean showOnlyRacesOfSameDay, boolean showOnlyCurrentlyRunningRaces) {
         this.visibleCourseAreas = visibleCourseAreas;
         this.visibleRegattas = visibleRegattas;
         this.showOnlyRacesOfSameDay = showOnlyRacesOfSameDay;
-    }
-
-    public List<RaceLogRaceStatus> getVisibleRaceStates() {
-        return visibleRaceStates;
+        this.showOnlyCurrentlyRunningRaces = showOnlyCurrentlyRunningRaces;
     }
 
     public List<String> getVisibleCourseAreas() {
@@ -41,5 +35,9 @@ public class RegattaRaceStatesSettings {
 
     public boolean isShowOnlyRacesOfSameDay() {
         return showOnlyRacesOfSameDay;
+    }
+    
+    public boolean isShowOnlyCurrentlyRunningRaces() {
+        return showOnlyCurrentlyRunningRaces;
     }
 }

@@ -638,4 +638,10 @@ public interface StringMessages extends Messages {
     
     String courseAreaOverview();
     String courseDesignOverview();
+    String regattaOverview();
+    String additionalSettings();
+    String showFollowingCourseAreas();
+    String showFollowingRegattas();
+    String showOnlyRacesOfSameDay();
+    String showOnlyCurrentlyRunningRaces();
 }

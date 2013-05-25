@@ -27,7 +27,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
-public class RegattaOverviewPanel extends SimplePanel implements RegattaOverviewRaceSelectionChangeListener {
+public class RegattaOverviewPanel extends SimplePanel implements RegattaOverviewRaceSelectionChangeListener, EventProvider {
     
     private final long serverUpdateRateInMs = 10000;
     private final long uiUpdateRateInMs = 1000;
@@ -39,6 +39,7 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
     protected final StringMessages stringMessages;
     
     private final String eventIdAsString;
+    private EventDTO eventDTO;
     
     private RegattaOverviewRaceSelectionModel raceSelectionProvider;
     
@@ -69,6 +70,9 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         this.stringMessages = stringMessages;
         this.eventIdAsString = eventIdAsString;
         
+        this.eventDTO = null;
+        retrieveEvent();
+        
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
@@ -89,7 +93,8 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         raceSelectionProvider = new RegattaOverviewRaceSelectionModel(false);
         raceSelectionProvider.addRegattaOverviewRaceSelectionChangeListener(this);
         
-        regattaRaceStatesComponent = new RegattaRaceStatesComponent(sailingService, errorReporter, stringMessages, eventIdAsString, raceSelectionProvider);
+        regattaRaceStatesComponent = new RegattaRaceStatesComponent(sailingService, errorReporter, stringMessages, eventIdAsString, 
+                raceSelectionProvider, this);
         grid.setWidget(1, 0, regattaRaceStatesComponent);
         
         raceCourseComposite = new RaceCourseComposite(sailingService, errorReporter, stringMessages);
@@ -130,6 +135,7 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
 
             @Override
             public void onClick(ClickEvent event) {
+                //new RegattaRaceStatesSettingsDialogComponent(regattaRaceStatesComponent, stringMessages, null).show();
                 new SettingsDialog<RegattaRaceStatesSettings>(regattaRaceStatesComponent, stringMessages).show();
             }            
         });
@@ -204,7 +210,6 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         mainPanel.add(flexTable);
         mainPanel.add(grid);
         
-        fillEventAndVenueName();
         onUpdateUI(new Date());
     }
 
@@ -244,22 +249,44 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         }
     }
     
-    private void fillEventAndVenueName() {
+    private void retrieveEvent() {
         sailingService.getEventByIdAsString(eventIdAsString, new MarkedAsyncCallback<EventDTO>() {
 
             @Override
             protected void handleFailure(Throwable cause) {
-                
+                //Show a (friendly) error message
+                settingsButton.setEnabled(false);
             }
 
             @Override
             protected void handleSuccess(EventDTO result) {
                 if (result != null) {
-                    eventNameLabel.setText(result.name);
-                    venueNameLabel.setText(result.venue.name);
+                    setEvent(result);
                 }
             }
         });
     }
+    
+    private void fillEventAndVenueName() {
+        eventNameLabel.setText(eventDTO.name);
+        venueNameLabel.setText(eventDTO.venue.name);
+    }
+
+    @Override
+    public EventDTO getEvent() {
+        return eventDTO;
+    }
+
+    protected void setEvent(EventDTO event) {
+        eventDTO = event;
+        onEventUpdated();
+    }
+
+    private void onEventUpdated() {
+        fillEventAndVenueName();
+        settingsButton.setEnabled(true);
+    }
+    
+    
     
 }

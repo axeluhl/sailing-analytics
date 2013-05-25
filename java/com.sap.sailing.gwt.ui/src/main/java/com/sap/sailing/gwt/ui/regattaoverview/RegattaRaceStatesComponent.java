@@ -50,6 +50,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private final StringMessages stringMessages;
     private final String eventIdAsString;
     private final RegattaOverviewRaceSelectionProvider raceSelectionProvider;
+    private final EventProvider eventProvider;
 
     private final FlagImageResolver flagImageResolver;
 
@@ -58,14 +59,16 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private static RegattaRaceStatesTableResources tableRes = GWT.create(RegattaRaceStatesTableResources.class);
 
     public RegattaRaceStatesComponent(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            final StringMessages stringMessages, final String eventIdAsString, final RegattaOverviewRaceSelectionProvider raceSelectionProvider) {
+            final StringMessages stringMessages, final String eventIdAsString, final RegattaOverviewRaceSelectionProvider raceSelectionProvider,
+            final EventProvider eventProvider) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.eventIdAsString = eventIdAsString;
         this.raceSelectionProvider = raceSelectionProvider;
+        this.eventProvider = eventProvider;
         this.flagImageResolver = new FlagImageResolver();
 
-        settings = new RegattaRaceStatesSettings();
+        settings = new RegattaRaceStatesSettings();//TODO initialize settings properly
         
         mainPanel = new VerticalPanel();
         setWidth("100%");
@@ -388,7 +391,17 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     public List<RegattaOverviewEntryDTO> getAllRaces() {
         return allEntries;
     }
-
+    
+    public List<String> getRegattaNames() {
+        List<String> regattaNames = new ArrayList<String>();
+        for (RegattaOverviewEntryDTO entry : allEntries) {
+            if (!regattaNames.contains(entry.regattaName)) {
+                regattaNames.add(entry.regattaName);
+            }
+        }
+        return regattaNames;
+    }
+ 
     private void showSelectedRaces() {
         List<RegattaOverviewEntryDTO> selectedRaces = getSelectedRaces();
         RegattaRaceStatesComponent.this.raceSelectionProvider.setSelection(selectedRaces);
@@ -433,7 +446,9 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     @Override
     public SettingsDialogComponent<RegattaRaceStatesSettings> getSettingsDialogComponent() {
-        return new RegattaRaceStatesSettingsDialogComponent(settings, stringMessages);
+        return new RegattaRaceStatesSettingsDialogComponent(settings, stringMessages, 
+                Collections.unmodifiableList(eventProvider.getEvent().venue.getCourseAreas()),
+                Collections.unmodifiableList(getRegattaNames()));
     }
 
     @Override
@@ -444,7 +459,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     @Override
     public String getLocalizedShortName() {
-        return "Regatta Overview";
+        return stringMessages.regattaOverview();
     }
 
     @Override
