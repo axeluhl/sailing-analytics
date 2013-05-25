@@ -29,7 +29,7 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     }
 
     @Override
-    protected void setupAdditionalWidgetsOnSeriesPanel(VerticalPanel panel) {
+    protected void setupAdditionalWidgetsOnPanel(VerticalPanel panel) {
         // nothing yet
     }
 

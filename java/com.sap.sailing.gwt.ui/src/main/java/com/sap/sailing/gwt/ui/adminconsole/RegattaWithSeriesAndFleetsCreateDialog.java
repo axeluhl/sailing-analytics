@@ -19,6 +19,8 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
+    
+    protected Grid seriesGrid;
 
     protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
 
@@ -97,10 +99,13 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             List<EventDTO> existingEvents, StringMessages stringConstants, DialogCallback<RegattaDTO> callback) {
         super(new RegattaDTO(), existingEvents, stringConstants.addRegatta(), stringConstants.ok(), stringConstants,
                 new RegattaParameterValidator(stringConstants, existingRegattas), callback);
+        this.seriesGrid = new Grid(0, 0);
     }
 
     @Override
-    protected void setupAdditionalWidgetsOnSeriesPanel(final VerticalPanel panel) {
+    protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {
+        panel.add(createHeadlineLabel(stringConstants.series()));
+        panel.add(seriesGrid);
         Button addSeriesButton = new Button("Add series");
         addSeriesButton.addClickHandler(new ClickHandler() {
             @Override

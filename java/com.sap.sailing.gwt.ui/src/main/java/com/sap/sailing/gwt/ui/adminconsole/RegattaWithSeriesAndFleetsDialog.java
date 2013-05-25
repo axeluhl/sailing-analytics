@@ -31,12 +31,11 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
     protected ListBox scoringSchemeListBox;
     protected ListBox courseAreaListBox;
     protected ListBox sailingEventsListBox;
-    protected Grid seriesGrid;
 
     protected List<SeriesDTO> series;
     protected List<EventDTO> existingEvents;
 
-    protected abstract void setupAdditionalWidgetsOnSeriesPanel(VerticalPanel panel);
+    protected abstract void setupAdditionalWidgetsOnPanel(VerticalPanel panel);
 
     public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, List<EventDTO> existingEvents, String title,
             String okButton, StringMessages stringConstants, Validator<RegattaDTO> validator,
@@ -73,7 +72,6 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         setupEventAndCourseAreaListBoxes(stringConstants);
         
         courseAreaListBox.setEnabled(false);
-        seriesGrid = new Grid(0, 0);
     }
 
     @Override
@@ -95,10 +93,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         formGrid.setWidget(3, 1, sailingEventsListBox);
         formGrid.setWidget(4, 0, new Label(stringConstants.courseArea() + ":"));
         formGrid.setWidget(4, 1, courseAreaListBox);
-
-        panel.add(createHeadlineLabel(stringConstants.series()));
-        panel.add(seriesGrid);
-        setupAdditionalWidgetsOnSeriesPanel(panel);
+        setupAdditionalWidgetsOnPanel(panel);
         return panel;
     }
     
