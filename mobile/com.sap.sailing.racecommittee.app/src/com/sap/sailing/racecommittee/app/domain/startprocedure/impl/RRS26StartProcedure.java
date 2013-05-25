@@ -20,6 +20,7 @@ import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.RunningRaceEventListener;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.StartModeChoosableStartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartPhaseEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureListener;
@@ -27,7 +28,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RRS26RunningRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.RRS26StartPhaseFragment;
 
-public class RRS26StartProcedure implements StartProcedure {
+public class RRS26StartProcedure implements StartProcedure, StartModeChoosableStartProcedure {
 
     private final static long startPhaseClassUpInterval = 5 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseStartModeUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
@@ -117,7 +118,7 @@ public class RRS26StartProcedure implements StartProcedure {
         raceLog.add(event);
 
         if (startPhaseEventListener != null) {
-            startPhaseEventListener.onStartModeUp();
+            startPhaseEventListener.onStartModeUp(this.startModeFlag);
         }
     }
 
@@ -129,7 +130,7 @@ public class RRS26StartProcedure implements StartProcedure {
         raceLog.add(event);
 
         if (startPhaseEventListener != null) {
-            startPhaseEventListener.onStartModeDown();
+            startPhaseEventListener.onStartModeUp(this.startModeFlag);
         }
     }
 
@@ -142,6 +143,10 @@ public class RRS26StartProcedure implements StartProcedure {
 
         if (startPhaseEventListener != null) {
             startPhaseEventListener.onClassDown();
+        }
+        
+        if (raceStateChangedListener != null) {
+            raceStateChangedListener.onRaceStarted(eventTime);
         }
     }
 
@@ -357,5 +362,28 @@ public class RRS26StartProcedure implements StartProcedure {
             setIndividualRecallRemoval(eventTime);
         }
 
+    }
+
+    @Override
+    public void setStartModeFlag(Flags startModeFlag) {
+        this.startModeFlag = startModeFlag;
+        startPhaseEventListener.onStartModeFlagChosen(startModeFlag);
+    }
+
+    @Override
+    public Flags getCurrentStartModeFlag() {
+        return this.startModeFlag;
+    }
+
+    public boolean isIndividualRecallDisplayed() {
+        if(this.individualRecallFinder.getIndividualRecallDisplayedTime() != null){
+            if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime() != null){
+                if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime().after(this.individualRecallFinder.getIndividualRecallDisplayedTime())){
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 }
