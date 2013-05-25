@@ -10,10 +10,11 @@ public class StartProcedureFactory {
         switch (type) {
         case ESS:
             return new ExtremeSailingSeriesStartProcedure(raceLog);
-        case GateStart:
+        //commented out for safety reasons
+        /*case GateStart:
             return new GateStartProcedure(raceLog);
         case RRS26:
-            return new RRS26StartProcedure(raceLog);
+            return new RRS26StartProcedure(raceLog);*/
         default:
             throw new UnsupportedOperationException("Not yet implemented start procedure.");
         }
