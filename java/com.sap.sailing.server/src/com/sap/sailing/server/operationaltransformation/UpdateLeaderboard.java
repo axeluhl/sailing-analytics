@@ -10,7 +10,7 @@ import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class UpdateLeaderboard extends AbstractLeaderboardOperation<Void> {
+public class UpdateLeaderboard extends AbstractLeaderboardOperation<Leaderboard> {
     private static final long serialVersionUID = -8040361040050151768L;
     private final String newLeaderboardName;
     private final String newLeaderboardDisplayName;
@@ -38,7 +38,7 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Void> {
     }
 
     @Override
-    public Void internalApplyTo(RacingEventService toState) {
+    public Leaderboard internalApplyTo(RacingEventService toState) {
         if (!getLeaderboardName().equals(newLeaderboardName)) {
             toState.renameLeaderboard(getLeaderboardName(), newLeaderboardName);
         }
@@ -56,7 +56,7 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Void> {
             }
         }
         updateStoredLeaderboard(toState, leaderboard);
-        return null;
+        return leaderboard;
     }
 
 }
