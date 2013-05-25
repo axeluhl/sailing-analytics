@@ -190,7 +190,7 @@ public interface SailingServiceAsync {
     void getLeaderboardsByRace(RaceDTO race, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
-            int[] newDiscardingThreasholds, AsyncCallback<Void> callback);
+            int[] newDiscardingThreasholds, String newCourseAreaIdAsId, AsyncCallback<Void> callback);
 
     void createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, String courseAreaId,
             AsyncCallback<StrippedLeaderboardDTO> asyncCallback);

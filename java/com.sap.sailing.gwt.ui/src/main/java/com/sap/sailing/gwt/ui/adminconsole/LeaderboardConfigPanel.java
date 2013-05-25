@@ -1023,7 +1023,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
     private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
         sailingService.updateLeaderboard(oldLeaderboardName, leaderboardToUpdate.getName(), leaderboardToUpdate.getDisplayName(),
-                leaderboardToUpdate.getDiscardThresholds(), new AsyncCallback<Void>() {
+                leaderboardToUpdate.getDiscardThresholds(), leaderboardToUpdate.getCourseAreaIdAsString(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to update leaderboard " + oldLeaderboardName + ": "
@@ -1038,6 +1038,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                         dao.name = leaderboardToUpdate.getName();
                         dao.displayName = leaderboardToUpdate.getDisplayName();
                         dao.discardThresholds = leaderboardToUpdate.getDiscardThresholds();
+                        dao.defaultCourseAreaIdAsString = leaderboardToUpdate.getCourseAreaIdAsString();
                         break;
                     }
                 }
