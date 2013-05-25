@@ -346,18 +346,24 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     @Override
-    public Pair<String, Long> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart) {
-        Pair<String, Long> result;
+    public Pair<String, List<Object>> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart) {
+        Pair<String, List<Object>> result;
+        List<Object> milisecondsList = new ArrayList<Object>();
         if (millisecondsTillStart < startPhaseESSOneUpInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_one_flag_remove), millisecondsTillStart);
+            milisecondsList.add(millisecondsTillStart);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_ess_countdown_one_flag_remove), milisecondsList );
         } else if (millisecondsTillStart < startPhaseESSTwoUpInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_one_flag_display), millisecondsTillStart - startPhaseESSOneUpInterval);
+            milisecondsList.add(millisecondsTillStart - startPhaseESSOneUpInterval);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_ess_countdown_one_flag_display), milisecondsList);
         } else if (millisecondsTillStart < startPhaseESSThreeUpInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_two_flag_display), millisecondsTillStart - startPhaseESSTwoUpInterval);
+            milisecondsList.add(millisecondsTillStart - startPhaseESSTwoUpInterval);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_ess_countdown_two_flag_display), milisecondsList);
         } else if (millisecondsTillStart < startPhaseAPDownInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_three_flag_display), millisecondsTillStart - startPhaseESSThreeUpInterval);
+            milisecondsList.add(millisecondsTillStart - startPhaseESSThreeUpInterval);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_ess_countdown_three_flag_display), milisecondsList);
         } else {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_ap_flag_removed), millisecondsTillStart - startPhaseAPDownInterval);
+            milisecondsList.add(millisecondsTillStart - startPhaseAPDownInterval);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_ess_countdown_ap_flag_removed), milisecondsList);
         }
         return result;
     }

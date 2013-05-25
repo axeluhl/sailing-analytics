@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.os.Bundle;
@@ -152,9 +154,9 @@ public class EssStartPhaseFragment extends RaceFragment implements EssStartPhase
     }
 
     private void setNextFlagCountdownLabel(long millisecondsTillStart) {
-        Pair<String, Long> countDownPair = getRace().getState().getStartProcedure().getNextFlagCountdownUiLabel(getActivity(), millisecondsTillStart);
-        nextFlagCountdown.setText(String.format(countDownPair.getA(),
-                TimeUtils.prettyString(countDownPair.getB().longValue())));
+        Pair<String, List<Object>> countdownStringPackage = getRace().getState().getStartProcedure().getNextFlagCountdownUiLabel(getActivity(), millisecondsTillStart);
+        nextFlagCountdown.setText(String.format(countdownStringPackage.getA(),
+                TimeUtils.prettyString(((Number) countdownStringPackage.getB().get(0)).longValue())));
     }
 
     protected void showAPModeDialog() {

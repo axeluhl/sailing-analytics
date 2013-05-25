@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.os.Bundle;
@@ -22,6 +24,7 @@ import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.EssStartPhaseEventListener;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.RRS26StartPhaseEventListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
@@ -29,15 +32,18 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
-public class RRS26StartPhaseFragment extends RaceFragment implements EssStartPhaseEventListener {
+public class RRS26StartPhaseFragment extends RaceFragment implements RRS26StartPhaseEventListener {
 
     private RaceInfoListener infoListener;
     
     TextView raceCountdown;
     TextView nextFlagCountdown;
+    ImageButton startModeButton;
     ImageButton abortingFlagButton;
-    ImageView displayedFlag;
-    ImageView nextToBeDisplayedFlag;
+    ImageView currentFlagLeft;
+    ImageView currentFlagRight;
+    ImageView nextFlagLeft;
+    ImageView nextFlagRight;
     Button resetTimeButton;
 
     @Override
@@ -65,11 +71,23 @@ public class RRS26StartPhaseFragment extends RaceFragment implements EssStartPha
 
         raceCountdown = (TextView) getView().findViewById(R.id.raceCountdown);
         nextFlagCountdown = (TextView) getView().findViewById(R.id.nextFlagCountdown);
-        displayedFlag = (ImageView) getView().findViewById(R.id.currentlyDisplayedFlag);
-        nextToBeDisplayedFlag = (ImageView) getView().findViewById(R.id.nextFlagToBeDisplayed);
+        currentFlagLeft = (ImageView) getView().findViewById(R.id.currentFlagLeft);
+        currentFlagRight = (ImageView) getView().findViewById(R.id.currentFlagRight);
+        nextFlagLeft = (ImageView) getView().findViewById(R.id.nextFlagLeft);
+        nextFlagRight = (ImageView) getView().findViewById(R.id.nextFlagRight);
 
         ExLog.i("STARTPHASE", "" + getRace().getId() + " " + getRace().getStatus().toString());
 
+        startModeButton = (ImageButton) getView().findViewById(R.id.startModeButton);
+        startModeButton.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                showStartModeDialog();
+            }
+        });
+
+        
         abortingFlagButton = (ImageButton) getView().findViewById(R.id.abortingFlagButton);
         abortingFlagButton.setOnClickListener(new OnClickListener() {
 
@@ -95,7 +113,7 @@ public class RRS26StartPhaseFragment extends RaceFragment implements EssStartPha
         try {
             RaceLogEvent lastEvent = log.getLastFixAtOrBefore(MillisecondsTimePoint.now());
             // TODO: better analysis of state. only flagevents... sort by timestamp...
-            if (lastEvent instanceof RaceLogFlagEvent) {
+            /*if (lastEvent instanceof RaceLogFlagEvent) {
                 RaceLogFlagEvent flagEvent = (RaceLogFlagEvent) lastEvent;
                 Flags flag = flagEvent.getUpperFlag();
                 
@@ -110,7 +128,7 @@ public class RRS26StartPhaseFragment extends RaceFragment implements EssStartPha
                         (flagEvent.isDisplayed() && flag.equals(Flags.ESSONE))) {
                     onEssOneUp();
                 }
-            }
+            }*/
         } finally {
             log.unlockAfterRead();
         }
@@ -152,12 +170,25 @@ public class RRS26StartPhaseFragment extends RaceFragment implements EssStartPha
     }
 
     private void setNextFlagCountdownLabel(long millisecondsTillStart) {
-        Pair<String, Long> countDownPair = getRace().getState().getStartProcedure().getNextFlagCountdownUiLabel(getActivity(), millisecondsTillStart);
-        nextFlagCountdown.setText(String.format(countDownPair.getA(),
-                TimeUtils.prettyString(countDownPair.getB().longValue())));
+        Pair<String, List<Object>> countdownStringPackage = getRace().getState().getStartProcedure().getNextFlagCountdownUiLabel(getActivity(), millisecondsTillStart);
+        CharSequence countdownTime = TimeUtils.prettyString(((Number) countdownStringPackage.getB().get(0)).longValue());
+        String countDownMetaInfo = (String) countdownStringPackage.getB().get(1);
+        nextFlagCountdown.setText(String.format(countdownStringPackage.getA(), countdownTime, countDownMetaInfo));
     }
 
     protected void showAPModeDialog() {
+        /*FragmentManager fragmentManager = getFragmentManager();
+
+        RaceDialogFragment fragment = new Start();
+
+        Bundle args = getRecentArguments();
+        args.putString(AppConstants.FLAG_KEY, Flags.AP.name());
+        fragment.setArguments(args);
+
+        fragment.show(fragmentManager, "dialogAPMode");*/
+    }
+    
+    protected void showStartModeDialog() {
         FragmentManager fragmentManager = getFragmentManager();
 
         RaceDialogFragment fragment = new AbortModeSelectionDialog();
@@ -170,32 +201,26 @@ public class RRS26StartPhaseFragment extends RaceFragment implements EssStartPha
     }
 
     @Override
-    public void onAPDown() {
-        displayedFlag.setVisibility(View.INVISIBLE);
+    public void onClassUp() {
+        // TODO Auto-generated method stub
         
-        resetTimeButton.setEnabled(false);
-        resetTimeButton.setVisibility(View.GONE);
     }
 
     @Override
-    public void onEssThreeUp() {
-        displayedFlag.setVisibility(View.VISIBLE);
-        displayedFlag.setImageResource(R.drawable.three_min_flag);
+    public void onStartModeUp() {
+        // TODO Auto-generated method stub
         
-        nextToBeDisplayedFlag.setImageResource(R.drawable.two_min_flag);
     }
 
     @Override
-    public void onEssTwoUp() {
-        displayedFlag.setImageResource(R.drawable.two_min_flag);
+    public void onStartModeDown() {
+        // TODO Auto-generated method stub
         
-        nextToBeDisplayedFlag.setImageResource(R.drawable.one_min_flag);
     }
 
     @Override
-    public void onEssOneUp() {
-        displayedFlag.setImageResource(R.drawable.one_min_flag);
+    public void onClassDown() {
+        // TODO Auto-generated method stub
         
-        nextToBeDisplayedFlag.setVisibility(View.INVISIBLE);
     }
 }
