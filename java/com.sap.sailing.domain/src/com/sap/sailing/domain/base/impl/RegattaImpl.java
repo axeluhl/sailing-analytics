@@ -48,7 +48,9 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final ScoringScheme scoringScheme;
     private final Serializable id;
     private transient RaceLogStore raceLogStore;
-    private final CourseArea courseArea;
+    
+    // Can be changed...
+    private CourseArea courseArea;
 
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
@@ -333,6 +335,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public CourseArea getDefaultCourseArea() {
         return courseArea;
+    }
+
+    @Override
+    public void setDefaultCourseArea(CourseArea newCourseArea) {
+        this.courseArea = newCourseArea;
     }
 
 }

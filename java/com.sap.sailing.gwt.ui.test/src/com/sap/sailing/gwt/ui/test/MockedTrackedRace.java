@@ -400,6 +400,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                         // TODO Auto-generated method stub
                         return null;
                     }
+
+                    @Override
+                    public void setDefaultCourseArea(CourseArea newCourseArea) {
+                        // TODO Auto-generated method stub
+                        
+                    }
                 };
             }
 
