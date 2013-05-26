@@ -15,9 +15,11 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
@@ -92,28 +94,38 @@ public class RegattaRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
             raceLogStateJson.put("startTime", startTimeFinder.getStartTime() != null ? startTimeFinder.getStartTime().toString() : null);
 
             RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog);
-            raceLogStateJson.put("lastStatus", raceStatusAnalyzer.getStatus().name());
+            RaceLogRaceStatus lastStatus = raceStatusAnalyzer.getStatus();
+            raceLogStateJson.put("lastStatus", lastStatus.name());
 
             PathfinderFinder pathfinderFinder = new PathfinderFinder(raceLog);
             raceLogStateJson.put("pathfinderId", pathfinderFinder.getPathfinderId());
 
             GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
             raceLogStateJson.put("gateLineOpeningTime", gateLineOpeningTimeFinder.getGateLineOpeningTime());
+            
+            AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
+            RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.getAbortingFlagEvent();
 
             LastFlagFinder lastFlagFinder = new LastFlagFinder(raceLog);
             RaceLogFlagEvent lastFlagEvent = lastFlagFinder.getLastFlagEvent();
             if (lastFlagEvent != null) {
-                raceLogStateJson.put("lastUpperFlag", lastFlagEvent.getUpperFlag().name());
-                raceLogStateJson.put("lastLowerFlag", lastFlagEvent.getLowerFlag().name());
-                raceLogStateJson.put("displayed", lastFlagEvent.isDisplayed());
+                setLastFlagField(raceLogStateJson, lastFlagEvent.getUpperFlag().name(), lastFlagEvent.getLowerFlag().name(), lastFlagEvent.isDisplayed());
+            
+            } else if (lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED) && abortingFlagEvent != null) {
+                setLastFlagField(raceLogStateJson, abortingFlagEvent.getUpperFlag().name(), abortingFlagEvent.getLowerFlag().name(), abortingFlagEvent.isDisplayed());
+            
             } else {
-                raceLogStateJson.put("lastUpperFlag", null);
-                raceLogStateJson.put("lastLowerFlag", null);
-                raceLogStateJson.put("displayed", null);
+                setLastFlagField(raceLogStateJson, null, null, null);
             }
         }
-        
+
         return result;
+    }
+    
+    private void setLastFlagField(JSONObject raceLogStateJson, String upperFlagName, String lowerFlagName, Boolean isDisplayed) {
+        raceLogStateJson.put("lastUpperFlag", upperFlagName);
+        raceLogStateJson.put("lastLowerFlag", lowerFlagName);
+        raceLogStateJson.put("displayed", isDisplayed);
     }
 
     private UUID convertIdentifierStringToUuid(String identifierToConvert) {
