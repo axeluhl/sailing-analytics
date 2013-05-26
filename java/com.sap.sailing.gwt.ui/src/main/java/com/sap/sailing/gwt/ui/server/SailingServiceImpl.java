@@ -490,12 +490,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
-            try {
-                raceLog.lockForRead();
-                raceInfoDTO.hasEvents = !Util.isEmpty(raceLog.getRawFixes());
-            } finally {
-                raceLog.unlockAfterRead();
-            }
             
             StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
             if(startTimeFinder.getStartTime()!=null){

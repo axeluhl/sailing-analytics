@@ -31,6 +31,8 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     private final Map<String, CheckBox> courseAreaCheckBoxMap;
     private final Map<String, CheckBox> regattaCheckBoxMap;
     
+    private final static String SETTINGS_DIALOG_COMPONENT = "SettingsDialogComponent";
+    
     public RegattaRaceStatesSettingsDialogComponent(RegattaRaceStatesSettings settings, StringMessages stringMessages, 
             List<CourseAreaDTO> courseAreas, List<String> regattaNames) {
         this.stringMessages = stringMessages;
@@ -43,7 +45,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
 
     private FlowPanel fillCourseAreaWidget(DataEntryDialog<?> dialog) {
         FlowPanel flowPanel = new FlowPanel();
-        flowPanel.addStyleName("SettingsDialogComponent");
+        flowPanel.addStyleName(SETTINGS_DIALOG_COMPONENT);
         flowPanel.add(dialog.createHeadline(stringMessages.showFollowingCourseAreas(), true));
         FlowPanel courseAreaPanel = new FlowPanel();
         flowPanel.add(courseAreaPanel);
@@ -76,7 +78,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     
     private FlowPanel fillRegattaNamesWidget(DataEntryDialog<?> dialog) {
         FlowPanel flowPanel = new FlowPanel();
-        flowPanel.addStyleName("SettingsDialogComponent");
+        flowPanel.addStyleName(SETTINGS_DIALOG_COMPONENT);
         flowPanel.add(dialog.createHeadline(stringMessages.showFollowingRegattas(), true));
         FlowPanel regattaNamesPanel = new FlowPanel();
         flowPanel.add(regattaNamesPanel);
@@ -121,7 +123,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     
     private Widget getAdditionalSettingsWidget(DataEntryDialog<?> dialog) {
         FlowPanel flowPanel = new FlowPanel();
-        flowPanel.addStyleName("SettingsDialogComponent");
+        flowPanel.addStyleName(SETTINGS_DIALOG_COMPONENT);
         flowPanel.add(dialog.createHeadline(stringMessages.additionalSettings(), true));
         FlowPanel additionalSettingsPanel = new FlowPanel();
         flowPanel.add(additionalSettingsPanel);

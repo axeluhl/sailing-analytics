@@ -113,6 +113,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         List<RegattaOverviewEntryDTO> filteredRegattaRaces = getFilteredRegattaRaces(allEntries);
         Collections.sort(filteredRegattaRaces, new RegattaRaceStatesComparator()); //sort entries after filtering
         List<RegattaOverviewEntryDTO> racesToBeShown = getRacesToBeShown(filteredRegattaRaces);
+        //TODO group races by same day
         regattaOverviewDataProvider.getList().clear();
         regattaOverviewDataProvider.getList().addAll(racesToBeShown);
         // now sort again according to selected criterion
@@ -234,6 +235,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         TextColumn<RegattaOverviewEntryDTO> fleetNameColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                //TODO Fleet column shall be not shown when the races of this event have no fleets
                 return entryDTO.raceInfo.fleetName.equals("Default") ? "-" : entryDTO.raceInfo.fleetName;
             }
         };
@@ -344,9 +346,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
                 StringBuffer additionalInformation = new StringBuffer();
-                if (entryDTO.raceInfo.hasEvents && !isRaceActive(entryDTO.raceInfo.lastStatus)) {
-                    additionalInformation.append("Race has been aborted before. ");
-                }
                 if (entryDTO.raceInfo.pathfinderId != null) {
                     additionalInformation.append("Pathfinder: " + entryDTO.raceInfo.pathfinderId);
                 }
@@ -368,6 +367,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         table.addColumn(regattaNameColumn, stringMessages.regatta()); // For sailors the boat class also contains
                                                                         // additional infos such as woman/man, e.g.
                                                                         // Laser Radial Woman or Laser Radial Men
+        //TODO Show Series when available
         table.addColumn(fleetNameColumn, stringMessages.fleet());
         table.addColumn(raceNameColumn, stringMessages.race());
         table.addColumn(raceStartTimeColumn, stringMessages.startTime());
