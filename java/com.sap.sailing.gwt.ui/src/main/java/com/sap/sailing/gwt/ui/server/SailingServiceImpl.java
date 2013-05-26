@@ -118,6 +118,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
@@ -523,11 +524,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             
             RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.getAbortingFlagEvent();
             if (abortingFlagEvent != null) {
-                raceInfoDTO.lastUpperAbortingFlag = abortingFlagEvent.getUpperFlag();
-                raceInfoDTO.lastLowerAbortingFlag = abortingFlagEvent.getLowerFlag();
-                raceInfoDTO.isAbortingFlagDisplayed = abortingFlagEvent.isDisplayed();
+                raceInfoDTO.isRaceAbortedInPassBefore = true;
+                
+                if (raceInfoDTO.lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
+                    raceInfoDTO.lastUpperFlag = abortingFlagEvent.getUpperFlag();
+                    raceInfoDTO.lastLowerFlag = abortingFlagEvent.getLowerFlag();
+                    raceInfoDTO.isLastFlagDisplayed = abortingFlagEvent.isDisplayed();
+                }
             }
-
+            
             LastPublishedCourseDesignFinder courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
             raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(courseDesignFinder.getLastCourseDesign());
         }

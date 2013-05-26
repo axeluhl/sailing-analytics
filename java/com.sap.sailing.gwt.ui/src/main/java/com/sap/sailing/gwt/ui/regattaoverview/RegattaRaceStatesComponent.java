@@ -139,7 +139,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         numberOfFinishedRacesOfCurrentRegattaFleet++;
                     } else if (entry.raceInfo.lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
                         //don't filter when the race is unscheduled and aborted before
-                        if (entry.raceInfo.lastUpperAbortingFlag == null) {
+                        if (!entry.raceInfo.isRaceAbortedInPassBefore) {
                             racesToBeShown.remove(entry);
                         }
                         
