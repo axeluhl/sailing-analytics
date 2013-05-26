@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.regattaoverview;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -24,7 +23,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.impl.Util.NaturalComparator;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -140,8 +138,11 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         }
                         numberOfFinishedRacesOfCurrentRegattaFleet++;
                     } else if (entry.raceInfo.lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
-                        //TODO except the race is unscheduled and aborted before
-                        racesToBeShown.remove(entry);
+                        //don't filter when the race is unscheduled and aborted before
+                        if (entry.raceInfo.lastUpperAbortingFlag == null) {
+                            racesToBeShown.remove(entry);
+                        }
+                        
                     }
                 }
             }
@@ -333,7 +334,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             @Override
             public ImageResource getValue(RegattaOverviewEntryDTO entryDTO) {
                 if (entryDTO.raceInfo.lastUpperFlag != null)
-                    return flagImageResolver.resolveFlagDirectionToImage(entryDTO.raceInfo.displayed);
+                    return flagImageResolver.resolveFlagDirectionToImage(entryDTO.raceInfo.isLastFlagDisplayed);
                 else
                     return null;
             }
@@ -402,10 +403,10 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private String getStatusText(RaceInfoDTO raceInfo) {
         String statusText = "";
         if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING) && raceInfo.lastUpperFlag.equals(Flags.XRAY)
-                && raceInfo.displayed) {
+                && raceInfo.isLastFlagDisplayed) {
             statusText = "Race is running (had early starters)";
         } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING) && raceInfo.lastUpperFlag.equals(Flags.XRAY)
-                && !raceInfo.displayed) {
+                && !raceInfo.isLastFlagDisplayed) {
             statusText = "Race is running";
         } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING)) {
             statusText = "Race is running";
@@ -423,9 +424,9 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             statusText = "";
         } else if (raceInfo.lastUpperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
             statusText = "General recall";
-        } else if (raceInfo.lastUpperFlag.equals(Flags.AP) && raceInfo.displayed) {
+        } else if (raceInfo.lastUpperFlag.equals(Flags.AP) && raceInfo.isLastFlagDisplayed) {
             statusText = "Start postponed";
-        } else if (raceInfo.lastUpperFlag.equals(Flags.NOVEMBER) && raceInfo.displayed) {
+        } else if (raceInfo.lastUpperFlag.equals(Flags.NOVEMBER) && raceInfo.isLastFlagDisplayed) {
             statusText = "Start abandoned";
         }
         return statusText;

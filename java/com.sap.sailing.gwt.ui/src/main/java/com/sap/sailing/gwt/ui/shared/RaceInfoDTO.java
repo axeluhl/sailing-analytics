@@ -16,11 +16,14 @@ public class RaceInfoDTO implements IsSerializable {
     public RaceLogRaceStatus lastStatus;
     public Flags lastUpperFlag;
     public Flags lastLowerFlag;
-    public boolean displayed;
+    public boolean isLastFlagDisplayed;
     public RaceCourseDTO lastCourseDesign;
     public RaceIdentifier raceIdentifier;
     public String pathfinderId;
     public Long gateLineOpeningTime;
+    public Flags lastUpperAbortingFlag;
+    public Flags lastLowerAbortingFlag;
+    public boolean isAbortingFlagDisplayed;
     // for GWT serialization
     public RaceInfoDTO() { }
     

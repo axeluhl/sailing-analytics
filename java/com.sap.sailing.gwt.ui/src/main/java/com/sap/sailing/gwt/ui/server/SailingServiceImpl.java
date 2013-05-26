@@ -133,6 +133,7 @@ import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.polarsheets.PolarSheetsWindStepping;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
@@ -515,7 +516,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (lastFlagEvent != null) {
                 raceInfoDTO.lastUpperFlag = lastFlagEvent.getUpperFlag();
                 raceInfoDTO.lastLowerFlag = lastFlagEvent.getLowerFlag();
-                raceInfoDTO.displayed = lastFlagEvent.isDisplayed();
+                raceInfoDTO.isLastFlagDisplayed = lastFlagEvent.isDisplayed();
+            }
+            
+            AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
+            
+            RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.getAbortingFlagEvent();
+            if (abortingFlagEvent != null) {
+                raceInfoDTO.lastUpperAbortingFlag = abortingFlagEvent.getUpperFlag();
+                raceInfoDTO.lastLowerAbortingFlag = abortingFlagEvent.getLowerFlag();
+                raceInfoDTO.isAbortingFlagDisplayed = abortingFlagEvent.isDisplayed();
             }
 
             LastPublishedCourseDesignFinder courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
