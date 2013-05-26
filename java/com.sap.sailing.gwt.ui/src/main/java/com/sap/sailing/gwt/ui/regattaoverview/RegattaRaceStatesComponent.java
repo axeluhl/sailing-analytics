@@ -112,14 +112,44 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private void updateTable(List<RegattaOverviewEntryDTO> newEntries) {
         allEntries = newEntries;
-        List<RegattaOverviewEntryDTO> filteredEntries = getFilteredEntries(allEntries);
+        List<RegattaOverviewEntryDTO> filteredRegattaRaces = getFilteredRegattaRaces(allEntries);
+        Collections.sort(filteredRegattaRaces, new RegattaRaceStatesComparator()); //sort entries after filtering
+        List<RegattaOverviewEntryDTO> racesToBeShown = getRacesToBeShown(filteredRegattaRaces);
         regattaOverviewDataProvider.getList().clear();
-        regattaOverviewDataProvider.getList().addAll(allEntries);
+        regattaOverviewDataProvider.getList().addAll(racesToBeShown);
         // now sort again according to selected criterion
         ColumnSortEvent.fire(regattaOverviewTable, regattaOverviewTable.getColumnSortList());
     }
 
-    private List<RegattaOverviewEntryDTO> getFilteredEntries(List<RegattaOverviewEntryDTO> raceList) {
+    private List<RegattaOverviewEntryDTO> getRacesToBeShown(List<RegattaOverviewEntryDTO> filteredEntries) {
+        List<RegattaOverviewEntryDTO> racesToBeShown = new ArrayList<RegattaOverviewEntryDTO>(filteredEntries);
+        if (settings.isShowOnlyCurrentlyRunningRaces()) {
+            String currentRegattaName = "";
+            String currentFleetName = "";
+            int numberOfFinishedRacesOfCurrentRegattaFleet = 0;
+            for (RegattaOverviewEntryDTO entry : filteredEntries) {
+                if (!currentRegattaName.equals(entry.regattaName) || !currentFleetName.equals(entry.raceInfo.fleetName)) {
+                    currentRegattaName = entry.regattaName;
+                    currentFleetName = entry.raceInfo.fleetName;
+                    numberOfFinishedRacesOfCurrentRegattaFleet = 0;
+                }
+                if (!isRaceActive(entry.raceInfo.lastStatus)) {
+                    if (entry.raceInfo.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
+                        if (numberOfFinishedRacesOfCurrentRegattaFleet > 0) {
+                            racesToBeShown.remove(entry);
+                        }
+                        numberOfFinishedRacesOfCurrentRegattaFleet++;
+                    } else if (entry.raceInfo.lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
+                        //TODO except the race is unscheduled and aborted before
+                        racesToBeShown.remove(entry);
+                    }
+                }
+            }
+        }
+        return racesToBeShown;
+    }
+
+    private List<RegattaOverviewEntryDTO> getFilteredRegattaRaces(List<RegattaOverviewEntryDTO> raceList) {
         List<RegattaOverviewEntryDTO> filteredEntries = new ArrayList<RegattaOverviewEntryDTO>(raceList);
         
         for (RegattaOverviewEntryDTO entry : raceList) {
@@ -134,62 +164,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         }
         
         return filteredEntries;
-    }
-
-    //TODO: Change all of this using a filter model
-    private Collection<? extends RegattaOverviewEntryDTO> filterAndSort(List<RegattaOverviewEntryDTO> raceList) {
-        List<RegattaOverviewEntryDTO> reversedUnfilterted = new ArrayList<RegattaOverviewEntryDTO>(raceList);
-
-        // This has grown to an ugly hack. Consider moving this filtering to a better place and
-        // change the handling of alphanum-like race names!
-        Collections.sort(reversedUnfilterted, new Comparator<RegattaOverviewEntryDTO>() {
-            @Override
-            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
-                int result = left.courseAreaName.compareTo(right.courseAreaName);
-                if (result == 0) {
-                    if (left.regattaName != null && right.regattaName != null) {
-                        result = left.regattaName.compareTo(right.regattaName);
-                    }
-                    if (result == 0) {
-                        result = left.raceInfo.fleet.compareTo(right.raceInfo.fleet);
-                        if (result == 0) {
-                            result = new NaturalComparator().compare(right.raceInfo.raceName, left.raceInfo.raceName);
-                        }
-                    }
-                }
-                return result;
-            }
-        });
-
-        List<RegattaOverviewEntryDTO> filtered = new ArrayList<RegattaOverviewEntryDTO>();
-        int maxAddtionalRacesCount = 2;
-        for (RegattaOverviewEntryDTO entry : reversedUnfilterted) {
-            RaceLogRaceStatus status = entry.raceInfo.lastStatus;
-            if (status != null && isRaceActive(status)) {
-                filtered.add(entry);
-                continue;
-            }
-
-            if (maxAddtionalRacesCount == 0) {
-                continue;
-            }
-
-            if (entry.raceInfo.hasEvents) {
-                maxAddtionalRacesCount--;
-                filtered.add(entry);
-            }
-        }
-        
-        // Add the "next race" to the list of races
-        // TODO: Should be done for each course area, for each regatta, for each fleet...
-        if (filtered.size() > 0 && filtered.size() != reversedUnfilterted.size()) {
-            RegattaOverviewEntryDTO topMostEntry = filtered.get(0);
-            int topMostIndex = reversedUnfilterted.indexOf(topMostEntry);
-            if (topMostIndex >= 1) {
-                filtered.add(0, reversedUnfilterted.get(topMostIndex - 1));
-            }
-        }
-        return filtered;
     }
 
     private boolean isRaceActive(RaceLogRaceStatus status) {
@@ -259,7 +233,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         TextColumn<RegattaOverviewEntryDTO> fleetNameColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
-                return entryDTO.raceInfo.fleet.equals("Default") ? "-" : entryDTO.raceInfo.fleet;
+                return entryDTO.raceInfo.fleetName.equals("Default") ? "-" : entryDTO.raceInfo.fleetName;
             }
         };
         fleetNameColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -268,7 +242,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
             @Override
             public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
-                return left.raceInfo.fleet.compareTo(right.raceInfo.fleet);
+                return left.raceInfo.fleetName.compareTo(right.raceInfo.fleetName);
             }
 
         });
@@ -471,21 +445,21 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     @Override
     public void updateSettings(RegattaRaceStatesSettings newSettings) {
-        if (!settings.getVisibleCourseAreas().containsAll(newSettings.getVisibleCourseAreas())) {
+        if (!settings.getVisibleCourseAreas().equals(newSettings.getVisibleCourseAreas())) {
             settings.getVisibleCourseAreas().clear();
             settings.getVisibleCourseAreas().addAll(newSettings.getVisibleCourseAreas());
         }
         
-        if (!settings.getVisibleRegattas().containsAll(newSettings.getVisibleRegattas())) {
+        if (!settings.getVisibleRegattas().equals(newSettings.getVisibleRegattas())) {
             settings.getVisibleRegattas().clear();
             settings.getVisibleRegattas().addAll(newSettings.getVisibleRegattas());
         }
         
-        if (settings.isShowOnlyRacesOfSameDay() == newSettings.isShowOnlyRacesOfSameDay()) {
+        if (settings.isShowOnlyRacesOfSameDay() != newSettings.isShowOnlyRacesOfSameDay()) {
             settings.setShowOnlyRaceOfSameDay(newSettings.isShowOnlyRacesOfSameDay());
         }
         
-        if (settings.isShowOnlyCurrentlyRunningRaces() == newSettings.isShowOnlyCurrentlyRunningRaces()) {
+        if (settings.isShowOnlyCurrentlyRunningRaces() != newSettings.isShowOnlyCurrentlyRunningRaces()) {
             settings.setShowOnlyCurrentlyRunningRaces(newSettings.isShowOnlyCurrentlyRunningRaces());
         }
         updateTable(allEntries);

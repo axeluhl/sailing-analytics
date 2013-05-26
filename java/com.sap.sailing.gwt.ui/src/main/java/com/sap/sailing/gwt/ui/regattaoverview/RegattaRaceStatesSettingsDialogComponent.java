@@ -62,7 +62,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         
         for (CourseAreaDTO courseAreaDTO : courseAreas) {
             CheckBox checkBox = dialog.createCheckbox(courseAreaDTO.name);
-            checkBox.setValue(Util.contains(initialSettings.getVisibleCourseAreas(), courseAreaDTO.name));
+            checkBox.setValue(Util.contains(initialSettings.getVisibleCourseAreas(), courseAreaDTO.id));
             courseAreaCheckBoxMap.put(courseAreaDTO.id, checkBox);
             
             courseAreaGrid.setWidget(rowIndex, columnIndex++, checkBox);
