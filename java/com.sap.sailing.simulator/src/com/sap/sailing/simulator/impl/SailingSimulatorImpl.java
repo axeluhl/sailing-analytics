@@ -391,7 +391,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
             } else {
                 throw new Exception("Unknown path name!");
             }
-            SimulatorUtils.saveToFile(path, SimulatorUtils.getPathPrefix() + "\\src\\resources\\" + fileName);
+            SimulatorUtils.saveToFile(path, SimulatorUtils.getPathPrefix() + "\\resources\\" + fileName);
         }
 
         return path;
