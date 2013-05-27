@@ -5,9 +5,9 @@ import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
-import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 

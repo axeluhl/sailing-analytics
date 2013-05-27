@@ -63,13 +63,6 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     /**
      * Constructs a regatta with an empty {@link RaceLogStore}.
      */
-    public RegattaImpl(String baseName, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme, Serializable id) {
-        this(EmptyRaceLogStore.INSTANCE, baseName, boatClass, trackedRegattaRegistry, scoringScheme, id, null);
-    }
-    
-    /**
-     * Constructs a regatta with an empty {@link RaceLogStore}.
-     */
     public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
         this(EmptyRaceLogStore.INSTANCE, baseName, boatClass, series, persistent, scoringScheme, id, courseArea);
     }

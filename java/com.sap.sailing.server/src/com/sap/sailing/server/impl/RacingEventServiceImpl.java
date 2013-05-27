@@ -569,9 +569,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         leaderboard.removeRaceColumnListener(raceLogScoringReplicator);
         mongoObjectFactory.removeLeaderboard(leaderboardName);
         syncGroupsAfterLeaderboardRemove(leaderboardName, true);
+        leaderboard.destroy();
     }
 
-    protected Leaderboard removeLeaderboardFromLeaderboardsByName(String leaderboardName) {
+    private Leaderboard removeLeaderboardFromLeaderboardsByName(String leaderboardName) {
         synchronized (leaderboardsByName) {
             return leaderboardsByName.remove(leaderboardName);
         }

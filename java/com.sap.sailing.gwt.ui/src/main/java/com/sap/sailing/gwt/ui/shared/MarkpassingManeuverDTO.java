@@ -5,6 +5,7 @@ import java.util.Date;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class MarkpassingManeuverDTO extends ManeuverDTO {

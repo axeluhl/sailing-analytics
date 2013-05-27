@@ -22,23 +22,23 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
+import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
-import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
-import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -288,7 +288,7 @@ public interface SailingService extends RemoteService {
     
     PolarSheetsData getPolarSheetsGenerationResults(String id);
     
-    PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle, int windSpeed);
+    PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle, int windSpeedLevel);
     
     EventDTO getEventById(Serializable id);
     

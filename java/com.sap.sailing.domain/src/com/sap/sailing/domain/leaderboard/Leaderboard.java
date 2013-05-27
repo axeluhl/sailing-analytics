@@ -1,10 +1,13 @@
 package com.sap.sailing.domain.leaderboard;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -16,9 +19,12 @@ import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 /**
  * A leaderboard is used to display the results of one or more {@link TrackedRace races}. It manages the competitors'
@@ -61,6 +67,10 @@ public interface Leaderboard extends Named {
         Fleet getFleet();
     }
     
+    LeaderboardDTO computeDTO(final TimePoint timePoint,
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory)
+            throws NoWindException;
+
     /**
      * Obtains the unique set of {@link Competitor} objects from all {@link TrackedRace}s currently linked to this
      * leaderboard, with suppressed competitors removed. See also {@link #getAllCompetitors()} which also returns
@@ -381,4 +391,43 @@ public interface Leaderboard extends Named {
      * @return the default {@link CourseArea} for all races of this leaderboard.
      */
     CourseArea getDefaultCourseArea();
+
+    /**
+     * Must be called when the leaderboard is removed from its server, becoming in accessible. This will give the leaderboard
+     * a chance to release all its resources that won't be collected or freed automatically. In particular, a leaderboard may
+     * hold on to listeners which in turn are registered with {@link TrackedRace}s and therefore won't be released to the garbage
+     * collector unless the tracked race becomes unreferenced. This may take long because the tracked race can generally
+     * be referenced by more than one leaderboard. For example, a test leaderboard may additionally reference a tracked
+     * race already referenced by an "official" leaderboard. When the test leaderboard is removed, its listeners would not
+     * be released and avoid garbage-collecting the test leaderboard. When calling this method, the leaderboard will cleanly
+     * unregister its listeners from the tracked races and therefore become eligible for garbage collection.
+     */
+    void destroy();
+
+    /**
+     * Returns a data transfer object (DTO) that has the leaderboard's data for the race columns with basic information
+     * for all columns, and with detailed information for those columns whose names are provided in
+     * <code>namesOfRaceColumnsForWhichToLoadLegDetails</code>. The leaderboard is evaluated at <code>timePoint</code>,
+     * or, if <code>timePoint</code> is <code>null</code>, for the "live" time point (now - delay).
+     * <p>
+     * 
+     * The implementation uses different approaches for caching the results. For "live" requests, a
+     * {@link LiveLeaderboardUpdater} is used to keep refreshing the cached results. Other queries are managed by a
+     * {@link LeaderboardDTOCache} which remembers a number of results before it starts evicting the least frequently
+     * used ones.
+     * 
+     * @param timePoint
+     *            <code>null</code> for "live" results for the time point "now" - delay; otherwise, the explicit time
+     *            point at which to evaluate the leaderboard status
+     * @param namesOfRaceColumnsForWhichToLoadLegDetails
+     *            the names of the race columns of which to expand the details in the result
+     * @param trackedRegattaRegistry
+     *            used to determine which of the races are still being tracked and which ones are not
+     * @param baseDomainFactory
+     *            required as factory and cache for various DTO types
+     */
+    LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
+            Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
+            TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException,
+            InterruptedException, ExecutionException;
 }

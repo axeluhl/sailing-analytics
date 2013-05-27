@@ -10,12 +10,15 @@ public class RaceBoardViewConfiguration {
     private boolean showWindChart; 
     private boolean showCompetitorsChart;
     private ViewModes viewMode;
+    private String activeCompetitorsFilterSetName;
+    private boolean canReplayDuringLiveRaces;
     
     public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
     public static final String PARAM_VIEW_SHOW_NAVIGATION_PANEL = "viewShowNavigationPanel";
     public static final String PARAM_VIEW_SHOW_WINDCHART = "viewShowWindChart";
     public static final String PARAM_VIEW_SHOW_COMPETITORSCHART = "viewShowCompetitorsChart";
+    public static final String PARAM_VIEW_COMPETITOR_FILTER = "viewCompetitorFilter";
     public static final String PARAM_CAN_REPLAY_DURING_LIVE_RACES = "canReplayDuringLiveRaces";
 
     public static enum ViewModes { ONESCREEN };
@@ -27,11 +30,14 @@ public class RaceBoardViewConfiguration {
         showCompetitorsChart = false;
     }
     
-    public RaceBoardViewConfiguration(ViewModes viewMode, boolean showLeaderboard, boolean showWindChart, boolean showCompetitorsChart) {
+    public RaceBoardViewConfiguration(ViewModes viewMode, String activeCompetitorsFilterSetName,
+            boolean showLeaderboard, boolean showWindChart, boolean showCompetitorsChart, boolean canReplayDuringLiveRaces) {
         this.viewMode = viewMode;
+        this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
         this.showWindChart = showWindChart;
         this.showCompetitorsChart = showCompetitorsChart;
+        this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
     }
 
     public boolean isShowLeaderboard() {
@@ -48,5 +54,13 @@ public class RaceBoardViewConfiguration {
 
     public ViewModes getViewMode() {
         return viewMode;
+    }
+
+    public String getActiveCompetitorsFilterSetName() {
+        return activeCompetitorsFilterSetName;
+    }
+
+    public boolean isCanReplayDuringLiveRaces() {
+        return canReplayDuringLiveRaces;
     }
 }

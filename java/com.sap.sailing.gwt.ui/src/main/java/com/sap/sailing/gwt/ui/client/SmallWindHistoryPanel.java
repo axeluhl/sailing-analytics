@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.gwt.ui.shared.PositionDTO;
+import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;

@@ -11,15 +11,15 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
-import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
-import com.sap.sailing.gwt.ui.shared.FleetDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 /**

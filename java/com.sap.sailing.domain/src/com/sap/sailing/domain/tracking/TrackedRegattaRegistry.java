@@ -41,4 +41,7 @@ public interface TrackedRegattaRegistry {
      * @param raceID the ID as obtained from {@link RaceDefinition#getId()}
      */
     Regatta getRememberedRegattaForRace(Serializable raceID);
+
+    boolean isRaceBeingTracked(RaceDefinition r);
+
 }
