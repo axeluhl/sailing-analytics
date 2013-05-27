@@ -20,15 +20,15 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
     
-    protected Grid seriesGrid;
+    private Grid seriesGrid;
 
     protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
 
-        private StringMessages stringConstants;
+        private StringMessages stringMessages;
         private ArrayList<RegattaDTO> existingRegattas;
 
-        public RegattaParameterValidator(StringMessages stringConstants, Collection<RegattaDTO> existingRegattas) {
-            this.stringConstants = stringConstants;
+        public RegattaParameterValidator(StringMessages stringMessages, Collection<RegattaDTO> existingRegattas) {
+            this.stringMessages = stringMessages;
             this.existingRegattas = new ArrayList<RegattaDTO>(existingRegattas);
         }
 
@@ -48,11 +48,11 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             }
 
             if (!nameNotEmpty) {
-                errorMessage = stringConstants.pleaseEnterAName();
+                errorMessage = stringMessages.pleaseEnterAName();
             } else if (!boatClassNotEmpty) {
-                errorMessage = stringConstants.pleaseEnterAName();
+                errorMessage = stringMessages.pleaseEnterAName();
             } else if (!unique) {
-                errorMessage = stringConstants.regattaWithThisNameAlreadyExists();
+                errorMessage = stringMessages.regattaWithThisNameAlreadyExists();
             }
 
             if (errorMessage == null) {
@@ -81,11 +81,11 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                 }
 
                 if (!seriesNameNotEmpty) {
-                    errorMessage = stringConstants.series() + " " + (index + 1) + ": "
-                            + stringConstants.pleaseEnterAName();
+                    errorMessage = stringMessages.series() + " " + (index + 1) + ": "
+                            + stringMessages.pleaseEnterAName();
                 } else if (!seriesUnique) {
-                    errorMessage = stringConstants.series() + " " + (index2 + 1) + ": "
-                            + stringConstants.seriesWithThisNameAlreadyExists();
+                    errorMessage = stringMessages.series() + " " + (index2 + 1) + ": "
+                            + stringMessages.seriesWithThisNameAlreadyExists();
                 }
 
             }
@@ -104,7 +104,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
 
     @Override
     protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {
-        panel.add(createHeadlineLabel(stringConstants.series()));
+        panel.add(createHeadlineLabel(stringMessages.series()));
         panel.add(seriesGrid);
         Button addSeriesButton = new Button("Add series");
         addSeriesButton.addClickHandler(new ClickHandler() {
@@ -112,7 +112,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             public void onClick(ClickEvent event) {
                 RegattaDTO result = getResult();
                 SeriesWithFleetsCreateDialog dialog = new SeriesWithFleetsCreateDialog(Collections
-                        .unmodifiableCollection(result.series), stringConstants, new DialogCallback<SeriesDTO>() {
+                        .unmodifiableCollection(result.series), stringMessages, new DialogCallback<SeriesDTO>() {
                     @Override
                     public void cancel() {
                     }
@@ -139,7 +139,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
 
         for (int i = 0; i < seriesCount; i++) {
             SeriesDTO seriesDTO = series.get(i);
-            Label seriesLabel = new Label((i + 1) + ". " + stringConstants.series() + ":");
+            Label seriesLabel = new Label((i + 1) + ". " + stringMessages.series() + ":");
             seriesLabel.setWordWrap(false);
             seriesLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
             seriesGrid.setWidget(i * 2, 0, seriesLabel);

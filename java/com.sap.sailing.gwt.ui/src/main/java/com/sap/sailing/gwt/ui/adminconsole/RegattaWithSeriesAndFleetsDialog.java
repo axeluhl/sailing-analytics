@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<RegattaDTO> {
 
-    protected StringMessages stringConstants;
+    protected StringMessages stringMessages;
     protected RegattaDTO regatta;
 
     protected TextBox nameEntryField;
@@ -38,11 +38,11 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
     protected abstract void setupAdditionalWidgetsOnPanel(VerticalPanel panel);
 
     public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, List<EventDTO> existingEvents, String title,
-            String okButton, StringMessages stringConstants, Validator<RegattaDTO> validator,
+            String okButton, StringMessages stringMessages, Validator<RegattaDTO> validator,
             DialogCallback<RegattaDTO> callback) {
-        super(title, null, okButton, stringConstants.cancel(), validator, callback);
+        super(title, null, okButton, stringMessages.cancel(), validator, callback);
 
-        this.stringConstants = stringConstants;
+        this.stringMessages = stringMessages;
         
         this.regatta = regatta;
         this.existingEvents = existingEvents;
@@ -60,7 +60,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
 
         scoringSchemeListBox = createListBox(false);
         for (ScoringSchemeType scoringSchemeType : ScoringSchemeType.values()) {
-            scoringSchemeListBox.addItem(ScoringSchemeTypeFormatter.format(scoringSchemeType, stringConstants),
+            scoringSchemeListBox.addItem(ScoringSchemeTypeFormatter.format(scoringSchemeType, stringMessages),
                     String.valueOf(scoringSchemeType.ordinal()));
             if (scoringSchemeType == regatta.scoringScheme) {
                 scoringSchemeListBox.setSelectedIndex(scoringSchemeListBox.getItemCount() - 1);
@@ -69,7 +69,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
 
         sailingEventsListBox = createListBox(false);
         courseAreaListBox = createListBox(false);
-        setupEventAndCourseAreaListBoxes(stringConstants);
+        setupEventAndCourseAreaListBoxes(stringMessages);
         
         courseAreaListBox.setEnabled(false);
     }
@@ -83,15 +83,15 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         }
         Grid formGrid = new Grid(5, 2);
         panel.add(formGrid);
-        formGrid.setWidget(0, 0, new Label(stringConstants.name() + ":"));
+        formGrid.setWidget(0, 0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
-        formGrid.setWidget(1, 0, new Label(stringConstants.boatClass() + ":"));
+        formGrid.setWidget(1, 0, new Label(stringMessages.boatClass() + ":"));
         formGrid.setWidget(1, 1, boatClassEntryField);
-        formGrid.setWidget(2, 0, new Label(stringConstants.scoringSystem() + ":"));
+        formGrid.setWidget(2, 0, new Label(stringMessages.scoringSystem() + ":"));
         formGrid.setWidget(2, 1, scoringSchemeListBox);
-        formGrid.setWidget(3, 0, new Label(stringConstants.event() + ":"));
+        formGrid.setWidget(3, 0, new Label(stringMessages.event() + ":"));
         formGrid.setWidget(3, 1, sailingEventsListBox);
-        formGrid.setWidget(4, 0, new Label(stringConstants.courseArea() + ":"));
+        formGrid.setWidget(4, 0, new Label(stringMessages.courseArea() + ":"));
         formGrid.setWidget(4, 1, courseAreaListBox);
         setupAdditionalWidgetsOnPanel(panel);
         return panel;
@@ -165,7 +165,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
     }
 
     private void fillCourseAreaListBox(EventDTO selectedEvent) {
-        courseAreaListBox.addItem(stringConstants.selectCourseArea());
+        courseAreaListBox.addItem(stringMessages.selectCourseArea());
         for (CourseAreaDTO courseArea : selectedEvent.venue.getCourseAreas()) {
             courseAreaListBox.addItem(courseArea.name);
             if (courseArea.id == regatta.defaultCourseAreaIdAsString) {

@@ -11,8 +11,8 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFleetsDialog {
 
     public RegattaWithSeriesAndFleetsEditDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
-            List<EventDTO> existingEvents, StringMessages stringConstants, DialogCallback<RegattaDTO> callback) {
-        super(regatta, existingEvents, stringConstants.editRegatta(), stringConstants.ok(), stringConstants,
+            List<EventDTO> existingEvents, StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
+        super(regatta, existingEvents, stringMessages.editRegatta(), stringMessages.ok(), stringMessages,
                 null, callback);
         nameEntryField.setEnabled(false);
         boatClassEntryField.setEnabled(false);
