@@ -34,6 +34,11 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
+/**
+ * This component shows a table displaying the current state of races for a given event. 
+ * Which races are shown depends on the setting {@link RegattaRaceStatesSettings}.
+ * Each entry shows what flags are currently displayed, what start time the race has and additional information, e.g. for Gate start.
+ */
 public class RegattaRaceStatesComponent extends SimplePanel implements Component<RegattaRaceStatesSettings> {
 
     private List<RegattaOverviewEntryDTO> allEntries;
