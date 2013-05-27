@@ -128,6 +128,7 @@ public class RegattaRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
                 result = UUID.fromString(identifierToConvert);
             } catch (IllegalArgumentException iae) {
                 logger.warning("The identifier " + identifierToConvert + " could not be converted to a UUID");
+                //in this case null is returned
             }
         }
         return result;
