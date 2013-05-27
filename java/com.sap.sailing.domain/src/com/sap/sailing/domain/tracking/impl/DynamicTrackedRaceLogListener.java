@@ -36,11 +36,9 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     public void addTo(RaceLog raceLog) {
         raceLog.addListener(this);
-
         startTimeFinder = new StartTimeFinder(raceLog);
         courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
         statusAnalyzer = new RaceStatusAnalyzer(raceLog);
-
         analyze();
     }
 
