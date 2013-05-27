@@ -49,7 +49,6 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
     private final Label eventNameLabel;
     private final Label venueNameLabel;
     private final Label timeLabel;
-//    private final Button filterButton;
     private final Button settingsButton;
     private final Button refreshNowButton;
     private final Button startStopUpdatingButton;
@@ -107,18 +106,6 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingLeft(20.0, Unit.PX);
         
-        //TODO: change filter button
-//        filterButton = new Button(stringMessages.disableRaceFilter());
-//        filterButton.addClickHandler(new ClickHandler() {
-//            
-//            @Override
-//            public void onClick(ClickEvent event) {
-//                boolean isFilterActive = regattaRaceStatesComponent.switchFilter();
-//                filterButton.setText(isFilterActive ? 
-//                        stringMessages.disableRaceFilter() : stringMessages.enableRaceFilter());
-//            }
-//        });
-        
         refreshNowButton = new Button(stringMessages.refreshNow());
         refreshNowButton.addClickHandler(new ClickHandler() {
 
@@ -135,7 +122,6 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
 
             @Override
             public void onClick(ClickEvent event) {
-                //new RegattaRaceStatesSettingsDialogComponent(regattaRaceStatesComponent, stringMessages, null).show();
                 new SettingsDialog<RegattaRaceStatesSettings>(regattaRaceStatesComponent, stringMessages).show();
             }            
         });
@@ -219,7 +205,6 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         refreshStartStopClockPanel.setStyleName(STYLE_REFRESH_STOP_TIME);
         refreshStartStopClockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         
-//        refreshStartStopClockPanel.add(filterButton);
         refreshStartStopClockPanel.add(settingsButton);
         refreshStartStopClockPanel.add(refreshNowButton);
         refreshStartStopClockPanel.add(startStopUpdatingButton);

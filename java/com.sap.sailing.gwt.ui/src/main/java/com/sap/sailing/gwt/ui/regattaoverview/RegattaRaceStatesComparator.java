@@ -15,11 +15,11 @@ public class RegattaRaceStatesComparator implements Comparator<RegattaOverviewEn
                 result = new NaturalComparator().compare(left.regattaName, right.regattaName);
             }
             if (result == 0) {
-              //Caution: Series is missing!!!
+              //TODO Caution: Series is missing!!!
                 result = Integer.valueOf(left.raceInfo.fleetOrdering).compareTo(Integer.valueOf(right.raceInfo.fleetOrdering));
                 if (result == 0) {
                     result = (-1) * new NaturalComparator().compare(right.raceInfo.raceName, left.raceInfo.raceName);
-                    //this naturalComparator sorts the other way round R30 < R29 < R28 etc.
+                    //the naturalComparator sorts the other way round R30 < R29 < R28 etc., therefore the (-1) multiplication
                 }
             }
         }
