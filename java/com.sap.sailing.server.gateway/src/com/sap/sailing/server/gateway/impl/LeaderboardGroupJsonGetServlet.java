@@ -15,8 +15,8 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
@@ -55,7 +55,6 @@ public class LeaderboardGroupJsonGetServlet extends AbstractJsonHttpServlet {
                     jsonLeaderboard.put("name", leaderboard.getName());
                     jsonLeaderboard.put("displayName", leaderboard.getDisplayName());
                     jsonLeaderboard.put("isMetaLeaderboard", isMetaLeaderboard);
-                    jsonLeaderboard.put("isRegattaLeaderboard", isRegattaLeaderboard);
                     jsonLeaderboardEntries.add(jsonLeaderboard);
 
                     SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
@@ -73,16 +72,17 @@ public class LeaderboardGroupJsonGetServlet extends AbstractJsonHttpServlet {
                         Regatta regatta = regattaLeaderboard.getRegatta();
 
                         jsonLeaderboard.put("scoringScheme", leaderboard.getScoringScheme().getType());
+                        jsonLeaderboard.put("regattaName", regatta.getName());
 
-                        Iterable<? extends Series> regattaSeries = regatta.getSeries();
-                        // there should only be one series
-                        if(regattaSeries != null && Util.size(regattaSeries) == 1) {
-                            Series series = regattaSeries.iterator().next();
-                            jsonLeaderboard.put("seriesName", series.getName());
-                            jsonLeaderboard.put("regattaName", regatta.getName());
+                        JSONArray jsonSeriesEntries = new JSONArray();
+                        jsonLeaderboard.put("series", jsonSeriesEntries);
+                        for (Series series: regatta.getSeries()) {
+                            JSONObject jsonSeries = new JSONObject();
+                            jsonSeries.put("name", series.getName());
+                            jsonSeries.put("isMedalSeries", series.isMedal());
 
                             JSONArray jsonFleetsEntries = new JSONArray();
-                            jsonLeaderboard.put("fleets", jsonFleetsEntries);
+                            jsonSeries.put("fleets", jsonFleetsEntries);
                             for(Fleet fleet: series.getFleets()) {
                                 
                                 JSONObject jsonFleet = new JSONObject();
@@ -108,17 +108,26 @@ public class LeaderboardGroupJsonGetServlet extends AbstractJsonHttpServlet {
                                     }
                                     jsonRacesEntries.add(jsonRaceColumn);
                                 }
+                                jsonSeriesEntries.add(jsonSeries);
                             }
                         }
                     } else {
                         jsonLeaderboard.put("scoringScheme", leaderboard.getScoringScheme().getType());
-                        jsonLeaderboard.put("seriesName", "Default");
                         jsonLeaderboard.put("regattaName", null);
 
-                        JSONArray jsonFleetsEntries = new JSONArray();
-                        jsonLeaderboard.put("fleets", jsonFleetsEntries);
+                        JSONArray jsonSeriesEntries = new JSONArray();
+                        jsonLeaderboard.put("series", jsonSeriesEntries);
+
+                        // write a 'default' series to be conform with our common regatta structure 
+                        JSONObject jsonSeries = new JSONObject();
+                        jsonSeriesEntries.add(jsonSeries);
+                        jsonSeries.put("name", LeaderboardNameConstants.DEFAULT_SERIES_NAME);
+                        jsonSeries.put("isMedalSeries", null);
                         
-                        Fleet fleet = leaderboard.getFleet("Default");
+                        JSONArray jsonFleetsEntries = new JSONArray();
+                        jsonSeries.put("fleets", jsonFleetsEntries);
+                        
+                        Fleet fleet = leaderboard.getFleet(LeaderboardNameConstants.DEFAULT_FLEET_NAME);
                         if(fleet != null) {
                             JSONObject jsonFleet = new JSONObject();
                             jsonFleet.put("name", fleet.getName());
