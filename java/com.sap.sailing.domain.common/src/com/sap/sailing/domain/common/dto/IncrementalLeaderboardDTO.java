@@ -236,11 +236,13 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 RaceColumnDTO previousRaceColumn = previousVersion.getRaceColumnByName(raceColumnNameForWhichCompetitorOrderingPerRaceUnchanged);
                 setCompetitorsFromBestToWorst(raceColumn, previousVersion.getCompetitorsFromBestToWorst(previousRaceColumn));
             }
-            for (Pair<CompetitorDTO, String> competitorAndColumnName : unchangedLeaderboardEntries.getAllUnchangedCompetitorAndRaceColumnPairs(previousVersion)) {
-                CompetitorDTO previousCompetitor = competitorAndColumnName.getA();
-                LeaderboardEntryDTO previousEntry = previousVersion.rows.get(previousCompetitor).fieldsByRaceColumnName
-                        .get(competitorAndColumnName.getB());
-                rows.get(previousCompetitor).fieldsByRaceColumnName.put(competitorAndColumnName.getB(), previousEntry);
+            if (unchangedLeaderboardEntries != null) {
+                for (Pair<CompetitorDTO, String> competitorAndColumnName : unchangedLeaderboardEntries
+                        .getAllUnchangedCompetitorAndRaceColumnPairs(previousVersion)) {
+                    CompetitorDTO previousCompetitor = competitorAndColumnName.getA();
+                    LeaderboardEntryDTO previousEntry = previousVersion.rows.get(previousCompetitor).fieldsByRaceColumnName.get(competitorAndColumnName.getB());
+                    rows.get(previousCompetitor).fieldsByRaceColumnName.put(competitorAndColumnName.getB(), previousEntry);
+                }
             }
             if (legDetailsUnchanged != null) {
                 for (Triple<Integer, String, Integer> competitorIndexInPreviosAndColumnNameAndLegDetailsIndex : legDetailsUnchanged) {
@@ -341,6 +343,9 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                     previousEntryDTO = previousRowDTO.fieldsByRaceColumnName.get(raceColumnNameAndLeaderboardEntry.getKey());
                 }
                 if (previousEntryDTO != null && Util.equalsWithNull(raceColumnNameAndLeaderboardEntry.getValue(), previousEntryDTO)) {
+                    if (unchangedLeaderboardEntries == null) {
+                        unchangedLeaderboardEntries = new UnchangedLeaderboardEntries();
+                    }
                     unchangedLeaderboardEntries.unchanged(competitorAndRow.getKey(), raceColumnNameAndLeaderboardEntry.getKey());
                 } else {
                     LeaderboardEntryDTO newLeaderboardEntryDTO = new LeaderboardEntryDTO();
