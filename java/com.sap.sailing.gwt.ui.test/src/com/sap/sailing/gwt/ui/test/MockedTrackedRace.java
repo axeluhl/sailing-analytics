@@ -766,7 +766,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void setCourseDesignChangedListener(CourseDesignChangedListener listener) {
+    public void addCourseDesignChangedListener(CourseDesignChangedListener listener) {
         // TODO Auto-generated method stub
         
     }

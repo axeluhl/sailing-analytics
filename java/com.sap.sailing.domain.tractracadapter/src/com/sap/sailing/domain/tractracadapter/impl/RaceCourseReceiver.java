@@ -189,7 +189,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler(courseDesignUpdateURI, 
                 tracTracUsername, tracTracPassword,
                 getTracTracEvent().getId(), race.getId());
-        trackedRace.setCourseDesignChangedListener(courseDesignHandler);
+        trackedRace.addCourseDesignChangedListener(courseDesignHandler);
     }
 
 }

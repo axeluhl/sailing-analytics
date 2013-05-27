@@ -60,7 +60,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     private transient DynamicTrackedRaceLogListener logListener;
 
-    private transient CourseDesignChangedListener courseDesignChangedListener;
+    private transient Set<CourseDesignChangedListener> courseDesignChangedListeners;
 
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
@@ -68,6 +68,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         super(trackedRegatta, race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation);
         this.logListener = new DynamicTrackedRaceLogListener(this);
+        this.courseDesignChangedListeners = new HashSet<>();
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
@@ -674,14 +675,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void setCourseDesignChangedListener(CourseDesignChangedListener listener) {
-        this.courseDesignChangedListener = listener;
+    public void addCourseDesignChangedListener(CourseDesignChangedListener listener) {
+        this.courseDesignChangedListeners.add(listener);
     }
 
     @Override
     public void onCourseDesignChangedByRaceCommittee(CourseBase newCourseDesign) {
         try {
-            if (courseDesignChangedListener != null) {
+            for (CourseDesignChangedListener courseDesignChangedListener : courseDesignChangedListeners) {
                 courseDesignChangedListener.courseDesignChanged(newCourseDesign);
             }
         } catch (IOException e) {
