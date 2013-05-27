@@ -16,6 +16,12 @@ import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
+/**
+ * "Fix" validity is decided based on the {@link #getCurrentPassId() current pass}. The validity is not cached.
+ *  
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     private static final long serialVersionUID = -176745401321893502L;
     private static final String DefaultLockName = RaceLogImpl.class.getName() + ".lock";
