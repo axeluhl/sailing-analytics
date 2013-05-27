@@ -134,12 +134,10 @@ public class OnlineDataManager extends DataManager {
     }
 
     public void loadRaces(Serializable courseAreaId, LoadClient<Collection<ManagedRace>> client) {
-
         if (!dataStore.hasCourseArea(courseAreaId)) {
             client.onLoadFailed(new DataLoadingException(String.format("No course area found with id %s", courseAreaId)));
             return;
         }
-
         SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
         JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
         DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(new RaceGroupDeserializer(
@@ -147,7 +145,6 @@ public class OnlineDataManager extends DataManager {
                         new ColorDeserializer()), new RaceCellDeserializer(
                                 new RaceLogDeserializer(RaceLogEventDeserializer.create(domainFactory)))))));
         DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(this, client);
-
         try {
             new DataLoader<Collection<ManagedRace>>(context, URI.create(AppConstants.getServerBaseURL(context)
                     + "/sailingserver/rc/racegroups?courseArea=" + courseAreaId.toString()), parser, handler)

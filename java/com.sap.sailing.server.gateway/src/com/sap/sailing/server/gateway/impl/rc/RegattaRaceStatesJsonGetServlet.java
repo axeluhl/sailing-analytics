@@ -48,13 +48,10 @@ public class RegattaRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event "+eventIdParam+" not found");
             } else {
                 JSONObject result = new JSONObject();
-                
                 result.put(FIELD_EVENT_NAME, event.getName());
                 result.put(FIELD_EVENT_ID, event.getId().toString());
-
                 JSONArray raceStatesLogEntriesJson = new JSONArray();
                 result.put(FIELD_RACE_STATES, raceStatesLogEntriesJson);
-
                 for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
                     for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
                         if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea().equals(courseArea)) {
@@ -70,7 +67,6 @@ public class RegattaRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
                         }
                     }
                 }
-
                 setJsonResponseHeader(response);
                 result.writeJSONString(response.getWriter());
             }
@@ -79,46 +75,35 @@ public class RegattaRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
     
     private JSONObject createRaceStateJsonObject(RaceColumn raceColumn, Fleet fleet) {
         JSONObject result = new JSONObject();
-
         result.put("raceName", raceColumn.getName());
         result.put("fleetName", fleet.getName());
         RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);
         result.put("trackedRaceId", raceIdentifier != null ? raceIdentifier.toString() : null);
-
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
             JSONObject raceLogStateJson = new JSONObject();
             result.put("raceState", raceLogStateJson);
-
             StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
             raceLogStateJson.put("startTime", startTimeFinder.getStartTime() != null ? startTimeFinder.getStartTime().toString() : null);
-
             RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog);
             RaceLogRaceStatus lastStatus = raceStatusAnalyzer.getStatus();
             raceLogStateJson.put("lastStatus", lastStatus.name());
-
             PathfinderFinder pathfinderFinder = new PathfinderFinder(raceLog);
             raceLogStateJson.put("pathfinderId", pathfinderFinder.getPathfinderId());
-
             GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
             raceLogStateJson.put("gateLineOpeningTime", gateLineOpeningTimeFinder.getGateLineOpeningTime());
-            
             AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
             RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.getAbortingFlagEvent();
-
             LastFlagFinder lastFlagFinder = new LastFlagFinder(raceLog);
             RaceLogFlagEvent lastFlagEvent = lastFlagFinder.getLastFlagEvent();
             if (lastFlagEvent != null) {
                 setLastFlagField(raceLogStateJson, lastFlagEvent.getUpperFlag().name(), lastFlagEvent.getLowerFlag().name(), lastFlagEvent.isDisplayed());
-            
             } else if (lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED) && abortingFlagEvent != null) {
                 setLastFlagField(raceLogStateJson, abortingFlagEvent.getUpperFlag().name(), abortingFlagEvent.getLowerFlag().name(), abortingFlagEvent.isDisplayed());
-            
             } else {
                 setLastFlagField(raceLogStateJson, null, null, null);
             }
         }
-
         return result;
     }
     
