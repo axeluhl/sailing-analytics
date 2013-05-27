@@ -331,9 +331,14 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Cloneab
                                 unchangedLegDetailsForCompetitorsByColumnNameAndLegDetailsIndex.put(keyForAllLegsUnchanged, competitorsWithAllLegsUnchanged);
                             }
                             competitorsWithAllLegsUnchanged.add(competitorAndRow.getKey());
+                            if (competitorsWithAllLegsUnchanged.equals(rows.keySet())) {
+                                // no competitor has a change for any leg detail in this column:
+                                // TODO compact all legs in this column
+                            }
                             String currentRaceColumnName = raceColumnNameAndLeaderboardEntry.getKey();
                             for (Entry<Pair<String, Integer>, Set<CompetitorDTO>> e : unchangedLegDetailsForCompetitorsByColumnNameAndLegDetailsIndex.entrySet()) {
-                                if (raceColumnNameAndLeaderboardEntry.getKey().equals(e.getKey().getA()) && e.getKey().getB() != null) {
+                                if (/* same race column */ raceColumnNameAndLeaderboardEntry.getKey().equals(e.getKey().getA()) &&
+                                        e.getKey().getB() != null) {
                                     // no "all leg details" entry; combine with the "all let details" entries, then check if this spans all competitors
                                     Set<CompetitorDTO> competitorsWithUnchangedLegDetailsForCurrentColumnAndOneLegPlusThoseUnchangedForAllLegs =
                                             new HashSet<CompetitorDTO>(e.getValue());
