@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.impl.rc;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +30,8 @@ import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 
 public class RegattaRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = -4820965681871902242L;
+    
+    private final static Logger logger = Logger.getLogger(RegattaRaceStatesJsonGetServlet.class.getName());
 
     private static final String PARAM_NAME_EVENTID = "eventId";
 
@@ -113,12 +116,18 @@ public class RegattaRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
         raceLogStateJson.put("displayed", isDisplayed);
     }
 
+    /**
+     * Tries to convert the given identifier to a UUID. When the identifier is not a UUID, null is returned.
+     * @param identifierToConvert the identifier as a String
+     * @return a UUID when the given identifier is a UUID, null otherwise
+     */
     private UUID convertIdentifierStringToUuid(String identifierToConvert) {
         UUID result = null;
         if (identifierToConvert != null) {
             try {
                 result = UUID.fromString(identifierToConvert);
             } catch (IllegalArgumentException iae) {
+                logger.warning("The identifier " + identifierToConvert + " could not be converted to a UUID");
             }
         }
         return result;
