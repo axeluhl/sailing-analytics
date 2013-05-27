@@ -82,6 +82,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         
         public UnchangedWithCompetitorsInBitSet(LeaderboardDTO previousLeaderboard, int totalNumberOfCompetitorsInNewLeaderboard) {
             this.previousLeaderboard = previousLeaderboard;
+            this.totalNumberOfCompetitorsInNewLeaderboard = totalNumberOfCompetitorsInNewLeaderboard;
             unchanged = new HashMap<K, long[]>();
         }
         
