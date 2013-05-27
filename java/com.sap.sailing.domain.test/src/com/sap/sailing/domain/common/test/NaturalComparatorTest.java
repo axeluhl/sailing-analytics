@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.impl.Util.NaturalComparator;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 
 public class NaturalComparatorTest {
 

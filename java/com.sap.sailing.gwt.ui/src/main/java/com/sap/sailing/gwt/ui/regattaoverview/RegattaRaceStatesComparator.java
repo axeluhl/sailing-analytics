@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.regattaoverview;
 
 import java.util.Comparator;
 
-import com.sap.sailing.domain.common.impl.Util.NaturalComparator;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
 public class RegattaRaceStatesComparator implements Comparator<RegattaOverviewEntryDTO> {
