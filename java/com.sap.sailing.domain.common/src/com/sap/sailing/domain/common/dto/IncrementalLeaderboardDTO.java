@@ -44,12 +44,10 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
     
     /**
      * If a {@link LeaderboardEntryDTO} in {@link LeaderboardRowDTO#fieldsByRaceColumnName} is unchanged, this field
-     * holds a valid set which contains the position of the competitor in the previous leaderboard's
-     * {@link LeaderboardDTO#competitors} list and the race column name for which the entry is unchanged. If the
-     * {@link LeaderboardEntryDTO}s are unchanged for <em>all</em> competitors in a column and the previous version has
-     * entries for the same set of competitors as the new version, a single entry with <code>null</code> as the
-     * {@link Integer} is provided. In this case, the {@link #applyThisToPreviousVersionByUpdatingThis(LeaderboardDTO)} method
-     * can simply copy all {@link LeaderboardEntryDTO}s for the entire column from the previous version.
+     * holds a valid object which describes for which competitors in which race columns their leaderboard entry is
+     * unchanged as compared to the previous leaderboard. The representation chosen is pretty compact. It uses a bit set
+     * that encodes the competitors relative to their position in the previous leaderboard version or uses <code>null</code>
+     * for the entire bit set if the leaderboard entry is unchanged for all competitors in a column.
      */
     private UnchangedLeaderboardEntries unchangedLeaderboardEntries;
 
@@ -66,6 +64,11 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
      * Note that this field can be <code>null</code>, meaning that there are no such leg details.
      */
     private Set<Triple<Integer, String, Integer>> legDetailsUnchanged;
+    
+    static class UnchangedLegDetails implements Serializable {
+        private static final long serialVersionUID = 4141249996386599220L;
+        
+    }
     
     static class UnchangedLeaderboardEntries implements Serializable {
         private static final long serialVersionUID = -8855577157811163915L;
@@ -344,7 +347,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 }
                 if (previousEntryDTO != null && Util.equalsWithNull(raceColumnNameAndLeaderboardEntry.getValue(), previousEntryDTO)) {
                     if (unchangedLeaderboardEntries == null) {
-                        unchangedLeaderboardEntries = new UnchangedLeaderboardEntries();
+                        unchangedLeaderboardEntries = new UnchangedLeaderboardEntries(previousVersion, rows.size());
                     }
                     unchangedLeaderboardEntries.unchanged(competitorAndRow.getKey(), raceColumnNameAndLeaderboardEntry.getKey());
                 } else {
