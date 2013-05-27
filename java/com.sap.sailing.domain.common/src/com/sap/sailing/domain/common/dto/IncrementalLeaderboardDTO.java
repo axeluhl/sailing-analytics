@@ -85,14 +85,17 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             unchanged = new HashMap<K, long[]>();
         }
         
+        /**
+         * ORs two bit sets into a new bit set; the bit sets may have different or zero lengths and can even be <code>null</code>
+         */
         protected long[] or(long[] a, long[] b) {
-            final int maxLength = Math.max(a.length, b.length);
+            final int maxLength = Math.max(a==null?0:a.length, b==null?0:b.length);
             long[] result = new long[maxLength];
             for (int i=0; i<maxLength; i++) {
-                if (a.length > i) {
+                if (a != null && a.length > i) {
                     result[i] |= a[i];
                 }
-                if (b.length > i) {
+                if (b != null && b.length > i) {
                     result[i] |= b[i];
                 }
             }
@@ -469,7 +472,9 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             newRowDTO.fieldsByRaceColumnName = newFieldsByRaceColumnName;
         }
         rows = newRows;
-        legDetailsUnchanged.compact(); // compacts even those columns where the *last* entry was one with a null leg index
+        if (legDetailsUnchanged != null) {
+            legDetailsUnchanged.compact(); // compacts even those columns where the *last* entry was one with a null leg index
+        }
         return this;
     }
 }
