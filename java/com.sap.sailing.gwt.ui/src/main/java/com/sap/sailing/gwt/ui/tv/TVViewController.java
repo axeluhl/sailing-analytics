@@ -146,8 +146,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, null, raceboardTimer,
-                /* canReplayWhileLiveIsPossible */ false, raceSelectionModel, leaderboardName,
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, null, raceboardTimer, raceSelectionModel, leaderboardName,
                 null, raceboardViewConfig, errorReporter, stringMessages, userAgent, raceTimesInfoProvider);
         return raceBoardPanel;
     }
@@ -190,7 +189,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
             }
             if (showNavigationPanel) {
                 FlowPanel toolbarPanel = new FlowPanel();
-                toolbarPanel.add(raceBoardPanel.getNavigationWidget());
+                toolbarPanel.add(raceBoardPanel.getComponentControlsPanel());
                 dockPanel.addNorth(toolbarPanel, 40);
             }
             FlowPanel timePanel = createTimePanel(raceBoardPanel);
@@ -208,7 +207,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     private FlowPanel createTimePanel(RaceBoardPanel raceBoardPanel) {
         FlowPanel timeLineInnerBgPanel = new FlowPanel();
         timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
-        timeLineInnerBgPanel.add(raceBoardPanel.getTimeWidget());
+        timeLineInnerBgPanel.add(raceBoardPanel.getTimePanel());
         
         FlowPanel timeLineInnerPanel = new FlowPanel();
         timeLineInnerPanel.add(timeLineInnerBgPanel);

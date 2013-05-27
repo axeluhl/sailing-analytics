@@ -124,6 +124,12 @@ img.openColumn {
 	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
 }
 
+.raceBoardControls {
+	float: right;
+	margin: 9px 0 0 12px;
+	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
+}
+
 .raceBoardNavigation-navigationitem {
 	color: #dddcdc;
 	text-transform: uppercase;
@@ -185,6 +191,24 @@ img.openColumn {
 
 .raceBoardNavigation-settingsButton:hover {
 	background-image: url(images/settings_white.png), url(images/btn-cta-orangeleft.png);
+	background-position: center, center -30px;
+	background-repeat: no-repeat, repeat-x;
+    cursor: pointer;
+}
+
+.raceBoardNavigation-filterButton {
+	background: url(images/filter_white.png), url(images/btn-cta-orangeleft.png);
+	background-position: center, center 0;
+	background-repeat: no-repeat, repeat-x;
+	width: 27px;
+	height: 23px;	
+    margin: 0 12px 0 1px;
+	-webkit-border-radius: 0px 3px 3px 0px;
+	border-radius: 0px 3px 3px 0px; 
+}
+
+.raceBoardNavigation-filterButton:hover {
+	background-image: url(images/filter_white.png), url(images/btn-cta-orangeleft.png);
 	background-position: center, center -30px;
 	background-repeat: no-repeat, repeat-x;
     cursor: pointer;

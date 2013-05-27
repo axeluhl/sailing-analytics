@@ -32,6 +32,8 @@ public class PolarSheetGenerationWorker {
 
     private final Executor executor;
 
+    private PolarSheetsWindStepping stepping;
+
     /**
      * Will prepare the {@link PerRaceAndCompetitorPolarSheetGenerationWorker}s per race & per competitor. This includes
      * determining start and end time.
@@ -42,6 +44,8 @@ public class PolarSheetGenerationWorker {
      *            executes the tasks upon {@link #startPolarSheetGeneration()}
      */
     public PolarSheetGenerationWorker(Set<TrackedRace> trackedRaces, Executor executor) {
+        Integer[] levels = {4,6,8,10,12,14,16,20,25,30};
+        stepping = new PolarSheetsWindStepping(levels);
         polarData = initializePolarDataContainer();
         this.executor = executor;
         workers = new HashSet<PerRaceAndCompetitorPolarSheetGenerationWorker>();
@@ -107,11 +111,12 @@ public class PolarSheetGenerationWorker {
      *         product.
      */
     public PolarSheetsData getPolarData() {
-        Number[][] averagedPolarDataByWindSpeed = new Number[13][360];
+        int levelCount = stepping.getNumberOfLevels();
+        Number[][] averagedPolarDataByWindSpeed = new Number[levelCount][360];
         Integer[] dataCountPerAngle = new Integer[360];
         int dataCount = 0;
         Map<Integer, Integer[]> dataCountPerAngleForWindspeed = new HashMap<Integer, Integer[]>();
-        for (int i = 0; i < 13; i++) {
+        for (int i = 0; i < levelCount; i++) {
             dataCountPerAngleForWindspeed.put(i, new Integer[360]);
         }
         for (int i = 0; i < 360; i++) {
@@ -119,22 +124,22 @@ public class PolarSheetGenerationWorker {
             BoatAndWindSpeed[] values = polarData.get(i).toArray(new BoatAndWindSpeed[polarData.get(i).size()]);
             dataCount = dataCount + values.length;
             dataCountPerAngle[i] = values.length;
-            double[] sumsPerWindSpeed = new double[13];
-            int[] dataCountPerWindSpeed = new int[13];
+            double[] sumsPerWindSpeed = new double[levelCount];
+            int[] dataCountPerWindSpeed = new int[levelCount];
             for (BoatAndWindSpeed singleDataPoint : values) {
                 if (singleDataPoint != null) {
-                    int windSpeed = (int) singleDataPoint.getWindSpeed().getBeaufort();
-                    //Somehow beaufort sometimes gets bigger than twelve. TODO: Investigation
-                    if (windSpeed > 12) {
-                        windSpeed = 12;
+                    double windSpeed = singleDataPoint.getWindSpeed().getKnots();
+                    int level = stepping.getLevelForValue(windSpeed);
+                    if (level < 0) {
+                        continue;
                     }
                     //TODO enable different kinds of metrics for boats speed
-                    sumsPerWindSpeed[windSpeed] = sumsPerWindSpeed[windSpeed] + singleDataPoint.getBoatSpeed().getKnots();
-                    dataCountPerWindSpeed[windSpeed]++;
+                    sumsPerWindSpeed[level] = sumsPerWindSpeed[level] + singleDataPoint.getBoatSpeed().getKnots();
+                    dataCountPerWindSpeed[level]++;
                 }
             }
             
-            for (int j = 0; j < 13; j++) {
+            for (int j = 0; j < levelCount; j++) {
                 Double average = sumsPerWindSpeed[j] / dataCountPerWindSpeed[j];
                 if (average.isNaN()) {
                     average = new Double(0);
@@ -156,7 +161,7 @@ public class PolarSheetGenerationWorker {
         }
 
         PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarDataByWindSpeed, complete, dataCount,
-                dataCountPerAngleForWindspeed);
+                dataCountPerAngleForWindspeed, stepping.getRawStepping());
 
         return data;
     }
@@ -169,6 +174,10 @@ public class PolarSheetGenerationWorker {
      */
     public List<List<BoatAndWindSpeed>> getCompleteData() {
         return polarData;
+    }
+
+    public PolarSheetsWindStepping getStepping() {
+        return stepping;
     }
 
 }
