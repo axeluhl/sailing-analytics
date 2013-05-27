@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 
 public class CompetitorColumnBase<T> {
     private final LeaderboardFetcher leaderboardFetcher;
