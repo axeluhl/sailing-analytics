@@ -72,16 +72,12 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
     public void courseDesignChanged(CourseBase newCourseDesign) throws MalformedURLException, IOException {
         JSONObject serializedCourseDesign = courseSerializer.serialize(newCourseDesign);
         String payload = serializedCourseDesign.toJSONString();
-
         URL currentCourseDesignURL = buildCourseUpdateURL();
         HttpURLConnection connection = (HttpURLConnection) currentCourseDesignURL.openConnection();
         try {
             setConnectionProperties(connection, payload);
-
             sendWithPayload(connection, payload);
-
             BufferedReader reader = getResponseOnCourseUpdateFromTracTrac(connection);
-
             try {
                 Object responseBody = JSONValue.parseWithException(reader);
                 JSONObject responseObject = Helpers.toJSONObjectSafe(responseBody);
@@ -90,7 +86,6 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
             } catch (ParseException pe) {
                 pe.printStackTrace();
             }
-
         } finally {
             if (connection != null) {
                 connection.disconnect();

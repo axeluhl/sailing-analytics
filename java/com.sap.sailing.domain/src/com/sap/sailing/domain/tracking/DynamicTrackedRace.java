@@ -81,9 +81,11 @@ public interface DynamicTrackedRace extends TrackedRace {
     void setStatus(TrackedRaceStatus newStatus);
 
     /**
-     * whenever a new course design is published by the race committee and the appropriate event occures in the race log, this method is 
-     * called to propagate the course design to the tracking provider.
-     * @param courseDesign the new course design to be published
+     * whenever a new course design is published by the race committee and the appropriate event occurs in the race log,
+     * this method is called to propagate the course design to the tracking provider.
+     * 
+     * @param courseDesign
+     *            the new course design to be published
      */
     void onCourseDesignChangedByRaceCommittee(CourseBase courseDesign);
 }
