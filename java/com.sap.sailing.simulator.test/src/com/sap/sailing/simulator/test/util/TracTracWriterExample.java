@@ -1,7 +1,7 @@
 package com.sap.sailing.simulator.test.util;
 
 
-public class TestTracTracWriter {
+public class TracTracWriterExample {
 
     public static void main(String[] args) throws Exception {
 
