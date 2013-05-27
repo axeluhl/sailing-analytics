@@ -317,9 +317,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 mapw.setScrollWheelZoomEnabled(true);
                 // mapw.setContinuousZoom(true);
                 mapw.setTitle(stringMessages.simulator() + " " + stringMessages.map());
-                // PositionDTO kiel = new PositionDTO(54.46195148135232, 10.1513671875);
-                PositionDTO trave = new PositionDTO(54.007063, 10.838356); // 53.978276,10.880156);//53.968015,10.891331);
-                LatLng position = LatLng.newInstance(trave.latDeg, trave.lngDeg);
+                PositionDTO kiel = new PositionDTO(54.46195148135232, 10.1513671875);
+                //PositionDTO trave = new PositionDTO(54.007063, 10.838356); // 53.978276,10.880156);//53.968015,10.891331);
+                PositionDTO initialMapPosition = kiel; 
+                LatLng position = LatLng.newInstance(initialMapPosition.latDeg, initialMapPosition.lngDeg);
                 mapw.panTo(position);
                 // mapw.panTo(LatLng.newInstance(0, 0));
                 add(mapw, 0, 0);

@@ -171,8 +171,8 @@ public class WindFieldGeneratorTest {
 
     }
 
-    @Test
-    public void testWindFieldGeneratorBlast() {
+    //@Test
+    /*public void testWindFieldGeneratorBlast() {
         Position start = new DegreePosition(54.32447456461419, 10.15613079071045);
         Position end = new DegreePosition(54.32877915239163, 10.156173706054688);
         List<Position> course = new LinkedList<Position>();
@@ -198,9 +198,9 @@ public class WindFieldGeneratorTest {
 
         SpeedWithBearing speed = new KilometersPerHourSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
 
-        /*
-         * Check the speed & angle at the start time
-         */
+        //
+        // Check the speed & angle at the start time
+        //
         List<Wind> windList = new ArrayList<Wind>();
         for (int i = 0; i < vSteps; ++i) {
             for (int j = 0; j < hSteps; ++j) {
@@ -213,7 +213,7 @@ public class WindFieldGeneratorTest {
         //double epsilon = 1e-6;
         // Check the speed
         assertEquals("StartTime First Wind Speed ", 10, windList.get(0).getKnots(), 0);
-    }
+    }*/
     
     @Test
     public void testWindFieldGeneratorCombinedNoBlast() {

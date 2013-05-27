@@ -9,7 +9,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class TestTracTracReader {
+public class TracTracReaderExample {
 
     public static void main(String[] args) throws Exception {
 

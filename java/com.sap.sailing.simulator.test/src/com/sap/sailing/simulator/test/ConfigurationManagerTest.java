@@ -21,11 +21,11 @@ public class ConfigurationManagerTest {
 
     @Before
     public void initialize() {
-        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er", 4.995, "resources/PolarDiagram49.csv", 0));
-        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er Bethwaite", 4.876, "resources/PolarDiagram49Bethwaite.csv", 1));
-        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er ORC", 4.995, "resources/PolarDiagram49ORC.csv", 2));
-        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er STG", 4.876, "resources/PolarDiagram49STG.csv", 3));
-        this._boatClassesInfo.add(new BoatClassPropertiesImpl("505 STG", 5.05, "resources/PolarDiagram505STG.csv", 4));
+        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er", 4.995, "PolarDiagram49.csv", 0));
+        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er Bethwaite", 4.876, "PolarDiagram49Bethwaite.csv", 1));
+        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er ORC", 4.995, "PolarDiagram49ORC.csv", 2));
+        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er STG", 4.876, "PolarDiagram49STG.csv", 3));
+        this._boatClassesInfo.add(new BoatClassPropertiesImpl("505 STG", 5.05, "PolarDiagram505STG.csv", 4));
 
         this._racesInfo
                 .add(new RacePropertiesImpl(
@@ -55,15 +55,15 @@ public class ConfigurationManagerTest {
 
     @Test
     public void test_getPolarDiagramFileLocation() {
-        Assert.assertEquals("resources/PolarDiagram49.csv", ConfigurationManager.INSTANCE
+        Assert.assertEquals("PolarDiagram49.csv", ConfigurationManager.INSTANCE
                 .getPolarDiagramFileLocation(0));
-        Assert.assertEquals("resources/PolarDiagram49Bethwaite.csv", ConfigurationManager.INSTANCE
+        Assert.assertEquals("PolarDiagram49Bethwaite.csv", ConfigurationManager.INSTANCE
                 .getPolarDiagramFileLocation(1));
-        Assert.assertEquals("resources/PolarDiagram49ORC.csv", ConfigurationManager.INSTANCE
+        Assert.assertEquals("PolarDiagram49ORC.csv", ConfigurationManager.INSTANCE
                 .getPolarDiagramFileLocation(2));
-        Assert.assertEquals("resources/PolarDiagram49STG.csv", ConfigurationManager.INSTANCE
+        Assert.assertEquals("PolarDiagram49STG.csv", ConfigurationManager.INSTANCE
                 .getPolarDiagramFileLocation(3));
-        Assert.assertEquals("resources/PolarDiagram505STG.csv", ConfigurationManager.INSTANCE
+        Assert.assertEquals("PolarDiagram505STG.csv", ConfigurationManager.INSTANCE
                 .getPolarDiagramFileLocation(4));
     }
 
