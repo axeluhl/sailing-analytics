@@ -50,7 +50,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private transient RaceLogStore raceLogStore;
     
     // Can be changed...
-    private CourseArea courseArea;
+    private CourseArea defaultCourseArea;
 
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
@@ -107,7 +107,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         }
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
-        this.courseArea = courseArea;       
+        this.defaultCourseArea = courseArea;       
     }
 
     private void registerRaceLogsOnRaceColumns(Series series) {
@@ -334,12 +334,12 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public CourseArea getDefaultCourseArea() {
-        return courseArea;
+        return defaultCourseArea;
     }
 
     @Override
     public void setDefaultCourseArea(CourseArea newCourseArea) {
-        this.courseArea = newCourseArea;
+        this.defaultCourseArea = newCourseArea;
     }
 
 }
