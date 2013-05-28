@@ -23,7 +23,7 @@ public class RaceLogSerializer implements JsonSerializer<RaceLog> {
         object.lockForRead();
         try {
             JSONArray events = new JSONArray();
-            for (RaceLogEvent event : object.getFixes()) {
+            for (RaceLogEvent event : object.getRawFixes()) {
                 events.add(itemSerializer.serialize(event));
             }
             result.put(FIELD_EVENTS, events);

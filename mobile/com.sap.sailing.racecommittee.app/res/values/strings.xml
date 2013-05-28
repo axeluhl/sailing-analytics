@@ -8,9 +8,7 @@
     <string name="intentActionSendSavedIntents">com.sap.sailing.racecommittee.app.action.sendSavedIntents</string>
     <string name="intentActionSendEvent">com.sap.sailing.racecommittee.app.action.sendEvent</string>
     <string name="intentActionAlarmAction">com.sap.sailing.racecommittee.app.action.alarmAction</string>
-    <string name="intentActionIndividualRecallRemoval">com.sap.sailing.racecommittee.app.action.individualrecallremovalaction</string>
-    <string name="intentActionAutomaticRaceEnd">com.sap.sailing.racecommittee.app.action.automaticRaceEnd</string>
-    <string name="intentActionAutomaticGateClose">com.sap.sailing.racecommittee.app.action.automaticGateClose</string>
+    <string name="intenStartProcedureSpecificAction">com.sap.sailing.racecommittee.app.action.startProcedureSpecificAction</string>
     
     <string name="hello">Hello World, RaceCommitteeActivity!</string>
     <string name="running_on_course">(on course %s)</string>
@@ -118,7 +116,8 @@
 	<string name="race_startphase_ess_countdown_three_flag_display">%1$s until Three flag is displayed</string>
 	<string name="race_startphase_countdown_class_remove">%1$s until %2$s class flag is removed and race starts</string>
 	<string name="race_startphase_ess_countdown_one_flag_remove">%1$s until One flag is removed and race starts</string>
-	<string name="race_startphase_countdown_class_display">%1$s until %2$s class flag is displayed</string><string name="race_startphase_countdown_start">%1$s until %2$s starts&quot;</string>
+	<string name="race_startphase_countdown_class_display">%1$s until %2$s class flag is displayed</string>
+	<string name="race_startphase_countdown_start">%1$s until %2$s starts&quot;</string>
 	<string name="race_startphase_gate_class_over_golf_display">%1$s until Class flag over Golf flag is displayed</string>
 	<string name="race_startphase_gate_class_over_golf_removed">%1$s until Class flag over Golf flag is removed and race starts</string>
 	<string name="race_startphase_gate_papa_display">%1$s until Papa flag is displayed</string>
@@ -164,5 +163,9 @@
 	<string name="availableFinishingCompetitors">Competitors</string>
 	<string name="choose_blue_flag_finishing">Finish race</string>
 	<string name="drag_handle_description">Drag handle</string>
+	
+	<string name="settings_advanced_mail_default">lukas.niemeier@sap.com</string>
+	<string name="settings_advanced_mail_description">Mail recipient used for positiong list images.</string>
+	<string name="settings_advanced_mail_header">Positioning mail recipient</string>
 	
 </resources>

@@ -28,7 +28,7 @@
         
         <ListPreference
             android:key="defaultStartProcedureType"
-            android:title="Default start procedure type"
+            android:title="Overwrite default start procedure type"
             android:summary="Races will use selected start procedure type as a default. For this option to be active override checkbox has to be enabled."
             />
 
@@ -48,6 +48,13 @@
             android:key="webserviceUrlPref"
             android:summary="@string/settings_advanced_service_description"
             android:title="@string/settings_advanced_service_header" />
+        
+        <EditTextPreference
+            android:name="@string/settings_advanced_mail_header"
+            android:defaultValue="@string/settings_advanced_mail_default"
+            android:key="mailRecipientPreference"
+            android:summary="@string/settings_advanced_mail_description"
+            android:title="@string/settings_advanced_mail_header" />
     </PreferenceCategory>
 
 </PreferenceScreen>

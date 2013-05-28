@@ -7,7 +7,6 @@ import java.util.SortedSet;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -496,19 +495,12 @@ public interface TrackedRace extends Serializable {
      * Otherwise <code>null</code>.
      */
     RaceLog getRaceLog();
-
-    /**
-     * whenever a new course design is published by the race committee and the appropriate event occures in the race log, this method is 
-     * called to propagate the course design to the tracking provider.
-     * @param courseDesign the new course design to be published
-     */
-    void onCourseDesignChangedByRaceCommittee(CourseBase courseDesign);
     
     /**
      * a setter for the listener on course design changes. The listener is mostly part of the tracking provider adapter.
      * @param listener the listener to operate with.
      */
-    void setCourseDesignChangedListener(CourseDesignChangedListener listener);
+    void addCourseDesignChangedListener(CourseDesignChangedListener listener);
 
     /**
      * For a competitor, computes the distance (TODO not yet clear whether over ground or projected onto wind direction)

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.leaderboard;
 
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
@@ -68,4 +69,10 @@ public interface FlexibleLeaderboard extends Leaderboard, Renamable {
     void removeRaceColumn(String columnName);
 
     void updateIsMedalRace(String raceName, boolean isMedalRace);
+
+    /**
+     * Sets the default {@link CourseArea} of this leaderboard.
+     * @param newCourseArea the {@link CourseArea} to be set.
+     */
+    void setDefaultCourseArea(CourseArea newCourseArea);
 }

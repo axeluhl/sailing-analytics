@@ -42,6 +42,7 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="500dp"
+        
         android:gravity="center_vertical|center_horizontal"
         android:orientation="horizontal" >
 
@@ -57,6 +58,7 @@
             android:layout_width="350dp"
             android:layout_height="fill_parent"
             android:layout_gravity="left"
+            android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:gravity="center_horizontal|center_vertical"
             android:verticalSpacing="5dp"

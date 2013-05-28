@@ -71,9 +71,6 @@ import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.confidence.impl.HyperbolicTimeDifferenceWeigher;
 import com.sap.sailing.domain.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
-import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -223,11 +220,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private transient CombinedWindTrackImpl combinedWindTrack;
 
-    private transient RaceLog attachedRaceLog;
-
-    private transient TrackedRaceLogListener raceLogListener;
-
-    protected transient CourseDesignChangedListener courseDesignChangedListener;
+    protected transient RaceLog attachedRaceLog;
 
     /**
      * The time delay to the current point in time in milliseconds.
@@ -279,7 +272,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.startToNextMarkCacheInvalidationListeners = new ConcurrentHashMap<Mark, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
         this.maneuverCache = createManeuverCache();
         this.markTracks = new ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>>();
-        this.raceLogListener = new TrackedRaceLogListener(this);
         this.crossTrackErrorCache = new CrossTrackErrorCache(this);
         int i = 0;
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
@@ -2340,28 +2332,16 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public void attachRaceLog(RaceLog raceLog) {
         this.attachedRaceLog = raceLog;
-        attachedRaceLog.addListener(raceLogListener);
-        // set start time for race, if there is one valid in the log
-        StartTimeFinder startTimeFinder = new StartTimeFinder(PassAwareRaceLogImpl.copy(raceLog));
-        if (startTimeFinder.getStartTime() != null) {
-            setStartTimeReceived(startTimeFinder.getStartTime());
-        }
     }
 
     @Override
     public void detachRaceLog() {
-        this.attachedRaceLog.removeListener(raceLogListener);
         this.attachedRaceLog = null;
     }
 
     @Override
     public RaceLog getRaceLog() {
         return attachedRaceLog;
-    }
-
-    @Override
-    public void setCourseDesignChangedListener(CourseDesignChangedListener listener) {
-        this.courseDesignChangedListener = listener;
     }
 
     @Override

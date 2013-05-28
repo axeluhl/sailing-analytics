@@ -32,32 +32,8 @@ public class RaceStateListener implements RaceStateChangedListener {
     }
 
     @Override
-    public void onIndividualRecallDisplayed(TimePoint individualRecallRemovalFireTimePoint) {
-        service.handleIndividualRecall(race, individualRecallRemovalFireTimePoint);
-    }
-
-    @Override
-    public void onIndividualRecallRemoval() {
-        service.handleIndividualRecallRemoved(race);
-    }
-
-    @Override
-    public void onAutomaticRaceEnd(TimePoint automaticRaceEnd) {
-        service.handleAutomaticRaceEnd(race, automaticRaceEnd);
-    }
-
-    @Override
-    public void onPathfinderSelected() {
-        // do nothing
-    }
-
-    @Override
-    public void onGateLineOpeningTimeChanged() {
-        // do nothing
-    }
-
-    @Override
-    public void onGateLineOpeningTimeTrigger(TimePoint gateCloseTimePoint) {
-        service.handleGateLineOpeningTimeChanged(race, gateCloseTimePoint);
+    public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
+        service.handleStartProcedureSpecificEvent(race, eventTime, eventId);
+        
     }
 }
