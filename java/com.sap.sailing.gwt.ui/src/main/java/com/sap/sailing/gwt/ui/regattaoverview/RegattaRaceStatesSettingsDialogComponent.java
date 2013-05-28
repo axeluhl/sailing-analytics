@@ -24,7 +24,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     private final StringMessages stringMessages;
     private final RegattaRaceStatesSettings initialSettings;
     private final List<CourseAreaDTO> courseAreas;
-    private final List<String> regattaNames;
+    private final Map<String, String> regattaNames;
 
     private CheckBox showOnlyRacesOfSameDayCheckBox;
     private CheckBox showOnlyCurrentlyRunningRacesCheckBox;
@@ -34,7 +34,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     private final static String SETTINGS_DIALOG_COMPONENT = "SettingsDialogComponent";
     
     public RegattaRaceStatesSettingsDialogComponent(RegattaRaceStatesSettings settings, StringMessages stringMessages, 
-            List<CourseAreaDTO> courseAreas, List<String> regattaNames) {
+            List<CourseAreaDTO> courseAreas, Map<String, String> regattaNames) {
         this.stringMessages = stringMessages;
         this.initialSettings = settings;
         this.courseAreas = courseAreas;
@@ -95,10 +95,10 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         Grid regattaGrid = new Grid(numberOfRequiredRows, maxRegattasPerRow);
         regattaNamesPanel.add(regattaGrid);
         
-        for (String regattaName : regattaNames) {
-            CheckBox checkBox = dialog.createCheckbox(regattaName);
-            checkBox.setValue(Util.contains(initialSettings.getVisibleRegattas(), regattaName));
-            regattaCheckBoxMap.put(regattaName, checkBox);
+        for (Entry<String, String> regattaNameEntry : regattaNames.entrySet()) {
+            CheckBox checkBox = dialog.createCheckbox(regattaNameEntry.getValue());
+            checkBox.setValue(Util.contains(initialSettings.getVisibleRegattas(), regattaNameEntry.getKey()));
+            regattaCheckBoxMap.put(regattaNameEntry.getKey(), checkBox);
             
             regattaGrid.setWidget(rowIndex, columnIndex++, checkBox);
             if(columnIndex == maxRegattasPerRow) {

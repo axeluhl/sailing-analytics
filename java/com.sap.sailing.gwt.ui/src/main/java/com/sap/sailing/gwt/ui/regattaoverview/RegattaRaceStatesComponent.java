@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.core.client.GWT;
@@ -31,6 +33,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
@@ -57,21 +60,25 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private final FlagImageResolver flagImageResolver;
 
-    private RegattaRaceStatesSettings settings; 
+    private final RegattaRaceStatesSettings settings; 
+    private Map<String, String> regattaNames;
     
     private static RegattaRaceStatesTableResources tableRes = GWT.create(RegattaRaceStatesTableResources.class);
 
     public RegattaRaceStatesComponent(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final StringMessages stringMessages, final String eventIdAsString, final RegattaOverviewRaceSelectionProvider raceSelectionProvider,
-            final EventProvider eventProvider) {
+            final EventProvider eventProvider, RegattaRaceStatesSettings settings) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.eventIdAsString = eventIdAsString;
         this.raceSelectionProvider = raceSelectionProvider;
         this.eventProvider = eventProvider;
         this.flagImageResolver = new FlagImageResolver();
+        regattaNames = new HashMap<String, String>();
+        this.allEntries = new ArrayList<RegattaOverviewEntryDTO>();
 
-        settings = new RegattaRaceStatesSettings();//TODO initialize settings properly
+        this.settings = new RegattaRaceStatesSettings();
+        updateSettings(settings);
         
         mainPanel = new VerticalPanel();
         setWidth("100%");
@@ -132,8 +139,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             String currentFleetName = "";
             int numberOfFinishedRacesOfCurrentRegattaFleet = 0;
             for (RegattaOverviewEntryDTO entry : filteredEntries) {
-                if (!currentRegattaName.equals(entry.regattaName) || !currentFleetName.equals(entry.raceInfo.fleetName)) {
-                    currentRegattaName = entry.regattaName;
+                if (!currentRegattaName.equals(entry.regattaDisplayName) || !currentFleetName.equals(entry.raceInfo.fleetName)) {
+                    currentRegattaName = entry.regattaDisplayName;
                     currentFleetName = entry.raceInfo.fleetName;
                     numberOfFinishedRacesOfCurrentRegattaFleet = 0;
                 }
@@ -159,14 +166,21 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private List<RegattaOverviewEntryDTO> getFilteredRegattaRaces(List<RegattaOverviewEntryDTO> raceList) {
         List<RegattaOverviewEntryDTO> filteredEntries = new ArrayList<RegattaOverviewEntryDTO>(raceList);
         
-        for (RegattaOverviewEntryDTO entry : raceList) {
-            if (!settings.getVisibleCourseAreas().contains(entry.courseAreaIdAsString)) {
-                filteredEntries.remove(entry);
-                continue;
-            }
-            if (!settings.getVisibleRegattas().contains(entry.regattaName)) {
-                filteredEntries.remove(entry);
-                continue;
+        if (!settings.getVisibleCourseAreas().isEmpty() || !settings.getVisibleRegattas().isEmpty()) {
+            for (RegattaOverviewEntryDTO entry : raceList) {
+                if (!settings.getVisibleCourseAreas().isEmpty()) {
+                    if (!settings.getVisibleCourseAreas().contains(entry.courseAreaIdAsString)) {
+                        filteredEntries.remove(entry);
+                        continue;
+                    }
+                }
+
+                if (!settings.getVisibleRegattas().isEmpty()) {
+                    if (!settings.getVisibleRegattas().contains(entry.regattaName)) {
+                        filteredEntries.remove(entry);
+                        continue;
+                    }
+                }
             }
         }
         
@@ -224,7 +238,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         TextColumn<RegattaOverviewEntryDTO> regattaNameColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
-                return entryDTO.regattaName;
+                return entryDTO.regattaDisplayName;
             }
         };
         regattaNameColumn.setSortable(true);
@@ -232,7 +246,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
             @Override
             public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
-                return left.regattaName.compareTo(right.regattaName);
+                return left.regattaDisplayName.compareTo(right.regattaDisplayName);
             }
 
         });
@@ -390,11 +404,12 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         return allEntries;
     }
     
-    public List<String> getRegattaNames() {
-        List<String> regattaNames = new ArrayList<String>();
-        for (RegattaOverviewEntryDTO entry : allEntries) {
-            if (!regattaNames.contains(entry.regattaName)) {
-                regattaNames.add(entry.regattaName);
+    public Map<String, String> getRegattaNames() {
+        if (this.regattaNames.isEmpty()) {
+            for (RegattaOverviewEntryDTO entry : allEntries) {
+                if (!regattaNames.containsValue(entry.regattaDisplayName)) {
+                    regattaNames.put(entry.regattaName, entry.regattaDisplayName);
+                }
             }
         }
         return regattaNames;
@@ -446,7 +461,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     public SettingsDialogComponent<RegattaRaceStatesSettings> getSettingsDialogComponent() {
         return new RegattaRaceStatesSettingsDialogComponent(settings, stringMessages, 
                 Collections.unmodifiableList(eventProvider.getEvent().venue.getCourseAreas()),
-                Collections.unmodifiableList(getRegattaNames()));
+                Collections.unmodifiableMap(getRegattaNames()));
     }
 
     @Override
@@ -454,11 +469,21 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         if (!settings.getVisibleCourseAreas().equals(newSettings.getVisibleCourseAreas())) {
             settings.getVisibleCourseAreas().clear();
             settings.getVisibleCourseAreas().addAll(newSettings.getVisibleCourseAreas());
+            
+            if (settings.getVisibleCourseAreas().isEmpty()) {
+                for (CourseAreaDTO courseArea : eventProvider.getEvent().venue.getCourseAreas()) {
+                    settings.getVisibleCourseAreas().add(courseArea.id);
+                }
+            }
         }
         
         if (!settings.getVisibleRegattas().equals(newSettings.getVisibleRegattas())) {
             settings.getVisibleRegattas().clear();
             settings.getVisibleRegattas().addAll(newSettings.getVisibleRegattas());
+            
+            if (settings.getVisibleRegattas().isEmpty()) {
+                settings.getVisibleRegattas().addAll(getRegattaNames().values());
+            }
         }
         
         if (settings.isShowOnlyRacesOfSameDay() != newSettings.isShowOnlyRacesOfSameDay()) {
@@ -468,7 +493,10 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         if (settings.isShowOnlyCurrentlyRunningRaces() != newSettings.isShowOnlyCurrentlyRunningRaces()) {
             settings.setShowOnlyCurrentlyRunningRaces(newSettings.isShowOnlyCurrentlyRunningRaces());
         }
-        updateTable(allEntries);
+        //do not update the table when the entries are not loaded yet
+        if (!allEntries.isEmpty()) {
+            updateTable(allEntries);
+        }
     }
 
     @Override

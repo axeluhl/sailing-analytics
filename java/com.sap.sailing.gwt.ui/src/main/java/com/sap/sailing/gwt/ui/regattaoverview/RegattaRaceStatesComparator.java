@@ -11,8 +11,8 @@ public class RegattaRaceStatesComparator implements Comparator<RegattaOverviewEn
     public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
         int result = left.courseAreaName.compareTo(right.courseAreaName);
         if (result == 0) {
-            if (left.regattaName != null && right.regattaName != null) {
-                result = new NaturalComparator().compare(left.regattaName, right.regattaName);
+            if (left.regattaDisplayName != null && right.regattaDisplayName != null) {
+                result = new NaturalComparator().compare(left.regattaDisplayName, right.regattaDisplayName);
             }
             if (result == 0) {
               //TODO Caution: Series is missing!!!

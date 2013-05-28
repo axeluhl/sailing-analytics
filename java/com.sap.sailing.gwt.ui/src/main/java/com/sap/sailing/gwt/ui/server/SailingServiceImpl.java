@@ -2421,7 +2421,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 RegattaOverviewEntryDTO entry = new RegattaOverviewEntryDTO();
                                 entry.courseAreaName = courseArea.getName();
                                 entry.courseAreaIdAsString = courseArea.getId().toString();
-                                entry.regattaName = regattaName;
+                                entry.regattaDisplayName = regattaName;
+                                entry.regattaName = leaderboard.getName();
                                 entry.raceInfo = createRaceInfoDTO(raceColumn, fleet);
                                 result.add(entry);
                             }

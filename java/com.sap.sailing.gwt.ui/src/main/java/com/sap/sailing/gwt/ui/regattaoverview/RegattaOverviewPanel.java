@@ -64,7 +64,8 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
     private static final String STYLE_VENUE_LABEL = STYLE_NAME_PREFIX + "VenueLabel";
     private static final String STYLE_CLOCK_LABEL = STYLE_NAME_PREFIX + "ClockLabel";
     
-    public RegattaOverviewPanel(SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages, String eventIdAsString) {
+    public RegattaOverviewPanel(SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages, 
+            String eventIdAsString, RegattaRaceStatesSettings settings) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.eventIdAsString = eventIdAsString;
@@ -93,7 +94,7 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         raceSelectionProvider.addRegattaOverviewRaceSelectionChangeListener(this);
         
         regattaRaceStatesComponent = new RegattaRaceStatesComponent(sailingService, errorReporter, stringMessages, eventIdAsString, 
-                raceSelectionProvider, this);
+                raceSelectionProvider, this, settings);
         grid.setWidget(1, 0, regattaRaceStatesComponent);
         
         raceCourseComposite = new RaceCourseComposite(sailingService, errorReporter, stringMessages);
