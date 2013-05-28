@@ -466,23 +466,23 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     @Override
     public void updateSettings(RegattaRaceStatesSettings newSettings) {
-        if (!settings.getVisibleCourseAreas().equals(newSettings.getVisibleCourseAreas())) {
+        if (settings.getVisibleCourseAreas().isEmpty() || !settings.getVisibleCourseAreas().equals(newSettings.getVisibleCourseAreas())) {
             settings.getVisibleCourseAreas().clear();
             settings.getVisibleCourseAreas().addAll(newSettings.getVisibleCourseAreas());
             
-            if (settings.getVisibleCourseAreas().isEmpty()) {
+            if (settings.getVisibleCourseAreas().isEmpty() && eventProvider.getEvent() != null) {
                 for (CourseAreaDTO courseArea : eventProvider.getEvent().venue.getCourseAreas()) {
                     settings.getVisibleCourseAreas().add(courseArea.id);
                 }
             }
         }
         
-        if (!settings.getVisibleRegattas().equals(newSettings.getVisibleRegattas())) {
+        if (settings.getVisibleRegattas().isEmpty() || !settings.getVisibleRegattas().equals(newSettings.getVisibleRegattas())) {
             settings.getVisibleRegattas().clear();
             settings.getVisibleRegattas().addAll(newSettings.getVisibleRegattas());
             
             if (settings.getVisibleRegattas().isEmpty()) {
-                settings.getVisibleRegattas().addAll(getRegattaNames().values());
+                settings.getVisibleRegattas().addAll(getRegattaNames().keySet());
             }
         }
         
