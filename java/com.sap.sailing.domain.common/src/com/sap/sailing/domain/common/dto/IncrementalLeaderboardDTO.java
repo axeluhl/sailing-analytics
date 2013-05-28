@@ -20,7 +20,8 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 public class IncrementalLeaderboardDTO extends LeaderboardDTO implements IncrementalOrFullLeaderboardDTO {
     private static final long serialVersionUID = -7011986430671280594L;
     private String isDiffToLeaderboardDTOWithId;
-    private LeaderboardDTO updatedFromPreviousVersion;
+    
+    private String updatedFromPreviousVersionWithId;
 
     private boolean commentUnchanged;
     
@@ -182,7 +183,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 unchanged.put(key, bitset);
             } else {
                 final int indexOfCompetitor = getIndexOfCompetitor(competitor);
-                if (bitset.length < indexOfCompetitor/Long.SIZE) {
+                if (bitset.length <= indexOfCompetitor/Long.SIZE) {
                     // bitset array is too short; extend
                     long[] newBitset = new long[1+indexOfCompetitor/Long.SIZE];
                     System.arraycopy(bitset, 0, newBitset, 0, bitset.length);
@@ -273,8 +274,8 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
     }
 
     private void applyThisToPreviousVersionByUpdatingThis(LeaderboardDTO previousVersion) {
-        if (this.updatedFromPreviousVersion != null) {
-            if (this.updatedFromPreviousVersion != previousVersion) {
+        if (this.updatedFromPreviousVersionWithId != null) {
+            if (!this.updatedFromPreviousVersionWithId.equals(previousVersion.getId())) {
                 throw new IllegalStateException("This incremental leaderboard DTO was already applied to a different previous version. It cannot be applied multiple times.");
             } else {
                 // the previous version remains unchanged; no need to make any changes, no need to throw an exception
@@ -284,7 +285,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 throw new IllegalArgumentException("Trying to apply leaderboard DTO diff to leaderboard DTO with ID "+previousVersion.getId()+
                         " although the diff was meant to be applied to a leaderboard DTO with ID "+isDiffToLeaderboardDTOWithId);
             }
-            this.updatedFromPreviousVersion = previousVersion;
+            this.updatedFromPreviousVersionWithId = previousVersion.getId();
             if (this.commentUnchanged) {
                 this.setComment(previousVersion.getComment());
             }
@@ -367,6 +368,8 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
     }
 
     /**
+     * TODO handle exceptions in here; log them very prominently; then continue in a fail-safe way as this is very central to leaderboard delivery
+     * 
      * @return for easy chaining, <code>this</code> object is returned
      */
     public IncrementalLeaderboardDTO strip(LeaderboardDTO previousVersion) {

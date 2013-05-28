@@ -424,35 +424,49 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public IncrementalOrFullLeaderboardDTO getLeaderboardByName(final String leaderboardName, final Date date,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, String previousLeaderboardId)
-                    throws NoWindException, InterruptedException, ExecutionException, IllegalArgumentException, IllegalAccessException {
-        long startOfRequestHandling = System.currentTimeMillis();
-        IncrementalOrFullLeaderboardDTO result = null;
-        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            TimePoint timePoint;
-            if (date == null) {
-                timePoint = null;
-            } else {
-                timePoint = new MillisecondsTimePoint(date);
-            }
-            LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails, getService(), baseDomainFactory);
-            LeaderboardDTO previousLeaderboardDTO = null;
-            synchronized (leaderboardByNameResultsCacheById) {
-                leaderboardByNameResultsCacheById.put(leaderboardDTO.getId(), leaderboardDTO);
-                if (previousLeaderboardId != null) {
-                    previousLeaderboardDTO = leaderboardByNameResultsCacheById.get(previousLeaderboardId);
+                    throws NoWindException, InterruptedException, ExecutionException, IllegalArgumentException {
+        try {
+            long startOfRequestHandling = System.currentTimeMillis();
+            IncrementalOrFullLeaderboardDTO result = null;
+            final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+            if (leaderboard != null) {
+                TimePoint timePoint;
+                if (date == null) {
+                    timePoint = null;
+                } else {
+                    timePoint = new MillisecondsTimePoint(date);
                 }
+                LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint,
+                        namesOfRaceColumnsForWhichToLoadLegDetails, getService(), baseDomainFactory);
+                LeaderboardDTO previousLeaderboardDTO = null;
+                synchronized (leaderboardByNameResultsCacheById) {
+                    leaderboardByNameResultsCacheById.put(leaderboardDTO.getId(), leaderboardDTO);
+                    if (previousLeaderboardId != null) {
+                        previousLeaderboardDTO = leaderboardByNameResultsCacheById.get(previousLeaderboardId);
+                    }
+                }
+                if (previousLeaderboardDTO == null) {
+                    result = new FullLeaderboardDTO(leaderboardDTO);
+                } else {
+                    result = new IncrementalLeaderboardDTOCloner().clone(leaderboardDTO).strip(previousLeaderboardDTO);
+                }
+                logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
+                        + namesOfRaceColumnsForWhichToLoadLegDetails + ") took "
+                        + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
             }
-            if (previousLeaderboardDTO == null) {
-                result = new FullLeaderboardDTO(leaderboardDTO);
-            } else {
-                result = new IncrementalLeaderboardDTOCloner().clone(leaderboardDTO).strip(previousLeaderboardDTO);
-            }
-            logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
-                    + namesOfRaceColumnsForWhichToLoadLegDetails + ") took "
-                    + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
+            return result;
+        } catch (NoWindException e) {
+            throw e;
+        } catch (InterruptedException e) {
+            throw e;
+        } catch (ExecutionException e) {
+            throw e;
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE,"Exception during SailingService.getLeaderboardByName", e);
+            throw new RuntimeException(e);
         }
-        return result;
     }
 
     @Override

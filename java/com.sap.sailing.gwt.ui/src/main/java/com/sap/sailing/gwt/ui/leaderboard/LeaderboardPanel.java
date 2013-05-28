@@ -1772,7 +1772,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
                     getLeaderboardName(), timer.getPlayMode() == PlayModes.Live ? null : date,
                     /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                    new AsyncCallback<LeaderboardDTO>() {
+                    /* previousLeaderboard */ getLeaderboard(), new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
                             updateLeaderboard(result);
@@ -1786,7 +1786,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                                     .reportError("Error trying to obtain leaderboard contents: " + caught.getMessage(),
                                             true /* silentMode */);
                         }
-                    }, /* previousLeaderboard */ getLeaderboard());
+                    });
             asyncActionsExecutor.execute(getLeaderboardByNameAction);
         } else {
             getBusyIndicator().setBusy(false);

@@ -26,7 +26,7 @@ public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDT
     private final LeaderboardDTO previousLeaderboard;
     
     public GetLeaderboardByNameAction(SailingServiceAsync sailingService, String leaderboardName, Date date,
-            final Collection<String> namesOfRacesForWhichToLoadLegDetails, AsyncCallback<LeaderboardDTO> callback, LeaderboardDTO previousLeaderboard) {
+            final Collection<String> namesOfRacesForWhichToLoadLegDetails, LeaderboardDTO previousLeaderboard, AsyncCallback<LeaderboardDTO> callback) {
         super(callback);
         this.sailingService = sailingService;
         this.leaderboardName = leaderboardName;
