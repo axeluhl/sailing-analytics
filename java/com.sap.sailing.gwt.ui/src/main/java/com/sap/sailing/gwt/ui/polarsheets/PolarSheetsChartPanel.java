@@ -189,5 +189,11 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         timer.schedule(200);
         super.onLoad();
     }
+    
+    @Override
+    public void onResize() {
+        chart.setSizeToMatchContainer();
+        super.onResize();
+    }
 
 }

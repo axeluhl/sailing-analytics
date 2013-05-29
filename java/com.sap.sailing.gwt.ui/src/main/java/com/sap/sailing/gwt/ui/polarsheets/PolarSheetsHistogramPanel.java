@@ -73,5 +73,11 @@ public class PolarSheetsHistogramPanel extends DockLayoutPanel {
         super.onLoad();
     }
     
+    @Override
+    public void onResize() {
+        chart.setSizeToMatchContainer();
+        super.onResize();
+    }
+    
 
 }

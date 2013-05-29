@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
 import com.sap.sailing.domain.common.PolarSheetsData;
@@ -37,7 +38,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class PolarSheetsPanel extends DockLayoutPanel implements RaceSelectionChangeListener, RegattaDisplayer {
+public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionChangeListener, RegattaDisplayer {
 
     // TODO UI stuff
     public static final String POLARSHEETS_STYLE = "polarSheets";
@@ -63,9 +64,10 @@ public class PolarSheetsPanel extends DockLayoutPanel implements RaceSelectionCh
 
     private ListBox nameListBox;
 
+    private ScrollPanel leftScrollPanel;
+
     public PolarSheetsPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages, PolarSheetsEntryPoint polarSheetsEntryPoint) {
-        super(Unit.PCT);
         this.polarSheetsEntryPoint = polarSheetsEntryPoint;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -76,8 +78,8 @@ public class PolarSheetsPanel extends DockLayoutPanel implements RaceSelectionCh
         setSize("100%", "100%");
 
         VerticalPanel leftPanel = addFilteredTrackedRacesList();
-        ScrollPanel leftScrollPanel = new ScrollPanel(leftPanel);
-        addWest(leftScrollPanel, 40);
+        leftScrollPanel = new ScrollPanel(leftPanel);
+        addWest(leftScrollPanel, 400);
         polarSheetsGenerationLabel = createPolarSheetGenerationStatusLabel();
         leftPanel.add(polarSheetsGenerationLabel);
         dataCountLabel = new Label();
@@ -335,4 +337,26 @@ public class PolarSheetsPanel extends DockLayoutPanel implements RaceSelectionCh
         polarSheetsTrackedRacesList.fillRegattas(regattas);
     }
 
+    
+    @Override
+    protected void onLoad() {
+        Timer timer = new Timer() {
+            
+            @Override
+            public void run() {
+                setWidgetSize(leftScrollPanel, polarSheetsTrackedRacesList.getOffsetWidth() + 30);
+                Timer timer = new Timer() {
+                    
+                    @Override
+                    public void run() {
+                        chartPanel.onResize();
+                        histogramPanel.onResize();
+                    }
+                };
+                timer.schedule(200);
+            }
+        };
+        timer.schedule(600);
+        super.onLoad();
+    }
 }
