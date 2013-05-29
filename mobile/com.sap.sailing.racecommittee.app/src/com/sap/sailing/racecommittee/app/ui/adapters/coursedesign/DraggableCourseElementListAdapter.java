@@ -16,8 +16,8 @@ import com.sap.sailing.racecommittee.app.utils.MarkImageHelper;
 
 public class DraggableCourseElementListAdapter extends ArrayAdapter<CourseListDataElement> {
 
-    public DraggableCourseElementListAdapter(Context context, int textViewResourceId, List<CourseListDataElement> objects) {
-        super(context, textViewResourceId, objects);
+    public DraggableCourseElementListAdapter(Context context, List<CourseListDataElement> objects) {
+        super(context, 0, objects);
     }
 
     @Override

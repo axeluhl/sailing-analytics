@@ -53,7 +53,9 @@ public class RaceChooseLineOpeningTimeDialog extends RaceDialogFragment {
     protected void onChooseClicked(View view) {
         try{
         Integer lineOpeningTime = convertToInteger(lineOpeningTimeEditText.getText().toString());
-        this.getRace().getState().setGateLineOpeningTime(Long.valueOf(60 * 1000 * lineOpeningTime));
+        if(getRace().getState().getStartProcedure() instanceof GateStartProcedure){
+            ((GateStartProcedure) getRace().getState().getStartProcedure()).setGateLineOpeningTime(Long.valueOf(60 * 1000 * lineOpeningTime));
+        }
         Log.i("RACE_SET_GATELINE_OPENING_TIME", String.valueOf(lineOpeningTime));
         dismiss();
         } catch(NumberFormatException nfe){

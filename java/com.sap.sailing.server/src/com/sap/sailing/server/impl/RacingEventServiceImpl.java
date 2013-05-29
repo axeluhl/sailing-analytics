@@ -127,6 +127,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
+import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
@@ -1171,6 +1172,22 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         regatta.removeRegattaListener(this);
         regatta.removeRaceColumnListener(raceLogReplicator);
         regatta.removeRaceColumnListener(raceLogScoringReplicator);
+    }
+
+    @Override
+    public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId) {
+        // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
+        Regatta regatta = getRegatta(regattaIdentifier);
+        synchronized(regatta) {
+            CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
+            if (newCourseArea != regatta.getDefaultCourseArea()) {
+                regatta.setDefaultCourseArea(newCourseArea);
+                mongoObjectFactory.storeRegatta(regatta);
+            }
+            
+            replicate(new UpdateSpecificRegatta(regattaIdentifier, newDefaultCourseAreaId));
+        }
+        return regatta;
     }
 
     @Override

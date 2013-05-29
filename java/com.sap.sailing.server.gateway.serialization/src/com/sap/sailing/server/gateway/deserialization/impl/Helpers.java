@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 
 import java.io.Serializable;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -9,6 +10,8 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 
 public class Helpers {
+    
+    private final static Logger logger = Logger.getLogger(Helpers.class.getName());
 
     public static JSONArray toJSONArraySafe(Object object) throws JsonDeserializationException {
         if (object instanceof JSONArray) {
@@ -49,7 +52,7 @@ public class Helpers {
         try {
             return UUID.fromString(serializableId.toString());
         } catch (IllegalArgumentException iae) {
-            // / TODO: insert warning of non-uuid id.
+            logger.warning("The serializable " + serializableId.toString() + " could not be converted to a UUID");
         }
         return serializableId;
     }

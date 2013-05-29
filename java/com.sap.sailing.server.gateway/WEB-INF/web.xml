@@ -58,7 +58,16 @@
 		<servlet-name>RCCompetitors</servlet-name>
 		<url-pattern>/rc/competitors</url-pattern>
 	</servlet-mapping>
-	
+
+	<servlet>
+		<servlet-name>RCRegattaRaceStates</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.rc.RegattaRaceStatesJsonGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RCRegattaRaceStates</servlet-name>
+		<url-pattern>/rc/regattaRaceStates</url-pattern>
+	</servlet-mapping>
+		
 	<!-- RACE COMMITTEE END -->
 
 	<servlet>

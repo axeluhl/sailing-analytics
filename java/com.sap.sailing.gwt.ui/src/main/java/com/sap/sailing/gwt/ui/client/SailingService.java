@@ -122,7 +122,7 @@ public interface SailingService extends RemoteService {
     
     List<StrippedLeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta);
     
-    void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds);
+    StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds, String newCourseAreaIdAsString);
 
     StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, String courseAreaId);
 
@@ -147,6 +147,8 @@ public interface SailingService extends RemoteService {
             boolean persistent, ScoringSchemeType scoringSchemeType, String defaultCourseAreaId);
     
     void removeRegatta(RegattaIdentifier regattaIdentifier);
+    
+    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId);
     
     List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
 

@@ -9,13 +9,11 @@ public interface StartProcedureListener {
 
     void onRaceStarted(TimePoint eventTime);
 
-    void onRaceFinishing(TimePoint now);
+    void onRaceFinishing(TimePoint eventTime);
     
-    void onRaceFinishing(TimePoint now, TimePoint automaticRaceEnd);
+    void onRaceFinishing(TimePoint eventTime, TimePoint automaticRaceEnd);
     
-    void onRaceFinished(TimePoint now);
+    void onRaceFinished(TimePoint eventTime);
     
-    void onIndividualRecall(TimePoint eventTime);
-
-    void onIndividualRecallRemoval();
+    void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId);
 }

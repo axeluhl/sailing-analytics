@@ -27,6 +27,8 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -55,12 +57,18 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     private boolean raceIsKnownToStartUpwind;
 
     private boolean delayToLiveInMillisFixed;
+    
+    private transient DynamicTrackedRaceLogListener logListener;
+
+    private transient Set<CourseDesignChangedListener> courseDesignChangedListeners;
 
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForCacheInvalidationOfWindEstimation) {
         super(trackedRegatta, race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation);
+        this.logListener = new DynamicTrackedRaceLogListener(this);
+        this.courseDesignChangedListeners = new HashSet<>();
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
@@ -653,11 +661,28 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public boolean raceIsKnownToStartUpwind() {
         return raceIsKnownToStartUpwind;
     }
+    
+    @Override
+    public void attachRaceLog(RaceLog raceLog) {
+        super.attachRaceLog(raceLog);
+        logListener.addTo(attachedRaceLog);
+    }
+    
+    @Override
+    public void detachRaceLog() {
+        logListener.removeFrom(attachedRaceLog);
+        super.detachRaceLog();
+    }
+
+    @Override
+    public void addCourseDesignChangedListener(CourseDesignChangedListener listener) {
+        this.courseDesignChangedListeners.add(listener);
+    }
 
     @Override
     public void onCourseDesignChangedByRaceCommittee(CourseBase newCourseDesign) {
         try {
-            if (courseDesignChangedListener != null) {
+            for (CourseDesignChangedListener courseDesignChangedListener : courseDesignChangedListeners) {
                 courseDesignChangedListener.courseDesignChanged(newCourseDesign);
             }
         } catch (IOException e) {

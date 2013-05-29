@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagFinder;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartRunningRaceEventListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
@@ -75,12 +76,16 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
         
         getRace().getState().getStartProcedure().setRunningRaceEventListener(this);
         
-        if(getRace().getState().getPathfinder()==null){
-            showPathFinderDialog();
+        if(getRace().getState().getStartProcedure() instanceof GateStartProcedure){
+            if(((GateStartProcedure) getRace().getState().getStartProcedure()).getPathfinder()==null){
+                showPathFinderDialog();
+            }
+            if(((GateStartProcedure) getRace().getState().getStartProcedure()).getGateLineOpeningTime()==null){
+                showLineOpeningTimeDialog();
+            }
         }
-        if(getRace().getState().getGateLineOpeningTime()==null){
-            showLineOpeningTimeDialog();
-        }
+        
+        
     }
 
     private void displayGolfFlag(boolean golfFlagDisplayed) {

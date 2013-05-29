@@ -31,17 +31,6 @@ import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
-import com.sap.sailing.racecommittee.app.deserialization.impl.BoatClassJsonDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.ColorDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.CourseAreaJsonDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.EventDataJsonDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.FleetDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.RaceCellDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.RaceGroupDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.RaceLogDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.RaceRowDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.SeriesWithRowsDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
@@ -51,7 +40,18 @@ import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseData
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.ColorDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.FleetDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceCellDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceRowDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racegroup.impl.SeriesWithRowsDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 
 /**
@@ -86,7 +86,7 @@ public class OnlineDataManager extends DataManager {
     }
 
     protected void reloadEvents(LoadClient<Collection<EventBase>> client) {
-        DataParser<Collection<EventBase>> parser = new EventsDataParser(new EventDataJsonDeserializer(
+        DataParser<Collection<EventBase>> parser = new EventsDataParser(new EventBaseJsonDeserializer(
                 new VenueJsonDeserializer(new CourseAreaJsonDeserializer())));
         DataHandler<Collection<EventBase>> handler = new EventsDataHandler(this, client);
 
@@ -134,12 +134,10 @@ public class OnlineDataManager extends DataManager {
     }
 
     public void loadRaces(Serializable courseAreaId, LoadClient<Collection<ManagedRace>> client) {
-
         if (!dataStore.hasCourseArea(courseAreaId)) {
             client.onLoadFailed(new DataLoadingException(String.format("No course area found with id %s", courseAreaId)));
             return;
         }
-
         SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
         JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
         DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(new RaceGroupDeserializer(
@@ -147,7 +145,6 @@ public class OnlineDataManager extends DataManager {
                         new ColorDeserializer()), new RaceCellDeserializer(
                                 new RaceLogDeserializer(RaceLogEventDeserializer.create(domainFactory)))))));
         DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(this, client);
-
         try {
             new DataLoader<Collection<ManagedRace>>(context, URI.create(AppConstants.getServerBaseURL(context)
                     + "/sailingserver/rc/racegroups?courseArea=" + courseAreaId.toString()), parser, handler)
