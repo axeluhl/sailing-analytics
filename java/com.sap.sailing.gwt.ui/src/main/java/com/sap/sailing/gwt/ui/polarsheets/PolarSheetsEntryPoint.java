@@ -4,12 +4,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -31,16 +27,11 @@ public class PolarSheetsEntryPoint extends AbstractEntryPoint implements Regatta
     }
 
     private void createUI() {
-        RootPanel rootPanel = RootPanel.get();
-        DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
-        RootLayoutPanel.get().add(mainPanel);
-        ScrollPanel contentScrollPanel = new ScrollPanel();
+        RootLayoutPanel rootPanel = RootLayoutPanel.get();
         PolarSheetsPanel polarSheetsPanel = new PolarSheetsPanel(sailingService, this, stringMessages, this);
         polarSheetsPanel.addStyleName(PolarSheetsPanel.POLARSHEETS_STYLE);
         regattaDisplayers.add(polarSheetsPanel);
-        contentScrollPanel.setWidget(polarSheetsPanel);
-        mainPanel.add(contentScrollPanel);
-        rootPanel.add(mainPanel);
+        rootPanel.add(polarSheetsPanel);
     }
 
     @Override

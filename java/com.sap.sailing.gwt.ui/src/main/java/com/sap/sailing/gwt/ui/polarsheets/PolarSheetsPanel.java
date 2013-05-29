@@ -10,6 +10,7 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEventHandler;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -17,11 +18,10 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
 import com.sap.sailing.domain.common.PolarSheetsData;
@@ -37,12 +37,11 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeListener, RegattaDisplayer {
+public class PolarSheetsPanel extends DockLayoutPanel implements RaceSelectionChangeListener, RegattaDisplayer {
 
     // TODO UI stuff
     public static final String POLARSHEETS_STYLE = "polarSheets";
 
-    private FlowPanel mainPanel;
     private SailingServiceAsync sailingService;
     private PolarSheetsTrackedRacesList polarSheetsTrackedRacesList;
     private ErrorReporter errorReporter;
@@ -66,6 +65,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
 
     public PolarSheetsPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages, PolarSheetsEntryPoint polarSheetsEntryPoint) {
+        super(Unit.PCT);
         this.polarSheetsEntryPoint = polarSheetsEntryPoint;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -73,28 +73,27 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         
         idNameMapping = new HashMap<String, String>();
         nameIdMapping = new HashMap<String, String>();
-
-        this.mainPanel = new FlowPanel();
         setSize("100%", "100%");
 
-        mainPanel.setSize("100%", "100%");
-        setWidget(mainPanel);
-        HorizontalPanel splitPanel = createSplitPanel();
-        VerticalPanel leftPanel = addFilteredTrackedRacesList(splitPanel);
+        VerticalPanel leftPanel = addFilteredTrackedRacesList();
+        ScrollPanel leftScrollPanel = new ScrollPanel(leftPanel);
+        addWest(leftScrollPanel, 40);
         polarSheetsGenerationLabel = createPolarSheetGenerationStatusLabel();
         leftPanel.add(polarSheetsGenerationLabel);
         dataCountLabel = new Label();
         leftPanel.add(dataCountLabel);
-        VerticalPanel rightPanel = addPolarSheetsChartPanel(splitPanel);
+        DockLayoutPanel rightPanel = new DockLayoutPanel(Unit.PCT);
+        PolarSheetsChartPanel polarSheetsChartPanel = createPolarSheetsChartPanel();
+        rightPanel.addNorth(polarSheetsChartPanel, 70);
         histogramPanel = new PolarSheetsHistogramPanel(stringMessages);
         histogramPanel.getElement().setAttribute("align", "top");
-        rightPanel.add(histogramPanel);
+        rightPanel.addSouth(histogramPanel, 30);
         nameListBox = new ListBox();
-        rightPanel.add(nameListBox);
+        leftPanel.add(nameListBox);
         Button exportButton = new Button("Export");
         setExportButtonListener(exportButton);
-        rightPanel.add(exportButton);
-        mainPanel.add(splitPanel);
+        leftPanel.add(exportButton);
+        add(rightPanel);
 
         asyncActionsExecutor = new AsyncActionsExecutor();
         setEventListenersForPolarSheetChart();
@@ -221,32 +220,17 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         return polarSheetsGenerationStatusLabel;
     }
 
-    private VerticalPanel addPolarSheetsChartPanel(HorizontalPanel splitPanel) {
-        VerticalPanel verticalPanel = new VerticalPanel();
-        verticalPanel.setSize("100%", "100%");
+    private PolarSheetsChartPanel createPolarSheetsChartPanel() {
         chartPanel = new PolarSheetsChartPanel(stringMessages);
-        verticalPanel.add(chartPanel);
-        verticalPanel.setCellHeight(chartPanel, "800px");
-        splitPanel.add(verticalPanel);
-        splitPanel.setCellWidth(verticalPanel, "50%");
-        return verticalPanel;
+        return chartPanel;
     }
 
-    private HorizontalPanel createSplitPanel() {
-        HorizontalPanel splitPanel = new HorizontalPanel();
-        splitPanel.setSize("100%", "100%");
-        return splitPanel;
-    }
-
-    private VerticalPanel addFilteredTrackedRacesList(HorizontalPanel splitPanel) {
+    private VerticalPanel addFilteredTrackedRacesList() {
         VerticalPanel trackedRacesPanel = new VerticalPanel();
         trackedRacesPanel.setWidth("100%");
 
         createPolarSheetsTrackedRacesList();
         trackedRacesPanel.add(polarSheetsTrackedRacesList);
-
-        splitPanel.add(trackedRacesPanel);
-        splitPanel.setCellWidth(trackedRacesPanel, "50%");
         return trackedRacesPanel;
     }
 
