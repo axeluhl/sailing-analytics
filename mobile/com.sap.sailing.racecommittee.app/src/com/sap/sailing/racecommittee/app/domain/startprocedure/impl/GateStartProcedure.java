@@ -21,6 +21,8 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.StartPhaseEventLi
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishedRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishingRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartRunningRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.GateStartPhaseFragment;
 
@@ -309,6 +311,16 @@ public class GateStartProcedure implements StartProcedure {
     public Long getGateLineOpeningTime() {
         // TODO Auto-generated method stub
         return null;
+    }
+    
+    @Override
+    public Class<? extends RaceFragment> getFinishingRaceFragment() {
+        return FinishingRaceFragment.class;
+    }
+
+    @Override
+    public Class<? extends RaceFragment> getFinishedRaceFragment() {
+        return FinishedRaceFragment.class;
     }
 
 }
