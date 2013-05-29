@@ -26,6 +26,8 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.EssRunningRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishedRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishingRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.EssStartPhaseFragment;
 
 public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
@@ -380,5 +382,15 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
             setIndividualRecallRemoval(eventTime);
         }
         
+    }
+
+    @Override
+    public Class<? extends RaceFragment> getFinishingRaceFragment() {
+        return FinishingRaceFragment.class;
+    }
+
+    @Override
+    public Class<? extends RaceFragment> getFinishedRaceFragment() {
+        return FinishedRaceFragment.class;
     }
 }

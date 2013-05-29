@@ -25,6 +25,8 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.StartPhaseEventLi
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RRS26FinishedRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RRS26FinishingRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RRS26RunningRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.RRS26StartPhaseFragment;
 
@@ -385,5 +387,15 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
             return true;
         }
         return false;
+    }
+    
+    @Override
+    public Class<? extends RaceFragment> getFinishingRaceFragment() {
+        return RRS26FinishingRaceFragment.class;
+    }
+
+    @Override
+    public Class<? extends RaceFragment> getFinishedRaceFragment() {
+        return RRS26FinishedRaceFragment.class;
     }
 }
