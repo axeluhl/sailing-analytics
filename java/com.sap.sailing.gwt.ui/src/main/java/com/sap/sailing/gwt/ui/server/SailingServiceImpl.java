@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -454,6 +456,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
                         + namesOfRaceColumnsForWhichToLoadLegDetails + ") took "
                         + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
+            }
+            // Un-comment the following lines if you need to update the file used by LeaderboardDTODiffingTest, set a breakpoint
+            // and toggle the storeLeaderboardForTesting flag if you found a good version. See also bug 1417.
+            boolean storeLeaderboardForTesting = false;
+            if (storeLeaderboardForTesting) {
+                ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File("c:/data/SAP/sailing/workspace/java/com.sap.sailing.domain.test/resources/IncrementalLeaderboardDTO.ser")));
+                oos.writeObject(result);
+                oos.close();
             }
             return result;
         } catch (NoWindException e) {
