@@ -29,12 +29,17 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragm
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 
 public class RacingActivity extends TwoPaneActivity implements RaceInfoListener, CourseDesignListener /*
-                                                                                 * implements ResetTimeListener,
-                                                                                 * StartModeSelectionListener,
-                                                                                 * PathfinderSelectionListener,
-                                                                                 * GateLineOpeningTimeSelectionListener,
-                                                                                 * CourseDesignSelectionListener
-                                                                                 */{
+                                                                                                       * implements
+                                                                                                       * ResetTimeListener
+                                                                                                       * ,
+                                                                                                       * StartModeSelectionListener
+                                                                                                       * ,
+                                                                                                       * PathfinderSelectionListener
+                                                                                                       * ,
+                                                                                                       * GateLineOpeningTimeSelectionListener
+                                                                                                       * ,
+                                                                                                       * CourseDesignSelectionListener
+                                                                                                       */{
     // private final static String TAG = RacingActivity.class.getName();
 
     private final static String ListFragmentTag = RacingActivity.class.getName() + ".ManagedRaceListFragment";
@@ -59,10 +64,14 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // features must be requested before anything else
+        getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        
         super.onCreate(savedInstanceState);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        
         dataManager = DataManager.create(this);
 
-        getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.racing_view);
         setProgressBarIndeterminateVisibility(false);
 

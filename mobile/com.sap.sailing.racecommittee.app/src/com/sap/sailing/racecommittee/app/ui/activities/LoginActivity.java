@@ -38,9 +38,11 @@ public class LoginActivity extends TwoPaneActivity implements EventSelectedListe
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+        // features must be requested before anything else
         getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        
+        super.onCreate(savedInstanceState);
+        
         setContentView(R.layout.login_view);
         setProgressBarIndeterminateVisibility(false);
 
