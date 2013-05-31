@@ -10,33 +10,31 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelect
 
 public class EventListFragment extends NamedListFragment<EventBase> {
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		loadItems();
-	}
-	
-	@Override
-	protected ItemSelectedListener<EventBase> attachListener(Activity activity) {
-		if (activity instanceof EventSelectedListenerHost) { 
-			EventSelectedListenerHost listener = (EventSelectedListenerHost) activity;
-			return listener.getEventSelectionListener();
-		}
-		
-		throw new IllegalStateException(String.format(
-				"%s cannot be attached to a instance of %s", 
-				EventListFragment.class.getName(),
-				activity.getClass().getName()));
-	}
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadItems();
+    }
 
-	@Override
-	protected String getHeaderText() {
-		return getString(R.string.label_login_events);
-	}
+    @Override
+    protected ItemSelectedListener<EventBase> attachListener(Activity activity) {
+        if (activity instanceof EventSelectedListenerHost) {
+            EventSelectedListenerHost listener = (EventSelectedListenerHost) activity;
+            return listener.getEventSelectionListener();
+        }
 
-	@Override
-	protected void loadItems(ReadonlyDataManager manager) {
-		manager.loadEvents(this);
-	}
+        throw new IllegalStateException(String.format("%s cannot be attached to a instance of %s",
+                EventListFragment.class.getName(), activity.getClass().getName()));
+    }
+
+    @Override
+    protected String getHeaderText() {
+        return getString(R.string.label_login_events);
+    }
+
+    @Override
+    protected void loadItems(ReadonlyDataManager manager) {
+        manager.loadEvents(this);
+    }
 
 }

@@ -50,8 +50,6 @@ public class LoginActivity extends TwoPaneActivity implements EventSelectedListe
         }
     }
 
-    // Login -> startRaceActivity(selectedCourse);
-
     private void addEventListFragment() {
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.add(R.id.leftContainer, new EventListFragment());
