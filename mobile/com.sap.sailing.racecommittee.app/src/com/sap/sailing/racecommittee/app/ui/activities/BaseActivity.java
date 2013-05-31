@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService.EventSendingBinder;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService.EventSendingServiceLogger;
@@ -68,7 +69,7 @@ public abstract class BaseActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options_menu, menu);
-        menuItemLive = menu.findItem(R.id.LiveIcon);
+        menuItemLive = menu.findItem(R.id.options_menu_live);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         return true;
     }
@@ -77,16 +78,16 @@ public abstract class BaseActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-        /*
-         * case R.id.SystemInfo: fadeActivity(InformationActivity.class); return true;
-         */
-        case R.id.OptionsSettings:
+        case R.id.options_menu_settings:
             fadeActivity(SettingsActivity.class);
             return true;
-        case R.id.LiveIcon:
+        case R.id.options_menu_reload:
+            InMemoryDataStore.INSTANCE.reset();
+            fadeActivity(LoginActivity.class);
+            return true;
+        case R.id.options_menu_live:
             Toast.makeText(this, getLiveIconText(), Toast.LENGTH_LONG).show();
             return true;
-        case R.id.WindLog: // fadeActivity(WindActivity.class); return false;
         case android.R.id.home:
             return onHomeClicked();
         default:

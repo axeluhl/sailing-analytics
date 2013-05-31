@@ -26,8 +26,8 @@ import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.BoatClassSeriesDataFleet;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListAdapter.JuryFlagClickedListener;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter.JuryFlagClickedListener;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeTitle;
@@ -38,7 +38,7 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 
     private Serializable selectedRaceId;
     private HashMap<Serializable, ManagedRace> managedRacesById;
-    private RaceListAdapter adapter;
+    private ManagedRaceListAdapter adapter;
     private ArrayList<RaceListDataType> raceDataTypeList;
     
     private String magicFilterString = "";
@@ -55,7 +55,7 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         // pass the localized string to the data elements...
         RaceListDataTypeElement.initializeTemplates(this);
 
-        adapter = new RaceListAdapter(getActivity(), R.layout.welter_two_row_no_image, raceDataTypeList, this);
+        adapter = new ManagedRaceListAdapter(getActivity(), raceDataTypeList, this);
         getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         setListAdapter(adapter);
     }
@@ -63,45 +63,40 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     @Override
     public void onStart() {
         super.onStart();
-        unregisterAllRaces();
-        registerAllRaces();
+        unregisterOnAllRaces();
+        registerOnAllRaces();
     }
 
     @Override
     public void onStop() {
-        unregisterAllRaces();
+        unregisterOnAllRaces();
         super.onStop();
     }
 
-    private void registerAllRaces() {
+    private void registerOnAllRaces() {
         for (ManagedRace managedRace : managedRacesById.values()) {
             managedRace.getState().registerListener(this);
         }
     }
 
-    private void unregisterAllRaces() {
+    private void unregisterOnAllRaces() {
         for (ManagedRace managedRace : managedRacesById.values()) {
             managedRace.getState().unregisterListener(this);
         }
     }
 
     public void setupOn(Collection<ManagedRace> listOfManagedRaces) {
-        unregisterAllRaces();
+        unregisterOnAllRaces();
         managedRacesById.clear();
         for (ManagedRace managedRace : listOfManagedRaces) {
             managedRacesById.put(managedRace.getId(), managedRace);
         }
-        registerAllRaces();
+        registerOnAllRaces();
 
         // initialize view
         initListElements(false);
 
         adapter.getFilter().filter("");
-        notifyDataChanged();
-    }
-
-    @Override
-    public void onRaceStateChanged(RaceState state) {
         notifyDataChanged();
     }
 
@@ -185,7 +180,7 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         }
     }
 
-    public void notifyDataChanged() {
+    private void notifyDataChanged() {
         List<RaceListDataType> list = adapter.getItems();
         for (int i = 0; i < list.size(); ++i) {
             if (list.get(i) instanceof RaceListDataTypeElement) {
@@ -220,19 +215,23 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     }
 
     @Override
-    public void onStartTimeChanged(TimePoint startTime) {
+    public void onRaceStateChanged(RaceState state) {
         notifyDataChanged();
+    }
+    
+    @Override
+    public void onStartTimeChanged(TimePoint startTime) {
+        // ???
     }
 
     @Override
     public void onRaceAborted() {
-        notifyDataChanged();
+        // ???
     }
 
     @Override
     public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
-        // TODO Auto-generated method stub
-        
+        // ???
     }
 
     /*
