@@ -200,7 +200,11 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
     }
 
     public void onRaceItemClicked(ManagedRace managedRace) {
-        this.infoFragment = new RaceInfoFragment();
+        if (infoFragment != null && infoFragment.getRace().equals(managedRace)) {
+            return;
+        }
+        
+        infoFragment = new RaceInfoFragment();
         infoFragment.setArguments(RaceFragment.createArguments(managedRace));
 
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
