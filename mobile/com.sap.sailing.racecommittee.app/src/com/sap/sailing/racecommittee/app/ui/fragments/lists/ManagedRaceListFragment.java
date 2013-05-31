@@ -55,7 +55,7 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         // pass the localized string to the data elements...
         RaceListDataTypeElement.initializeTemplates(this);
 
-        adapter = new RaceListAdapter(getActivity(), R.layout.welter_two_row_no_image, raceDataTypeList, this);
+        adapter = new RaceListAdapter(getActivity(), raceDataTypeList, this);
         getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         setListAdapter(adapter);
     }
@@ -63,45 +63,40 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     @Override
     public void onStart() {
         super.onStart();
-        unregisterAllRaces();
-        registerAllRaces();
+        unregisterOnAllRaces();
+        registerOnAllRaces();
     }
 
     @Override
     public void onStop() {
-        unregisterAllRaces();
+        unregisterOnAllRaces();
         super.onStop();
     }
 
-    private void registerAllRaces() {
+    private void registerOnAllRaces() {
         for (ManagedRace managedRace : managedRacesById.values()) {
             managedRace.getState().registerListener(this);
         }
     }
 
-    private void unregisterAllRaces() {
+    private void unregisterOnAllRaces() {
         for (ManagedRace managedRace : managedRacesById.values()) {
             managedRace.getState().unregisterListener(this);
         }
     }
 
     public void setupOn(Collection<ManagedRace> listOfManagedRaces) {
-        unregisterAllRaces();
+        unregisterOnAllRaces();
         managedRacesById.clear();
         for (ManagedRace managedRace : listOfManagedRaces) {
             managedRacesById.put(managedRace.getId(), managedRace);
         }
-        registerAllRaces();
+        registerOnAllRaces();
 
         // initialize view
         initListElements(false);
 
         adapter.getFilter().filter("");
-        notifyDataChanged();
-    }
-
-    @Override
-    public void onRaceStateChanged(RaceState state) {
         notifyDataChanged();
     }
 
@@ -220,6 +215,11 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     }
 
     @Override
+    public void onRaceStateChanged(RaceState state) {
+        notifyDataChanged();
+    }
+    
+    @Override
     public void onStartTimeChanged(TimePoint startTime) {
         notifyDataChanged();
     }
@@ -232,7 +232,6 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     @Override
     public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
         // TODO Auto-generated method stub
-        
     }
 
     /*

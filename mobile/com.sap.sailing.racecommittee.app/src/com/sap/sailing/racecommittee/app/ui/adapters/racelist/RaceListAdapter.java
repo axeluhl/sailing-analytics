@@ -40,9 +40,8 @@ public class RaceListAdapter extends ArrayAdapter<RaceListDataType> {
     private List<RaceListDataType> items;
     private List<RaceListDataType> originalItems;
 
-    public RaceListAdapter(Context context, int textViewResourceId, List<RaceListDataType> objects,
-            JuryFlagClickedListener juryListener) {
-        super(context, textViewResourceId, objects);
+    public RaceListAdapter(Context context, List<RaceListDataType> objects, JuryFlagClickedListener juryListener) {
+        super(context, 0, objects);
         this.items = objects;
         this.originalItems = new ArrayList<RaceListDataType>();
 
