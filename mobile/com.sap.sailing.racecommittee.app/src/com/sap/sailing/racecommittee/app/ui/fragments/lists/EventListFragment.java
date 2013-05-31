@@ -1,7 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
 import android.app.Activity;
-
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
@@ -9,7 +8,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelec
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
 public class EventListFragment extends NamedListFragment<EventBase> {
-
+    
     @Override
     public void onResume() {
         super.onResume();
