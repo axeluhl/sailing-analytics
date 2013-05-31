@@ -168,4 +168,9 @@
 	<string name="settings_advanced_mail_description">Mail recipient used for positiong list images.</string>
 	<string name="settings_advanced_mail_header">Positioning mail recipient</string>
 	
+	<string name="options_menu_live">Connection Information</string>
+	<string name="options_menu_wind">Enter Wind Data</string>
+	<string name="options_menu_reload">Reload</string>
+	<string name="options_menu_settings">Settings</string>
+	
 </resources>

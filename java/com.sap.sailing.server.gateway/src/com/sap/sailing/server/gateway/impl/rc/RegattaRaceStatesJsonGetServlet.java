@@ -1,6 +1,8 @@
 package com.sap.sailing.server.gateway.impl.rc;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -16,11 +18,13 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
@@ -34,6 +38,8 @@ public class RegattaRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
     private final static Logger logger = Logger.getLogger(RegattaRaceStatesJsonGetServlet.class.getName());
 
     private static final String PARAM_NAME_EVENTID = "eventId";
+    private static final String PARAM_NAME_FILTER_BY_COURSEAREA = "filterByCourseArea";
+    private static final String PARAM_NAME_FILTER_BY_DAYOFFSET = "filterByDayOffset";
 
     public static final String FIELD_EVENT_NAME = "name";
     public static final String FIELD_EVENT_ID = "id";
@@ -42,6 +48,20 @@ public class RegattaRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String eventIdParam = request.getParameter(PARAM_NAME_EVENTID);
+        String courseAreaFilterParam = request.getParameter(PARAM_NAME_FILTER_BY_COURSEAREA);
+        String filterByDayOffsetParam = request.getParameter(PARAM_NAME_FILTER_BY_DAYOFFSET);
+        boolean filterByDayOffset = false;
+        Calendar dayToCheck = Calendar.getInstance();
+        dayToCheck.setTime(new Date());
+        if(filterByDayOffsetParam != null) {
+            try {
+                int dayOffset = Integer.parseInt(filterByDayOffsetParam);
+                filterByDayOffset = true;
+                dayToCheck.add(Calendar.DAY_OF_YEAR, dayOffset);
+            } catch (NumberFormatException e) {
+                // invalid integer
+            }
+        }
         if (eventIdParam == null) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "You need to specify a event id using the "+
                     PARAM_NAME_EVENTID + " parameter");
@@ -56,15 +76,19 @@ public class RegattaRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
                 JSONArray raceStatesLogEntriesJson = new JSONArray();
                 result.put(FIELD_RACE_STATES, raceStatesLogEntriesJson);
                 for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                    for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
-                        if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea().equals(courseArea)) {
-                            String regattaDisplayName = leaderboard.getDisplayName();
-                            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                                for (Fleet fleet : raceColumn.getFleets()) {
-                                    JSONObject raceStateJson = createRaceStateJsonObject(raceColumn, fleet);
-                                    raceStateJson.put("courseAreaName", courseArea.getName());
-                                    raceStateJson.put("regattaName", regattaDisplayName);
-                                    raceStatesLogEntriesJson.add(raceStateJson);
+                    if(courseAreaFilterParam == null || courseArea.getName().equals(courseAreaFilterParam)) {
+                        for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
+                            if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea().equals(courseArea)) {
+                                String regattaDisplayName = leaderboard.getDisplayName();
+                                for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                                    for (Fleet fleet : raceColumn.getFleets()) {
+                                        if(!filterByDayOffset || isRaceStateOfSameDay(raceColumn, fleet, dayToCheck)) {
+                                            JSONObject raceStateJson = createRaceStateJsonObject(raceColumn, fleet);
+                                            raceStateJson.put("courseAreaName", courseArea.getName());
+                                            raceStateJson.put("regattaName", regattaDisplayName);
+                                            raceStatesLogEntriesJson.add(raceStateJson);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -74,6 +98,34 @@ public class RegattaRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
                 result.writeJSONString(response.getWriter());
             }
         }
+    }
+
+    private boolean isRaceStateOfSameDay(RaceColumn raceColumn, Fleet fleet, Calendar now) {
+        boolean result = false;
+        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        if (raceLog != null && !raceLog.isEmpty()) {
+            TimePoint startTime = new StartTimeFinder(raceLog).getStartTime();
+            TimePoint finishedTime = new FinishedTimeFinder(raceLog).getFinishedTime();
+            if(finishedTime != null) {
+                Calendar finishedTimeCal = Calendar.getInstance();
+                finishedTimeCal.setTime(finishedTime.asDate());
+                if(isSameDay(now, finishedTimeCal)) {
+                    result = true;
+                }
+            } else if(startTime != null) {
+                Calendar startTimeCal = Calendar.getInstance();
+                startTimeCal.setTime(startTime.asDate());
+                if(isSameDay(now, startTimeCal)) {
+                    result = true;
+                }
+            }
+        }
+        return result;
+    }
+
+    private boolean isSameDay(Calendar cal1, Calendar cal2) {
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
     
     private JSONObject createRaceStateJsonObject(RaceColumn raceColumn, Fleet fleet) {
@@ -88,6 +140,8 @@ public class RegattaRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
             result.put("raceState", raceLogStateJson);
             StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
             raceLogStateJson.put("startTime", startTimeFinder.getStartTime() != null ? startTimeFinder.getStartTime().toString() : null);
+            FinishedTimeFinder finishedTimeFinder = new FinishedTimeFinder(raceLog);
+            raceLogStateJson.put("endTime", finishedTimeFinder.getFinishedTime() != null ? finishedTimeFinder.getFinishedTime().toString() : null);
             RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog);
             RaceLogRaceStatus lastStatus = raceStatusAnalyzer.getStatus();
             raceLogStateJson.put("lastStatus", lastStatus.name());

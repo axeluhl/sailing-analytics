@@ -11,8 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="0.70"
-        android:background="@color/welter_extralight_gray_transparent"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:background="@color/welter_extralight_gray_transparent">
 
         <TextView
             android:id="@+id/textListHeader"
@@ -20,6 +20,7 @@
             android:layout_height="wrap_content"
             android:padding="6dip"
             android:layout_alignParentTop="true"
+            android:textIsSelectable="false"
             android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
 
         <FrameLayout
@@ -42,9 +43,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="0.30"
-        android:background="@color/welter_extralight_gray_transparent"
         android:orientation="vertical"
-        android:padding="6dip"
         android:visibility="invisible" >
 
         <FrameLayout

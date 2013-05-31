@@ -34,6 +34,5 @@ public class RaceStateListener implements RaceStateChangedListener {
     @Override
     public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
         service.handleStartProcedureSpecificEvent(race, eventTime, eventId);
-        
     }
 }

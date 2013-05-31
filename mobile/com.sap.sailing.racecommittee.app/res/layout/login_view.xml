@@ -11,9 +11,7 @@
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    android:orientation="vertical"
-	    android:layout_weight="0.5"
-	    android:background="@color/welter_extralight_gray_transparent"
-	    >
+	    android:layout_weight="0.5">
 	    
 	    <FrameLayout
 	        android:id="@+id/leftContainer"
@@ -37,9 +35,7 @@
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    android:orientation="vertical"
-	    android:layout_weight="0.5"
-	    android:background="@color/welter_extralight_gray_transparent"
-	    >
+	    android:layout_weight="0.5">
 	    	        
 	    <FrameLayout
 	        android:id="@+id/rightContainer"

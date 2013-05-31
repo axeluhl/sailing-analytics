@@ -131,11 +131,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         transaction.commit();
     }
 
-    public void onRaceStateChanged(RaceState state) {
-        updateCourseDesignLabel();
-        switchToInfoFragment();
-    }
-
     public void onResetTime() {
         switchToInfoFragment(SetStartTimeRaceFragment.create(getRace()));
     }
@@ -154,16 +149,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     @Override
     public void onChangeCourseDesign() {
         updateCourseDesignLabel();
-    }
-
-    @Override
-    public void onStartTimeChanged(TimePoint startTime) {
-        //do nothing (onRaceStateChanged(RaceState) handles state change and fragment switch already
-    }
-
-    @Override
-    public void onRaceAborted() {
-        //do nothing (onRaceStateChanged(RaceState) handles state change and fragment switch already
     }
 
     private void showRaceResetConfirmationDialog() {
@@ -222,6 +207,22 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     @Override
     public void notifyTick() {
         //do nothing
+    }
+
+    @Override
+    public void onRaceStateChanged(RaceState state) {
+        updateCourseDesignLabel();
+        switchToInfoFragment();
+    }
+
+    @Override
+    public void onStartTimeChanged(TimePoint startTime) {
+        //do nothing (onRaceStateChanged(RaceState) handles state change and fragment switch already
+    }
+
+    @Override
+    public void onRaceAborted() {
+        //do nothing (onRaceStateChanged(RaceState) handles state change and fragment switch already
     }
 
     @Override

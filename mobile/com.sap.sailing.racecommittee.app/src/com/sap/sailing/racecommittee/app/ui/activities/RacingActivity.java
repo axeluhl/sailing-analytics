@@ -29,12 +29,17 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragm
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 
 public class RacingActivity extends TwoPaneActivity implements RaceInfoListener, CourseDesignListener /*
-                                                                                 * implements ResetTimeListener,
-                                                                                 * StartModeSelectionListener,
-                                                                                 * PathfinderSelectionListener,
-                                                                                 * GateLineOpeningTimeSelectionListener,
-                                                                                 * CourseDesignSelectionListener
-                                                                                 */{
+                                                                                                       * implements
+                                                                                                       * ResetTimeListener
+                                                                                                       * ,
+                                                                                                       * StartModeSelectionListener
+                                                                                                       * ,
+                                                                                                       * PathfinderSelectionListener
+                                                                                                       * ,
+                                                                                                       * GateLineOpeningTimeSelectionListener
+                                                                                                       * ,
+                                                                                                       * CourseDesignSelectionListener
+                                                                                                       */{
     // private final static String TAG = RacingActivity.class.getName();
 
     private final static String ListFragmentTag = RacingActivity.class.getName() + ".ManagedRaceListFragment";
@@ -59,14 +64,18 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // features must be requested before anything else
+        getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        
         super.onCreate(savedInstanceState);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        
         dataManager = DataManager.create(this);
 
-        getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.racing_view);
         setProgressBarIndeterminateVisibility(false);
 
-        listFragment = getListFragment();
+        listFragment = getOrCreateListFragment();
 
         Serializable courseAreaId = getCourseAreaIdFromIntent();
         if (courseAreaId == null) {
@@ -84,7 +93,7 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
         // StaticVibrator.prepareVibrator(this);
     }
 
-    private ManagedRaceListFragment getListFragment() {
+    private ManagedRaceListFragment getOrCreateListFragment() {
         Fragment fragment = getFragmentManager().findFragmentByTag(ListFragmentTag);
         // on first create add race list fragment
         if (fragment == null) {
@@ -191,7 +200,11 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
     }
 
     public void onRaceItemClicked(ManagedRace managedRace) {
-        this.infoFragment = new RaceInfoFragment();
+        if (infoFragment != null && infoFragment.getRace().equals(managedRace)) {
+            return;
+        }
+        
+        infoFragment = new RaceInfoFragment();
         infoFragment.setArguments(RaceFragment.createArguments(managedRace));
 
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
