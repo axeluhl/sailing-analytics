@@ -135,6 +135,7 @@ import com.sap.sailing.domain.polarsheets.PolarSheetsWindStepping;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
@@ -493,7 +494,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (raceLog != null) {
             
             StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
-            if(startTimeFinder.getStartTime()!=null){
+            if (startTimeFinder.getStartTime() != null) {
                 raceInfoDTO.startTime = startTimeFinder.getStartTime().asDate();
             }
 
@@ -505,6 +506,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
             GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
             raceInfoDTO.gateLineOpeningTime = gateLineOpeningTimeFinder.getGateLineOpeningTime();
+            
+            if (raceLog.getLastRawFix() != null) {
+                raceInfoDTO.lastUpdateTime = raceLog.getLastRawFix().getTimePoint().asDate();
+            }
+            
+            FinishedTimeFinder finishedTimeFinder = new FinishedTimeFinder(raceLog);
+            TimePoint finishedTime = finishedTimeFinder.getFinishedTime();
+            if (finishedTime != null) {
+                raceInfoDTO.finishedTime = finishedTime.asDate();
+            }
 
             LastFlagFinder lastFlagFinder = new LastFlagFinder(raceLog);
 
