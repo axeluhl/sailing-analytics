@@ -75,7 +75,7 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
         setContentView(R.layout.racing_view);
         setProgressBarIndeterminateVisibility(false);
 
-        listFragment = getListFragment();
+        listFragment = getOrCreateListFragment();
 
         Serializable courseAreaId = getCourseAreaIdFromIntent();
         if (courseAreaId == null) {
@@ -93,7 +93,7 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
         // StaticVibrator.prepareVibrator(this);
     }
 
-    private ManagedRaceListFragment getListFragment() {
+    private ManagedRaceListFragment getOrCreateListFragment() {
         Fragment fragment = getFragmentManager().findFragmentByTag(ListFragmentTag);
         // on first create add race list fragment
         if (fragment == null) {
