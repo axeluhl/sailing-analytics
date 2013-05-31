@@ -31,6 +31,7 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.StartProcedureFactory;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
+import com.sap.sailing.racecommittee.app.domain.state.RaceStateEventListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class RaceStateImpl implements RaceState, RaceLogChangedListener {
@@ -42,6 +43,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     
     protected RaceLogRaceStatus status;
     protected Set<RaceStateChangedListener> stateChangedListeners;
+    protected Set<RaceStateEventListener> stateEventListeners;
 
     private RaceLogChangedVisitor raceLogListener;
     
@@ -59,6 +61,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         
         this.status = RaceLogRaceStatus.UNKNOWN;
         this.stateChangedListeners = new HashSet<RaceStateChangedListener>();
+        this.stateEventListeners = new HashSet<RaceStateEventListener>();
 
         this.raceLogListener = new RaceLogChangedVisitor(this);
         this.raceLog.addListener(raceLogListener);
@@ -120,13 +123,13 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
     
     private void notifyListenersAboutStartTimeChange(TimePoint newStartTime) {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
+        for (RaceStateEventListener listener : stateEventListeners) {
             listener.onStartTimeChanged(newStartTime);
         }
     }
     
     private void notifyListenersAboutRaceAbortion() {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
+        for (RaceStateEventListener listener : stateEventListeners) {
             listener.onRaceAborted();
         }
     }
@@ -267,7 +270,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     @Override
     public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
+        for (RaceStateEventListener listener : stateEventListeners) {
             listener.onStartProcedureSpecificEvent(eventTime, eventId);
         }
     }

@@ -17,7 +17,6 @@ import android.widget.ListView;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -31,8 +30,8 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAda
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeTitle;
-import com.sap.sailing.racecommittee.app.ui.comparators.NamedRaceComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesBaseFleetComparator;
+import com.sap.sailing.racecommittee.app.ui.comparators.NamedRaceComparator;
 
 public class ManagedRaceListFragment extends ListFragment implements JuryFlagClickedListener, RaceStateChangedListener {
 
@@ -219,21 +218,6 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         notifyDataChanged();
     }
     
-    @Override
-    public void onStartTimeChanged(TimePoint startTime) {
-        // ???
-    }
-
-    @Override
-    public void onRaceAborted() {
-        // ???
-    }
-
-    @Override
-    public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
-        // ???
-    }
-
     /*
      * 
      * public void notifyDataChanged() { List<RaceListDataType> list = adapter.getItems(); for (int i = 0; i <

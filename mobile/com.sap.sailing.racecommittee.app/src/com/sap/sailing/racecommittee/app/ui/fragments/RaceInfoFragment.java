@@ -15,7 +15,6 @@ import android.widget.TextView;
 
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -213,22 +212,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     public void onRaceStateChanged(RaceState state) {
         updateCourseDesignLabel();
         switchToInfoFragment();
-    }
-
-    @Override
-    public void onStartTimeChanged(TimePoint startTime) {
-        //do nothing (onRaceStateChanged(RaceState) handles state change and fragment switch already
-    }
-
-    @Override
-    public void onRaceAborted() {
-        //do nothing (onRaceStateChanged(RaceState) handles state change and fragment switch already
-    }
-
-    @Override
-    public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
-        // TODO Auto-generated method stub
-        
     }
 
 }
