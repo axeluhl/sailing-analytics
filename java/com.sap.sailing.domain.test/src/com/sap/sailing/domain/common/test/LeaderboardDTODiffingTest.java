@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -81,9 +82,12 @@ public class LeaderboardDTODiffingTest {
         cloner.clone(newVersion.rows.get(wolfgang), wolfgangsRow);
         newVersion.rows.put(wolfgang, wolfgangsRow);
         wolfgangsRow.totalDistanceTraveledInMeters += 1;
+        Map<CompetitorDTO, LeaderboardRowDTO> rowsBeforeStripping = newVersion.rows;
         newVersion.strip(previousVersion);
         assertNotNull(newVersion.rows);
         assertEquals(1, newVersion.rows.size()); // only wolfgang's row show show
         assertTrue(newVersion.rows.get(wolfgang).fieldsByRaceColumnName.isEmpty());
+        LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
+        assertEquals(rowsBeforeStripping, applied.rows);
     }
 }
