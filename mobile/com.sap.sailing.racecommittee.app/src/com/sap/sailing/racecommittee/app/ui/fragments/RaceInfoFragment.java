@@ -1,10 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import android.app.AlertDialog;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,9 +21,8 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.ui.activities.CourseDesigner;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.CourseDesignDialogFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 
@@ -135,14 +134,16 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     }
 
     private void showCourseDesignDialog() {
-        FragmentManager fragmentManager = getFragmentManager();
+        Intent message = new Intent(this.getActivity(), CourseDesigner.class);
+        startActivity(message);
+        /*FragmentManager fragmentManager = getFragmentManager();
 
         RaceDialogFragment fragment = new CourseDesignDialogFragment();
 
         Bundle args = getRecentArguments();
         fragment.setArguments(args);
 
-        fragment.show(fragmentManager, "courseDesignDialogFragment");
+        fragment.show(fragmentManager, "courseDesignDialogFragment");*/
     }
 
     @Override
