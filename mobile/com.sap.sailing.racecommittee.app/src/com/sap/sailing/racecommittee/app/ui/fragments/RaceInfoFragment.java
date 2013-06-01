@@ -92,12 +92,12 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     @Override
     public void onStart() {
         super.onStart();
-        getRace().getState().registerListener(this);
+        getRace().getState().registerStateChangeListener(this);
     }
 
     @Override
     public void onStop() {
-        getRace().getState().unregisterListener(this);
+        getRace().getState().unregisterStateChangeListener(this);
         super.onStop();
     }
 

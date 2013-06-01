@@ -74,13 +74,13 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 
     private void registerOnAllRaces() {
         for (ManagedRace managedRace : managedRacesById.values()) {
-            managedRace.getState().registerListener(this);
+            managedRace.getState().registerStateChangeListener(this);
         }
     }
 
     private void unregisterOnAllRaces() {
         for (ManagedRace managedRace : managedRacesById.values()) {
-            managedRace.getState().unregisterListener(this);
+            managedRace.getState().unregisterStateChangeListener(this);
         }
     }
 

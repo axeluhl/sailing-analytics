@@ -134,26 +134,32 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         }
     }
 
-    public void registerListener(RaceStateChangedListener listener) {
+    public void registerStateChangeListener(RaceStateChangedListener listener) {
         stateChangedListeners.add(listener);
     }
+    
+    public void registerStateEventListener(RaceStateEventListener listener) {
+        stateEventListeners.add(listener);
+    }
 
-    public void unregisterListener(RaceStateChangedListener listener) {
+    public void unregisterStateChangeListener(RaceStateChangedListener listener) {
         stateChangedListeners.remove(listener);
+    }
+    
+    public void unregisterStateEventListener(RaceStateEventListener listener) {
+        stateEventListeners.remove(listener);
     }
 
     public TimePoint getStartTime() {
         return startTimeFinder.getStartTime();
     }
 
-    public void setStartTime(TimePoint newStartTime, StartProcedureType type) {
+    public void setStartTime(TimePoint newStartTime) {
         
         RaceLogRaceStatus status = getStatus();
         if (status != RaceLogRaceStatus.UNSCHEDULED) {
             onRaceAborted(MillisecondsTimePoint.now());
         }
-        
-        switchStartProcedure(type);
         
         TimePoint eventTime = startProcedure.getLogicalStartTimeEventTime(newStartTime);
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(eventTime, UUID.randomUUID(), 
@@ -162,8 +168,9 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         
         notifyListenersAboutStartTimeChange(newStartTime);
     }
-
-    private void switchStartProcedure(StartProcedureType type) {
+    
+    @Override
+    public void createNewStartProcedure(StartProcedureType type) {
         if (!type.equals(startProcedureTypeAnalyzer.getActiveStartProcedureType())) {
 
             RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartProcedureChangedEvent(MillisecondsTimePoint.now(), raceLog.getCurrentPassId(), type);
@@ -199,7 +206,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         
         RaceLogEvent passChangeEvent = RaceLogEventFactory.INSTANCE.createPassChangeEvent(eventTime, raceLog.getCurrentPassId() + 1);
         this.raceLog.add(passChangeEvent);
-        
+        registerStartProcedure();
         notifyListenersAboutRaceAbortion();
     }
     
