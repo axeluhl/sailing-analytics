@@ -143,9 +143,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
             Bundle args = getRecentArguments();
             fragment.setArguments(args);
             
-            //handle map bug - https://code.google.com/p/gmaps-api-issues/issues/detail?id=4865
-            fragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.Theme_DimDisabledDialog);
-            
             fragment.show(fragmentManager, "courseDesignDialogFragment");
         } catch (java.lang.InstantiationException e) {
             // TODO Auto-generated catch block

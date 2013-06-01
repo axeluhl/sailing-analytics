@@ -16,22 +16,27 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sap.sailing.racecommittee.app.R;
 
-
 public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private MapView mMapView;
     private GoogleMap mMap;
     private Bundle mBundle;
-    
+
+    public ClassicCourseDesignDialogFragment() {
+        super();
+        // handle map bug - https://code.google.com/p/gmaps-api-issues/issues/detail?id=4865
+        this.setStyle(DialogFragment.STYLE_NORMAL, R.style.Theme_DimDisabledDialog);
+    }
+
     @SuppressWarnings("unused")
     private final static String TAG = ClassicCourseDesignDialogFragment.class.getName();
 
     protected CourseDesignListener hostActivity;
-    
+
     private Button publishButton;
     private Button unpublishButton;
     @SuppressWarnings("unused")
     private GoogleMap courseAreaMap;
-    
+
     @Override
     public void onAttach(android.app.Activity activity) {
         super.onAttach(activity);
@@ -39,12 +44,10 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         if (activity instanceof CourseDesignListener) {
             this.hostActivity = (CourseDesignListener) activity;
         } else {
-            throw new IllegalStateException(
-                    String.format(
-                            "Instance of %s must be attached to instances of %s. Tried to attach to %s.",
-                            ActivityDialogFragment.class.getName(),
-                            CourseDesignListener.class.getName(),
-                            activity.getClass().getName()));
+            throw new IllegalStateException(String.format(
+                    "Instance of %s must be attached to instances of %s. Tried to attach to %s.",
+                    ActivityDialogFragment.class.getName(), CourseDesignListener.class.getName(), activity.getClass()
+                            .getName()));
         }
     };
 
@@ -54,7 +57,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //Inflate the layout for this fragment
+        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.race_choose_classic_course_design_view, container);
         try {
             MapsInitializer.initialize(getActivity());
@@ -65,7 +68,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         mMapView = (MapView) view.findViewById(R.id.mapView);
         mMapView.onCreate(mBundle);
         setUpMapIfNeeded(view);
-        
+
         return view;
 
     }
@@ -74,8 +77,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getDialog().setTitle(getActivity().getText(R.string.course_design_dialog_title));
-        
-        
+
         publishButton = (Button) getView().findViewById(R.id.publishCourseDesignButton);
         publishButton.setOnClickListener(new OnClickListener() {
 
@@ -93,18 +95,18 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
 
         });
     }
-    
+
     @Override
     public void onResume() {
         super.onResume();
         mMapView.onResume();
     }
-    
+
     @Override
     public void notifyTick() {
-        
+
     }
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
