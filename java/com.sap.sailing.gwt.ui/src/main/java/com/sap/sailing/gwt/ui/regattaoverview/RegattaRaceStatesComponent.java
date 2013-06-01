@@ -529,7 +529,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     
     private boolean isRaceStateOfSameDay(RaceInfoDTO raceInfo, Calendar now) {
         boolean result = false;
-        
+        //TODO to be shifted to SailingService. GWT cannot cope with java.util.Calendar
         if (raceInfo.finishedTime != null) {
             Calendar finishedTimeCal = Calendar.getInstance();
             finishedTimeCal.setTime(raceInfo.finishedTime);
