@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+     <style name="Theme.DimDisabledDialog" parent="Theme.Welter">
+         <item name="android:backgroundDimEnabled">false</item>
+     </style>
+
     <style name="Theme.Welter" parent="android:Theme.Holo.Light">
         <item name="android:actionBarStyle">@style/Widget.ActionBar</item>
-         
         <item name="android:textColorPrimary">@color/welter_deep_gray</item>
-                
+        
         <!-- 
         <item name="timePickerStyle">@style/Widget.TimePicker</item>
         -->

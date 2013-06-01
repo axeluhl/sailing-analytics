@@ -59,4 +59,6 @@ public interface StartProcedure {
 
     List<Class<? extends RaceDialogFragment>> checkForUserActionRequiredActions(MillisecondsTimePoint newStartTime, UserRequiredActionPerformedListener listener);
 
+    Class<? extends RaceDialogFragment> getCourseDesignDialog();
+
 }

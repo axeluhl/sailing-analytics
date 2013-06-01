@@ -26,6 +26,7 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.UserRequiredActionPerformedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ClassicCourseDesignDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseStartModeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RRS26FinishedRaceFragment;
@@ -418,5 +419,10 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
             this.userRequiredActionPerformedListener = listener;
         }
         return actionList;
+    }
+    
+    @Override
+    public Class<? extends RaceDialogFragment> getCourseDesignDialog() {
+        return ClassicCourseDesignDialogFragment.class;
     }
 }

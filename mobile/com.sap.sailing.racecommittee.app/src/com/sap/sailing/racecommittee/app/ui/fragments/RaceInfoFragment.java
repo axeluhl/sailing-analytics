@@ -1,10 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import android.app.AlertDialog;
+import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,8 +22,8 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sailing.racecommittee.app.ui.activities.CourseDesigner;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 
@@ -134,16 +135,25 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     }
 
     private void showCourseDesignDialog() {
-        Intent message = new Intent(this.getActivity(), CourseDesigner.class);
-        startActivity(message);
-        /*FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getFragmentManager();
 
-        RaceDialogFragment fragment = new CourseDesignDialogFragment();
-
-        Bundle args = getRecentArguments();
-        fragment.setArguments(args);
-
-        fragment.show(fragmentManager, "courseDesignDialogFragment");*/
+        RaceDialogFragment fragment;
+        try {
+            fragment = getRace().getState().getStartProcedure().getCourseDesignDialog().newInstance();
+            Bundle args = getRecentArguments();
+            fragment.setArguments(args);
+            
+            //handle map bug - https://code.google.com/p/gmaps-api-issues/issues/detail?id=4865
+            fragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.Theme_DimDisabledDialog);
+            
+            fragment.show(fragmentManager, "courseDesignDialogFragment");
+        } catch (java.lang.InstantiationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Override
