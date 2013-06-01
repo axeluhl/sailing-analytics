@@ -448,6 +448,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         previousLeaderboardDTO = leaderboardByNameResultsCacheById.get(previousLeaderboardId);
                     }
                 }
+                // Un-comment the following lines if you need to update the file used by LeaderboardDTODiffingTest, set a breakpoint
+                // and toggle the storeLeaderboardForTesting flag if you found a good version. See also bug 1417.
+                boolean storeLeaderboardForTesting = false;
+                if (storeLeaderboardForTesting) {
+                    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File("c:/data/SAP/sailing/workspace/java/com.sap.sailing.domain.test/resources/IncrementalLeaderboardDTO.ser")));
+                    oos.writeObject(leaderboardDTO);
+                    oos.close();
+                }
                 if (previousLeaderboardDTO == null) {
                     result = new FullLeaderboardDTO(leaderboardDTO);
                 } else {
@@ -456,14 +464,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
                         + namesOfRaceColumnsForWhichToLoadLegDetails + ") took "
                         + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
-            }
-            // Un-comment the following lines if you need to update the file used by LeaderboardDTODiffingTest, set a breakpoint
-            // and toggle the storeLeaderboardForTesting flag if you found a good version. See also bug 1417.
-            boolean storeLeaderboardForTesting = false;
-            if (storeLeaderboardForTesting) {
-                ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File("c:/data/SAP/sailing/workspace/java/com.sap.sailing.domain.test/resources/IncrementalLeaderboardDTO.ser")));
-                oos.writeObject(result);
-                oos.close();
             }
             return result;
         } catch (NoWindException e) {

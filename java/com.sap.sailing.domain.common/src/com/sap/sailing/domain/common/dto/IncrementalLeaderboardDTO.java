@@ -76,6 +76,12 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
      */
     private UnchangedLegDetails legDetailsUnchanged;
     
+    /**
+     * The single key is <code>null</code> if the field is not <code>null</code>. The value identifies the competitors
+     * for which the entire row is unchanged in {@link #rows}.
+     */
+    private UnchangedWithCompetitorsInBitSet<Void> rowsUnchanged;
+    
     static class UnchangedWithCompetitorsInBitSet<K> implements Serializable {
         private static final long serialVersionUID = 504599408604780499L;
         private transient int totalNumberOfCompetitorsInNewLeaderboard;
@@ -222,6 +228,15 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         }
     }
     
+    /**
+     * A specialized, bit set-based structure for marking leg details that haven't changed. The key is a composite of
+     * the race column name and the zero-based leg index. If <code>null</code> is used for the leg index in a call to
+     * {@link #unchanged(CompetitorDTO, Object)}, this means that all leg details in that race were unchanged for the
+     * competitor, e.g., because they were <code>null</code> both in the old and new version.
+     * 
+     * @author Axel Uhl (d043530)
+     * 
+     */
     static class UnchangedLegDetails extends UnchangedWithCompetitorsInBitSet<Pair<String, Integer>> {
         private static final long serialVersionUID = 8726138955651801210L;
         
@@ -341,6 +356,14 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 RaceColumnDTO previousRaceColumn = previousVersion.getRaceColumnByName(raceColumnNameForWhichCompetitorOrderingPerRaceUnchanged);
                 setCompetitorsFromBestToWorst(raceColumn, previousVersion.getCompetitorsFromBestToWorst(previousRaceColumn));
             }
+            if (rowsUnchanged != null) {
+                if (rows == null) {
+                    rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
+                }
+                for (Pair<CompetitorDTO, Void> rowUnchanged : rowsUnchanged.getAllUnchangedCompetitorsAndKeys(previousVersion)) {
+                    rows.put(rowUnchanged.getA(), previousVersion.rows.get(rowUnchanged.getA()));
+                }
+            }
             final Set<Pair<CompetitorDTO, String>> allUnchangedLeaderboardEntriesAsCompetitorsAndColumnNames =
                     unchangedLeaderboardEntries == null ? new HashSet<Util.Pair<CompetitorDTO,String>>() :
                         unchangedLeaderboardEntries.getAllUnchangedCompetitorsAndKeys(previousVersion);
@@ -447,52 +470,90 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         }
         setCompetitorOrderingPerRace(competitorOrderingPerRace);
         // now clone the rows map to enable stripping the LeaderboardEntryDTOs inside
-        HashMap<CompetitorDTO, LeaderboardRowDTO> newRows = new HashMap<CompetitorDTO, LeaderboardRowDTO>(rows);
+        HashMap<CompetitorDTO, LeaderboardRowDTO> newRows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
         for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> competitorAndRow : rows.entrySet()) {
             LeaderboardRowDTO previousRowDTO = previousVersion.rows.get(competitorAndRow.getKey());
-            LeaderboardRowDTO newRowDTO = new LeaderboardRowDTO();
-            cloner.clone(competitorAndRow.getValue(), newRowDTO);
-            newRows.put(competitorAndRow.getKey(), newRowDTO);
-            HashMap<String, LeaderboardEntryDTO> newFieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
-            for (Map.Entry<String, LeaderboardEntryDTO> raceColumnNameAndLeaderboardEntry : newRowDTO.fieldsByRaceColumnName.entrySet()) {
-                LeaderboardEntryDTO previousEntryDTO = null;
-                if (previousRowDTO != null) {
-                    previousEntryDTO = previousRowDTO.fieldsByRaceColumnName.get(raceColumnNameAndLeaderboardEntry.getKey());
-                }
-                if (previousEntryDTO != null && Util.equalsWithNull(raceColumnNameAndLeaderboardEntry.getValue(), previousEntryDTO)) {
-                    getUnchangedLeaderboardEntries(previousVersion).unchanged(competitorAndRow.getKey(), raceColumnNameAndLeaderboardEntry.getKey());
-                    // also mark all leg details for the competitor for this column as unchanged; this will ensure that column compression can work for leg details
-                    getLegDetailsUnchanged(previousVersion).unchanged(competitorAndRow.getKey(), new Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(), null));
-                } else {
-                    LeaderboardEntryDTO newLeaderboardEntryDTO = new LeaderboardEntryDTO();
-                    cloner.clone(raceColumnNameAndLeaderboardEntry.getValue(), newLeaderboardEntryDTO);
-                    newFieldsByRaceColumnName.put(raceColumnNameAndLeaderboardEntry.getKey(), newLeaderboardEntryDTO);
-                    if (newLeaderboardEntryDTO.legDetails != null) {
-                        for (int legDetailsIndex = 0; legDetailsIndex < newLeaderboardEntryDTO.legDetails.size(); legDetailsIndex++) {
-                            LegEntryDTO legDetails = newLeaderboardEntryDTO.legDetails.get(legDetailsIndex);
-                            if (previousEntryDTO != null
-                                    && previousEntryDTO.legDetails != null
-                                    && Util.equalsWithNull(legDetails, previousEntryDTO.legDetails.get(legDetailsIndex))) {
-                                getLegDetailsUnchanged(previousVersion).unchanged(competitorAndRow.getKey(), new Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(), legDetailsIndex));
-                                newLeaderboardEntryDTO.legDetails.set(legDetailsIndex, null);
-                            }
-                        }
+            if (Util.equalsWithNull(competitorAndRow.getValue(), previousRowDTO)) {
+                entireRowUnchanged(previousVersion, competitorAndRow.getKey());
+                // And don't enter into newRows. Mark all entries and all leg details in this row as unchanged for compaction of those structures:
+            } else {
+                LeaderboardRowDTO newRowDTO = new LeaderboardRowDTO();
+                cloner.clone(competitorAndRow.getValue(), newRowDTO);
+                newRows.put(competitorAndRow.getKey(), newRowDTO);
+                HashMap<String, LeaderboardEntryDTO> newFieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
+                for (Map.Entry<String, LeaderboardEntryDTO> raceColumnNameAndLeaderboardEntry : newRowDTO.fieldsByRaceColumnName
+                        .entrySet()) {
+                    LeaderboardEntryDTO previousEntryDTO = null;
+                    if (previousRowDTO != null) {
+                        previousEntryDTO = previousRowDTO.fieldsByRaceColumnName.get(raceColumnNameAndLeaderboardEntry
+                                .getKey());
+                    }
+                    if (previousEntryDTO != null
+                            && Util.equalsWithNull(raceColumnNameAndLeaderboardEntry.getValue(), previousEntryDTO)) {
+                        getUnchangedLeaderboardEntries(previousVersion).unchanged(competitorAndRow.getKey(),
+                                raceColumnNameAndLeaderboardEntry.getKey());
+                        // also mark all leg details for the competitor for this column as unchanged; this will ensure
+                        // that column compression can work for leg details
+                        getLegDetailsUnchanged(previousVersion).unchanged(competitorAndRow.getKey(),
+                                new Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(), null));
                     } else {
-                        if (previousEntryDTO.legDetails == null) {
-                            // old and new entry are null; no need to set the legDetails in the new version to null as it already consumes no space;
-                            // however, mark the legDetails as unchanged in legDetailsUnchanged so as to allow for all-column compression
-                            getLegDetailsUnchanged(previousVersion).unchanged(competitorAndRow.getKey(), new Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(), null));
+                        LeaderboardEntryDTO newLeaderboardEntryDTO = new LeaderboardEntryDTO();
+                        cloner.clone(raceColumnNameAndLeaderboardEntry.getValue(), newLeaderboardEntryDTO);
+                        newFieldsByRaceColumnName.put(raceColumnNameAndLeaderboardEntry.getKey(), newLeaderboardEntryDTO);
+                        if (newLeaderboardEntryDTO.legDetails != null) {
+                            for (int legDetailsIndex = 0; legDetailsIndex < newLeaderboardEntryDTO.legDetails.size(); legDetailsIndex++) {
+                                LegEntryDTO legDetails = newLeaderboardEntryDTO.legDetails.get(legDetailsIndex);
+                                if (previousEntryDTO != null
+                                        && previousEntryDTO.legDetails != null
+                                        && Util.equalsWithNull(legDetails,
+                                                previousEntryDTO.legDetails.get(legDetailsIndex))) {
+                                    getLegDetailsUnchanged(previousVersion).unchanged(
+                                            competitorAndRow.getKey(),
+                                            new Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(),
+                                                    legDetailsIndex));
+                                    newLeaderboardEntryDTO.legDetails.set(legDetailsIndex, null);
+                                }
+                            }
+                        } else {
+                            if (previousEntryDTO.legDetails == null) {
+                                // old and new entry are null; no need to set the legDetails in the new version to null
+                                // as it already consumes no space;
+                                // however, mark the legDetails as unchanged in legDetailsUnchanged so as to allow for
+                                // all-column compression
+                                getLegDetailsUnchanged(previousVersion).unchanged(competitorAndRow.getKey(),
+                                        new Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(), null));
+                            }
                         }
                     }
                 }
+                newRowDTO.fieldsByRaceColumnName = newFieldsByRaceColumnName;
             }
-            newRowDTO.fieldsByRaceColumnName = newFieldsByRaceColumnName;
         }
-        rows = newRows;
+        rows = newRows.isEmpty() ? null : newRows;
         if (legDetailsUnchanged != null) {
             legDetailsUnchanged.compact(); // compacts even those columns where the *last* entry was one with a null leg index
         }
         return this;
+    }
+
+    /**
+     * Marks the <code>competitor</code>'s row as unchanged in the {@link #rowsUnchanged} structure as well as for all
+     * races and legs in {@link #legDetailsUnchanged} and {@link #unchangedLeaderboardEntries} so that compaction of
+     * those structures can happen accordingly. The races/legs can only be marked as unchanged if the row is not
+     * <code>null</code>.
+     */
+    private void entireRowUnchanged(LeaderboardDTO previousVersion, CompetitorDTO competitor) {
+        if (rowsUnchanged == null) {
+            rowsUnchanged = new UnchangedWithCompetitorsInBitSet<Void>(previousVersion, rows.size());
+        }
+        rowsUnchanged.unchanged(competitor, null);
+        LeaderboardRowDTO row = rows.get(competitor);
+        if (row != null && row.fieldsByRaceColumnName != null) {
+            for (Map.Entry<String, LeaderboardEntryDTO> e : row.fieldsByRaceColumnName.entrySet()) {
+                getUnchangedLeaderboardEntries(previousVersion).unchanged(competitor, e.getKey());
+                getLegDetailsUnchanged(previousVersion).unchanged(competitor, new Pair<String, Integer>(e.getKey(), /* all legs unchanged */ null));
+            }
+        }
     }
 
     private UnchangedWithCompetitorsInBitSet<String> getUnchangedLeaderboardEntries(LeaderboardDTO previousVersion) {
