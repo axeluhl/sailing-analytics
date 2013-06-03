@@ -75,7 +75,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         int stepCount = result.getStepping().length;
         if (seriesMap.containsKey(seriesId)) {
             for (int i = 0; i < stepCount; i++) {
-                if (hasSufficientDataForWindspeed(result.getDataCountPerAngleForWindspeed(i), result.getDataCount())) {
+                if (hasSufficientDataForWindspeed(result.getDataCountPerAngleForWindspeed(i))) {
                     if (seriesMap.get(seriesId)[i] == null) {
                         createSeriesForWindspeed(seriesId, i, result.getStepping()[i]);
                     }
@@ -90,13 +90,13 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         }
     }
 
-    private boolean hasSufficientDataForWindspeed(Integer[] dataCountPerAngleForWindspeed, int countOverall) {
+    private boolean hasSufficientDataForWindspeed(Integer[] dataCountPerAngleForWindspeed) {
         int sum = 0;
         for (int count : dataCountPerAngleForWindspeed) {
             sum = sum + count;
         }
         //TODO make configurable
-        if (sum >= (0.05 * countOverall)) {
+        if (sum > /*Make this configurable*/0) {
             return true;
         }
         return false;
