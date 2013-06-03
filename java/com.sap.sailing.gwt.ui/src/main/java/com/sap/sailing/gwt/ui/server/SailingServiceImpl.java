@@ -327,7 +327,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
-    private final Map<String,PolarSheetGenerationWorker> polarSheetGenerationWorkers;
     
     private static final int LEADERBOARD_BY_NAME_RESULTS_CACHE_BY_ID_SIZE = 100;
     
@@ -343,7 +342,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * {@link #LEADERBOARD_DIFFERENCE_CACHE_SIZE}.
      */
     private final LinkedHashMap<Pair<String, String>, IncrementalLeaderboardDTO> leaderboardDifferenceCacheByIdPair;
-
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         tractracDomainFactory = DomainFactory.INSTANCE;
@@ -2943,7 +2941,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             trackedRaces.add(service.getTrackedRace(race));
         }
         PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(trackedRaces, executor);
-        polarSheetGenerationWorkers.put(id, genWorker);
+        HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
+        HttpSession session = httpServletRequest.getSession();
+        session.setAttribute("polarworker" + id, genWorker);
         genWorker.startPolarSheetGeneration();
         String name = getCommonBoatClass(trackedRaces);
         return new PolarSheetGenerationTriggerResponseImpl(id, name);
@@ -2965,18 +2965,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public PolarSheetsData getPolarSheetsGenerationResults(String id) {
+        HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
+        HttpSession session = httpServletRequest.getSession();
         PolarSheetsData data = null;
-        if (polarSheetGenerationWorkers.containsKey(id)) {
-            PolarSheetGenerationWorker worker = polarSheetGenerationWorkers.get(id);
-            data = worker.getPolarData();
+        PolarSheetGenerationWorker cachedWorker = (PolarSheetGenerationWorker) session.getAttribute("polarworker" + id);
+        if (cachedWorker != null) {
+            data = cachedWorker.getPolarData();
             if (data.isComplete()) {
-                polarSheetGenerationWorkers.remove(id);
-                HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
-                if (httpServletRequest != null) {
-                    HttpSession session = httpServletRequest.getSession();
-                    session.setAttribute(id, worker.getCompleteData());
-                    session.setAttribute("stepping", worker.getStepping());
-                }       
+                session.removeAttribute("polarworker" + id);
+                session.setAttribute(id, cachedWorker.getCompleteData());
+                session.setAttribute("stepping", cachedWorker.getStepping());       
             }
         } else {
             //TODO Exception handling
@@ -2989,6 +2987,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle, int windSpeed) {
         HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
         HttpSession session = httpServletRequest.getSession();
+        String partIdentifier = polarSheetId + angle + windSpeed;
+        PolarSheetsHistogramData cachedResult = (PolarSheetsHistogramData) session.getAttribute(partIdentifier);
+        if (cachedResult != null) {
+            return cachedResult;
+        }
+        
+        
         @SuppressWarnings("unchecked")
         List<List<BoatAndWindSpeed>> data = (List<List<BoatAndWindSpeed>>) session.getAttribute(polarSheetId);
         if (data == null) {
@@ -3041,7 +3046,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
 
         PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, dataForAngleAndWindSpeed.size());
-
+        session.setAttribute(partIdentifier, histogramData);
 
         return histogramData;
     }
