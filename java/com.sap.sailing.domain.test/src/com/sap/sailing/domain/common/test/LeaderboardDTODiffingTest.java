@@ -157,6 +157,7 @@ public class LeaderboardDTODiffingTest {
     
     @Test
     public void testCompetitorListChange() {
+        newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
         CompetitorDTO somebodyNew = new CompetitorDTO("Someone New", "DE", "GER", "Germany", "GER 1234", "912p09871203987",
                 new BoatClassDTO("505", 5.05));
         newVersion.competitors.add(13, somebodyNew); // insert a competitor; this should mess up all others' indexes; check if this works
