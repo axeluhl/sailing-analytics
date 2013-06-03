@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Cloner;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -154,5 +155,18 @@ public class LeaderboardDTODiffingTest {
         assertEquals(rowsBeforeStripping, applied.rows);
     }
     
-    // TODO write a test where a competitor is added and where a competitor is removed to check that competitors compression works properly; ensure that all orders remain unchanged
+    @Test
+    public void testCompetitorListChange() {
+        CompetitorDTO somebodyNew = new CompetitorDTO("Someone New", "DE", "GER", "Germany", "GER 1234", "912p09871203987",
+                new BoatClassDTO("505", 5.05));
+        newVersion.competitors.add(13, somebodyNew); // insert a competitor; this should mess up all others' indexes; check if this works
+        CompetitorDTO wolfgang = getPreviousCompetitorByName("HUNGER +JESS");
+        newVersion.competitors.remove(wolfgang);
+        newVersion.rows.remove(wolfgang); // remove another competitor
+        List<CompetitorDTO> newCompetitorsBeforeStripping = new ArrayList<CompetitorDTO>(newVersion.competitors);
+        newVersion.strip(previousVersion);
+        assertNull(newVersion.competitors); // but there should be an added competitor that we can't see through the public interface
+        LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
+        assertEquals(newCompetitorsBeforeStripping, applied.competitors);
+    }
 }

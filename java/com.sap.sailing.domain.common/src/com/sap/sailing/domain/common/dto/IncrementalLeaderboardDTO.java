@@ -356,11 +356,13 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 RaceColumnDTO previousRaceColumn = previousVersion.getRaceColumnByName(raceColumnNameForWhichCompetitorOrderingPerRaceUnchanged);
                 setCompetitorsFromBestToWorst(raceColumn, previousVersion.getCompetitorsFromBestToWorst(previousRaceColumn));
             }
+            final Set<CompetitorDTO> rowsUnchangedForCompetitors = new HashSet<CompetitorDTO>();
             if (rowsUnchanged != null) {
                 if (rows == null) {
                     rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
                 }
                 for (Pair<CompetitorDTO, Void> rowUnchanged : rowsUnchanged.getAllUnchangedCompetitorsAndKeys(previousVersion)) {
+                    rowsUnchangedForCompetitors.add(rowUnchanged.getA());
                     rows.put(rowUnchanged.getA(), previousVersion.rows.get(rowUnchanged.getA()));
                 }
             }
@@ -370,8 +372,11 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             if (unchangedLeaderboardEntries != null) {
                 for (Pair<CompetitorDTO, String> competitorAndColumnName : allUnchangedLeaderboardEntriesAsCompetitorsAndColumnNames) {
                     CompetitorDTO previousCompetitor = competitorAndColumnName.getA();
-                    LeaderboardEntryDTO previousEntry = previousVersion.rows.get(previousCompetitor).fieldsByRaceColumnName.get(competitorAndColumnName.getB());
-                    rows.get(previousCompetitor).fieldsByRaceColumnName.put(competitorAndColumnName.getB(), previousEntry);
+                    if (!rowsUnchangedForCompetitors.contains(previousCompetitor)) { // only care if not the entire row was marked unchanged
+                        LeaderboardEntryDTO previousEntry = previousVersion.rows.get(previousCompetitor).fieldsByRaceColumnName.get(
+                                competitorAndColumnName.getB());
+                        rows.get(previousCompetitor).fieldsByRaceColumnName.put(competitorAndColumnName.getB(), previousEntry);
+                    }
                 }
             }
             if (legDetailsUnchanged != null) {
