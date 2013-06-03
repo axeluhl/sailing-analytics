@@ -111,6 +111,11 @@ public class PolarSheetGenerationWorker {
      *         product.
      */
     public PolarSheetsData getPolarData() {
+        
+        //Do this before working through data, since it's possible that remaining data is processed by the workers 
+        // during the process of filling the result data. 
+        boolean complete = allWorkersDone();
+        
         int levelCount = stepping.getNumberOfLevels();
         Number[][] averagedPolarDataByWindSpeed = new Number[levelCount][360];
         Integer[] dataCountPerAngle = new Integer[360];
@@ -120,7 +125,7 @@ public class PolarSheetGenerationWorker {
             dataCountPerAngleForWindspeed.put(i, new Integer[360]);
         }
         for (int i = 0; i < 360; i++) {
-            // Avoid Concurrent modification, lock would slow things down
+            // Avoid Concurrent modification of lists, so get current state as an array; lock would slow things down
             BoatAndWindSpeed[] values = polarData.get(i).toArray(new BoatAndWindSpeed[polarData.get(i).size()]);
             dataCount = dataCount + values.length;
             dataCountPerAngle[i] = values.length;
@@ -152,6 +157,14 @@ public class PolarSheetGenerationWorker {
             
 
         }
+
+        PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarDataByWindSpeed, complete, dataCount,
+                dataCountPerAngleForWindspeed, stepping.getRawStepping());
+
+        return data;
+    }
+
+    private boolean allWorkersDone() {
         boolean complete = true;
         for (PerRaceAndCompetitorPolarSheetGenerationWorker task : workers) {
             if (!task.isDone()) {
@@ -159,11 +172,7 @@ public class PolarSheetGenerationWorker {
                 break;
             }
         }
-
-        PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarDataByWindSpeed, complete, dataCount,
-                dataCountPerAngleForWindspeed, stepping.getRawStepping());
-
-        return data;
+        return complete;
     }
 
     /**
