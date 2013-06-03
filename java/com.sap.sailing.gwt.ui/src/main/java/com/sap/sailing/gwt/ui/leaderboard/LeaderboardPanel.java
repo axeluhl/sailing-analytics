@@ -955,9 +955,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     double distanceTraveledInMeters = 0;
                     long timeInMilliseconds = 0;
                     for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
-                        if (legDetail != null) {
+                        if (legDetail != null && legDetail.distanceTraveledInMeters != null &&
+                                legDetail.timeInMilliseconds != null) {
                             distanceTraveledInMeters += legDetail.distanceTraveledInMeters;
                             timeInMilliseconds += legDetail.timeInMilliseconds;
+                        } else {
+                            distanceTraveledInMeters = 0;
+                            timeInMilliseconds = 0;
+                            break;
                         }
                     }
                     if (timeInMilliseconds != 0) {

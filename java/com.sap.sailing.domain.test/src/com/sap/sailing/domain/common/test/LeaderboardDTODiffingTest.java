@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +19,9 @@ import com.sap.sailing.domain.common.Cloner;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
+import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.test.StoredTrackBasedTest;
 import com.sap.sailing.util.ClonerImpl;
 
@@ -43,6 +46,7 @@ public class LeaderboardDTODiffingTest {
     public void setUp() throws FileNotFoundException, IOException, ClassNotFoundException {
         ObjectInputStream ois = StoredTrackBasedTest.getObjectInputStream("IncrementalLeaderboardDTO.ser");
         previousVersion = (LeaderboardDTO) ois.readObject();
+        ois.close();
         newVersion = new IncrementalLeaderboardDTO("12345", cloner);
         cloner.clone(previousVersion, newVersion);
     }
@@ -90,4 +94,40 @@ public class LeaderboardDTODiffingTest {
         LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
         assertEquals(rowsBeforeStripping, applied.rows);
     }
+
+    @Test
+    public void testStrippingExceptOneColumnInOneRace() {
+        HashMap<CompetitorDTO, LeaderboardRowDTO> newRows = new HashMap<CompetitorDTO, LeaderboardRowDTO>(newVersion.rows);
+        double newDistance = 1234;
+        String nameOfRaceColumnToChange = "R9";
+        int indexOfLegToChange = 7; // ( zero based: ) 8th leg is the last leg
+        for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : newVersion.rows.entrySet()) {
+            LeaderboardRowDTO newRow = new LeaderboardRowDTO();
+            cloner.clone(e.getValue(), newRow);
+            newRows.put(e.getKey(), newRow);
+            newRow.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>(newRow.fieldsByRaceColumnName); // clone entry map
+            LeaderboardEntryDTO newEntry = new LeaderboardEntryDTO();
+            cloner.clone(newRow.fieldsByRaceColumnName.get(nameOfRaceColumnToChange), newEntry);
+            newRow.fieldsByRaceColumnName.put(nameOfRaceColumnToChange, newEntry);
+            if (newEntry.legDetails != null) {
+                newEntry.legDetails = new ArrayList<LegEntryDTO>(newEntry.legDetails); // clone leg details list
+                if (newEntry.legDetails.get(indexOfLegToChange) != null) {
+                    LegEntryDTO newLegDetail = new LegEntryDTO();
+                    cloner.clone(newEntry.legDetails.get(indexOfLegToChange), newLegDetail);
+                    newEntry.legDetails.set(indexOfLegToChange, newLegDetail);
+                    newLegDetail.distanceTraveledInMeters = newDistance;
+                    newDistance += 1;
+                }
+            }
+        }
+        newVersion.rows = newRows;
+        Map<CompetitorDTO, LeaderboardRowDTO> rowsBeforeStripping = newVersion.rows;
+        newVersion.strip(previousVersion);
+        assertNotNull(newVersion.rows);
+        assertEquals(previousVersion.rows.size()-17, newVersion.rows.size()); // all rows have changed except for 17 that have no leg details in leg 8
+        LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
+        assertEquals(rowsBeforeStripping, applied.rows);
+    }
+    
+    // TODO write a test where a competitor is added and where a competitor is removed to check that competitors compression works properly; ensure that all orders remain unchanged
 }
