@@ -262,6 +262,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
             public void onSuccess(PolarSheetGenerationTriggerResponse result) {
                 // TODO string messages
                 setCompletionLabel("Generating...");
+                chartPanel.showLoadingInfo();
                 startPullingResults(result.getId());
                 addNameForPolarSheet(result);
             }
@@ -310,6 +311,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
                 } else {
                     // TODO string messages
                     setCompletionLabel("Generation finished!");
+                    chartPanel.hideLoadingInfo();
                     polarSheetsTrackedRacesList.changeGenerationButtonState(true);
                 }
             }

@@ -196,4 +196,15 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         super.onResize();
     }
 
+    public void showLoadingInfo() {
+        // TODO string messages
+        chart.showLoading("Generating Polar Sheets");
+        
+    }
+
+    public void hideLoadingInfo() {
+        chart.hideLoading();
+        
+    }
+
 }
