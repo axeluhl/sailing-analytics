@@ -12,5 +12,7 @@ public interface PolarSheetsHistogramData extends Serializable{
 
     public Number[] getxValues();
     
+    double getStandardDeviator();
+    
 
 }

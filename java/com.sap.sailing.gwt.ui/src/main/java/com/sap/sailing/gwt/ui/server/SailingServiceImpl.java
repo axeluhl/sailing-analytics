@@ -2973,8 +2973,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             data = cachedWorker.getPolarData();
             if (data.isComplete()) {
                 session.removeAttribute("polarworker" + id);
-                session.setAttribute(id, cachedWorker.getCompleteData());
-                session.setAttribute("stepping", cachedWorker.getStepping());       
+                session.setAttribute("completedata" + id, cachedWorker.getCompleteData());
+                session.setAttribute("resultdata" + id, data);
+                session.setAttribute("stepping" + id, cachedWorker.getStepping());       
             }
         } else {
             //TODO Exception handling
@@ -2995,7 +2996,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         
         @SuppressWarnings("unchecked")
-        List<List<BoatAndWindSpeed>> data = (List<List<BoatAndWindSpeed>>) session.getAttribute(polarSheetId);
+        List<List<BoatAndWindSpeed>> data = (List<List<BoatAndWindSpeed>>) session.getAttribute("completedata" + polarSheetId);
         if (data == null) {
             //TODO exception handling
             return null;
@@ -3006,21 +3007,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             return null;
         }
         
-        PolarSheetsWindStepping stepping = (PolarSheetsWindStepping) session.getAttribute("stepping");
+        PolarSheetsWindStepping stepping = (PolarSheetsWindStepping) session.getAttribute("stepping" + polarSheetId);
+        PolarSheetsData generationResultData = (PolarSheetsData) session.getAttribute("resultdata" + polarSheetId);
+        
 
         List<Double> dataForAngleAndWindSpeed = new ArrayList<Double>();
         int windSpeedLevel = stepping.getLevelForValue(windSpeed);
 
+        double mean = generationResultData.getAveragedPolarDataByWindSpeed()[windSpeedLevel][angle].doubleValue();
+        
+        double partOfVariance = 0;
+        
         for (BoatAndWindSpeed dataPoint: dataForAngle) {
             if ((stepping.getLevelForValue(dataPoint.getWindSpeed().getKnots()) == windSpeedLevel)) {
-                dataForAngleAndWindSpeed.add(dataPoint.getBoatSpeed().getKnots());
+                double speed = dataPoint.getBoatSpeed().getKnots();
+                partOfVariance = partOfVariance + Math.pow((speed - mean), 2); 
+                dataForAngleAndWindSpeed.add(speed);
             }
         }
-
+        
         if (dataForAngleAndWindSpeed.size() < 1) {
             //TODO exception handling
             return null;
         }
+        
+        double variance = partOfVariance / dataForAngleAndWindSpeed.size();
+        
+        double standardDeviator = Math.sqrt(variance);
 
         Double min = Collections.min(dataForAngleAndWindSpeed);
         Double max = Collections.max(dataForAngleAndWindSpeed);
@@ -3045,7 +3058,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             yValues[i]++;
         }
 
-        PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, dataForAngleAndWindSpeed.size());
+        PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, dataForAngleAndWindSpeed.size(), standardDeviator);
         session.setAttribute(partIdentifier, histogramData);
 
         return histogramData;

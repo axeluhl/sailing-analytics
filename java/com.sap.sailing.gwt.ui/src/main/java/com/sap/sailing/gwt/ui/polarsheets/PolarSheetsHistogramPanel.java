@@ -43,7 +43,7 @@ public class PolarSheetsHistogramPanel extends DockLayoutPanel {
     public void setData(PolarSheetsHistogramData data) {
         chart.removeAllSeries();
         chart.setTitle(new ChartTitle().setText(stringMessages.histogram()),
-                new ChartSubtitle().setText(stringMessages.angleAndTotalNumberOfDataPoints(data.getAngle(), data.getDataCount())));
+                new ChartSubtitle().setText(stringMessages.angleAndTotalNumberOfDataPointsAndStandardDeviator(data.getAngle(), data.getDataCount(), data.getStandardDeviator())));
         Point[] points = toPoints(data);
         Series series = chart.createSeries();
         series.setPoints(points);
