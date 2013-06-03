@@ -1,7 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import android.app.AlertDialog;
-import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;

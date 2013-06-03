@@ -55,7 +55,7 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.named_list_fragment, container, false);
+        return inflater.inflate(R.layout.list_fragment, container, false);
     }
 
     @Override

@@ -3,7 +3,7 @@
     <item android:id="@+id/options_menu_live"
           android:icon="@drawable/ic_menu_share_local"
           android:title="@string/options_menu_live"
-          android:showAsAction="always" />
+          android:showAsAction="ifRoom" />
     <item android:id="@+id/options_menu_wind"
           android:icon="@drawable/ic_menu_btn_wind"
           android:title="@string/options_menu_wind"
