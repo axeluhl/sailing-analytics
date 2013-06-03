@@ -347,8 +347,12 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
         cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
-        cp -v $PROJECT_HOME/java/target/start $ACDIR/
-        cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+
+        # avoid overwriting start configuration if it exists
+        if [ ! -f $ACDIR/start ]; then
+            cp -v $PROJECT_HOME/java/target/start $ACDIR/
+            cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+        fi
     fi
 
     cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
