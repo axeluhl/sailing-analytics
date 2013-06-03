@@ -168,6 +168,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new CellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
+        leaderboardTable.ensureDebugId("AvailableLeaderboardsTable");
         ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
                 leaderboardList.getList());
 
@@ -1023,7 +1024,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
     private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
         sailingService.updateLeaderboard(oldLeaderboardName, leaderboardToUpdate.getName(), leaderboardToUpdate.getDisplayName(),
-                leaderboardToUpdate.getDiscardThresholds(), new AsyncCallback<Void>() {
+                leaderboardToUpdate.getDiscardThresholds(), leaderboardToUpdate.getCourseAreaIdAsString(), new AsyncCallback<StrippedLeaderboardDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to update leaderboard " + oldLeaderboardName + ": "
@@ -1031,16 +1032,16 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             }
 
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(StrippedLeaderboardDTO updatedLeaderboard) {
+                int indexOfLeaderboard = 0;
                 for (int i = 0; i < leaderboardList.getList().size(); i++) {
                     StrippedLeaderboardDTO dao = leaderboardList.getList().get(i);
                     if (dao.name.equals(oldLeaderboardName)) {
-                        dao.name = leaderboardToUpdate.getName();
-                        dao.displayName = leaderboardToUpdate.getDisplayName();
-                        dao.discardThresholds = leaderboardToUpdate.getDiscardThresholds();
+                        indexOfLeaderboard = i;
                         break;
                     }
                 }
+                leaderboardList.getList().set(indexOfLeaderboard, updatedLeaderboard);
                 leaderboardList.refresh();
             }
         });

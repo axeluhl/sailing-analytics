@@ -11,12 +11,10 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
@@ -73,76 +71,28 @@ public class LeaderboardGroupJsonGetServlet extends AbstractJsonHttpServlet {
                         Regatta regatta = regattaLeaderboard.getRegatta();
 
                         jsonLeaderboard.put("scoringScheme", leaderboard.getScoringScheme().getType());
-
-                        Iterable<? extends Series> regattaSeries = regatta.getSeries();
-                        // there should only be one series
-                        if(regattaSeries != null && Util.size(regattaSeries) == 1) {
-                            Series series = regattaSeries.iterator().next();
-                            jsonLeaderboard.put("seriesName", series.getName());
-                            jsonLeaderboard.put("regattaName", regatta.getName());
-
-                            JSONArray jsonFleetsEntries = new JSONArray();
-                            jsonLeaderboard.put("fleets", jsonFleetsEntries);
-                            for(Fleet fleet: series.getFleets()) {
-                                
-                                JSONObject jsonFleet = new JSONObject();
-                                jsonFleet.put("name", fleet.getName());
-                                jsonFleet.put("color", fleet.getColor() != null ? fleet.getColor().getAsHtml() : null);
-                                jsonFleet.put("ordering", fleet.getOrdering());
-                                jsonFleetsEntries.add(jsonFleet);
-                                
-                                JSONArray jsonRacesEntries = new JSONArray();
-                                jsonFleet.put("races", jsonRacesEntries);
-                                for(RaceColumnInSeries raceColumn: series.getRaceColumns()) {
-                                    JSONObject jsonRaceColumn = new JSONObject();
-                                    jsonRaceColumn.put("name", raceColumn.getName());
-                                    jsonRaceColumn.put("isMedalRace" , raceColumn.isMedalRace());
-                                    
-                                    TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                                    if(trackedRace != null) {
-                                        jsonRaceColumn.put("isTracked", true);
-                                        jsonRaceColumn.put("trackedRaceName", trackedRace.getRace().getName());
-                                    } else {
-                                        jsonRaceColumn.put("isTracked", false);
-                                        jsonRaceColumn.put("trackedRaceName", null);
-                                    }
-                                    jsonRacesEntries.add(jsonRaceColumn);
-                                }
-                            }
-                        }
+                        jsonLeaderboard.put("regattaName", regatta.getName());
                     } else {
                         jsonLeaderboard.put("scoringScheme", leaderboard.getScoringScheme().getType());
-                        jsonLeaderboard.put("seriesName", "Default");
                         jsonLeaderboard.put("regattaName", null);
 
-                        JSONArray jsonFleetsEntries = new JSONArray();
-                        jsonLeaderboard.put("fleets", jsonFleetsEntries);
-                        
-                        Fleet fleet = leaderboard.getFleet("Default");
-                        if(fleet != null) {
-                            JSONObject jsonFleet = new JSONObject();
-                            jsonFleet.put("name", fleet.getName());
-                            jsonFleet.put("color", fleet.getColor() != null ? fleet.getColor().getAsHtml() : null);
-                            jsonFleet.put("ordering", fleet.getOrdering());
-                            jsonFleetsEntries.add(jsonFleet);
-                            
-                            JSONArray jsonRacesEntries = new JSONArray();
-                            jsonFleet.put("races", jsonRacesEntries);
-                            for(RaceColumn raceColumn: leaderboard.getRaceColumns()) {
-                                JSONObject jsonRaceColumn = new JSONObject();
-                                jsonRaceColumn.put("name", raceColumn.getName());
-                                jsonRaceColumn.put("isMedalRace" , raceColumn.isMedalRace());
+                        JSONArray jsonRacesEntries = new JSONArray();
+                        jsonLeaderboard.put("races", jsonRacesEntries);
+                        for(RaceColumn raceColumn: leaderboard.getRaceColumns()) {
+                            JSONObject jsonRaceColumn = new JSONObject();
+                            jsonRaceColumn.put("name", raceColumn.getName());
+                            jsonRaceColumn.put("isMedalRace" , raceColumn.isMedalRace());
 
+                            Fleet fleet = leaderboard.getFleet(LeaderboardNameConstants.DEFAULT_FLEET_NAME);
+                            if(fleet != null && raceColumn.getTrackedRace(fleet) != null) {
                                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                                if(trackedRace != null) {
-                                    jsonRaceColumn.put("isTracked", true);
-                                    jsonRaceColumn.put("trackedRaceName", trackedRace.getRace().getName());
-                                } else {
-                                    jsonRaceColumn.put("isTracked", false);
-                                    jsonRaceColumn.put("trackedRaceName", null);
-                                }
-                                jsonRacesEntries.add(jsonRaceColumn);
+                                jsonRaceColumn.put("isTracked", true);
+                                jsonRaceColumn.put("trackedRaceName", trackedRace.getRace().getName());                                
+                            } else {
+                                jsonRaceColumn.put("isTracked", false);
+                                jsonRaceColumn.put("trackedRaceName", null);
                             }
+                            jsonRacesEntries.add(jsonRaceColumn);
                         }
                     }
                 }

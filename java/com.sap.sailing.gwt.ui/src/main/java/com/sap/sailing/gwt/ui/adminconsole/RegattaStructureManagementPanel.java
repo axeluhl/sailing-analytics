@@ -133,7 +133,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
                 newRegatta.scoringScheme, newRegatta.defaultCourseAreaIdAsString, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to create new regatta" + newRegatta.name + ": " + t.getMessage());
+                errorReporter.reportError("Error trying to create new regatta " + newRegatta.name + ": " + t.getMessage());
             }
 
             @Override

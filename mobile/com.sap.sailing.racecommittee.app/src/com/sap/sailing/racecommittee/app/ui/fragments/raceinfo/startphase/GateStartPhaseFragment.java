@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.os.Bundle;
@@ -22,6 +24,7 @@ import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartPhaseEventListener;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartProcedure;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
@@ -95,13 +98,19 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
         pathFinderButton = (Button) getView().findViewById(R.id.pathFinderButton);
         lineOpeningTimeButton = (Button) getView().findViewById(R.id.lineOpeningTimeButton);
         pathfinderLabel = (TextView) getView().findViewById(R.id.pathfinderLabel);
-        if(getRace().getState().getPathfinder()!=null){
-            pathfinderLabel.setText(getRace().getState().getPathfinder());
-        }
         lineOpeningTimeLabel = (TextView) getView().findViewById(R.id.lineOpeningTimeLabel);
-        if(getRace().getState().getGateLineOpeningTime()!=null){
-            lineOpeningTimeLabel.setText(String.valueOf(getRace().getState().getGateLineOpeningTime()/(60 * 1000))+" minutes");
+        
+        if(getRace().getState().getStartProcedure() instanceof GateStartProcedure){
+            GateStartProcedure gateStartProcedure = ((GateStartProcedure) getRace().getState().getStartProcedure());
+            if(gateStartProcedure.getPathfinder()!=null){
+                pathfinderLabel.setText(gateStartProcedure.getPathfinder());
+            }
+            if(gateStartProcedure.getGateLineOpeningTime()!=null){
+                lineOpeningTimeLabel.setText(String.valueOf(gateStartProcedure.getGateLineOpeningTime()/(60 * 1000))+" minutes");
+            }
         }
+        
+       
         pathFinderButton.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
@@ -194,9 +203,9 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
     }
 
     private void setNextFlagCountdownLabel(long millisecondsTillStart) {
-        Pair<String, Long> countDownPair = getRace().getState().getStartProcedure().getNextFlagCountdownUiLabel(getActivity(), millisecondsTillStart);
-        nextFlagCountdown.setText(String.format(countDownPair.getA(),
-                TimeUtils.prettyString(countDownPair.getB().longValue())));
+        Pair<String, List<Object>> countdownStringPackage = getRace().getState().getStartProcedure().getNextFlagCountdownUiLabel(getActivity(), millisecondsTillStart);
+        nextFlagCountdown.setText(String.format(countdownStringPackage.getA(),
+                TimeUtils.prettyString(((Number) countdownStringPackage.getB().get(0)).longValue())));
     }
 
     protected void showAPModeDialog() {
@@ -233,15 +242,22 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
 
     @Override
     public void updatePathfinderLabel() {
-        if (getRace().getState().getPathfinder() != null) {
-            pathfinderLabel.setText(getRace().getState().getPathfinder());
+        if (getRace().getState().getStartProcedure() instanceof GateStartProcedure) {
+            GateStartProcedure gateStartProcedure = ((GateStartProcedure) getRace().getState().getStartProcedure());
+            if (gateStartProcedure.getPathfinder() != null) {
+                pathfinderLabel.setText(gateStartProcedure.getPathfinder());
+            }
         }
     }
 
     @Override
     public void updateGateLineOpeningTimeLabel() {
-        if (getRace().getState().getGateLineOpeningTime() != null) {
-            lineOpeningTimeLabel.setText(String.valueOf(getRace().getState().getGateLineOpeningTime()/(60 * 1000))+" minutes");
+        if (getRace().getState().getStartProcedure() instanceof GateStartProcedure) {
+            GateStartProcedure gateStartProcedure = ((GateStartProcedure) getRace().getState().getStartProcedure());
+            if (gateStartProcedure.getGateLineOpeningTime() != null) {
+                lineOpeningTimeLabel.setText(String.valueOf(gateStartProcedure.getGateLineOpeningTime() / (60 * 1000))
+                        + " minutes");
+            }
         }
     }
 }

@@ -52,7 +52,7 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Pair<Intent, Intege
             }
             ExLog.i(TAG, "Post successful for the following event: " + serializedEvent);
         } catch (Exception e) {
-            ExLog.e(TAG, String.format("Post not successful, exception occured: ", e.toString()));
+            ExLog.e(TAG, String.format("Post not successful, exception occured: %s", e.toString()));
             return Pair.create(intent, -1);
         }
         return Pair.create(intent, 0);

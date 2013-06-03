@@ -1,23 +1,28 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class UpdateLeaderboard extends AbstractLeaderboardOperation<Void> {
+public class UpdateLeaderboard extends AbstractLeaderboardOperation<Leaderboard> {
     private static final long serialVersionUID = -8040361040050151768L;
     private final String newLeaderboardName;
     private final String newLeaderboardDisplayName;
     private final int[] newDiscardingThresholds;
+    private final Serializable newCourseAreaId;
     
-    public UpdateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThresholds) {
+    public UpdateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThresholds, Serializable newCourseAreaId) {
         super(leaderboardName);
         this.newLeaderboardName = newLeaderboardName;
         this.newLeaderboardDisplayName = newLeaderboardDisplayName;
         this.newDiscardingThresholds = newDiscardingThresholds;
+        this.newCourseAreaId = newCourseAreaId;
     }
 
     @Override
@@ -33,7 +38,7 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Void> {
     }
 
     @Override
-    public Void internalApplyTo(RacingEventService toState) {
+    public Leaderboard internalApplyTo(RacingEventService toState) {
         if (!getLeaderboardName().equals(newLeaderboardName)) {
             toState.renameLeaderboard(getLeaderboardName(), newLeaderboardName);
         }
@@ -42,8 +47,16 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Void> {
             leaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(newDiscardingThresholds));
         }
         leaderboard.setDisplayName(newLeaderboardDisplayName);
+        
+        if (leaderboard instanceof FlexibleLeaderboard) {
+            FlexibleLeaderboard flexibleLeaderboard = (FlexibleLeaderboard) leaderboard;
+            CourseArea newCourseArea = toState.getCourseArea(newCourseAreaId);
+            if (newCourseArea != flexibleLeaderboard.getDefaultCourseArea()) {
+                flexibleLeaderboard.setDefaultCourseArea(newCourseArea);
+            }
+        }
         updateStoredLeaderboard(toState, leaderboard);
-        return null;
+        return leaderboard;
     }
 
 }

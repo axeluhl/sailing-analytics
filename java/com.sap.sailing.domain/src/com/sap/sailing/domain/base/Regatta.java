@@ -18,7 +18,17 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 public interface Regatta extends Named, WithID {
     ScoringScheme getScoringScheme();
     
+    /**
+     * Gets the course area for all races of this {@link Regatta}.
+     * @return the {@link CourseArea} object.
+     */
     CourseArea getDefaultCourseArea();
+
+    /**
+     * Sets the course area for all races of this {@link Regatta}.
+     * @param newCourseArea {@link CourseArea} to be set.
+     */
+    void setDefaultCourseArea(CourseArea newCourseArea);
     
     /**
      * A regatta consists of one or more series.

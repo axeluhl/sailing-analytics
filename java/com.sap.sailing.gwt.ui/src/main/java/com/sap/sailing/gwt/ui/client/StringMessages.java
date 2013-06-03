@@ -589,6 +589,10 @@ public interface StringMessages extends Messages {
     String filterNothing();
     String topNCompetitorsByRaceRank(int n);
     String topNCompetitorsByTotalRank(int n);
+    
+    String editRegatta();
+    String selectSailingEvent();
+    String selectCourseArea();
 
     /*Start of simulator related messages*/
     String simulator();
@@ -636,4 +640,13 @@ public interface StringMessages extends Messages {
     String freemode();
     String whatIfCourse();
     /*End of simulator related messages*/
+    
+    String courseAreaOverview();
+    String courseDesignOverview();
+    String regattaOverview();
+    String additionalSettings();
+    String showFollowingCourseAreas();
+    String showFollowingRegattas();
+    String showOnlyRacesOfSameDay();
+    String showOnlyCurrentlyRunningRaces();
 }

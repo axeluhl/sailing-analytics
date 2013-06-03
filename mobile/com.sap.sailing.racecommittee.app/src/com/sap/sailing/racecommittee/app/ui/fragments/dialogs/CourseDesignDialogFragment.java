@@ -107,9 +107,9 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         courseElements = new ArrayList<CourseListDataElement>();
         previousCourseElements = new ArrayList<CourseListDataElement>();
 
-        gridAdapter = new MarkGridAdapter(getActivity(), R.layout.welter_one_row_no_image, aMarkList);
-        courseElementAdapter = new DraggableCourseElementListAdapter(getActivity(), R.layout.welter_draggable_waypoint_item, courseElements);
-        previousCourseElementAdapter = new CourseElementListAdapter(getActivity(), R.layout.welter_one_row_three_columns, previousCourseElements);
+        gridAdapter = new MarkGridAdapter(getActivity(), aMarkList);
+        courseElementAdapter = new DraggableCourseElementListAdapter(getActivity(), courseElements);
+        previousCourseElementAdapter = new CourseElementListAdapter(getActivity(), previousCourseElements);
         
         loadMarks();
         loadCourseOnServer();
@@ -177,10 +177,11 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
 
             public void onClick(View arg0) {
                 if (!previousCourseElements.isEmpty()) {
-                    if (!courseElements.isEmpty())
+                    if (!courseElements.isEmpty()) {
                         createUsePreviousCourseDialog();
-                    else
+                    } else {
                         copyPreviousToNewCourseDesign();
+                    }
                 }
                 else {
                     Toast.makeText(getActivity(), "No course available to copy", Toast.LENGTH_LONG).show();
@@ -254,9 +255,9 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
 
             @Override
             public void onLoadSucceded(CourseBase data) {
-                if (Util.size(data.getWaypoints()) > 0) {
+                /*if (Util.size(data.getWaypoints()) > 0) {
                     fillPreviousCourseElementsInList(data);
-                } else {
+                } else*/ {
                     fillPreviousCourseElementsWithLastPublishedCourseDesign();
                 }
                 

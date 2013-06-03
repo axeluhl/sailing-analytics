@@ -45,7 +45,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private final ScoringScheme scoringScheme;
     private String name;
     private transient RaceLogStore raceLogStore;
-    private final CourseArea courseArea;
+    private CourseArea courseArea;
 
     public FlexibleLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoringScheme, CourseArea courseArea) {
@@ -233,6 +233,11 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     @Override
     public CourseArea getDefaultCourseArea() {
         return courseArea;
+    }
+
+    @Override
+    public void setDefaultCourseArea(CourseArea newCourseArea) {
+        this.courseArea = newCourseArea;
     }
 
 }

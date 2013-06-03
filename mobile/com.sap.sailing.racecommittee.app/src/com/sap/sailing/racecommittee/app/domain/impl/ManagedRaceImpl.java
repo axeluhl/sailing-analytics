@@ -11,7 +11,6 @@ import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
-import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
@@ -29,7 +28,7 @@ public class ManagedRaceImpl implements ManagedRace {
     private CourseBase courseOnServer;
 
     public ManagedRaceImpl(ManagedRaceIdentifier identifier, StartProcedureType defaultStartProcedureType,
-            PassAwareRaceLog raceLog) {
+            RaceLog raceLog) {
         this(identifier, new RaceStateImpl(defaultStartProcedureType, raceLog));
     }
 
