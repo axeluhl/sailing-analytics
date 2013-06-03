@@ -338,9 +338,6 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     rm -rf $ACDIR/configuration/org.eclipse.*
 
     if [[ $HAS_OVERWRITTEN_TARGET -eq 0 ]]; then
-        rm -rf $ACDIR/start
-        rm -rf $ACDIR/stop
-
         cp -v $p2PluginRepository/configuration/config.ini configuration/
         mkdir -p configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
