@@ -481,12 +481,10 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 cloner.clone(competitorAndRow.getValue(), newRowDTO);
                 newRows.put(competitorAndRow.getKey(), newRowDTO);
                 HashMap<String, LeaderboardEntryDTO> newFieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
-                for (Map.Entry<String, LeaderboardEntryDTO> raceColumnNameAndLeaderboardEntry : newRowDTO.fieldsByRaceColumnName
-                        .entrySet()) {
+                for (Map.Entry<String, LeaderboardEntryDTO> raceColumnNameAndLeaderboardEntry : newRowDTO.fieldsByRaceColumnName.entrySet()) {
                     LeaderboardEntryDTO previousEntryDTO = null;
                     if (previousRowDTO != null) {
-                        previousEntryDTO = previousRowDTO.fieldsByRaceColumnName.get(raceColumnNameAndLeaderboardEntry
-                                .getKey());
+                        previousEntryDTO = previousRowDTO.fieldsByRaceColumnName.get(raceColumnNameAndLeaderboardEntry.getKey());
                     }
                     if (previousEntryDTO != null
                             && Util.equalsWithNull(raceColumnNameAndLeaderboardEntry.getValue(), previousEntryDTO)) {

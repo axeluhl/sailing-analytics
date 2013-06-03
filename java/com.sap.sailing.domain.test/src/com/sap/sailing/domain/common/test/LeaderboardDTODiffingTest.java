@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -125,6 +126,30 @@ public class LeaderboardDTODiffingTest {
         newVersion.strip(previousVersion);
         assertNotNull(newVersion.rows);
         assertEquals(previousVersion.rows.size()-17, newVersion.rows.size()); // all rows have changed except for 17 that have no leg details in leg 8
+        // now assert that for all rows there is no leaderboard entry for all races but R9 and
+        // for R9 there either are no leg details or all leg details for all legs other than L8 are null
+        for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : newVersion.rows.entrySet()) {
+            if (e.getValue().fieldsByRaceColumnName != null) {
+                assertTrue(e.getValue().fieldsByRaceColumnName.size() <= 1);
+                for (Map.Entry<String, LeaderboardEntryDTO> e2 : e.getValue().fieldsByRaceColumnName.entrySet()) {
+                    if (e2.getKey().equals(nameOfRaceColumnToChange)) {
+                        List<LegEntryDTO> r9LegDetails = e2.getValue().legDetails;
+                        if (r9LegDetails != null) {
+                            for (int i=0; i<r9LegDetails.size(); i++) {
+                                if (i != indexOfLegToChange) {
+                                    assertNull(r9LegDetails.get(i));
+                                } else {
+                                    assertNotNull(r9LegDetails.get(i));
+                                }
+                            }
+                        }
+                    } else {
+                        // if there is an entry for any column other than R9 (which is not really expected) then the entry is expected to be null
+                        assertNull(e2.getValue());
+                    }
+                }
+            }
+        }
         LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
         assertEquals(rowsBeforeStripping, applied.rows);
     }
