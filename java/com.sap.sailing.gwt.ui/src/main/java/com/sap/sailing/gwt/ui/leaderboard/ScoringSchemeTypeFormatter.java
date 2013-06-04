@@ -14,6 +14,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeHighPointEssOverall();
         case HIGH_POINT_LAST_BREAKS_TIE:
             return stringMessages.scoringSchemeHighPointLastBreaksTie();
+        case HIGH_POINT_FIRST_GETS_ONE:
+            return stringMessages.scoringSchemeHighPointFirstGetsOne();
         case HIGH_POINT_FIRST_GETS_TEN:
             return stringMessages.scoringSchemeHighPointFirstGetsTen();
         case LOW_POINT_WINNER_GETS_ZERO:

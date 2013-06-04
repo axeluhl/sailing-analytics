@@ -88,7 +88,6 @@ public class LeaderboardDTOCache implements LeaderboardCache {
             }
         };
         this.leaderboardCacheManager = new LeaderboardCacheManager(this);
-        this.leaderboardCacheManager.add(leaderboard);
     }
     
     @Override
@@ -159,6 +158,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
                 }
             });
             computeLeadearboardByNameExecutor.execute(future);
+            this.leaderboardCacheManager.add(leaderboard); // ensure the leaderboard is tracked for changes to invalidate
             leaderboardCache.put(key, future);
         } else {
             cacheHit = true;

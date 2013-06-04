@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.impl.rc;
+package com.sap.sailing.server.gateway.impl;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -32,10 +32,10 @@ import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 
-public class RegattaRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
+public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = -4820965681871902242L;
     
-    private final static Logger logger = Logger.getLogger(RegattaRaceStatesJsonGetServlet.class.getName());
+    private final static Logger logger = Logger.getLogger(EventRaceStatesJsonGetServlet.class.getName());
 
     private static final String PARAM_NAME_EVENTID = "eventId";
     private static final String PARAM_NAME_FILTER_BY_COURSEAREA = "filterByCourseArea";
