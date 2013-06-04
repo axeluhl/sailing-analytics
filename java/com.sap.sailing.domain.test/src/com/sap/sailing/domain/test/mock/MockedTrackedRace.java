@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test.mock;
 import java.io.Serializable;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -191,8 +192,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
-        // TODO Auto-generated method stub
-        return null;
+        return new TreeSet<MarkPassing>();
     }
 
     @Override

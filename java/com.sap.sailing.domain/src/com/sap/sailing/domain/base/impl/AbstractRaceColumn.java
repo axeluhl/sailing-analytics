@@ -101,7 +101,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public synchronized void releaseTrackedRace(Fleet fleet) {
-        trackedRaces.remove(fleet);
+        setTrackedRace(fleet, null);
     }
 
     @Override
