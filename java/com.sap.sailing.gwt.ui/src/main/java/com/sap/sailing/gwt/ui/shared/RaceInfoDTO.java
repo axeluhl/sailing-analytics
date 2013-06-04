@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -24,7 +23,7 @@ public class RaceInfoDTO implements IsSerializable {
     public String pathfinderId;
     public Long gateLineOpeningTime;
     public boolean isRaceAbortedInPassBefore;
-    public String seriesName = LeaderboardNameConstants.DEFAULT_SERIES_NAME;
+    public String seriesName;
     
     // for GWT serialization
     public RaceInfoDTO() { }
