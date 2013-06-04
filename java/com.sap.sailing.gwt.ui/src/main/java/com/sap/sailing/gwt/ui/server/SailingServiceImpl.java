@@ -483,7 +483,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 final IncrementalLeaderboardDTO cachedDiff;
                 if (previousLeaderboardId != null) {
-                    cachedDiff = leaderboardDifferenceCacheByIdPair.get(new Pair<String, String>(previousLeaderboardId, leaderboardDTO.getId()));
+                    synchronized (leaderboardDifferenceCacheByIdPair) {
+                        cachedDiff = leaderboardDifferenceCacheByIdPair.get(new Pair<String, String>(previousLeaderboardId, leaderboardDTO.getId()));
+                    }
                     if (cachedDiff == null) {
                         leaderboardDifferenceCacheByIdPairMisses++;
                     } else {
@@ -495,7 +497,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (previousLeaderboardDTO == null) {
                     result = new FullLeaderboardDTO(leaderboardDTO);
                 } else {
-                    result = cachedDiff != null ? cachedDiff : new IncrementalLeaderboardDTOCloner().clone(leaderboardDTO).strip(previousLeaderboardDTO);
+                    if (cachedDiff == null) {
+                        IncrementalLeaderboardDTO preResult = new IncrementalLeaderboardDTOCloner().clone(leaderboardDTO).strip(previousLeaderboardDTO);
+                        synchronized (leaderboardDifferenceCacheByIdPair) {
+                            leaderboardDifferenceCacheByIdPair.put(new Pair<String, String>(previousLeaderboardId, leaderboardDTO.getId()), preResult);
+                        }
+                        result = preResult;
+                    } else {
+                        result = cachedDiff;
+                    }
                 }
                 logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
                         + namesOfRaceColumnsForWhichToLoadLegDetails + ") took "
