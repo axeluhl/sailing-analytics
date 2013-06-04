@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -171,6 +172,7 @@ import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
+import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesComparator;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
@@ -489,8 +491,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal());
         return result;
     }
-
-    private RaceInfoDTO createRaceInfoDTO(RaceColumn raceColumn, Fleet fleet) {
+    
+    private RaceInfoDTO createRaceInfoDTO(String seriesName, RaceColumn raceColumn, Fleet fleet) {
         RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
@@ -544,6 +546,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             LastPublishedCourseDesignFinder courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
             raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(courseDesignFinder.getLastCourseDesign());
         }
+        raceInfoDTO.seriesName = seriesName;
         raceInfoDTO.raceName = raceColumn.getName();
         raceInfoDTO.fleetName = fleet.getName();
         raceInfoDTO.fleetOrdering = fleet.getOrdering();
@@ -2454,46 +2457,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return raceGroups;
     }
-    
-    @Override
-    public List<RegattaOverviewEntryDTO> getRegattaOverviewEntriesForEvent(String eventIdAsString) {
-        List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
-        Event event = getService().getEvent(convertIdentifierStringToUuid(eventIdAsString));
-        if (event != null) {
-            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
-                    if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea().equals(courseArea)) {
-                        String regattaName = getRegattaNameFromLeaderboard(leaderboard);
-                        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                            for (Fleet fleet : raceColumn.getFleets()) {
-                                RegattaOverviewEntryDTO entry = new RegattaOverviewEntryDTO();
-                                entry.courseAreaName = courseArea.getName();
-                                entry.courseAreaIdAsString = courseArea.getId().toString();
-                                entry.regattaDisplayName = regattaName;
-                                entry.regattaName = leaderboard.getName();
-                                entry.raceInfo = createRaceInfoDTO(raceColumn, fleet);
-                                result.add(entry);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return result;
-    }
 
     private String getRegattaNameFromLeaderboard(Leaderboard leaderboard) {
         String regattaName;
-        if (leaderboard instanceof RegattaLeaderboard) {
-            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
-            if (regattaLeaderboard.getDisplayName() != null) {
-                regattaName = regattaLeaderboard.getDisplayName();
-            } else {
-                regattaName = regattaLeaderboard.getRegatta().getName();
-            }
+        if (leaderboard.getDisplayName() != null) {
+            regattaName = leaderboard.getDisplayName();
         } else {
-            if (leaderboard.getDisplayName() != null) {
-                regattaName = leaderboard.getDisplayName();
+            if (leaderboard instanceof RegattaLeaderboard) {
+                RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                regattaName = regattaLeaderboard.getRegatta().getName();
             } else {
                 regattaName = leaderboard.getName();
             }
@@ -2837,5 +2809,148 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
         return baseDomainFactory;
+    }
+
+    @Override
+    public List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(String eventIdAsString, List<String> visibleCourseAreaIdsAsString, 
+            List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay) {
+        List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
+        
+        Calendar dayToCheck = Calendar.getInstance();
+        dayToCheck.setTime(new Date());
+        
+        Event event = getService().getEvent(convertIdentifierStringToUuid(eventIdAsString));
+        if (event != null) {
+            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                if (!visibleCourseAreaIdsAsString.contains(courseArea.getId().toString())) {
+                    continue;
+                }
+                for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
+                    if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea().equals(courseArea)) {
+                        if (!visibleRegattas.contains(leaderboard.getName())) {
+                            continue;
+                        }
+                        String regattaName = getRegattaNameFromLeaderboard(leaderboard);
+                        if (leaderboard instanceof RegattaLeaderboard) {
+                            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                            for (Series series : regattaLeaderboard.getRegatta().getSeries()) {
+                                Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet = new HashMap<String, List<RegattaOverviewEntryDTO>>();
+                                for (RaceColumn raceColumn : series.getRaceColumns()) {
+                                    getRegattaOverviewEntries(showOnlyRacesOfSameDay, dayToCheck,
+                                            courseArea, leaderboard, regattaName, series.getName(), raceColumn, entriesPerFleet);
+                                }
+                                result.addAll(getRegattaOverviewEntriesToBeShown(showOnlyCurrentlyRunningRaces, entriesPerFleet));
+                            }
+
+                        } else {
+                            Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet = new HashMap<String, List<RegattaOverviewEntryDTO>>();
+                            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                                getRegattaOverviewEntries(showOnlyRacesOfSameDay, dayToCheck, courseArea,
+                                        leaderboard, regattaName, LeaderboardNameConstants.DEFAULT_SERIES_NAME, raceColumn, entriesPerFleet);
+                            }
+                            result.addAll(getRegattaOverviewEntriesToBeShown(showOnlyCurrentlyRunningRaces, entriesPerFleet));
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    private void getRegattaOverviewEntries(boolean showOnlyRacesOfSameDay, Calendar dayToCheck,
+            CourseArea courseArea, Leaderboard leaderboard, String regattaName, String seriesName, RaceColumn raceColumn,
+            Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet) {
+
+        for (Fleet fleet : raceColumn.getFleets()) {
+            RegattaOverviewEntryDTO entry = createRegattaOverviewEntryDTO(courseArea,
+                    leaderboard, regattaName, seriesName, raceColumn, fleet, 
+                    showOnlyRacesOfSameDay, dayToCheck);
+            if (entry != null) {
+                addRegattaOverviewEntryToEntriesPerFleet(entriesPerFleet, fleet, entry);
+            }
+        }
+    }
+
+    private List<RegattaOverviewEntryDTO> getRegattaOverviewEntriesToBeShown(boolean showOnlyCurrentlyRunningRaces,
+            Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet) {
+        List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
+        for (List<RegattaOverviewEntryDTO> entryList : entriesPerFleet.values()) {
+            Collections.sort(entryList, new RegattaRaceStatesComparator());
+            result.addAll(entryList);
+            if (showOnlyCurrentlyRunningRaces) {
+                int numberOfFinishedRaces = 0;
+                
+                for (RegattaOverviewEntryDTO entry : entryList) {
+                    if (!isRaceActiveAccordingToRaceLog(entry.raceInfo.lastStatus)) {
+                        if (entry.raceInfo.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
+                            if (numberOfFinishedRaces > 0) {
+                                result.remove(entry);
+                            }
+                            numberOfFinishedRaces++;
+                        } else if (entry.raceInfo.lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
+                            //don't filter when the race is unscheduled and aborted before
+                            if (!entry.raceInfo.isRaceAbortedInPassBefore) {
+                                result.remove(entry);
+                            }
+                            
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    private void addRegattaOverviewEntryToEntriesPerFleet(Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet,
+            Fleet fleet, RegattaOverviewEntryDTO entry) {
+        if (!entriesPerFleet.containsKey(fleet.getName())) {
+           entriesPerFleet.put(fleet.getName(), new ArrayList<RegattaOverviewEntryDTO>()); 
+        }
+        entriesPerFleet.get(fleet.getName()).add(entry);
+    }
+    
+    private boolean isRaceActiveAccordingToRaceLog(RaceLogRaceStatus status) {
+        return status.equals(RaceLogRaceStatus.SCHEDULED) || status.equals(RaceLogRaceStatus.STARTPHASE)
+                || status.equals(RaceLogRaceStatus.RUNNING) || status.equals(RaceLogRaceStatus.FINISHING);
+    }
+
+    private RegattaOverviewEntryDTO createRegattaOverviewEntryDTO(CourseArea courseArea, Leaderboard leaderboard,
+            String regattaName, String seriesName, RaceColumn raceColumn, Fleet fleet, boolean showOnlyRacesOfSameDay, Calendar dayToCheck) {
+        RegattaOverviewEntryDTO entry = new RegattaOverviewEntryDTO();
+        entry.courseAreaName = courseArea.getName();
+        entry.courseAreaIdAsString = courseArea.getId().toString();
+        entry.regattaDisplayName = regattaName;
+        entry.regattaName = leaderboard.getName();
+        entry.raceInfo = createRaceInfoDTO(seriesName, raceColumn, fleet);
+        
+        if (showOnlyRacesOfSameDay) {
+            if (!isRaceStateOfSameDay(entry.raceInfo, dayToCheck)) {
+                entry = null;
+            }
+        }
+        return entry;
+    }
+    
+    private boolean isRaceStateOfSameDay(RaceInfoDTO raceInfo, Calendar now) {
+        boolean result = false;
+        if (raceInfo.finishedTime != null) {
+            Calendar finishedTimeCal = Calendar.getInstance();
+            finishedTimeCal.setTime(raceInfo.finishedTime);
+            if(isSameDay(now, finishedTimeCal)) {
+                result = true;
+            }
+        } else if (raceInfo.startTime != null) {
+            Calendar startTimeCal = Calendar.getInstance();
+            startTimeCal.setTime(raceInfo.startTime);
+            if(isSameDay(now, startTimeCal)) {
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    private boolean isSameDay(Calendar cal1, Calendar cal2) {
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 }

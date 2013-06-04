@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.regattaoverview;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -106,8 +105,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
         mainPanel.add(regattaOverviewTable);
         setWidget(mainPanel);
-        
-        loadAndUpdateEventLog();
     }
 
     protected List<RegattaOverviewEntryDTO> getSelectedRaces() {
@@ -129,109 +126,32 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private void updateTable(List<RegattaOverviewEntryDTO> newEntries) {
         allEntries = newEntries;
         
-        List<RegattaOverviewEntryDTO> filteredRegattaRaces = getFilteredRegattaRaces(allEntries);
-        Collections.sort(filteredRegattaRaces, new RegattaRaceStatesComparator()); //sort entries after filtering
-        List<RegattaOverviewEntryDTO> racesToBeShown = getCurrentlyRunningRaces(filteredRegattaRaces);
-        racesToBeShown = getRacesOfSameDay(racesToBeShown);
+        Collections.sort(allEntries, new RegattaRaceStatesComparator()); //sort entries
         
         regattaOverviewDataProvider.getList().clear();
-        regattaOverviewDataProvider.getList().addAll(racesToBeShown);
+        regattaOverviewDataProvider.getList().addAll(allEntries);
         // now sort again according to selected criterion
         ColumnSortEvent.fire(regattaOverviewTable, regattaOverviewTable.getColumnSortList());
     }
 
-    private List<RegattaOverviewEntryDTO> getRacesOfSameDay(List<RegattaOverviewEntryDTO> filteredEntries) {
-        List<RegattaOverviewEntryDTO> racesToBeShown = new ArrayList<RegattaOverviewEntryDTO>(filteredEntries);
-        if (settings.isShowOnlyRacesOfSameDay()) {
-            Calendar dayToCheck = Calendar.getInstance();
-            dayToCheck.setTime(new Date());
-            
-            for (RegattaOverviewEntryDTO entry : filteredEntries) {
-                if (!isRaceStateOfSameDay(entry.raceInfo, dayToCheck)) {
-                    racesToBeShown.remove(entry);
-                }
-            }
-        }
-        return racesToBeShown;
-    }
-
-    private List<RegattaOverviewEntryDTO> getCurrentlyRunningRaces(List<RegattaOverviewEntryDTO> filteredEntries) {
-        List<RegattaOverviewEntryDTO> racesToBeShown = new ArrayList<RegattaOverviewEntryDTO>(filteredEntries);
-        if (settings.isShowOnlyCurrentlyRunningRaces()) {
-            String currentRegattaName = "";
-            String currentFleetName = "";
-            int numberOfFinishedRacesOfCurrentRegattaFleet = 0;
-            for (RegattaOverviewEntryDTO entry : filteredEntries) {
-                if (!currentRegattaName.equals(entry.regattaDisplayName) || !currentFleetName.equals(entry.raceInfo.fleetName)) {
-                    currentRegattaName = entry.regattaDisplayName;
-                    currentFleetName = entry.raceInfo.fleetName;
-                    numberOfFinishedRacesOfCurrentRegattaFleet = 0;
-                }
-                if (!isRaceActive(entry.raceInfo.lastStatus)) {
-                    if (entry.raceInfo.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
-                        if (numberOfFinishedRacesOfCurrentRegattaFleet > 0) {
-                            racesToBeShown.remove(entry);
-                        }
-                        numberOfFinishedRacesOfCurrentRegattaFleet++;
-                    } else if (entry.raceInfo.lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
-                        //don't filter when the race is unscheduled and aborted before
-                        if (!entry.raceInfo.isRaceAbortedInPassBefore) {
-                            racesToBeShown.remove(entry);
-                        }
-                        
-                    }
-                }
-            }
-        }
-        return racesToBeShown;
-    }
-
-    private List<RegattaOverviewEntryDTO> getFilteredRegattaRaces(List<RegattaOverviewEntryDTO> raceList) {
-        List<RegattaOverviewEntryDTO> filteredEntries = new ArrayList<RegattaOverviewEntryDTO>(raceList);
-        
-        if (!settings.getVisibleCourseAreas().isEmpty() || !settings.getVisibleRegattas().isEmpty()) {
-            for (RegattaOverviewEntryDTO entry : raceList) {
-                if (!settings.getVisibleCourseAreas().isEmpty()) {
-                    if (!settings.getVisibleCourseAreas().contains(entry.courseAreaIdAsString)) {
-                        filteredEntries.remove(entry);
-                        continue;
-                    }
-                }
-
-                if (!settings.getVisibleRegattas().isEmpty()) {
-                    if (!settings.getVisibleRegattas().contains(entry.regattaName)) {
-                        filteredEntries.remove(entry);
-                        continue;
-                    }
-                }
-            }
-        }
-        
-        return filteredEntries;
-    }
-
-    private boolean isRaceActive(RaceLogRaceStatus status) {
-        return status.equals(RaceLogRaceStatus.SCHEDULED) || status.equals(RaceLogRaceStatus.STARTPHASE)
-                || status.equals(RaceLogRaceStatus.RUNNING) || status.equals(RaceLogRaceStatus.FINISHING);
-    }
-
     protected void loadAndUpdateEventLog() {
-        if (eventIdAsString == null) {
+        if (eventIdAsString == null || eventDTO == null || raceGroupDTOs == null) {
             return;
         }
-        sailingService.getRegattaOverviewEntriesForEvent(eventIdAsString,
-                new MarkedAsyncCallback<List<RegattaOverviewEntryDTO>>() {
+        sailingService.getRaceStateEntriesForRaceGroup(eventIdAsString, settings.getVisibleCourseAreas(), settings.getVisibleRegattas(), 
+                settings.isShowOnlyCurrentlyRunningRaces(), settings.isShowOnlyRacesOfSameDay(), new MarkedAsyncCallback<List<RegattaOverviewEntryDTO>>() {
 
                     @Override
                     protected void handleFailure(Throwable cause) {
-
+                        
                     }
 
                     @Override
                     protected void handleSuccess(List<RegattaOverviewEntryDTO> result) {
                         updateTable(result);
                     }
-                });
+            
+        });
     }
 
     private CellTable<RegattaOverviewEntryDTO> createRegattaTable() {
@@ -470,6 +390,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     }
 
     private String getStatusText(RaceInfoDTO raceInfo) {
+        //TODO i8n
         String statusText = "";
         if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING) && raceInfo.lastUpperFlag.equals(Flags.XRAY)
                 && raceInfo.isLastFlagDisplayed) {
@@ -519,22 +440,14 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             settings.getVisibleCourseAreas().clear();
             settings.getVisibleCourseAreas().addAll(newSettings.getVisibleCourseAreas());
             
-            if (settings.getVisibleCourseAreas().isEmpty() && eventDTO != null) {
-                for (CourseAreaDTO courseArea : eventDTO.venue.getCourseAreas()) {
-                    settings.getVisibleCourseAreas().add(courseArea.id);
-                }
-            }
+            fillVisibleCourseAreasInSettingsIfEmpty();
         }
         
         if (settings.getVisibleRegattas().isEmpty() || !settings.getVisibleRegattas().equals(newSettings.getVisibleRegattas())) {
             settings.getVisibleRegattas().clear();
             settings.getVisibleRegattas().addAll(newSettings.getVisibleRegattas());
             
-            if (settings.getVisibleRegattas().isEmpty() && raceGroupDTOs != null) {
-                for (RaceGroupDTO raceGroup : raceGroupDTOs) {
-                    settings.getVisibleRegattas().add(raceGroup.name);
-                }
-            }
+            fillVisibleRegattasInSettingsIfEmpty();
         }
         
         if (settings.isShowOnlyRacesOfSameDay() != newSettings.isShowOnlyRacesOfSameDay()) {
@@ -544,9 +457,29 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         if (settings.isShowOnlyCurrentlyRunningRaces() != newSettings.isShowOnlyCurrentlyRunningRaces()) {
             settings.setShowOnlyCurrentlyRunningRaces(newSettings.isShowOnlyCurrentlyRunningRaces());
         }
-        //do not update the table when the entries are not loaded yet
-        if (!allEntries.isEmpty()) {
-            updateTable(allEntries);
+        
+        refreshTableWithNewSettings();
+    }
+
+    private void refreshTableWithNewSettings() {
+        if (eventDTO != null && raceGroupDTOs != null) {
+            loadAndUpdateEventLog();
+        }
+    }
+
+    private void fillVisibleRegattasInSettingsIfEmpty() {
+        if (settings.getVisibleRegattas().isEmpty() && raceGroupDTOs != null) {
+            for (RaceGroupDTO raceGroup : raceGroupDTOs) {
+                settings.getVisibleRegattas().add(raceGroup.name);
+            }
+        }
+    }
+
+    private void fillVisibleCourseAreasInSettingsIfEmpty() {
+        if (settings.getVisibleCourseAreas().isEmpty() && eventDTO != null) {
+            for (CourseAreaDTO courseArea : eventDTO.venue.getCourseAreas()) {
+                settings.getVisibleCourseAreas().add(courseArea.id);
+            }
         }
     }
 
@@ -559,34 +492,12 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     public Widget getEntryWidget() {
         return this;
     }
-    
-    private boolean isRaceStateOfSameDay(RaceInfoDTO raceInfo, Calendar now) {
-        boolean result = false;
-        //TODO to be shifted to SailingService. GWT cannot cope with java.util.Calendar
-        if (raceInfo.finishedTime != null) {
-            Calendar finishedTimeCal = Calendar.getInstance();
-            finishedTimeCal.setTime(raceInfo.finishedTime);
-            if(isSameDay(now, finishedTimeCal)) {
-                result = true;
-            }
-        } else if (raceInfo.startTime != null) {
-            Calendar startTimeCal = Calendar.getInstance();
-            startTimeCal.setTime(raceInfo.startTime);
-            if(isSameDay(now, startTimeCal)) {
-                result = true;
-            }
-        }
-        return result;
-    }
-
-    private boolean isSameDay(Calendar cal1, Calendar cal2) {
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
-    }
 
     @Override
     public void onEventUpdated(EventDTO event) {
         eventDTO = event;
+        fillVisibleCourseAreasInSettingsIfEmpty();
+        refreshTableWithNewSettings();
     }
 
     @Override
@@ -599,5 +510,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         if (!hasAnyRaceGroupAFleet()) {
             regattaOverviewTable.removeColumn(fleetNameColumn);
         }
+        fillVisibleRegattasInSettingsIfEmpty();
+        refreshTableWithNewSettings();
     }
 }

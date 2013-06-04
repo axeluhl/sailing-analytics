@@ -9,17 +9,19 @@ public class RegattaRaceStatesComparator implements Comparator<RegattaOverviewEn
 
     @Override
     public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+        //TODO this comparator should first call a comparator that compares the RaceGroupDTOs, then the raceNames in this comparator
         int result = left.courseAreaName.compareTo(right.courseAreaName);
         if (result == 0) {
             if (left.regattaDisplayName != null && right.regattaDisplayName != null) {
                 result = new NaturalComparator().compare(left.regattaDisplayName, right.regattaDisplayName);
             }
             if (result == 0) {
-              //TODO Caution: Series is missing!!!
+                result = left.raceInfo.seriesName.compareTo(right.raceInfo.seriesName);
+                if (result == 0) {
                 result = Integer.valueOf(left.raceInfo.fleetOrdering).compareTo(Integer.valueOf(right.raceInfo.fleetOrdering));
                 if (result == 0) {
-                    result = (-1) * new NaturalComparator().compare(right.raceInfo.raceName, left.raceInfo.raceName);
-                    //the naturalComparator sorts the other way round R30 < R29 < R28 etc., therefore the (-1) multiplication
+                    result = new NaturalComparator().compare(left.raceInfo.raceName, right.raceInfo.raceName);
+                }
                 }
             }
         }
