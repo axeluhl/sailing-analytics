@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.regattaoverview;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -25,9 +26,10 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
-public class RegattaOverviewPanel extends SimplePanel implements RegattaOverviewRaceSelectionChangeListener, EventProvider {
+public class RegattaOverviewPanel extends SimplePanel implements RegattaOverviewRaceSelectionChangeListener {
     
     private final long serverUpdateRateInMs = 10000;
     private final long uiUpdateRateInMs = 1000;
@@ -40,6 +42,8 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
     
     private final String eventIdAsString;
     private EventDTO eventDTO;
+    private List<RaceGroupDTO> raceGroupDTOs;
+    private List<EventAndRaceGroupAvailabilityListener> eventRaceGroupListeners;
     
     private RegattaOverviewRaceSelectionModel raceSelectionProvider;
     
@@ -71,7 +75,10 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         this.eventIdAsString = eventIdAsString;
         
         this.eventDTO = null;
+        this.raceGroupDTOs = new ArrayList<RaceGroupDTO>();
+        this.eventRaceGroupListeners = new ArrayList<EventAndRaceGroupAvailabilityListener>();
         retrieveEvent();
+        retrieveRegattaStructure();
         
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
@@ -94,7 +101,8 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         raceSelectionProvider.addRegattaOverviewRaceSelectionChangeListener(this);
         
         regattaRaceStatesComponent = new RegattaRaceStatesComponent(sailingService, errorReporter, stringMessages, eventIdAsString, 
-                raceSelectionProvider, this, settings);
+                raceSelectionProvider, settings);
+        this.eventRaceGroupListeners.add(regattaRaceStatesComponent);
         grid.setWidget(1, 0, regattaRaceStatesComponent);
         
         raceCourseComposite = new RaceCourseComposite(sailingService, errorReporter, stringMessages);
@@ -258,11 +266,6 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         venueNameLabel.setText(eventDTO.venue.name);
     }
 
-    @Override
-    public EventDTO getEvent() {
-        return eventDTO;
-    }
-
     protected void setEvent(EventDTO event) {
         eventDTO = event;
         onEventUpdated();
@@ -270,9 +273,49 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
 
     private void onEventUpdated() {
         fillEventAndVenueName();
-        settingsButton.setEnabled(true);
+        
+        for (EventAndRaceGroupAvailabilityListener listener : this.eventRaceGroupListeners) {
+            listener.onEventUpdated(eventDTO);
+        }
+        
+        checkToEnableSettingsButton();
     }
     
-    
+    private void retrieveRegattaStructure() {
+        sailingService.getRegattaStructureForEvent(eventIdAsString, new MarkedAsyncCallback<List<RaceGroupDTO>>() {
+
+            @Override
+            protected void handleFailure(Throwable cause) {
+                // TODO error message
+            }
+
+            @Override
+            protected void handleSuccess(List<RaceGroupDTO> result) {
+                if (result != null) {
+                    setRaceGroups(result);
+                }
+            }
+            
+        });
+    }
+
+    protected void setRaceGroups(List<RaceGroupDTO> result) {
+        raceGroupDTOs.clear();
+        raceGroupDTOs.addAll(result);
+        onRaceGroupsUpdated();
+    }
+
+    private void onRaceGroupsUpdated() {
+        for (EventAndRaceGroupAvailabilityListener listener : this.eventRaceGroupListeners) {
+            listener.onRaceGroupsUpdated(raceGroupDTOs);
+        }
+        checkToEnableSettingsButton();
+    }
+
+    private void checkToEnableSettingsButton() {
+        if (eventDTO != null && raceGroupDTOs.size() > 0) {
+            settingsButton.setEnabled(true);
+        }
+    }
     
 }

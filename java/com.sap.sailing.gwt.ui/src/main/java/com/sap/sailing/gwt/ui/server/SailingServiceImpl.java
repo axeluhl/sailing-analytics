@@ -189,6 +189,8 @@ import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.MarkpassingManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
@@ -2416,6 +2418,41 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getName());
         courseAreaDTO.id = courseArea.getId().toString();
         return courseAreaDTO;
+    }
+    
+    @Override
+    public List<RaceGroupDTO> getRegattaStructureForEvent(String eventIdAsString) {
+        List<RaceGroupDTO> raceGroups = new ArrayList<RaceGroupDTO>();
+        Event event = getService().getEvent(convertIdentifierStringToUuid(eventIdAsString));
+        if (event != null) {
+            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
+                    if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea().equals(courseArea)) {
+                        RaceGroupDTO raceGroup = new RaceGroupDTO(leaderboard.getName());
+                        raceGroup.courseAreaIdAsString = courseArea.getId().toString();
+                        raceGroup.displayName = getRegattaNameFromLeaderboard(leaderboard);
+                        if (leaderboard instanceof RegattaLeaderboard) {
+                            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                            for (Series series : regattaLeaderboard.getRegatta().getSeries()) {
+                                RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(series.getName());
+                                raceGroup.getSeries().add(seriesDTO);
+                                for (Fleet fleet : series.getFleets()) {
+                                    FleetDTO fleetDTO = new FleetDTO(fleet.getName(), series.getName(), fleet.getOrdering(), fleet.getColor());
+                                    seriesDTO.getFleets().add(fleetDTO);
+                                }
+                            }
+                        } else {
+                            RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(LeaderboardNameConstants.DEFAULT_SERIES_NAME);
+                            raceGroup.getSeries().add(seriesDTO);
+                            FleetDTO fleetDTO = new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, seriesDTO.name, 0, null);
+                            seriesDTO.getFleets().add(fleetDTO);
+                        }
+                        raceGroups.add(raceGroup);
+                    }
+                }
+            }
+        }
+        return raceGroups;
     }
     
     @Override

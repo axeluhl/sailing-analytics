@@ -18,13 +18,14 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 
 public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogComponent<RegattaRaceStatesSettings> {
 
     private final StringMessages stringMessages;
     private final RegattaRaceStatesSettings initialSettings;
     private final List<CourseAreaDTO> courseAreas;
-    private final Map<String, String> regattaNames;
+    private final List<RaceGroupDTO> raceGroups;
 
     private CheckBox showOnlyRacesOfSameDayCheckBox;
     private CheckBox showOnlyCurrentlyRunningRacesCheckBox;
@@ -34,11 +35,11 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     private final static String SETTINGS_DIALOG_COMPONENT = "SettingsDialogComponent";
     
     public RegattaRaceStatesSettingsDialogComponent(RegattaRaceStatesSettings settings, StringMessages stringMessages, 
-            List<CourseAreaDTO> courseAreas, Map<String, String> regattaNames) {
+            List<CourseAreaDTO> courseAreas, List<RaceGroupDTO> raceGroups) {
         this.stringMessages = stringMessages;
         this.initialSettings = settings;
         this.courseAreas = courseAreas;
-        this.regattaNames = regattaNames;
+        this.raceGroups = raceGroups;
         this.courseAreaCheckBoxMap = new HashMap<String, CheckBox>();
         this.regattaCheckBoxMap = new HashMap<String, CheckBox>();
     }
@@ -84,7 +85,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         flowPanel.add(regattaNamesPanel);
         
         int maxRegattasPerRow = 4;
-        int numberOfRegattas = regattaNames.size();
+        int numberOfRegattas = raceGroups.size();
         int numberOfRequiredRows = numberOfRegattas / maxRegattasPerRow;
         if (numberOfRegattas % maxRegattasPerRow != 0) {
             numberOfRequiredRows++;
@@ -95,10 +96,10 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         Grid regattaGrid = new Grid(numberOfRequiredRows, maxRegattasPerRow);
         regattaNamesPanel.add(regattaGrid);
         
-        for (Entry<String, String> regattaNameEntry : regattaNames.entrySet()) {
-            CheckBox checkBox = dialog.createCheckbox(regattaNameEntry.getValue());
-            checkBox.setValue(Util.contains(initialSettings.getVisibleRegattas(), regattaNameEntry.getKey()));
-            regattaCheckBoxMap.put(regattaNameEntry.getKey(), checkBox);
+        for (RaceGroupDTO raceGroup : raceGroups) {
+            CheckBox checkBox = dialog.createCheckbox(raceGroup.displayName);
+            checkBox.setValue(Util.contains(initialSettings.getVisibleRegattas(), raceGroup.name));
+            regattaCheckBoxMap.put(raceGroup.name, checkBox);
             
             regattaGrid.setWidget(rowIndex, columnIndex++, checkBox);
             if(columnIndex == maxRegattasPerRow) {
