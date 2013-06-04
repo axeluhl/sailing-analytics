@@ -147,7 +147,13 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         assertNotNull(leaderboardDTO);
         assertSame(leaderboardDTO, leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE)); // assert it's cached
         leaderboard.getRaceColumnByName(columnName).releaseTrackedRace(defaultFleet); // this should clear the cache
-        assertNotSame(leaderboardDTO, leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE));
+        LeaderboardDTO leaderboardDTO2 = leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE);
+        assertNotSame(leaderboardDTO, leaderboardDTO2);
+        assertSame(leaderboardDTO2, leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE)); // and cached again
+        leaderboard.getRaceColumnByName(columnName).setTrackedRace(defaultFleet, testRaces.iterator().next()); // clear cache again; requires listener(s) to still be attached
+        LeaderboardDTO leaderboardDTO3 = leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE);
+        assertNotSame(leaderboardDTO2, leaderboardDTO3);
+        assertSame(leaderboardDTO3, leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE)); // and cached again
     }
 
     @Test
