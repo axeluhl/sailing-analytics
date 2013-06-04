@@ -307,7 +307,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private static final int LEADERBOARD_BY_NAME_RESULTS_CACHE_BY_ID_SIZE = 100;
     
+    private static final int LEADERBOARD_DIFFERENCE_CACHE_SIZE = 50;
+
+    private int leaderboardByNameResultsCacheByIdHits;
+    private int leaderboardByNameResultsCacheByIdMisses;
     private final LinkedHashMap<String, LeaderboardDTO> leaderboardByNameResultsCacheById;
+
+    private int leaderboardDifferenceCacheByIdPairHits;
+    private int leaderboardDifferenceCacheByIdPairMisses;
+    /**
+     * Caches some results of the hard to compute difference between two {@link LeaderboardDTO}s. The objects contained as values
+     * have been obtained by {@link IncrementalLeaderboardDTO#strip(LeaderboardDTO)}. The cache size is limited to
+     * {@link #LEADERBOARD_DIFFERENCE_CACHE_SIZE}.
+     */
+    private final LinkedHashMap<Pair<String, String>, IncrementalLeaderboardDTO> leaderboardDifferenceCacheByIdPair;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
@@ -324,6 +337,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
         polarSheetGenerationWorkers = new HashMap<String, PolarSheetGenerationWorker>();
+        leaderboardDifferenceCacheByIdPair = new LinkedHashMap<Pair<String, String>, IncrementalLeaderboardDTO>(LEADERBOARD_DIFFERENCE_CACHE_SIZE, 0.75f, /* accessOrder */ true) {
+            private static final long serialVersionUID = 3775119859130148488L;
+            @Override
+            protected boolean removeEldestEntry(Entry<Pair<String, String>, IncrementalLeaderboardDTO> eldest) {
+                return this.size() > LEADERBOARD_DIFFERENCE_CACHE_SIZE;
+            }
+        };
         leaderboardByNameResultsCacheById = new LinkedHashMap<String, LeaderboardDTO>(LEADERBOARD_BY_NAME_RESULTS_CACHE_BY_ID_SIZE, 0.75f, /* accessOrder */ true) {
             private static final long serialVersionUID = 3775119859130148488L;
             @Override
@@ -446,6 +466,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     leaderboardByNameResultsCacheById.put(leaderboardDTO.getId(), leaderboardDTO);
                     if (previousLeaderboardId != null) {
                         previousLeaderboardDTO = leaderboardByNameResultsCacheById.get(previousLeaderboardId);
+                        if (previousLeaderboardDTO != null) {
+                            leaderboardByNameResultsCacheByIdHits++;
+                        } else {
+                            leaderboardByNameResultsCacheByIdMisses++;
+                        }
                     }
                 }
                 // Un-comment the following lines if you need to update the file used by LeaderboardDTODiffingTest, set a breakpoint
@@ -456,10 +481,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     oos.writeObject(leaderboardDTO);
                     oos.close();
                 }
+                final IncrementalLeaderboardDTO cachedDiff;
+                if (previousLeaderboardId != null) {
+                    cachedDiff = leaderboardDifferenceCacheByIdPair.get(new Pair<String, String>(previousLeaderboardId, leaderboardDTO.getId()));
+                    if (cachedDiff == null) {
+                        leaderboardDifferenceCacheByIdPairMisses++;
+                    } else {
+                        leaderboardDifferenceCacheByIdPairHits++;
+                    }
+                } else {
+                    cachedDiff = null;
+                }
                 if (previousLeaderboardDTO == null) {
                     result = new FullLeaderboardDTO(leaderboardDTO);
                 } else {
-                    result = new IncrementalLeaderboardDTOCloner().clone(leaderboardDTO).strip(previousLeaderboardDTO);
+                    result = cachedDiff != null ? cachedDiff : new IncrementalLeaderboardDTOCloner().clone(leaderboardDTO).strip(previousLeaderboardDTO);
                 }
                 logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
                         + namesOfRaceColumnsForWhichToLoadLegDetails + ") took "
