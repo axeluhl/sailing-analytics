@@ -14,18 +14,18 @@ public class PolarSheetsHistogramDataImpl implements PolarSheetsHistogramData {
     
     private int dataCount;
 
-    private double standardDeviator;
+    private double coefficiantOfVariation;
     
     //For GWT serialization
     PolarSheetsHistogramDataImpl() {}
 
-    public PolarSheetsHistogramDataImpl(int angle, Number[] xValues, Number[] yValues, int dataCount, double standardDeviator) {
+    public PolarSheetsHistogramDataImpl(int angle, Number[] xValues, Number[] yValues, int dataCount, double coefficiantOfVariation) {
         super();
         this.angle = angle;
         this.yValues = yValues;
         this.xValues = xValues;
         this.dataCount = dataCount;
-        this.standardDeviator = standardDeviator;
+        this.coefficiantOfVariation = coefficiantOfVariation;
     }
 
     @Override
@@ -49,8 +49,8 @@ public class PolarSheetsHistogramDataImpl implements PolarSheetsHistogramData {
     }
 
     @Override
-    public double getStandardDeviator() {
-        return standardDeviator;
+    public double getCoefficiantOfVariation() {
+        return coefficiantOfVariation;
     }
 
 }

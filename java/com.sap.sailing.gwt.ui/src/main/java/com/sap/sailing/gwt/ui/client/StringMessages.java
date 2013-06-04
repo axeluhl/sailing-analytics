@@ -502,7 +502,7 @@ public interface StringMessages extends Messages {
     String displayName();
     String histogram();
     String numberOfDataPoints();
-    String angleAndTotalNumberOfDataPointsAndStandardDeviator(int angle, int dataCount, double standardDeviator);
+    String angleAndTotalNumberOfDataPointsAndCov(int angle, int dataCount, double standardDeviator);
     String buoyZone();
     String radiusInMeters();
     String addCourseArea();

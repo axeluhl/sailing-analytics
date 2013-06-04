@@ -3034,6 +3034,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         double variance = partOfVariance / dataForAngleAndWindSpeed.size();
         
         double standardDeviator = Math.sqrt(variance);
+        
+        double coefficiantOfVariation = standardDeviator / mean;
 
         Double min = Collections.min(dataForAngleAndWindSpeed);
         Double max = Collections.max(dataForAngleAndWindSpeed);
@@ -3058,7 +3060,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             yValues[i]++;
         }
 
-        PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, dataForAngleAndWindSpeed.size(), standardDeviator);
+        PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, dataForAngleAndWindSpeed.size(), coefficiantOfVariation);
         session.setAttribute(partIdentifier, histogramData);
 
         return histogramData;

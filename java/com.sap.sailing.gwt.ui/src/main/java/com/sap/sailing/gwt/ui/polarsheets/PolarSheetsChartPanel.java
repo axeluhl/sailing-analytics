@@ -121,7 +121,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
             if (alpha > 0.2) {
                 red = (int) (alpha * 255);
                 blue = 0;
-                radius = 4;
+                radius = 2;
             } else {
                 blue = (int) ((1 - alpha) * 255);
                 red = 0;
