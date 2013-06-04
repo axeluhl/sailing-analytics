@@ -168,6 +168,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new CellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
+        leaderboardTable.ensureDebugId("AvailableLeaderboardsTable");
         ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
                 leaderboardList.getList());
 

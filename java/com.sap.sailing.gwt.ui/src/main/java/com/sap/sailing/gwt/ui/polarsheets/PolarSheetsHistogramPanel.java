@@ -10,26 +10,28 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.Series.Type;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class PolarSheetsHistogramPanel extends SimplePanel implements RequiresResize{
+public class PolarSheetsHistogramPanel extends DockLayoutPanel {
     
     private final Chart chart;
     private final StringMessages stringMessages;
 
     public PolarSheetsHistogramPanel(StringMessages stringMessages) {
+        super(Unit.PCT);
         this.stringMessages = stringMessages;
         setSize("100%", "100%");
         chart = createHistogramChart();
         chart.getElement().setAttribute("align", "top");
-        setWidget(chart);
+        add(chart);
     }
 
     private Chart createHistogramChart() {
-        Chart histogramChart = new Chart().setType(Type.COLUMN).setZoomType(Chart.ZoomType.X).setWidth(800);
+        Chart histogramChart = new Chart().setType(Type.COLUMN).setZoomType(Chart.ZoomType.X).setHeight100().setWidth100();
         histogramChart.setChartTitleText(stringMessages.histogram());
         histogramChart.getYAxis().setMin(0).setAxisTitle(new AxisTitle().setText(stringMessages.numberOfDataPoints()));
         histogramChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(10)).setAxisTitle(new AxisTitle().setText(
@@ -59,9 +61,23 @@ public class PolarSheetsHistogramPanel extends SimplePanel implements RequiresRe
     }
     
     @Override
+    protected void onLoad() {
+        Timer timer = new Timer() {
+            
+            @Override
+            public void run() {
+                chart.setSizeToMatchContainer();
+            }
+        };
+        timer.schedule(200);
+        super.onLoad();
+    }
+    
+    @Override
     public void onResize() {
         chart.setSizeToMatchContainer();
-        chart.redraw();
+        super.onResize();
     }
+    
 
 }

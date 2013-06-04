@@ -338,17 +338,18 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     rm -rf $ACDIR/configuration/org.eclipse.*
 
     if [[ $HAS_OVERWRITTEN_TARGET -eq 0 ]]; then
-        rm -rf $ACDIR/start
-        rm -rf $ACDIR/stop
-
         cp -v $p2PluginRepository/configuration/config.ini configuration/
         mkdir -p configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
         cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
-        cp -v $PROJECT_HOME/java/target/start $ACDIR/
-        cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+
+        # avoid overwriting start configuration if it exists
+        if [ ! -f $ACDIR/start ]; then
+            cp -v $PROJECT_HOME/java/target/start $ACDIR/
+            cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+        fi
     fi
 
     cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
