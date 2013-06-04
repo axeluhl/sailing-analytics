@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.server;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -309,8 +307,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private static final int LEADERBOARD_DIFFERENCE_CACHE_SIZE = 50;
 
-    private int leaderboardByNameResultsCacheByIdHits;
-    private int leaderboardByNameResultsCacheByIdMisses;
     private final LinkedHashMap<String, LeaderboardDTO> leaderboardByNameResultsCacheById;
 
     private int leaderboardDifferenceCacheByIdPairHits;
@@ -466,21 +462,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     leaderboardByNameResultsCacheById.put(leaderboardDTO.getId(), leaderboardDTO);
                     if (previousLeaderboardId != null) {
                         previousLeaderboardDTO = leaderboardByNameResultsCacheById.get(previousLeaderboardId);
-                        if (previousLeaderboardDTO != null) {
-                            leaderboardByNameResultsCacheByIdHits++;
-                        } else {
-                            leaderboardByNameResultsCacheByIdMisses++;
-                        }
                     }
                 }
                 // Un-comment the following lines if you need to update the file used by LeaderboardDTODiffingTest, set a breakpoint
                 // and toggle the storeLeaderboardForTesting flag if you found a good version. See also bug 1417.
-                boolean storeLeaderboardForTesting = false;
-                if (storeLeaderboardForTesting) {
-                    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File("c:/data/SAP/sailing/workspace/java/com.sap.sailing.domain.test/resources/IncrementalLeaderboardDTO.ser")));
-                    oos.writeObject(leaderboardDTO);
-                    oos.close();
-                }
+//                boolean storeLeaderboardForTesting = false;
+//                if (storeLeaderboardForTesting) {
+//                    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File("c:/data/SAP/sailing/workspace/java/com.sap.sailing.domain.test/resources/IncrementalLeaderboardDTO.ser")));
+//                    oos.writeObject(leaderboardDTO);
+//                    oos.close();
+//                }
                 final IncrementalLeaderboardDTO cachedDiff;
                 if (previousLeaderboardId != null) {
                     synchronized (leaderboardDifferenceCacheByIdPair) {
@@ -509,7 +500,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
                         + namesOfRaceColumnsForWhichToLoadLegDetails + ") took "
-                        + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
+                        + (System.currentTimeMillis() - startOfRequestHandling) + "ms; diff cache hits/misses "
+                        + leaderboardDifferenceCacheByIdPairHits+"/"+leaderboardDifferenceCacheByIdPairMisses);
             }
             return result;
         } catch (NoWindException e) {
