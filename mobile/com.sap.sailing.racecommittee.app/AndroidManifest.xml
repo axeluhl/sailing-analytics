@@ -34,6 +34,12 @@
         android:allowBackup="true"
         android:hardwareAccelerated="true" >
         
+        <uses-library android:name="com.google.android.maps" />
+        
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="@string/GoogleMapsKey" />
+        
         <activity 
             android:name=".ui.activities.LoginActivity" 
             >

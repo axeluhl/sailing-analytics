@@ -29,6 +29,7 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
+import com.sap.sailing.racecommittee.app.domain.state.RaceStateEventListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.RaceEventSender;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
@@ -61,7 +62,8 @@ public class RaceStateService extends Service {
     private ReadonlyDataManager dataManager;
     
     private Map<ManagedRace, RaceLogEventVisitor> registeredLogListeners;
-    private Map<ManagedRace, RaceStateChangedListener> registeredStateListeners;
+    private Map<ManagedRace, RaceStateChangedListener> registeredStateChangeListeners;
+    private Map<ManagedRace, RaceStateEventListener> registeredStateEventListeners;
     
     private Map<Serializable, List<PendingIntent>> managedIntents;
 
@@ -72,7 +74,8 @@ public class RaceStateService extends Service {
         this.dataManager = DataManager.create(this);
         
         this.registeredLogListeners = new HashMap<ManagedRace, RaceLogEventVisitor>();
-        this.registeredStateListeners = new HashMap<ManagedRace, RaceStateChangedListener>();
+        this.registeredStateChangeListeners = new HashMap<ManagedRace, RaceStateChangedListener>();
+        this.registeredStateEventListeners = new HashMap<ManagedRace, RaceStateEventListener>();
         this.managedIntents = new HashMap<Serializable, List<PendingIntent>>();
 
         startForeground();
@@ -111,8 +114,12 @@ public class RaceStateService extends Service {
         for (Entry<ManagedRace, RaceLogEventVisitor> entry : registeredLogListeners.entrySet()) {
             entry.getKey().getState().getRaceLog().removeListener(entry.getValue());
         }
-        for (Entry<ManagedRace, RaceStateChangedListener> entry : registeredStateListeners.entrySet()) {
-            entry.getKey().getState().unregisterListener(entry.getValue());
+        for (Entry<ManagedRace, RaceStateChangedListener> entry : registeredStateChangeListeners.entrySet()) {
+            entry.getKey().getState().unregisterStateChangeListener(entry.getValue());
+        }
+        
+        for (Entry<ManagedRace, RaceStateEventListener> entry : registeredStateEventListeners.entrySet()) {
+            entry.getKey().getState().unregisterStateEventListener(entry.getValue());
         }
         
         for (List<PendingIntent> intents : managedIntents.values()) {
@@ -231,10 +238,13 @@ public class RaceStateService extends Service {
 
             // ... register on state changes!
             RaceStateChangedListener stateListener = new RaceStateListener(this, race);
-            state.registerListener(stateListener);
+            RaceStateEventListener eventListener = new RaceStateListener(this, race);
+            state.registerStateChangeListener(stateListener);
+            state.registerStateEventListener(eventListener);
 
             this.registeredLogListeners.put(race, logListener);
-            this.registeredStateListeners.put(race, stateListener);
+            this.registeredStateChangeListeners.put(race, stateListener);
+            this.registeredStateEventListeners.put(race, eventListener);
             
             ExLog.i(TAG, "Race " + race.getId() + " registered.");
         } else {

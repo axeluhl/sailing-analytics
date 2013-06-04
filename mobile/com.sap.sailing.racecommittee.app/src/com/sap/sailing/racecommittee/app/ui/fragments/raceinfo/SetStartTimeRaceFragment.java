@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.FragmentManager;
@@ -27,13 +28,14 @@ import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.UserRequiredActionPerformedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
-public class SetStartTimeRaceFragment extends RaceFragment {
+public class SetStartTimeRaceFragment extends RaceFragment implements UserRequiredActionPerformedListener {
 
     public static SetStartTimeRaceFragment create(ManagedRace race) {
         SetStartTimeRaceFragment fragment = new SetStartTimeRaceFragment();
@@ -237,7 +239,33 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     }
 
     private void setStartTime(Date newStartTime) {
-        getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime), selectedStartProcedureType);
+        getRace().getState().createNewStartProcedure(selectedStartProcedureType);
+        List<Class<? extends RaceDialogFragment>> actionList = getRace().getState().getStartProcedure()
+                .checkForUserActionRequiredActions(new MillisecondsTimePoint(newStartTime), this);
+        if (actionList.isEmpty()) {
+            getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime));
+        } else {
+            for (Class<? extends RaceDialogFragment> actionFragment : actionList) {
+                FragmentManager fragmentManager = getFragmentManager();
+
+                RaceDialogFragment fragment;
+                try {
+                    fragment = actionFragment.newInstance();
+                    Bundle args = getRecentArguments();
+                    fragment.setArguments(args);
+
+                    fragment.show(fragmentManager, "userActionRequiredDialog");
+                } catch (java.lang.InstantiationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+            }
+        }
+
     }
 
     protected void showAPModeDialog() {
@@ -250,6 +278,11 @@ public class SetStartTimeRaceFragment extends RaceFragment {
         fragment.setArguments(args);
 
         fragment.show(fragmentManager, "dialogAPMode");
+    }
+
+    @Override
+    public void onUserRequiredActionPerformed() {
+        setStartTime();
     }
 
 }

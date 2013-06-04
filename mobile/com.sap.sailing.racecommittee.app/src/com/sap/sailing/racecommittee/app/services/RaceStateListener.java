@@ -4,8 +4,9 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
+import com.sap.sailing.racecommittee.app.domain.state.RaceStateEventListener;
 
-public class RaceStateListener implements RaceStateChangedListener {
+public class RaceStateListener implements RaceStateChangedListener, RaceStateEventListener {
     @SuppressWarnings("unused")
     private final static String TAG = RaceStateListener.class.getName();
 

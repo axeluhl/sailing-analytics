@@ -11,13 +11,14 @@ import java.util.TreeMap;
 
 import android.app.ListFragment;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -31,10 +32,27 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAda
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeTitle;
-import com.sap.sailing.racecommittee.app.ui.comparators.NamedRaceComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesBaseFleetComparator;
+import com.sap.sailing.racecommittee.app.ui.comparators.NamedRaceComparator;
 
 public class ManagedRaceListFragment extends ListFragment implements JuryFlagClickedListener, RaceStateChangedListener {
+    
+    public enum FilterMode {
+        ALL("Show all"),
+        ACTIVE("Show active");
+        
+        private String displayName;
+        
+        private FilterMode(String displayName) {
+            this.displayName = displayName;
+        }
+        
+        @Override
+        public String toString() {
+            return displayName;
+        }
+        
+    }
 
     private Serializable selectedRaceId;
     private HashMap<Serializable, ManagedRace> managedRacesById;
@@ -47,6 +65,11 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         this.selectedRaceId = null;
         this.managedRacesById = new HashMap<Serializable, ManagedRace>();
         this.raceDataTypeList = new ArrayList<RaceListDataType>();
+    }
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.list_fragment, container, false);
     }
 
     @Override
@@ -75,13 +98,13 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 
     private void registerOnAllRaces() {
         for (ManagedRace managedRace : managedRacesById.values()) {
-            managedRace.getState().registerListener(this);
+            managedRace.getState().registerStateChangeListener(this);
         }
     }
 
     private void unregisterOnAllRaces() {
         for (ManagedRace managedRace : managedRacesById.values()) {
-            managedRace.getState().unregisterListener(this);
+            managedRace.getState().unregisterStateChangeListener(this);
         }
     }
 
@@ -219,21 +242,6 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         notifyDataChanged();
     }
     
-    @Override
-    public void onStartTimeChanged(TimePoint startTime) {
-        // ???
-    }
-
-    @Override
-    public void onRaceAborted() {
-        // ???
-    }
-
-    @Override
-    public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
-        // ???
-    }
-
     /*
      * 
      * public void notifyDataChanged() { List<RaceListDataType> list = adapter.getItems(); for (int i = 0; i <

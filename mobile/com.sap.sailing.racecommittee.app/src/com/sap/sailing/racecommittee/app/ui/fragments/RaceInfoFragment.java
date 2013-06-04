@@ -15,7 +15,6 @@ import android.widget.TextView;
 
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -23,7 +22,6 @@ import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.CourseDesignDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
@@ -93,12 +91,12 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     @Override
     public void onStart() {
         super.onStart();
-        getRace().getState().registerListener(this);
+        getRace().getState().registerStateChangeListener(this);
     }
 
     @Override
     public void onStop() {
-        getRace().getState().unregisterListener(this);
+        getRace().getState().unregisterStateChangeListener(this);
         super.onStop();
     }
 
@@ -138,12 +136,20 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     private void showCourseDesignDialog() {
         FragmentManager fragmentManager = getFragmentManager();
 
-        RaceDialogFragment fragment = new CourseDesignDialogFragment();
-
-        Bundle args = getRecentArguments();
-        fragment.setArguments(args);
-
-        fragment.show(fragmentManager, "courseDesignDialogFragment");
+        RaceDialogFragment fragment;
+        try {
+            fragment = getRace().getState().getStartProcedure().getCourseDesignDialog().newInstance();
+            Bundle args = getRecentArguments();
+            fragment.setArguments(args);
+            
+            fragment.show(fragmentManager, "courseDesignDialogFragment");
+        } catch (java.lang.InstantiationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -213,22 +219,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     public void onRaceStateChanged(RaceState state) {
         updateCourseDesignLabel();
         switchToInfoFragment();
-    }
-
-    @Override
-    public void onStartTimeChanged(TimePoint startTime) {
-        //do nothing (onRaceStateChanged(RaceState) handles state change and fragment switch already
-    }
-
-    @Override
-    public void onRaceAborted() {
-        //do nothing (onRaceStateChanged(RaceState) handles state change and fragment switch already
-    }
-
-    @Override
-    public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
-        // TODO Auto-generated method stub
-        
     }
 
 }

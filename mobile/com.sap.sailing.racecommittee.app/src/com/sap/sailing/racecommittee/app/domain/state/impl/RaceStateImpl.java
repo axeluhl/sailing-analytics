@@ -31,6 +31,7 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.StartProcedureFactory;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
+import com.sap.sailing.racecommittee.app.domain.state.RaceStateEventListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class RaceStateImpl implements RaceState, RaceLogChangedListener {
@@ -42,6 +43,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     
     protected RaceLogRaceStatus status;
     protected Set<RaceStateChangedListener> stateChangedListeners;
+    protected Set<RaceStateEventListener> stateEventListeners;
 
     private RaceLogChangedVisitor raceLogListener;
     
@@ -59,6 +61,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         
         this.status = RaceLogRaceStatus.UNKNOWN;
         this.stateChangedListeners = new HashSet<RaceStateChangedListener>();
+        this.stateEventListeners = new HashSet<RaceStateEventListener>();
 
         this.raceLogListener = new RaceLogChangedVisitor(this);
         this.raceLog.addListener(raceLogListener);
@@ -120,37 +123,43 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
     
     private void notifyListenersAboutStartTimeChange(TimePoint newStartTime) {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
+        for (RaceStateEventListener listener : stateEventListeners) {
             listener.onStartTimeChanged(newStartTime);
         }
     }
     
     private void notifyListenersAboutRaceAbortion() {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
+        for (RaceStateEventListener listener : stateEventListeners) {
             listener.onRaceAborted();
         }
     }
 
-    public void registerListener(RaceStateChangedListener listener) {
+    public void registerStateChangeListener(RaceStateChangedListener listener) {
         stateChangedListeners.add(listener);
     }
+    
+    public void registerStateEventListener(RaceStateEventListener listener) {
+        stateEventListeners.add(listener);
+    }
 
-    public void unregisterListener(RaceStateChangedListener listener) {
+    public void unregisterStateChangeListener(RaceStateChangedListener listener) {
         stateChangedListeners.remove(listener);
+    }
+    
+    public void unregisterStateEventListener(RaceStateEventListener listener) {
+        stateEventListeners.remove(listener);
     }
 
     public TimePoint getStartTime() {
         return startTimeFinder.getStartTime();
     }
 
-    public void setStartTime(TimePoint newStartTime, StartProcedureType type) {
+    public void setStartTime(TimePoint newStartTime) {
         
         RaceLogRaceStatus status = getStatus();
         if (status != RaceLogRaceStatus.UNSCHEDULED) {
             onRaceAborted(MillisecondsTimePoint.now());
         }
-        
-        switchStartProcedure(type);
         
         TimePoint eventTime = startProcedure.getLogicalStartTimeEventTime(newStartTime);
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(eventTime, UUID.randomUUID(), 
@@ -159,8 +168,9 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         
         notifyListenersAboutStartTimeChange(newStartTime);
     }
-
-    private void switchStartProcedure(StartProcedureType type) {
+    
+    @Override
+    public void createNewStartProcedure(StartProcedureType type) {
         if (!type.equals(startProcedureTypeAnalyzer.getActiveStartProcedureType())) {
 
             RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartProcedureChangedEvent(MillisecondsTimePoint.now(), raceLog.getCurrentPassId(), type);
@@ -196,7 +206,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         
         RaceLogEvent passChangeEvent = RaceLogEventFactory.INSTANCE.createPassChangeEvent(eventTime, raceLog.getCurrentPassId() + 1);
         this.raceLog.add(passChangeEvent);
-        
+        registerStartProcedure();
         notifyListenersAboutRaceAbortion();
     }
     
@@ -267,7 +277,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     @Override
     public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
+        for (RaceStateEventListener listener : stateEventListeners) {
             listener.onStartProcedureSpecificEvent(eventTime, eventId);
         }
     }

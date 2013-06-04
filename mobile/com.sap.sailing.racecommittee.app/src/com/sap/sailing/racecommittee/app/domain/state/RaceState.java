@@ -21,7 +21,7 @@ public interface RaceState extends StartProcedureListener {
      * @param listener
      *            to be registered.
      */
-    void registerListener(RaceStateChangedListener listener);
+    void registerStateChangeListener(RaceStateChangedListener listener);
 
     /**
      * Unregister a previously registered state change listener.
@@ -29,8 +29,24 @@ public interface RaceState extends StartProcedureListener {
      * @param listener
      *            to be unregistered.
      */
-    void unregisterListener(RaceStateChangedListener listener);
+    void unregisterStateChangeListener(RaceStateChangedListener listener);
+    
+    /**
+     * Register a new listener on state events.
+     * 
+     * @param listener
+     *            to be registered.
+     */
+    void registerStateEventListener(RaceStateEventListener eventListener);
 
+    /**
+     * Unregister a previously registered state event listener.
+     * 
+     * @param listener
+     *            to be unregistered.
+     */
+    void unregisterStateEventListener(RaceStateEventListener value);
+    
     /**
      * @return the log of the race.
      */
@@ -87,7 +103,7 @@ public interface RaceState extends StartProcedureListener {
      * @param newStartTime
      *            to be set.
      */
-    void setStartTime(TimePoint newStartTime, StartProcedureType startProcedureType);
+    void setStartTime(TimePoint newStartTime);
     
     /**
      * Sets the current race's course design
@@ -120,5 +136,7 @@ public interface RaceState extends StartProcedureListener {
      * @return the status of the race.
      */
     RaceLogRaceStatus getStatus();
+
+    void createNewStartProcedure(StartProcedureType selectedStartProcedureType);
 
 }

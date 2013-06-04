@@ -20,7 +20,10 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.RunningRaceEventL
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartPhaseEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureListener;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.UserRequiredActionPerformedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ClassicCourseDesignDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishedRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishingRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartRunningRaceFragment;
@@ -322,5 +325,14 @@ public class GateStartProcedure implements StartProcedure {
     public Class<? extends RaceFragment> getFinishedRaceFragment() {
         return FinishedRaceFragment.class;
     }
-
+    
+    @Override
+    public List<Class<? extends RaceDialogFragment>> checkForUserActionRequiredActions(MillisecondsTimePoint newStartTime, UserRequiredActionPerformedListener listener) {
+        return new ArrayList<Class<? extends RaceDialogFragment>>();
+    }
+    
+    @Override
+    public Class<? extends RaceDialogFragment> getCourseDesignDialog() {
+        return ClassicCourseDesignDialogFragment.class;
+    }
 }

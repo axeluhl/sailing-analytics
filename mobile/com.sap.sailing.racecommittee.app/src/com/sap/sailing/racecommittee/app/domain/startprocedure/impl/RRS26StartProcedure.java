@@ -24,7 +24,11 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.StartModeChoosabl
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartPhaseEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureListener;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.UserRequiredActionPerformedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ClassicCourseDesignDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseStartModeDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RRS26FinishedRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RRS26FinishingRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RRS26RunningRaceFragment;
@@ -47,10 +51,12 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     private StartProcedureListener raceStateChangedListener;
     private RRS26StartPhaseEventListener startPhaseEventListener;
     private RRS26RunningRaceEventListener runningRaceEventListener;
+    private UserRequiredActionPerformedListener userRequiredActionPerformedListener;
 
     private IndividualRecallFinder individualRecallFinder;
     private Flags startModeFlag = Flags.PAPA;
     private String boatClassName = "";
+    private boolean startModeFlagChosen = false;
 
     public RRS26StartProcedure(RaceLog raceLog) {
         this.raceLog = raceLog;
@@ -369,7 +375,13 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     @Override
     public void setStartModeFlag(Flags startModeFlag) {
         this.startModeFlag = startModeFlag;
-        startPhaseEventListener.onStartModeFlagChosen(startModeFlag);
+        this.startModeFlagChosen = true;
+        if(startPhaseEventListener!=null){
+            startPhaseEventListener.onStartModeFlagChosen(startModeFlag);
+        }
+        if(userRequiredActionPerformedListener != null){
+            userRequiredActionPerformedListener.onUserRequiredActionPerformed();
+        }
     }
 
     @Override
@@ -397,5 +409,20 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     @Override
     public Class<? extends RaceFragment> getFinishedRaceFragment() {
         return RRS26FinishedRaceFragment.class;
+    }
+    
+    @Override
+    public List<Class<? extends RaceDialogFragment>> checkForUserActionRequiredActions(MillisecondsTimePoint newStartTime, UserRequiredActionPerformedListener listener) {
+        List<Class<? extends RaceDialogFragment>>  actionList = new ArrayList<Class<? extends RaceDialogFragment>>();
+        if(MillisecondsTimePoint.now().after(newStartTime.minus(startPhaseStartModeUpInterval)) && !startModeFlagChosen){
+            actionList.add(RaceChooseStartModeDialog.class);
+            this.userRequiredActionPerformedListener = listener;
+        }
+        return actionList;
+    }
+    
+    @Override
+    public Class<? extends RaceDialogFragment> getCourseDesignDialog() {
+        return ClassicCourseDesignDialogFragment.class;
     }
 }
