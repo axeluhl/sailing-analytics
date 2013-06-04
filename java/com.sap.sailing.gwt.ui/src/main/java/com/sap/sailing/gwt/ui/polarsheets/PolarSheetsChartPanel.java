@@ -15,12 +15,13 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize {
+public class PolarSheetsChartPanel extends DockLayoutPanel {
 
     private StringMessages stringMessages;
     private Chart chart;
@@ -29,17 +30,18 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
     private Map<Series, String> nameForSeries = new HashMap<Series, String>();
 
     public PolarSheetsChartPanel(StringMessages stringMessages) {
+        super(Unit.PCT);
         this.stringMessages = stringMessages;
-        setPixelSize(800, 800);
+        setSize("100%", "100%");
         chart = createPolarSheetChart();
         seriesMap = new HashMap<String, Series[]>();
-        setWidget(chart);
+        add(chart);
     }
 
     private Chart createPolarSheetChart() {
         Chart polarSheetChart = new Chart().setType(Series.Type.LINE)
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(1)).setZoomType(Chart.ZoomType.X_AND_Y)
-                .setPolar(true).setSize(800, 800);
+                .setPolar(true).setHeight100().setWidth100();
         polarSheetChart.setChartTitleText(stringMessages.polarSheetChart());
         polarSheetChart.getYAxis().setMin(0);
         return polarSheetChart;
@@ -167,18 +169,31 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
         chart.setSeriesPlotOptions(new SeriesPlotOptions().setPointMouseOverEventHandler(pointMouseOverHandler));
     }
 
-    @Override
-    public void onResize() {
-        chart.setSizeToMatchContainer();
-        chart.redraw();
-    }
-
     public Series[] getSeriesPerWindspeedForName(String name) {
         return seriesMap.get(name);
     }
     
     public String getNameForSeries(Series series) {
         return nameForSeries.get(series);
+    }
+    
+    @Override
+    protected void onLoad() {
+        Timer timer = new Timer() {
+            
+            @Override
+            public void run() {
+                chart.setSizeToMatchContainer();
+            }
+        };
+        timer.schedule(200);
+        super.onLoad();
+    }
+    
+    @Override
+    public void onResize() {
+        chart.setSizeToMatchContainer();
+        super.onResize();
     }
 
 }

@@ -56,6 +56,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10LastBreaksTie;
+import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets1LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
@@ -320,6 +321,8 @@ public class DomainFactoryImpl implements DomainFactory {
             return new HighPointExtremeSailingSeriesOverall();
         case HIGH_POINT_LAST_BREAKS_TIE:
             return new HighPointLastBreaksTie();
+        case HIGH_POINT_FIRST_GETS_ONE:
+            return new HighPointFirstGets1LastBreaksTie();
         case HIGH_POINT_FIRST_GETS_TEN:
             return new HighPointFirstGets10LastBreaksTie();
         case LOW_POINT_WINNER_GETS_ZERO:
