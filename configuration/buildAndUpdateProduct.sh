@@ -378,7 +378,7 @@ if [[ "$@" == "remote-deploy" ]]; then
 
     echo "Will deploy server $SERVER"
 
-    read -s -n1 -p "Did you want me to start a LOCAL build (without tests) for $SERVER_HOMES/$SERVER before deploying (y/n)? " answer
+    read -s -n1 -p "Did you want me to start a LOCAL build (without tests) for $SERVERS_HOME/$SERVER before deploying (y/n)? " answer
     case $answer in
     "Y" | "y") BUILD=1;;
     *) echo "Aborting..."
