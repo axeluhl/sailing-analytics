@@ -32,6 +32,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     private boolean isMedal;
     private Regatta regatta;
     private final RaceColumnListeners raceColumnListeners;
+    private ThresholdBasedResultDiscardingRule resultDiscardingRule;
     
     /**
      * @param fleets
@@ -258,5 +259,15 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     @Override
     public boolean isTransient() {
         return false;
+    }
+
+    @Override
+    public ThresholdBasedResultDiscardingRule getResultDiscardingRule() {
+        return resultDiscardingRule;
+    }
+
+    @Override
+    public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        this.resultDiscardingRule = resultDiscardingRule;
     }
 }

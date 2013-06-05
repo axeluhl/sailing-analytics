@@ -24,12 +24,11 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
@@ -195,14 +194,14 @@ public class RegattaDetailsComposite extends Composite {
 
     private void editRacesOfRegattaSeries(final RegattaDTO regatta, final SeriesDTO series) {
         RaceColumnInRegattaSeriesDialog raceDialog = new RaceColumnInRegattaSeriesDialog(regatta, series, stringMessages, 
-                new DialogCallback<Pair<SeriesDTO, List<RaceColumnDTO>>>() {
+                new DialogCallback<RegattaSeriesDescriptor>() {
                     @Override
                     public void cancel() {
                     }
 
                     @Override
-                    public void ok(final Pair<SeriesDTO, List<RaceColumnDTO>> result) {
-                        updateRacesOfRegattaSeries(regatta, result.getA(), result.getB());
+                    public void ok(final RegattaSeriesDescriptor result) {
+                        updateRacesOfRegattaSeries(regatta, result.getSeries(), result.getRaces());
                     }
                 });
         raceDialog.show();

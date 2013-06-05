@@ -27,6 +27,9 @@ public class LeaderboardDescriptor {
         this.courseAreaIdAsString = courseAreaIdAsString;
     }
 
+    /**
+     * Leaves the {@link #regattaName} <code>null</code>, representing a flexible leaderboard, not a regatta leaderboard
+     */
     public LeaderboardDescriptor(String name, String displayName, ScoringSchemeType scoringScheme, int[] discardThresholds, String courseAreaIdAsString) {
         this.name = name;
         this.displayName = displayName;
