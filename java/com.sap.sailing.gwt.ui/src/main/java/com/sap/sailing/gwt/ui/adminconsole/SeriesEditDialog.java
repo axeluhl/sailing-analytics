@@ -110,7 +110,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         raceNameEntryFields = new ArrayList<TextBox>();
         raceNameDeleteButtons = new ArrayList<Button>();
         raceColumnsGrid = new Grid(0, 0);
-        discardThresholdBoxes = new DiscardThresholdBoxes(this, selectedSeries.getDiscardThresholds());
+        discardThresholdBoxes = new DiscardThresholdBoxes(this, selectedSeries.getDiscardThresholds(), stringMessages);
     }
 
     private Widget createRaceNameWidget(String defaultName, boolean enabled) {

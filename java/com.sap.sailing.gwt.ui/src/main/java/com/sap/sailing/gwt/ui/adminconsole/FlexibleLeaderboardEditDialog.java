@@ -48,6 +48,6 @@ public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
                 }
             }
         }
-        discardThresholdBoxes = new DiscardThresholdBoxes(this, leaderboard.getDiscardThresholds());
+        discardThresholdBoxes = new DiscardThresholdBoxes(this, leaderboard.getDiscardThresholds(), stringMessages);
     }
 }

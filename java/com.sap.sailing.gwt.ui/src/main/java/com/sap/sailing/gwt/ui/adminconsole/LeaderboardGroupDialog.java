@@ -134,11 +134,10 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
                     group.getOverallLeaderboardScoringSchemeType()));
         }
         formGrid.setWidget(0, 1, overallLeaderboardScoringSchemeListBox);
-        formGrid.setWidget(1, 0, new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
         if (group.hasOverallLeaderboard()) {
-            overallLeaderboardDiscardThresholdBoxes = new DiscardThresholdBoxes(this, group.getOverallLeaderboardDiscardThresholds());
+            overallLeaderboardDiscardThresholdBoxes = new DiscardThresholdBoxes(this, group.getOverallLeaderboardDiscardThresholds(), stringMessages);
         } else {
-            overallLeaderboardDiscardThresholdBoxes = new DiscardThresholdBoxes(this);
+            overallLeaderboardDiscardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);
         }
         formGrid.setWidget(1, 1, overallLeaderboardDiscardThresholdBoxes.getWidget());
         overallLeaderboardConfigPanel = formGrid;

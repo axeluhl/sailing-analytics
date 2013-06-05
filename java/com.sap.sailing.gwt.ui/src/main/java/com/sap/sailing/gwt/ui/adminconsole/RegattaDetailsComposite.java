@@ -151,6 +151,29 @@ public class RegattaDetailsComposite extends Composite {
             }
         };
 
+        TextColumn<SeriesDTO> discardsColumn = new TextColumn<SeriesDTO>() {
+            @Override
+            public String getValue(SeriesDTO series) {
+                final String result;
+                if (series.getDiscardThresholds() == null) {
+                    result = stringMessages.no();
+                } else {
+                    StringBuilder sb = new StringBuilder();
+                    boolean first = true;
+                    for (int threshold : series.getDiscardThresholds()) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            sb.append(", ");
+                        }
+                        sb.append(threshold);
+                    }
+                    result = sb.toString();
+                }
+                return result;
+            }
+        };
+
         ImagesBarColumn<SeriesDTO, SeriesConfigImagesBarCell> seriesActionColumn = new ImagesBarColumn<SeriesDTO, SeriesConfigImagesBarCell>(
                 new SeriesConfigImagesBarCell(stringMessages));
         seriesActionColumn.setFieldUpdater(new FieldUpdater<SeriesDTO, String>() {
@@ -169,6 +192,7 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(isMedalSeriesColumn, stringMessages.medalSeries());
         table.addColumn(racesColumn, stringMessages.races());
         table.addColumn(fleetsColumn, stringMessages.fleets());
+        table.addColumn(discardsColumn, stringMessages.discarding());
         table.addColumn(seriesActionColumn, stringMessages.actions());
         
         return table;

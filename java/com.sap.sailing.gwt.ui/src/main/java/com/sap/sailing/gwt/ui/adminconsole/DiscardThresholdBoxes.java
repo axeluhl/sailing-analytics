@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -32,11 +33,11 @@ public class DiscardThresholdBoxes {
      */
     private final Widget widget;
 
-    public DiscardThresholdBoxes(DataEntryDialog<?> parent) {
-        this(parent, /* values to show */ new int[0]);
+    public DiscardThresholdBoxes(DataEntryDialog<?> parent, StringMessages stringMessages) {
+        this(parent, /* values to show */ new int[0], stringMessages);
     }
     
-    public DiscardThresholdBoxes(DataEntryDialog<?> parent, int[] initialDiscardThresholds) {
+    public DiscardThresholdBoxes(DataEntryDialog<?> parent, int[] initialDiscardThresholds, StringMessages stringMessages) {
         this.parent = parent;
         discardThresholdBoxes = new LongBox[MAX_NUMBER_OF_DISCARDED_RESULTS];
         for (int i = 0; i < discardThresholdBoxes.length; i++) {
@@ -47,7 +48,7 @@ public class DiscardThresholdBoxes {
             }
             discardThresholdBoxes[i].setVisibleLength(2);
         }
-        widget = createDiscardThresholdBoxesPanel();
+        widget = createDiscardThresholdBoxesPanel(stringMessages);
     }
     
     /**
@@ -78,16 +79,19 @@ public class DiscardThresholdBoxes {
         return discardThresholdsBoxContents;
     }
 
-    private Widget createDiscardThresholdBoxesPanel() {
+    private Widget createDiscardThresholdBoxesPanel(StringMessages stringMessages) {
         assert discardThresholdBoxes != null && discardThresholdBoxes.length == MAX_NUMBER_OF_DISCARDED_RESULTS;
+        VerticalPanel vp = new VerticalPanel();
+        vp.add(new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
         HorizontalPanel hp = new HorizontalPanel();
+        vp.add(hp);
         hp.setSpacing(3);
         for (int i = 0; i < discardThresholdBoxes.length; i++) {
             hp.add(new Label("" + (i + 1) + "."));
             hp.add(discardThresholdBoxes[i]);
         }
         parent.alignAllPanelWidgetsVertically(hp, HasVerticalAlignment.ALIGN_MIDDLE);
-        return hp;
+        return vp;
     }
     
     public static String getErrorMessage(int[] discardThresholds, StringMessages stringMessages) {

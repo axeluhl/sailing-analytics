@@ -100,9 +100,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         formGrid.setWidget(4, 0, new Label(stringMessages.courseArea() + ":"));
         formGrid.setWidget(4, 1, courseAreaListBox);
         mainPanel.add(formGrid);
-        mainPanel.add(new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
-        Widget discardingThresholdWidget = discardThresholdBoxes.getWidget();
-        mainPanel.add(discardingThresholdWidget);
+        mainPanel.add(discardThresholdBoxes.getWidget());
 
         return mainPanel;
     }

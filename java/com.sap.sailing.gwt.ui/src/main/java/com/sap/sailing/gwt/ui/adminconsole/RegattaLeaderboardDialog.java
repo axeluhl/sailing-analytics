@@ -105,12 +105,8 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         formGrid.setWidget(1, 1, nameTextBox);
         formGrid.setWidget(2,  0, createLabel(stringMessages.displayName()));
         formGrid.setWidget(2, 1, displayNameTextBox);
-
         mainPanel.add(formGrid);
-
-        mainPanel.add(new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
-        Widget discardThresholdWidget = discardThresholdBoxes.getWidget();
-        mainPanel.add(discardThresholdWidget);
+        mainPanel.add(discardThresholdBoxes.getWidget());
         return mainPanel;
     }
 

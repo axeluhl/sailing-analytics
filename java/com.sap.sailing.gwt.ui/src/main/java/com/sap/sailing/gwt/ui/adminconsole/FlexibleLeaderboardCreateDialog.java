@@ -21,6 +21,6 @@ public class FlexibleLeaderboardCreateDialog extends FlexibleLeaderboardDialog {
 
         scoringSchemeListBox = createScoringSchemeListBox(this, stringMessages);
         sailingEventsListBox = createSailingEventListBox();
-        discardThresholdBoxes = new DiscardThresholdBoxes(this);
+        discardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);
     }
 }

@@ -32,7 +32,7 @@ public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
                 }
             }
         });
-        discardThresholdBoxes = new DiscardThresholdBoxes(this);
+        discardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);
     }
 
 }
