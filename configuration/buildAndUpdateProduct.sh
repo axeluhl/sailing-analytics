@@ -324,32 +324,27 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         mkdir $ACDIR/configuration
     fi
 
-    # seems that initial scripts not there
-    if [ ! -f "$ACDIR/start" ]; then
-        cp -v $PROJECT_HOME/java/target/start $ACDIR
-        cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
-        cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration
-    fi
-
     cd $ACDIR
 
     rm -rf $ACDIR/plugins/*.*
     rm -rf $ACDIR/org.eclipse.*
     rm -rf $ACDIR/configuration/org.eclipse.*
 
-    if [[ $HAS_OVERWRITTEN_TARGET -eq 0 ]]; then
+    if [[ $HAS_OVERWRITTEN_TARGET -eq 0 ]] && [ ! -f $ACDIR/no-overwrite ]; then
         cp -v $p2PluginRepository/configuration/config.ini configuration/
+
         mkdir -p configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
         cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
 
-        # avoid overwriting start configuration if it exists
-        if [ ! -f $ACDIR/start ]; then
-            cp -v $PROJECT_HOME/java/target/start $ACDIR/
-            cp -v $PROJECT_HOME/java/target/stop $ACDIR/
-        fi
+        cp -v $PROJECT_HOME/java/target/start $ACDIR/
+        cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+        cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
+
+        cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
+        cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration
     fi
 
     cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
@@ -359,8 +354,6 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 
     # Make sure this script is up2date at least for the next run
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
-
-    cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
 
     echo "Installation complete. You may now start the server using ./start"
 fi
