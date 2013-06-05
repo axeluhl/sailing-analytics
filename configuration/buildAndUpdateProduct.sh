@@ -432,6 +432,7 @@ if [[ "$@" == "remote-deploy" ]]; then
     exit;;
     esac
 
+    echo ""
     $SSH_CMD "$REMOTE_SERVER/stop"
     $SSH_CMD "$REMOTE_SERVER/start"
 
