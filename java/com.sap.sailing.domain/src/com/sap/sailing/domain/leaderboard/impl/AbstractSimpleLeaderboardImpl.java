@@ -656,7 +656,6 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
                 Set<RaceColumn> discardedRacesForCompetitor = discardedRaces.get(competitor);
                 if (discardedRacesForCompetitor == null) {
-                    // TODO cache discards within this method to avoid re-calculation for each column
                     discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
                     discardedRaces.put(competitor, discardedRacesForCompetitor);
                 }
