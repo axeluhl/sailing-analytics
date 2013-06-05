@@ -257,6 +257,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPoin
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrectionMetadata;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
+import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationFactory;
@@ -483,7 +484,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             raceColumnDTO.setExplicitFactor(raceColumn.getExplicitFactor());
             raceColumns.add(raceColumnDTO);
         }
-        SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal());
+        SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal(),
+                series.getResultDiscardingRule() == null ? null : series.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces());
         return result;
     }
 
@@ -2481,6 +2483,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return result;
+    }
+    
+    @Override
+    public void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal,
+            int[] resultDiscardingThresholds) {
+        getService().apply(new UpdateSeries(regattaIdentifier, seriesName, isMedal, resultDiscardingThresholds));
     }
 
     @Override

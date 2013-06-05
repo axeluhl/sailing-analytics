@@ -369,6 +369,8 @@ public interface SailingServiceAsync {
 
     void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<List<RaceColumnInSeriesDTO>> callback);
+    
+    void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal, int[] resultDiscardingThresholds, AsyncCallback<Void> callback);
 
     void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);

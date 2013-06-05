@@ -110,6 +110,8 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         fleetsGrid = new Grid(0, 0);
         // create at least one fleet
         addFleetWidget("Default", 0, null);
+        
+        // TODO bug 1414 add checkbox for enabling series-specific result discarding and, if checked, show the discard threshold boxes to be shared with leaderboard create/edit dialogs
     }
 
     private Widget createFleetNameWidget(String defaultName) {

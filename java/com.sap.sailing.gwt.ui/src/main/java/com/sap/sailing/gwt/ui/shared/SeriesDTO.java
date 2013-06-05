@@ -15,11 +15,12 @@ public class SeriesDTO extends NamedDTO {
     
     public SeriesDTO() {}
     
-    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal) {
+    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, int[] discardThresholds) {
         super(name);
         this.fleets = fleets;
         this.raceColumns = raceColumns;
         this.isMedal = isMedal;
+        this.discardThresholds = discardThresholds;
     }
     
     public boolean isMedal() {
@@ -44,5 +45,9 @@ public class SeriesDTO extends NamedDTO {
 
     public void setRaceColumns(List<RaceColumnDTO> raceColumns) {
         this.raceColumns = raceColumns;
+    }
+
+    public int[] getDiscardThresholds() {
+        return discardThresholds;
     }
 }
