@@ -22,7 +22,8 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
     public Void internalApplyTo(RacingEventService toState) throws Exception {
         Series series = getSeries(toState);
         series.setIsMedal(isMedal);
-        series.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(resultDiscardingThresholds));
+        series.setResultDiscardingRule(resultDiscardingThresholds == null ?
+                null : new ThresholdBasedResultDiscardingRuleImpl(resultDiscardingThresholds));
         if (series.getRegatta().isPersistent()) {
             toState.updateStoredRegatta(series.getRegatta());
         }

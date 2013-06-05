@@ -7,6 +7,8 @@ import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -183,9 +185,18 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         String seriesName = getSelectedSeries().name;
         seriesPanel.add(new Label(stringMessages.series() + ": " + seriesName));
         additionalWidgetPanel.add(seriesPanel);
-        isMedalCheckbox = new CheckBox(stringMessages.medalSeries());
+        isMedalCheckbox = createCheckbox(stringMessages.medalSeries());
+        isMedalCheckbox.setValue(selectedSeries.isMedal());
         additionalWidgetPanel.add(isMedalCheckbox);
-        useSeriesResultDiscardingThresholdsCheckbox = new CheckBox(stringMessages.seriesDefinesResultDiscardingRule());
+        useSeriesResultDiscardingThresholdsCheckbox = createCheckbox(stringMessages.seriesDefinesResultDiscardingRule());
+        useSeriesResultDiscardingThresholdsCheckbox.setValue(selectedSeries.getDiscardThresholds() != null);
+        useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                boolean showResultDiscardingThresholdComponent = event.getValue();
+                // TODO show discard threshold UI component based on 
+            }
+        });
         additionalWidgetPanel.add(useSeriesResultDiscardingThresholdsCheckbox);
         // add races controls
         HorizontalPanel addRacesPanel = new HorizontalPanel();
