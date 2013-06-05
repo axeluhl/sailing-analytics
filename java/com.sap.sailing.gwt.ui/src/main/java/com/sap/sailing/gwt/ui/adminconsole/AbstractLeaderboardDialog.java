@@ -3,6 +3,9 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -54,6 +57,17 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
             discardThresholdsBoxContents[i] = discardThresholds.get(i);
         }
         return discardThresholdsBoxContents;
+    }
+
+    protected static HorizontalPanel createDiscardThresholdBoxesPanel(LongBox[] discardThresholdBoxes) {
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.setSpacing(3);
+        for (int i = 0; i < discardThresholdBoxes.length; i++) {
+            hp.add(new Label("" + (i + 1) + "."));
+            hp.add(discardThresholdBoxes[i]);
+        }
+        alignAllPanelWidgetsVertically(hp, HasVerticalAlignment.ALIGN_MIDDLE);
+        return hp;
     }
 
     @Override

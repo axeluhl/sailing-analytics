@@ -238,7 +238,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeScoreCorrections(leaderboard, dbScoreCorrections);
         dbLeaderboard.put(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name(), dbScoreCorrections);
         final ThresholdBasedResultDiscardingRule resultDiscardingRule = leaderboard.getResultDiscardingRule();
-        storeResultDiscardingRule(dbLeaderboard, resultDiscardingRule);
+        storeResultDiscardingRule(dbLeaderboard, resultDiscardingRule, FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS);
         BasicDBList competitorDisplayNames = new BasicDBList();
         for (Competitor competitor : leaderboard.getCompetitors()) {
             String displayNameForCompetitor = leaderboard.getDisplayName(competitor);
@@ -252,13 +252,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbLeaderboard.put(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name(), competitorDisplayNames);
     }
 
-    private void storeResultDiscardingRule(BasicDBObject dbLeaderboard,
-            final ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+    private void storeResultDiscardingRule(DBObject dbObject,
+            final ThresholdBasedResultDiscardingRule resultDiscardingRule, FieldNames field) {
         BasicDBList dbResultDiscardingThresholds = new BasicDBList();
         for (int threshold : resultDiscardingRule.getDiscardIndexResultsStartingWithHowManyRaces()) {
             dbResultDiscardingThresholds.add(threshold);
         }
-        dbLeaderboard.put(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name(), dbResultDiscardingThresholds);
+        dbObject.put(field.name(), dbResultDiscardingThresholds);
     }
 
     private BasicDBObject storeRaceColumn(RaceColumn raceColumn) {
@@ -478,6 +478,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbRaceColumns.add(storeRaceColumn(raceColumn));
         }
         dbSeries.put(FieldNames.SERIES_RACE_COLUMNS.name(), dbRaceColumns);
+        if (s.getResultDiscardingRule() != null) {
+            storeResultDiscardingRule(dbSeries, s.getResultDiscardingRule(), FieldNames.SERIES_DISCARDING_THRESHOLDS);
+        }
         return dbSeries;
     }
 

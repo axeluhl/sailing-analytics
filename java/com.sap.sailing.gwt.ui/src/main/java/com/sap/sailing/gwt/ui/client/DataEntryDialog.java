@@ -383,8 +383,8 @@ public abstract class DataEntryDialog<T> {
         return result;
     }
 
-    public void alignAllPanelWidgetsVertically(HorizontalPanel panel, HasVerticalAlignment.VerticalAlignmentConstant alignment) {
-        for(int i = 0; i < panel.getWidgetCount(); i++) {
+    public static void alignAllPanelWidgetsVertically(HorizontalPanel panel, HasVerticalAlignment.VerticalAlignmentConstant alignment) {
+        for (int i = 0; i < panel.getWidgetCount(); i++) {
             panel.setCellVerticalAlignment(panel.getWidget(i), alignment);
         }
     }

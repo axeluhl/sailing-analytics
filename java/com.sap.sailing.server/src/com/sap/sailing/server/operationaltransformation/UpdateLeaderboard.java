@@ -6,7 +6,7 @@ import java.util.Arrays;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
+import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -44,7 +44,7 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Leaderboard>
         }
         Leaderboard leaderboard = toState.getLeaderboardByName(newLeaderboardName);
         if (!Arrays.equals(leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), newDiscardingThresholds)) {
-            leaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(newDiscardingThresholds));
+            leaderboard.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(newDiscardingThresholds));
         }
         leaderboard.setDisplayName(newLeaderboardDisplayName);
         

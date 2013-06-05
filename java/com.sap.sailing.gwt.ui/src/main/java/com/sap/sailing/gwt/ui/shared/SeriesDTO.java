@@ -11,6 +11,7 @@ public class SeriesDTO extends NamedDTO {
     private List<FleetDTO> fleets;
     private List<RaceColumnDTO> raceColumns;
     private boolean isMedal;
+    private int[] discardThresholds;
     
     public SeriesDTO() {}
     

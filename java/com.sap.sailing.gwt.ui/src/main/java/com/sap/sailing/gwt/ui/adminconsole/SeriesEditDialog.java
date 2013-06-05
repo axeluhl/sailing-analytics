@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
-public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<RegattaSeriesDescriptor> {
+public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     private final ListBox addRacesListBox;
     private Button addRacesBtn;
     private final List<TextBox> raceNameEntryFields;
@@ -33,7 +33,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<RegattaSeri
     private VerticalPanel additionalWidgetPanel;
     private final SeriesDTO selectedSeries;
     
-    private static class RaceDialogValidator implements Validator<RegattaSeriesDescriptor> {
+    private static class RaceDialogValidator implements Validator<SeriesDescriptor> {
         private StringMessages stringConstants;
         private RegattaDTO regatta;
         
@@ -43,7 +43,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<RegattaSeri
         }
 
         @Override
-        public String getErrorMessage(RegattaSeriesDescriptor valueToValidate) {
+        public String getErrorMessage(SeriesDescriptor valueToValidate) {
             Set<String> raceColumnNamesOfOtherSeries = new HashSet<String>();
             SeriesDTO seriesToValidate = valueToValidate.getSeries();
             List<RaceColumnDTO> raceColumnsToValidate = valueToValidate.getRaces();
@@ -100,12 +100,11 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<RegattaSeri
 
     }
 
-    public RaceColumnInRegattaSeriesDialog(RegattaDTO regatta, SeriesDTO selectedSeries, StringMessages stringConstants,
-            DialogCallback<RegattaSeriesDescriptor> callback) {
-        super(stringConstants.actionEditRaces(), null, stringConstants.ok(), stringConstants.cancel(),
-                new RaceDialogValidator(regatta, stringConstants), callback);
+    public SeriesEditDialog(RegattaDTO regatta, SeriesDTO selectedSeries, StringMessages stringMessages,DialogCallback<SeriesDescriptor> callback) {
+        super(stringMessages.actionEditRaces(), null, stringMessages.ok(), stringMessages.cancel(),
+                new RaceDialogValidator(regatta, stringMessages), callback);
         this.selectedSeries = selectedSeries;
-        this.stringMessages = stringConstants;
+        this.stringMessages = stringMessages;
         addRacesListBox = createListBox(false);
         raceNamePrefixTextBox = createTextBox(null);
         raceNameEntryFields = new ArrayList<TextBox>();
@@ -145,7 +144,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<RegattaSeri
     }
     
     @Override
-    protected RegattaSeriesDescriptor getResult() {
+    protected SeriesDescriptor getResult() {
         SeriesDTO selectedSeries = getSelectedSeries();
         List<RaceColumnDTO> races = new ArrayList<RaceColumnDTO>();
         int racesCount = raceNameEntryFields.size();
@@ -158,7 +157,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<RegattaSeri
             }
             races.add(raceColumnDTO);
         }
-        return new RegattaSeriesDescriptor(selectedSeries, races);
+        return new SeriesDescriptor(selectedSeries, races);
     }
 
     private RaceColumnDTO findRaceColumnInSeriesByName(SeriesDTO series, String raceColumnName) {

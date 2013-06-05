@@ -66,7 +66,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
-import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
+import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -330,7 +330,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 mongoObjectFactory, 
                 domainObjectFactory);
         CourseArea courseArea = getCourseArea(courseAreaId);
-        FlexibleLeaderboard result = new FlexibleLeaderboardImpl(raceLogStore, leaderboardName, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
+        FlexibleLeaderboard result = new FlexibleLeaderboardImpl(raceLogStore, leaderboardName, new ScoreCorrectionImpl(), new ThresholdBasedResultDiscardingRuleImpl(
                 discardThresholds), scoringScheme, courseArea);
         result.setDisplayName(leaderboardDisplayName);
         synchronized (leaderboardsByName) {
@@ -362,7 +362,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 + (regatta == null ? "null" : (regatta.getName() + " (" + regatta.hashCode() + ")")) + " to " + this);
         RegattaLeaderboard result = null;
         if (regatta != null) {
-            result = new RegattaLeaderboardImpl(regatta, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
+            result = new RegattaLeaderboardImpl(regatta, new ScoreCorrectionImpl(), new ThresholdBasedResultDiscardingRuleImpl(
                     discardThresholds));
             result.setDisplayName(leaderboardDisplayName);
             synchronized (leaderboardsByName) {
@@ -1513,7 +1513,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 removeLeaderboard(overallLeaderboard.getName());
             } else {
                 // update existing overall leaderboard's discards settings; scoring scheme cannot be updated in-place
-                overallLeaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(overallLeaderboardDiscardThresholds));
+                overallLeaderboard.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(overallLeaderboardDiscardThresholds));
                 updateStoredLeaderboard(overallLeaderboard);
             }
         } else if (overallLeaderboard == null && overallLeaderboardScoringSchemeType != null) {
@@ -1527,7 +1527,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private void addOverallLeaderboardToLeaderboardGroup(LeaderboardGroup leaderboardGroup,
             ScoringScheme scoringScheme, int[] discardThresholds) {
         Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup, scoringScheme,
-                new ResultDiscardingRuleImpl(discardThresholds));
+                new ThresholdBasedResultDiscardingRuleImpl(discardThresholds));
         leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
         addLeaderboard(overallLeaderboard);
         updateStoredLeaderboard(overallLeaderboard);

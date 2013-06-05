@@ -193,14 +193,14 @@ public class RegattaDetailsComposite extends Composite {
     }
 
     private void editRacesOfRegattaSeries(final RegattaDTO regatta, final SeriesDTO series) {
-        RaceColumnInRegattaSeriesDialog raceDialog = new RaceColumnInRegattaSeriesDialog(regatta, series, stringMessages, 
-                new DialogCallback<RegattaSeriesDescriptor>() {
+        SeriesEditDialog raceDialog = new SeriesEditDialog(regatta, series, stringMessages, 
+                new DialogCallback<SeriesDescriptor>() {
                     @Override
                     public void cancel() {
                     }
 
                     @Override
-                    public void ok(final RegattaSeriesDescriptor result) {
+                    public void ok(final SeriesDescriptor result) {
                         updateRacesOfRegattaSeries(regatta, result.getSeries(), result.getRaces());
                     }
                 });

@@ -22,7 +22,7 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
+import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -47,7 +47,7 @@ public class LeaderboardDiscardingRulesTest {
         FlexibleLeaderboard leaderboard = (FlexibleLeaderboard) racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboard);
         int[] discardingRulesNew = new int[] { 1, 5 };
-        leaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(discardingRulesNew));
+        leaderboard.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(discardingRulesNew));
         racingEventService.updateStoredLeaderboard(leaderboard);
         Leaderboard leaderboardNew = racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboardNew);
