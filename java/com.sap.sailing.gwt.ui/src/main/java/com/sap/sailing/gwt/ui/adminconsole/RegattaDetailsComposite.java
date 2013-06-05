@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.cell.client.FieldUpdater;
@@ -61,32 +62,24 @@ public class RegattaDetailsComposite extends Composite {
         this.regattaRefresher = regattaRefresher;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        
         regatta = null;
-        
         mainPanel = new CaptionPanel(stringMessages.regatta());
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
-        
         Grid grid = new Grid(4, 2);
         vPanel.add(grid);
-        
         regattaName = new Label();
         grid.setWidget(0 , 0, new Label(stringMessages.regattaName() + ":"));
         grid.setWidget(0 , 1, regattaName);
-
         boatClassName = new Label();
         grid.setWidget(1 , 0, new Label(stringMessages.boatClass() + ":"));
         grid.setWidget(1 , 1, boatClassName);
-
         defaultCourseArea = new Label();
         grid.setWidget(2 , 0, new Label(stringMessages.courseArea() + ":"));
         grid.setWidget(2 , 1, defaultCourseArea);
-        
         scoringSystem = new Label();
         grid.setWidget(3 , 0, new Label(stringMessages.scoringSystem() + ":"));
         grid.setWidget(3 , 1, scoringSystem);
-        
         seriesTable = createRegattaSeriesTable();
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
         seriesSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -95,11 +88,9 @@ public class RegattaDetailsComposite extends Composite {
             }
         });
         seriesTable.setSelectionModel(seriesSelectionModel);
-        
         seriesListDataProvider = new ListDataProvider<SeriesDTO>();
         seriesListDataProvider.addDataDisplay(seriesTable);
         vPanel.add(seriesTable);
-        
         initWidget(mainPanel);
     }
 
@@ -201,13 +192,18 @@ public class RegattaDetailsComposite extends Composite {
 
                     @Override
                     public void ok(final SeriesDescriptor result) {
-                        updateRacesOfRegattaSeries(regatta, result.getSeries(), result.getRaces());
+                        updateRacesOfRegattaSeries(regatta, result);
                     }
                 });
         raceDialog.show();
     }
 
-    private void updateRacesOfRegattaSeries(final RegattaDTO regatta, final SeriesDTO series, List<RaceColumnDTO> newRaceColumns) {
+    private void updateRacesOfRegattaSeries(final RegattaDTO regatta, final SeriesDescriptor seriesDescriptor) {
+        final SeriesDTO series = seriesDescriptor.getSeries();
+        final List<RaceColumnDTO> newRaceColumns = seriesDescriptor.getRaces();
+        final boolean isMedalChanged = series.isMedal() != seriesDescriptor.isMedal();
+        final boolean seriesResultDiscardingThresholdsChanged = !Arrays.equals(series.getDiscardThresholds(),
+                seriesDescriptor.getResultDiscardingThresholds());
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
         List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
         final List<String> raceColumnsToAdd = new ArrayList<String>();
@@ -223,7 +219,6 @@ public class RegattaDetailsComposite extends Composite {
                 raceColumnsToRemove.add(existingRaceColumn.name);
             }
         }
-
         sailingService.addRaceColumnsToSeries(regattaIdentifier, series.name, raceColumnsToAdd, new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -245,7 +240,6 @@ public class RegattaDetailsComposite extends Composite {
                 errorReporter.reportError("Error trying to remove race columns "
                         + raceColumnsToAdd + " from series " + series.name
                         + ": " + caught.getMessage());
-
             }
 
             @Override
@@ -253,6 +247,22 @@ public class RegattaDetailsComposite extends Composite {
                 regattaRefresher.fillRegattas();
             }
         });
+        if (isMedalChanged || seriesResultDiscardingThresholdsChanged) {
+            sailingService.updateSeries(regattaIdentifier, series.name, seriesDescriptor.isMedal(),
+                    seriesDescriptor.getResultDiscardingThresholds(), new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error trying to remove race columns "
+                                    + raceColumnsToAdd + " from series " + series.name
+                                    + ": " + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            regattaRefresher.fillRegattas();
+                        }
+            });
+        }
     }
 
     private void updateRegattaDetails() {

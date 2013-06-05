@@ -15,10 +15,14 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 public class SeriesDescriptor {
     private final SeriesDTO series;
     private final List<RaceColumnDTO> races;
+    private final boolean isMedal;
+    private final int[] resultDiscardingThresholds;
     
-    public SeriesDescriptor(SeriesDTO series, List<RaceColumnDTO> races) {
+    public SeriesDescriptor(SeriesDTO series, List<RaceColumnDTO> races, boolean isMedal, int[] resultDiscardingThresholds) {
         this.series = series;
         this.races = races;
+        this.isMedal = isMedal;
+        this.resultDiscardingThresholds = resultDiscardingThresholds;
     }
 
     public SeriesDTO getSeries() {
@@ -27,5 +31,13 @@ public class SeriesDescriptor {
     
     public List<RaceColumnDTO> getRaces() {
         return races;
+    }
+
+    public boolean isMedal() {
+        return isMedal;
+    }
+
+    public int[] getResultDiscardingThresholds() {
+        return resultDiscardingThresholds;
     }
 }
