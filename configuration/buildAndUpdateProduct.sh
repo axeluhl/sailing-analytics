@@ -99,7 +99,7 @@ echo PROJECT_HOME is $PROJECT_HOME
 echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 
-options=':gtocpm:n:l:s:'
+options=':gtocpm:n:l:s:w:'
 while getopts $options option
 do
     case $option in
@@ -115,7 +115,7 @@ do
            HAS_OVERWRITTEN_TARGET=1;;
         w) REMOTE_SERVER_LOGIN=$OPTARG;;
         \?) echo "Invalid option"
-            exit 2;;
+            exit 4;;
     esac
 done
 
