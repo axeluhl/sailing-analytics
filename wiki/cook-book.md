@@ -92,6 +92,6 @@ Following http://stackoverflow.com/questions/861995/is-it-possible-for-git-merge
 To remove the association between the local and remote branch, and delete the local branch, run:
 
 <pre>
-git config --unset branch.<branch>.remote
-git config --unset branch.<branch>.merge
+git config --unset branch.&lt;branch&gt;.remote
+git config --unset branch.&lt;branch&gt;.merge
 </pre>
