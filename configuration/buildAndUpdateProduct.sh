@@ -381,8 +381,7 @@ if [[ "$@" == "remote-deploy" ]]; then
     read -s -n1 -p "Did you want me to start a LOCAL build (without tests) for $SERVERS_HOME/$SERVER before deploying (y/n)? " answer
     case $answer in
     "Y" | "y") BUILD=1;;
-    *) echo "Aborting..."
-    exit;;
+    *) echo "Not building anything. You have been warned!"
     esac
 
     if [[ $BUILD -eq 1 ]]; then
