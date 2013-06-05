@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -96,7 +95,6 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
     @Override
     protected Widget getAdditionalWidget() {
         VerticalPanel mainPanel = new VerticalPanel();
-
         Grid formGrid = new Grid(3,3);
         formGrid.setCellSpacing(3);
         formGrid.setWidget(0, 0, createLabel(stringMessages.regatta()));
