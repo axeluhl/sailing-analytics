@@ -64,7 +64,7 @@ proxy=0
 extra=''
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-g -t -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy]"
+    echo "buildAndUpdateProduct [-g -t -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-t Disable tests"
@@ -76,11 +76,17 @@ if [ $# -eq 0 ]; then
     echo "                  com.sap.sailing.monitoring. Only works if there is a fully built server available."
     echo "-l <telnet port>  Telnet port the OSGi server is running. Optional but enables fully automatic hot-deploy."
     echo "-s <target server> Name of server you want to use as target for install or hot-deploy. This overrides default behaviour."
+    echo "-w <ssh target> Target for remote-deploy. Must comply with the following format: user@server."
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo "install: installs product and configuration to $SERVERS_HOME/$active_branch. Overwrites any configuration by using config from branch."
     echo "all: calls build and then install"
+    echo ""
     echo "hot-deploy: performs hot deployment of named bundle into OSGi server"
+    echo "Example: $0 -n com.sap.sailing.www -l 14888 hot-deploy"
+    echo ""
+    echo "remote-deploy: performs hot deployment of named bundle into OSGi server"
+    echo "Example: $0 -w trac@sapsailing.com remote-deploy"
     echo ""
     echo "Active branch is $active_branch"
     echo "Project home is $PROJECT_HOME"
@@ -93,7 +99,7 @@ echo PROJECT_HOME is $PROJECT_HOME
 echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 
-options=':gtocpm:n:l:s:'
+options=':gtocpm:n:l:s:w:'
 while getopts $options option
 do
     case $option in
@@ -107,8 +113,9 @@ do
         l) OSGI_TELNET_PORT=$OPTARG;;
         s) TARGET_SERVER_NAME=$OPTARG
            HAS_OVERWRITTEN_TARGET=1;;
+        w) REMOTE_SERVER_LOGIN=$OPTARG;;
         \?) echo "Invalid option"
-            exit 2;;
+            exit 4;;
     esac
 done
 
@@ -324,32 +331,27 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         mkdir $ACDIR/configuration
     fi
 
-    # seems that initial scripts not there
-    if [ ! -f "$ACDIR/start" ]; then
-        cp -v $PROJECT_HOME/java/target/start $ACDIR
-        cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
-        cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration
-    fi
-
     cd $ACDIR
 
     rm -rf $ACDIR/plugins/*.*
     rm -rf $ACDIR/org.eclipse.*
     rm -rf $ACDIR/configuration/org.eclipse.*
 
-    if [[ $HAS_OVERWRITTEN_TARGET -eq 0 ]]; then
+    if [[ $HAS_OVERWRITTEN_TARGET -eq 0 ]] && [ ! -f $ACDIR/no-overwrite ]; then
         cp -v $p2PluginRepository/configuration/config.ini configuration/
+
         mkdir -p configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
         cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
 
-        # avoid overwriting start configuration if it exists
-        if [ ! -f $ACDIR/start ]; then
-            cp -v $PROJECT_HOME/java/target/start $ACDIR/
-            cp -v $PROJECT_HOME/java/target/stop $ACDIR/
-        fi
+        cp -v $PROJECT_HOME/java/target/start $ACDIR/
+        cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+        cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
+
+        cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
+        cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration
     fi
 
     cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
@@ -360,7 +362,79 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     # Make sure this script is up2date at least for the next run
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
-    cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
-
     echo "Installation complete. You may now start the server using ./start"
+fi
+
+if [[ "$@" == "remote-deploy" ]]; then
+    read -s -n1 -p "Which server do you want to deploy ([d]ev,[t]est,[p]rod1,p[r]od2): " answer
+    case $answer in
+    "D" | "d") SERVER="dev";;
+    "T" | "t") SERVER="test";;
+    "P" | "p") SERVER="prod1";;
+    "R" | "r") SERVER="prod2";;
+    *) echo "Aborting..."
+    exit;;
+    esac
+
+    echo "Will deploy server $SERVER"
+
+    read -s -n1 -p "Did you want me to start a LOCAL build (without tests) for $SERVERS_HOME/$SERVER before deploying (y/n)? " answer
+    case $answer in
+    "Y" | "y") BUILD=1;;
+    *) echo "Not building anything. You have been warned!"
+    esac
+
+    if [[ $BUILD -eq 1 ]]; then
+            ACDIR=$PWD
+            cd $HOME/code
+            git co dev
+            configuration/buildAndUpdateProduct.sh -t build
+            read -s -n1 -p "Has the build been successful (y/n)? " answer
+            case $answer in
+            "Y" | "y") OK=1;;
+            *) echo "Aborting..."
+            exit;;
+            esac
+            cd $ACDIR
+            echo ""
+    fi
+
+    SSH_CMD="ssh $REMOTE_SERVER_LOGIN"
+    SCP_CMD="scp -r"
+
+    REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/servers'`
+    REMOTE_SERVER="$REMOTE_HOME/$SERVER"
+
+    read -s -n1 -p "I will deploy $SERVERS_HOME/$SERVER to $REMOTE_SERVER_LOGIN:$REMOTE_SERVER. Is this correct (y/n)? " answer
+    case $answer in
+    "Y" | "y") OK=1;;
+    *) echo "Aborting... nothing has been changed on remote server!"
+    exit;;
+    esac
+
+    echo ""
+    echo "Starting deployment to $REMOTE_HOME/$SERVER..."
+
+    $SSH_CMD "rm -rf $REMOTE_SERVER/plugins/*.*"
+    $SSH_CMD "rm -rf $REMOTE_SERVER/org.eclipse*.*"
+    $SSH_CMD "rm -rf $REMOTE_SERVER/configuration/org.eclipse*.*"
+
+    $SCP_CMD $SERVERS_HOME/$SERVER/org.eclipse* $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+    $SCP_CMD $SERVERS_HOME/$SERVER/configuration/org.eclipse* $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration
+    $SCP_CMD $SERVERS_HOME/$SERVER/plugins/*.jar $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/plugins/
+
+    echo "Deployed successfully. I did NOT change any configuration, only code."
+
+    read -s -n1 -p "Do you want me to restart the remote server (y/n)? " answer
+    case $answer in
+    "Y" | "y") OK=1;;
+    *) echo "Aborting... deployment should be ready by now!"
+    exit;;
+    esac
+
+    echo ""
+    $SSH_CMD "$REMOTE_SERVER/stop"
+    $SSH_CMD "$REMOTE_SERVER/start"
+
+    echo "Restarted remote server. Please check."
 fi
