@@ -1,13 +1,91 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.LongBox;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+
 /**
  * For a result discarding rule based on thresholds that tell after how many races the next discard kicks in, an instance of
  * this class offers the UI components and validation rules that help in composing a UI that, among other things, allows a user
- * to configure the discarding thresholds.
+ * to configure the discarding thresholds.<p>
+ * 
+ * TODO produce error messages during validation
  * 
  * @author Axel Uhl (d043530)
  *
  */
 public class DiscardThresholdBoxes {
+    private static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
+    private final LongBox[] discardThresholdBoxes;
+    private final DataEntryDialog<?> parent;
+    
+    /**
+     * The widget used to represent the UI
+     */
+    private final Widget widget;
+
+    public DiscardThresholdBoxes(DataEntryDialog<?> parent) {
+        this(parent, /* values to show */ new int[0]);
+    }
+    
+    public DiscardThresholdBoxes(DataEntryDialog<?> parent, int[] initialDiscardThresholds) {
+        this.parent = parent;
+        discardThresholdBoxes = new LongBox[MAX_NUMBER_OF_DISCARDED_RESULTS];
+        for (int i = 0; i < discardThresholdBoxes.length; i++) {
+            if (initialDiscardThresholds != null && i < initialDiscardThresholds.length) {
+                discardThresholdBoxes[i] = parent.createLongBox(initialDiscardThresholds[i], 2);
+            } else {
+                discardThresholdBoxes[i] = parent.createLongBoxWithOptionalValue(null, 2);
+            }
+            discardThresholdBoxes[i].setVisibleLength(2);
+        }
+        widget = createDiscardThresholdBoxesPanel();
+    }
+    
+    /**
+     * @return the widget that can be added to the parent dialog passed to the constructor to visualize and edit the
+     *         result discarding thresholds
+     */
+    public Widget getWidget() {
+        return widget;
+    }
+
+    public int[] getDiscardThresholds() {
+        List<Integer> discardThresholds = new ArrayList<Integer>();
+        // go backwards; starting from first non-zero element, add them; take over leading zeroes which validator shall discard
+        for (int i = discardThresholdBoxes.length-1; i>=0; i--) {
+            if ((discardThresholdBoxes[i].getValue() != null
+                    && discardThresholdBoxes[i].getValue().toString().length() > 0) || !discardThresholds.isEmpty()) {
+                if (discardThresholdBoxes[i].getValue() == null) {
+                    discardThresholds.add(0, 0);
+                } else {
+                    discardThresholds.add(0, discardThresholdBoxes[i].getValue().intValue());
+                }
+            }
+        }
+        int[] discardThresholdsBoxContents = new int[discardThresholds.size()];
+        for (int i = 0; i < discardThresholds.size(); i++) {
+            discardThresholdsBoxContents[i] = discardThresholds.get(i);
+        }
+        return discardThresholdsBoxContents;
+    }
+
+    private Widget createDiscardThresholdBoxesPanel() {
+        assert discardThresholdBoxes != null && discardThresholdBoxes.length == MAX_NUMBER_OF_DISCARDED_RESULTS;
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.setSpacing(3);
+        for (int i = 0; i < discardThresholdBoxes.length; i++) {
+            hp.add(new Label("" + (i + 1) + "."));
+            hp.add(discardThresholdBoxes[i]);
+        }
+        parent.alignAllPanelWidgetsVertically(hp, HasVerticalAlignment.ALIGN_MIDDLE);
+        return hp;
+    }
 }

@@ -23,6 +23,6 @@ public class RegattaLeaderboardEditDialog extends RegattaLeaderboardDialog {
 
         regattaListBox = createSortedRegattaListBox(existingRegattas, leaderboardDescriptor.getRegattaName());
         regattaListBox.setEnabled(false);
-        discardThresholdBoxes = initPrefilledDiscardThresholdBoxes(leaderboardDescriptor.getDiscardThresholds(), this);
+        discardThresholdBoxes = new DiscardThresholdBoxes(this, leaderboardDescriptor.getDiscardThresholds());
     }
 }

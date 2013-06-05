@@ -37,6 +37,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     private Grid raceColumnsGrid;
     private VerticalPanel additionalWidgetPanel;
     private final SeriesDTO selectedSeries;
+    private final DiscardThresholdBoxes discardThresholdBoxes;
     
     private static class RaceDialogValidator implements Validator<SeriesDescriptor> {
         private StringMessages stringConstants;
@@ -95,7 +96,6 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             }
             return errorMessage;
         }
-
     }
 
     public SeriesEditDialog(RegattaDTO regatta, SeriesDTO selectedSeries, StringMessages stringMessages,DialogCallback<SeriesDescriptor> callback) {
@@ -108,6 +108,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         raceNameEntryFields = new ArrayList<TextBox>();
         raceNameDeleteButtons = new ArrayList<Button>();
         raceColumnsGrid = new Grid(0, 0);
+        discardThresholdBoxes = new DiscardThresholdBoxes(this, selectedSeries.getDiscardThresholds());
     }
 
     private Widget createRaceNameWidget(String defaultName, boolean enabled) {
@@ -157,7 +158,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         }
         return new SeriesDescriptor(selectedSeries, races, isMedalCheckbox.getValue(),
                 useSeriesResultDiscardingThresholdsCheckbox.getValue() ?
-                        /* TODO grab thresholds from discard threshold boxes */new int[0] : null);
+                        discardThresholdBoxes.getDiscardThresholds() : null);
     }
 
     private RaceColumnDTO findRaceColumnInSeriesByName(SeriesDTO series, String raceColumnName) {
@@ -193,8 +194,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                boolean showResultDiscardingThresholdComponent = event.getValue();
-                // TODO show discard threshold UI component based on 
+                discardThresholdBoxes.getWidget().setVisible(event.getValue());
             }
         });
         additionalWidgetPanel.add(useSeriesResultDiscardingThresholdsCheckbox);

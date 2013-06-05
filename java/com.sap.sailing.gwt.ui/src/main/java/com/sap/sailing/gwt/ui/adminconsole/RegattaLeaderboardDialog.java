@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -120,14 +118,8 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         mainPanel.add(formGrid);
 
         mainPanel.add(new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
-        HorizontalPanel hp = new HorizontalPanel();
-        hp.setSpacing(3);
-        for (int i = 0; i < discardThresholdBoxes.length; i++) {
-            hp.add(new Label("" + (i + 1) + "."));
-            hp.add(discardThresholdBoxes[i]);
-        }
-        alignAllPanelWidgetsVertically(hp, HasVerticalAlignment.ALIGN_MIDDLE);
-        mainPanel.add(hp);
+        Widget discardThresholdWidget = discardThresholdBoxes.getWidget();
+        mainPanel.add(discardThresholdWidget);
         return mainPanel;
     }
 

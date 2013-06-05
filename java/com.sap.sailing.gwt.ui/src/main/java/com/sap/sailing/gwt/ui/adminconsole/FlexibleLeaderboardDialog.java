@@ -6,7 +6,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -112,8 +111,8 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         formGrid.setWidget(4, 1, courseAreaListBox);
         mainPanel.add(formGrid);
         mainPanel.add(new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
-        HorizontalPanel hp = createDiscardThresholdBoxesPanel(discardThresholdBoxes);
-        mainPanel.add(hp);
+        Widget discardingThresholdWidget = discardThresholdBoxes.getWidget();
+        mainPanel.add(discardingThresholdWidget);
 
         return mainPanel;
     }
