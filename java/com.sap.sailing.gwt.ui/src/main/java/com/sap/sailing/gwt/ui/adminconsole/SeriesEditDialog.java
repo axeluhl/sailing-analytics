@@ -40,11 +40,11 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     private final DiscardThresholdBoxes discardThresholdBoxes;
     
     private static class RaceDialogValidator implements Validator<SeriesDescriptor> {
-        private StringMessages stringConstants;
+        private StringMessages stringMessages;
         private RegattaDTO regatta;
         
-        public RaceDialogValidator(RegattaDTO regatta, StringMessages stringConstants) {
-            this.stringConstants = stringConstants;
+        public RaceDialogValidator(RegattaDTO regatta, StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
             this.regatta = regatta;
         }
 
@@ -85,14 +85,16 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                 } 
             }
             if (!raceColumnNameNotEmpty) {
-                errorMessage = stringConstants.race() + " " + wrongRaceColumn.name + ": "
-                        + stringConstants.pleaseEnterAName();
+                errorMessage = stringMessages.race() + " " + wrongRaceColumn.name + ": "
+                        + stringMessages.pleaseEnterAName();
             } else if (!raceColumnUniqueInSeries) {
-                errorMessage = stringConstants.race() + " " +  wrongRaceColumn.name + ": "
-                        + stringConstants.raceWithThisNameAlreadyExists();
+                errorMessage = stringMessages.race() + " " +  wrongRaceColumn.name + ": "
+                        + stringMessages.raceWithThisNameAlreadyExists();
             }  else if (!raceColumnUniqueInRegatta) {
-                errorMessage = stringConstants.race() + " " +  wrongRaceColumn.name + ": "
-                        + stringConstants.raceWithThisNameAlreadyExistsInRegatta();
+                errorMessage = stringMessages.race() + " " +  wrongRaceColumn.name + ": "
+                        + stringMessages.raceWithThisNameAlreadyExistsInRegatta();
+            } else {
+                errorMessage = DiscardThresholdBoxes.getErrorMessage(valueToValidate.getResultDiscardingThresholds(), stringMessages);
             }
             return errorMessage;
         }
@@ -198,6 +200,8 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             }
         });
         additionalWidgetPanel.add(useSeriesResultDiscardingThresholdsCheckbox);
+        additionalWidgetPanel.add(discardThresholdBoxes.getWidget());
+        discardThresholdBoxes.getWidget().setVisible(useSeriesResultDiscardingThresholdsCheckbox.getValue());
         // add races controls
         HorizontalPanel addRacesPanel = new HorizontalPanel();
         addRacesPanel.setSpacing(3);

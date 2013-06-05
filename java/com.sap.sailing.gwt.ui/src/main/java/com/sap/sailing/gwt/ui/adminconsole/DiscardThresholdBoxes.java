@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * For a result discarding rule based on thresholds that tell after how many races the next discard kicks in, an instance of
@@ -87,5 +88,24 @@ public class DiscardThresholdBoxes {
         }
         parent.alignAllPanelWidgetsVertically(hp, HasVerticalAlignment.ALIGN_MIDDLE);
         return hp;
+    }
+    
+    public static String getErrorMessage(int[] discardThresholds, StringMessages stringMessages) {
+        String errorMessage = null;
+        if (discardThresholds != null) {
+            boolean discardThresholdsAscending = true;
+            for (int i = 1; i < discardThresholds.length; i++) {
+                if (0 < discardThresholds.length) {
+                    discardThresholdsAscending = discardThresholdsAscending
+                            && discardThresholds[i - 1] < discardThresholds[i]
+                            // and if one box is empty, all subsequent boxes need to be empty too
+                            && (discardThresholds[i] == 0 || discardThresholds[i - 1] > 0);
+                }
+            }
+            if (!discardThresholdsAscending) {
+                errorMessage = stringMessages.discardThresholdsMustBeAscending();
+            }
+        }
+        return errorMessage;
     }
 }

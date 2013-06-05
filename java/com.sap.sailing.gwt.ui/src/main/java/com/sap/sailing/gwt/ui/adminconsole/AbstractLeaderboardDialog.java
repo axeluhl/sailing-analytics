@@ -16,10 +16,10 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
     protected DiscardThresholdBoxes discardThresholdBoxes;
     protected static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
-    public AbstractLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDescriptor, StringMessages stringConstants,
+    public AbstractLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDescriptor, StringMessages stringMessages,
             Validator<LeaderboardDescriptor> validator,  DialogCallback<LeaderboardDescriptor> callback) {
-        super(title, null, stringConstants.ok(), stringConstants.cancel(), validator, callback);
-        this.stringMessages = stringConstants;
+        super(title, null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
+        this.stringMessages = stringMessages;
         this.leaderboardDescriptor = leaderboardDescriptor;
     }
 

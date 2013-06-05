@@ -21,47 +21,38 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
     protected Collection<RegattaDTO> existingRegattas;
 
     protected static class LeaderboardParameterValidator implements Validator<LeaderboardDescriptor> {
-        protected final StringMessages stringConstants;
+        protected final StringMessages stringMessages;
         protected final Collection<StrippedLeaderboardDTO> existingLeaderboards;
 
-        public LeaderboardParameterValidator(StringMessages stringConstants, Collection<StrippedLeaderboardDTO> existingLeaderboards){
+        public LeaderboardParameterValidator(StringMessages stringMessages, Collection<StrippedLeaderboardDTO> existingLeaderboards){
             super();
-            this.stringConstants = stringConstants;
+            this.stringMessages = stringMessages;
             this.existingLeaderboards = existingLeaderboards;
         }
 
         @Override
         public String getErrorMessage(LeaderboardDescriptor leaderboardToValidate) {
             String errorMessage;
-
-            boolean discardThresholdsAscending = true;
-            for (int i = 1; i < leaderboardToValidate.getDiscardThresholds().length; i++) {
-                // TODO what are correct values for discarding Thresholds?
-                if (0 < leaderboardToValidate.getDiscardThresholds().length){ 
-                    discardThresholdsAscending = discardThresholdsAscending
-                            && leaderboardToValidate.getDiscardThresholds()[i - 1] < leaderboardToValidate.getDiscardThresholds()[i]
-                                    // and if one box is empty, all subsequent boxes need to be empty too
-                                    && (leaderboardToValidate.getDiscardThresholds()[i] == 0 || leaderboardToValidate.getDiscardThresholds()[i-1] > 0);
-                }
-            }
-
             boolean unique = true;
             for (StrippedLeaderboardDTO dao : existingLeaderboards) {
                 if(dao.name.equals(leaderboardToValidate.getRegattaName())){
                     unique = false;
                 }
             }
-
             boolean regattaSelected = leaderboardToValidate.getRegattaName() != null ? true : false;
 
             if(!regattaSelected){
-                errorMessage = stringConstants.pleaseSelectARegatta();
+                errorMessage = stringMessages.pleaseSelectARegatta();
             } else if(!unique){
-                errorMessage = stringConstants.leaderboardWithThisNameAlreadyExists();
-            } else if (!discardThresholdsAscending) {
-                errorMessage = stringConstants.discardThresholdsMustBeAscending();
+                errorMessage = stringMessages.leaderboardWithThisNameAlreadyExists();
             } else {
-                errorMessage = null;
+                String discardThresholdErrorMessage = DiscardThresholdBoxes.getErrorMessage(
+                        leaderboardToValidate.getDiscardThresholds(), stringMessages);
+                if (discardThresholdErrorMessage != null) {
+                    errorMessage = discardThresholdErrorMessage;
+                } else {
+                    errorMessage = null;
+                }
             }
             return errorMessage;
         }

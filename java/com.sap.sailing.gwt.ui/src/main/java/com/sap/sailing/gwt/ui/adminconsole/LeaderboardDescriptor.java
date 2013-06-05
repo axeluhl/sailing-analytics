@@ -3,9 +3,10 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 
 /**
- * A descriptor class for creating and editing basic data of a leaderboard
+ * A descriptor class for creating and editing basic data of a leaderboard.
+ * 
  * @author Frank
- *
+ * 
  */
 public class LeaderboardDescriptor {
     private String name;
