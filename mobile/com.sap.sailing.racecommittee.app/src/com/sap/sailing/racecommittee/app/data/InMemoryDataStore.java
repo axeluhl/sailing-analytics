@@ -18,6 +18,8 @@ public enum InMemoryDataStore implements DataStore {
     private HashMap<Serializable, ManagedRace> managedRaceById;
     private HashMap<Serializable, Mark> marksById;
     private CourseBase courseData;
+    private double lastLatitude, lastLongitude, lastWindSpeed;
+    private int lastWindDirection;
 
     private InMemoryDataStore() {
         reset();
@@ -161,5 +163,44 @@ public enum InMemoryDataStore implements DataStore {
     @Override
     public void setLastPublishedCourseDesign(CourseBase courseData) {
         this.courseData = courseData;
+    }
+
+    
+    /*
+     * * * * * * *
+     *    Wind   *
+     * * * * * * *
+     */
+    @Override
+    public double getLastLongitude() {
+        return lastLongitude;
+    }
+    @Override
+    public void setLastLongitude(double lastLongitude) {
+        this.lastLongitude = lastLongitude;
+    }
+    @Override
+    public double getLastLatitude() {
+        return lastLatitude;
+    }
+    @Override
+    public void setLastLatitude(double lastLatitude) {
+        this.lastLatitude = lastLatitude;
+    }
+    @Override
+    public int getLastWindDirection() {
+        return lastWindDirection;
+    }
+    @Override
+    public void setLastWindDirection(int lastWindDirection) {
+        this.lastWindDirection = lastWindDirection;
+    }
+    @Override
+    public double getLastWindSpeed() {
+        return lastWindSpeed;
+    }
+    @Override
+    public void setLastWindSpeed(double lastWindSpeed) {
+        this.lastWindSpeed = lastWindSpeed;
     }
 }
