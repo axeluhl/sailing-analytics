@@ -64,7 +64,7 @@ proxy=0
 extra=''
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-g -t -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy]"
+    echo "buildAndUpdateProduct [-g -t -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-t Disable tests"
@@ -76,6 +76,7 @@ if [ $# -eq 0 ]; then
     echo "                  com.sap.sailing.monitoring. Only works if there is a fully built server available."
     echo "-l <telnet port>  Telnet port the OSGi server is running. Optional but enables fully automatic hot-deploy."
     echo "-s <target server> Name of server you want to use as target for install or hot-deploy. This overrides default behaviour."
+    echo "-w <ssh target> Target for remote-deploy. Must comply with the following format: user@server."
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo "install: installs product and configuration to $SERVERS_HOME/$active_branch. Overwrites any configuration by using config from branch."
@@ -107,6 +108,7 @@ do
         l) OSGI_TELNET_PORT=$OPTARG;;
         s) TARGET_SERVER_NAME=$OPTARG
            HAS_OVERWRITTEN_TARGET=1;;
+        w) REMOTE_SERVER_LOGIN=$OPTARG;;
         \?) echo "Invalid option"
             exit 2;;
     esac
@@ -356,4 +358,78 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
     echo "Installation complete. You may now start the server using ./start"
+fi
+
+if [[ "$@" == "remote-deploy" ]]; then
+    read -s -n1 -p "Which server do you want to deploy ([d]ev,[t]est,[p]rod1,p[r]od2): " answer
+    case $answer in
+    "D" | "d") SERVER="dev";;
+    "T" | "t") SERVER="test";;
+    "P" | "p") SERVER="prod1";;
+    "R" | "r") SERVER="prod2";;
+    *) echo "Aborting..."
+    exit;;
+    esac
+
+    echo "Will deploy server $SERVER"
+
+    read -s -n1 -p "Did you want me to start a LOCAL build (without tests) for $SERVER_HOMES/$SERVER before deploying (y/n)? " answer
+    case $answer in
+    "Y" | "y") BUILD=1;;
+    *) echo "Aborting..."
+    exit;;
+    esac
+
+    if [[ $BUILD -eq 1 ]]; then
+            ACDIR=$PWD
+            cd $HOME/code
+            git co dev
+            configuration/buildAndUpdateProduct.sh -t build
+            read -s -n1 -p "Has the build been successful (y/n)? " answer
+            case $answer in
+            "Y" | "y") OK=1;;
+            *) echo "Aborting..."
+            exit;;
+            esac
+            cd $ACDIR
+            echo ""
+    fi
+
+    SSH_CMD="ssh $REMOTE_SERVER_LOGIN"
+    SCP_CMD="scp -r"
+
+    REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/servers'`
+    REMOTE_SERVER="$REMOTE_HOME/$SERVER"
+
+    read -s -n1 -p "I will deploy $SERVERS_HOME/$SERVER to $@:$REMOTE_SERVER. Is this correct (y/n)? " answer
+    case $answer in
+    "Y" | "y") OK=1;;
+    *) echo "Aborting... nothing has been changed on remote server!"
+    exit;;
+    esac
+
+    echo ""
+    echo "Starting deployment to $REMOTE_HOME/$SERVER..."
+
+    $SSH_CMD "rm -rf $REMOTE_SERVER/plugins/*.*"
+    $SSH_CMD "rm -rf $REMOTE_SERVER/org.eclipse*.*"
+    $SSH_CMD "rm -rf $REMOTE_SERVER/configuration/org.eclipse*.*"
+
+    $SCP_CMD $SERVER_HOME/$SERVER/org.eclipse* $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+    $SCP_CMD $SERVER_HOME/$SERVER/configuration/org.eclipse* $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration
+    $SCP_CMD $SERVER_HOME/$SERVER/plugins/*.jar $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/plugins/
+
+    echo "Deployed successfully. I did NOT change any configuration, only code."
+
+    read -s -n1 -p "Do you want me to restart the remote server (y/n)? " answer
+    case $answer in
+    "Y" | "y") OK=1;;
+    *) echo "Aborting... deployment should be ready by now!"
+    exit;;
+    esac
+
+    $SSH_CMD "$REMOTE_SERVER/stop"
+    $SSH_CMD "$REMOTE_SERVER/start"
+
+    echo "Restarted remote server. Please check."
 fi
