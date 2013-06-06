@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -2788,5 +2791,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
         return baseDomainFactory;
+    }
+    
+    public String getBuildVersion() {
+        String version = "Unknown or Development";
+        File versionfile = new File(System.getProperty("jetty.home") + File.pathSeparator + "version.txt");
+        if (versionfile.exists()) {
+            try {
+                version = new BufferedReader(new FileReader(versionfile)).readLine();
+            } catch (Exception ex) {
+                logger.severe("Could not load file " + versionfile.getAbsolutePath());
+            }
+        }
+        return version;
     }
 }
