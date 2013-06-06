@@ -1516,7 +1516,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 removeLeaderboard(overallLeaderboard.getName());
             } else {
                 // update existing overall leaderboard's discards settings; scoring scheme cannot be updated in-place
-                overallLeaderboard.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(overallLeaderboardDiscardThresholds));
+                overallLeaderboard.setCrossLeaderboardResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(overallLeaderboardDiscardThresholds));
                 updateStoredLeaderboard(overallLeaderboard);
             }
         } else if (overallLeaderboard == null && overallLeaderboardScoringSchemeType != null) {

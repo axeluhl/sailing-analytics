@@ -66,4 +66,11 @@ public interface Series extends SeriesBase {
     void addRaceColumnListener(RaceColumnListener listener);
     
     void removeRaceColumnListener(RaceColumnListener listener);
+
+    /**
+     * @return whether this series defines its local result discarding rule; if so, any leaderboard based on the
+     *         enclosing regatta has to respect this and has to use a result discarding rule implementation that keeps
+     *         discards local to each series rather than spreading them across the entire leaderboard.
+     */
+    boolean definesSeriesDiscardThresholds();
 }

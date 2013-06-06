@@ -424,7 +424,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule) {
+    public void setCrossLeaderboardResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule) {
         ResultDiscardingRule oldDiscardingRule = getResultDiscardingRule();
         this.crossLeaderboardResultDiscardingRule = discardingRule;
         getRaceColumnListeners().notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, discardingRule);

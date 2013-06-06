@@ -270,4 +270,10 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         this.resultDiscardingRule = resultDiscardingRule;
     }
+
+    @Override
+    public boolean definesSeriesDiscardThresholds() {
+        return getResultDiscardingRule() != null;
+    }
+
 }

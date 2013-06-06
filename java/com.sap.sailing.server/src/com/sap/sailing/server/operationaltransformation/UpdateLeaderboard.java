@@ -52,7 +52,7 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Leaderboard>
                 && (!(leaderboard.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) || !Arrays
                         .equals(((ThresholdBasedResultDiscardingRule) leaderboard.getResultDiscardingRule())
                                 .getDiscardIndexResultsStartingWithHowManyRaces(), newDiscardingThresholds))) {
-            leaderboard.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(newDiscardingThresholds));
+            leaderboard.setCrossLeaderboardResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(newDiscardingThresholds));
         }
         leaderboard.setDisplayName(newLeaderboardDisplayName);
         
