@@ -123,6 +123,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
@@ -1595,7 +1596,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         leaderboardDTO.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
         leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
-        leaderboardDTO.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
+        if (leaderboard.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
+            leaderboardDTO.discardThresholds = ((ThresholdBasedResultDiscardingRule) leaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces();
+        } else {
+            leaderboardDTO.discardThresholds = null;
+        }
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 TimePoint latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = null;
@@ -2244,7 +2249,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
         if (overallLeaderboard != null) {
-            groupDTO.setOverallLeaderboardDiscardThresholds(overallLeaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces());
+            if (overallLeaderboard.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
+                groupDTO.setOverallLeaderboardDiscardThresholds(((ThresholdBasedResultDiscardingRule) overallLeaderboard
+                        .getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces());
+            }
             groupDTO.setOverallLeaderboardScoringSchemeType(overallLeaderboard.getScoringScheme().getType());
         }
         return groupDTO;

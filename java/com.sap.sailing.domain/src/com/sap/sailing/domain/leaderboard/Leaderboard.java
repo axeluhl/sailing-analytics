@@ -282,7 +282,7 @@ public interface Leaderboard extends Named {
 
     SettableScoreCorrection getScoreCorrection();
 
-    ThresholdBasedResultDiscardingRule getResultDiscardingRule();
+    ResultDiscardingRule getResultDiscardingRule();
 
     Competitor getCompetitorByName(String competitorName);
     

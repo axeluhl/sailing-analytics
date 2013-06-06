@@ -55,6 +55,11 @@ public class LeaderboardDescriptor {
         this.scoringScheme = scoringScheme;
     }
 
+    /**
+     * @return <code>null</code>, in case the leaderboard does not explicitly define result discarding thresholds itself
+     *         (e.g., a regatta leaderboard that obtains its result discarding rules from the underlying regatta's
+     *         series definitions); a valid but possibly empty array otherwise
+     */
     public int[] getDiscardThresholds() {
         return discardThresholds;
     }

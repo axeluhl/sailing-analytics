@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
-
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -24,8 +23,8 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -302,8 +301,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
-    public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
-            ThresholdBasedResultDiscardingRule newDiscardingRule) {
+    public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule) {
         raceColumnListeners.notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
     }
 

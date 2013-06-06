@@ -11,9 +11,9 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
 
-    public RegattaLeaderboardCreateDialog(Collection<StrippedLeaderboardDTO> existingLeaderboards, Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
+    public RegattaLeaderboardCreateDialog(Collection<StrippedLeaderboardDTO> existingLeaderboards, Collection<RegattaDTO> existingRegattas, StringMessages stringMessages,
             ErrorReporter errorReporter, DialogCallback<LeaderboardDescriptor> callback) {
-        super(stringConstants.createRegattaLeaderboard(), new LeaderboardDescriptor(), existingRegattas, stringConstants, errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(stringConstants, existingLeaderboards), callback);
+        super(stringMessages.createRegattaLeaderboard(), new LeaderboardDescriptor(), existingRegattas, stringMessages, errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(stringMessages, existingLeaderboards), callback);
 
         nameTextBox = createTextBox(null);
         displayNameTextBox = createTextBox(null);
@@ -30,6 +30,7 @@ public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
                 if (selectedIndex > 0) {
                     nameTextBox.setText(regattaListBox.getValue(selectedIndex)); 
                 }
+                adjustVisibilityOfResultDiscardingRuleComponent();
             }
         });
         discardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);

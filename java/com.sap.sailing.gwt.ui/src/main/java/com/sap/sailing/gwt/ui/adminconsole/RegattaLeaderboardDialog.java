@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -18,6 +19,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog {
     protected ListBox regattaListBox;
     protected Collection<RegattaDTO> existingRegattas;
+    private Label regattaDefinesDiscardsLabel;
 
     protected static class LeaderboardParameterValidator implements Validator<LeaderboardDescriptor> {
         protected final StringMessages stringMessages;
@@ -57,10 +59,21 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         }
     }
 
-    public RegattaLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
+    public RegattaLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, Collection<RegattaDTO> existingRegattas, StringMessages stringMessages,
             ErrorReporter errorReporter, LeaderboardParameterValidator validator,  DialogCallback<LeaderboardDescriptor> callback) {
-        super(title, leaderboardDTO, stringConstants, validator, callback);
+        super(title, leaderboardDTO, stringMessages, validator, callback);
         this.existingRegattas = existingRegattas;
+    }
+
+
+    protected void adjustVisibilityOfResultDiscardingRuleComponent() {
+        if (getSelectedRegatta().definesSeriesDiscardThresholds()) {
+            discardThresholdBoxes.getWidget().setVisible(false);
+            regattaDefinesDiscardsLabel.setVisible(true);
+        } else {
+            discardThresholdBoxes.getWidget().setVisible(true);
+            regattaDefinesDiscardsLabel.setVisible(false);
+        }
     }
 
     protected ListBox createSortedRegattaListBox(Collection<RegattaDTO> regattas, String preSelectedRegattaName) {
@@ -103,18 +116,23 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         formGrid.setWidget(1, 1, nameTextBox);
         formGrid.setWidget(2,  0, createLabel(stringMessages.displayName()));
         formGrid.setWidget(2, 1, displayNameTextBox);
+        regattaDefinesDiscardsLabel = new Label(stringMessages.regattaDefinesResultDiscardingRules());
         mainPanel.add(formGrid);
-        mainPanel.add(discardThresholdBoxes.getWidget());
+        mainPanel.add(regattaDefinesDiscardsLabel);
+        if (discardThresholdBoxes != null) {
+            mainPanel.add(discardThresholdBoxes.getWidget());
+            regattaDefinesDiscardsLabel.setVisible(false);
+        }
         return mainPanel;
     }
 
     public RegattaDTO getSelectedRegatta() {
         RegattaDTO result = null;
         int selIndex = regattaListBox.getSelectedIndex();
-        if(selIndex > 0) { // the zero index represents the 'no selection' text
+        if (selIndex > 0) { // the zero index represents the 'no selection' text
             String itemText = regattaListBox.getItemText(selIndex);
-            for(RegattaDTO regattaDTO: existingRegattas) {
-                if(regattaDTO.name.equals(itemText)) {
+            for (RegattaDTO regattaDTO : existingRegattas) {
+                if (regattaDTO.name.equals(itemText)) {
                     result = regattaDTO;
                     break;
                 }

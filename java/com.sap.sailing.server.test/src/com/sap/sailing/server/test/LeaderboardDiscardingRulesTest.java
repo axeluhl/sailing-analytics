@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
@@ -51,7 +52,7 @@ public class LeaderboardDiscardingRulesTest {
         racingEventService.updateStoredLeaderboard(leaderboard);
         Leaderboard leaderboardNew = racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboardNew);
-        int[] result = leaderboardNew.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
+        int[] result = ((ThresholdBasedResultDiscardingRule) leaderboardNew.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces();
         assertArrayEquals(discardingRulesNew, result);
     }
 

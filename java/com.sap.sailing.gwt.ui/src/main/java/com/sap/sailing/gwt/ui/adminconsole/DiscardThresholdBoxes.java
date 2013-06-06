@@ -53,7 +53,8 @@ public class DiscardThresholdBoxes {
     
     /**
      * @return the widget that can be added to the parent dialog passed to the constructor to visualize and edit the
-     *         result discarding thresholds
+     *         result discarding thresholds. The result returned from this object remains the same across this object's
+     *         life time.
      */
     public Widget getWidget() {
         return widget;

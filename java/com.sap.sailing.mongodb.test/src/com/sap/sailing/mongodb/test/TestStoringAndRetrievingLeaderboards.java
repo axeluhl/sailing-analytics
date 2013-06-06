@@ -27,6 +27,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
@@ -136,8 +137,8 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
         Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db).loadLeaderboard(leaderboardName, /* regattaRegistry */ null);
         assertEquals(leaderboardName, loadedLeaderboard.getName());
-        assertTrue(Arrays.equals(discardIndexResultsStartingWithHowManyRaces, loadedLeaderboard.getResultDiscardingRule()
-                .getDiscardIndexResultsStartingWithHowManyRaces()));
+        assertTrue(Arrays.equals(discardIndexResultsStartingWithHowManyRaces,
+                ((ThresholdBasedResultDiscardingRule) loadedLeaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces()));
     }
     
     @Test
@@ -169,8 +170,8 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         // attach tracked race to leaderboard to ensure that competitor object is assigned properly
         loadedLeaderboard.addRace(raceWithOneCompetitor, raceColumnName, /* medalRace, ignored */ false, leaderboard.getFleet(null));
         assertEquals(leaderboardName, loadedLeaderboard.getName());
-        assertTrue(Arrays.equals(discardIndexResultsStartingWithHowManyRaces, loadedLeaderboard.getResultDiscardingRule()
-                .getDiscardIndexResultsStartingWithHowManyRaces()));
+        assertTrue(Arrays.equals(discardIndexResultsStartingWithHowManyRaces,
+                ((ThresholdBasedResultDiscardingRule) loadedLeaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces()));
         assertEquals(1, Util.size(loadedLeaderboard.getCompetitors()));
         assertEquals(competitor, loadedLeaderboard.getCompetitors().iterator().next());
         assertEquals(carriedPointsForWolfgangHunger, loadedLeaderboard.getCarriedPoints(competitor), 0.000000001);

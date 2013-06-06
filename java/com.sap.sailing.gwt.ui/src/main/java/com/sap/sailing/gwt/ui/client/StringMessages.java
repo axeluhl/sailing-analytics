@@ -651,4 +651,5 @@ public interface StringMessages extends Messages {
     String showOnlyCurrentlyRunningRaces();
     String seriesDefinesResultDiscardingRule();
     String addSeries();
+    String regattaDefinesResultDiscardingRules();
 }

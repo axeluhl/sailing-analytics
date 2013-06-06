@@ -41,6 +41,7 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -237,7 +238,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject dbScoreCorrections = new BasicDBObject();
         storeScoreCorrections(leaderboard, dbScoreCorrections);
         dbLeaderboard.put(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name(), dbScoreCorrections);
-        final ThresholdBasedResultDiscardingRule resultDiscardingRule = leaderboard.getResultDiscardingRule();
+        final ResultDiscardingRule resultDiscardingRule = leaderboard.getResultDiscardingRule();
         storeResultDiscardingRule(dbLeaderboard, resultDiscardingRule, FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS);
         BasicDBList competitorDisplayNames = new BasicDBList();
         for (Competitor competitor : leaderboard.getCompetitors()) {
@@ -252,13 +253,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbLeaderboard.put(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name(), competitorDisplayNames);
     }
 
+    /**
+     * Stores the result discarding rule to <code>dbObject</code>'s field identified by <code>field</code> if the result discarding
+     * rule is not <code>null</code> and is of type {@link ThresholdBasedResultDiscardingRule}. Otherwise, it is assumed that the
+     * result discarding rule is otherwise implicitly obtained, e.g., from a definition of a regatta with its series, stored elsewhere.
+     */
     private void storeResultDiscardingRule(DBObject dbObject,
-            final ThresholdBasedResultDiscardingRule resultDiscardingRule, FieldNames field) {
-        BasicDBList dbResultDiscardingThresholds = new BasicDBList();
-        for (int threshold : resultDiscardingRule.getDiscardIndexResultsStartingWithHowManyRaces()) {
-            dbResultDiscardingThresholds.add(threshold);
+            final ResultDiscardingRule resultDiscardingRule, FieldNames field) {
+        if (resultDiscardingRule != null && resultDiscardingRule instanceof ThresholdBasedResultDiscardingRule) {
+            BasicDBList dbResultDiscardingThresholds = new BasicDBList();
+            for (int threshold : ((ThresholdBasedResultDiscardingRule) resultDiscardingRule).getDiscardIndexResultsStartingWithHowManyRaces()) {
+                dbResultDiscardingThresholds.add(threshold);
+            }
+            dbObject.put(field.name(), dbResultDiscardingThresholds);
         }
-        dbObject.put(field.name(), dbResultDiscardingThresholds);
     }
 
     private BasicDBObject storeRaceColumn(RaceColumn raceColumn) {
