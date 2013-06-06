@@ -2795,7 +2795,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     public String getBuildVersion() {
         String version = "Unknown or Development";
-        File versionfile = new File(System.getProperty("jetty.home") + File.pathSeparator + "version.txt");
+        File versionfile = new File(System.getProperty("jetty.home") + File.separator + "version.txt");
         if (versionfile.exists()) {
             try {
                 version = new BufferedReader(new FileReader(versionfile)).readLine();
