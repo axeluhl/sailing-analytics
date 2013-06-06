@@ -26,5 +26,6 @@ public class RegattaLeaderboardEditDialog extends RegattaLeaderboardDialog {
         if (leaderboardDescriptor.getDiscardThresholds() != null) {
             discardThresholdBoxes = new DiscardThresholdBoxes(this, leaderboardDescriptor.getDiscardThresholds(), stringMessages);
         } // else, the regatta leaderboard obtains its result discarding rule implicitly from the underlying regatta
+        adjustVisibilityOfResultDiscardingRuleComponent();
     }
 }

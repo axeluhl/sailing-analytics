@@ -63,6 +63,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
             ErrorReporter errorReporter, LeaderboardParameterValidator validator,  DialogCallback<LeaderboardDescriptor> callback) {
         super(title, leaderboardDTO, stringMessages, validator, callback);
         this.existingRegattas = existingRegattas;
+        regattaDefinesDiscardsLabel = new Label(stringMessages.regattaDefinesResultDiscardingRules());
     }
 
 
@@ -116,7 +117,6 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         formGrid.setWidget(1, 1, nameTextBox);
         formGrid.setWidget(2,  0, createLabel(stringMessages.displayName()));
         formGrid.setWidget(2, 1, displayNameTextBox);
-        regattaDefinesDiscardsLabel = new Label(stringMessages.regattaDefinesResultDiscardingRules());
         mainPanel.add(formGrid);
         mainPanel.add(regattaDefinesDiscardsLabel);
         if (discardThresholdBoxes != null) {
