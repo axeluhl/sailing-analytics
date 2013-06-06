@@ -50,4 +50,8 @@ public class SeriesDTO extends NamedDTO {
     public int[] getDiscardThresholds() {
         return discardThresholds;
     }
+    
+    public void setDiscardThresholds(int[] discardThresholds) {
+        this.discardThresholds = discardThresholds;
+    }
 }

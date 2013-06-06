@@ -824,15 +824,18 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
     }
 
-    private Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> getSeriesWithoutRaceColumnsConstructionParametersAsMap(Regatta regatta) {
-        Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> result = new HashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>>();
+    private Map<String, Triple<List<Triple<String, Integer, Color>>, Boolean, int[]>> getSeriesWithoutRaceColumnsConstructionParametersAsMap(
+            Regatta regatta) {
+        Map<String, Triple<List<Triple<String, Integer, Color>>, Boolean, int[]>> result =
+                new HashMap<String, Triple<List<Triple<String, Integer, Color>>, Boolean, int[]>>();
         for (Series s : regatta.getSeries()) {
             assert Util.isEmpty(s.getRaceColumns());
             List<Triple<String, Integer, Color>> fleetNamesAndOrdering = new ArrayList<Triple<String, Integer, Color>>();
             for (Fleet f : s.getFleets()) {
                 fleetNamesAndOrdering.add(new Triple<String, Integer, Color>(f.getName(), f.getOrdering(), f.getColor()));
             }
-            result.put(s.getName(), new Pair<List<Triple<String, Integer, Color>>, Boolean>(fleetNamesAndOrdering, s.isMedal()));
+            result.put(s.getName(), new Triple<List<Triple<String, Integer, Color>>, Boolean, int[]>(fleetNamesAndOrdering, s.isMedal(),
+                    s.getResultDiscardingRule() == null ? null : s.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces()));
         }
         return result;
     }
