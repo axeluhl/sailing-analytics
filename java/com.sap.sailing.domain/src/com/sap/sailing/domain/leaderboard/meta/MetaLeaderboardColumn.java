@@ -166,4 +166,9 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     public boolean isTransient() {
         return false;
     }
+
+    @Override
+    public RaceLogIdentifier getRaceLogIdentifier(Fleet fleet) {
+        return null;
+    }
 }

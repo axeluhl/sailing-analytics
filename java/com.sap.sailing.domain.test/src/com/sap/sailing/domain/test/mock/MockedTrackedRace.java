@@ -753,7 +753,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public RaceLog getRaceLog() {
+    public RaceLog getRaceLog(Serializable identifier) {
         // TODO Auto-generated method stub
         return null;
     }

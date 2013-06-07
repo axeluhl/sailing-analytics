@@ -499,7 +499,7 @@ public interface TrackedRace extends Serializable {
      * Returns the attached race log event track for this race if any.
      * Otherwise <code>null</code>.
      */
-    RaceLog getRaceLog();
+    RaceLog getRaceLog(Serializable identifier);
     
     /**
      * a setter for the listener on course design changes. The listener is mostly part of the tracking provider adapter.

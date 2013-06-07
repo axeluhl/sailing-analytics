@@ -39,7 +39,7 @@ public class RaceLogAttachOnTrackedRaceTest {
         }
         
         @Override
-        public RaceLog getRaceLog() {
+        public RaceLog getRaceLog(Serializable identifier) {
             return raceLog;
         }
     }
@@ -61,7 +61,7 @@ public class RaceLogAttachOnTrackedRaceTest {
         
         column.setTrackedRace(defaultFleet, trackedRace);
         
-        assertSame(column.getRaceLog(defaultFleet), trackedRace.getRaceLog());
+        assertSame(column.getRaceLog(defaultFleet), trackedRace.getRaceLog(column.getRaceLogIdentifier(defaultFleet)));
     }
     
     @Test
@@ -74,7 +74,7 @@ public class RaceLogAttachOnTrackedRaceTest {
         column.setTrackedRace(fleet, trackedRace);
         column.setTrackedRace(fleet, null);
         
-        assertNull(trackedRace.getRaceLog());
+        assertNull(trackedRace.getRaceLog(column.getRaceLogIdentifier(fleet)));
     }
     
     @Test
@@ -88,8 +88,8 @@ public class RaceLogAttachOnTrackedRaceTest {
         
         column.setTrackedRace(aFleet, trackedRace);
         
-        assertSame(column.getRaceLog(aFleet), trackedRace.getRaceLog());
-        assertNotSame(column.getRaceLog(bFleet), trackedRace.getRaceLog());
+        assertSame(column.getRaceLog(aFleet), trackedRace.getRaceLog(column.getRaceLogIdentifier(aFleet)));
+        assertNotSame(column.getRaceLog(bFleet), trackedRace.getRaceLog(column.getRaceIdentifier(bFleet)));
     }
     
     @Test
@@ -104,8 +104,8 @@ public class RaceLogAttachOnTrackedRaceTest {
         column.setTrackedRace(fleet, firstRace);
         column.setTrackedRace(fleet, secondRace);
         
-        assertNull(firstRace.getRaceLog());
-        assertSame(column.getRaceLog(fleet), secondRace.getRaceLog());
+        assertNull(firstRace.getRaceLog(column.getRaceLogIdentifier(fleet)));
+        assertSame(column.getRaceLog(fleet), secondRace.getRaceLog(column.getRaceLogIdentifier(fleet)));
     }
 
 }

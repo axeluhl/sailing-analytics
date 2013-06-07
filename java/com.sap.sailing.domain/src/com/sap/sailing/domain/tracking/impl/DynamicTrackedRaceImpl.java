@@ -666,11 +666,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public void attachRaceLog(RaceLog raceLog) {
         super.attachRaceLog(raceLog);
-        logListener.addTo(attachedRaceLog);
+        logListener.addTo(raceLog);
     }
     
     @Override
     public void detachRaceLog(Serializable identifier) {
+        RaceLog attachedRaceLog = attachedRaceLogs.get(identifier);
         if (attachedRaceLog != null) {
             logListener.removeFrom(attachedRaceLog);
         }

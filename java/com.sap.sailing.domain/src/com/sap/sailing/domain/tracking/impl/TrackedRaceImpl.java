@@ -221,7 +221,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private transient CombinedWindTrackImpl combinedWindTrack;
 
-    protected transient RaceLog attachedRaceLog;
     protected transient HashMap<Serializable, RaceLog> attachedRaceLogs;
 
     /**
@@ -2347,8 +2346,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public RaceLog getRaceLog() {
-        return attachedRaceLog;
+    public RaceLog getRaceLog(Serializable identifier) {
+        return attachedRaceLogs.get(identifier);
     }
 
     @Override
