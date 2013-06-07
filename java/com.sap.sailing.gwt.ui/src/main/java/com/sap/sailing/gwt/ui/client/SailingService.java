@@ -301,4 +301,6 @@ public interface SailingService extends RemoteService {
     List<RegattaOverviewEntryDTO> getRegattaOverviewEntriesForEvent(String eventIdAsString);
     
     EventDTO getEventByIdAsString(String eventIdAsString);
+    
+    String getBuildVersion();
 }
