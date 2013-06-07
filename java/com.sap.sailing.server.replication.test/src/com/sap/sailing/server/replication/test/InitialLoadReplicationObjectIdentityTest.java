@@ -129,6 +129,9 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         assertNotNull(replica.getLeaderboardGroupByName(leaderBoardGroupName));
         assertNotNull(replica.getLeaderboardByName(leaderboardName));
         assertTrue(replica.getAllRegattas().iterator().hasNext());
+        
+        //System.out.println("InitialLoadReplicationObjectIdentityTest.testInitialLoad - replica.getAllMediaTracks: " + replica.getAllMediaTracks());
+        
         assertThat(replica.getAllMediaTracks().size(), is(3));
     }
 

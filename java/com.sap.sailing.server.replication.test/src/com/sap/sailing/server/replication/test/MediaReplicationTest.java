@@ -14,9 +14,9 @@ import static org.junit.Assert.assertThat;
 import static org.hamcrest.core.Is.is;
 
 public class MediaReplicationTest extends AbstractServerReplicationTest {
-
+      
     private void waitSomeTime() throws InterruptedException {
-        Thread.sleep(500); // wait for JMS to deliver the message and the message to be applied
+        Thread.sleep(1000); // wait for JMS to deliver the message and the message to be applied
     }
     
     /* util */
