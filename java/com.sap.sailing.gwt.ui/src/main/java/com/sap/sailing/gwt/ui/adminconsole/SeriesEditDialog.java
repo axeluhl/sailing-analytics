@@ -29,6 +29,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     private final ListBox addRacesListBox;
     private Button addRacesBtn;
     private CheckBox isMedalCheckbox;
+    private CheckBox startWithZeroScoreCheckbox;
     private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
     private final List<TextBox> raceNameEntryFields;
     private final List<Button> raceNameDeleteButtons;
@@ -160,7 +161,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         }
         return new SeriesDescriptor(selectedSeries, races, isMedalCheckbox.getValue(),
                 useSeriesResultDiscardingThresholdsCheckbox.getValue() ?
-                        discardThresholdBoxes.getDiscardThresholds() : null);
+                        discardThresholdBoxes.getDiscardThresholds() : null, startWithZeroScoreCheckbox.getValue());
     }
 
     private RaceColumnDTO findRaceColumnInSeriesByName(SeriesDTO series, String raceColumnName) {
@@ -191,6 +192,9 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         isMedalCheckbox = createCheckbox(stringMessages.medalSeries());
         isMedalCheckbox.setValue(selectedSeries.isMedal());
         additionalWidgetPanel.add(isMedalCheckbox);
+        startWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());
+        startWithZeroScoreCheckbox.setValue(selectedSeries.isStartsWithZeroScore());
+        additionalWidgetPanel.add(startWithZeroScoreCheckbox);
         useSeriesResultDiscardingThresholdsCheckbox = createCheckbox(stringMessages.seriesDefinesResultDiscardingRule());
         useSeriesResultDiscardingThresholdsCheckbox.setValue(selectedSeries.getDiscardThresholds() != null);
         useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {

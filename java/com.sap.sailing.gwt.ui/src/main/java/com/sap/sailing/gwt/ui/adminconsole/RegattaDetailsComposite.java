@@ -273,7 +273,8 @@ public class RegattaDetailsComposite extends Composite {
         });
         if (isMedalChanged || seriesResultDiscardingThresholdsChanged) {
             sailingService.updateSeries(regattaIdentifier, series.name, seriesDescriptor.isMedal(),
-                    seriesDescriptor.getResultDiscardingThresholds(), new AsyncCallback<Void>() {
+                    seriesDescriptor.getResultDiscardingThresholds(), seriesDescriptor.isStartsWithZeroScore(),
+                    new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError("Error trying to remove race columns "

@@ -16,12 +16,14 @@ public class SeriesDescriptor {
     private final SeriesDTO series;
     private final List<RaceColumnDTO> races;
     private final boolean isMedal;
+    private final boolean startsWithZeroScore;
     private final int[] resultDiscardingThresholds;
     
-    public SeriesDescriptor(SeriesDTO series, List<RaceColumnDTO> races, boolean isMedal, int[] resultDiscardingThresholds) {
+    public SeriesDescriptor(SeriesDTO series, List<RaceColumnDTO> races, boolean isMedal, int[] resultDiscardingThresholds, boolean startsWithZeroScore) {
         this.series = series;
         this.races = races;
         this.isMedal = isMedal;
+        this.startsWithZeroScore = startsWithZeroScore;
         this.resultDiscardingThresholds = resultDiscardingThresholds;
     }
 
@@ -39,5 +41,9 @@ public class SeriesDescriptor {
 
     public int[] getResultDiscardingThresholds() {
         return resultDiscardingThresholds;
+    }
+
+    public boolean isStartsWithZeroScore() {
+        return startsWithZeroScore;
     }
 }
