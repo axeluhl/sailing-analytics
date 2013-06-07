@@ -2,11 +2,9 @@ package com.sap.sailing.racecommittee.app.services;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.state.RaceState;
-import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateEventListener;
 
-public class RaceStateListener implements RaceStateChangedListener, RaceStateEventListener {
+public class RaceStateListener implements RaceStateEventListener {
     @SuppressWarnings("unused")
     private final static String TAG = RaceStateListener.class.getName();
 
@@ -16,10 +14,6 @@ public class RaceStateListener implements RaceStateChangedListener, RaceStateEve
     public RaceStateListener(RaceStateService service, ManagedRace race) {
         this.service = service;
         this.race = race;
-    }
-
-    public void onRaceStateChanged(RaceState state) {
-        //service.registerAlarms(race, state);
     }
 
     @Override
