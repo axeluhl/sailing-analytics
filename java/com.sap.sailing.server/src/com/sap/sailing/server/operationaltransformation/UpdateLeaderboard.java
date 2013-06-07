@@ -6,7 +6,8 @@ import java.util.Arrays;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -43,8 +44,15 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Leaderboard>
             toState.renameLeaderboard(getLeaderboardName(), newLeaderboardName);
         }
         Leaderboard leaderboard = toState.getLeaderboardByName(newLeaderboardName);
-        if (!Arrays.equals(leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), newDiscardingThresholds)) {
-            leaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(newDiscardingThresholds));
+        // If the new thresholds are null this means that the leaderboard is expected to obtain its result discarding
+        // configuration from somewhere else implicitly, e.g., an underlying regatta, and we'll leave it alone;
+        // Otherwise, a new threshold-based result discarding rule will be set based on the newDiscardingThresholds
+        // unless the leaderboard already has an equal definition.
+        if (newDiscardingThresholds != null
+                && (!(leaderboard.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) || !Arrays
+                        .equals(((ThresholdBasedResultDiscardingRule) leaderboard.getResultDiscardingRule())
+                                .getDiscardIndexResultsStartingWithHowManyRaces(), newDiscardingThresholds))) {
+            leaderboard.setCrossLeaderboardResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(newDiscardingThresholds));
         }
         leaderboard.setDisplayName(newLeaderboardDisplayName);
         

@@ -30,11 +30,11 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
  * @author Axel Uhl (d043530)
  * 
  */
-public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingRule {
+public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingRule {
     private static final long serialVersionUID = 386341628517357988L;
     private final int[] discardIndexResultsStartingWithHowManyRaces;
     
-    public ResultDiscardingRuleImpl(int[] discardIndexResultsStartingWithHowManyRaces) {
+    public ThresholdBasedResultDiscardingRuleImpl(int[] discardIndexResultsStartingWithHowManyRaces) {
         super();
         this.discardIndexResultsStartingWithHowManyRaces = new int[discardIndexResultsStartingWithHowManyRaces.length];
         System.arraycopy(discardIndexResultsStartingWithHowManyRaces, 0,

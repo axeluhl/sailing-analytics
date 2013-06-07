@@ -53,6 +53,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -208,10 +209,10 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertEquals(Util.size(regatta.getSeries()), Util.size(loadedRegatta.getSeries()));
         Leaderboard loadedLeaderboard = resForLoading.getLeaderboardByName(loadedRegatta.getName());
         assertNotNull(loadedLeaderboard);
-        assertEquals(regattaLeaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces().length,
-                loadedLeaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces().length);
-        assertTrue(Arrays.equals(regattaLeaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(),
-                loadedLeaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces()));
+        assertEquals(((ThresholdBasedResultDiscardingRule) regattaLeaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces().length,
+                ((ThresholdBasedResultDiscardingRule) loadedLeaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces().length);
+        assertTrue(Arrays.equals(((ThresholdBasedResultDiscardingRule) regattaLeaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces(),
+                ((ThresholdBasedResultDiscardingRule) loadedLeaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces()));
         assertTrue(loadedLeaderboard instanceof RegattaLeaderboard);
         RegattaLeaderboard loadedRegattaLeaderboard = (RegattaLeaderboard) loadedLeaderboard;
         assertSame(loadedRegatta, loadedRegattaLeaderboard.getRegatta());

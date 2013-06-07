@@ -3,9 +3,10 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 
 /**
- * A descriptor class for creating and editing basic data of a leaderboard
+ * A descriptor class for creating and editing basic data of a leaderboard.
+ * 
  * @author Frank
- *
+ * 
  */
 public class LeaderboardDescriptor {
     private String name;
@@ -27,6 +28,9 @@ public class LeaderboardDescriptor {
         this.courseAreaIdAsString = courseAreaIdAsString;
     }
 
+    /**
+     * Leaves the {@link #regattaName} <code>null</code>, representing a flexible leaderboard, not a regatta leaderboard
+     */
     public LeaderboardDescriptor(String name, String displayName, ScoringSchemeType scoringScheme, int[] discardThresholds, String courseAreaIdAsString) {
         this.name = name;
         this.displayName = displayName;
@@ -51,6 +55,11 @@ public class LeaderboardDescriptor {
         this.scoringScheme = scoringScheme;
     }
 
+    /**
+     * @return <code>null</code>, in case the leaderboard does not explicitly define result discarding thresholds itself
+     *         (e.g., a regatta leaderboard that obtains its result discarding rules from the underlying regatta's
+     *         series definitions); a valid but possibly empty array otherwise
+     */
     public int[] getDiscardThresholds() {
         return discardThresholds;
     }

@@ -61,6 +61,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
+import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -100,7 +101,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     private final SettableScoreCorrection scoreCorrection;
 
-    private ThresholdBasedResultDiscardingRule resultDiscardingRule;
+    private ThresholdBasedResultDiscardingRule crossLeaderboardResultDiscardingRule;
 
     /**
      * The optional display name mappings for competitors. This allows a user to override the tracking-provided
@@ -330,7 +331,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         this.carriedPoints = new HashMap<Competitor, Double>();
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
-        this.resultDiscardingRule = resultDiscardingRule;
+        this.crossLeaderboardResultDiscardingRule = resultDiscardingRule;
         this.suppressedCompetitors = Collections.synchronizedSet(new HashSet<Competitor>());
         this.raceColumnListeners = new RaceColumnListeners();
         this.raceDetailsAtEndOfTrackingCache = new HashMap<Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>>();
@@ -383,8 +384,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public ThresholdBasedResultDiscardingRule getResultDiscardingRule() {
-        return resultDiscardingRule;
+    public ResultDiscardingRule getResultDiscardingRule() {
+        return crossLeaderboardResultDiscardingRule;
     }
 
     @Override
@@ -423,9 +424,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule) {
-        ThresholdBasedResultDiscardingRule oldDiscardingRule = getResultDiscardingRule();
-        this.resultDiscardingRule = discardingRule;
+    public void setCrossLeaderboardResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule) {
+        ResultDiscardingRule oldDiscardingRule = getResultDiscardingRule();
+        this.crossLeaderboardResultDiscardingRule = discardingRule;
         getRaceColumnListeners().notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, discardingRule);
     }
 
@@ -735,8 +736,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
-            ThresholdBasedResultDiscardingRule newDiscardingRule) {
+    public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule) {
         getRaceColumnListeners().notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
     }
 
@@ -1021,7 +1021,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result.setDelayToLiveInMillisForLatestRace(this.getDelayToLiveInMillis());
             result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
             result.hasCarriedPoints = this.hasCarriedPoints();
-            result.discardThresholds = this.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
+            if (this.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
+                result.discardThresholds = ((ThresholdBasedResultDiscardingRule) this.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces();
+            } else {
+                result.discardThresholds = null;
+            }
             // Computing the competitor leg ranks is expensive, especially in live mode, in case new events keep invalidating
             // the ranks cache in TrackedLegImpl. Then problem then is that the sorting based on wind data is repeated for each
             // competitor, leading to square effort. We therefore need to compute the leg ranks for those race where leg details

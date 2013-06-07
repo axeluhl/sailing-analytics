@@ -1,16 +1,22 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 /**
- * A series is a part of a {@link Regatta}. Rounds are ordered within the regatta, and rules for who is assigned to
+ * A series is a part of a {@link Regatta}. Series are ordered within the regatta, and rules for who is assigned to
  * which series may exist on the regatta. For example, a regatta may have a qualification series, a final series, and a
  * medal "series" with usually only a single medal race. Each series has one or more fleets, deciding how many races per
  * race column have to be run in this round. For example, if the 49er regatta has so many competitors that they cannot
- * all start in one race, the qualification round can be split into two {@link Fleet}s, "Yellow" and "Blue," each
- * getting their separate races. Fleet assignment may or may not vary. This usually depends on the round's
+ * all start in one race, the qualification series can be split into two {@link Fleet}s, "Yellow" and "Blue," each
+ * getting their separate races. Fleet assignment may or may not vary. This usually depends on the series'
  * characteristics of having ordered or unordered fleets.<p>
+ * 
+ * A series may define its result discarding scheme. If it does, a regatta leaderboard for the containing regatta
+ * has to adhere to this and may not define its own cross-cutting result discarding scheme. If one or more series
+ * in the regatta choose to define their own result discarding scheme, discards are determined per series and not
+ * per leaderboard.<p>
  * 
  * To receive notifications when {@link TrackedRace tracked races} are linked to or unlinked from any of this series'
  * columns, {@link RaceColumnListener}s can be added / removed.
@@ -42,6 +48,14 @@ public interface Series extends SeriesBase {
     
     void removeRaceColumn(String raceColumnName);
     
+    /**
+     * If not <code>null</code>, a containing regatta's leaderboard must obey this rule and in particular cannot define
+     * a "cross-cutting" result discarding rule where discards may be arbitrarily distributed across series.
+     */
+    ThresholdBasedResultDiscardingRule getResultDiscardingRule();
+    
+    void setResultDiscardingRule(ThresholdBasedResultDiscardingRule resultDiscardingRule);
+    
     Regatta getRegatta();
     
     /**
@@ -52,4 +66,11 @@ public interface Series extends SeriesBase {
     void addRaceColumnListener(RaceColumnListener listener);
     
     void removeRaceColumnListener(RaceColumnListener listener);
+
+    /**
+     * @return whether this series defines its local result discarding rule; if so, any leaderboard based on the
+     *         enclosing regatta has to respect this and has to use a result discarding rule implementation that keeps
+     *         discards local to each series rather than spreading them across the entire leaderboard.
+     */
+    boolean definesSeriesDiscardThresholds();
 }
