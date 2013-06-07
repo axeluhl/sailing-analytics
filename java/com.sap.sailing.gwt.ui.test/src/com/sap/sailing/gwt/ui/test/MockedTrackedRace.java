@@ -406,6 +406,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                         // TODO Auto-generated method stub
                         
                     }
+
+                    @Override
+                    public boolean definesSeriesDiscardThresholds() {
+                        // TODO Auto-generated method stub
+                        return false;
+                    }
                 };
             }
 

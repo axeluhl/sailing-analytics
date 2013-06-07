@@ -254,8 +254,7 @@ public class LeaderboardCacheManager {
                 }
 
                 @Override
-                public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
-                        ThresholdBasedResultDiscardingRule newDiscardingRule) {
+                public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule) {
                     removeFromCache(leaderboard);
                 }
 

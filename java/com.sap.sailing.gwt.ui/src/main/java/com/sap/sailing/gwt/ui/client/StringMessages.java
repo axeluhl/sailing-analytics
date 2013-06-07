@@ -649,4 +649,7 @@ public interface StringMessages extends Messages {
     String showFollowingRegattas();
     String showOnlyRacesOfSameDay();
     String showOnlyCurrentlyRunningRaces();
+    String seriesDefinesResultDiscardingRule();
+    String addSeries();
+    String regattaDefinesResultDiscardingRules();
 }

@@ -282,8 +282,6 @@ public interface Leaderboard extends Named {
 
     SettableScoreCorrection getScoreCorrection();
 
-    ThresholdBasedResultDiscardingRule getResultDiscardingRule();
-
     Competitor getCompetitorByName(String competitorName);
     
     void setDisplayName(Competitor competitor, String displayName);
@@ -314,7 +312,19 @@ public interface Leaderboard extends Named {
      */
     boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
     
-    public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule);
+    /**
+     * Returns the result discarding rule for this leaderboard. This may be an explicit rule set for the entire leaderboard,
+     * or it may be an implicit rule that relies on other data such as a regatta's series-specific result discarding rules.
+     */
+    ResultDiscardingRule getResultDiscardingRule();
+
+    /**
+     * Trying to set a cross-leaderboard result discarding rule may fail with an exception if the leaderboard obtains
+     * its result discarding rule in another way. For example, if the leaderboard is a {@link RegattaLeaderboard} and the
+     * regatta's series define their own result discarding rules, the regatta leaderboard will use a composite
+     * result discarding rule that considers all series-specific result discarding rules.
+     */
+    public void setCrossLeaderboardResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule);
 
     Competitor getCompetitorByIdAsString(String idAsString);
     

@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
-import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -126,8 +126,8 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
-    public void notifyListenersAboutResultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
-            ThresholdBasedResultDiscardingRule newDiscardingRule) {
+    public void notifyListenersAboutResultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule,
+            ResultDiscardingRule newDiscardingRule) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.resultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
         }

@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -32,6 +33,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     private boolean isMedal;
     private Regatta regatta;
     private final RaceColumnListeners raceColumnListeners;
+    private ThresholdBasedResultDiscardingRule resultDiscardingRule;
     
     /**
      * @param fleets
@@ -245,8 +247,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     }
 
     @Override
-    public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
-            ThresholdBasedResultDiscardingRule newDiscardingRule) {
+    public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule) {
         raceColumnListeners.notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
     }
 
@@ -259,4 +260,20 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     public boolean isTransient() {
         return false;
     }
+
+    @Override
+    public ThresholdBasedResultDiscardingRule getResultDiscardingRule() {
+        return resultDiscardingRule;
+    }
+
+    @Override
+    public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        this.resultDiscardingRule = resultDiscardingRule;
+    }
+
+    @Override
+    public boolean definesSeriesDiscardThresholds() {
+        return getResultDiscardingRule() != null;
+    }
+
 }

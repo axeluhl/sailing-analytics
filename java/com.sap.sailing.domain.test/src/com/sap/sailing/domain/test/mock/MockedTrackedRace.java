@@ -405,6 +405,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     public void setDefaultCourseArea(CourseArea newCourseArea) {
                         // TODO Auto-generated method stub
                     }
+
+                    @Override
+                    public boolean definesSeriesDiscardThresholds() {
+                        // TODO Auto-generated method stub
+                        return false;
+                    }
                 };
             }
 
