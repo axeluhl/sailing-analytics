@@ -1,7 +1,6 @@
 package com.sap.sailing.selenium.test.adminconsole.pages;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.openqa.selenium.By;

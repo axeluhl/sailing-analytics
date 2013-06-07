@@ -670,7 +670,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     @Override
     public void detachRaceLog() {
-        logListener.removeFrom(attachedRaceLog);
+        if (attachedRaceLog != null) {
+            logListener.removeFrom(attachedRaceLog);
+        }
         super.detachRaceLog();
     }
 
