@@ -112,6 +112,13 @@ public class RegattaDetailsComposite extends Composite {
             }
         };
 
+        TextColumn<SeriesDTO> startsWithZeroScoreColumn = new TextColumn<SeriesDTO>() {
+            @Override
+            public String getValue(SeriesDTO series) {
+                return series.isStartsWithZeroScore() ? stringMessages.yes() : stringMessages.no();
+            }
+        };
+
         TextColumn<SeriesDTO> racesColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
@@ -193,6 +200,7 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(racesColumn, stringMessages.races());
         table.addColumn(fleetsColumn, stringMessages.fleets());
         table.addColumn(discardsColumn, stringMessages.discarding());
+        table.addColumn(startsWithZeroScoreColumn, stringMessages.startsWithZeroScore());
         table.addColumn(seriesActionColumn, stringMessages.actions());
         
         return table;
