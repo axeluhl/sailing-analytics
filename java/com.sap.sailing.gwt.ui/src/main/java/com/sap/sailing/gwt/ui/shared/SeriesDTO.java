@@ -69,4 +69,8 @@ public class SeriesDTO extends NamedDTO {
     public Boolean isStartsWithZeroScore() {
         return startsWithZeroScore;
     }
+
+    public void setStartsWithZeroScore(Boolean startsWithZeroScore) {
+        this.startsWithZeroScore = startsWithZeroScore;
+    }
 }
