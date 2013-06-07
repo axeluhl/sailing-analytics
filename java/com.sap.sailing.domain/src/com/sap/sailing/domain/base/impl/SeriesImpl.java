@@ -34,6 +34,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     private Regatta regatta;
     private final RaceColumnListeners raceColumnListeners;
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
+    private boolean startsWithZeroScore;
     
     /**
      * @param fleets
@@ -274,6 +275,16 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     @Override
     public boolean definesSeriesDiscardThresholds() {
         return getResultDiscardingRule() != null;
+    }
+
+    @Override
+    public boolean isStartsWithZeroScore() {
+        return startsWithZeroScore;
+    }
+
+    @Override
+    public void setStartsWithZeroScore(boolean startsWithZeroScore) {
+        this.startsWithZeroScore = startsWithZeroScore;
     }
 
 }

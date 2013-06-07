@@ -483,6 +483,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public Double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
         double result = getCarriedPoints(competitor);
         for (RaceColumn r : getRaceColumns()) {
+            if (r.isStartsWithZeroScore()) {
+                result = 0;
+            }
             if (getScoringScheme().isValidInTotalScore(this, r, timePoint)) {
                 final Double totalPoints = getTotalPoints(competitor, r, timePoint);
                 if (totalPoints != null) {

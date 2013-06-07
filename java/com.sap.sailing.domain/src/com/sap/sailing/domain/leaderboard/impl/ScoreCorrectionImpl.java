@@ -164,7 +164,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      */
     @Override
     public Result getCorrectedScore(Callable<Integer> trackedRankProvider, final Competitor competitor,
-            final RaceColumn raceColumn, TimePoint timePoint,NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
+            final RaceColumn raceColumn, TimePoint timePoint, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
             ScoringScheme scoringScheme) {
         Double result;
         final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn);

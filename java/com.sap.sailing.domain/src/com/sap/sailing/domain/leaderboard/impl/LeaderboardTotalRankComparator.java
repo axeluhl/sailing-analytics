@@ -128,10 +128,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             }
         }
         // now count the races in which they scored; if they scored in a different number of races, prefer the
-        // competitor
-        // who scored more often; otherwise, prefer the competitor who has a better score sum; if score sums are equal,
-        // break
-        // tie by sorting scores and looking for the first score difference.
+        // competitor who scored more often; otherwise, prefer the competitor who has a better score sum; if score sums are equal,
+        // break tie by sorting scores and looking for the first score difference.
         int result = compareByNumberOfRacesScored(o1Scores.size(), o2Scores.size());
         if (result == 0) {
             result = compareByScoreSum(o1ScoreSum, o2ScoreSum);

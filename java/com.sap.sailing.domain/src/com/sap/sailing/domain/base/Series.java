@@ -73,4 +73,20 @@ public interface Series extends SeriesBase {
      *         discards local to each series rather than spreading them across the entire leaderboard.
      */
     boolean definesSeriesDiscardThresholds();
+    
+    /**
+     * By default, a competitor's total score is computed by summing up the non-discarded total points of each race
+     * across the leaderboard, considering the {@link RaceColumn#getFactor() column factors}. Some series, however, are
+     * defined such that participating competitors start the series with a zero score. Any carry-forward would then have
+     * to be modeled as a first carry-forward "race" in the series which the ISAF in 2013 has defined as being a race
+     * logically, therefore also being discardable. If this method returns <code>true</code>, this series advises the
+     * leaderboard and scoring scheme to start counting the total points at this series with zero.
+     * <p>
+     * 
+     * This condition propagates to the first race column of the series which is then used by the leaderboard and
+     * scoring scheme.
+     */
+    boolean isStartsWithZeroScore();
+    
+    void setStartsWithZeroScore(boolean startsWithZeroScore);
 }
