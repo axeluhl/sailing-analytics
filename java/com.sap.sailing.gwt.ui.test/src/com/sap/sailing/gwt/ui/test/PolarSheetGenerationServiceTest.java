@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import junit.framework.Assert;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -50,6 +51,9 @@ public class PolarSheetGenerationServiceTest {
     
     private static final String BOAT_CLASS = "Forelle";
     
+    //Ignore since session is needed. But since we will drop session context due to 
+    // our load balancing needs, it doesn't make sense to mock session right now
+    @Ignore
     @Test
     public void testPolarSheetGenerationService() throws InterruptedException {
          
