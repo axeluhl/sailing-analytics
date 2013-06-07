@@ -72,6 +72,7 @@ import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.confidence.impl.HyperbolicTimeDifferenceWeigher;
 import com.sap.sailing.domain.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -257,6 +258,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation) {
         super();
         locksForMarkPassings = new IdentityHashMap<>();
+        attachedRaceLogs = new HashMap<>();
         this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
         this.statusNotifier = new Object[0];
         this.serializationLock = new NamedReentrantReadWriteLock("Serialization lock for tracked race "
@@ -366,6 +368,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
+        attachedRaceLogs = new HashMap<>();
         markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
         cacheInvalidationTimerLock = new Object();
         windStore = EmptyWindStore.INSTANCE;
@@ -452,11 +455,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return endOfTrackingReceived;
     }
 
-    protected void invalidateStartTime() {
+    public void invalidateStartTime() {
         startTime = null;
     }
 
-    protected void invalidateEndTime() {
+    public void invalidateEndTime() {
         endTime = null;
     }
 
@@ -467,35 +470,46 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     /**
-     * Calculates the start time of the race from various sources
+     * Calculates the start time of the race from various sources. The highest precedence take the {@link #attachedRaceLogs race logs},
+     * followed by the field {@link #startTimeReceived} which can explicitly be set using {@link #setStartTimeReceived(TimePoint)}.
+     * If that does not provide any start time either, a start time is attempted to be inferred from the time points
+     * of the start mark passing events.
      */
     @Override
     public TimePoint getStartOfRace() {
         if (startTime == null) {
-            startTime = startTimeReceived;
-            // If not null, check if the first mark passing for the start line is too much after the startTimeReceived;
-            // if so, return an adjusted, later start time.
-            // If no official start time was received, try to estimate the start time using the mark passings for the
-            // start line.
-            final Waypoint firstWaypoint = getRace().getCourse().getFirstWaypoint();
-            if (firstWaypoint != null) {
-                if (startTimeReceived != null) {
-                    TimePoint timeOfFirstMarkPassing = getFirstPassingTime(firstWaypoint);
-                    if (timeOfFirstMarkPassing != null) {
-                        long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassing.asMillis()
-                                - startTimeReceived.asMillis();
-                        if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
-                            startTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
-                                    - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
-                        } else {
-                            startTime = startTimeReceived;
+            for (RaceLog raceLog : attachedRaceLogs.values()) {
+                startTime = new StartTimeFinder(raceLog).getStartTime();
+                if (startTime != null) {
+                    break;
+                }
+            }
+            if (startTime == null) {
+                startTime = startTimeReceived;
+                // If not null, check if the first mark passing for the start line is too much after the
+                // startTimeReceived; if so, return an adjusted, later start time.
+                // If no official start time was received, try to estimate the start time using the mark passings for
+                // the start line.
+                final Waypoint firstWaypoint = getRace().getCourse().getFirstWaypoint();
+                if (firstWaypoint != null) {
+                    if (startTimeReceived != null) {
+                        TimePoint timeOfFirstMarkPassing = getFirstPassingTime(firstWaypoint);
+                        if (timeOfFirstMarkPassing != null) {
+                            long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassing.asMillis()
+                                    - startTimeReceived.asMillis();
+                            if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
+                                startTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
+                                        - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
+                            } else {
+                                startTime = startTimeReceived;
+                            }
                         }
-                    }
-                } else {
-                    final NavigableSet<MarkPassing> markPassingsForFirstWaypointInOrder = getMarkPassingsInOrderAsNavigableSet(firstWaypoint);
-                    if (markPassingsForFirstWaypointInOrder != null) {
-                        startTime = calculateStartOfRaceFromMarkPassings(markPassingsForFirstWaypointInOrder, getRace()
-                                .getCompetitors());
+                    } else {
+                        final NavigableSet<MarkPassing> markPassingsForFirstWaypointInOrder = getMarkPassingsInOrderAsNavigableSet(firstWaypoint);
+                        if (markPassingsForFirstWaypointInOrder != null) {
+                            startTime = calculateStartOfRaceFromMarkPassings(markPassingsForFirstWaypointInOrder,
+                                    getRace().getCompetitors());
+                        }
                     }
                 }
             }

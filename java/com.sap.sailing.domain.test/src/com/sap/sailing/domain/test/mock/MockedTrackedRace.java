@@ -787,4 +787,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         // TODO Auto-generated method stub
         
     }
+
+    @Override
+    public void invalidateStartTime() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void invalidateEndTime() {
+        // TODO Auto-generated method stub
+        
+    }
 }

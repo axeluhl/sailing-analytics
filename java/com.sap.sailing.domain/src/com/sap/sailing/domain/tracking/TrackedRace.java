@@ -51,10 +51,12 @@ public interface TrackedRace extends Serializable {
 
     /**
      * Computes the estimated start time for this race (not to be confused with the {@link #getStartOfTracking()} time
-     * point which is expected to be before the race start time). When there are no {@link MarkPassing}s for the first
-     * mark, <code>null</code> is returned. If there are mark passings for the first mark and the start time is less
-     * than {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} before the first mark passing for the
-     * first mark. Otherwise, the first mark passing for the first mark minus
+     * point which is expected to be before the race start time). The highest precedence take the
+     * {@link #attachedRaceLogs race logs} and their start time events, followed by the field {@link #startTimeReceived}
+     * which can explicitly be set using {@link #setStartTimeReceived(TimePoint)}. When there are no {@link MarkPassing}s
+     * for the first mark, <code>null</code> is returned. If there are mark passings for the first mark and the start
+     * time is less than {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} before the first mark
+     * passing for the first mark. Otherwise, the first mark passing for the first mark minus
      * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} is returned as the race start time.
      * <p>
      * 
