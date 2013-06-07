@@ -303,4 +303,6 @@ public interface SailingService extends RemoteService {
     
     List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(String eventIdAsString, List<String> visibleCourseAreas,
             List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay);
+    
+    String getBuildVersion();
 }

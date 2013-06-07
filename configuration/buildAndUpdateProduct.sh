@@ -48,6 +48,10 @@ cd $PROJECT_HOME
 active_branch=$(git symbolic-ref -q HEAD)
 active_branch=`basename $active_branch`
 
+HEAD_SHA=$(git show-ref --head -s | head -1)
+HEAD_DATE=$(date "+%Y%m%d%H%M")
+VERSION_INFO="$HEAD_SHA-$active_branch-$HEAD_DATE"
+
 MAVEN_SETTINGS=$PROJECT_HOME/configuration/maven-settings.xml
 MAVEN_SETTINGS_PROXY=$PROJECT_HOME/configuration/maven-settings-proxy.xml
 
@@ -91,6 +95,7 @@ if [ $# -eq 0 ]; then
     echo "Active branch is $active_branch"
     echo "Project home is $PROJECT_HOME"
     echo "Server home is $SERVERS_HOME"
+    echo "Version info: $VERSION_INFO"
     echo "P2 home is $p2PluginRepository"
     exit 2
 fi
@@ -362,6 +367,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     # Make sure this script is up2date at least for the next run
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
+    echo $VERSION_INFO > $ACDIR/configuration/jetty/version.txt
     echo "Installation complete. You may now start the server using ./start"
 fi
 

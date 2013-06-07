@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.shared.panels.SystemInformationPanel;
 import com.sap.sailing.gwt.ui.client.shared.panels.UserStatusPanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
@@ -122,6 +123,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
             }
         });
         fillRegattas();
+        
+        SystemInformationPanel sysinfoPanel = new SystemInformationPanel(sailingService, this);
+        sysinfoPanel.ensureDebugId("SystemInformation");
+        rootPanel.add(sysinfoPanel);
     }
 
     @Override
