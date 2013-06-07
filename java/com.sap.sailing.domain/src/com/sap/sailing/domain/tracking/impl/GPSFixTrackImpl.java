@@ -611,8 +611,12 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         SpeedWithConfidenceImpl<TimePoint> speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(speed, /* original confidence */
                 0.9, relativeTo);
         speeds.add(speedWithConfidence);
+        double bearingConfidence = 0.9;
+        if (speed.getKnots() < 0.01) {
+            bearingConfidence = 0;
+        }
         bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getPosition().getBearingGreatCircle(next.getPosition()),
-                /* confidence */ 0.9, // TODO use number of tracked satellites to determine confidence of single fix
+                bearingConfidence, // TODO use number of tracked satellites to determine confidence of single fix
                 relativeTo));
     }
 

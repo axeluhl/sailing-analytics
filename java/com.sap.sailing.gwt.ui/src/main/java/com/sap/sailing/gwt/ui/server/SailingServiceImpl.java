@@ -356,7 +356,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
-        polarSheetGenerationWorkers = new HashMap<String, PolarSheetGenerationWorker>();
         leaderboardDifferenceCacheByIdPair = new LinkedHashMap<Pair<String, String>, IncrementalLeaderboardDTO>(LEADERBOARD_DIFFERENCE_CACHE_SIZE, 0.75f, /* accessOrder */ true) {
             private static final long serialVersionUID = 3775119859130148488L;
             @Override
