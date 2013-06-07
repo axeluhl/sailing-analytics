@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.polarsheets;
 
 public class PolarSheetsWindStepping {
-    
+
+    private static final long serialVersionUID = 1L;
+
     private Integer[] levels;
 
     public PolarSheetsWindStepping(Integer[] levels) {
