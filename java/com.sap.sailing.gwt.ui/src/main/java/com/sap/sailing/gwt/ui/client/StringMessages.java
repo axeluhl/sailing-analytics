@@ -449,6 +449,7 @@ public interface StringMessages extends Messages {
     String sideToWhichMarkAtLegStartWasRounded();
     String raceIsLive(String raceName);
     String racesAreLive(String raceNames);
+    String scoringSchemeHighPointFirstGetsOne();
     String scoringSchemeHighPointFirstGetsTen();
     String knotsUnit();
     String averageJibeLossInMetersTooltip();
