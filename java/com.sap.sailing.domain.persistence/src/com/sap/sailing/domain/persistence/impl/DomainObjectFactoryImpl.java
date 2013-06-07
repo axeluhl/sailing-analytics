@@ -997,7 +997,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     @Override
     public RaceLog loadRaceLog(RaceLogIdentifier identifier) {
-        RaceLog result = new RaceLogImpl(RaceLogImpl.class.getSimpleName());
+        RaceLog result = new RaceLogImpl(RaceLogImpl.class.getSimpleName(), identifier.getIdentifier());
         try {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(identifier.getIdentifier().toString()));

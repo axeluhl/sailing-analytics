@@ -482,7 +482,12 @@ public interface TrackedRace extends Serializable {
     /**
      * Detaches the race log associated with this {@link TrackedRace}.
      */
-    void detachRaceLog();
+    void detachRaceLog(Serializable identifier);
+    
+    /**
+     * Detaches all {@link RaceLog} instances from this race
+     */
+    void detachAllRaceLogs();
     
     /**
      * Attaches the passed race log with this {@link TrackedRace}.

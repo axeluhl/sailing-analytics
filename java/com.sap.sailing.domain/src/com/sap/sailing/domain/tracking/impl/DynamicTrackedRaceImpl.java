@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -669,11 +670,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
     
     @Override
-    public void detachRaceLog() {
+    public void detachRaceLog(Serializable identifier) {
         if (attachedRaceLog != null) {
             logListener.removeFrom(attachedRaceLog);
         }
-        super.detachRaceLog();
+        super.detachRaceLog(identifier);
     }
 
     @Override

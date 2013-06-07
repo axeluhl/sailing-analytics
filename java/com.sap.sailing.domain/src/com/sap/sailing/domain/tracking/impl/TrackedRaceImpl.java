@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -221,6 +222,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private transient CombinedWindTrackImpl combinedWindTrack;
 
     protected transient RaceLog attachedRaceLog;
+    protected transient HashMap<Serializable, RaceLog> attachedRaceLogs;
 
     /**
      * The time delay to the current point in time in milliseconds.
@@ -2331,12 +2333,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public void attachRaceLog(RaceLog raceLog) {
-        this.attachedRaceLog = raceLog;
+        this.attachedRaceLogs.put(raceLog.getId(), raceLog);
     }
 
     @Override
-    public void detachRaceLog() {
-        this.attachedRaceLog = null;
+    public void detachRaceLog(Serializable identifier) {
+        this.attachedRaceLogs.remove(identifier);
+    }
+    
+    @Override
+    public void detachAllRaceLogs() {
+        this.attachedRaceLogs.clear();
     }
 
     @Override

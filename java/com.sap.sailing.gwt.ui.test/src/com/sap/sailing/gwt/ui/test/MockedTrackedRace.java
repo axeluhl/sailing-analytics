@@ -742,7 +742,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void detachRaceLog() {
+    public void detachRaceLog(Serializable identifier) {
         // TODO Auto-generated method stub
 
     }
@@ -781,6 +781,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void detachAllRaceLogs() {
+        // TODO Auto-generated method stub
+        
     }
 
 }

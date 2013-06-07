@@ -4,6 +4,8 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
+import java.io.Serializable;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,7 +29,7 @@ public class RaceLogAttachOnTrackedRaceTest {
         private RaceLog raceLog;
         
         @Override
-        public void detachRaceLog() {
+        public void detachRaceLog(Serializable identifier) {
             this.raceLog = null;
         }
         

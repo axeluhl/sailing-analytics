@@ -16,6 +16,7 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.impl.RaceLogIdentifierImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implements RaceColumn {
@@ -75,7 +76,8 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 }
             }
             if (previouslyLinkedRace != null) {
-                previouslyLinkedRace.detachRaceLog();
+                RaceLogIdentifierImpl identifier = new RaceLogIdentifierImpl(raceLogsIdentifierTemplate, getName(), fleet);
+                previouslyLinkedRace.detachRaceLog(identifier);
                 getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(this, fleet, previouslyLinkedRace);
             }
             if (trackedRace != null) {

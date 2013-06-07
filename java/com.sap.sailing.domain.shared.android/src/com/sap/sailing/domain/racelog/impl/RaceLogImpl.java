@@ -2,6 +2,7 @@ package com.sap.sailing.domain.racelog.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -24,6 +25,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     private static final String DefaultLockName = RaceLogImpl.class.getName() + ".lock";
     private final static Logger logger = Logger.getLogger(RaceLogImpl.class.getName());
     
+    private final Serializable id;
     private transient Set<RaceLogEventVisitor> listeners;
     private int currentPassId;
     
@@ -32,19 +34,25 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     /**
      * Initializes a new {@link RaceLogImpl} with the default lock name.
      */
-    public RaceLogImpl() {
-        this(DefaultLockName);
+    public RaceLogImpl(Serializable identifier) {
+        this(DefaultLockName, identifier);
     }
 
     /**
      * Initializes a new {@link RaceLogImpl}.
      * @param nameForReadWriteLock name of lock.
      */
-    public RaceLogImpl(String nameForReadWriteLock) {
+    public RaceLogImpl(String nameForReadWriteLock, Serializable identifier) {
         super(new ArrayListNavigableSet<Timed>(RaceLogEventComparator.INSTANCE), nameForReadWriteLock);
         
         this.listeners = new HashSet<RaceLogEventVisitor>();
         this.currentPassId = DefaultPassId;
+        this.id = identifier;
+    }
+    
+    @Override
+    public Serializable getId() {
+        return this.id;
     }
     
     @Override
@@ -132,4 +140,5 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         ois.defaultReadObject();
         listeners = new HashSet<RaceLogEventVisitor>();
     }
+
 }

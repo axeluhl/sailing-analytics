@@ -12,6 +12,6 @@ public enum EmptyRaceLogStore implements RaceLogStore {
 
     @Override
     public RaceLog getRaceLog(RaceLogIdentifier identifier) {
-        return new RaceLogImpl(UUID.randomUUID().toString());
+        return new RaceLogImpl(UUID.randomUUID().toString(), identifier.getIdentifier());
     }
 }

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.test.mock;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -477,7 +478,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void detachRaceLog() {
+    public void detachRaceLog(Serializable identifier) {
         // TODO Auto-generated method stub
 
     }
@@ -510,6 +511,12 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void detachAllRaceLogs() {
+        // TODO Auto-generated method stub
+        
     }
 
 }
