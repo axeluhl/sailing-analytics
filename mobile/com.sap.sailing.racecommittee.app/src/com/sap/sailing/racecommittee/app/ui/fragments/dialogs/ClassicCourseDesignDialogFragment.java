@@ -1,24 +1,34 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
 import android.app.DialogFragment;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataStore;
+import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
+import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
 
 public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private MapView mMapView;
-    private GoogleMap mMap;
+    private GoogleMap courseAreaMap;
     private Bundle mBundle;
 
     public ClassicCourseDesignDialogFragment() {
@@ -33,9 +43,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     protected CourseDesignListener hostActivity;
 
     private Button publishButton;
-    private Button unpublishButton;
-    @SuppressWarnings("unused")
-    private GoogleMap courseAreaMap;
+    private ImageButton windButton;
 
     @Override
     public void onAttach(android.app.Activity activity) {
@@ -86,11 +94,14 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
 
         });
 
-        unpublishButton = (Button) getView().findViewById(R.id.unpublishCourseDesignButton);
-        unpublishButton.setOnClickListener(new OnClickListener() {
+        windButton = (ImageButton) getView().findViewById(R.id.windButton);
+        windButton.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
+                Intent intent = new Intent(getActivity(), WindActivity.class);
+                startActivity(intent);
+                getActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             }
 
         });
@@ -100,6 +111,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     public void onResume() {
         super.onResume();
         mMapView.onResume();
+        setUpMap();
     }
 
     @Override
@@ -114,16 +126,34 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     private void setUpMapIfNeeded(View inflatedView) {
-        if (mMap == null) {
-            mMap = ((MapView) inflatedView.findViewById(R.id.mapView)).getMap();
-            if (mMap != null) {
+        if (courseAreaMap == null) {
+            courseAreaMap = ((MapView) inflatedView.findViewById(R.id.mapView)).getMap();
+            if (courseAreaMap != null) {
                 setUpMap();
             }
         }
     }
 
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        courseAreaMap.clear();
+        DataStore ds = InMemoryDataStore.INSTANCE;
+        if (ds.getLastLatitude() != null && ds.getLastLongitude() != null && ds.getLastWindDirection() != null && ds.getLastWindSpeed() != null) {
+            courseAreaMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(ds.getLastLatitude(), ds.getLastLongitude()), 13.0f));
+        
+            Bitmap bmpOriginal = BitmapFactory.decodeResource(this.getResources(), R.drawable.boat);
+            Bitmap bmResult = Bitmap.createBitmap(bmpOriginal.getHeight(), bmpOriginal.getHeight(),
+                    Bitmap.Config.ARGB_8888);
+            Canvas tempCanvas = new Canvas(bmResult);
+            tempCanvas.rotate(ds.getLastWindDirection(), bmpOriginal.getWidth() / 2, bmpOriginal.getHeight() / 2);
+            tempCanvas.drawBitmap(bmpOriginal, 0, 0, null);
+
+            courseAreaMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(ds.getLastLatitude(), ds.getLastLongitude()))
+                    .icon(BitmapDescriptorFactory.fromBitmap(bmResult)).draggable(false)
+                    .title(ds.getLastLatitude()+"/"+ds.getLastLongitude()+", "+ds.getLastWindSpeed()+"kn, "+ds.getLastWindDirection()+"°"));
+        }
+
     }
 
     @Override

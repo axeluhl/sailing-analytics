@@ -4,10 +4,6 @@
           android:icon="@drawable/ic_menu_share_local"
           android:title="@string/options_menu_live"
           android:showAsAction="ifRoom" />
-    <item android:id="@+id/options_menu_wind"
-          android:icon="@drawable/ic_menu_btn_wind"
-          android:title="@string/options_menu_wind"
-          android:showAsAction="ifRoom" />
     <item android:id="@+id/options_menu_reload"
           android:icon="@drawable/ic_menu_info_details"
           android:title="@string/options_menu_reload"

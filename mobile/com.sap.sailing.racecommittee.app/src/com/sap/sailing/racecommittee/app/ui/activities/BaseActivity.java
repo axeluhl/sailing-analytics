@@ -85,9 +85,6 @@ public abstract class BaseActivity extends Activity {
             InMemoryDataStore.INSTANCE.reset();
             fadeActivity(LoginActivity.class);
             return true;
-        case R.id.options_menu_wind:
-            fadeActivity(WindActivity.class);
-            return true;
         case R.id.options_menu_live:
             Toast.makeText(this, getLiveIconText(), Toast.LENGTH_LONG).show();
             return true;
