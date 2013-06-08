@@ -30,25 +30,66 @@
                 android:textSize="14pt"
                 android:textStyle="bold" />
 
-            <ListView
-                android:id="@+id/listViewNewCourse"
+            <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="1. Enter the wind/local information"
+		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+	    
+            <ImageButton 
+                android:id="@+id/windButton"
+                android:src="@drawable/ic_menu_btn_wind" 
                 android:layout_width="match_parent"
-                android:layout_height="400dp"
-                android:layout_margin="10dp"
-                android:gravity="center_horizontal|center_vertical" />
+                android:layout_height="50dp"
+                android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+            
+            <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="2. Select the boat class"
+		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+            <Spinner
+		            android:id="@+id/classic_course_designer_boat_class"
+		            android:layout_width="fill_parent"
+		            android:layout_height="wrap_content"
+		            android:gravity="center_horizontal" />
+            
+            <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="3. Select the course layout"
+		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+            <Spinner
+		            android:id="@+id/classic_course_designer_course_layout"
+		            android:layout_width="fill_parent"
+		            android:layout_height="wrap_content"
+		            android:gravity="center_horizontal" />
+            <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="4. Select the number of rounds"
+		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+            <Spinner
+		            android:id="@+id/classic_course_designer_number_of_rounds"
+		            android:layout_width="fill_parent"
+		            android:layout_height="wrap_content"
+		            android:gravity="center_horizontal" />
+            <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="5. Select the target time"
+		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+            <Spinner
+		            android:id="@+id/classic_course_designer_target_time"
+		            android:layout_width="fill_parent"
+		            android:layout_height="wrap_content"
+		            android:gravity="center_horizontal" />
 
             <Button
                 android:id="@+id/publishCourseDesignButton"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:text="@string/publish"
-                android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
-
-            <Button
-                android:id="@+id/unpublishCourseDesignButton"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text="@string/unpublish"
                 android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
 
             <Button
@@ -73,8 +114,7 @@
             android:layout_height="match_parent"
             android:layout_margin="18dp"
             android:layout_marginRight="26dp"
-            android:orientation="vertical"
-             />
+            android:orientation="vertical" />
     </LinearLayout>
 
 </LinearLayout>

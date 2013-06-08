@@ -18,8 +18,8 @@ public enum InMemoryDataStore implements DataStore {
     private HashMap<Serializable, ManagedRace> managedRaceById;
     private HashMap<Serializable, Mark> marksById;
     private CourseBase courseData;
-    private double lastLatitude, lastLongitude, lastWindSpeed;
-    private int lastWindDirection;
+    private Double lastLatitude, lastLongitude, lastWindSpeed;
+    private Integer lastWindDirection;
 
     private InMemoryDataStore() {
         reset();
@@ -172,35 +172,35 @@ public enum InMemoryDataStore implements DataStore {
      * * * * * * *
      */
     @Override
-    public double getLastLongitude() {
+    public Double getLastLongitude() {
         return lastLongitude;
     }
     @Override
-    public void setLastLongitude(double lastLongitude) {
+    public void setLastLongitude(Double lastLongitude) {
         this.lastLongitude = lastLongitude;
     }
     @Override
-    public double getLastLatitude() {
+    public Double getLastLatitude() {
         return lastLatitude;
     }
     @Override
-    public void setLastLatitude(double lastLatitude) {
+    public void setLastLatitude(Double lastLatitude) {
         this.lastLatitude = lastLatitude;
     }
     @Override
-    public int getLastWindDirection() {
+    public Integer getLastWindDirection() {
         return lastWindDirection;
     }
     @Override
-    public void setLastWindDirection(int lastWindDirection) {
+    public void setLastWindDirection(Integer lastWindDirection) {
         this.lastWindDirection = lastWindDirection;
     }
     @Override
-    public double getLastWindSpeed() {
+    public Double getLastWindSpeed() {
         return lastWindSpeed;
     }
     @Override
-    public void setLastWindSpeed(double lastWindSpeed) {
+    public void setLastWindSpeed(Double lastWindSpeed) {
         this.lastWindSpeed = lastWindSpeed;
     }
 }
