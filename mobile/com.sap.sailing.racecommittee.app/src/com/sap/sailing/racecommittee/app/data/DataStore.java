@@ -36,12 +36,12 @@ public interface DataStore {
     public CourseBase getLastPublishedCourseDesign();
     public void setLastPublishedCourseDesign(CourseBase courseData);
     
-    public double getLastLongitude();
-    public void setLastLongitude(double lastLongitude);
-    public double getLastLatitude();
-    public void setLastLatitude(double lastLatitude);
-    public int getLastWindDirection();
-    public void setLastWindDirection(int lastWindDirection);
-    public double getLastWindSpeed();
-    public void setLastWindSpeed(double lastWindSpeed);
+    public Double getLastLongitude();
+    public void setLastLongitude(Double lastLongitude);
+    public Double getLastLatitude();
+    public void setLastLatitude(Double lastLatitude);
+    public Integer getLastWindDirection();
+    public void setLastWindDirection(Integer lastWindDirection);
+    public Double getLastWindSpeed();
+    public void setLastWindSpeed(Double lastWindSpeed);
 }

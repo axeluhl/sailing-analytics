@@ -269,8 +269,10 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                         Window.alert("This is a meta leaderboard. It can't be changed here.");
                     } else {
                         if (leaderboardDTO.isRegattaLeaderboard) {
-                            LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, 
-                                    leaderboardDTO.displayName, null, leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, leaderboardDTO.defaultCourseAreaIdAsString);
+                            LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name,
+                                    leaderboardDTO.displayName, /* scoring scheme provided by regatta */ null,
+                                    leaderboardDTO.discardThresholds, leaderboardDTO.regattaName,
+                                    leaderboardDTO.defaultCourseAreaIdAsString);
                             AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
                                     .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
                                     descriptor, stringMessages, errorReporter,

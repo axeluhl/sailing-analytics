@@ -45,7 +45,7 @@ import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
-import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
+import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
@@ -60,7 +60,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
 
     private Leaderboard createLeaderboard(Regatta regatta, int[] discardingThresholds) {
         ScoreCorrectionImpl scoreCorrections = new ScoreCorrectionImpl();
-        ResultDiscardingRuleImpl discardingRules = new ResultDiscardingRuleImpl(discardingThresholds);
+        ThresholdBasedResultDiscardingRuleImpl discardingRules = new ThresholdBasedResultDiscardingRuleImpl(discardingThresholds);
         return new RegattaLeaderboardImpl(regatta, scoreCorrections, discardingRules);
     }
 
@@ -801,7 +801,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
         FlexibleLeaderboard leaderboard1 = new FlexibleLeaderboardImpl("Leaderboard 1", new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint(), null);
+                new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint(), null);
         leaderboard1.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f1)), "R1", /* medalRace */ false,
                 leaderboard1.getFleet(null));
         leaderboard1.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f2)), "R2", /* medalRace */ false,
@@ -809,7 +809,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertTrue(leaderboard1.getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
                 leaderboard1.getTotalPoints(c[0], later), leaderboard1.getTotalPoints(c[3], later)) < 0); // c0 better than c3
         FlexibleLeaderboard leaderboard2 = new FlexibleLeaderboardImpl("Leaderboard 3", new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint(), null);
+                new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint(), null);
         leaderboard2.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f3)), "R1", /* medalRace */ false,
                 leaderboard1.getFleet(null));
         leaderboard2.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f4)), "R2", /* medalRace */ false,
@@ -817,7 +817,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertTrue(leaderboard2.getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
                 leaderboard2.getTotalPoints(c[3], later), leaderboard2.getTotalPoints(c[0], later)) < 0); // c3 better than c0
         FlexibleLeaderboard leaderboard3 = new FlexibleLeaderboardImpl("Leaderboard 3", new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint(), null);
+                new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint(), null);
         leaderboard3.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f5)), "R1", /* medalRace */ false,
                 leaderboard1.getFleet(null));
         leaderboard3.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f6)), "R2", /* medalRace */ false,
@@ -827,7 +827,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("Leaderboard Group", "Leaderboard Group", false, Arrays.asList(leaderboard1,
                 leaderboard2, leaderboard3));
         leaderboardGroup.setOverallLeaderboard(new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPointExtremeSailingSeriesOverall(),
-                new ResultDiscardingRuleImpl(new int[0])));
+                new ThresholdBasedResultDiscardingRuleImpl(new int[0])));
         leaderboardGroup.getOverallLeaderboard().setSuppressed(c[1], true);
         leaderboardGroup.getOverallLeaderboard().setSuppressed(c[2], true);
         List<Competitor> rankedCompetitors = leaderboardGroup.getOverallLeaderboard().getCompetitorsFromBestToWorst(later);

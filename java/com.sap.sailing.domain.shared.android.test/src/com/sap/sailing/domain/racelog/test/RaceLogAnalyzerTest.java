@@ -17,7 +17,7 @@ public class RaceLogAnalyzerTest {
 
     @Test
     public void testLastFlagFinder() {
-        RaceLog raceLog = new RaceLogImpl("RaceLogTest");
+        RaceLog raceLog = new RaceLogImpl("RaceLogTest", "test-identifier");
         TimePoint t1 = MillisecondsTimePoint.now();
         int passId = 0;
         boolean isDisplayed = true;

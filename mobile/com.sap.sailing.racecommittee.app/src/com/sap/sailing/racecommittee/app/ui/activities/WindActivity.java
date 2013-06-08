@@ -85,6 +85,7 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
                     Toast.makeText(WindActivity.this, "The entered information is not valid", Toast.LENGTH_LONG).show();
                     ExLog.i(this.getClass().getCanonicalName(), nfe.getMessage());
                 }
+                finish();
             }
         });
 
