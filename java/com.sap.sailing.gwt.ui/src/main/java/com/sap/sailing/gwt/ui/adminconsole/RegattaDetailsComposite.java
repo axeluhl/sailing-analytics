@@ -234,6 +234,7 @@ public class RegattaDetailsComposite extends Composite {
         final SeriesDTO series = seriesDescriptor.getSeries();
         final List<RaceColumnDTO> newRaceColumns = seriesDescriptor.getRaces();
         final boolean isMedalChanged = series.isMedal() != seriesDescriptor.isMedal();
+        final boolean isStartsWithZeroScoreChanged = series.isStartsWithZeroScore() != seriesDescriptor.isStartsWithZeroScore();
         final boolean seriesResultDiscardingThresholdsChanged = !Arrays.equals(series.getDiscardThresholds(),
                 seriesDescriptor.getResultDiscardingThresholds());
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
@@ -279,7 +280,7 @@ public class RegattaDetailsComposite extends Composite {
                 regattaRefresher.fillRegattas();
             }
         });
-        if (isMedalChanged || seriesResultDiscardingThresholdsChanged) {
+        if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged) {
             sailingService.updateSeries(regattaIdentifier, series.name, seriesDescriptor.isMedal(),
                     seriesDescriptor.getResultDiscardingThresholds(), seriesDescriptor.isStartsWithZeroScore(),
                     new AsyncCallback<Void>() {

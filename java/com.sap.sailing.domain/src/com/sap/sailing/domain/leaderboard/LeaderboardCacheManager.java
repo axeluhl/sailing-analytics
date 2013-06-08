@@ -229,6 +229,11 @@ public class LeaderboardCacheManager {
                 }
 
                 @Override
+                public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
+                    removeFromCache(leaderboard);
+                }
+
+                @Override
                 public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
                     return true;
                 }
