@@ -481,14 +481,20 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public Double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        // when a column with isStartsWithZeroScore() is found, only reset score if the competitor scored in any race from there on
+        boolean needToResetScoreUponNextNonEmptyEntry = false;
         double result = getCarriedPoints(competitor);
         for (RaceColumn r : getRaceColumns()) {
             if (r.isStartsWithZeroScore()) {
-                result = 0;
+                needToResetScoreUponNextNonEmptyEntry = true;
             }
             if (getScoringScheme().isValidInTotalScore(this, r, timePoint)) {
                 final Double totalPoints = getTotalPoints(competitor, r, timePoint);
                 if (totalPoints != null) {
+                    if (needToResetScoreUponNextNonEmptyEntry) {
+                        result = 0;
+                        needToResetScoreUponNextNonEmptyEntry = false;
+                    }
                     result += totalPoints;
                 }
             }
