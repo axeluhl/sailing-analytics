@@ -10,8 +10,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -21,6 +25,8 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.sap.sailing.domain.common.racelog.BoatClassType;
+import com.sap.sailing.domain.common.racelog.CourseLayout;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
@@ -30,13 +36,6 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private MapView mMapView;
     private GoogleMap courseAreaMap;
     private Bundle mBundle;
-
-    public ClassicCourseDesignDialogFragment() {
-        super();
-        // handle map bug - https://code.google.com/p/gmaps-api-issues/issues/detail?id=4865
-        this.setStyle(DialogFragment.STYLE_NORMAL, R.style.Theme_DimDisabledDialog);
-    }
-
     @SuppressWarnings("unused")
     private final static String TAG = ClassicCourseDesignDialogFragment.class.getName();
 
@@ -44,7 +43,25 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
 
     private Button publishButton;
     private ImageButton windButton;
+    private Spinner spinnerBoatClass;
+    private Spinner spinnerCourseLayout;
+    @SuppressWarnings("unused")
+    private Spinner spinnerNumberOfRounds;
+    @SuppressWarnings("unused")
+    private Spinner spinnerTargetTime;
+    
+    private ArrayAdapter<CourseLayout> courseLayoutAdapter;
+    
+    //TODO determine this by given race
+    private BoatClassType selectedBoatClass = BoatClassType.boatClass470er;
+    private CourseLayout selectedCourseLayout =(CourseLayout) BoatClassType.boatClass470er.getPossibleCourseLayoutsWithTargetTime().keySet().toArray().clone()[0];
 
+    public ClassicCourseDesignDialogFragment() {
+        super();
+        // handle map bug - https://code.google.com/p/gmaps-api-issues/issues/detail?id=4865
+        this.setStyle(DialogFragment.STYLE_NORMAL, R.style.Theme_DimDisabledDialog);
+    }
+    
     @Override
     public void onAttach(android.app.Activity activity) {
         super.onAttach(activity);
@@ -105,6 +122,63 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             }
 
         });
+        
+        spinnerBoatClass = (Spinner) getView().findViewById(R.id.classic_course_designer_boat_class);
+        setupBoatClassSpinner();
+        spinnerCourseLayout = (Spinner) getView().findViewById(R.id.classic_course_designer_course_layout);
+        setupCourseLayoutSpinner();
+        spinnerNumberOfRounds = (Spinner) getView().findViewById(R.id.classic_course_designer_number_of_rounds);
+        setupNumberOfRoundsSpinner();
+        spinnerNumberOfRounds = (Spinner) getView().findViewById(R.id.classic_course_designer_target_time);
+        setupTargetTimeSpinner();
+    }
+    
+    private void setupBoatClassSpinner() {
+        ArrayAdapter<BoatClassType> adapter = new ArrayAdapter<BoatClassType>(getActivity(),
+                android.R.layout.simple_spinner_dropdown_item, BoatClassType.values());
+        spinnerBoatClass.setAdapter(adapter);
+        spinnerBoatClass.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                selectedBoatClass = (BoatClassType) adapterView.getItemAtPosition(position);
+                courseLayoutAdapter.clear();
+                courseLayoutAdapter.addAll(selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet());
+                courseLayoutAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
+        spinnerBoatClass.setSelection(adapter.getPosition(selectedBoatClass));
+    }
+    
+    private void setupCourseLayoutSpinner() {
+        courseLayoutAdapter = new ArrayAdapter<CourseLayout>(getActivity(),
+                android.R.layout.simple_spinner_dropdown_item);
+        courseLayoutAdapter.addAll(selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet());
+        spinnerCourseLayout.setAdapter(courseLayoutAdapter);
+        spinnerCourseLayout.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                selectedCourseLayout = (CourseLayout) adapterView.getItemAtPosition(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
+        spinnerCourseLayout.setSelection(courseLayoutAdapter.getPosition(selectedCourseLayout));
+    }
+    
+    private void setupNumberOfRoundsSpinner() {
+        
+    }
+    
+    private void setupTargetTimeSpinner() {
+       
     }
 
     @Override
@@ -139,7 +213,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         DataStore ds = InMemoryDataStore.INSTANCE;
         if (ds.getLastLatitude() != null && ds.getLastLongitude() != null && ds.getLastWindDirection() != null && ds.getLastWindSpeed() != null) {
             courseAreaMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(ds.getLastLatitude(), ds.getLastLongitude()), 13.0f));
+                    new LatLng(ds.getLastLatitude(), ds.getLastLongitude()), 17.0f));
         
             Bitmap bmpOriginal = BitmapFactory.decodeResource(this.getResources(), R.drawable.boat);
             Bitmap bmResult = Bitmap.createBitmap(bmpOriginal.getHeight(), bmpOriginal.getHeight(),
