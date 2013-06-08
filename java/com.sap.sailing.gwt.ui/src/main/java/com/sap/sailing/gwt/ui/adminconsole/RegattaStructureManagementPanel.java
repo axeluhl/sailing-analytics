@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -117,16 +118,17 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     }
     
     private void createNewRegatta(final RegattaDTO newRegatta) {
-        LinkedHashMap<String, Triple<List<Triple<String, Integer, Color>>, Boolean, int[]>> seriesStructure =
-                new LinkedHashMap<String, Triple<List<Triple<String,Integer,Color>>,Boolean,int[]>>();
+        LinkedHashMap<String, Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>> seriesStructure =
+                new LinkedHashMap<String, Triple<List<Triple<String,Integer,Color>>,Pair<Boolean, Boolean>,int[]>>();
         for (SeriesDTO seriesDTO : newRegatta.series) {
             List<Triple<String, Integer, Color>> fleets = new ArrayList<Triple<String, Integer, Color>>();
             for(FleetDTO fleetDTO : seriesDTO.getFleets()) {
                 Triple<String, Integer, Color> fleetTriple = new Triple<String, Integer, Color>(fleetDTO.name, fleetDTO.getOrderNo(), fleetDTO.getColor());
                 fleets.add(fleetTriple);
             }
-            Triple<List<Triple<String, Integer, Color>>, Boolean, int[]> seriesPair = new Triple<List<Triple<String, Integer, Color>>, Boolean, int[]>(
-                    fleets, seriesDTO.isMedal(), seriesDTO.getDiscardThresholds());
+            Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]> seriesPair =
+                    new Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>(
+                    fleets, new Pair<Boolean, Boolean>(seriesDTO.isMedal(), seriesDTO.isStartsWithZeroScore()), seriesDTO.getDiscardThresholds());
             seriesStructure.put(seriesDTO.name, seriesPair);
         }
         sailingService.createRegatta(newRegatta.name, newRegatta.boatClass==null?null:newRegatta.boatClass.name, seriesStructure, true,
