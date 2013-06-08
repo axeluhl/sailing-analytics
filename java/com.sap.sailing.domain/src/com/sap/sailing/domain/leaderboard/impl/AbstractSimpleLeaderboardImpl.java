@@ -1064,6 +1064,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 row.competitor = competitorDTO;
                 row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
                 row.carriedPoints = this.hasCarriedPoints(competitor) ? this.getCarriedPoints(competitor) : null;
+                row.totalPoints = this.getTotalPoints(competitor, timePoint);
                 addOverallDetailsToRow(timePoint, competitor, row);
                 result.competitors.add(competitorDTO);
                 Map<String, Future<LeaderboardEntryDTO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDTO>>();

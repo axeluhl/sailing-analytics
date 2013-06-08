@@ -87,21 +87,6 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         return false;
     }
 
-    public Double getTotalPoints(LeaderboardRowDTO object) {
-        // FIXME this can be inconsistent with Leaderboard.getTotalPoints(Competitor, TimePoint) which considers RaceColumn.isStartsWithZeroScore()
-        Double totalPoints = object.carriedPoints == null ? null : object.carriedPoints;
-        for (Map.Entry<String, LeaderboardEntryDTO> e : object.fieldsByRaceColumnName.entrySet()) {
-            if (e.getValue().totalPoints != null && getOrCreateRaceColumn(e.getKey()).isValidInTotalScore()) {
-                if (totalPoints == null) {
-                    totalPoints = e.getValue().totalPoints;
-                } else {
-                    totalPoints += e.getValue().totalPoints;
-                }
-            }
-        }
-        return totalPoints;
-    }
-
     public Double getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
         Double netPoints = null;
         LeaderboardRowDTO row = rows.get(competitor);
