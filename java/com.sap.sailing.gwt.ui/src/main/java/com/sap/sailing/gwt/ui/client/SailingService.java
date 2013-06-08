@@ -144,7 +144,7 @@ public interface SailingService extends RemoteService {
     void moveLeaderboardColumnDown(String leaderboardName, String columnName);
     
     RegattaDTO createRegatta(String regattaName, String boatClassName, 
-            LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
+            LinkedHashMap<String, Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType, String defaultCourseAreaId);
     
     void removeRegatta(RegattaIdentifier regattaIdentifier);
@@ -152,6 +152,8 @@ public interface SailingService extends RemoteService {
     void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId);
     
     List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
+
+    void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal, int[] resultDiscardingThresholds, boolean startsWithZeroScore);
 
     RaceColumnInSeriesDTO addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 

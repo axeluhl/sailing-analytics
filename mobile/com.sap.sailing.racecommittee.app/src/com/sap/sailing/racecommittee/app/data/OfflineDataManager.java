@@ -73,7 +73,7 @@ public class OfflineDataManager extends DataManager {
         competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", null, null));
 
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
-        RaceLog log = new RaceLogImpl();
+        RaceLog log = new RaceLogImpl(UUID.randomUUID());
         log.add(factory.createStartTimeEvent(
                 new MillisecondsTimePoint(new Date().getTime() - 2000), 
                 1,
@@ -93,7 +93,7 @@ public class OfflineDataManager extends DataManager {
                         StartProcedureType.ESS,
                         log);
 
-        log = new RaceLogImpl();
+        log = new RaceLogImpl(UUID.randomUUID());
         /*log.add(factory.createStartTimeEvent(
 				new MillisecondsTimePoint(new Date()), 
 				1,
@@ -110,7 +110,7 @@ public class OfflineDataManager extends DataManager {
                         StartProcedureType.ESS,
                         log);
 
-        log = new RaceLogImpl();
+        log = new RaceLogImpl(UUID.randomUUID());
         /*log.add(factory.createRaceStatusEvent(
 				new MillisecondsTimePoint(new Date()), 
 				5,
