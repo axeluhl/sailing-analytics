@@ -12,14 +12,16 @@ public class SeriesDTO extends NamedDTO {
     private List<RaceColumnDTO> raceColumns;
     private boolean isMedal;
     private int[] discardThresholds;
+    private Boolean startsWithZeroScore;
     
     public SeriesDTO() {}
     
-    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, int[] discardThresholds) {
+    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, int[] discardThresholds, boolean startsWithZeroScore) {
         super(name);
         this.fleets = fleets;
         this.raceColumns = raceColumns;
         this.isMedal = isMedal;
+        this.startsWithZeroScore = startsWithZeroScore;
         this.discardThresholds = discardThresholds;
     }
     
@@ -62,5 +64,13 @@ public class SeriesDTO extends NamedDTO {
     
     public void setDiscardThresholds(int[] discardThresholds) {
         this.discardThresholds = discardThresholds;
+    }
+
+    public Boolean isStartsWithZeroScore() {
+        return startsWithZeroScore;
+    }
+
+    public void setStartsWithZeroScore(Boolean startsWithZeroScore) {
+        this.startsWithZeroScore = startsWithZeroScore;
     }
 }

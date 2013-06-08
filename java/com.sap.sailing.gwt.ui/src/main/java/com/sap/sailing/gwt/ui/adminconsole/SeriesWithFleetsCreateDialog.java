@@ -33,6 +33,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
 
     private TextBox nameEntryField;
     private CheckBox isMedalSeriesCheckbox;
+    private CheckBox startsWithZeroScoreCheckbox;
     private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
     private DiscardThresholdBoxes discardThresholdBoxes;
 
@@ -109,6 +110,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         nameEntryField = createTextBox(null);
         nameEntryField.setVisibleLength(40);
         isMedalSeriesCheckbox = createCheckbox(stringMessages.medalSeries());
+        startsWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());
         useSeriesResultDiscardingThresholdsCheckbox = createCheckbox(stringMessages.seriesDefinesResultDiscardingRule());
         useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -178,6 +180,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     protected SeriesDTO getResult() {
         series.name = nameEntryField.getText();
         series.setMedal(isMedalSeriesCheckbox.getValue());
+        series.setStartsWithZeroScore(startsWithZeroScoreCheckbox.getValue());
         List<FleetDTO> fleets = new ArrayList<FleetDTO>();
         int fleetsCount = fleetNameEntryFields.size();
         for(int i = 0; i < fleetsCount; i++) {
@@ -219,13 +222,14 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(4, 2);
+        Grid formGrid = new Grid(5, 2);
         panel.add(formGrid);
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 1, isMedalSeriesCheckbox);
-        formGrid.setWidget(2, 1, useSeriesResultDiscardingThresholdsCheckbox);
-        formGrid.setWidget(3, 1, discardThresholdBoxes.getWidget());
+        formGrid.setWidget(2, 1, startsWithZeroScoreCheckbox);
+        formGrid.setWidget(3, 1, useSeriesResultDiscardingThresholdsCheckbox);
+        formGrid.setWidget(4, 1, discardThresholdBoxes.getWidget());
         panel.add(createHeadlineLabel(stringMessages.fleets()));
         panel.add(fleetsGrid);
         Button addFleetButton = new Button(stringMessages.addFleet());

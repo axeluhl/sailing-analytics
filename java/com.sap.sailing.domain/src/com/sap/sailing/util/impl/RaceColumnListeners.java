@@ -85,6 +85,12 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutIsStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.isStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
+        }
+    }
+
     public void notifyListenersAboutRaceColumnAddedToContainer(RaceColumn raceColumn) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.raceColumnAddedToContainer(raceColumn);

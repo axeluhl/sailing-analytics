@@ -481,11 +481,20 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public Double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        // when a column with isStartsWithZeroScore() is found, only reset score if the competitor scored in any race from there on
+        boolean needToResetScoreUponNextNonEmptyEntry = false;
         double result = getCarriedPoints(competitor);
         for (RaceColumn r : getRaceColumns()) {
+            if (r.isStartsWithZeroScore()) {
+                needToResetScoreUponNextNonEmptyEntry = true;
+            }
             if (getScoringScheme().isValidInTotalScore(this, r, timePoint)) {
                 final Double totalPoints = getTotalPoints(competitor, r, timePoint);
                 if (totalPoints != null) {
+                    if (needToResetScoreUponNextNonEmptyEntry) {
+                        result = 0;
+                        needToResetScoreUponNextNonEmptyEntry = false;
+                    }
                     result += totalPoints;
                 }
             }
@@ -695,6 +704,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         getRaceColumnListeners().notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
     }
     
+    @Override
+    public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
+        getRaceColumnListeners().notifyListenersAboutIsStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
+    }
+
     @Override
     public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
         getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
@@ -1056,6 +1070,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 row.competitor = competitorDTO;
                 row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
                 row.carriedPoints = this.hasCarriedPoints(competitor) ? this.getCarriedPoints(competitor) : null;
+                row.totalPoints = this.getTotalPoints(competitor, timePoint);
                 addOverallDetailsToRow(timePoint, competitor, row);
                 result.competitors.add(competitorDTO);
                 Map<String, Future<LeaderboardEntryDTO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDTO>>();

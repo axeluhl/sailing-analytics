@@ -11,11 +11,13 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
     
     private final boolean isMedal;
     private final int[] resultDiscardingThresholds;
+    private final boolean startsWithZeroScore;
 
-    public UpdateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal, int[] resultDiscardingThresholds) {
+    public UpdateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal, int[] resultDiscardingThresholds, boolean startsWithZeroScore) {
         super(regattaIdentifier, seriesName);
         this.isMedal = isMedal;
         this.resultDiscardingThresholds = resultDiscardingThresholds;
+        this.startsWithZeroScore = startsWithZeroScore;
     }
 
     @Override
@@ -24,6 +26,7 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
         series.setIsMedal(isMedal);
         series.setResultDiscardingRule(resultDiscardingThresholds == null ?
                 null : new ThresholdBasedResultDiscardingRuleImpl(resultDiscardingThresholds));
+        series.setStartsWithZeroScore(startsWithZeroScore);
         if (series.getRegatta().isPersistent()) {
             toState.updateStoredRegatta(series.getRegatta());
         }

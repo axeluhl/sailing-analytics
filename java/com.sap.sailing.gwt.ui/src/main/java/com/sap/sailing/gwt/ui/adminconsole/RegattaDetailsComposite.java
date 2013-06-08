@@ -112,6 +112,13 @@ public class RegattaDetailsComposite extends Composite {
             }
         };
 
+        TextColumn<SeriesDTO> startsWithZeroScoreColumn = new TextColumn<SeriesDTO>() {
+            @Override
+            public String getValue(SeriesDTO series) {
+                return series.isStartsWithZeroScore() ? stringMessages.yes() : stringMessages.no();
+            }
+        };
+
         TextColumn<SeriesDTO> racesColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
@@ -193,6 +200,7 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(racesColumn, stringMessages.races());
         table.addColumn(fleetsColumn, stringMessages.fleets());
         table.addColumn(discardsColumn, stringMessages.discarding());
+        table.addColumn(startsWithZeroScoreColumn, stringMessages.startsWithZeroScore());
         table.addColumn(seriesActionColumn, stringMessages.actions());
         
         return table;
@@ -226,6 +234,7 @@ public class RegattaDetailsComposite extends Composite {
         final SeriesDTO series = seriesDescriptor.getSeries();
         final List<RaceColumnDTO> newRaceColumns = seriesDescriptor.getRaces();
         final boolean isMedalChanged = series.isMedal() != seriesDescriptor.isMedal();
+        final boolean isStartsWithZeroScoreChanged = series.isStartsWithZeroScore() != seriesDescriptor.isStartsWithZeroScore();
         final boolean seriesResultDiscardingThresholdsChanged = !Arrays.equals(series.getDiscardThresholds(),
                 seriesDescriptor.getResultDiscardingThresholds());
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
@@ -271,9 +280,10 @@ public class RegattaDetailsComposite extends Composite {
                 regattaRefresher.fillRegattas();
             }
         });
-        if (isMedalChanged || seriesResultDiscardingThresholdsChanged) {
+        if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged) {
             sailingService.updateSeries(regattaIdentifier, series.name, seriesDescriptor.isMedal(),
-                    seriesDescriptor.getResultDiscardingThresholds(), new AsyncCallback<Void>() {
+                    seriesDescriptor.getResultDiscardingThresholds(), seriesDescriptor.isStartsWithZeroScore(),
+                    new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError("Error trying to remove race columns "

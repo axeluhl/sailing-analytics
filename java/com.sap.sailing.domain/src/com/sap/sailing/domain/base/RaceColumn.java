@@ -150,6 +150,15 @@ public interface RaceColumn extends Named {
     double getFactor();
     
     /**
+     * By default, a competitor's total score is computed by summing up the non-discarded total points of each race
+     * across the leaderboard, considering the {@link RaceColumn#getFactor() column factors}. Some race columns,
+     * however, are defined such that participating competitors start with a zero score from this race column on. If
+     * this method returns <code>true</code>, this column advises the leaderboard and scoring scheme to start counting
+     * the total points at this column with zero.
+     */
+    boolean isStartsWithZeroScore();
+
+    /**
      * @param factor if <code>null</code>, {@link #getFactor()} will again compute a default value; otherwise, {@link #getFactor()} will
      * then return the double value of <code>factor</code>.
      */

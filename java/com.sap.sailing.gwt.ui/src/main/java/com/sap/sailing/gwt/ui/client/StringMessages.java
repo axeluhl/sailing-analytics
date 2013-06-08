@@ -652,4 +652,5 @@ public interface StringMessages extends Messages {
     String seriesDefinesResultDiscardingRule();
     String addSeries();
     String regattaDefinesResultDiscardingRules();
+    String startsWithZeroScore();
 }

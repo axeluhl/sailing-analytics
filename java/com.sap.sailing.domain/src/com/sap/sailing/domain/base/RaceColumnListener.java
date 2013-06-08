@@ -14,6 +14,8 @@ public interface RaceColumnListener extends Serializable {
     
     void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace);
     
+    void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore);
+    
     boolean canAddRaceColumnToContainer(RaceColumn raceColumn);
     
     void raceColumnAddedToContainer(RaceColumn raceColumn);

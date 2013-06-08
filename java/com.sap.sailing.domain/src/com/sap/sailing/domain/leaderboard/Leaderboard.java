@@ -198,7 +198,7 @@ public interface Leaderboard extends Named {
 
     /**
      * Sums up the {@link #getTotalPoints(Competitor, TrackedRace, TimePoint) total points} of <code>competitor</code>
-     * across all races tracked by this leaderboard.
+     * across all races tracked by this leaderboard, respecting the {@link RaceColumn#isStartsWithZeroScore()} property.
      */
     Double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
     
