@@ -272,12 +272,14 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         TimePoint eventTime = MillisecondsTimePoint.now();
         
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(eventTime, raceLog.getCurrentPassId());
-        this.raceLog.add(event);        
+        this.raceLog.add(event);
     }
 
     @Override
     public void setProtestTime(TimePoint protestTime) {
-        // Add protest time event to race log...
+        TimePoint eventTime = MillisecondsTimePoint.now();
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createProtestStartTimeEvent(eventTime, raceLog.getCurrentPassId(), protestTime);
+        this.raceLog.add(event);
     }
 
     @Override
