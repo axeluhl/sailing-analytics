@@ -276,6 +276,7 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener, Co
     @Override
     public void onProtestTimeSet(List<ManagedRace> races) {
         // TODO: somehow ping any FINISHED view to reflect protest time change...
+        Toast.makeText(this, "This is not implemented yet...", Toast.LENGTH_LONG).show();
     }
 
 }
