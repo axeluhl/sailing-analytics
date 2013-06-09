@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
@@ -51,6 +51,10 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     }
 
     @Override
+    public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
+    }
+
+    @Override
     public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
         return true;
     }
@@ -76,8 +80,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     }
 
     @Override
-    public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
-            ThresholdBasedResultDiscardingRule newDiscardingRule) {
+    public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule) {
     }
 
     @Override

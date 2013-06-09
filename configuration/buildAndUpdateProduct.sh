@@ -375,6 +375,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     sed -i "s/mongo.port=.*$/mongo.port=$MONGODB_PORT/g" $ACDIR/configuration/config.ini
     sed -i "s/expedition.udp.port=.*$/expedition.udp.port=$EXPEDITION_PORT/g" $ACDIR/configuration/config.ini
     sed -i "s/replication.exchangeName=.*$/replication.exchangeName=$REPLICATION_CHANNEL/g" $ACDIR/configuration/config.ini
+
     echo "I have updated the configuration with the following data:"
     echo "SERVER_NAME: $SERVER_NAME"
     echo "SERVER_PORT: $SERVER_PORT"

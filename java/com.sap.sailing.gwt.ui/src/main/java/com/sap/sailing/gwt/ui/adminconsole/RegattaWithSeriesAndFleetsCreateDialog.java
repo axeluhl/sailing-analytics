@@ -106,7 +106,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {
         panel.add(createHeadlineLabel(stringMessages.series()));
         panel.add(seriesGrid);
-        Button addSeriesButton = new Button("Add series");
+        Button addSeriesButton = new Button(stringMessages.addSeries());
         addSeriesButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
