@@ -49,4 +49,7 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
 
     RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint createdAt, TimePoint timePoint,
             Serializable id, List<Competitor> competitors, int passId, StartProcedureType type);
+    
+    RaceLogProtestStartTimeEvent createProtestStartTimeEvent(TimePoint createdAt, TimePoint timePoint,
+            Serializable id, List<Competitor> competitors, int passId, TimePoint protestStartTime);
 }
