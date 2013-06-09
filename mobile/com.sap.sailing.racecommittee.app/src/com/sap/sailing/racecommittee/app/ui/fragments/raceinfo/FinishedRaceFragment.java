@@ -109,7 +109,10 @@ public class FinishedRaceFragment extends RaceFragment {
     }
 
     private CharSequence getProtestStartTimeText() {
-        // TODO Currently no protest time...
+        TimePoint protestStartTime = getRace().getState().getProtestStartTime();
+        if (protestStartTime != null) {
+            return String.format(getString(R.string.protest_start_time), getFormattedTime(protestStartTime.asDate()));
+        }
         return getString(R.string.empty);
     }
 

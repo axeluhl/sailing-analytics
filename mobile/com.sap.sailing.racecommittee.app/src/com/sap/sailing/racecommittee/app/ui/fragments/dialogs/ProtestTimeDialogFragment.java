@@ -82,7 +82,7 @@ public class ProtestTimeDialogFragment extends DialogFragment {
         super.onActivityCreated(savedInstanceState);
 
         if (getDialog() != null) {
-            getDialog().setTitle("Protest time");
+            getDialog().setTitle(getString(R.string.protest_dialog_title));
         }
 
         getRacesFromArguments();
@@ -158,7 +158,7 @@ public class ProtestTimeDialogFragment extends DialogFragment {
         List<ManagedRace> selectedRaces = getSelectedRaces();
         TimePoint protestTime = getProtestTime();
         for (ManagedRace race : selectedRaces) {
-            race.getState().setProtestTime(protestTime);
+            race.getState().setProtestStartTime(protestTime);
         }
         listener.onProtestTimeSet(selectedRaces);
     }

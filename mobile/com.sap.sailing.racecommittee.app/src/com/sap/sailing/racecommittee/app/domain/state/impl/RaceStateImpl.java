@@ -22,6 +22,7 @@ import com.sap.sailing.domain.racelog.analyzing.impl.FinishPositioningListFinder
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.ProtestStartTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartProcedureTypeAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
@@ -54,6 +55,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private LastPublishedCourseDesignFinder lastCourseDesignFinder;
     private FinishPositioningListFinder finishPositioningListFinder;
     private StartProcedureTypeAnalyzer startProcedureTypeAnalyzer;
+    private ProtestStartTimeFinder protestStartTimeAnalyzer;
 
     public RaceStateImpl(StartProcedureType defaultStartProcedureType, RaceLog raceLog) {
         this.defaultStartProcedureType = defaultStartProcedureType;
@@ -73,6 +75,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.lastCourseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
         this.finishPositioningListFinder = new FinishPositioningListFinder(raceLog);
         this.startProcedureTypeAnalyzer = new StartProcedureTypeAnalyzer(raceLog);
+        this.protestStartTimeAnalyzer = new ProtestStartTimeFinder(raceLog);
         
         registerStartProcedure();
         updateStatus();
@@ -276,10 +279,15 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     @Override
-    public void setProtestTime(TimePoint protestTime) {
+    public void setProtestStartTime(TimePoint protestStartTime) {
         TimePoint eventTime = MillisecondsTimePoint.now();
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createProtestStartTimeEvent(eventTime, raceLog.getCurrentPassId(), protestTime);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createProtestStartTimeEvent(eventTime, raceLog.getCurrentPassId(), protestStartTime);
         this.raceLog.add(event);
+    }
+    
+    @Override
+    public TimePoint getProtestStartTime() {
+        return protestStartTimeAnalyzer.getProtestStartTime();
     }
 
     @Override
