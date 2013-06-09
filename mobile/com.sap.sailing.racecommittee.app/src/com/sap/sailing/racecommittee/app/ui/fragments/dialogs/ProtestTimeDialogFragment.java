@@ -125,6 +125,8 @@ public class ProtestTimeDialogFragment extends DialogFragment {
 
     private void setupTimePicker(TimePicker timePicker) {
         timePicker.setIs24HourView(true);
+        
+        // TODO: set initial time to last finished race!
         Calendar now = Calendar.getInstance();
         now.add(Calendar.MINUTE, 10);
         int hours = now.get(Calendar.HOUR_OF_DAY);
