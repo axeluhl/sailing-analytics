@@ -6,7 +6,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -31,10 +30,6 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public class ProtestTimeDialogFragment extends DialogFragment {
 
-    public interface ProtestTimeSetListener {
-        public void onProtestTimeSet(List<ManagedRace> races);
-    }
-
     private static String ARGS_RACE_IDS = ProtestTimeDialogFragment.class.getSimpleName() + ".raceids";
 
     public static ProtestTimeDialogFragment newInstace(List<ManagedRace> races) {
@@ -50,27 +45,12 @@ public class ProtestTimeDialogFragment extends DialogFragment {
         return fragment;
     }
 
-    private ProtestTimeSetListener listener;
     private List<ManagedRace> races;
     private ListView racesList;
     private TimePicker timePicker;
 
     public ProtestTimeDialogFragment() {
         races = new ArrayList<ManagedRace>();
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        if (activity instanceof ProtestTimeSetListener) {
-            this.listener = (ProtestTimeSetListener) activity;
-        } else {
-            throw new IllegalStateException(String.format(
-                    "Instance of %s must be attached to instances of %s. Tried to attach to %s.",
-                    ProtestTimeDialogFragment.class.getName(), ProtestTimeSetListener.class.getName(), activity
-                            .getClass().getName()));
-        }
     }
 
     @Override
@@ -177,7 +157,6 @@ public class ProtestTimeDialogFragment extends DialogFragment {
         for (ManagedRace race : selectedRaces) {
             race.getState().setProtestStartTime(protestTime);
         }
-        listener.onProtestTimeSet(selectedRaces);
     }
 
     private List<ManagedRace> getSelectedRaces() {

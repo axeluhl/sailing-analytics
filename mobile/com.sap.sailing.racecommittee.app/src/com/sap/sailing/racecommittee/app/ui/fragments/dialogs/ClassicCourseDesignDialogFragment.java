@@ -44,8 +44,6 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     @SuppressWarnings("unused")
     private final static String TAG = ClassicCourseDesignDialogFragment.class.getName();
 
-    protected CourseDesignListener hostActivity;
-
     private Button publishButton;
     private ImageButton windButton;
     private Spinner spinnerBoatClass;
@@ -68,24 +66,6 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         super();
         // handle map bug - https://code.google.com/p/gmaps-api-issues/issues/detail?id=4865
         this.setStyle(DialogFragment.STYLE_NORMAL, R.style.Theme_DimDisabledDialog);
-    }
-
-    @Override
-    public void onAttach(android.app.Activity activity) {
-        super.onAttach(activity);
-
-        if (activity instanceof CourseDesignListener) {
-            this.hostActivity = (CourseDesignListener) activity;
-        } else {
-            throw new IllegalStateException(String.format(
-                    "Instance of %s must be attached to instances of %s. Tried to attach to %s.",
-                    ActivityAttachedDialogFragment.class.getName(), CourseDesignListener.class.getName(), activity.getClass()
-                            .getName()));
-        }
-    };
-
-    protected CourseDesignListener getHost() {
-        return this.hostActivity;
     }
 
     @Override

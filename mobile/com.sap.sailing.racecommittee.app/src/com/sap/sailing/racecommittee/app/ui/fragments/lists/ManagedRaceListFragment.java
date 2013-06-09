@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 
-import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -34,13 +33,10 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHe
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
 import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesDataFleetComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 
 public class ManagedRaceListFragment extends ListFragment implements JuryFlagClickedListener, RaceStateChangedListener {
 
-    public interface ProtestTimeRequestedListener {
-        public void onProtestTimeRequested(List<ManagedRace> races);
-    }
-    
     public enum FilterMode {
         ALL("Show all"), ACTIVE("Show active");
 
@@ -55,8 +51,6 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
             return displayName;
         }
     }
-
-    private ProtestTimeRequestedListener hostActivity;
 
     private FilterMode filterMode;
     private ManagedRaceListAdapter adapter;
@@ -90,20 +84,6 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 
         getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
     }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        if (activity instanceof ProtestTimeRequestedListener) {
-            hostActivity = (ProtestTimeRequestedListener) activity;
-        } else {
-            throw new IllegalStateException(String.format(
-                    "Instance of %s must be attached to instances of %s. Tried to attach to %s.",
-                    ManagedRaceListFragment.class.getName(), ProtestTimeRequestedListener.class.getName(), activity
-                            .getClass().getName()));
-        }
-    };
 
     @Override
     public void onStart() {
@@ -234,64 +214,28 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     }
 
     @Override
-    public void onRaceStateChanged(RaceState state) {
+    public void onJuryFlagClicked(BoatClassSeriesDataFleet group) {
+        if (racesByGroup.containsKey(group)) {
+            List<ManagedRace> races = racesByGroup.get(group);
+            ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstace(races);
+            fragment.show(getFragmentManager(), null);
+        }
+    }
+
+    @Override
+    public void onRaceStateStatusChanged(RaceState state) {
         dataChanged(state);
         filterChanged();
     }
 
     @Override
-    public void onJuryFlagClicked(BoatClassSeriesDataFleet group) {
-        if (racesByGroup.containsKey(group)) {
-            List<ManagedRace> races = racesByGroup.get(group);
-            hostActivity.onProtestTimeRequested(races);
-        }
+    public void onRaceStateCourseDesignChanged(RaceState state) {
+        // not interested
     }
 
-    /*
-     * 
-     * 
-     * public void onJuryFlagClicked(final Group group) {
-     * 
-     * TimePickerDialog dialog = createJuryDialog(group); dialog.setIcon(R.drawable.ic_dialog_alert_holo_light);
-     * dialog.setTitle(getString(R.string.protest_dialog_title)); dialog.show(); }
-     * 
-     * private TimePickerDialog createJuryDialog(final Group group) {
-     * 
-     * // TODO: remove this hack!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! boolean hasFinishTime =
-     * false; Date latestFinish = new Date(0); for (Race race : group.getRaces()) { FlagRacingEvent latestFinishEvent =
-     * new FlagRacingEvent(false, Flags.NONE, new Date(0), 0); for (RacingEvent event : race.getEventLog()) { if (event
-     * instanceof FlagRacingEvent) { FlagRacingEvent flagEvent = (FlagRacingEvent) event; if
-     * (flagEvent.getUpperFlag().equals(Flags.BLUE) && !flagEvent.isDisplayed()) { if
-     * (latestFinishEvent.getTimeStamp().before(flagEvent.getTimeStamp())) { latestFinishEvent = flagEvent; } } } } if
-     * (latestFinish.before(latestFinishEvent.getTimeStamp())) { latestFinish = latestFinishEvent.getTimeStamp();
-     * hasFinishTime = true; } }
-     * 
-     * final Calendar presetJuryTime = Calendar.getInstance();
-     * 
-     * if (hasFinishTime) { presetJuryTime.setTime(latestFinish); } else { Calendar now = Calendar.getInstance();
-     * now.set(Calendar.SECOND, 0); now.set(Calendar.MILLISECOND, 0); presetJuryTime.setTime(now.getTime()); } // we
-     * always add one minute to round the time // so jury event is after finish event
-     * presetJuryTime.add(Calendar.MINUTE, 1);
-     * 
-     * TimePickerDialog dialog = new TimePickerDialog(getActivity(), new OnTimeSetListener() {
-     * 
-     * public void onTimeSet(TimePicker view, int hourOfDay, int minute) { Date protestStartDateTime =
-     * getStartOfProtestTime(hourOfDay, minute); displayJuryFlag(group, new Date(), protestStartDateTime); }
-     * 
-     * }, presetJuryTime.get(Calendar.HOUR_OF_DAY), presetJuryTime.get(Calendar.MINUTE), true); return dialog; }
-     * 
-     * private Date getStartOfProtestTime(int hourOfDay, int minute) { Calendar now = Calendar.getInstance();
-     * now.set(Calendar.SECOND, 0); now.set(Calendar.MILLISECOND, 0);
-     * 
-     * Date pickedDate = (Date)now.getTime().clone(); pickedDate.setHours(hourOfDay); pickedDate.setMinutes(minute);
-     * 
-     * return pickedDate; }
-     * 
-     * private void displayJuryFlag(Group group, Date eventTime, Date protestTime) { for (ManagedRace race :
-     * managedRacesMap.values()) { if (!race.getGroup().equals(group)) { continue; } if
-     * (race.getStatus().equals(SimpleRaceStatus.FINISHED)) { race.displayJuryFlag(eventTime, protestTime); } }
-     * Toast.makeText(getActivity(), String.format(getString(R.string.protest_flag_set), group.getName()),
-     * Toast.LENGTH_LONG).show(); }
-     */
+    @Override
+    public void onRaceStateProtestStartTimeChanged(RaceState state) {
+        // TODO: show protest time changes in status bar oder show update indicator!
+    }
 
 }

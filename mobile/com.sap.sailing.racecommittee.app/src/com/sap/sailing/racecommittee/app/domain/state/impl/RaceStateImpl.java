@@ -115,42 +115,8 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         RaceLogRaceStatus oldStatus = this.status;
         this.status = newStatus;
         if (oldStatus != newStatus) {
-            notifyListenersAboutStateChange();
+            fireStatusChanged();
         }
-    }
-
-    private void notifyListenersAboutStateChange() {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
-            listener.onRaceStateChanged(this);
-        }
-    }
-    
-    private void notifyListenersAboutStartTimeChange(TimePoint newStartTime) {
-        for (RaceStateEventListener listener : stateEventListeners) {
-            listener.onStartTimeChanged(newStartTime);
-        }
-    }
-    
-    private void notifyListenersAboutRaceAbortion() {
-        for (RaceStateEventListener listener : stateEventListeners) {
-            listener.onRaceAborted();
-        }
-    }
-
-    public void registerStateChangeListener(RaceStateChangedListener listener) {
-        stateChangedListeners.add(listener);
-    }
-    
-    public void registerStateEventListener(RaceStateEventListener listener) {
-        stateEventListeners.add(listener);
-    }
-
-    public void unregisterStateChangeListener(RaceStateChangedListener listener) {
-        stateChangedListeners.remove(listener);
-    }
-    
-    public void unregisterStateEventListener(RaceStateEventListener listener) {
-        stateEventListeners.remove(listener);
     }
 
     public TimePoint getStartTime() {
@@ -169,7 +135,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
                 Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newStartTime);
         this.raceLog.add(event);
         
-        notifyListenersAboutStartTimeChange(newStartTime);
+        fireStartTimeChange(newStartTime);
     }
     
     @Override
@@ -200,6 +166,8 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(eventTime, UUID.randomUUID(),
                 Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newCourseData);
         this.raceLog.add(event);
+        
+        fireCourseDesignChanged();
     }
 
     @Override
@@ -210,7 +178,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         RaceLogEvent passChangeEvent = RaceLogEventFactory.INSTANCE.createPassChangeEvent(eventTime, raceLog.getCurrentPassId() + 1);
         this.raceLog.add(passChangeEvent);
         registerStartProcedure();
-        notifyListenersAboutRaceAbortion();
+        fireRaceAborted();
     }
     
     @Override
@@ -283,8 +251,9 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         TimePoint eventTime = MillisecondsTimePoint.now();
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createProtestStartTimeEvent(eventTime, raceLog.getCurrentPassId(), protestStartTime);
         this.raceLog.add(event);
+        fireProtestStartTimeChanged();
     }
-    
+
     @Override
     public TimePoint getProtestStartTime() {
         return protestStartTimeAnalyzer.getProtestStartTime();
@@ -295,5 +264,51 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         for (RaceStateEventListener listener : stateEventListeners) {
             listener.onStartProcedureSpecificEvent(eventTime, eventId);
         }
+    }
+
+    private void fireStatusChanged() {
+        for (RaceStateChangedListener listener : stateChangedListeners) {
+            listener.onRaceStateStatusChanged(this);
+        }
+    }
+
+    private void fireCourseDesignChanged() {
+        for (RaceStateChangedListener listener : stateChangedListeners) {
+            listener.onRaceStateCourseDesignChanged(this);
+        }
+    }
+    
+    private void fireProtestStartTimeChanged() {
+        for (RaceStateChangedListener listener : stateChangedListeners) {
+            listener.onRaceStateProtestStartTimeChanged(this);
+        }
+    }
+    
+    private void fireStartTimeChange(TimePoint newStartTime) {
+        for (RaceStateEventListener listener : stateEventListeners) {
+            listener.onStartTimeChanged(newStartTime);
+        }
+    }
+    
+    private void fireRaceAborted() {
+        for (RaceStateEventListener listener : stateEventListeners) {
+            listener.onRaceAborted();
+        }
+    }
+
+    public void registerStateChangeListener(RaceStateChangedListener listener) {
+        stateChangedListeners.add(listener);
+    }
+    
+    public void registerStateEventListener(RaceStateEventListener listener) {
+        stateEventListeners.add(listener);
+    }
+
+    public void unregisterStateChangeListener(RaceStateChangedListener listener) {
+        stateChangedListeners.remove(listener);
+    }
+    
+    public void unregisterStateEventListener(RaceStateEventListener listener) {
+        stateEventListeners.remove(listener);
     }
 }

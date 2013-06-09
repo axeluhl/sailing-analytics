@@ -27,16 +27,11 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.CourseDesignListener;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment.ProtestTimeSetListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment.FilterMode;
-import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment.ProtestTimeRequestedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 
-public class RacingActivity extends BaseActivity implements RaceInfoListener, CourseDesignListener,
-        ProtestTimeRequestedListener, ProtestTimeSetListener {
+public class RacingActivity extends BaseActivity implements RaceInfoListener {
     //private final static String TAG = RacingActivity.class.getName();
     private final static String ListFragmentTag = RacingActivity.class.getName() + ".ManagedRaceListFragment";
 
@@ -248,35 +243,8 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener, Co
     }
 
     @Override
-    public ReadonlyDataManager getDataManager() {
-        return dataManager;
-    }
-
-    @Override
     public void onResetTime() {
         infoFragment.onResetTime();
-    }
-
-    @Override
-    public void onCourseDesignPublish() {
-        onChangeCourseDesign();
-    }
-
-    @Override
-    public void onChangeCourseDesign() {
-        infoFragment.onChangeCourseDesign();
-    }
-
-    @Override
-    public void onProtestTimeRequested(List<ManagedRace> races) {
-        ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstace(races);
-        fragment.show(getFragmentManager(), null);
-    }
-
-    @Override
-    public void onProtestTimeSet(List<ManagedRace> races) {
-        // TODO: somehow ping any FINISHED view to reflect protest time change...
-        Toast.makeText(this, "This is not implemented yet...", Toast.LENGTH_LONG).show();
     }
 
 }

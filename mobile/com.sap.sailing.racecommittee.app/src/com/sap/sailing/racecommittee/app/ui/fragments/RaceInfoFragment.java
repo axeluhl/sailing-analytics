@@ -84,7 +84,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
 
         // Initial fragment selection...
         switchToInfoFragment();
-        
         updateCourseDesignLabel();
     }
 
@@ -129,10 +128,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         transaction.commit();
     }
 
-    public void onResetTime() {
-        switchToInfoFragment(SetStartTimeRaceFragment.create(getRace()));
-    }
-
     private void showCourseDesignDialog() {
         FragmentManager fragmentManager = getFragmentManager();
 
@@ -150,11 +145,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void onChangeCourseDesign() {
-        updateCourseDesignLabel();
     }
 
     private void showRaceResetConfirmationDialog() {
@@ -194,7 +184,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         raceInfoView.setText(String.format("%s - %s - %s", race.getRaceGroup().getName(), race.getFleet().getName(), race.getRaceName()));
     }
 
-    public void updateCourseDesignLabel() {
+    private void updateCourseDesignLabel() {
         if (getRace().getState().getCourseDesign() != null) {
 
             CourseBase courseDesign = getRace().getState().getCourseDesign();
@@ -211,9 +201,23 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     }
 
     @Override
-    public void onRaceStateChanged(RaceState state) {
-        updateCourseDesignLabel();
+    public void onResetTime() {
+        switchToInfoFragment(SetStartTimeRaceFragment.create(getRace()));
+    }
+
+    @Override
+    public void onRaceStateStatusChanged(RaceState state) {
         switchToInfoFragment();
+    }
+
+    @Override
+    public void onRaceStateCourseDesignChanged(RaceState state) {
+        updateCourseDesignLabel();
+    }
+
+    @Override
+    public void onRaceStateProtestStartTimeChanged(RaceState state) {
+        // not interested...
     }
 
 }

@@ -34,10 +34,11 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.RoundingDirection;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.DraggableCourseElementListAdapter;
@@ -45,9 +46,8 @@ import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.MarkGridAdapte
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 
 public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
-    private final static String TAG = ESSCourseDesignDialogFragment.class.getName();
+    //private final static String TAG = ESSCourseDesignDialogFragment.class.getName();
 
-    protected CourseDesignListener hostActivity;
     private List<Mark> aMarkList;
     private MarkGridAdapter gridAdapter;
     private List<CourseListDataElement> courseElements;
@@ -63,6 +63,8 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
     private Button unpublishButton;
     private Button takePreviousButton;
     
+    private ReadonlyDataManager dataManager;
+    
     private int dragStartMode = DragSortController.ON_DRAG;
     private boolean removeEnabled = true;
     private int removeMode = DragSortController.FLING_REMOVE;
@@ -70,32 +72,8 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
     private boolean dragEnabled = true;
 
     @Override
-    public void onAttach(android.app.Activity activity) {
-        super.onAttach(activity);
-
-        if (activity instanceof CourseDesignListener) {
-            this.hostActivity = (CourseDesignListener) activity;
-        } else {
-            throw new IllegalStateException(
-                    String.format(
-                            "Instance of %s must be attached to instances of %s. Tried to attach to %s.",
-                            ActivityAttachedDialogFragment.class.getName(),
-                            CourseDesignListener.class.getName(),
-                            activity.getClass().getName()));
-        }
-    };
-
-    protected CourseDesignListener getHost() {
-        return this.hostActivity;
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.race_choose_ess_course_design_view, container);
-
-        return view;
-
+        return inflater.inflate(R.layout.race_choose_ess_course_design_view, container);
     }
 
     @Override
@@ -103,6 +81,8 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
         super.onActivityCreated(savedInstanceState);
         getDialog().setTitle(getActivity().getText(R.string.course_design_dialog_title));
 
+        dataManager = DataManager.create(getActivity());
+        
         aMarkList  = new ArrayList<Mark>();
         courseElements = new ArrayList<CourseListDataElement>();
         previousCourseElements = new ArrayList<CourseListDataElement>();
@@ -242,11 +222,11 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-        onLoadMarksSucceeded(hostActivity.getDataManager().getDataStore().getMarks());
+        onLoadMarksSucceeded(dataManager.getDataStore().getMarks());
     }
     
     private void loadCourseOnServer() {
-        hostActivity.getDataManager().loadCourse(getRace(), new LoadClient<CourseBase>() {
+        dataManager.loadCourse(getRace(), new LoadClient<CourseBase>() {
 
             @Override
             public void onLoadFailed(Exception reason) {
@@ -274,7 +254,7 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     private void loadMarks() {
-        hostActivity.getDataManager().loadMarks(getRace(), new LoadClient<Collection<Mark>>() {
+        dataManager.loadMarks(getRace(), new LoadClient<Collection<Mark>>() {
 
             @Override
             public void onLoadFailed(Exception reason) {
@@ -334,14 +314,9 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     protected void sendCourseDataAndDismiss(CourseBase courseDesign) {
-        sendCourseData(courseDesign);
-        onPublish();
-        dismiss();
-    }
-
-    protected void sendCourseData(CourseBase courseDesign) {
         getRace().getState().setCourseDesign(courseDesign);
         saveChangedCourseDesignInCache(courseDesign);
+        dismiss();
     }
 
     private void saveChangedCourseDesignInCache(CourseBase courseDesign) {
@@ -489,19 +464,6 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
             courseElements.add(courseElement);
         }
         courseElementAdapter.notifyDataSetChanged();
-    }
-
-    protected void onPublish() {
-        if (getHost() != null) {
-            getHost().onCourseDesignPublish();
-        } else {
-            ExLog.w(TAG, "Dialog host was null.");
-        }
-    }
-
-    @Override
-    public void notifyTick() {
-        
     }
 
 }
