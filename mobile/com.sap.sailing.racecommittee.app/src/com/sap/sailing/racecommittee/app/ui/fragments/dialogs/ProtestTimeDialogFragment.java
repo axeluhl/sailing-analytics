@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
@@ -67,8 +68,8 @@ public class ProtestTimeDialogFragment extends DialogFragment {
         } else {
             throw new IllegalStateException(String.format(
                     "Instance of %s must be attached to instances of %s. Tried to attach to %s.",
-                    ProtestTimeDialogFragment.class.getName(), ProtestTimeSetListener.class.getName(), activity.getClass()
-                            .getName()));
+                    ProtestTimeDialogFragment.class.getName(), ProtestTimeSetListener.class.getName(), activity
+                            .getClass().getName()));
         }
     }
 
@@ -125,17 +126,25 @@ public class ProtestTimeDialogFragment extends DialogFragment {
 
     private void setupTimePicker(TimePicker timePicker) {
         timePicker.setIs24HourView(true);
-        
-        // TODO: set initial time to last finished race!
-        Calendar now = Calendar.getInstance();
-        now.add(Calendar.MINUTE, 10);
-        int hours = now.get(Calendar.HOUR_OF_DAY);
-        int minutes = now.get(Calendar.MINUTE);
-        minutes = (int) (Math.ceil((minutes / 5.0)) * 5.0);
-        if (minutes >= 60) {
-            hours++;
-        }
 
+        TimePoint recentFinishedTime = null;
+        for (ManagedRace race : races) {
+            TimePoint currentFinishedTime = race.getState().getFinishedTime();
+            if (currentFinishedTime != null
+                    && (recentFinishedTime == null || recentFinishedTime.before(currentFinishedTime))) {
+                recentFinishedTime = currentFinishedTime;
+            }
+        }
+        Date suggestedDate = null;
+        if (recentFinishedTime != null) {
+            suggestedDate = recentFinishedTime.asDate();
+        } else {
+            suggestedDate = new Date();
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(suggestedDate);
+        int hours = calendar.get(Calendar.HOUR_OF_DAY);
+        int minutes = calendar.get(Calendar.MINUTE);
         timePicker.setCurrentHour(hours);
         timePicker.setCurrentMinute(minutes);
     }
@@ -162,7 +171,7 @@ public class ProtestTimeDialogFragment extends DialogFragment {
         }
         listener.onProtestTimeSet(selectedRaces);
     }
-    
+
     private List<ManagedRace> getSelectedRaces() {
         List<ManagedRace> result = new ArrayList<ManagedRace>();
         SparseBooleanArray checked = racesList.getCheckedItemPositions();
@@ -173,14 +182,14 @@ public class ProtestTimeDialogFragment extends DialogFragment {
         }
         return result;
     }
-    
+
     private TimePoint getProtestTime() {
         Calendar time = Calendar.getInstance();
         time.set(Calendar.HOUR_OF_DAY, timePicker.getCurrentHour());
         time.set(Calendar.MINUTE, timePicker.getCurrentMinute());
         return new MillisecondsTimePoint(time.getTime());
     }
-    
+
     private static boolean isFinishedToday(ManagedRace race) {
         if (race.getStatus().equals(RaceLogRaceStatus.FINISHED)) {
             FinishedTimeFinder analyzer = new FinishedTimeFinder(race.getRaceLog());
