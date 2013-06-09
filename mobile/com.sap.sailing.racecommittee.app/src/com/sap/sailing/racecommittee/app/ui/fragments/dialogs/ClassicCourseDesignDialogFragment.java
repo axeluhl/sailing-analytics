@@ -25,13 +25,14 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sap.sailing.domain.common.racelog.courseDesigner.BoatClassType;
+import com.sap.sailing.domain.common.racelog.courseDesigner.CourseDesign;
 import com.sap.sailing.domain.common.racelog.courseDesigner.CourseLayout;
 import com.sap.sailing.domain.common.racelog.courseDesigner.NumberOfRounds;
 import com.sap.sailing.domain.common.racelog.courseDesigner.TargetTime;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.courseDesigner.CourseDesignComputer;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
@@ -51,6 +52,8 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private Spinner spinnerCourseLayout;
     private Spinner spinnerNumberOfRounds;
     private Spinner spinnerTargetTime;
+
+    private CourseDesignComputer courseDesignComputer;
 
     private ArrayAdapter<CourseLayout> courseLayoutAdapter;
 
@@ -97,8 +100,6 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
 
         mMapView = (MapView) view.findViewById(R.id.mapView);
         mMapView.onCreate(mBundle);
-        setUpMapIfNeeded(view);
-
         return view;
 
     }
@@ -136,6 +137,13 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         setupNumberOfRoundsSpinner();
         spinnerTargetTime = (Spinner) getView().findViewById(R.id.classic_course_designer_target_time);
         setupTargetTimeSpinner();
+
+        DataStore ds = InMemoryDataStore.INSTANCE;
+        courseDesignComputer= new CourseDesignComputer().setStartBoatPosition(ds.getLastWindPosition()).setWindDirection(ds.getLastWindDirection())
+                .setWindSpeed(ds.getLastWindSpeed()).setBoatClass(selectedBoatClass)
+                .setCourseLayout(selectedCourseLayout).setNumberOfRounds(selectedNumberOfRounds)
+                .setTargetTime(selectedTargetTime);
+        setUpMapIfNeeded(getView());
     }
 
     @Override
@@ -148,13 +156,20 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         }
     }// onActivityResult
 
-    private void recomputeCourseDesign() {
+    private CourseDesign recomputeCourseDesign() {
+        try{
+        courseDesignComputer.compute();
+        }catch (IllegalStateException ise){
+            Toast.makeText(
+                    getActivity(),
+                    ise.getMessage(), Toast.LENGTH_LONG).show();
+        }
         DataStore ds = InMemoryDataStore.INSTANCE;
         Toast.makeText(
                 getActivity(),
-                "" + ds.getLastLatitude() + ds.getLastLongitude() + ds.getLastWindDirection() + ds.getLastWindSpeed()
-                        + selectedBoatClass + selectedCourseLayout + selectedNumberOfRounds + selectedTargetTime,
-                Toast.LENGTH_LONG).show();
+                "" + ds.getLastWindPosition() + ds.getLastWindDirection() + ds.getLastWindSpeed() + selectedBoatClass
+                        + selectedCourseLayout + selectedNumberOfRounds + selectedTargetTime, Toast.LENGTH_LONG).show();
+        return null;
 
     }
 
@@ -169,7 +184,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
                 courseLayoutAdapter.clear();
                 courseLayoutAdapter.addAll(selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet());
                 courseLayoutAdapter.notifyDataSetChanged();
-                if(selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet().contains(selectedCourseLayout)){
+                if (selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet().contains(selectedCourseLayout)) {
                     recomputeCourseDesign();
                 }
             }
@@ -270,10 +285,8 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private void setUpMap() {
         courseAreaMap.clear();
         DataStore ds = InMemoryDataStore.INSTANCE;
-        if (ds.getLastLatitude() != null && ds.getLastLongitude() != null && ds.getLastWindDirection() != null
-                && ds.getLastWindSpeed() != null) {
-            courseAreaMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(ds.getLastLatitude(), ds.getLastLongitude()), 17.0f));
+        if (ds.getLastWindPosition() != null && ds.getLastWindDirection() != null && ds.getLastWindSpeed() != null) {
+            courseAreaMap.animateCamera(CameraUpdateFactory.newLatLngZoom(ds.getLastWindPosition(), 17.0f));
 
             Bitmap bmpOriginal = BitmapFactory.decodeResource(this.getResources(), R.drawable.boat);
             Bitmap bmResult = Bitmap.createBitmap(bmpOriginal.getHeight(), bmpOriginal.getHeight(),
@@ -283,12 +296,13 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             tempCanvas.drawBitmap(bmpOriginal, 0, 0, null);
 
             courseAreaMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(ds.getLastLatitude(), ds.getLastLongitude()))
+                    .position(ds.getLastWindPosition())
                     .icon(BitmapDescriptorFactory.fromBitmap(bmResult))
                     .draggable(false)
-                    .title(ds.getLastLatitude() + "/" + ds.getLastLongitude() + ", " + ds.getLastWindSpeed() + "kn, "
-                            + ds.getLastWindDirection() + "°"));
+                    .title(ds.getLastWindPosition() + ", " + ds.getLastWindSpeed() + "kn, " + ds.getLastWindDirection()
+                            + "°"));
         }
+        recomputeCourseDesign();
 
     }
 

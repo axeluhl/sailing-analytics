@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
@@ -18,8 +19,9 @@ public enum InMemoryDataStore implements DataStore {
     private HashMap<Serializable, ManagedRace> managedRaceById;
     private HashMap<Serializable, Mark> marksById;
     private CourseBase courseData;
-    private Double lastLatitude, lastLongitude, lastWindSpeed;
+    private Double lastWindSpeed;
     private Integer lastWindDirection;
+    private LatLng lastWindPosition;
 
     private InMemoryDataStore() {
         reset();
@@ -172,22 +174,6 @@ public enum InMemoryDataStore implements DataStore {
      * * * * * * *
      */
     @Override
-    public Double getLastLongitude() {
-        return lastLongitude;
-    }
-    @Override
-    public void setLastLongitude(Double lastLongitude) {
-        this.lastLongitude = lastLongitude;
-    }
-    @Override
-    public Double getLastLatitude() {
-        return lastLatitude;
-    }
-    @Override
-    public void setLastLatitude(Double lastLatitude) {
-        this.lastLatitude = lastLatitude;
-    }
-    @Override
     public Integer getLastWindDirection() {
         return lastWindDirection;
     }
@@ -202,5 +188,15 @@ public enum InMemoryDataStore implements DataStore {
     @Override
     public void setLastWindSpeed(Double lastWindSpeed) {
         this.lastWindSpeed = lastWindSpeed;
+    }
+    
+    @Override
+    public void setLastWindPosition(LatLng lastWindPosition) {
+        this.lastWindPosition = lastWindPosition;
+    }
+    
+    @Override
+    public LatLng getLastWindPosition() {
+        return this.lastWindPosition;
     }
 }
