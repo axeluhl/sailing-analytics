@@ -20,6 +20,7 @@ import android.widget.ListView;
 import android.widget.TimePicker;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
@@ -76,7 +77,7 @@ public class ProtestTimeDialogFragment extends DialogFragment {
                 dismiss();
             }
         });
-        
+
         Button cancelButton = (Button) getView().findViewById(R.id.protest_time_cancel_button);
         cancelButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -220,8 +221,9 @@ public class ProtestTimeDialogFragment extends DialogFragment {
 
         @Override
         public String toString() {
-            return String.format("%s %s %s %s", race.getRaceGroup().getBoatClass().getName(), race.getSeries()
-                    .getName(), race.getFleet().getName(), race.getRaceName());
+            RaceGroup group = race.getRaceGroup();
+            return String.format("%s %s %s %s", group.getBoatClass() == null ? group.getName() : group.getBoatClass()
+                    .getName(), race.getSeries().getName(), race.getFleet().getName(), race.getRaceName());
         }
 
     }

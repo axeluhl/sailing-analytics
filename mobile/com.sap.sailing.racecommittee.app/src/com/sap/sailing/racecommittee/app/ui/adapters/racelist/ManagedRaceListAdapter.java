@@ -19,7 +19,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterS
 public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> implements FilterSubscriber {
 
     public interface JuryFlagClickedListener {
-        public void onJuryFlagClicked(BoatClassSeriesDataFleet clickedItem);
+        public void onJuryFlagClicked(BoatClassSeriesFleet clickedItem);
     }
 
     private class ViewHolder {

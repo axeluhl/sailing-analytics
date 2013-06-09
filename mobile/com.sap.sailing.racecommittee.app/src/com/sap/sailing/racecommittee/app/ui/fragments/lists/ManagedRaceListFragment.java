@@ -17,15 +17,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.BoatClassSeriesDataFleet;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.BoatClassSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter.JuryFlagClickedListener;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
@@ -56,14 +54,14 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     private ManagedRaceListAdapter adapter;
     private ManagedRace selectedRace;
     private HashMap<Serializable, ManagedRace> managedRacesById;
-    private TreeMap<BoatClassSeriesDataFleet, List<ManagedRace>> racesByGroup;
+    private TreeMap<BoatClassSeriesFleet, List<ManagedRace>> racesByGroup;
     private ArrayList<RaceListDataType> viewItems;
 
     public ManagedRaceListFragment() {
         this.filterMode = FilterMode.ACTIVE;
         this.selectedRace = null;
         this.managedRacesById = new HashMap<Serializable, ManagedRace>();
-        this.racesByGroup = new TreeMap<BoatClassSeriesDataFleet, List<ManagedRace>>(
+        this.racesByGroup = new TreeMap<BoatClassSeriesFleet, List<ManagedRace>>(
                 new BoatClassSeriesDataFleetComparator());
         this.viewItems = new ArrayList<RaceListDataType>();
     }
@@ -134,19 +132,12 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         }
     }
 
-    private BoatClass getBoatClassForRace(ManagedRace managedRace) {
-        if (managedRace.getRaceGroup().getBoatClass() == null) {
-            return new BoatClassImpl(managedRace.getRaceGroup().getName(), false);
-        }
-        return managedRace.getRaceGroup().getBoatClass();
-    }
-
     private void initializeViewElements() {
         // 1. Group races by <boat class, series, fleet>
         initializeRacesByGroup();
 
         // 2. Create view elements from tree
-        for (BoatClassSeriesDataFleet key : racesByGroup.navigableKeySet()) {
+        for (BoatClassSeriesFleet key : racesByGroup.navigableKeySet()) {
             // ... add the header view...
             viewItems.add(new RaceListDataTypeHeader(key));
 
@@ -162,8 +153,7 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     private void initializeRacesByGroup() {
         racesByGroup.clear();
         for (ManagedRace race : managedRacesById.values()) {
-            BoatClassSeriesDataFleet container = new BoatClassSeriesDataFleet(getBoatClassForRace(race),
-                    race.getSeries(), race.getFleet());
+            BoatClassSeriesFleet container = new BoatClassSeriesFleet(race);
 
             if (!racesByGroup.containsKey(container)) {
                 racesByGroup.put(container, new LinkedList<ManagedRace>());
@@ -214,7 +204,7 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     }
 
     @Override
-    public void onJuryFlagClicked(BoatClassSeriesDataFleet group) {
+    public void onJuryFlagClicked(BoatClassSeriesFleet group) {
         if (racesByGroup.containsKey(group)) {
             List<ManagedRace> races = racesByGroup.get(group);
             ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstace(races);

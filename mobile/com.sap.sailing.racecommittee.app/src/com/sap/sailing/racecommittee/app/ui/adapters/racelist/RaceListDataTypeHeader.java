@@ -6,14 +6,14 @@ import com.sap.sailing.domain.base.SeriesBase;
 
 public class RaceListDataTypeHeader implements RaceListDataType {
 
-    private BoatClassSeriesDataFleet data;
+    private BoatClassSeriesFleet data;
     private final static String DEFAULT = "Default";
 
-    public RaceListDataTypeHeader(BoatClassSeriesDataFleet data) {
+    public RaceListDataTypeHeader(BoatClassSeriesFleet data) {
         this.data = data;
     }
 
-    public BoatClassSeriesDataFleet getBoatClassSeriesDataFleet() {
+    public BoatClassSeriesFleet getBoatClassSeriesDataFleet() {
         return data;
     }
 
