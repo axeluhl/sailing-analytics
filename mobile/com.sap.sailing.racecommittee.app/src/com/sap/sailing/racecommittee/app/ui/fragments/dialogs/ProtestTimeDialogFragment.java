@@ -96,6 +96,14 @@ public class ProtestTimeDialogFragment extends DialogFragment {
                 dismiss();
             }
         });
+        
+        Button cancelButton = (Button) getView().findViewById(R.id.protest_time_cancel_button);
+        cancelButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dismiss();
+            }
+        });
 
         racesList = (ListView) getView().findViewById(R.id.protest_time_races_list);
         setupRacesList(racesList);
