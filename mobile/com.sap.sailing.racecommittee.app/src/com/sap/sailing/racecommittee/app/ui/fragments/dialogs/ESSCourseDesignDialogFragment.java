@@ -39,10 +39,10 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.RoundingDirection;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementListAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.DraggableCourseElementListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.DraggableCourseElementListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.MarkGridAdapter;
-import com.sap.sailing.racecommittee.app.ui.comparators.NamedComparator;
+import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 
 public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
     private final static String TAG = ESSCourseDesignDialogFragment.class.getName();
@@ -79,7 +79,7 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
             throw new IllegalStateException(
                     String.format(
                             "Instance of %s must be attached to instances of %s. Tried to attach to %s.",
-                            ActivityDialogFragment.class.getName(),
+                            ActivityAttachedDialogFragment.class.getName(),
                             CourseDesignListener.class.getName(),
                             activity.getClass().getName()));
         }
@@ -291,7 +291,7 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
     protected void onLoadMarksSucceeded(Collection<Mark> data) {
         aMarkList.clear();
         aMarkList.addAll(data);
-        Collections.sort(aMarkList, new NamedComparator());
+        Collections.sort(aMarkList, new NaturalNamedComparator());
         gridAdapter.notifyDataSetChanged();
     }
 

@@ -76,7 +76,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         } else {
             throw new IllegalStateException(String.format(
                     "Instance of %s must be attached to instances of %s. Tried to attach to %s.",
-                    ActivityDialogFragment.class.getName(), CourseDesignListener.class.getName(), activity.getClass()
+                    ActivityAttachedDialogFragment.class.getName(), CourseDesignListener.class.getName(), activity.getClass()
                             .getName()));
         }
     };

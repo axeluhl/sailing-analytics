@@ -22,9 +22,9 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
-import com.sap.sailing.racecommittee.app.ui.comparators.NamedComparator;
+import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogFragmentButtonListener;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
@@ -101,7 +101,7 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
     public void onLoadSucceded(Collection<T> data) {
         namedList.clear();
         namedList.addAll(data);
-        Collections.sort(namedList, new NamedComparator());
+        Collections.sort(namedList, new NaturalNamedComparator());
         listAdapter.notifyDataSetChanged();
 
         showProgressBar(false);
@@ -131,7 +131,7 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
     private void showLoadFailedDialog(String message) {
         FragmentManager manager = getFragmentManager();
         if (manager != null) {
-            FragmentDialogFragment dialog = LoadFailedDialog.create(message);
+            FragmentAttachedDialogFragment dialog = LoadFailedDialog.create(message);
             dialog.setTargetFragment(this, 0);
             dialog.show(manager, "failedDialog");
         } else {

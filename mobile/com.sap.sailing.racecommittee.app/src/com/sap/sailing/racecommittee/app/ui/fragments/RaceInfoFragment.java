@@ -211,11 +211,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     }
 
     @Override
-    public void notifyTick() {
-        //do nothing
-    }
-
-    @Override
     public void onRaceStateChanged(RaceState state) {
         updateCourseDesignLabel();
         switchToInfoFragment();

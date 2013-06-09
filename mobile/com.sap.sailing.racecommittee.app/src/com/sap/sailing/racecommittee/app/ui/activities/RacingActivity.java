@@ -1,7 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
@@ -26,24 +28,47 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.CourseDesignListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment.ProtestTimeSetListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment.FilterMode;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment.ProtestTimeRequestedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 
-public class RacingActivity extends BaseActivity implements RaceInfoListener, CourseDesignListener /*
-                                                                                                    * implements
-                                                                                                    * ResetTimeListener
-                                                                                                    * ,
-                                                                                                    * StartModeSelectionListener
-                                                                                                    * ,
-                                                                                                    * PathfinderSelectionListener
-                                                                                                    * ,
-                                                                                                    * GateLineOpeningTimeSelectionListener
-                                                                                                    * ,
-                                                                                                    * CourseDesignSelectionListener
-                                                                                                    */{
-    // private final static String TAG = RacingActivity.class.getName();
-
+public class RacingActivity extends BaseActivity implements RaceInfoListener, CourseDesignListener,
+        ProtestTimeRequestedListener, ProtestTimeSetListener {
+    //private final static String TAG = RacingActivity.class.getName();
     private final static String ListFragmentTag = RacingActivity.class.getName() + ".ManagedRaceListFragment";
+
+    private class FilterModeSelectionBinder implements OnNavigationListener {
+
+        private ManagedRaceListFragment targetList;
+        private ActionBar actionBar;
+        private List<FilterMode> items;
+
+        public FilterModeSelectionBinder(ManagedRaceListFragment list, ActionBar actionBar,
+                ArrayAdapter<FilterMode> adapter, FilterMode... rawItems) {
+            this.targetList = list;
+            this.actionBar = actionBar;
+            this.items = Arrays.asList(rawItems);
+            adapter.addAll(this.items);
+            this.actionBar.setListNavigationCallbacks(adapter, this);
+            trackSelection(list);
+        }
+
+        private void trackSelection(ManagedRaceListFragment list) {
+            int selectedIndex = this.items.indexOf(list.getFilterMode());
+            if (selectedIndex >= 0) {
+                this.actionBar.setSelectedNavigationItem(selectedIndex);
+            }
+        }
+
+        @Override
+        public boolean onNavigationItemSelected(int position, long id) {
+            targetList.setFilterMode(items.get(position));
+            return true;
+        }
+    }
 
     /**
      * Selection list of all races
@@ -139,16 +164,7 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener, Co
         ArrayAdapter<ManagedRaceListFragment.FilterMode> adapter = new ArrayAdapter<ManagedRaceListFragment.FilterMode>(
                 this, R.layout.action_bar_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        adapter.addAll(ManagedRaceListFragment.FilterMode.values());
-        actionBar.setListNavigationCallbacks(adapter, new OnNavigationListener() {
-            @Override
-            public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-                Toast.makeText(RacingActivity.this, itemPosition + " | " + itemId, Toast.LENGTH_LONG).show();
-                return true;
-            }
-        });
-        
-        
+        new FilterModeSelectionBinder(raceListFragment, actionBar, adapter, ManagedRaceListFragment.FilterMode.values());
     }
 
     private void unloadAllRaces() {
@@ -231,13 +247,14 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener, Co
         transaction.commit();
     }
 
-    public void onResetTime() {
-        infoFragment.onResetTime();
-    }
-
     @Override
     public ReadonlyDataManager getDataManager() {
         return dataManager;
+    }
+
+    @Override
+    public void onResetTime() {
+        infoFragment.onResetTime();
     }
 
     @Override
@@ -250,19 +267,15 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener, Co
         infoFragment.onChangeCourseDesign();
     }
 
-    /*
-     * public void onResetTimeClick() { infoFragment.displayResetTimeFragment(); }
-     * 
-     * public void onStartModeSelected() { infoFragment.startModeSelected(); }
-     * 
-     * 
-     * public void onPathfinderSelected() { infoFragment.pathfinderSelected(); }
-     * 
-     * 
-     * public void onLineOpeningTimeSelected() { infoFragment.gateLineOpeningTimeSelected(); }
-     * 
-     * 
-     * @Override public void onCourseDesignSelected() { infoFragment.courseDesignSelected(); }
-     */
+    @Override
+    public void onProtestTimeRequested(List<ManagedRace> races) {
+        ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstace(races);
+        fragment.show(getFragmentManager(), null);
+    }
+
+    @Override
+    public void onProtestTimeSet(List<ManagedRace> races) {
+        // TODO: somehow ping any FINISHED view to reflect protest time change...
+    }
 
 }

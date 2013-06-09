@@ -2,12 +2,12 @@ package com.sap.sailing.racecommittee.app.ui.comparators;
 
 import java.util.Comparator;
 
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeTitle;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
 
 
-public class RaceListDataTypeTitleComparator implements Comparator<RaceListDataTypeTitle> {
+public class RaceListDataTypeTitleComparator implements Comparator<RaceListDataTypeHeader> {
 
-	public int compare(RaceListDataTypeTitle left, RaceListDataTypeTitle right) {
+	public int compare(RaceListDataTypeHeader left, RaceListDataTypeHeader right) {
 		
 		if (left.getBoatClass().getName() == null || right.getBoatClass().getName() == null)
 			return 0;

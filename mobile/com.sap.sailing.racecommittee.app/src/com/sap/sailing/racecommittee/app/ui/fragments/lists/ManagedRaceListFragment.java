@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 
+import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -19,7 +20,6 @@ import android.widget.ListView;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
@@ -30,43 +30,50 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.BoatClassSeriesDat
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter.JuryFlagClickedListener;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeElement;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeTitle;
-import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesBaseFleetComparator;
-import com.sap.sailing.racecommittee.app.ui.comparators.NamedRaceComparator;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
+import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesDataFleetComparator;
+import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 
 public class ManagedRaceListFragment extends ListFragment implements JuryFlagClickedListener, RaceStateChangedListener {
+
+    public interface ProtestTimeRequestedListener {
+        public void onProtestTimeRequested(List<ManagedRace> races);
+    }
     
     public enum FilterMode {
-        ALL("Show all"),
-        ACTIVE("Show active");
-        
+        ALL("Show all"), ACTIVE("Show active");
+
         private String displayName;
-        
+
         private FilterMode(String displayName) {
             this.displayName = displayName;
         }
-        
+
         @Override
         public String toString() {
             return displayName;
         }
-        
     }
 
-    private Serializable selectedRaceId;
-    private HashMap<Serializable, ManagedRace> managedRacesById;
+    private ProtestTimeRequestedListener hostActivity;
+
+    private FilterMode filterMode;
     private ManagedRaceListAdapter adapter;
-    private ArrayList<RaceListDataType> raceDataTypeList;
-    
-    private String magicFilterString = "";
+    private ManagedRace selectedRace;
+    private HashMap<Serializable, ManagedRace> managedRacesById;
+    private TreeMap<BoatClassSeriesDataFleet, List<ManagedRace>> racesByGroup;
+    private ArrayList<RaceListDataType> viewItems;
 
     public ManagedRaceListFragment() {
-        this.selectedRaceId = null;
+        this.filterMode = FilterMode.ACTIVE;
+        this.selectedRace = null;
         this.managedRacesById = new HashMap<Serializable, ManagedRace>();
-        this.raceDataTypeList = new ArrayList<RaceListDataType>();
+        this.racesByGroup = new TreeMap<BoatClassSeriesDataFleet, List<ManagedRace>>(
+                new BoatClassSeriesDataFleetComparator());
+        this.viewItems = new ArrayList<RaceListDataType>();
     }
-    
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.list_fragment, container, false);
@@ -76,12 +83,27 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // pass the localized string to the data elements...
-        RaceListDataTypeElement.initializeTemplates(this);
+        RaceListDataTypeRace.initializeTemplates(this);
 
-        adapter = new ManagedRaceListAdapter(getActivity(), raceDataTypeList, this);
-        getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        this.adapter = new ManagedRaceListAdapter(getActivity(), viewItems, this);
         setListAdapter(adapter);
+
+        getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
     }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity instanceof ProtestTimeRequestedListener) {
+            hostActivity = (ProtestTimeRequestedListener) activity;
+        } else {
+            throw new IllegalStateException(String.format(
+                    "Instance of %s must be attached to instances of %s. Tried to attach to %s.",
+                    ManagedRaceListFragment.class.getName(), ProtestTimeRequestedListener.class.getName(), activity
+                            .getClass().getName()));
+        }
+    };
 
     @Override
     public void onStart() {
@@ -96,6 +118,30 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         super.onStop();
     }
 
+    public FilterMode getFilterMode() {
+        return filterMode;
+    }
+
+    public void setFilterMode(FilterMode filterMode) {
+        this.filterMode = filterMode;
+        filterChanged();
+    }
+
+    public void setupOn(Collection<ManagedRace> races) {
+        unregisterOnAllRaces();
+        managedRacesById.clear();
+
+        for (ManagedRace managedRace : races) {
+            managedRacesById.put(managedRace.getId(), managedRace);
+        }
+        registerOnAllRaces();
+
+        // prepare views and do initial filtering
+        initializeViewElements();
+        filterChanged();
+        adapter.notifyDataSetChanged();
+    }
+
     private void registerOnAllRaces() {
         for (ManagedRace managedRace : managedRacesById.values()) {
             managedRace.getState().registerStateChangeListener(this);
@@ -108,21 +154,6 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         }
     }
 
-    public void setupOn(Collection<ManagedRace> listOfManagedRaces) {
-        unregisterOnAllRaces();
-        managedRacesById.clear();
-        for (ManagedRace managedRace : listOfManagedRaces) {
-            managedRacesById.put(managedRace.getId(), managedRace);
-        }
-        registerOnAllRaces();
-
-        // initialize view
-        initListElements(false);
-
-        adapter.getFilter().filter("");
-        notifyDataChanged();
-    }
-
     private BoatClass getBoatClassForRace(ManagedRace managedRace) {
         if (managedRace.getRaceGroup().getBoatClass() == null) {
             return new BoatClassImpl(managedRace.getRaceGroup().getName(), false);
@@ -130,54 +161,55 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         return managedRace.getRaceGroup().getBoatClass();
     }
 
-    private void initListElements(boolean clearFirst) {
+    private void initializeViewElements() {
+        // 1. Group races by <boat class, series, fleet>
+        initializeRacesByGroup();
 
-        HashMap<Serializable, RaceLogRaceStatus> savedStates = new HashMap<Serializable, RaceLogRaceStatus>();
-        if (clearFirst) {
-            // we have to save the previous states of the elements
-            for (RaceListDataType r : raceDataTypeList) {
-                if (r instanceof RaceListDataTypeElement) {
-                    RaceListDataTypeElement el = (RaceListDataTypeElement) r;
-                    savedStates.put(el.getRace().getId(), el.getPreviousRaceStatus());
-                }
-            }
-            raceDataTypeList.clear();
-        }
+        // 2. Create view elements from tree
+        for (BoatClassSeriesDataFleet key : racesByGroup.navigableKeySet()) {
+            // ... add the header view...
+            viewItems.add(new RaceListDataTypeHeader(key));
 
-        TreeMap<BoatClassSeriesDataFleet, List<ManagedRace>> raceListHashMap = new TreeMap<BoatClassSeriesDataFleet, List<ManagedRace>>(
-                new BoatClassSeriesBaseFleetComparator());
-        if (managedRacesById != null) {
-
-            // Group Managed Races by boat class and group
-            for (ManagedRace m : managedRacesById.values()) {
-                BoatClassSeriesDataFleet ser = new BoatClassSeriesDataFleet(getBoatClassForRace(m), m.getSeries(),
-                        m.getFleet());
-
-                if (raceListHashMap.containsKey(ser)) {
-                    raceListHashMap.get(ser).add(m);
-                } else {
-                    List<ManagedRace> lmr = new LinkedList<ManagedRace>();
-                    lmr.add(m);
-                    raceListHashMap.put(ser, lmr);
-                }
-
-            }
-
-            for (BoatClassSeriesDataFleet key : raceListHashMap.navigableKeySet()) {
-                List<ManagedRace> mrl = raceListHashMap.get(key);
-                Collections.sort(mrl, new NamedRaceComparator());
-
-                raceDataTypeList.add(new RaceListDataTypeTitle(key));
-
-                for (ManagedRace mr : mrl) {
-                    RaceListDataTypeElement dataElement = new RaceListDataTypeElement(mr);
-                    if (savedStates.containsKey(mr.getId())) {
-                        dataElement.setPreviousRaceStatus(savedStates.get(mr.getId()));
-                    }
-                    raceDataTypeList.add(dataElement);
-                }
+            List<ManagedRace> races = racesByGroup.get(key);
+            Collections.sort(races, new NaturalNamedComparator());
+            for (ManagedRace race : races) {
+                // ... and add the race view!
+                viewItems.add(new RaceListDataTypeRace(race));
             }
         }
+    }
+
+    private void initializeRacesByGroup() {
+        racesByGroup.clear();
+        for (ManagedRace race : managedRacesById.values()) {
+            BoatClassSeriesDataFleet container = new BoatClassSeriesDataFleet(getBoatClassForRace(race),
+                    race.getSeries(), race.getFleet());
+
+            if (!racesByGroup.containsKey(container)) {
+                racesByGroup.put(container, new LinkedList<ManagedRace>());
+            }
+            racesByGroup.get(container).add(race);
+        }
+    }
+
+    private void filterChanged() {
+        adapter.getFilter().filterByMode(getFilterMode());
+        adapter.notifyDataSetChanged();
+    }
+
+    private void dataChanged(RaceState changedState) {
+        List<RaceListDataType> adapterItems = adapter.getItems();
+        for (int i = 0; i < adapterItems.size(); ++i) {
+            if (adapterItems.get(i) instanceof RaceListDataTypeRace) {
+                RaceListDataTypeRace raceView = (RaceListDataTypeRace) adapterItems.get(i);
+                ManagedRace race = raceView.getRace();
+                if (changedState == null
+                        || (race.getState().equals(changedState) && !raceView.getRace().equals(this.selectedRace))) {
+                    raceView.setUpdateIndicator(true);
+                }
+            }
+        }
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -185,75 +217,37 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         super.onListItemClick(listView, view, position, id);
 
         RaceListDataType selectedItem = adapter.getItem(position);
-        if (selectedItem instanceof RaceListDataTypeElement) {
-            RaceListDataTypeElement selectedElement = (RaceListDataTypeElement) selectedItem;
+        if (selectedItem instanceof RaceListDataTypeRace) {
+            RaceListDataTypeRace selectedElement = (RaceListDataTypeRace) selectedItem;
             selectedElement.setUpdateIndicator(false);
             ((ImageView) view.findViewById(R.id.Welter_Cell_UpdateLabel)).setVisibility(View.GONE);
 
-            ManagedRace selectedRace = selectedElement.getRace();
-            this.selectedRaceId = selectedRace.getId();
-
+            selectedRace = selectedElement.getRace();
             ExLog.i(ExLog.RACE_SELECTED_ELEMENT, selectedRace.getId() + " " + selectedRace.getStatus(), getActivity());
-
             ((RacingActivity) getActivity()).onRaceItemClicked(selectedRace);
 
-        } else if (selectedItem instanceof RaceListDataTypeTitle) {
-            RaceListDataTypeTitle selectedTitle = (RaceListDataTypeTitle) selectedItem;
+        } else if (selectedItem instanceof RaceListDataTypeHeader) {
+            // This is for logging purposes only!
+            RaceListDataTypeHeader selectedTitle = (RaceListDataTypeHeader) selectedItem;
             ExLog.i(ExLog.RACE_SELECTED_TITLE, selectedTitle.toString(), getActivity());
-        }
-    }
-
-    private void notifyDataChanged() {
-        List<RaceListDataType> list = adapter.getItems();
-        for (int i = 0; i < list.size(); ++i) {
-            if (list.get(i) instanceof RaceListDataTypeElement) {
-                RaceListDataTypeElement listElement = (RaceListDataTypeElement) list.get(i);
-                ManagedRace mr = this.managedRacesById.get(listElement.getRace().getId());
-                if (mr != null) {
-                    if (!listElement.getPreviousRaceStatus().name().equals(mr.getStatus().name())) {
-                        listElement.setRace(mr);
-
-                        if (!listElement.getRace().getId().equals(this.selectedRaceId)) {
-                            listElement.setUpdateIndicator(true);
-                        }
-                        // / TODO: StaticVibrator.vibrate(1000);
-                    }
-
-                }
-            }
-        }
-        refilterList();
-    }
-
-    public void onJuryFlagClicked(BoatClassSeriesDataFleet clicked) {
-        magicFilterString = magicFilterString.equals("") ? "nofilter" : ""; 
-        refilterList();
-    }
-
-    private void refilterList() {
-        if (adapter != null) {
-            adapter.getFilter().filter(magicFilterString);
-            adapter.notifyDataSetChanged();
         }
     }
 
     @Override
     public void onRaceStateChanged(RaceState state) {
-        notifyDataChanged();
+        dataChanged(state);
+        filterChanged();
     }
-    
+
+    @Override
+    public void onJuryFlagClicked(BoatClassSeriesDataFleet group) {
+        if (racesByGroup.containsKey(group)) {
+            List<ManagedRace> races = racesByGroup.get(group);
+            hostActivity.onProtestTimeRequested(races);
+        }
+    }
+
     /*
-     * 
-     * public void notifyDataChanged() { List<RaceListDataType> list = adapter.getItems(); for (int i = 0; i <
-     * list.size(); ++i) { if (list.get(i) instanceof RaceListDataTypeElement) { RaceListDataTypeElement listElement =
-     * (RaceListDataTypeElement) list.get(i); ManagedRace mr = managedRacesMap.get(listElement.getRace().getId()); if
-     * (mr != null) { if (!listElement.getPreviousRaceStatus().name().equals(mr.getStatus().name())) {
-     * listElement.setRace(mr);
-     * 
-     * if (!listElement.getRace().getId().equals(selectedRaceId)) { listElement.setUpdateIndicator(true); }
-     * StaticVibrator.vibrate(1000); }
-     * 
-     * } } } if (adapter != null) { adapter.getFilter().filter(""); adapter.notifyDataSetChanged(); } }
      * 
      * 
      * public void onJuryFlagClicked(final Group group) {
