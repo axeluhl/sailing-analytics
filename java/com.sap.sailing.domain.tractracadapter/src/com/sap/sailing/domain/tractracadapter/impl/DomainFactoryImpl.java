@@ -474,7 +474,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler(courseDesignUpdateURI,
                             tracTracUsername, tracTracPassword,
                             tracTracEventUuid, raceDefinition.getId());
-                    trackedRace.setCourseDesignChangedListener(courseDesignHandler);
+                    trackedRace.addCourseDesignChangedListener(courseDesignHandler);
                     
                     synchronized (raceCache) {
                         raceCache.put(race, raceDefinition);

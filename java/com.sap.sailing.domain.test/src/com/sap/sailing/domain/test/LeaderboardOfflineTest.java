@@ -2,10 +2,13 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,27 +16,34 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
+import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCompetitors;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
     private Set<TrackedRace> testRaces;
@@ -90,7 +100,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
 
     @Test
     public void ensureMedalRaceParamIsIgnoredIfRaceColumnAlreadyExists() {
-        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ScoreCorrectionImpl(), new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { 5, 8 }), new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
         final String columnName = "abc";
@@ -99,6 +109,51 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         leaderboard.addRaceColumn(columnName, /* medalRace */ true);
         leaderboard.addRace(testRaces.iterator().next(), columnName, /* medalRace */ false, defaultFleet);
         assertTrue(leaderboard.getRaceColumnByName(columnName).isMedalRace());
+    }
+    
+    @Test
+    public void testRepeatedLeaderboardDTOCacheInvalidation() throws NoWindException, InterruptedException, ExecutionException {
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ScoreCorrectionImpl(), new ThresholdBasedResultDiscardingRuleImpl(
+                new int[] { 5, 8 }), new LowPoint(), null);
+        Fleet defaultFleet = leaderboard.getFleet(null);
+        final String columnName = "abc";
+        setupRaces(1, 0);
+        leaderboard.addRaceColumn(columnName, /* medalRace */ true);
+        leaderboard.addRace(testRaces.iterator().next(), columnName, /* medalRace */ false, defaultFleet);
+        final Set<String> emptySet = Collections.emptySet();
+        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        final TrackedRegattaRegistry trackedRegattaRegistry = new TrackedRegattaRegistry() {
+            @Override
+            public DynamicTrackedRegatta getOrCreateTrackedRegatta(Regatta regatta) {
+                return null;
+            }
+            @Override
+            public DynamicTrackedRegatta getTrackedRegatta(Regatta regatta) {
+                return null;
+            }
+            @Override
+            public void removeTrackedRegatta(Regatta regatta) {}
+
+            @Override
+            public Regatta getRememberedRegattaForRace(Serializable raceID) {
+                return null;
+            }
+            @Override
+            public boolean isRaceBeingTracked(RaceDefinition r) {
+                return true;
+            }
+        };
+        LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE);
+        assertNotNull(leaderboardDTO);
+        assertSame(leaderboardDTO, leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE)); // assert it's cached
+        leaderboard.getRaceColumnByName(columnName).releaseTrackedRace(defaultFleet); // this should clear the cache
+        LeaderboardDTO leaderboardDTO2 = leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE);
+        assertNotSame(leaderboardDTO, leaderboardDTO2);
+        assertSame(leaderboardDTO2, leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE)); // and cached again
+        leaderboard.getRaceColumnByName(columnName).setTrackedRace(defaultFleet, testRaces.iterator().next()); // clear cache again; requires listener(s) to still be attached
+        LeaderboardDTO leaderboardDTO3 = leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE);
+        assertNotSame(leaderboardDTO2, leaderboardDTO3);
+        assertSame(leaderboardDTO3, leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE)); // and cached again
     }
 
     @Test
@@ -114,7 +169,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             testRaces.add(r); // hash set should take care of more or less randomly permuting the races
         }
         ScoreCorrectionImpl scoreCorrection = new ScoreCorrectionImpl();
-        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ResultDiscardingRuleImpl(
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { 1 }), new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
         int i=0;
@@ -148,7 +203,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         testRace.addCompetitor(c2);
         testRace.addCompetitor(c3); // this makes maxPoints==4
         ScoreCorrectionImpl scoreCorrection = new ScoreCorrectionImpl();
-        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ResultDiscardingRuleImpl(
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { 2 }), new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
         leaderboard.addRace(testRace, "R1", /* medalRace */ false, defaultFleet);
@@ -177,7 +232,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         testRace.addCompetitor(c2);
         testRace.addCompetitor(c3); // this makes maxPoints==4
         ScoreCorrectionImpl scoreCorrection = new ScoreCorrectionImpl();
-        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ResultDiscardingRuleImpl(
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { 2 }), new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
         RaceColumn r1 = leaderboard.addRace(testRace, "R1", /* medalRace */ false, defaultFleet);
@@ -205,7 +260,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             testRaces.add(r); // hash set should take care of more or less randomly permuting the races
         }
         ScoreCorrectionImpl scoreCorrection = new ScoreCorrectionImpl();
-        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ResultDiscardingRuleImpl(
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { 1 }), new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
         int i=0;
@@ -232,7 +287,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
     protected void testLeaderboard(int numberOfStartedRaces, int numberOfNotStartedRaces, int firstDiscardingThreshold,
             int secondDiscardingThreshold, Integer carry, boolean addOneMedalRace, int numberOfUntrackedRaces) throws NoWindException {
         setupRaces(numberOfStartedRaces, numberOfNotStartedRaces);
-        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ScoreCorrectionImpl(), new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { firstDiscardingThreshold, secondDiscardingThreshold }), new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
         int i=0;

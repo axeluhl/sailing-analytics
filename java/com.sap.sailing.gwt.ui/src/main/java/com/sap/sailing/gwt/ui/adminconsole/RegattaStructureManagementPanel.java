@@ -118,22 +118,24 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     }
     
     private void createNewRegatta(final RegattaDTO newRegatta) {
-        LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesStructure =
-                new LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>>();
+        LinkedHashMap<String, Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>> seriesStructure =
+                new LinkedHashMap<String, Triple<List<Triple<String,Integer,Color>>,Pair<Boolean, Boolean>,int[]>>();
         for (SeriesDTO seriesDTO : newRegatta.series) {
             List<Triple<String, Integer, Color>> fleets = new ArrayList<Triple<String, Integer, Color>>();
             for(FleetDTO fleetDTO : seriesDTO.getFleets()) {
                 Triple<String, Integer, Color> fleetTriple = new Triple<String, Integer, Color>(fleetDTO.name, fleetDTO.getOrderNo(), fleetDTO.getColor());
                 fleets.add(fleetTriple);
             }
-            Pair<List<Triple<String, Integer, Color>>, Boolean> seriesPair = new Pair<List<Triple<String, Integer, Color>>, Boolean>(fleets, seriesDTO.isMedal());
+            Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]> seriesPair =
+                    new Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>(
+                    fleets, new Pair<Boolean, Boolean>(seriesDTO.isMedal(), seriesDTO.isStartsWithZeroScore()), seriesDTO.getDiscardThresholds());
             seriesStructure.put(seriesDTO.name, seriesPair);
         }
         sailingService.createRegatta(newRegatta.name, newRegatta.boatClass==null?null:newRegatta.boatClass.name, seriesStructure, true,
                 newRegatta.scoringScheme, newRegatta.defaultCourseAreaIdAsString, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to create new regatta" + newRegatta.name + ": " + t.getMessage());
+                errorReporter.reportError("Error trying to create new regatta " + newRegatta.name + ": " + t.getMessage());
             }
 
             @Override

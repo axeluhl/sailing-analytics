@@ -9,16 +9,5 @@ public interface RaceStateChangedListener {
     
     void onRaceAborted();
     
-    void onIndividualRecallDisplayed(TimePoint individualRecallRemovalFireTimePoint);
-
-    void onIndividualRecallRemoval();
-
-    void onAutomaticRaceEnd(TimePoint automaticRaceEnd);
-    
-    void onPathfinderSelected();
-
-    void onGateLineOpeningTimeChanged();
-    
-    void onGateLineOpeningTimeTrigger(TimePoint gateCloseTimePoint);
-
+    void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId);
 }

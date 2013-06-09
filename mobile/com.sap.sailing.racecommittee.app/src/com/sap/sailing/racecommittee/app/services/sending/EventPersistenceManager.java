@@ -165,7 +165,7 @@ public class EventPersistenceManager {
             fileContent = FileHandlerUtils.convertStreamToString(inputStream);
             inputStream.close();
         } catch (IOException e) {
-            ExLog.e(TAG, "In Method getFileContent(): " + e.getMessage() + " fileContent is empty");
+            ExLog.w(TAG, "In Method getFileContent(): " + e.getMessage() + " fileContent is empty");
         }
         return fileContent;
     }

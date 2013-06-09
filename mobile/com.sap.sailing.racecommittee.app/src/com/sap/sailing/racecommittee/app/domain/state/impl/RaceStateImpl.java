@@ -15,24 +15,19 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
-import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishPositioningListFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartProcedureTypeAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.racecommittee.app.domain.racelog.RaceLogChangedListener;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.StartProcedureFactory;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
@@ -42,7 +37,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private static final String TAG = RaceStateImpl.class.getSimpleName();
     
     protected StartProcedureType defaultStartProcedureType;
-    protected PassAwareRaceLog raceLog;
+    protected RaceLog raceLog;
     protected StartProcedure startProcedure;
     
     protected RaceLogRaceStatus status;
@@ -56,12 +51,9 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private FinishingTimeFinder finishingTimeFinder;
     private LastPublishedCourseDesignFinder lastCourseDesignFinder;
     private FinishPositioningListFinder finishPositioningListFinder;
-    private IndividualRecallFinder individualRecallFinder;
-    private PathfinderFinder pathfinderFinder;
-    private GateLineOpeningTimeFinder gateLineOpeningTimeFinder;
     private StartProcedureTypeAnalyzer startProcedureTypeAnalyzer;
 
-    public RaceStateImpl(StartProcedureType defaultStartProcedureType, PassAwareRaceLog raceLog) {
+    public RaceStateImpl(StartProcedureType defaultStartProcedureType, RaceLog raceLog) {
         this.defaultStartProcedureType = defaultStartProcedureType;
         this.raceLog = raceLog;
         
@@ -77,9 +69,6 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.statusAnalyzer = new RaceStatusAnalyzer(raceLog);
         this.lastCourseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
         this.finishPositioningListFinder = new FinishPositioningListFinder(raceLog);
-        this.individualRecallFinder = new IndividualRecallFinder(raceLog);
-        this.pathfinderFinder = new PathfinderFinder(raceLog);
-        this.gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
         this.startProcedureTypeAnalyzer = new StartProcedureTypeAnalyzer(raceLog);
         
         registerStartProcedure();
@@ -109,11 +98,11 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     private void registerStartProcedure() {
         if (startProcedure != null) {
-            startProcedure.setChangeListener(null);
+            startProcedure.setStartProcedureListener(null);
         }
         StartProcedureType type = getStartProcedureType();
         startProcedure = StartProcedureFactory.create(type, raceLog);
-        startProcedure.setChangeListener(this);
+        startProcedure.setStartProcedureListener(this);
     }
 
     private void setStatus(RaceLogRaceStatus newStatus) {
@@ -221,9 +210,6 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public void onRaceStarted(TimePoint eventTime) {
         RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.RUNNING);
         this.raceLog.add(statusEvent);
-        if(getGateLineOpeningTime()!=null){
-            notifyListenersAboutGateLineOpeningTimeTrigger();
-        }
     }
 
     @Override
@@ -235,15 +221,8 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     @Override
     public void onRaceFinishing(TimePoint eventTime, TimePoint automaticRaceEnd) {
         onRaceFinishing(eventTime);
-        notifyListenersAboutAutomaticRaceEnd(automaticRaceEnd);
     }
 
-    private void notifyListenersAboutAutomaticRaceEnd(TimePoint automaticRaceEnd) {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
-            listener.onAutomaticRaceEnd(automaticRaceEnd);
-        }
-    
-    }
 
     @Override
     public void onRaceFinished(TimePoint eventTime) {
@@ -287,91 +266,9 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     @Override
-    public void onIndividualRecall(TimePoint individualRecallRemovalFireTimePoint) {
-        notifyListenersAboutIndividualRecall(individualRecallRemovalFireTimePoint);
-    }
-
-    private void notifyListenersAboutIndividualRecall(TimePoint individualRecallRemovalFireTimePoint) {
+    public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
         for (RaceStateChangedListener listener : stateChangedListeners) {
-            listener.onIndividualRecallDisplayed(individualRecallRemovalFireTimePoint);
+            listener.onStartProcedureSpecificEvent(eventTime, eventId);
         }
     }
-
-    @Override
-    public TimePoint getIndividualRecallDisplayedTime() {
-        return individualRecallFinder.getIndividualRecallDisplayedTime();
-    }
-
-    @Override
-    public void onIndividualRecallRemoval() {
-        notifyListenersAboutIndividualRecallRemoval();
-    }
-
-    private void notifyListenersAboutIndividualRecallRemoval() {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
-            listener.onIndividualRecallRemoval();
-        }
-    }
-
-    @Override
-    public String getPathfinder() {
-        return pathfinderFinder.getPathfinderId();
-    }
-
-    @Override
-    public void setPathfinder(String sailingId) {
-
-        TimePoint eventTime = MillisecondsTimePoint.now();
-
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createPathfinderEvent(eventTime, raceLog.getCurrentPassId(),
-                sailingId);
-        
-        this.raceLog.add(event);
-
-        notifyListenersAboutPathFinderChange();
-    }
-
-    private void notifyListenersAboutPathFinderChange() {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
-            listener.onPathfinderSelected();
-        }
-    }
-
-    @Override
-    public Long getGateLineOpeningTime() {
-        return gateLineOpeningTimeFinder.getGateLineOpeningTime();
-    }
-
-    @Override
-    public void setGateLineOpeningTime(Long gateLineOpeningTimeInMillis) {
-        TimePoint eventTime = MillisecondsTimePoint.now();
-
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createGateLineOpeningTimeEvent(eventTime, raceLog.getCurrentPassId(),
-                gateLineOpeningTimeInMillis);
-        
-        this.raceLog.add(event);
-        notifyListenersAboutGateLineOpeningTimeChanged();
-        if(eventTime.after(getStartTime()) && getStatus().equals(RaceLogRaceStatus.RUNNING)){
-            notifyListenersAboutGateLineOpeningTimeTrigger();
-        }
-    }
-    
-    private void notifyListenersAboutGateLineOpeningTimeChanged() {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
-            listener.onGateLineOpeningTimeChanged();
-        }
-    }
-    
-    private void notifyListenersAboutGateLineOpeningTimeTrigger() {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
-            Long gateLineOpeningTime = GateStartProcedure.startPhaseGolfDownStandardInterval;
-            //this should not happen
-            if(this.getGateLineOpeningTime()!=null){
-                gateLineOpeningTime = this.getGateLineOpeningTime();
-            }
-                
-            listener.onGateLineOpeningTimeTrigger(this.getStartTime().plus(GateStartProcedure.startPhaseGolfDownStandardIntervalConstantSummand+gateLineOpeningTime));
-        }
-    }
-
 }

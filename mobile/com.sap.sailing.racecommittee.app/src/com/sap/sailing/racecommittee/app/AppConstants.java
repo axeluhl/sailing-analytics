@@ -17,18 +17,19 @@ public class AppConstants {
     public final static String RACE_ID_KEY = "raceUuid";
     public final static String SERVICE_UNIQUE_ID = "serviceUID";
     public final static String RACING_EVENT_TIME = "racingEventTime";
+    public final static String STARTPROCEDURE_SPECIFIC_EVENT_ID = "startProcedureSpecificEventId";
     public final static String EXTRAS_SERIALIZED_EVENT = "json";
     public final static String EXTRAS_URL = "url";
+    public final static String OPTIONAL_EXTRAS  = "optionalExtra";
     public final static String FLAG_KEY = "raceFlag";
 
-    public final static String LogFolder = "/racecommittee";
+    public final static String ApplicationFolder = "/racecommittee";
 
     // Login activity
     public final static String EventIdTag = "EventId";
 
     private final static String PREFERENCE_SERVICE_URL = "webserviceUrlPref";
     private final static String PREFERENCE_SENDING_ACTIVE = "sendingActivePref";
-    private final static String PREFERENCE_RACE_FINISHING_TIME_FRAME = "edittextRaceTimeFrameAfterFinish";
 
     public static final String RESET_TIME_FRAGMENT_IS_RESET = SetStartTimeRaceFragment.class.getName() + ".isReset";
 
@@ -36,6 +37,8 @@ public class AppConstants {
 
     public static String getServerBaseURL(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        if(sp.getString(PREFERENCE_SERVICE_URL, "").equals(""))
+            return "http://localhost:8889";
         return sp.getString(PREFERENCE_SERVICE_URL, "http://192.168.56.1:8888");
     }
 
@@ -47,13 +50,6 @@ public class AppConstants {
     public static void setSendingActive(Context context, boolean activate) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().putBoolean(PREFERENCE_SENDING_ACTIVE, activate).apply();
-    }
-
-    public static long getRaceFinishingTimeFrame(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String result = sp.getString(PREFERENCE_RACE_FINISHING_TIME_FRAME, "30");
-        long resultLong = Long.parseLong(result);
-        return (resultLong <= 0 ? 0 : resultLong * 60 * 1000);
     }
 
 }
