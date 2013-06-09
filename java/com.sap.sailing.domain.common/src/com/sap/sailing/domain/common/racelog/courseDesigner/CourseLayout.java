@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.racelog;
+package com.sap.sailing.domain.common.racelog.courseDesigner;
 
 public enum CourseLayout {
     windWardLeewardWindward("Windward/Leeward with Windward finish", "W"),
