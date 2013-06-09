@@ -125,6 +125,8 @@ public interface RaceState extends StartProcedureListener {
      */
     void setFinishPositioningConfirmed();
 
+    void setProtestTime(TimePoint protestTime);
+
     /**
      * Updates the race's status.
      * 

@@ -276,6 +276,11 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     @Override
+    public void setProtestTime(TimePoint protestTime) {
+        // Add protest time event to race log...
+    }
+
+    @Override
     public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
         for (RaceStateEventListener listener : stateEventListeners) {
             listener.onStartProcedureSpecificEvent(eventTime, eventId);
