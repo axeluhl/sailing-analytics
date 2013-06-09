@@ -29,7 +29,7 @@ public class RaceLogTest {
     public void testAddingTwoEventsOfDifferentPassesButSameTimestamps() {
         TimePoint t1 = MillisecondsTimePoint.now();
         int passId = 0;
-        RaceLog raceLog = new RaceLogImpl("RaceLogTest");
+        RaceLog raceLog = new RaceLogImpl("RaceLogTest", "test-identifier");
         
         RaceLogFlagEvent rcEvent1 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, UUID.randomUUID(), new ArrayList<Competitor>(), passId, Flags.CLASS, Flags.NONE, false);
         RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, UUID.randomUUID(), new ArrayList<Competitor>(), ++passId, Flags.CLASS, Flags.NONE, false);
@@ -48,7 +48,7 @@ public class RaceLogTest {
     
     @Test
     public void testAddOfEvent() {
-        RaceLog rcEventTrack = new RaceLogImpl("RaceLogTest");
+        RaceLog rcEventTrack = new RaceLogImpl("RaceLogTest", "test-identifier");
         TimePoint t1 = MillisecondsTimePoint.now();
         int passId = 0;
         boolean isDisplayed = true;
@@ -75,7 +75,7 @@ public class RaceLogTest {
 
     @Test
     public void testTrackAPIForEventLogUsage() {
-        RaceLog rcEventTrack = new RaceLogImpl("RaceLog");
+        RaceLog rcEventTrack = new RaceLogImpl("RaceLog", "test-identifier");
         List<RaceLogEvent> expectedOrderingList = new ArrayList<RaceLogEvent>();
         TimePoint t1 = MillisecondsTimePoint.now();
         TimePoint t2 = new MillisecondsTimePoint(t1.asMillis() - 1000);

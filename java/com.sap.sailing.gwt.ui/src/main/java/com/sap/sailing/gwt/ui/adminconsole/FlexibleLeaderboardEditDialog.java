@@ -14,10 +14,10 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
     
     public FlexibleLeaderboardEditDialog(Collection<StrippedLeaderboardDTO> otherExistingLeaderboards,
-            LeaderboardDescriptor leaderboard, StringMessages stringConstants, List<EventDTO> existingEvents, ErrorReporter errorReporter,
+            LeaderboardDescriptor leaderboard, StringMessages stringMessages, List<EventDTO> existingEvents, ErrorReporter errorReporter,
             DialogCallback<LeaderboardDescriptor> callback) {
-        super(stringConstants.editFlexibleLeaderboard(), leaderboard, stringConstants, existingEvents, errorReporter, new FlexibleLeaderboardDialog.LeaderboardParameterValidator(
-                stringConstants, otherExistingLeaderboards), callback);
+        super(stringMessages.editFlexibleLeaderboard(), leaderboard, stringMessages, existingEvents, errorReporter, new FlexibleLeaderboardDialog.LeaderboardParameterValidator(
+                stringMessages, otherExistingLeaderboards), callback);
         
         nameTextBox = createTextBox(leaderboard.getName());
         displayNameTextBox = createTextBox(leaderboard.getDisplayName()); 
@@ -27,7 +27,7 @@ public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
 
         int j = 0;
         for (ScoringSchemeType scoringSchemeType: ScoringSchemeType.values()) {
-            scoringSchemeListBox.addItem(ScoringSchemeTypeFormatter.format(scoringSchemeType, stringConstants));
+            scoringSchemeListBox.addItem(ScoringSchemeTypeFormatter.format(scoringSchemeType, stringMessages));
             if(leaderboard.getScoringScheme() == scoringSchemeType) {
                 scoringSchemeListBox.setSelectedIndex(j);
             }
@@ -48,6 +48,6 @@ public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
                 }
             }
         }
-        discardThresholdBoxes = initPrefilledDiscardThresholdBoxes(leaderboard.getDiscardThresholds(), this);
+        discardThresholdBoxes = new DiscardThresholdBoxes(this, leaderboard.getDiscardThresholds(), stringMessages);
     }
 }

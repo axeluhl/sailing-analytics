@@ -11,14 +11,18 @@ public class SeriesDTO extends NamedDTO {
     private List<FleetDTO> fleets;
     private List<RaceColumnDTO> raceColumns;
     private boolean isMedal;
+    private int[] discardThresholds;
+    private Boolean startsWithZeroScore;
     
     public SeriesDTO() {}
     
-    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal) {
+    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, int[] discardThresholds, boolean startsWithZeroScore) {
         super(name);
         this.fleets = fleets;
         this.raceColumns = raceColumns;
         this.isMedal = isMedal;
+        this.startsWithZeroScore = startsWithZeroScore;
+        this.discardThresholds = discardThresholds;
     }
     
     public boolean isMedal() {
@@ -43,5 +47,30 @@ public class SeriesDTO extends NamedDTO {
 
     public void setRaceColumns(List<RaceColumnDTO> raceColumns) {
         this.raceColumns = raceColumns;
+    }
+    
+    /**
+     * @return whether this series defines its local result discarding rule; if so, any leaderboard based on the
+     *         enclosing regatta has to respect this and has to use a result discarding rule implementation that keeps
+     *         discards local to each series rather than spreading them across the entire leaderboard.
+     */
+    public boolean definesSeriesDiscardThresholds() {
+        return getDiscardThresholds() != null;
+    }
+
+    public int[] getDiscardThresholds() {
+        return discardThresholds;
+    }
+    
+    public void setDiscardThresholds(int[] discardThresholds) {
+        this.discardThresholds = discardThresholds;
+    }
+
+    public Boolean isStartsWithZeroScore() {
+        return startsWithZeroScore;
+    }
+
+    public void setStartsWithZeroScore(Boolean startsWithZeroScore) {
+        this.startsWithZeroScore = startsWithZeroScore;
     }
 }
