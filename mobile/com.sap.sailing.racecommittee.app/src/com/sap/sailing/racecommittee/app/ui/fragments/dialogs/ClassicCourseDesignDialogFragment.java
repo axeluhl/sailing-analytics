@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -16,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -25,8 +27,10 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.sap.sailing.domain.common.racelog.BoatClassType;
-import com.sap.sailing.domain.common.racelog.CourseLayout;
+import com.sap.sailing.domain.common.racelog.courseDesigner.BoatClassType;
+import com.sap.sailing.domain.common.racelog.courseDesigner.CourseLayout;
+import com.sap.sailing.domain.common.racelog.courseDesigner.NumberOfRounds;
+import com.sap.sailing.domain.common.racelog.courseDesigner.TargetTime;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
@@ -45,23 +49,24 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private ImageButton windButton;
     private Spinner spinnerBoatClass;
     private Spinner spinnerCourseLayout;
-    @SuppressWarnings("unused")
     private Spinner spinnerNumberOfRounds;
-    @SuppressWarnings("unused")
     private Spinner spinnerTargetTime;
-    
+
     private ArrayAdapter<CourseLayout> courseLayoutAdapter;
-    
-    //TODO determine this by given race
+
+    // TODO determine this by given race
     private BoatClassType selectedBoatClass = BoatClassType.boatClass470er;
-    private CourseLayout selectedCourseLayout =(CourseLayout) BoatClassType.boatClass470er.getPossibleCourseLayoutsWithTargetTime().keySet().toArray().clone()[0];
+    private CourseLayout selectedCourseLayout = (CourseLayout) BoatClassType.boatClass470er
+            .getPossibleCourseLayoutsWithTargetTime().keySet().toArray().clone()[0];
+    private NumberOfRounds selectedNumberOfRounds = NumberOfRounds.TWO;
+    private TargetTime selectedTargetTime = TargetTime.thirty;
 
     public ClassicCourseDesignDialogFragment() {
         super();
         // handle map bug - https://code.google.com/p/gmaps-api-issues/issues/detail?id=4865
         this.setStyle(DialogFragment.STYLE_NORMAL, R.style.Theme_DimDisabledDialog);
     }
-    
+
     @Override
     public void onAttach(android.app.Activity activity) {
         super.onAttach(activity);
@@ -117,22 +122,42 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             @Override
             public void onClick(View arg0) {
                 Intent intent = new Intent(getActivity(), WindActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, 1);
                 getActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             }
 
         });
-        
+
         spinnerBoatClass = (Spinner) getView().findViewById(R.id.classic_course_designer_boat_class);
         setupBoatClassSpinner();
         spinnerCourseLayout = (Spinner) getView().findViewById(R.id.classic_course_designer_course_layout);
         setupCourseLayoutSpinner();
         spinnerNumberOfRounds = (Spinner) getView().findViewById(R.id.classic_course_designer_number_of_rounds);
         setupNumberOfRoundsSpinner();
-        spinnerNumberOfRounds = (Spinner) getView().findViewById(R.id.classic_course_designer_target_time);
+        spinnerTargetTime = (Spinner) getView().findViewById(R.id.classic_course_designer_target_time);
         setupTargetTimeSpinner();
     }
-    
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // TODO make use of activity result instead of just handling the callback
+        if (requestCode == 1) {
+            if (resultCode == Activity.RESULT_OK) {
+                recomputeCourseDesign();
+            }
+        }
+    }// onActivityResult
+
+    private void recomputeCourseDesign() {
+        DataStore ds = InMemoryDataStore.INSTANCE;
+        Toast.makeText(
+                getActivity(),
+                "" + ds.getLastLatitude() + ds.getLastLongitude() + ds.getLastWindDirection() + ds.getLastWindSpeed()
+                        + selectedBoatClass + selectedCourseLayout + selectedNumberOfRounds + selectedTargetTime,
+                Toast.LENGTH_LONG).show();
+
+    }
+
     private void setupBoatClassSpinner() {
         ArrayAdapter<BoatClassType> adapter = new ArrayAdapter<BoatClassType>(getActivity(),
                 android.R.layout.simple_spinner_dropdown_item, BoatClassType.values());
@@ -144,6 +169,9 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
                 courseLayoutAdapter.clear();
                 courseLayoutAdapter.addAll(selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet());
                 courseLayoutAdapter.notifyDataSetChanged();
+                if(selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet().contains(selectedCourseLayout)){
+                    recomputeCourseDesign();
+                }
             }
 
             @Override
@@ -153,7 +181,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
 
         spinnerBoatClass.setSelection(adapter.getPosition(selectedBoatClass));
     }
-    
+
     private void setupCourseLayoutSpinner() {
         courseLayoutAdapter = new ArrayAdapter<CourseLayout>(getActivity(),
                 android.R.layout.simple_spinner_dropdown_item);
@@ -163,6 +191,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 selectedCourseLayout = (CourseLayout) adapterView.getItemAtPosition(position);
+                recomputeCourseDesign();
             }
 
             @Override
@@ -172,13 +201,43 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
 
         spinnerCourseLayout.setSelection(courseLayoutAdapter.getPosition(selectedCourseLayout));
     }
-    
+
     private void setupNumberOfRoundsSpinner() {
-        
+        ArrayAdapter<NumberOfRounds> adapter = new ArrayAdapter<NumberOfRounds>(getActivity(),
+                android.R.layout.simple_spinner_dropdown_item, NumberOfRounds.values());
+        spinnerNumberOfRounds.setAdapter(adapter);
+        spinnerNumberOfRounds.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                selectedNumberOfRounds = (NumberOfRounds) adapterView.getItemAtPosition(position);
+                recomputeCourseDesign();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
+        spinnerNumberOfRounds.setSelection(adapter.getPosition(selectedNumberOfRounds));
     }
-    
+
     private void setupTargetTimeSpinner() {
-       
+        ArrayAdapter<TargetTime> adapter = new ArrayAdapter<TargetTime>(getActivity(),
+                android.R.layout.simple_spinner_dropdown_item, TargetTime.values());
+        spinnerTargetTime.setAdapter(adapter);
+        spinnerTargetTime.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                selectedTargetTime = (TargetTime) adapterView.getItemAtPosition(position);
+                recomputeCourseDesign();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
+        spinnerNumberOfRounds.setSelection(adapter.getPosition(selectedTargetTime));
     }
 
     @Override
@@ -211,10 +270,11 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private void setUpMap() {
         courseAreaMap.clear();
         DataStore ds = InMemoryDataStore.INSTANCE;
-        if (ds.getLastLatitude() != null && ds.getLastLongitude() != null && ds.getLastWindDirection() != null && ds.getLastWindSpeed() != null) {
+        if (ds.getLastLatitude() != null && ds.getLastLongitude() != null && ds.getLastWindDirection() != null
+                && ds.getLastWindSpeed() != null) {
             courseAreaMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(ds.getLastLatitude(), ds.getLastLongitude()), 17.0f));
-        
+
             Bitmap bmpOriginal = BitmapFactory.decodeResource(this.getResources(), R.drawable.boat);
             Bitmap bmResult = Bitmap.createBitmap(bmpOriginal.getHeight(), bmpOriginal.getHeight(),
                     Bitmap.Config.ARGB_8888);
@@ -224,8 +284,10 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
 
             courseAreaMap.addMarker(new MarkerOptions()
                     .position(new LatLng(ds.getLastLatitude(), ds.getLastLongitude()))
-                    .icon(BitmapDescriptorFactory.fromBitmap(bmResult)).draggable(false)
-                    .title(ds.getLastLatitude()+"/"+ds.getLastLongitude()+", "+ds.getLastWindSpeed()+"kn, "+ds.getLastWindDirection()+"°"));
+                    .icon(BitmapDescriptorFactory.fromBitmap(bmResult))
+                    .draggable(false)
+                    .title(ds.getLastLatitude() + "/" + ds.getLastLongitude() + ", " + ds.getLastWindSpeed() + "kn, "
+                            + ds.getLastWindDirection() + "°"));
         }
 
     }

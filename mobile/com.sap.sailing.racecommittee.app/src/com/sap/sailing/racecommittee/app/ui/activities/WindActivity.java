@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -81,11 +82,15 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
                 InMemoryDataStore.INSTANCE.setLastWindDirection(Integer.valueOf(windDirection.getText().toString()));
                 InMemoryDataStore.INSTANCE.setLastLatitude(Double.valueOf(latitude.getText().toString()));
                 InMemoryDataStore.INSTANCE.setLastLongitude(Double.valueOf(longitude.getText().toString()));
+                //TODO uses domain Wind and send result to calling activity instead of using InMemoryDataStore
+                //Wind windMeasurement = new WindImpl();
+                Intent returnIntent = new Intent();
+                setResult(RESULT_OK, returnIntent);        
+                finish();
                 }catch (NumberFormatException nfe){
                     Toast.makeText(WindActivity.this, "The entered information is not valid", Toast.LENGTH_LONG).show();
                     ExLog.i(this.getClass().getCanonicalName(), nfe.getMessage());
                 }
-                finish();
             }
         });
 
