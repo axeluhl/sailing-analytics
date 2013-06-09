@@ -195,6 +195,8 @@ public class ProtestTimeDialogFragment extends DialogFragment {
         Calendar time = Calendar.getInstance();
         time.set(Calendar.HOUR_OF_DAY, timePicker.getCurrentHour());
         time.set(Calendar.MINUTE, timePicker.getCurrentMinute());
+        time.set(Calendar.SECOND, 0);
+        time.set(Calendar.MILLISECOND, 0);
         return new MillisecondsTimePoint(time.getTime());
     }
 
