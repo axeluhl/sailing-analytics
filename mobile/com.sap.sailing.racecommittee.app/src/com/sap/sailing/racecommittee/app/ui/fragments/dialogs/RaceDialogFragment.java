@@ -49,6 +49,11 @@ public abstract class RaceDialogFragment extends DialogFragment implements TickL
     public ManagedRace getRace() {
         return managedRace;
     }
+    
+    @Override
+    public void notifyTick() {
+        // see subclasses
+    }
 
     /**
      * Creates a bundle that contains the race id as parameter for the next fragment
