@@ -87,6 +87,7 @@ public class FinishedRaceFragment extends RaceFragment {
             }
         });
     }
+    
 
     private void createFinisherImageFile() {
         File imageDirectory = new File(Environment.getExternalStorageDirectory() + AppConstants.ApplicationFolder);
@@ -176,7 +177,7 @@ public class FinishedRaceFragment extends RaceFragment {
     @Override
     public void onStart() {
         super.onStart();
-        ExLog.w(FinishedRaceFragment.class.getName(),
+        ExLog.i(FinishedRaceFragment.class.getName(),
                 String.format("Fragment %s is now shown", FinishedRaceFragment.class.getName()));
     }
 

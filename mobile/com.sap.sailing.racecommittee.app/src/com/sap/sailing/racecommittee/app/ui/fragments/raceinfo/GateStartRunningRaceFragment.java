@@ -142,7 +142,7 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
     @Override
     public void onStart() {
         super.onStart();
-        ExLog.w(GateStartRunningRaceFragment.class.getName(), String.format("Fragment %s is now shown", GateStartRunningRaceFragment.class.getName()));
+        ExLog.i(GateStartRunningRaceFragment.class.getName(), String.format("Fragment %s is now shown", GateStartRunningRaceFragment.class.getName()));
     }
     
     public void notifyTick() {

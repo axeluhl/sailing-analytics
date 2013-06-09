@@ -146,7 +146,7 @@ public class RRS26FinishingRaceFragment extends RaceFragment {
     @Override
     public void onStart() {
         super.onStart();
-        ExLog.w(RRS26FinishingRaceFragment.class.getName(), String.format("Fragment %s is now shown", RRS26FinishingRaceFragment.class.getName()));
+        ExLog.i(RRS26FinishingRaceFragment.class.getName(), String.format("Fragment %s is now shown", RRS26FinishingRaceFragment.class.getName()));
     }
 
     public void notifyTick() {

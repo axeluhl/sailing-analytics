@@ -127,7 +127,7 @@ public class RRS26RunningRaceFragment extends RaceFragment implements RRS26Runni
     public void onStart() {
         super.onStart();
         getRace().getState().getStartProcedure().setRunningRaceEventListener(this);
-        ExLog.w(RRS26RunningRaceFragment.class.getName(), String.format("Fragment %s is now shown", RRS26RunningRaceFragment.class.getName()));
+        ExLog.i(RRS26RunningRaceFragment.class.getName(), String.format("Fragment %s is now shown", RRS26RunningRaceFragment.class.getName()));
     }
     
     public void notifyTick() {
