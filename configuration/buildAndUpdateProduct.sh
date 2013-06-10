@@ -48,6 +48,10 @@ cd $PROJECT_HOME
 active_branch=$(git symbolic-ref -q HEAD)
 active_branch=`basename $active_branch`
 
+HEAD_SHA=$(git show-ref --head -s | head -1)
+HEAD_DATE=$(date "+%Y%m%d%H%M")
+VERSION_INFO="$HEAD_SHA-$active_branch-$HEAD_DATE"
+
 MAVEN_SETTINGS=$PROJECT_HOME/configuration/maven-settings.xml
 MAVEN_SETTINGS_PROXY=$PROJECT_HOME/configuration/maven-settings-proxy.xml
 
@@ -91,6 +95,7 @@ if [ $# -eq 0 ]; then
     echo "Active branch is $active_branch"
     echo "Project home is $PROJECT_HOME"
     echo "Server home is $SERVERS_HOME"
+    echo "Version info: $VERSION_INFO"
     echo "P2 home is $p2PluginRepository"
     exit 2
 fi
@@ -337,6 +342,12 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     rm -rf $ACDIR/org.eclipse.*
     rm -rf $ACDIR/configuration/org.eclipse.*
 
+    if [ ! -f "$ACDIR/env.sh" ]; then
+        cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
+        cp -v $PROJECT_HOME/java/target/start $ACDIR/
+        cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+    fi
+
     if [[ $HAS_OVERWRITTEN_TARGET -eq 0 ]] && [ ! -f $ACDIR/no-overwrite ]; then
         cp -v $p2PluginRepository/configuration/config.ini configuration/
 
@@ -346,6 +357,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
         cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
 
+        cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
         cp -v $PROJECT_HOME/java/target/start $ACDIR/
         cp -v $PROJECT_HOME/java/target/stop $ACDIR/
         cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
@@ -361,6 +373,24 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 
     # Make sure this script is up2date at least for the next run
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
+
+    echo $VERSION_INFO > $ACDIR/configuration/jetty/version.txt
+
+    # make sure to save the information from env.sh
+    . $ACDIR/env.sh
+    sed -i "s/mongo.port=.*$/mongo.port=$MONGODB_PORT/g" $ACDIR/configuration/config.ini
+    sed -i "s/expedition.udp.port=.*$/expedition.udp.port=$EXPEDITION_PORT/g" $ACDIR/configuration/config.ini
+    sed -i "s/replication.exchangeName=.*$/replication.exchangeName=$REPLICATION_CHANNEL/g" $ACDIR/configuration/config.ini
+
+    echo "I have updated the configuration with the following data:"
+    echo "SERVER_NAME: $SERVER_NAME"
+    echo "SERVER_PORT: $SERVER_PORT"
+    echo "MEMORY: $MEMORY"
+    echo "TELNET_PORT: $TELNET_PORT"
+    echo "MONGODB_PORT: $MONGODB_PORT"
+    echo "EXPEDITION_PORT: $EXPEDITION_PORT"
+    echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
+    echo ""
 
     echo "Installation complete. You may now start the server using ./start"
 fi

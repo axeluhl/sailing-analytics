@@ -16,4 +16,6 @@
 
 [[User Management|wiki/planning/usermanagement]]
 
+[[Usability of the Administration Interface|wiki/planning/usability-of-the-administration-interface]]
+
 [[Scaling by Server Replication|wiki/planning/scalebyreplication]]
