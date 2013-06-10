@@ -11,6 +11,10 @@ public class PreviousCompetitorDTOImpl implements CompetitorDTO {
         this.indexInPreviousCompetitorList = indexInPreviousCompetitorList;
     }
     
+    protected int getIndexInPreviousCompetitorList() {
+        return indexInPreviousCompetitorList;
+    }
+    
     @Override
     public String getTwoLetterIsoCountryCode() {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+

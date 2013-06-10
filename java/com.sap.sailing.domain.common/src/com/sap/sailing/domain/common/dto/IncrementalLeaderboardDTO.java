@@ -345,7 +345,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                     }
                 }
             }
-            Set<CompetitorDTO> suppressedCompetitors = new HashSet<CompetitorDTO>();
+            List<CompetitorDTO> suppressedCompetitors = new ArrayList<CompetitorDTO>();
             if (suppressedCompetitorsUnchanged) {
                 Util.addAll(previousVersion.getSuppressedCompetitors(), suppressedCompetitors);
             } else {
@@ -497,9 +497,21 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             suppressedCompetitorsUnchanged = true;
             setSuppressedCompetitors(null);
         } else {
-            Set<CompetitorDTO> compactSuppressedCompetitors = new HashSet<CompetitorDTO>();
+            List<CompetitorDTO> compactSuppressedCompetitors = new ArrayList<CompetitorDTO>();
             for (CompetitorDTO suppressedCompetitor : getSuppressedCompetitors()) {
-                compactSuppressedCompetitors.add(compactCompetitorMap.get(suppressedCompetitor));
+                final int indexOfSuppressedCompetitorInPreviousSuppressed = Util.indexOf(previousVersion.getSuppressedCompetitors(), suppressedCompetitor);
+                if (indexOfSuppressedCompetitorInPreviousSuppressed == -1) {
+                    // not found in previous version's suppressed competitors; maybe it just transitioned from non-suppressed to suppressed
+                    final CompetitorDTO compactedFromPreviousCompetitors = compactCompetitorMap.get(suppressedCompetitor);
+                    if (compactedFromPreviousCompetitors != null) {
+                        compactSuppressedCompetitors.add(compactedFromPreviousCompetitors);
+                    } else {
+                        compactSuppressedCompetitors.add(suppressedCompetitor);
+                    }
+                } else {
+                    compactSuppressedCompetitors.add(new PreviousSuppressedCompetitorDTOImpl(
+                            indexOfSuppressedCompetitorInPreviousSuppressed));
+                }
             }
             setSuppressedCompetitors(compactSuppressedCompetitors);
         }
@@ -577,7 +589,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                                 }
                             }
                         } else {
-                            if (previousEntryDTO.legDetails == null) {
+                            if (previousEntryDTO == null || previousEntryDTO.legDetails == null) {
                                 // old and new entry are null; no need to set the legDetails in the new version to null
                                 // as it already consumes no space;
                                 // however, mark the legDetails as unchanged in legDetailsUnchanged so as to allow for

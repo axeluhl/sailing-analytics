@@ -1,12 +1,11 @@
 package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Captures the serializable properties of a leaderboard which in particular has the competitors, any optional display
@@ -34,7 +33,10 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
      */
     public List<CompetitorDTO> competitors;
 
-    private Set<CompetitorDTO> suppressedCompetitors;
+    /**
+     * A list with set semantics; no duplicates are allowed.
+     */
+    private List<CompetitorDTO> suppressedCompetitors;
 
     private Map<RaceColumnDTO, List<CompetitorDTO>> competitorOrderingPerRace;
 
@@ -63,7 +65,7 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
 
     private void initCollections() {
         competitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>();
-        this.suppressedCompetitors = new HashSet<CompetitorDTO>();
+        this.suppressedCompetitors = new ArrayList<CompetitorDTO>();
     }
     
     public LeaderboardDTO(String id) {
@@ -79,12 +81,15 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
         return suppressedCompetitors;
     }
     
-    public void setSuppressedCompetitors(Set<CompetitorDTO> suppressedCompetitors) {
+    /**
+     * @param suppressedCompetitors must not contain any duplicates ("set" semantics)
+     */
+    public void setSuppressedCompetitors(List<CompetitorDTO> suppressedCompetitors) {
         this.suppressedCompetitors = suppressedCompetitors;
     }
 
     public void setSuppressed(CompetitorDTO competitor, boolean suppressed) {
-        if (suppressed) {
+        if (suppressed && !suppressedCompetitors.contains(competitor)) {
             suppressedCompetitors.add(competitor);
         } else {
             suppressedCompetitors.remove(competitor);
