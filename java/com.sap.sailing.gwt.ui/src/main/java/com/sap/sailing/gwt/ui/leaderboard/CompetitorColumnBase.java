@@ -51,9 +51,9 @@ public class CompetitorColumnBase<T> {
         return new InvertibleComparatorAdapter<T>() {
             @Override
             public int compare(T o1, T o2) {
-                return competitorFetcher.getCompetitor(o1).sailID == null ? competitorFetcher.getCompetitor(o2).sailID == null ? 0 : -1
-                        : competitorFetcher.getCompetitor(o2).sailID == null ? 1 : Collator.getInstance().compare(
-                                competitorFetcher.getCompetitor(o1).sailID, competitorFetcher.getCompetitor(o2).sailID);
+                return competitorFetcher.getCompetitor(o1).getSailID() == null ? competitorFetcher.getCompetitor(o2).getSailID() == null ? 0 : -1
+                        : competitorFetcher.getCompetitor(o2).getSailID() == null ? 1 : Collator.getInstance().compare(
+                                competitorFetcher.getCompetitor(o1).getSailID(), competitorFetcher.getCompetitor(o2).getSailID());
             }
         };
     }

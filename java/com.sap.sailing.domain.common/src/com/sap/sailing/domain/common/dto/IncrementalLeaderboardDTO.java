@@ -283,6 +283,66 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         }
     }
     
+    private class PreviousCompetitorDTOImpl implements CompetitorDTO {
+        private static final long serialVersionUID = 8820028699103040805L;
+        private int indexInPreviousCompetitorList;
+
+        @SuppressWarnings("unused") // for serialization only
+        PreviousCompetitorDTOImpl() {}
+        
+        public PreviousCompetitorDTOImpl(int indexInPreviousCompetitorList) {
+            super();
+            this.indexInPreviousCompetitorList = indexInPreviousCompetitorList;
+        }
+        
+        @Override
+        public String getTwoLetterIsoCountryCode() {
+            throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                    " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
+        }
+
+        @Override
+        public String getThreeLetterIocCountryCode() {
+            throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                    " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
+        }
+
+        @Override
+        public String getCountryName() {
+            throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                    " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
+        }
+
+        @Override
+        public String getSailID() {
+            throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                    " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
+        }
+
+        @Override
+        public String getIdAsString() {
+            throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                    " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
+        }
+
+        @Override
+        public BoatClassDTO getBoatClass() {
+            throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                    " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
+        }
+
+        @Override
+        public String getName() {
+            throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                    " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
+        }
+
+        @Override
+        public CompetitorDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion) {
+            return previousVersion.competitors.get(indexInPreviousCompetitorList);
+        }
+    }
+
     IncrementalLeaderboardDTO() {}
 
     public IncrementalLeaderboardDTO(String id, Cloner cloner) {
@@ -341,13 +401,23 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                     }
                 }
             }
+            Set<CompetitorDTO> suppressedCompetitors = new HashSet<CompetitorDTO>();
             if (suppressedCompetitorsUnchanged) {
-                Set<CompetitorDTO> suppressedCompetitors = new HashSet<CompetitorDTO>();
                 Util.addAll(previousVersion.getSuppressedCompetitors(), suppressedCompetitors);
-                setSuppressedCompetitors(suppressedCompetitors);
+            } else {
+                for (CompetitorDTO compactSuppressedCompetitor : getSuppressedCompetitors()) {
+                    suppressedCompetitors.add(compactSuppressedCompetitor.getCompetitorFromPrevious(previousVersion));
+                }
             }
+            setSuppressedCompetitors(suppressedCompetitors);
             if (competitorDisplayNamesUnchanged) {
                 competitorDisplayNames = previousVersion.competitorDisplayNames;
+            } else {
+                Map<CompetitorDTO, String> expandedCompetitorDisplayNames = new HashMap<CompetitorDTO, String>();
+                for (Map.Entry<CompetitorDTO, String> e : competitorDisplayNames.entrySet()) {
+                    expandedCompetitorDisplayNames.put(e.getKey().getCompetitorFromPrevious(previousVersion), e.getValue());
+                }
+                competitorDisplayNames = expandedCompetitorDisplayNames;
             }
             // TODO ensure that the races collection has all the necessary RaceColumnDTO objects before looking them up by name
             for (String raceColumnNameForWhichCompetitorOrderingPerRaceUnchanged : raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged) {
@@ -443,25 +513,44 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             this.defaultCourseAreaNameUnchanged = true;
         }
         competitorIndexesInPreviousCompetitorsList = new int[competitors.size()];
+        // for this stripping run, remembers the mapping of real CompetitorDTO objects to the compact form that only holds an int as reference to the
+        // previous version's competitors list; those will be used to replace the real CompetitorDTO objects where possible and will be replaced the other
+        // way in apply(...).
+        Map<CompetitorDTO, CompetitorDTO> compactCompetitorMap = new HashMap<CompetitorDTO, CompetitorDTO>();
         int i=0;
         for (CompetitorDTO competitor : competitors) {
             int indexInPrevious = previousVersion.competitors.indexOf(competitor);
             competitorIndexesInPreviousCompetitorsList[i++] = indexInPrevious;
+            CompetitorDTO compactReplacementCompetitor = new PreviousCompetitorDTOImpl(indexInPrevious);
+            compactCompetitorMap.put(competitor, compactReplacementCompetitor);
             if (indexInPrevious == -1) {
                 if (addedCompetitors == null) {
                     addedCompetitors = new ArrayList<CompetitorDTO>();
                 }
                 addedCompetitors.add(competitor);
+                compactCompetitorMap.put(competitor, competitor);
             }
         }
         competitors = null;
         if (Util.equalsWithNull(getSuppressedCompetitors(), previousVersion.getSuppressedCompetitors())) {
             suppressedCompetitorsUnchanged = true;
             setSuppressedCompetitors(null);
+        } else {
+            Set<CompetitorDTO> compactSuppressedCompetitors = new HashSet<CompetitorDTO>();
+            for (CompetitorDTO suppressedCompetitor : getSuppressedCompetitors()) {
+                compactSuppressedCompetitors.add(compactCompetitorMap.get(suppressedCompetitor));
+            }
+            setSuppressedCompetitors(compactSuppressedCompetitors);
         }
         if (Util.equalsWithNull(competitorDisplayNames, previousVersion.competitorDisplayNames)) {
             competitorDisplayNamesUnchanged = true;
             competitorDisplayNames = null;
+        } else {
+            Map<CompetitorDTO, String> compactCompetitorDisplayNames = new HashMap<CompetitorDTO, String>();
+            for (Map.Entry<CompetitorDTO, String> e : competitorDisplayNames.entrySet()) {
+                compactCompetitorDisplayNames.put(compactCompetitorMap.get(e.getKey()), e.getValue());
+            }
+            competitorDisplayNames = compactCompetitorDisplayNames;
         }
         raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged = new HashSet<String>();
         final HashMap<RaceColumnDTO, List<CompetitorDTO>> competitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>(getCompetitorOrderingPerRace());
@@ -469,7 +558,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             List<CompetitorDTO> competitorsFromBestToWorstForRaceColumn = getCompetitorsFromBestToWorst(raceColumn);
             List<CompetitorDTO> previousCompetitorsFrombestToWorstForRaceColumn = previousVersion.getCompetitorsFromBestToWorst(raceColumn);
             if (Util.equalsWithNull(competitorsFromBestToWorstForRaceColumn, previousCompetitorsFrombestToWorstForRaceColumn)) {
-                raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged.add(raceColumn.name);
+                raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged.add(raceColumn.getName());
                 competitorOrderingPerRace.remove(raceColumn);
             }
         }

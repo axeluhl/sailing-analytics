@@ -52,7 +52,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     }
     
     public String getRaceColumnName() {
-        return name;
+        return getName();
     }
     
     public Double getExplicitFactor() {
@@ -202,7 +202,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
         int result = 1;
         result = prime * result + ((fleets == null) ? 0 : fleets.hashCode());
         result = prime * result + (medalRace ? 1231 : 1237);
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
         result = prime * result + ((racesPerFleet == null) ? 0 : racesPerFleet.hashCode());
         return result;
     }
@@ -223,10 +223,10 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
             return false;
         if (medalRace != other.medalRace)
             return false;
-        if (name == null) {
-            if (other.name != null)
+        if (getName() == null) {
+            if (other.getName() != null)
                 return false;
-        } else if (!name.equals(other.name))
+        } else if (!getName().equals(other.getName()))
             return false;
         if (racesPerFleet == null) {
             if (other.racesPerFleet != null)

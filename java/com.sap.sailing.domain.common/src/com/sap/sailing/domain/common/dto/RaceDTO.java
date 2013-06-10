@@ -40,7 +40,7 @@ public class RaceDTO extends NamedDTO {
     }
 
     public RegattaAndRaceIdentifier getRaceIdentifier() {
-        return new RegattaNameAndRaceName(regattaName, name);
+        return new RegattaNameAndRaceName(regattaName, getName());
     }
 
     public String getRegattaName() {

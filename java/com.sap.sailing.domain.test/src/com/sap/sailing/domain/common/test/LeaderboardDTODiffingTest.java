@@ -19,6 +19,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.common.Cloner;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
@@ -55,7 +56,7 @@ public class LeaderboardDTODiffingTest {
     
     private CompetitorDTO getPreviousCompetitorByName(String name) {
         for (CompetitorDTO competitor : previousVersion.competitors) {
-            if (competitor.name.equals(name)) {
+            if (competitor.getName().equals(name)) {
                 return competitor;
             }
         }
@@ -158,7 +159,7 @@ public class LeaderboardDTODiffingTest {
     @Test
     public void testCompetitorListChange() {
         newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
-        CompetitorDTO somebodyNew = new CompetitorDTO("Someone New", "DE", "GER", "Germany", "GER 1234", "912p09871203987",
+        CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", "DE", "GER", "Germany", "GER 1234", "912p09871203987",
                 new BoatClassDTO("505", 5.05));
         newVersion.competitors.add(13, somebodyNew); // insert a competitor; this should mess up all others' indexes; check if this works
         CompetitorDTO wolfgang = getPreviousCompetitorByName("HUNGER +JESS");

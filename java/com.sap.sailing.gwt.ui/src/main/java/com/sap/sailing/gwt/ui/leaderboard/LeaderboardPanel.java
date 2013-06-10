@@ -399,7 +399,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 for (String nameOfRaceColumnToShow : newSettings.getNamesOfRaceColumnsToShow()) {
                     RaceColumnDTO raceColumnToShow = getRaceByColumnName(nameOfRaceColumnToShow);
                     if (raceColumnToShow != null) {
-                        raceColumnSelection.requestRaceColumnSelection(raceColumnToShow.name, raceColumnToShow);
+                        raceColumnSelection.requestRaceColumnSelection(raceColumnToShow.getName(), raceColumnToShow);
                     }
                 }
             } else {
@@ -413,7 +413,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     for (String nameOfRaceToShow : newSettings.getNamesOfRacesToShow()) {
                         RaceColumnDTO raceColumnToShow = getRaceByName(nameOfRaceToShow);
                         if (raceColumnToShow != null) {
-                            raceColumnSelection.requestRaceColumnSelection(raceColumnToShow.name, raceColumnToShow);
+                            raceColumnSelection.requestRaceColumnSelection(raceColumnToShow.getName(), raceColumnToShow);
                         }
                     }
                 }
@@ -613,9 +613,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             return new InvertibleComparatorAdapter<T>() {
                 @Override
                 public int compare(T o1, T o2) {
-                    return competitorFetcher.getCompetitor(o1).sailID == null ? competitorFetcher.getCompetitor(o2).sailID == null ? 0 : -1
-                            : competitorFetcher.getCompetitor(o2).sailID == null ? 1 : Collator.getInstance().compare(
-                                    competitorFetcher.getCompetitor(o1).sailID, competitorFetcher.getCompetitor(o2).sailID);
+                    return competitorFetcher.getCompetitor(o1).getSailID() == null ? competitorFetcher.getCompetitor(o2).getSailID() == null ? 0 : -1
+                            : competitorFetcher.getCompetitor(o2).getSailID() == null ? 1 : Collator.getInstance().compare(
+                                    competitorFetcher.getCompetitor(o1).getSailID(), competitorFetcher.getCompetitor(o2).getSailID());
                 }
             };
         }
@@ -628,7 +628,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
             ImageResourceRenderer renderer = new ImageResourceRenderer();
-            final String twoLetterIsoCountryCode = competitorFetcher.getCompetitor(object).twoLetterIsoCountryCode;
+            final String twoLetterIsoCountryCode = competitorFetcher.getCompetitor(object).getTwoLetterIsoCountryCode();
             final ImageResource flagImageResource;
             if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
                 flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
@@ -639,12 +639,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 sb.append(renderer.render(flagImageResource));
                 sb.appendHtmlConstant("&nbsp;");
             }
-            sb.appendEscaped(competitorFetcher.getCompetitor(object).sailID);
+            sb.appendEscaped(competitorFetcher.getCompetitor(object).getSailID());
         }
 
         @Override
         public String getValue(T object) {
-            return competitorFetcher.getCompetitor(object).sailID;
+            return competitorFetcher.getCompetitor(object).getSailID();
         }
     }
 
@@ -1916,7 +1916,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      */
     private void updateRaceColumnDTOsToRaceColumns(LeaderboardDTO leaderboard) {
     	for (RaceColumnDTO newRace : leaderboard.getRaceList()) {
-    		RaceColumn<?> raceColumn = getRaceColumnByRaceColumnName(newRace.name);
+    		RaceColumn<?> raceColumn = getRaceColumnByRaceColumnName(newRace.getName());
     		if (raceColumn != null) {
     			raceColumn.setRace(newRace);
     		}
@@ -2245,7 +2245,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         for (int selectedRaceCount = 0; selectedRaceCount < Util.size(correctedOrderSelectedRaces); selectedRaceCount++) {
             RaceColumnDTO selectedRaceColumn = Util.get(correctedOrderSelectedRaces, selectedRaceCount);
             final RaceColumn<?> raceColumn = selectedRaceColumn == null ? null
-                    : getRaceColumnByRaceColumnName(selectedRaceColumn.name);
+                    : getRaceColumnByRaceColumnName(selectedRaceColumn.getName());
             if (raceColumn != null) {
                 // remove all raceColumns, starting at a specific selectedRaceCount, up to but excluding the selected
                 // raceName with the result that selectedRace is at position selectedRaceCount afterwards

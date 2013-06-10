@@ -96,14 +96,14 @@ public class SailingEventManagementPanel extends SimplePanel {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/RegattaOverview.html?event=" + event.id
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                return ANCHORTEMPLATE.cell(link, event.name);
+                return ANCHORTEMPLATE.cell(link, event.getName());
             }
         };
 
         TextColumn<EventDTO> venueNameColumn = new TextColumn<EventDTO>() {
             @Override
             public String getValue(EventDTO event) {
-                return event.venue != null ? event.venue.name : "";
+                return event.venue != null ? event.venue.getName() : "";
             }
         };
 
@@ -129,7 +129,7 @@ public class SailingEventManagementPanel extends SimplePanel {
                 int courseAreasCount = event.venue.getCourseAreas().size();
                 int i = 1;
                 for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
-                    builder.appendEscaped(courseArea.name);
+                    builder.appendEscaped(courseArea.getName());
                     if (i < courseAreasCount) {
                         builder.appendHtmlConstant("<br>");
                     }
@@ -145,7 +145,7 @@ public class SailingEventManagementPanel extends SimplePanel {
             @Override
             public void update(int index, EventDTO event, String value) {
                 if (EventConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(event.name))) {
+                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(event.getName()))) {
                         removeEvent(event);
                     }
                 } else if (EventConfigImagesBarCell.ACTION_EDIT.equals(value)) {
@@ -181,7 +181,7 @@ public class SailingEventManagementPanel extends SimplePanel {
         sailingService.removeEvent(event.id, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to remove event " + event.name + ": " + caught.getMessage());
+                errorReporter.reportError("Error trying to remove event " + event.getName() + ": " + caught.getMessage());
             }
 
             @Override
@@ -231,25 +231,25 @@ public class SailingEventManagementPanel extends SimplePanel {
         //        }
         List<CourseAreaDTO> courseAreasToAdd = getCourseAreasToAdd(oldEvent, updatedEvent);
 
-        sailingService.updateEvent(oldEvent.name, oldEvent.id, updatedEvent.venue, updatedEvent.publicationUrl, 
+        sailingService.updateEvent(oldEvent.getName(), oldEvent.id, updatedEvent.venue, updatedEvent.publicationUrl, 
                 updatedEvent.isPublic, regattaNames, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to update sailing event" + oldEvent.name + ": " + t.getMessage());
+                errorReporter.reportError("Error trying to update sailing event" + oldEvent.getName() + ": " + t.getMessage());
             }
 
             @Override
             public void onSuccess(Void result) {
                 fillEvents();
-                if(!oldEvent.name.equals(updatedEvent.name)) {
-                    sailingService.renameEvent(oldEvent.id, updatedEvent.name, new AsyncCallback<Void>() {
+                if(!oldEvent.getName().equals(updatedEvent.getName())) {
+                    sailingService.renameEvent(oldEvent.id, updatedEvent.getName(), new AsyncCallback<Void>() {
                         @Override
                         public void onSuccess(Void result) {
                             fillEvents();
                         }
                         @Override
                         public void onFailure(Throwable t) {
-                            errorReporter.reportError("Error trying to rename sailing event " + oldEvent.name + ": " + t.getMessage());
+                            errorReporter.reportError("Error trying to rename sailing event " + oldEvent.getName() + ": " + t.getMessage());
                         }
                     });
                 }
@@ -258,11 +258,11 @@ public class SailingEventManagementPanel extends SimplePanel {
 
         if (courseAreasToAdd.size() > 0) {
             for (CourseAreaDTO courseArea : courseAreasToAdd) {
-                sailingService.createCourseArea(oldEvent.id, courseArea.name, new AsyncCallback<CourseAreaDTO>() {
+                sailingService.createCourseArea(oldEvent.id, courseArea.getName(), new AsyncCallback<CourseAreaDTO>() {
 
                     @Override
                     public void onFailure(Throwable t) {
-                        errorReporter.reportError("Error trying to add course area to sailing event " + oldEvent.name + ": " + t.getMessage());
+                        errorReporter.reportError("Error trying to add course area to sailing event " + oldEvent.getName() + ": " + t.getMessage());
                     }
 
                     @Override
@@ -281,12 +281,12 @@ public class SailingEventManagementPanel extends SimplePanel {
 
         List<String> newCourseAreaNames = new ArrayList<String>();
         for(CourseAreaDTO courseArea : updatedEvent.venue.getCourseAreas()) {
-            newCourseAreaNames.add(courseArea.name);
+            newCourseAreaNames.add(courseArea.getName());
         }
 
         List<String> oldCourseAreaNames = new ArrayList<String>();
         for(CourseAreaDTO courseArea : oldEvent.venue.getCourseAreas()) {
-            oldCourseAreaNames.add(courseArea.name);
+            oldCourseAreaNames.add(courseArea.getName());
         }
 
         for (String newCourseAreaName : newCourseAreaNames) {
@@ -295,7 +295,7 @@ public class SailingEventManagementPanel extends SimplePanel {
         }
 
         for(CourseAreaDTO courseArea : updatedEvent.venue.getCourseAreas()) {
-            if (courseAreaNamesToAdd.contains(courseArea.name)) {
+            if (courseAreaNamesToAdd.contains(courseArea.getName())) {
                 courseAreasToAdd.add(courseArea);
             }
         }
@@ -306,12 +306,12 @@ public class SailingEventManagementPanel extends SimplePanel {
     private void createNewEvent(final EventDTO newEvent) {
         List<String> courseAreaNames = new ArrayList<String>();
         for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
-            courseAreaNames.add(courseAreaDTO.name);
+            courseAreaNames.add(courseAreaDTO.getName());
         }
-        sailingService.createEvent(newEvent.name, newEvent.venue.name, newEvent.publicationUrl, newEvent.isPublic, courseAreaNames, new AsyncCallback<EventDTO>() {
+        sailingService.createEvent(newEvent.getName(), newEvent.venue.getName(), newEvent.publicationUrl, newEvent.isPublic, courseAreaNames, new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to create new event" + newEvent.name + ": " + t.getMessage());
+                errorReporter.reportError("Error trying to create new event" + newEvent.getName() + ": " + t.getMessage());
             }
 
             @Override

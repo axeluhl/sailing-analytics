@@ -55,10 +55,10 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         @Override
         public String getErrorMessage(SeriesDTO seriesToValidate) {
             String errorMessage = null;
-            boolean nameNotEmpty = seriesToValidate.name != null && seriesToValidate.name.length() > 0;
+            boolean nameNotEmpty = seriesToValidate.getName() != null && seriesToValidate.getName().length() > 0;
             boolean unique = true;
             for (SeriesDTO series : existingSeries) {
-                if (series.name.equals(seriesToValidate.name)) {
+                if (series.getName().equals(seriesToValidate.getName())) {
                     unique = false;
                     break;
                 }
@@ -73,7 +73,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                 int index = 0;
                 boolean fleetNameNotEmpty = true;
                 for (FleetDTO fleet : fleetsToValidate) {
-                    fleetNameNotEmpty = fleet.name != null && fleet.name.length() > 0;
+                    fleetNameNotEmpty = fleet.getName() != null && fleet.getName().length() > 0;
                     if (!fleetNameNotEmpty) {
                         break;
                     }
@@ -83,7 +83,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                 boolean fleetUnique = true;
                 HashSet<String> setToFindDuplicates = new HashSet<String>();
                 for (FleetDTO fleet: fleetsToValidate) {
-                    if(!setToFindDuplicates.add(fleet.name)) {
+                    if(!setToFindDuplicates.add(fleet.getName())) {
                         fleetUnique = false;
                         break;
                     }
@@ -178,14 +178,14 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
 
     @Override
     protected SeriesDTO getResult() {
-        series.name = nameEntryField.getText();
+        series.setName(nameEntryField.getText());
         series.setMedal(isMedalSeriesCheckbox.getValue());
         series.setStartsWithZeroScore(startsWithZeroScoreCheckbox.getValue());
         List<FleetDTO> fleets = new ArrayList<FleetDTO>();
         int fleetsCount = fleetNameEntryFields.size();
         for(int i = 0; i < fleetsCount; i++) {
             FleetDTO fleetDTO = new FleetDTO();
-            fleetDTO.name = fleetNameEntryFields.get(i).getValue();
+            fleetDTO.setName(fleetNameEntryFields.get(i).getValue());
             fleetDTO.setColor(getSelectedColor(fleetColorEntryFields.get(i)));
             int orderNo = -1;
             if(fleetOrderNoEntryFields.get(i).getValue() != null) {

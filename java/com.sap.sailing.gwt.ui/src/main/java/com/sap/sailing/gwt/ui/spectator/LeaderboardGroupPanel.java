@@ -135,7 +135,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                             @Override
                             public void onSuccess(List<RegattaDTO> regattaDTOs) {
                                 for(RegattaDTO regattaDTO: regattaDTOs) {
-                                    regattasByName.put(regattaDTO.name, regattaDTO);
+                                    regattasByName.put(regattaDTO.getName(), regattaDTO);
                                 }
                                 createPageContent();
                             }
@@ -161,7 +161,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
 
     private void createPageContent() {
         if (!isEmbedded) {
-            Label groupNameLabel = new Label(leaderboardGroup.name + ":");
+            Label groupNameLabel = new Label(leaderboardGroup.getName() + ":");
             groupNameLabel.setStyleName(STYLE_NAME_PREFIX + "GroupName");
             mainPanel.add(groupNameLabel);
             // Using HTML to display the line breaks in the description
@@ -190,11 +190,11 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         
         if (leaderboardGroup.hasOverallLeaderboard()) {
             String debugParam = Window.Location.getParameter("gwt.codesvr");
-            String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboardGroup.name+" "+LeaderboardNameConstants.OVERALL
+            String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboardGroup.getName()+" "+LeaderboardNameConstants.OVERALL
                     + (showRaceDetails ? "&showRaceDetails=true" : "")
                     + (isEmbedded ? "&embedded=true" : "")
                     + "&displayName=" + stringMessages.overallStandings() 
-                    + "&leaderboardGroupName=" + leaderboardGroup.name + "&root=" + root
+                    + "&leaderboardGroupName=" + leaderboardGroup.getName() + "&root=" + root
                     + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
             Anchor overallStandingsLink = new Anchor(stringMessages.overallStandings(), true, link);
             overallStandingsLink.setStyleName(STYLE_ACTIVE_LEADERBOARD);
@@ -224,7 +224,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
                         + (leaderboard.displayName != null ? "&displayName="+leaderboard.displayName : "")
                         + (isEmbedded ? "&embedded=true" : "")
-                        + "&leaderboardGroupName=" + leaderboardGroup.name + "&root=" + root
+                        + "&leaderboardGroupName=" + leaderboardGroup.getName() + "&root=" + root
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return getAnchor(link, stringMessages.leaderboard(), STYLE_ACTIVE_LEADERBOARD);
             }
@@ -303,7 +303,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         boolean hasMultipleFleets = series.getFleets().size() > 1;
         b.appendHtmlConstant("<div style=\"float:left;\">");
         if(renderSeriesName) {
-            b.append(TEXTTEMPLATE.textWithClass(series.name, 50, STYLE_TABLE_TEXT));
+            b.append(TEXTTEMPLATE.textWithClass(series.getName(), 50, STYLE_TABLE_TEXT));
         }
         b.appendHtmlConstant("</div>");
         b.appendHtmlConstant("<div style=\"float:left;\">");
@@ -316,10 +316,10 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                 if(color != null) {
                     b.append(COLORBOXTEMPLATE.colorBox(color.getAsHtml(), STYLE_COLORBOX));
                 }
-                b.append(TEXTTEMPLATE.textWithClass(fleet.name, 50, STYLE_TABLE_TEXT));
+                b.append(TEXTTEMPLATE.textWithClass(fleet.getName(), 50, STYLE_TABLE_TEXT));
             } else {
-                String displayName = fleet.name;
-                if (! "Default".equals(fleet.name)) {
+                String displayName = fleet.getName();
+                if (! "Default".equals(fleet.getName())) {
                     b.append(TEXTTEMPLATE.textWithClass(displayName, 50, STYLE_TABLE_TEXT));
                 } 
             }
@@ -360,7 +360,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboardName
                     + "&raceName=" + raceIdentifier.getRaceName() + "&root=" + root
                     + (canReplayDuringLiveRaces ? "&"+RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES+"=true" : "")
-                    + "&regattaName=" + raceIdentifier.getRegattaName() + "&leaderboardGroupName=" + leaderboardGroup.name);
+                    + "&regattaName=" + raceIdentifier.getRegattaName() + "&leaderboardGroupName=" + leaderboardGroup.getName());
             if (debugParam != null && !debugParam.isEmpty()) {
                 link += "&gwt.codesvr=" + debugParam;
             }

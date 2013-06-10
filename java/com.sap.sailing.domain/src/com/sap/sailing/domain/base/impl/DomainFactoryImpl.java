@@ -45,6 +45,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
@@ -336,7 +337,7 @@ public class DomainFactoryImpl implements DomainFactory {
         CompetitorDTO competitorDTO = weakCompetitorDTOCache.get(c);
         if (competitorDTO == null) {
             CountryCode countryCode = c.getTeam().getNationality().getCountryCode();
-            competitorDTO = new CompetitorDTO(c.getName(), countryCode == null ? ""
+            competitorDTO = new CompetitorDTOImpl(c.getName(), countryCode == null ? ""
                     : countryCode.getTwoLetterISOCode(),
                     countryCode == null ? "" : countryCode.getThreeLetterIOCCode(), countryCode == null ? ""
                             : countryCode.getName(), c.getBoat().getSailID(), c.getId().toString(),

@@ -75,7 +75,7 @@ public class ExplicitRaceColumnSelection extends AbstractRaceColumnSelection imp
     @Override
     public void autoUpdateRaceColumnSelectionForUpdatedLeaderboard(LeaderboardDTO oldLeaderboard, LeaderboardDTO newLeaderboard) {
         for (RaceColumnDTO selectedRaceColumn : getRaceColumnsToAddImplicitly(newLeaderboard, oldLeaderboard)) {
-            requestRaceColumnSelection(selectedRaceColumn.name, selectedRaceColumn);
+            requestRaceColumnSelection(selectedRaceColumn.getName(), selectedRaceColumn);
         }
     }
 

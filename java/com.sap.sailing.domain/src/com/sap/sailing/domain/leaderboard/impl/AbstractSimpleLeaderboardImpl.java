@@ -1019,7 +1019,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 if (trackedRace != null) {
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(),
                             trackedRace.getRace().getName());
-                    race = baseDomainFactory.createRaceDTO(trackedRegattaRegistry, false, raceIdentifier, trackedRace);
+                    race = baseDomainFactory.createRaceDTO(trackedRegattaRegistry, /* withGeoLocationData */ false, raceIdentifier, trackedRace);
                     if (trackedRace.hasStarted(timePoint) && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
                         TimePoint liveTimePointForTrackedRace = timePoint;
                         final TimePoint endOfRace = trackedRace.getEndOfRace();
