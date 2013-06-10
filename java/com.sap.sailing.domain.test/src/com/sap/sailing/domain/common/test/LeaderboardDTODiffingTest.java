@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -10,8 +11,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +28,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.test.StoredTrackBasedTest;
 import com.sap.sailing.util.ClonerImpl;
 
@@ -170,5 +174,30 @@ public class LeaderboardDTODiffingTest {
         assertNull(newVersion.competitors); // but there should be an added competitor that we can't see through the public interface
         LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
         assertEquals(newCompetitorsBeforeStripping, applied.competitors);
+    }
+
+    @Test
+    public void testSuppressionChange() {
+        final HashSet<CompetitorDTO> newSuppressedCompetitors = new HashSet<CompetitorDTO>();
+        Util.addAll(newVersion.getSuppressedCompetitors(), newSuppressedCompetitors);
+        newVersion.setSuppressedCompetitors(newSuppressedCompetitors);
+        newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
+        CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", "DE", "GER", "Germany", "GER 1234", "912p09871203987",
+                new BoatClassDTO("505", 5.05));
+        newVersion.competitors.add(somebodyNew);
+        newVersion.setSuppressed(newVersion.competitors.get(13), true); // suppress an existing competitor; compaction should reduce this to a single number only
+        newVersion.setSuppressed(somebodyNew, true); // check that mixed mode with existing and new competitors works as well
+        Set<CompetitorDTO> newSuppressedCompetitorsBeforeStripping = new HashSet<CompetitorDTO>();
+        Util.addAll(newVersion.getSuppressedCompetitors(), newSuppressedCompetitorsBeforeStripping);
+        newVersion.strip(previousVersion);
+        assertEquals(2, Util.size(newVersion.getSuppressedCompetitors()));
+        assertTrue(Util.contains(newVersion.getSuppressedCompetitors(), somebodyNew));
+        for (CompetitorDTO compactSuppressedCompetitor : newVersion.getSuppressedCompetitors()) {
+            if (compactSuppressedCompetitor != somebodyNew) {
+                assertFalse(compactSuppressedCompetitor instanceof CompetitorDTOImpl); // assert that the existing competitor was compacted
+            }
+        }
+        LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
+        assertEquals(newSuppressedCompetitorsBeforeStripping, applied.getSuppressedCompetitors());
     }
 }

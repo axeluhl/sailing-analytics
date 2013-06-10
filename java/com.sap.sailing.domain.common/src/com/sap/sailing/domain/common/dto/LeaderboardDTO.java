@@ -79,7 +79,7 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
         return suppressedCompetitors;
     }
     
-    protected void setSuppressedCompetitors(Set<CompetitorDTO> suppressedCompetitors) {
+    public void setSuppressedCompetitors(Set<CompetitorDTO> suppressedCompetitors) {
         this.suppressedCompetitors = suppressedCompetitors;
     }
 

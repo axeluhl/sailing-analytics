@@ -521,14 +521,15 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         for (CompetitorDTO competitor : competitors) {
             int indexInPrevious = previousVersion.competitors.indexOf(competitor);
             competitorIndexesInPreviousCompetitorsList[i++] = indexInPrevious;
-            CompetitorDTO compactReplacementCompetitor = new PreviousCompetitorDTOImpl(indexInPrevious);
-            compactCompetitorMap.put(competitor, compactReplacementCompetitor);
             if (indexInPrevious == -1) {
                 if (addedCompetitors == null) {
                     addedCompetitors = new ArrayList<CompetitorDTO>();
                 }
                 addedCompetitors.add(competitor);
                 compactCompetitorMap.put(competitor, competitor);
+            } else {
+                CompetitorDTO compactReplacementCompetitor = new PreviousCompetitorDTOImpl(indexInPrevious);
+                compactCompetitorMap.put(competitor, compactReplacementCompetitor);
             }
         }
         competitors = null;
