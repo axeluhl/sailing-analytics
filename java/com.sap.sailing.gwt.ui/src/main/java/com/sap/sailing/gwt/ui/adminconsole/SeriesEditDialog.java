@@ -102,7 +102,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     }
 
     public SeriesEditDialog(RegattaDTO regatta, SeriesDTO selectedSeries, StringMessages stringMessages,DialogCallback<SeriesDescriptor> callback) {
-        super(stringMessages.actionEditRaces(), null, stringMessages.ok(), stringMessages.cancel(),
+        super(stringMessages.actionEditSeries(), null, stringMessages.ok(), stringMessages.cancel(),
                 new RaceDialogValidator(regatta, stringMessages), callback);
         this.selectedSeries = selectedSeries;
         this.stringMessages = stringMessages;
