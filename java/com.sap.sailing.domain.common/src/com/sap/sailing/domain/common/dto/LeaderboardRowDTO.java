@@ -15,6 +15,7 @@ public class LeaderboardRowDTO implements Serializable {
     public CompetitorDTO competitor;
     public Map<String, LeaderboardEntryDTO> fieldsByRaceColumnName;
     public Double carriedPoints;
+    public Double totalPoints;
     public Double totalTimeSailedInSeconds;
     public Double totalTimeSailedDownwindInSeconds;
     public Double maximumSpeedOverGroundInKnots;
@@ -34,6 +35,7 @@ public class LeaderboardRowDTO implements Serializable {
                 + ((maximumSpeedOverGroundInKnots == null) ? 0 : maximumSpeedOverGroundInKnots.hashCode());
         result = prime * result
                 + ((totalDistanceTraveledInMeters == null) ? 0 : totalDistanceTraveledInMeters.hashCode());
+        result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
         result = prime * result
                 + ((totalTimeSailedDownwindInSeconds == null) ? 0 : totalTimeSailedDownwindInSeconds.hashCode());
         result = prime * result + ((totalTimeSailedInSeconds == null) ? 0 : totalTimeSailedInSeconds.hashCode());
@@ -81,6 +83,11 @@ public class LeaderboardRowDTO implements Serializable {
             if (other.totalDistanceTraveledInMeters != null)
                 return false;
         } else if (!totalDistanceTraveledInMeters.equals(other.totalDistanceTraveledInMeters))
+            return false;
+        if (totalPoints == null) {
+            if (other.totalPoints != null)
+                return false;
+        } else if (!totalPoints.equals(other.totalPoints))
             return false;
         if (totalTimeSailedDownwindInSeconds == null) {
             if (other.totalTimeSailedDownwindInSeconds != null)

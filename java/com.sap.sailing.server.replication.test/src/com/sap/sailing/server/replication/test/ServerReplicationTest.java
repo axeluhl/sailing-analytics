@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
@@ -55,8 +56,8 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
         Thread.sleep(1000); // wait 1s for JMS to deliver the message and the message to be applied
         final Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
         assertNotNull(replicaLeaderboard);
-        assertTrue(Arrays.equals(masterLeaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(),
-                replicaLeaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces()));
+        assertTrue(Arrays.equals(((ThresholdBasedResultDiscardingRule) masterLeaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces(),
+                ((ThresholdBasedResultDiscardingRule) replicaLeaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces()));
     }
 
     @Test

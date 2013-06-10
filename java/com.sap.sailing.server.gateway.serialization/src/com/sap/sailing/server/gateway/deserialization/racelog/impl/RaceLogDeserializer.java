@@ -1,5 +1,7 @@
 package com.sap.sailing.server.gateway.deserialization.racelog.impl;
 
+import java.io.Serializable;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -20,7 +22,8 @@ public class RaceLogDeserializer implements JsonDeserializer<RaceLog> {
     }
     
     public RaceLog deserialize(JSONObject object) throws JsonDeserializationException {
-        RaceLog result = new RaceLogImpl();
+        Serializable id = (String)object.get(RaceLogSerializer.FIELD_RACELOG_IDENTIFIER);
+        RaceLog result = new RaceLogImpl(id);
         
         if (object.get(RaceLogSerializer.FIELD_EVENTS) == null) {
             return result;
