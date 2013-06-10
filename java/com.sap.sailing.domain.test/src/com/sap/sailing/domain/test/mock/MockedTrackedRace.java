@@ -405,6 +405,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     public void setDefaultCourseArea(CourseArea newCourseArea) {
                         // TODO Auto-generated method stub
                     }
+
+                    @Override
+                    public boolean definesSeriesDiscardThresholds() {
+                        // TODO Auto-generated method stub
+                        return false;
+                    }
                 };
             }
 
@@ -741,7 +747,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void detachRaceLog() {
+    public void detachRaceLog(Serializable identifier) {
         // TODO Auto-generated method stub
 
     }
@@ -753,7 +759,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public RaceLog getRaceLog() {
+    public RaceLog getRaceLog(Serializable identifier) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -780,5 +786,23 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void detachAllRaceLogs() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void invalidateStartTime() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void invalidateEndTime() {
+        // TODO Auto-generated method stub
+        
     }
 }

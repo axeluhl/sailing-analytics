@@ -6,8 +6,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -24,12 +22,12 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
     protected ListBox courseAreaListBox;
 
     protected static class LeaderboardParameterValidator implements Validator<LeaderboardDescriptor> {
-        protected final StringMessages stringConstants;
+        protected final StringMessages stringMessages;
         protected final Collection<StrippedLeaderboardDTO> existingLeaderboards;
 
-        public LeaderboardParameterValidator(StringMessages stringConstants, Collection<StrippedLeaderboardDTO> existingLeaderboards){
+        public LeaderboardParameterValidator(StringMessages stringConstants, Collection<StrippedLeaderboardDTO> existingLeaderboards) {
             super();
-            this.stringConstants = stringConstants;
+            this.stringMessages = stringConstants;
             this.existingLeaderboards = existingLeaderboards;
         }
 
@@ -37,33 +35,23 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         public String getErrorMessage(LeaderboardDescriptor leaderboardToValidate) {
             String errorMessage;
             boolean nonEmpty = leaderboardToValidate.getName() != null && leaderboardToValidate.getName().length() > 0;
-
-            boolean discardThresholdsAscending = true;
-            for (int i = 1; i < leaderboardToValidate.getDiscardThresholds().length; i++) {
-                // TODO what are correct values for discarding Thresholds?
-                if (0 < leaderboardToValidate.getDiscardThresholds().length){ 
-                    discardThresholdsAscending = discardThresholdsAscending
-                            && leaderboardToValidate.getDiscardThresholds()[i - 1] < leaderboardToValidate.getDiscardThresholds()[i]
-                                    // and if one box is empty, all subsequent boxes need to be empty too
-                                    && (leaderboardToValidate.getDiscardThresholds()[i] == 0 || leaderboardToValidate.getDiscardThresholds()[i-1] > 0);
-                }
-            }
-
             boolean unique = true;
             for (StrippedLeaderboardDTO dao : existingLeaderboards) {
                 if(dao.name.equals(leaderboardToValidate.getName())){
                     unique = false;
                 }
             }
-
             if (!nonEmpty) {
-                errorMessage = stringConstants.pleaseEnterAName();
+                errorMessage = stringMessages.pleaseEnterAName();
             } else if(!unique){
-                errorMessage = stringConstants.leaderboardWithThisNameAlreadyExists();
-            } else if (!discardThresholdsAscending) {
-                errorMessage = stringConstants.discardThresholdsMustBeAscending();
+                errorMessage = stringMessages.leaderboardWithThisNameAlreadyExists();
             } else {
-                errorMessage = null;
+                String discardThresholdErrorMessage = DiscardThresholdBoxes.getErrorMessage(leaderboardToValidate.getDiscardThresholds(), stringMessages);
+                if (discardThresholdErrorMessage != null) {
+                    errorMessage = discardThresholdErrorMessage;
+                } else {
+                    errorMessage = null;
+                }
             }
             return errorMessage;
         }
@@ -112,15 +100,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         formGrid.setWidget(4, 0, new Label(stringMessages.courseArea() + ":"));
         formGrid.setWidget(4, 1, courseAreaListBox);
         mainPanel.add(formGrid);
-        mainPanel.add(new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
-        HorizontalPanel hp = new HorizontalPanel();
-        hp.setSpacing(3);
-        for (int i = 0; i < discardThresholdBoxes.length; i++) {
-            hp.add(new Label("" + (i + 1) + "."));
-            hp.add(discardThresholdBoxes[i]);
-        }
-        alignAllPanelWidgetsVertically(hp, HasVerticalAlignment.ALIGN_MIDDLE);
-        mainPanel.add(hp);
+        mainPanel.add(discardThresholdBoxes.getWidget());
 
         return mainPanel;
     }
