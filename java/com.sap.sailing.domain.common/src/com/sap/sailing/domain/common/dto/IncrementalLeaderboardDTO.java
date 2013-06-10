@@ -440,10 +440,12 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 if (rows == null) {
                     rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
                 }
-                // expand all keys and remove values from compact keys and re-enter with expanded keys
+                // expand all keys and remove values from compact keys and re-enter with expanded keys; expand their competitor field
                 for (CompetitorDTO compactCompetitor : new ArrayList<CompetitorDTO>(rows.keySet())) {
                     final CompetitorDTO expandedCompetitor = compactCompetitor.getCompetitorFromPrevious(previousVersion);
-                    rows.put(expandedCompetitor, rows.remove(compactCompetitor));
+                    final LeaderboardRowDTO row = rows.remove(compactCompetitor);
+                    row.competitor = expandedCompetitor;
+                    rows.put(expandedCompetitor, row);
                 }
                 for (Pair<CompetitorDTO, Void> rowUnchanged : rowsUnchanged.getAllUnchangedCompetitorsAndKeys(previousVersion)) {
                     rowsUnchangedForCompetitors.add(rowUnchanged.getA());
@@ -595,7 +597,9 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             } else {
                 LeaderboardRowDTO newRowDTO = new LeaderboardRowDTO();
                 cloner.clone(competitorAndRow.getValue(), newRowDTO);
-                newRows.put(compactCompetitorMap.get(competitorAndRow.getKey()), newRowDTO);
+                CompetitorDTO compactCompetitor = compactCompetitorMap.get(competitorAndRow.getKey());
+                newRowDTO.competitor = compactCompetitor;
+                newRows.put(compactCompetitor, newRowDTO);
                 HashMap<String, LeaderboardEntryDTO> newFieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
                 for (Map.Entry<String, LeaderboardEntryDTO> raceColumnNameAndLeaderboardEntry : newRowDTO.fieldsByRaceColumnName.entrySet()) {
                     LeaderboardEntryDTO previousEntryDTO = null;

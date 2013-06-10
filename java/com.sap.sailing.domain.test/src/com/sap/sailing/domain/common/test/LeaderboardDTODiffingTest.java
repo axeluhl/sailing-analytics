@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertSame;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -82,6 +83,7 @@ public class LeaderboardDTODiffingTest {
     @Test
     public void testTotalStripping() {
         newVersion.strip(previousVersion);
+        assertAllRowsKeysAreIdenticalToAllLeaderboardRowDTOCompetitors(newVersion);
         assertNull(newVersion.rows);
     }
 
@@ -96,6 +98,7 @@ public class LeaderboardDTODiffingTest {
         wolfgangsRow.totalDistanceTraveledInMeters += 1;
         Map<CompetitorDTO, LeaderboardRowDTO> rowsBeforeStripping = newVersion.rows;
         newVersion.strip(previousVersion);
+        assertAllRowsKeysAreIdenticalToAllLeaderboardRowDTOCompetitors(newVersion);
         assertNotNull(newVersion.rows);
         assertEquals(1, newVersion.rows.size()); // only wolfgang's row should show
         assertEquals(wolfgang, newVersion.rows.keySet().iterator().next().getCompetitorFromPrevious(previousVersion));
@@ -132,6 +135,7 @@ public class LeaderboardDTODiffingTest {
         newVersion.rows = newRows;
         Map<CompetitorDTO, LeaderboardRowDTO> rowsBeforeStripping = newVersion.rows;
         newVersion.strip(previousVersion);
+        assertAllRowsKeysAreIdenticalToAllLeaderboardRowDTOCompetitors(newVersion);
         assertNotNull(newVersion.rows);
         assertEquals(previousVersion.rows.size()-17, newVersion.rows.size()); // all rows have changed except for 17 that have no leg details in leg 8
         // now assert that for all rows there is no leaderboard entry for all races but R9 and
@@ -173,6 +177,7 @@ public class LeaderboardDTODiffingTest {
         newVersion.rows.remove(wolfgang); // remove another competitor
         List<CompetitorDTO> newCompetitorsBeforeStripping = new ArrayList<CompetitorDTO>(newVersion.competitors);
         newVersion.strip(previousVersion);
+        assertAllRowsKeysAreIdenticalToAllLeaderboardRowDTOCompetitors(newVersion);
         assertNull(newVersion.competitors); // but there should be an added competitor that we can't see through the public interface
         LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
         assertEquals(newCompetitorsBeforeStripping, applied.competitors);
@@ -192,6 +197,7 @@ public class LeaderboardDTODiffingTest {
         Set<CompetitorDTO> newSuppressedCompetitorsBeforeStripping = new HashSet<CompetitorDTO>();
         Util.addAll(newVersion.getSuppressedCompetitors(), newSuppressedCompetitorsBeforeStripping);
         newVersion.strip(previousVersion);
+        assertAllRowsKeysAreIdenticalToAllLeaderboardRowDTOCompetitors(newVersion);
         assertEquals(2, Util.size(newVersion.getSuppressedCompetitors()));
         assertTrue(Util.contains(newVersion.getSuppressedCompetitors(), somebodyNew));
         for (CompetitorDTO compactSuppressedCompetitor : newVersion.getSuppressedCompetitors()) {
@@ -215,6 +221,7 @@ public class LeaderboardDTODiffingTest {
         final HashMap<CompetitorDTO, String> newDisplayNamesBeforeStripping = new HashMap<CompetitorDTO, String>();
         newDisplayNamesBeforeStripping.putAll(newVersion.competitorDisplayNames);
         newVersion.strip(previousVersion);
+        assertAllRowsKeysAreIdenticalToAllLeaderboardRowDTOCompetitors(newVersion);
         assertEquals(2, newVersion.competitorDisplayNames.size());
         assertTrue(newVersion.competitorDisplayNames.keySet().contains(somebodyNew));
         for (CompetitorDTO compactSuppressedCompetitor : newVersion.competitorDisplayNames.keySet()) {
@@ -242,6 +249,7 @@ public class LeaderboardDTODiffingTest {
         newOrdering.add(12, formerRank13);
         List<CompetitorDTO> newOrderBeforeStripping = new ArrayList<CompetitorDTO>(newOrdering);
         newVersion.strip(previousVersion);
+        assertAllRowsKeysAreIdenticalToAllLeaderboardRowDTOCompetitors(newVersion);
         for (RaceColumnDTO raceColumn : newVersion.getRaceList()) {
             if (!raceColumn.getName().equals("R9")) {
                 assertNull(newVersion.getCompetitorsFromBestToWorst(raceColumn));
@@ -255,5 +263,13 @@ public class LeaderboardDTODiffingTest {
         }
         LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
         assertEquals(newOrderBeforeStripping, applied.getCompetitorsFromBestToWorst(applied.getRaceColumnByName("R9")));
+    }
+    
+    private void assertAllRowsKeysAreIdenticalToAllLeaderboardRowDTOCompetitors(LeaderboardDTO leaderboard) {
+        if (leaderboard.rows != null) {
+            for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : leaderboard.rows.entrySet()) {
+                assertSame(e.getKey(), e.getValue().competitor);
+            }
+        }
     }
 }
