@@ -38,6 +38,8 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
     private final static Logger logger = Logger.getLogger(EventRaceStatesJsonGetServlet.class.getName());
 
     private static final String PARAM_NAME_EVENTID = "eventId";
+    // private static final String PARAM_NAME_FILTER_BY_REGATTA = "filterByRegatta";
+    private static final String PARAM_NAME_FILTER_BY_LEADERBOARD = "filterByLeaderboard";
     private static final String PARAM_NAME_FILTER_BY_COURSEAREA = "filterByCourseArea";
     private static final String PARAM_NAME_FILTER_BY_DAYOFFSET = "filterByDayOffset";
 
@@ -48,7 +50,8 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String eventIdParam = request.getParameter(PARAM_NAME_EVENTID);
-        String courseAreaFilterParam = request.getParameter(PARAM_NAME_FILTER_BY_COURSEAREA);
+        String filterByCourseAreaParam = request.getParameter(PARAM_NAME_FILTER_BY_COURSEAREA);
+        String filterByLeaderboardParam = request.getParameter(PARAM_NAME_FILTER_BY_LEADERBOARD);
         String filterByDayOffsetParam = request.getParameter(PARAM_NAME_FILTER_BY_DAYOFFSET);
         boolean filterByDayOffset = false;
         Calendar dayToCheck = Calendar.getInstance();
@@ -76,17 +79,21 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
                 JSONArray raceStatesLogEntriesJson = new JSONArray();
                 result.put(FIELD_RACE_STATES, raceStatesLogEntriesJson);
                 for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                    if(courseAreaFilterParam == null || courseArea.getName().equals(courseAreaFilterParam)) {
+                    if(filterByCourseAreaParam == null || courseArea.getName().equals(filterByCourseAreaParam)) {
                         for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
-                            if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea().equals(courseArea)) {
-                                String regattaDisplayName = leaderboard.getDisplayName();
-                                for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                                    for (Fleet fleet : raceColumn.getFleets()) {
-                                        if(!filterByDayOffset || isRaceStateOfSameDay(raceColumn, fleet, dayToCheck)) {
-                                            JSONObject raceStateJson = createRaceStateJsonObject(raceColumn, fleet);
-                                            raceStateJson.put("courseAreaName", courseArea.getName());
-                                            raceStateJson.put("regattaName", regattaDisplayName);
-                                            raceStatesLogEntriesJson.add(raceStateJson);
+                            if (filterByLeaderboardParam == null || leaderboard.getName().equals(filterByLeaderboardParam)) {
+                                if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea().equals(courseArea)) {
+                                    String leaderboardName = leaderboard.getName();
+                                    String leaderboardDisplayName = leaderboard.getDisplayName();
+                                    for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                                        for (Fleet fleet : raceColumn.getFleets()) {
+                                            if(!filterByDayOffset || isRaceStateOfSameDay(raceColumn, fleet, dayToCheck)) {
+                                                JSONObject raceStateJson = createRaceStateJsonObject(raceColumn, fleet);
+                                                raceStateJson.put("courseAreaName", courseArea.getName());
+                                                raceStateJson.put("leaderboardName", leaderboardName);
+                                                raceStateJson.put("leaderboardDisplayName", leaderboardDisplayName);
+                                                raceStatesLogEntriesJson.add(raceStateJson);
+                                            }
                                         }
                                     }
                                 }
