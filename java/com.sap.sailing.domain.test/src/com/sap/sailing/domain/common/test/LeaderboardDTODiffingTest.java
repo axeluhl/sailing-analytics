@@ -97,8 +97,9 @@ public class LeaderboardDTODiffingTest {
         Map<CompetitorDTO, LeaderboardRowDTO> rowsBeforeStripping = newVersion.rows;
         newVersion.strip(previousVersion);
         assertNotNull(newVersion.rows);
-        assertEquals(1, newVersion.rows.size()); // only wolfgang's row show show
-        assertTrue(newVersion.rows.get(wolfgang).fieldsByRaceColumnName.isEmpty());
+        assertEquals(1, newVersion.rows.size()); // only wolfgang's row should show
+        assertEquals(wolfgang, newVersion.rows.keySet().iterator().next().getCompetitorFromPrevious(previousVersion));
+        assertTrue(newVersion.rows.values().iterator().next().fieldsByRaceColumnName.isEmpty());
         LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
         assertEquals(rowsBeforeStripping, applied.rows);
     }
@@ -255,5 +256,4 @@ public class LeaderboardDTODiffingTest {
         LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
         assertEquals(newOrderBeforeStripping, applied.getCompetitorsFromBestToWorst(applied.getRaceColumnByName("R9")));
     }
-
 }
