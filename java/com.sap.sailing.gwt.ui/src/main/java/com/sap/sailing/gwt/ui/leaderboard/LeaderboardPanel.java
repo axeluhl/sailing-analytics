@@ -1201,7 +1201,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            Double totalPoints = getLeaderboard().getTotalPoints(object);
+            Double totalPoints = object.totalPoints;
             return "" + (totalPoints == null ? "" : scoreFormat.format(totalPoints));
         }
 

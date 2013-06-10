@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.RaceColumnInSeriesImpl;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -80,5 +81,22 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     public CourseArea getDefaultCourseArea() {
         return regatta.getDefaultCourseArea();
     }
+
+    /**
+     * If the regatta' series {@link Regatta#definesSeriesDiscardThresholds() define} their own result discarding rules, this leaderboard uses
+     * a composite result discarding rule of type {@link PerSeriesResultDiscardingRuleImpl} that contains discards within each series according
+     * to the series' discarding rules. Otherwise, the default cross-leaderboard result discarding rule is obtained from the super class
+     * implementation.
+     */
+    @Override
+    public ResultDiscardingRule getResultDiscardingRule() {
+        if (regatta.definesSeriesDiscardThresholds()) {
+            return new PerSeriesResultDiscardingRuleImpl(regatta);
+        } else {
+            return super.getResultDiscardingRule();
+        }
+    }
+    
+    
 
 }
