@@ -420,11 +420,20 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 competitorDisplayNames = expandedCompetitorDisplayNames;
             }
             // TODO ensure that the races collection has all the necessary RaceColumnDTO objects before looking them up by name
+            Set<RaceColumnDTO> columnsForWhichToExpandCompetitorOrderingPerRace = new HashSet<RaceColumnDTO>(getCompetitorOrderingPerRace().keySet());
             for (String raceColumnNameForWhichCompetitorOrderingPerRaceUnchanged : raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged) {
                 RaceColumnDTO raceColumn = getRaceColumnByName(raceColumnNameForWhichCompetitorOrderingPerRaceUnchanged);
                 // be on the safe side regarding the equals/hashCode implementation of RaceColumnDTO and look it up by name for old and new version
                 RaceColumnDTO previousRaceColumn = previousVersion.getRaceColumnByName(raceColumnNameForWhichCompetitorOrderingPerRaceUnchanged);
                 setCompetitorsFromBestToWorst(raceColumn, previousVersion.getCompetitorsFromBestToWorst(previousRaceColumn));
+                columnsForWhichToExpandCompetitorOrderingPerRace.remove(raceColumn);
+            }
+            // expand all other ordered competitor lists for all races where it changed 
+            for (RaceColumnDTO columnForWhichToExpandCompetitorOrderingPerRace : columnsForWhichToExpandCompetitorOrderingPerRace) {
+                List<CompetitorDTO> competitorsFromBestToWorstForRace = getCompetitorsFromBestToWorst(columnForWhichToExpandCompetitorOrderingPerRace);
+                for (int i=competitorsFromBestToWorstForRace.size()-1; i>=0; i--) {
+                    competitorsFromBestToWorstForRace.set(i, competitorsFromBestToWorstForRace.get(i).getCompetitorFromPrevious(previousVersion));
+                }
             }
             final Set<CompetitorDTO> rowsUnchangedForCompetitors = new HashSet<CompetitorDTO>();
             if (rowsUnchanged != null) {
@@ -557,10 +566,17 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         final HashMap<RaceColumnDTO, List<CompetitorDTO>> competitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>(getCompetitorOrderingPerRace());
         for (RaceColumnDTO raceColumn : this.getRaceList()) {
             List<CompetitorDTO> competitorsFromBestToWorstForRaceColumn = getCompetitorsFromBestToWorst(raceColumn);
-            List<CompetitorDTO> previousCompetitorsFrombestToWorstForRaceColumn = previousVersion.getCompetitorsFromBestToWorst(raceColumn);
-            if (Util.equalsWithNull(competitorsFromBestToWorstForRaceColumn, previousCompetitorsFrombestToWorstForRaceColumn)) {
+            List<CompetitorDTO> previousCompetitorsFromBestToWorstForRaceColumn = previousVersion.getCompetitorsFromBestToWorst(raceColumn);
+            if (Util.equalsWithNull(competitorsFromBestToWorstForRaceColumn, previousCompetitorsFromBestToWorstForRaceColumn)) {
                 raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged.add(raceColumn.getName());
                 competitorOrderingPerRace.remove(raceColumn);
+            } else {
+                // try at least partial compaction
+                List<CompetitorDTO> compactedCompetitorsFromBestToWorstForRaceColumn = new ArrayList<CompetitorDTO>();
+                for (CompetitorDTO competitor : competitorsFromBestToWorstForRaceColumn) {
+                    compactedCompetitorsFromBestToWorstForRaceColumn.add(compactCompetitorMap.get(competitor));
+                }
+                competitorOrderingPerRace.put(raceColumn, compactedCompetitorsFromBestToWorstForRaceColumn);
             }
         }
         setCompetitorOrderingPerRace(competitorOrderingPerRace);

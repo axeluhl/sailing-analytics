@@ -28,6 +28,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.test.StoredTrackBasedTest;
 import com.sap.sailing.util.ClonerImpl;
@@ -223,4 +224,36 @@ public class LeaderboardDTODiffingTest {
         LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
         assertEquals(newDisplayNamesBeforeStripping, applied.competitorDisplayNames);
     }
+
+    @Test
+    public void testCompetitorOrderingInRaceChange() {
+        RaceColumnDTO r9 = newVersion.getRaceColumnByName("R9");
+        Map<RaceColumnDTO, List<CompetitorDTO>> newCompetitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>(newVersion.getCompetitorOrderingPerRace());
+        newVersion.setCompetitorOrderingPerRace(newCompetitorOrderingPerRace);
+        List<CompetitorDTO> newOrdering = new ArrayList<CompetitorDTO>(newVersion.getCompetitorsFromBestToWorst(r9));
+        newVersion.setCompetitorsFromBestToWorst(r9, newOrdering);
+        newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
+        CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", "DE", "GER", "Germany", "GER 1234", "912p09871203987",
+                new BoatClassDTO("505", 5.05));
+        newVersion.competitors.add(somebodyNew);
+        newOrdering.add(somebodyNew);
+        CompetitorDTO formerRank13 = newOrdering.remove(13);
+        newOrdering.add(12, formerRank13);
+        List<CompetitorDTO> newOrderBeforeStripping = new ArrayList<CompetitorDTO>(newOrdering);
+        newVersion.strip(previousVersion);
+        for (RaceColumnDTO raceColumn : newVersion.getRaceList()) {
+            if (!raceColumn.getName().equals("R9")) {
+                assertNull(newVersion.getCompetitorsFromBestToWorst(raceColumn));
+            }
+        }
+        assertEquals(newVersion.getCompetitorsFromBestToWorst(r9).size()-1, newVersion.getCompetitorsFromBestToWorst(r9).indexOf(somebodyNew));
+        for (CompetitorDTO compactSuppressedCompetitor : newVersion.getCompetitorsFromBestToWorst(r9)) {
+            if (compactSuppressedCompetitor != somebodyNew) {
+                assertFalse(compactSuppressedCompetitor instanceof CompetitorDTOImpl); // assert that the existing competitor was compacted
+            }
+        }
+        LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
+        assertEquals(newOrderBeforeStripping, applied.getCompetitorsFromBestToWorst(applied.getRaceColumnByName("R9")));
+    }
+
 }

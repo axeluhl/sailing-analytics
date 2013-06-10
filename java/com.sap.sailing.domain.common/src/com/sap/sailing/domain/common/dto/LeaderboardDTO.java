@@ -99,11 +99,11 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
         competitorOrderingPerRace.put(raceColumn, orderedCompetitors);
     }
     
-    protected void setCompetitorOrderingPerRace(Map<RaceColumnDTO, List<CompetitorDTO>> competitorOrderingPerRace) {
+    public void setCompetitorOrderingPerRace(Map<RaceColumnDTO, List<CompetitorDTO>> competitorOrderingPerRace) {
         this.competitorOrderingPerRace = competitorOrderingPerRace;
     }
 
-    protected Map<RaceColumnDTO, List<CompetitorDTO>> getCompetitorOrderingPerRace() {
+    public Map<RaceColumnDTO, List<CompetitorDTO>> getCompetitorOrderingPerRace() {
         return competitorOrderingPerRace;
     }
     
