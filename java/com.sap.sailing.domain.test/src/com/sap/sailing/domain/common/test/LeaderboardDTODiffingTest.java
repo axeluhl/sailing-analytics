@@ -200,4 +200,27 @@ public class LeaderboardDTODiffingTest {
         LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
         assertEquals(newSuppressedCompetitorsBeforeStripping, applied.getSuppressedCompetitors());
     }
+
+    @Test
+    public void testDisplayNameChange() {
+        newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
+        CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", "DE", "GER", "Germany", "GER 1234", "912p09871203987",
+                new BoatClassDTO("505", 5.05));
+        newVersion.competitors.add(somebodyNew);
+        newVersion.competitorDisplayNames = new HashMap<CompetitorDTO, String>(newVersion.competitorDisplayNames);
+        newVersion.competitorDisplayNames.put(newVersion.competitors.get(13), "Humba");
+        newVersion.competitorDisplayNames.put(somebodyNew, "Trala");
+        final HashMap<CompetitorDTO, String> newDisplayNamesBeforeStripping = new HashMap<CompetitorDTO, String>();
+        newDisplayNamesBeforeStripping.putAll(newVersion.competitorDisplayNames);
+        newVersion.strip(previousVersion);
+        assertEquals(2, newVersion.competitorDisplayNames.size());
+        assertTrue(newVersion.competitorDisplayNames.keySet().contains(somebodyNew));
+        for (CompetitorDTO compactSuppressedCompetitor : newVersion.competitorDisplayNames.keySet()) {
+            if (compactSuppressedCompetitor != somebodyNew) {
+                assertFalse(compactSuppressedCompetitor instanceof CompetitorDTOImpl); // assert that the existing competitor was compacted
+            }
+        }
+        LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
+        assertEquals(newDisplayNamesBeforeStripping, applied.competitorDisplayNames);
+    }
 }
