@@ -18,15 +18,12 @@ import org.jdom.Document;
 import org.jdom.Element;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
@@ -44,10 +41,8 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.server.RacingEventService;
 
 public class RegattaDataPerRaceAction extends HttpAction {
@@ -91,7 +86,29 @@ public class RegattaDataPerRaceAction extends HttpAction {
                 RaceDefinition race = trackedRace.getRace();
                 
                 final Element race_node = addNamedElement(races_node, "race"); // add race node for the current race
-                addNamedElementWithValue(race_node, "name", race.getName()); // add name node to current race
+                
+                String raceName = race.getName();
+                if (raceName.matches("[A-Za-z ]*\\d")) {
+                    Pattern regex = Pattern.compile("([A-Za-z ]*)(\\d)");
+                    Matcher matcher = regex.matcher(raceName);
+                    
+                    String raceNameFirstPart = matcher.replaceAll("$1");
+                    String raceNumber = matcher.replaceAll("$2");
+                    
+                    
+                    
+                    try {
+                        if (Integer.parseInt(raceNumber) < 10) {
+                            raceNumber = "0" + raceNumber;
+                            raceName = raceNameFirstPart + raceNumber;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    
+                }
+                
+                addNamedElementWithValue(race_node, "name", raceName); // add name node to current race
                 
                 
                 final TimePoint raceStarted = getTimePoint(trackedRace); // get TimePoint for when the race started
@@ -135,54 +152,22 @@ public class RegattaDataPerRaceAction extends HttpAction {
                                         .get(Calendar.SECOND)));
 
                 Pair<Double, Double> averageWindSpeedofRace = calculateAverageWindSpeedofRace(trackedRace);
-                String wind_strength = "";
-                if (averageWindSpeedofRace != null) {
-                        if (averageWindSpeedofRace.getA() < 4) {
-                            wind_strength = "Very light";
-                        } else if (averageWindSpeedofRace.getA() >= 4 && averageWindSpeedofRace.getA() < 8) {
-                            wind_strength = "Light";
-                        } else if (averageWindSpeedofRace.getA() >= 8 && averageWindSpeedofRace.getA() < 14) {
-                            wind_strength = "Medium";
-                        } else if (averageWindSpeedofRace.getA() >= 14 && averageWindSpeedofRace.getA() < 20) {
-                            wind_strength = "Strong";
-                        } else if (averageWindSpeedofRace.getA() >= 20) {
-                            wind_strength = "Very strong";
-                        }
-                }
                 
                 Double wind_speed = 0.0;
-                Double wind_confi = 0.0;
-                Double wind_beaufort = 0.0;
+//                Double wind_confi = 0.0;
+                long wind_beaufort = 0;
                 
                 if (averageWindSpeedofRace != null) {
                     wind_speed = averageWindSpeedofRace.getA();
-                    wind_beaufort = averageWindSpeedofRace.getB();
+                    wind_beaufort = Math.round(averageWindSpeedofRace.getB());
                 }
                 
                 addNamedElementWithValue(race_node, "average_wind_speed", wind_speed);
                 addNamedElementWithValue(race_node, "average_wind_speed_beaufort", wind_beaufort);
-                addNamedElementWithValue(race_node, "wind_strength", wind_strength);
-                
-                addNamedElementWithValue(race_node, "b1", Math.exp(Math.log(1*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b15", Math.exp(Math.log(1.5*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b159", Math.exp(Math.log(1.59*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b16", Math.exp(Math.log(1.6*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b199", Math.exp(Math.log(1.99*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b2", Math.exp(Math.log(2*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b4", Math.exp(Math.log(4*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b45", Math.exp(Math.log(4.5*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b459", Math.exp(Math.log(4.59*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b46", Math.exp(Math.log(4.6*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b499", Math.exp(Math.log(4.99*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b5", Math.exp(Math.log(5*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b7", Math.exp(Math.log(7*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b11", Math.exp(Math.log(11*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b16", Math.exp(Math.log(16*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b22", Math.exp(Math.log(22*1.852/3.6 / 0.8360)*2/3));
-                addNamedElementWithValue(race_node, "b28", Math.exp(Math.log(28*1.852/3.6 / 0.8360)*2/3));
-                
-                
+           
                 addNamedElementWithValue(race_node, "course_length_m", getCourseLength(trackedRace) == null ? 0 : getCourseLength(trackedRace).getMeters());
+                
+                addNamedElementWithValue(race_node, "first_leg_type", trackedRace.getTrackedLeg(trackedRace.getRace().getCourse().getFirstLeg()).getLegType(raceStarted).toString());
                 
                 
                 final Element competitors_node = addNamedElement(race_node, "competitors"); // add node that contains all competitors
@@ -224,11 +209,10 @@ public class RegattaDataPerRaceAction extends HttpAction {
                         addNamedElementWithValue(competitor_node, "distance_traveled_m", trackedRace.getDistanceTraveled(competitor, trackedRace.getEndOfTracking()).getMeters());
                         addNamedElementWithValue(competitor_node, "avg_xte_m", trackedRace.getAverageCrossTrackError(competitor, trackedRace.getEndOfTracking(), true).getMeters());
                         
-                        
-                        
                         TrackedLeg previousLeg = null;
                         ArrayList<Integer> posGLlist = new ArrayList<Integer>();
                         Double race_time = 0.0;
+                        int rankAfterFirstLeg = -3;
                         for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
                             final Leg leg = trackedLeg.getLeg();
                             TrackedLegOfCompetitor trackedLegOfCompetitor = trackedLeg.getTrackedLeg(competitor); // Get data
@@ -269,6 +253,11 @@ public class RegattaDataPerRaceAction extends HttpAction {
                                 posGLlist.add(posGL * -1);
                             }
                             
+                            // get rank after first leg
+                            if (trackedLegOfCompetitor.getLeg().equals(trackedRace.getRace().getCourse().getFirstLeg())) {
+                                rankAfterFirstLeg = trackedLegOfCompetitor.getRank(now);
+                            }
+                            
                             // assign the smallest start time for the next leg
                             minNextLegStart = (minNextLegStart > compFinishedLeg.asMillis() ? compFinishedLeg
                                     .asMillis() : minNextLegStart);
@@ -288,8 +277,11 @@ public class RegattaDataPerRaceAction extends HttpAction {
                             avg_rank_gain = temp * 1.0 / posGLlist.size();
                         } 
 
-                        addNamedElementWithValue(competitor_node, "avg_rank_gain", avg_rank_gain); // Ranks Gained/Lost
+                        addNamedElementWithValue(competitor_node, "avg_rank_gain", avg_rank_gain); // avg rank gain
                         addNamedElementWithValue(competitor_node, "rank_gains", posGLlist.toString()); // Ranks Gained/Lost
+                        
+                        addNamedElementWithValue(competitor_node, "rank_after_first_leg", rankAfterFirstLeg); // Rank after first leg
+                        addNamedElementWithValue(competitor_node, "rank_gain_between_first_and_finish", rankAfterFirstLeg - trackedRace.getRank(competitor, now)); // Rank gain between first leg and finish
                         
                         addNamedElementWithValue(competitor_node, "race_time_s", race_time); 
                         
