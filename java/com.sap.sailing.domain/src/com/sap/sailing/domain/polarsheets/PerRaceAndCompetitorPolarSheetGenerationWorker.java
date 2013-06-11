@@ -96,7 +96,7 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable{
             
             if (oddFixClassifier.classifiesAsOdd(polarFix)) {
                 logger.log(Level.INFO, String.format("Odd point was found for: %1$s, in Race %2$s, at %3$tk:%3$tM:%3$tS", competitor.getName(), race.getRace().getName(), fix.getTimePoint().asDate()));
-                continue;
+                //continue;
             }
 
             

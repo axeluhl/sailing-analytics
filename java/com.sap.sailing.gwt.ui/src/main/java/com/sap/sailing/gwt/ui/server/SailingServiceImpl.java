@@ -124,6 +124,7 @@ import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationTriggerResponseImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
+import com.sap.sailing.domain.common.impl.PolarSheetsWindStepping;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -145,7 +146,6 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
-import com.sap.sailing.domain.polarsheets.PolarSheetsWindStepping;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
@@ -3011,14 +3011,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
 
         List<Double> dataForAngleAndWindSpeed = new ArrayList<Double>();
-        int windSpeedLevel = stepping.getLevelForValue(windSpeed);
+        int windSpeedLevel = stepping.getLevelIndexForValue(windSpeed);
 
         double mean = generationResultData.getAveragedPolarDataByWindSpeed()[windSpeedLevel][angle].doubleValue();
         
         double partOfVariance = 0;
         
         for (BoatAndWindSpeed dataPoint: dataForAngle) {
-            if ((stepping.getLevelForValue(dataPoint.getWindSpeed().getKnots()) == windSpeedLevel)) {
+            if ((stepping.getLevelIndexForValue(dataPoint.getWindSpeed().getKnots()) == windSpeedLevel)) {
                 double speed = dataPoint.getBoatSpeed().getKnots();
                 partOfVariance = partOfVariance + Math.pow((speed - mean), 2); 
                 dataForAngleAndWindSpeed.add(speed);

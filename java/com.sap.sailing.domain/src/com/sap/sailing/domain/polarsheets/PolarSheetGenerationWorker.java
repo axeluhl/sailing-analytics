@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.polarsheets;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,9 +12,12 @@ import java.util.concurrent.Executor;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
+import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
+import com.sap.sailing.domain.common.impl.PolarSheetsWindStepping;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -44,7 +48,7 @@ public class PolarSheetGenerationWorker {
      *            executes the tasks upon {@link #startPolarSheetGeneration()}
      */
     public PolarSheetGenerationWorker(Set<TrackedRace> trackedRaces, Executor executor) {
-        Integer[] levels = {4,6,8,10,12,14,16,20,25,30};
+        Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
         stepping = new PolarSheetsWindStepping(levels);
         polarData = initializePolarDataContainer();
         this.executor = executor;
@@ -60,7 +64,8 @@ public class PolarSheetGenerationWorker {
             Iterable<Competitor> competitors = raceDefinition.getCompetitors();
 
             for (Competitor competitor : competitors) {
-                PerRaceAndCompetitorPolarSheetGenerationWorker task = new PerRaceAndCompetitorPolarSheetGenerationWorker(race, this, startTime, endTime, competitor);
+                PerRaceAndCompetitorPolarSheetGenerationWorker task = new PerRaceAndCompetitorPolarSheetGenerationWorker(
+                        race, this, startTime, endTime, competitor);
                 workers.add(task);
             }
 
@@ -111,55 +116,109 @@ public class PolarSheetGenerationWorker {
      *         product.
      */
     public PolarSheetsData getPolarData() {
-        
-        //Do this before working through data, since it's possible that remaining data is processed by the workers 
-        // during the process of filling the result data. 
+
+        // Do this before working through data, since it's possible that remaining data is processed by the workers
+        // during the process of filling the result data.
         boolean complete = allWorkersDone();
-        
+
         int levelCount = stepping.getNumberOfLevels();
         Number[][] averagedPolarDataByWindSpeed = new Number[levelCount][360];
         Integer[] dataCountPerAngle = new Integer[360];
         int dataCount = 0;
         Map<Integer, Integer[]> dataCountPerAngleForWindspeed = new HashMap<Integer, Integer[]>();
+        Map<Integer, Map<Integer,PolarSheetsHistogramData>> histogramDataMap = new HashMap<Integer, Map<Integer,PolarSheetsHistogramData>>();
+        Map<Integer, Integer> totalDataCountPerWindSpeed = new HashMap<Integer, Integer>();
         for (int i = 0; i < levelCount; i++) {
             dataCountPerAngleForWindspeed.put(i, new Integer[360]);
+            histogramDataMap.put(i, new HashMap<Integer,PolarSheetsHistogramData>());
+            totalDataCountPerWindSpeed.put(i, 0);
         }
         for (int i = 0; i < 360; i++) {
+            Double[] varianceNominator = new Double[levelCount];
             // Avoid Concurrent modification of lists, so get current state as an array; lock would slow things down
             BoatAndWindSpeed[] values = polarData.get(i).toArray(new BoatAndWindSpeed[polarData.get(i).size()]);
             dataCount = dataCount + values.length;
             dataCountPerAngle[i] = values.length;
             double[] sumsPerWindSpeed = new double[levelCount];
             int[] dataCountPerWindSpeed = new int[levelCount];
+            Map<Integer, List<Double>> dataSetForWindLevel = new HashMap<Integer, List<Double>>();
             for (BoatAndWindSpeed singleDataPoint : values) {
                 if (singleDataPoint != null) {
                     double windSpeed = singleDataPoint.getWindSpeed().getKnots();
-                    int level = stepping.getLevelForValue(windSpeed);
+                    int level = stepping.getLevelIndexForValue(windSpeed);
                     if (level < 0) {
                         continue;
                     }
-                    //TODO enable different kinds of metrics for boats speed
-                    sumsPerWindSpeed[level] = sumsPerWindSpeed[level] + singleDataPoint.getBoatSpeed().getKnots();
+                    double speed = singleDataPoint.getBoatSpeed().getKnots();
+                    if (!dataSetForWindLevel.containsKey(level)) {
+                        dataSetForWindLevel.put(level, new ArrayList<Double>());
+                    }
+                    dataSetForWindLevel.get(level).add(speed);
+                    sumsPerWindSpeed[level] = sumsPerWindSpeed[level] + speed;
+                    varianceNominator[level] = (varianceNominator[level] == null) ? speed : varianceNominator[level]
+                            + speed;
                     dataCountPerWindSpeed[level]++;
                 }
             }
-            
+           
             for (int j = 0; j < levelCount; j++) {
+                totalDataCountPerWindSpeed.put(j, totalDataCountPerWindSpeed.get(j) + dataCountPerWindSpeed[j]);
                 Double average = sumsPerWindSpeed[j] / dataCountPerWindSpeed[j];
                 if (average.isNaN()) {
                     average = new Double(0);
                 }
                 averagedPolarDataByWindSpeed[j][i] = average;
                 dataCountPerAngleForWindspeed.get(j)[i] = dataCountPerWindSpeed[j];
-            }
-            
-            
-            
+                double coefficiantOfVariation = 0;
+                if (dataCountPerWindSpeed[j] > 0 && average > 0) {
+                    Double variance = varianceNominator[j] / dataCountPerWindSpeed[j];
+                    Double standardDeviation = Math.sqrt(variance);
+                    coefficiantOfVariation = standardDeviation / average;
+                } 
+                List<Double> rawData = dataSetForWindLevel.get(j);
+                if (rawData == null || rawData.size() <= 0) {
+                    continue;
+                }
+                Double min = Collections.min(rawData);
+                Double max = Collections.max(rawData);
+                //TODO make number of columns dynamic to chart size
+                int numberOfColumns = 20;
+                double range = (max - min) / numberOfColumns;
+                Double[] xValues = new Double[numberOfColumns];
+                for (int u = 0; u < numberOfColumns; u++) {
+                    xValues[u] = min + u * range + ( 0.5 * range);
+                }
 
+                Integer[] yValues = new Integer[numberOfColumns];
+                for (Double dataPoint : rawData) {
+                    int u = (int) (((dataPoint - min) / range));
+                    if (u == numberOfColumns) {
+                        //For max value
+                        u = 19;
+                    }
+                    if (yValues[u] == null) {
+                        yValues[u] = 0;
+                    }
+                    yValues[u]++;
+                }
+
+                PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(i, xValues, yValues, rawData.size(), coefficiantOfVariation);
+                histogramDataMap.get(j).put(i, histogramData);
+                
+            }
+
+        }
+        
+        for (int j = 0; j < levelCount; j++) {
+            for (PolarSheetsHistogramData histogramData : histogramDataMap.get(j).values()) {
+                Double polarSheetPointConfidenceMeasure = (1 - histogramData.getCoefficiantOfVariation()) * 
+                        (histogramData.getDataCount() / (double) totalDataCountPerWindSpeed.get(j)) * 360;
+                histogramData.setConfidenceMeasure(polarSheetPointConfidenceMeasure);
+            }
         }
 
         PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarDataByWindSpeed, complete, dataCount,
-                dataCountPerAngleForWindspeed, stepping.getRawStepping());
+                dataCountPerAngleForWindspeed, stepping, histogramDataMap);
 
         return data;
     }

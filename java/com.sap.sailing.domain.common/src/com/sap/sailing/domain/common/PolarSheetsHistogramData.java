@@ -14,5 +14,9 @@ public interface PolarSheetsHistogramData extends Serializable{
     
     double getCoefficiantOfVariation();
     
+    public double getConfidenceMeasure();
+
+    public void setConfidenceMeasure(double polarSheetPointConfidenceMeasure);
+    
 
 }

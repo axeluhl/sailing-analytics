@@ -15,6 +15,8 @@ public class PolarSheetsHistogramDataImpl implements PolarSheetsHistogramData {
     private int dataCount;
 
     private double coefficiantOfVariation;
+
+    private double confidenceMeasure = 0;
     
     //For GWT serialization
     PolarSheetsHistogramDataImpl() {}
@@ -51,6 +53,16 @@ public class PolarSheetsHistogramDataImpl implements PolarSheetsHistogramData {
     @Override
     public double getCoefficiantOfVariation() {
         return coefficiantOfVariation;
+    }
+
+    @Override
+    public double getConfidenceMeasure() {
+        return confidenceMeasure;
+    }
+
+    @Override
+    public void setConfidenceMeasure(double polarSheetPointConfidenceMeasure) {
+        confidenceMeasure = polarSheetPointConfidenceMeasure;      
     }
 
 }

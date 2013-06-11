@@ -72,12 +72,12 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
     }
 
     private void addValuesToSeries(String seriesId, PolarSheetsData result) {
-        int stepCount = result.getStepping().length;
+        int stepCount = result.getStepping().getRawStepping().length;
         if (seriesMap.containsKey(seriesId)) {
             for (int i = 0; i < stepCount; i++) {
                 if (hasSufficientDataForWindspeed(result.getDataCountPerAngleForWindspeed(i))) {
                     if (seriesMap.get(seriesId)[i] == null) {
-                        createSeriesForWindspeed(seriesId, i, result.getStepping()[i]);
+                        createSeriesForWindspeed(seriesId, i, result.getStepping().getRawStepping()[i]);
                     }
                     Series series = seriesMap.get(seriesId)[i];
                     series.setPoints(result.getAveragedPolarDataByWindSpeed()[i], false);
@@ -102,17 +102,22 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         return false;
     }
 
-    private Point[] createPointsWithMarkerAlphaAccordingToDataCount(PolarSheetsData result, int beaufort) {
+    private Point[] createPointsWithMarkerAlphaAccordingToDataCount(PolarSheetsData result, int windspeed) {
         Point[] points = new Point[360];
-        List<Integer> dataCountList = Arrays.asList(result.getDataCountPerAngleForWindspeed(beaufort));
+        List<Integer> dataCountList = Arrays.asList(result.getDataCountPerAngleForWindspeed(windspeed));
         Integer max = Collections.max(dataCountList);
         if (max <= 0) {
             return null;
         }
         for (int i = 0; i < 360; i++) {
-            points[i] = new Point(result.getAveragedPolarDataByWindSpeed()[beaufort][i]);
+            //TODO make configurable
+            if (result.getHistogramDataMap().get(windspeed) == null || 
+                    result.getHistogramDataMap().get(windspeed).get(i) == null || 
+                    result.getHistogramDataMap().get(windspeed).get(i).getConfidenceMeasure() < 0.5) {
+                continue;
+            }
             if (points[i] == null) {
-                points[i] = new Point(0);
+                points[i] = new Point(result.getAveragedPolarDataByWindSpeed()[windspeed][i]);
             }
             double alpha = (double) dataCountList.get(i) / (double) max;
             int blue;
@@ -159,7 +164,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
             return;
         }
         if (!seriesMap.containsKey(id)) {
-            newSeriesArray(id, result.getStepping().length);
+            newSeriesArray(id, result.getStepping().getRawStepping().length);
         }
         addValuesToSeries(id, result);
         chart.redraw();

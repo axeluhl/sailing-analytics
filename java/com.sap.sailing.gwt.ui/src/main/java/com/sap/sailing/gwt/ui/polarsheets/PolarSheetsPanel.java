@@ -28,8 +28,7 @@ import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
-import com.sap.sailing.gwt.ui.actions.GetPolarSheetDataByAngleAction;
+import com.sap.sailing.domain.common.WindStepping;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
@@ -52,7 +51,6 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
     private List<RegattaAndRaceIdentifier> selectedRaces;
     private PolarSheetsChartPanel chartPanel;
     private PolarSheetsHistogramPanel histogramPanel;
-    private AsyncActionsExecutor asyncActionsExecutor;
 
     private Label polarSheetsGenerationLabel;
     private Label dataCountLabel;
@@ -61,6 +59,8 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
     //But this would require to attach source code for gwt
     private Map<String,String> idNameMapping;
     private Map<String,String> nameIdMapping;
+    
+    private Map<String,PolarSheetsData> polarSheetsData;
 
     private ListBox nameListBox;
 
@@ -75,6 +75,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         
         idNameMapping = new HashMap<String, String>();
         nameIdMapping = new HashMap<String, String>();
+        polarSheetsData = new HashMap<String, PolarSheetsData>();
         setSize("100%", "100%");
 
         VerticalPanel leftPanel = addFilteredTrackedRacesList();
@@ -96,8 +97,6 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         setExportButtonListener(exportButton);
         leftPanel.add(exportButton);
         add(rightPanel);
-
-        asyncActionsExecutor = new AsyncActionsExecutor();
         setEventListenersForPolarSheetChart();
     }
 
@@ -193,24 +192,10 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
                 String polarSheetName = split[0] + "-" + split[1];
                 String polarSheetId = nameIdMapping.get(polarSheetName);
                 int windSpeed = Integer.parseInt(split[2]); 
-                
-                GetPolarSheetDataByAngleAction action = new GetPolarSheetDataByAngleAction(sailingService,
-                        polarSheetId, angle, windSpeed, new AsyncCallback<PolarSheetsHistogramData>() {
-
-                            @Override
-                            public void onSuccess(PolarSheetsHistogramData result) {
-                                if (result != null) {
-                                    histogramPanel.setData(result);
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError(caught.getLocalizedMessage());
-                            }
-
-                        });
-                asyncActionsExecutor.execute(action);
+                PolarSheetsData polarData = polarSheetsData.get(polarSheetId);
+                WindStepping stepping = polarData.getStepping();
+                PolarSheetsHistogramData histogramData = polarSheetsData.get(polarSheetId).getHistogramDataMap().get(stepping.getLevelIndexForValue(windSpeed)).get(angle);
+                histogramPanel.setData(histogramData);
                 return true;
             }
         };
@@ -296,6 +281,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
                 // TODO string messages
                 setCompletionLabel("Generating...");
                 dataCountLabel.setText("DataCount: " + result.getDataCount());
+                polarSheetsData.put(id, result);
                 chartPanel.setData(idNameMapping.get(id), result);
                 if (!result.isComplete()) {
                     Timer timer = new Timer() {
