@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.utils.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
@@ -113,26 +114,10 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
         if (raceLog != null && !raceLog.isEmpty()) {
             TimePoint startTime = new StartTimeFinder(raceLog).getStartTime();
             TimePoint finishedTime = new FinishedTimeFinder(raceLog).getFinishedTime();
-            if(finishedTime != null) {
-                Calendar finishedTimeCal = Calendar.getInstance();
-                finishedTimeCal.setTime(finishedTime.asDate());
-                if(isSameDay(now, finishedTimeCal)) {
-                    result = true;
-                }
-            } else if(startTime != null) {
-                Calendar startTimeCal = Calendar.getInstance();
-                startTimeCal.setTime(startTime.asDate());
-                if(isSameDay(now, startTimeCal)) {
-                    result = true;
-                }
-            }
+            
+            result = RaceStateOfSameDayHelper.isRaceStateOfSameDay(startTime, finishedTime, now);
         }
         return result;
-    }
-
-    private boolean isSameDay(Calendar cal1, Calendar cal2) {
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
     
     private JSONObject createRaceStateJsonObject(RaceColumn raceColumn, Fleet fleet) {
