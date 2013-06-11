@@ -573,7 +573,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private SeriesDTO convertToSeriesDTO(Series series) {
         List<FleetDTO> fleets = new ArrayList<FleetDTO>();
         for (Fleet fleet : series.getFleets()) {
-            fleets.add(baseDomainFactory.convertToFleetDTO(series, fleet));
+            fleets.add(baseDomainFactory.convertToFleetDTO(fleet));
         }
         List<RaceColumnDTO> raceColumns = new ArrayList<RaceColumnDTO>();
         for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
@@ -1721,7 +1721,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = liveTimePointForTrackedRace;
                     }
                 }    
-                final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(raceColumn, fleet);
+                final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(fleet);
                 RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
                 if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive != null) {

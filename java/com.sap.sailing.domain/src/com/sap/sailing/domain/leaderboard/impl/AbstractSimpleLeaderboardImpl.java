@@ -1015,7 +1015,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 RaceDTO race = null;
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
 
-                final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(raceColumn, fleet);
+                final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(fleet);
                 if (trackedRace != null) {
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(),
                             trackedRace.getRace().getName());
@@ -1224,7 +1224,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             }
         }
         final Fleet fleet = entry.getFleet();
-        entryDTO.fleet = fleet == null ? null : baseDomainFactory.convertToFleetDTO(raceColumn, fleet);
+        entryDTO.fleet = fleet == null ? null : baseDomainFactory.convertToFleetDTO(fleet);
         return entryDTO;
     }
 

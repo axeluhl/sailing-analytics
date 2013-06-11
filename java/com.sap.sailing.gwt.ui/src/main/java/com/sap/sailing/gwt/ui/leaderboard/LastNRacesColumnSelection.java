@@ -45,7 +45,7 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
     }
 
     @Override
-    public void requestRaceColumnSelection(String raceColumnName, RaceColumnDTO column) {
+    public void requestRaceColumnSelection(RaceColumnDTO column) {
         // no-op
     }
 

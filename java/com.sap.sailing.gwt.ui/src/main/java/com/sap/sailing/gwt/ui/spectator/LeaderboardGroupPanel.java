@@ -294,7 +294,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             }
         } else {
             List<RaceColumnDTO> raceColumns = leaderboard.getRaceList();
-            renderRacesToHTml(leaderboard.name, raceColumns, new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, /* series name */ null, 0, null), b); 
+            renderRacesToHTml(leaderboard.name, raceColumns, new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null), b); 
         }
         return b.toSafeHtml();
     }

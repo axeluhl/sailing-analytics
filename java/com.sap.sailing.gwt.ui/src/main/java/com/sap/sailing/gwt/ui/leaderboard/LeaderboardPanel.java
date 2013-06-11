@@ -399,21 +399,20 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 for (String nameOfRaceColumnToShow : newSettings.getNamesOfRaceColumnsToShow()) {
                     RaceColumnDTO raceColumnToShow = getRaceByColumnName(nameOfRaceColumnToShow);
                     if (raceColumnToShow != null) {
-                        raceColumnSelection.requestRaceColumnSelection(raceColumnToShow.getName(), raceColumnToShow);
+                        raceColumnSelection.requestRaceColumnSelection(raceColumnToShow);
                     }
                 }
             } else {
                 // apply the old column selections again
                 for (String oldNameOfRaceColumnToShow : oldNamesOfRaceColumnsToShow) {
-                    raceColumnSelection.requestRaceColumnSelection(oldNameOfRaceColumnToShow,
-                            getLeaderboard().getRaceColumnByName(oldNameOfRaceColumnToShow));
+                    raceColumnSelection.requestRaceColumnSelection(getLeaderboard().getRaceColumnByName(oldNameOfRaceColumnToShow));
                 }
                 if (newSettings.getNamesOfRacesToShow() != null) {
                     raceColumnSelection.requestClear();
                     for (String nameOfRaceToShow : newSettings.getNamesOfRacesToShow()) {
                         RaceColumnDTO raceColumnToShow = getRaceByName(nameOfRaceToShow);
                         if (raceColumnToShow != null) {
-                            raceColumnSelection.requestRaceColumnSelection(raceColumnToShow.getName(), raceColumnToShow);
+                            raceColumnSelection.requestRaceColumnSelection(raceColumnToShow);
                         }
                     }
                 }

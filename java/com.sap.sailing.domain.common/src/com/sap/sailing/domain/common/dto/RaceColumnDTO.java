@@ -209,6 +209,19 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
+        final boolean result;
+        if (this == obj) {
+            result = true;
+        } else {
+            result = equals2(obj);
+            if (result) {
+                int i=0; i = i+1; // TODO remove this code which is only used to set a breakpoint here...
+            }
+        }
+        return result;
+    }
+    
+    private boolean equals2(Object obj) {
         if (this == obj)
             return true;
         if (obj == null)

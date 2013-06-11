@@ -419,8 +419,8 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                     if (!allUnchangedLeaderboardEntriesAsCompetitorsAndColumnNames
                             .contains(new Pair<CompetitorDTO, String>(previousCompetitor, raceColumnName))) {
                         LeaderboardEntryDTO leaderboardEntry = rows.get(previousCompetitor).fieldsByRaceColumnName.get(raceColumnName);
-                        final List<LegEntryDTO> previousLegDetails = previousVersion.rows.get(previousCompetitor).fieldsByRaceColumnName
-                                .get(raceColumnName).legDetails;
+                        final LeaderboardEntryDTO previousLeaderboardEntryDTO = previousVersion.rows.get(previousCompetitor).fieldsByRaceColumnName.get(raceColumnName);
+                        final List<LegEntryDTO> previousLegDetails = previousLeaderboardEntryDTO == null ? null : previousLeaderboardEntryDTO.legDetails;
                         if (previousLegDetails == null) {
                             // the leg index can only be null if the previous leg details are null
                             leaderboardEntry.legDetails = null;
@@ -529,7 +529,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         final HashMap<RaceColumnDTO, List<CompetitorDTO>> competitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>(getCompetitorOrderingPerRace());
         for (RaceColumnDTO raceColumn : this.getRaceList()) {
             List<CompetitorDTO> competitorsFromBestToWorstForRaceColumn = getCompetitorsFromBestToWorst(raceColumn);
-            List<CompetitorDTO> previousCompetitorsFromBestToWorstForRaceColumn = previousVersion.getCompetitorsFromBestToWorst(raceColumn);
+            List<CompetitorDTO> previousCompetitorsFromBestToWorstForRaceColumn = previousVersion.getCompetitorsFromBestToWorst(previousVersion.getRaceColumnByName(raceColumn.getName()));
             if (Util.equalsWithNull(competitorsFromBestToWorstForRaceColumn, previousCompetitorsFromBestToWorstForRaceColumn)) {
                 raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged.add(raceColumn.getName());
                 competitorOrderingPerRace.remove(raceColumn);
