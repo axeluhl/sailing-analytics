@@ -89,7 +89,7 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
             
             boolean unique = true;
             for (LeaderboardGroupDTO group : existingGroups) {
-                if (group.name.equals(groupToValidate.getName())) {
+                if (group.getName().equals(groupToValidate.getName())) {
                     unique = false;
                     break;
                 }

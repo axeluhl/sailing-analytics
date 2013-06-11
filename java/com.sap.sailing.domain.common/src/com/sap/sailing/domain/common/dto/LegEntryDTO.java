@@ -61,7 +61,8 @@ public class LegEntryDTO implements Serializable {
                 * result
                 + ((estimatedTimeToNextWaypointInSeconds == null) ? 0 : estimatedTimeToNextWaypointInSeconds.hashCode());
         result = prime * result + (finished ? 1231 : 1237);
-        result = prime * result + ((gapChangeSinceLegStartInSeconds == null) ? 0 : gapChangeSinceLegStartInSeconds.hashCode());
+        result = prime * result
+                + ((gapChangeSinceLegStartInSeconds == null) ? 0 : gapChangeSinceLegStartInSeconds.hashCode());
         result = prime * result + ((gapToLeaderInSeconds == null) ? 0 : gapToLeaderInSeconds.hashCode());
         result = prime * result + ((numberOfManeuvers == null) ? 0 : numberOfManeuvers.hashCode());
         result = prime * result + rank;

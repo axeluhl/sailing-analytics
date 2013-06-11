@@ -52,7 +52,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     }
     
     public String getRaceColumnName() {
-        return name;
+        return getName();
     }
     
     public Double getExplicitFactor() {
@@ -202,13 +202,26 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
         int result = 1;
         result = prime * result + ((fleets == null) ? 0 : fleets.hashCode());
         result = prime * result + (medalRace ? 1231 : 1237);
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
         result = prime * result + ((racesPerFleet == null) ? 0 : racesPerFleet.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
+        final boolean result;
+        if (this == obj) {
+            result = true;
+        } else {
+            result = equals2(obj);
+            if (result) {
+                int i=0; i = i+1; // TODO remove this code which is only used to set a breakpoint here...
+            }
+        }
+        return result;
+    }
+    
+    private boolean equals2(Object obj) {
         if (this == obj)
             return true;
         if (obj == null)
@@ -223,10 +236,10 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
             return false;
         if (medalRace != other.medalRace)
             return false;
-        if (name == null) {
-            if (other.name != null)
+        if (getName() == null) {
+            if (other.getName() != null)
                 return false;
-        } else if (!name.equals(other.name))
+        } else if (!getName().equals(other.getName()))
             return false;
         if (racesPerFleet == null) {
             if (other.racesPerFleet != null)

@@ -41,13 +41,13 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
         Collections.sort(regattasSortedByName, new Comparator<RegattaDTO>() {
             @Override
             public int compare(RegattaDTO o1, RegattaDTO o2) {
-                return o1.name.compareTo(o2.name);
+                return o1.getName().compareTo(o2.getName());
             }
         });
         for (RegattaDTO regatta : regattasSortedByName) {
             this.availableRegattas.add(regatta);
-            this.availableRegattasListBox.addItem(regatta.name);
-            if(selectedRegatta != null && selectedRegatta.name.equals(regatta.name)) {
+            this.availableRegattasListBox.addItem(regatta.getName());
+            if(selectedRegatta != null && selectedRegatta.getName().equals(regatta.getName())) {
                 this.availableRegattasListBox.setSelectedIndex(this.availableRegattasListBox.getItemCount() - 1);
             }
         }
@@ -68,7 +68,7 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
         if (selIndex > 0) {
             String itemText = this.availableRegattasListBox.getItemText(selIndex);
             for (RegattaDTO regatta : this.availableRegattas) {
-                if (regatta.name.equals(itemText)) {
+                if (regatta.getName().equals(itemText)) {
                     result = regatta;
                     break;
                 }

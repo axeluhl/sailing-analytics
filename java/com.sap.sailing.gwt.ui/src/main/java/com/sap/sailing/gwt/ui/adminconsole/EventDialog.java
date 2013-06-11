@@ -45,13 +45,13 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
         @Override
         public String getErrorMessage(EventDTO eventToValidate) {
             String errorMessage = null;
-            boolean nameNotEmpty = eventToValidate.name != null && eventToValidate.name.length() > 0;
-            boolean venueNotEmpty = eventToValidate.venue.name != null && eventToValidate.venue.name.length() > 0;
+            boolean nameNotEmpty = eventToValidate.getName() != null && eventToValidate.getName().length() > 0;
+            boolean venueNotEmpty = eventToValidate.venue.getName() != null && eventToValidate.venue.getName().length() > 0;
             boolean courseAreaNotEmpty = eventToValidate.venue.getCourseAreas() != null && eventToValidate.venue.getCourseAreas().size() > 0;
 
             if (courseAreaNotEmpty) {
                 for (CourseAreaDTO courseArea : eventToValidate.venue.getCourseAreas()) {
-                    courseAreaNotEmpty = courseArea.name != null && courseArea.name.length() > 0;
+                    courseAreaNotEmpty = courseArea.getName() != null && courseArea.getName().length() > 0;
                     if (!courseAreaNotEmpty)
                         break;
                 }
@@ -59,7 +59,7 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
 
             boolean unique = true;
             for (EventDTO event : existingEvents) {
-                if (event.name.equals(eventToValidate.name)) {
+                if (event.getName().equals(eventToValidate.getName())) {
                     unique = false;
                     break;
                 }
@@ -105,7 +105,7 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
 
     @Override
     protected EventDTO getResult() {
-        this.event.name = nameEntryField.getText();
+        this.event.setName(nameEntryField.getText());
         this.event.publicationUrl = publicationUrlEntryField.getText();
         this.event.isPublic = isPublicCheckBox.getValue();
         this.event.id = id;
@@ -114,7 +114,7 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
         int count = courseAreaNameEntryFields.size();
         for(int i = 0; i < count; i++) {
             CourseAreaDTO courseAreaDTO = new CourseAreaDTO();
-            courseAreaDTO.name = courseAreaNameEntryFields.get(i).getValue();
+            courseAreaDTO.setName(courseAreaNameEntryFields.get(i).getValue());
             courseAreas.add(courseAreaDTO);
         }
 
