@@ -38,8 +38,6 @@ public class LeaderboardEntryDTO implements Serializable {
     
     public Double totalPoints;
     
-    public Integer rank;
-    
     public boolean discarded;
     
     public Double windwardDistanceToOverallLeaderInMeters;
@@ -83,9 +81,27 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result
                 + ((averageCrossTrackErrorInMeters == null) ? 0 : averageCrossTrackErrorInMeters.hashCode());
         result = prime * result + (discarded ? 1231 : 1237);
+        result = prime
+                * result
+                + ((distanceToStarboardSideOfStartLineInMeters == null) ? 0
+                        : distanceToStarboardSideOfStartLineInMeters.hashCode());
+        result = prime
+                * result
+                + ((distanceToStartLineAtStartOfRaceInMeters == null) ? 0 : distanceToStartLineAtStartOfRaceInMeters
+                        .hashCode());
+        result = prime * result + ((fleet == null) ? 0 : fleet.hashCode());
         result = prime * result + ((legDetails == null) ? 0 : legDetails.hashCode());
         result = prime * result + ((netPoints == null) ? 0 : netPoints.hashCode());
+        result = prime * result + (netPointsCorrected ? 1231 : 1237);
+        result = prime * result + ((race == null) ? 0 : race.hashCode());
         result = prime * result + ((reasonForMaxPoints == null) ? 0 : reasonForMaxPoints.hashCode());
+        result = prime
+                * result
+                + ((speedOverGroundAtPassingStartWaypointInKnots == null) ? 0
+                        : speedOverGroundAtPassingStartWaypointInKnots.hashCode());
+        result = prime * result
+                + ((speedOverGroundAtStartOfRaceInKnots == null) ? 0 : speedOverGroundAtStartOfRaceInKnots.hashCode());
+        result = prime * result + ((startTack == null) ? 0 : startTack.hashCode());
         result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
         result = prime
                 * result
@@ -110,6 +126,21 @@ public class LeaderboardEntryDTO implements Serializable {
             return false;
         if (discarded != other.discarded)
             return false;
+        if (distanceToStarboardSideOfStartLineInMeters == null) {
+            if (other.distanceToStarboardSideOfStartLineInMeters != null)
+                return false;
+        } else if (!distanceToStarboardSideOfStartLineInMeters.equals(other.distanceToStarboardSideOfStartLineInMeters))
+            return false;
+        if (distanceToStartLineAtStartOfRaceInMeters == null) {
+            if (other.distanceToStartLineAtStartOfRaceInMeters != null)
+                return false;
+        } else if (!distanceToStartLineAtStartOfRaceInMeters.equals(other.distanceToStartLineAtStartOfRaceInMeters))
+            return false;
+        if (fleet == null) {
+            if (other.fleet != null)
+                return false;
+        } else if (!fleet.equals(other.fleet))
+            return false;
         if (legDetails == null) {
             if (other.legDetails != null)
                 return false;
@@ -120,7 +151,27 @@ public class LeaderboardEntryDTO implements Serializable {
                 return false;
         } else if (!netPoints.equals(other.netPoints))
             return false;
+        if (netPointsCorrected != other.netPointsCorrected)
+            return false;
+        if (race == null) {
+            if (other.race != null)
+                return false;
+        } else if (!race.equals(other.race))
+            return false;
         if (reasonForMaxPoints != other.reasonForMaxPoints)
+            return false;
+        if (speedOverGroundAtPassingStartWaypointInKnots == null) {
+            if (other.speedOverGroundAtPassingStartWaypointInKnots != null)
+                return false;
+        } else if (!speedOverGroundAtPassingStartWaypointInKnots
+                .equals(other.speedOverGroundAtPassingStartWaypointInKnots))
+            return false;
+        if (speedOverGroundAtStartOfRaceInKnots == null) {
+            if (other.speedOverGroundAtStartOfRaceInKnots != null)
+                return false;
+        } else if (!speedOverGroundAtStartOfRaceInKnots.equals(other.speedOverGroundAtStartOfRaceInKnots))
+            return false;
+        if (startTack != other.startTack)
             return false;
         if (totalPoints == null) {
             if (other.totalPoints != null)

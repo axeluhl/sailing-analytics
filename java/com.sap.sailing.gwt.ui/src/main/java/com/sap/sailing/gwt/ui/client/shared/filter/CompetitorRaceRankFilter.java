@@ -3,19 +3,18 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
-import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.filter.AbstractNumberFilter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * A filter filtering competitors by their race rank
+ * 
  * @author Frank
- *
+ * 
  */
-public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO, Integer>
-    implements LeaderboardFilterContext, SelectedRaceFilterContext, FilterWithUI<CompetitorDTO> { 
+public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO, Integer> implements
+        LeaderboardFilterContext, SelectedRaceFilterContext, FilterWithUI<CompetitorDTO> {
     public static final String FILTER_NAME = "CompetitorRaceRankFilter";
 
     private LeaderboardFetcher leaderboardFetcher;
@@ -27,32 +26,22 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
     private LeaderboardDTO getLeaderboard() {
         return leaderboardFetcher != null ? leaderboardFetcher.getLeaderboard() : null;
     }
-    
+
     @Override
     public boolean matches(CompetitorDTO competitorDTO) {
         boolean result = false;
-        
         if (value != null && operator != null && getLeaderboard() != null && getSelectedRace() != null) {
-            String raceColumnName = null;
-            for(RaceColumnDTO raceColumnDTO: getLeaderboard().getRaceList()) {
-                if(raceColumnDTO.containsRace(getSelectedRace())) {
-                    raceColumnName = raceColumnDTO.name;
+            for (RaceColumnDTO raceColumnDTO : getLeaderboard().getRaceList()) {
+                if (raceColumnDTO.containsRace(getSelectedRace())) {
+                    int raceRank = getLeaderboard().getCompetitorsFromBestToWorst(raceColumnDTO).indexOf(competitorDTO)+1;
+                    result = operator.matchValues(value, raceRank);
                     break;
                 }
             }
-            if(raceColumnName != null) {
-                LeaderboardRowDTO leaderboardRowDTO = getLeaderboard().rows.get(competitorDTO);
-                LeaderboardEntryDTO leaderboardEntryDTO = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
-                if(leaderboardEntryDTO.rank != null) {
-                    int raceRank = leaderboardEntryDTO.rank;
-                    result = operator.matchValues(value, raceRank);
-                }
-            }
         }
-        
         return result;
     }
- 
+
     @Override
     public CompetitorRaceRankFilter copy() {
         CompetitorRaceRankFilter result = new CompetitorRaceRankFilter();
@@ -79,9 +68,9 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
     @Override
     public String validate(StringMessages stringMessages) {
         String errorMessage = null;
-        if(value != null) {
+        if (value != null) {
             Integer intfilterValue = (Integer) value;
-            if(intfilterValue <= 0) {
+            if (intfilterValue <= 0) {
                 errorMessage = stringMessages.numberMustBePositive();
             }
         } else {
