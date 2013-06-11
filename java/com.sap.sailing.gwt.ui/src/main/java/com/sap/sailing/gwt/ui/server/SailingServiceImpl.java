@@ -87,7 +87,6 @@ import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
 import com.sap.sailing.domain.common.PolarSheetsData;
-import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -123,8 +122,6 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationTriggerResponseImpl;
-import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
-import com.sap.sailing.domain.common.impl.PolarSheetsWindStepping;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -144,7 +141,6 @@ import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
-import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
@@ -2981,88 +2977,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
 
         return data;      
-    }
-
-    @Override
-    public PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle, int windSpeed) {
-        HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
-        HttpSession session = httpServletRequest.getSession();
-        String partIdentifier = polarSheetId + angle + windSpeed;
-        PolarSheetsHistogramData cachedResult = (PolarSheetsHistogramData) session.getAttribute(partIdentifier);
-        if (cachedResult != null) {
-            return cachedResult;
-        }
-        
-        
-        @SuppressWarnings("unchecked")
-        List<List<BoatAndWindSpeed>> data = (List<List<BoatAndWindSpeed>>) session.getAttribute("completedata" + polarSheetId);
-        if (data == null) {
-            //TODO exception handling
-            return null;
-        }
-        List<BoatAndWindSpeed> dataForAngle = data.get(angle);
-        if (dataForAngle.size() < 1) {
-            //TODO exception handling
-            return null;
-        }
-        
-        PolarSheetsWindStepping stepping = (PolarSheetsWindStepping) session.getAttribute("stepping" + polarSheetId);
-        PolarSheetsData generationResultData = (PolarSheetsData) session.getAttribute("resultdata" + polarSheetId);
-        
-
-        List<Double> dataForAngleAndWindSpeed = new ArrayList<Double>();
-        int windSpeedLevel = stepping.getLevelIndexForValue(windSpeed);
-
-        double mean = generationResultData.getAveragedPolarDataByWindSpeed()[windSpeedLevel][angle].doubleValue();
-        
-        double partOfVariance = 0;
-        
-        for (BoatAndWindSpeed dataPoint: dataForAngle) {
-            if ((stepping.getLevelIndexForValue(dataPoint.getWindSpeed().getKnots()) == windSpeedLevel)) {
-                double speed = dataPoint.getBoatSpeed().getKnots();
-                partOfVariance = partOfVariance + Math.pow((speed - mean), 2); 
-                dataForAngleAndWindSpeed.add(speed);
-            }
-        }
-        
-        if (dataForAngleAndWindSpeed.size() < 1) {
-            //TODO exception handling
-            return null;
-        }
-        
-        double variance = partOfVariance / dataForAngleAndWindSpeed.size();
-        
-        double standardDeviator = Math.sqrt(variance);
-        
-        double coefficiantOfVariation = standardDeviator / mean;
-
-        Double min = Collections.min(dataForAngleAndWindSpeed);
-        Double max = Collections.max(dataForAngleAndWindSpeed);
-        //TODO make number of columns dynamic to chart size
-        int numberOfColumns = 20;
-        double range = (max - min) / numberOfColumns;
-        Double[] xValues = new Double[numberOfColumns];
-        for (int i = 0; i < numberOfColumns; i++) {
-            xValues[i] = min + i * range + ( 0.5 * range);
-        }
-
-        Integer[] yValues = new Integer[numberOfColumns];
-        for (Double dataPoint : dataForAngleAndWindSpeed) {
-            int i = (int) (((dataPoint - min) / range));
-            if (i == numberOfColumns) {
-                //For max value
-                i = 19;
-            }
-            if (yValues[i] == null) {
-                yValues[i] = 0;
-            }
-            yValues[i]++;
-        }
-
-        PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, dataForAngleAndWindSpeed.size(), coefficiantOfVariation);
-        session.setAttribute(partIdentifier, histogramData);
-
-        return histogramData;
     }
 
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
