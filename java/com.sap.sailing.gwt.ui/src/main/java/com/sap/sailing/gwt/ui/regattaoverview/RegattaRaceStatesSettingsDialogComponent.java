@@ -98,8 +98,8 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         
         for (RaceGroupDTO raceGroup : raceGroups) {
             CheckBox checkBox = dialog.createCheckbox(raceGroup.displayName);
-            checkBox.setValue(Util.contains(initialSettings.getVisibleRegattas(), raceGroup.name));
-            regattaCheckBoxMap.put(raceGroup.name, checkBox);
+            checkBox.setValue(Util.contains(initialSettings.getVisibleRegattas(), raceGroup.getName()));
+            regattaCheckBoxMap.put(raceGroup.getName(), checkBox);
             
             regattaGrid.setWidget(rowIndex, columnIndex++, checkBox);
             if(columnIndex == maxRegattasPerRow) {

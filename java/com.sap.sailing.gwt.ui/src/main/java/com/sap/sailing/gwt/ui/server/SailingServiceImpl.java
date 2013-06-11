@@ -2549,14 +2549,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(series.getName());
                                 raceGroup.getSeries().add(seriesDTO);
                                 for (Fleet fleet : series.getFleets()) {
-                                    FleetDTO fleetDTO = new FleetDTO(fleet.getName(), series.getName(), fleet.getOrdering(), fleet.getColor());
+                                    FleetDTO fleetDTO = new FleetDTO(fleet.getName(), fleet.getOrdering(), fleet.getColor());
                                     seriesDTO.getFleets().add(fleetDTO);
                                 }
                             }
                         } else {
                             RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(LeaderboardNameConstants.DEFAULT_SERIES_NAME);
                             raceGroup.getSeries().add(seriesDTO);
-                            FleetDTO fleetDTO = new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, seriesDTO.name, 0, null);
+                            FleetDTO fleetDTO = new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null);
                             seriesDTO.getFleets().add(fleetDTO);
                         }
                         raceGroups.add(raceGroup);
@@ -2996,7 +2996,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 int numberOfFinishedRaces = 0;
                 
                 for (RegattaOverviewEntryDTO entry : entryList) {
-                    if (!isRaceActiveAccordingToRaceLog(entry.raceInfo.lastStatus)) {
+                    if (!RaceLogRaceStatus.isActive(entry.raceInfo.lastStatus)) {
                         if (entry.raceInfo.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
                             if (numberOfFinishedRaces > 0) {
                                 result.remove(entry);
@@ -3024,11 +3024,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         entriesPerFleet.get(fleet.getName()).add(entry);
     }
     
-    private boolean isRaceActiveAccordingToRaceLog(RaceLogRaceStatus status) {
-        return status.equals(RaceLogRaceStatus.SCHEDULED) || status.equals(RaceLogRaceStatus.STARTPHASE)
-                || status.equals(RaceLogRaceStatus.RUNNING) || status.equals(RaceLogRaceStatus.FINISHING);
-    }
-
     private RegattaOverviewEntryDTO createRegattaOverviewEntryDTO(CourseArea courseArea, Leaderboard leaderboard,
             String regattaName, String seriesName, RaceColumn raceColumn, Fleet fleet, boolean showOnlyRacesOfSameDay, Calendar dayToCheck) {
         RegattaOverviewEntryDTO entry = new RegattaOverviewEntryDTO();
