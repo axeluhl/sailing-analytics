@@ -6,8 +6,6 @@ import com.sap.sailing.mongodb.MongoDBService;
 public interface MediaDBFactory {
     MediaDBFactory INSTANCE = new MediaDBFactoryImpl();
     
-    MediaObjectFactory getDefaultDomainObjectFactory();
-    MediaObjectFactory getDomainObjectFactory(MongoDBService mongoDBService);
     MediaDB getDefaultMediaDB();
     MediaDB getMediaDB(MongoDBService mongoDBService);
 }

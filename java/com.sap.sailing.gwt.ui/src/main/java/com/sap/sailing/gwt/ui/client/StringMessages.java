@@ -586,6 +586,7 @@ public interface StringMessages extends Messages {
     String loading();
     String showHiddenRaces();
     String selectedCompetitors();
+    String mediaDateFormatError(String expectedTimeFormat);
     String filterNothing();
     String topNCompetitorsByRaceRank(int n);
     String topNCompetitorsByTotalRank(int n);
