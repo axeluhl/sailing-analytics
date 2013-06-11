@@ -59,6 +59,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
@@ -133,7 +134,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     /**
      * The leaderboard name is used to
-     * {@link SailingServiceAsync#getLeaderboardByName(String, java.util.Date, String[], com.google.gwt.user.client.rpc.AsyncCallback)
+     * {@link SailingServiceAsync#getLeaderboardByName(String, java.util.Date, String[], String, com.google.gwt.user.client.rpc.AsyncCallback)
      * obtain the leaderboard contents} from the server. It may change in case the leaderboard is renamed.
      */
     private String leaderboardName;
@@ -826,13 +827,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             if (getLeaderboard().getLegCount(getRaceColumnName()) != -1) {
                 callWhenExpansionDataIsLoaded.run();
             } else {
+                final LeaderboardDTO previousLeaderboard = getLeaderboard();
                 getSailingService().getLeaderboardByName(getLeaderboardName(),
                         timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
                         /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                        new AsyncCallback<LeaderboardDTO>() {
+                        previousLeaderboard.getId(), new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
                             @Override
-                            public void onSuccess(LeaderboardDTO result) {
-                                updateLeaderboard(result);
+                            public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
+                                updateLeaderboard(result.getLeaderboardDTO(previousLeaderboard));
                                 callWhenExpansionDataIsLoaded.run();
                             }
 
@@ -954,8 +956,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     long timeInMilliseconds = 0;
                     for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
                         if (legDetail != null) {
-                            distanceTraveledInMeters += legDetail.distanceTraveledInMeters;
-                            timeInMilliseconds += legDetail.timeInMilliseconds;
+                            if (legDetail.distanceTraveledInMeters != null && legDetail.timeInMilliseconds != null) {
+                                distanceTraveledInMeters += legDetail.distanceTraveledInMeters;
+                                timeInMilliseconds += legDetail.timeInMilliseconds;
+                            } else {
+                                distanceTraveledInMeters = 0;
+                                timeInMilliseconds = 0;
+                                break;
+                            }
                         }
                     }
                     if (timeInMilliseconds != 0) {
@@ -1770,7 +1778,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
                     getLeaderboardName(), timer.getPlayMode() == PlayModes.Live ? null : date,
                     /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                    new AsyncCallback<LeaderboardDTO>() {
+                    /* previousLeaderboard */ getLeaderboard(), new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
                             updateLeaderboard(result);

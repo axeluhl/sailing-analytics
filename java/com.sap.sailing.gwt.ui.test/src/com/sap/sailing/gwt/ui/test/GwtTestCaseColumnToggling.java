@@ -11,6 +11,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -165,7 +166,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     private void getLeaderboard(){
         ArrayList<String> al = new ArrayList<String>();
         al.add(COLUMN1_NAME);
-        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, new AsyncCallback<LeaderboardDTO>() {
+        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, /* previousLeaderboardId */ null, new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail("Failed to get leaderboard.");
@@ -173,10 +174,10 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
             }
 
             @Override
-            public void onSuccess(LeaderboardDTO result) {
+            public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
                 System.out.println("Got leaderboard.");
                 
-                leaderboard = result;
+                leaderboard = result.getLeaderboardDTO(/* previousVersion */ null);
                 leaderboardPanel.updateLeaderboard(leaderboard);
                 for (int i = 0; i < leaderboardPanel.getLeaderboardTable()
                         .getColumnCount(); i++) {

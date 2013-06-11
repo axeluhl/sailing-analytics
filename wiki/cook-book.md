@@ -86,3 +86,12 @@ One can find more information about the Jetty architecture here: http://docs.cod
 ### Ignore GIT line endings during merge
 
 Following http://stackoverflow.com/questions/861995/is-it-possible-for-git-merge-to-ignore-line-ending-differences one can use `git config merge.renormalize true`
+
+### Remove association between local and remote branch in GIT
+
+To remove the association between the local and remote branch, and delete the local branch, run:
+
+<pre>
+git config --unset branch.&lt;branch&gt;.remote
+git config --unset branch.&lt;branch&gt;.merge
+</pre>
