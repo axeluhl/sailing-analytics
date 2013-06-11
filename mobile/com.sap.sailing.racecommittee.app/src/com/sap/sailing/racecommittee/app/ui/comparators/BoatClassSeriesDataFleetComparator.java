@@ -14,12 +14,17 @@ public class BoatClassSeriesDataFleetComparator implements Comparator<BoatClassS
     }
 
     public int compare(BoatClassSeriesFleet left, BoatClassSeriesFleet right) {
-		int result = nameComparator.compare(left.getBoatClassName(), right.getBoatClassName());
+        int result = nameComparator.compare(left.getBoatClassName(), right.getBoatClassName());
         if (result == 0) {
-			// TODO: sort series and fleets by order number
-            result = nameComparator.compare(left.getSeriesName(), right.getSeriesName());
+            result = Integer.valueOf(left.getSeriesOrder()).compareTo(right.getSeriesOrder());
             if (result == 0) {
-                result = nameComparator.compare(left.getFleetName(), right.getFleetName());
+                result = nameComparator.compare(left.getSeriesName(), right.getSeriesName());
+                if (result == 0) {
+                    result = Integer.valueOf(left.getFleetOrdering()).compareTo(right.getFleetOrdering());
+                    if (result == 0) {
+                        result = nameComparator.compare(left.getFleetName(), right.getFleetName());
+                    }
+                }
             }
         }
         return result;
