@@ -14,8 +14,9 @@ public class BoatClassSeriesDataFleetComparator implements Comparator<BoatClassS
     }
 
     public int compare(BoatClassSeriesFleet left, BoatClassSeriesFleet right) {
-        int result = nameComparator.compare(left.getBoatClassName(), right.getBoatClassName());
+		int result = nameComparator.compare(left.getBoatClassName(), right.getBoatClassName());
         if (result == 0) {
+			// TODO: sort series and fleets by order number
             result = nameComparator.compare(left.getSeriesName(), right.getSeriesName());
             if (result == 0) {
                 result = nameComparator.compare(left.getFleetName(), right.getFleetName());
