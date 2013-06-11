@@ -127,6 +127,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.utils.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
@@ -3034,34 +3035,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         entry.raceInfo = createRaceInfoDTO(seriesName, raceColumn, fleet);
         
         if (showOnlyRacesOfSameDay) {
-            if (!isRaceStateOfSameDay(entry.raceInfo, dayToCheck)) {
+            if (!RaceStateOfSameDayHelper.isRaceStateOfSameDay(entry.raceInfo.startTime, entry.raceInfo.finishedTime, dayToCheck)) {
                 entry = null;
             }
         }
         return entry;
-    }
-    
-    private boolean isRaceStateOfSameDay(RaceInfoDTO raceInfo, Calendar now) {
-        boolean result = false;
-        if (raceInfo.finishedTime != null) {
-            Calendar finishedTimeCal = Calendar.getInstance();
-            finishedTimeCal.setTime(raceInfo.finishedTime);
-            if(isSameDay(now, finishedTimeCal)) {
-                result = true;
-            }
-        } else if (raceInfo.startTime != null) {
-            Calendar startTimeCal = Calendar.getInstance();
-            startTimeCal.setTime(raceInfo.startTime);
-            if(isSameDay(now, startTimeCal)) {
-                result = true;
-            }
-        }
-        return result;
-    }
-
-    private boolean isSameDay(Calendar cal1, Calendar cal2) {
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
     
     public String getBuildVersion() {
