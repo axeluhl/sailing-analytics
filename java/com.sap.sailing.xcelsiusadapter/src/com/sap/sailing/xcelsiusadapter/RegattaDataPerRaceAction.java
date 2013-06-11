@@ -3,9 +3,11 @@ package com.sap.sailing.xcelsiusadapter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,18 +18,24 @@ import org.jdom.Document;
 import org.jdom.Element;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -36,8 +44,10 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.server.RacingEventService;
 
 public class RegattaDataPerRaceAction extends HttpAction {
@@ -142,17 +152,38 @@ public class RegattaDataPerRaceAction extends HttpAction {
                 
                 Double wind_speed = 0.0;
                 Double wind_confi = 0.0;
+                Double wind_beaufort = 0.0;
                 
                 if (averageWindSpeedofRace != null) {
                     wind_speed = averageWindSpeedofRace.getA();
-                    wind_confi = averageWindSpeedofRace.getB();
+                    wind_beaufort = averageWindSpeedofRace.getB();
                 }
                 
                 addNamedElementWithValue(race_node, "average_wind_speed", wind_speed);
-                addNamedElementWithValue(race_node, "average_wind_speed_confidence", wind_confi);
+                addNamedElementWithValue(race_node, "average_wind_speed_beaufort", wind_beaufort);
                 addNamedElementWithValue(race_node, "wind_strength", wind_strength);
                 
-                addNamedElementWithValue(race_node, "course_length_m", getCourseLengthAtStart(trackedRace).getMeters());
+                addNamedElementWithValue(race_node, "b1", Math.exp(Math.log(1*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b15", Math.exp(Math.log(1.5*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b159", Math.exp(Math.log(1.59*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b16", Math.exp(Math.log(1.6*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b199", Math.exp(Math.log(1.99*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b2", Math.exp(Math.log(2*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b4", Math.exp(Math.log(4*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b45", Math.exp(Math.log(4.5*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b459", Math.exp(Math.log(4.59*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b46", Math.exp(Math.log(4.6*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b499", Math.exp(Math.log(4.99*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b5", Math.exp(Math.log(5*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b7", Math.exp(Math.log(7*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b11", Math.exp(Math.log(11*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b16", Math.exp(Math.log(16*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b22", Math.exp(Math.log(22*1.852/3.6 / 0.8360)*2/3));
+                addNamedElementWithValue(race_node, "b28", Math.exp(Math.log(28*1.852/3.6 / 0.8360)*2/3));
+                
+                
+                addNamedElementWithValue(race_node, "course_length_m", getCourseLength(trackedRace) == null ? 0 : getCourseLength(trackedRace).getMeters());
+                
                 
                 final Element competitors_node = addNamedElement(race_node, "competitors"); // add node that contains all competitors
                 
@@ -189,11 +220,10 @@ public class RegattaDataPerRaceAction extends HttpAction {
                         addNamedElementWithValue(competitor_node, "race_final_rank", trackedRace.getRank(competitor, now));
                         addNamedElementWithValue(competitor_node, "race_participants", trackedRace.getCompetitorsFromBestToWorst(trackedRace.getStartOfTracking()).size());
                         addNamedElementWithValue(competitor_node, "race_relative_final_rank", 1.0 - ((trackedRace.getRank(competitor, now) - 1.0)/(trackedRace.getCompetitorsFromBestToWorst(trackedRace.getStartOfTracking()).size() - 1.0)));
-                           
-                        
-                        
+
                         addNamedElementWithValue(competitor_node, "distance_traveled_m", trackedRace.getDistanceTraveled(competitor, trackedRace.getEndOfTracking()).getMeters());
                         addNamedElementWithValue(competitor_node, "avg_xte_m", trackedRace.getAverageCrossTrackError(competitor, trackedRace.getEndOfTracking(), true).getMeters());
+                        
                         
                         
                         TrackedLeg previousLeg = null;
@@ -263,9 +293,45 @@ public class RegattaDataPerRaceAction extends HttpAction {
                         
                         addNamedElementWithValue(competitor_node, "race_time_s", race_time); 
                         
-                        Double time_per_km = (race_time / getCourseLengthAtStart(trackedRace).getMeters()) * 1000;
+                        Double time_per_nm = (race_time / getCourseLength(trackedRace).getNauticalMiles());
                         
-                        addNamedElementWithValue(competitor_node, "time_per_km", time_per_km); 
+                        addNamedElementWithValue(competitor_node, "time_per_nm_s", time_per_nm); 
+                        
+                        // START ANALYSIS
+                        // Distance to startline at race start
+                        addNamedElementWithValue(competitor_node, "racestart_dist_to_startline_m", trackedRace.getDistanceToStartLine(competitor, trackedRace.getStartOfRace()).getMeters());
+                        
+                        // Speed at race start
+                        addNamedElementWithValue(competitor_node, "racestart_speed_kn", trackedRace.getTrack(competitor).getEstimatedSpeed(trackedRace.getStartOfRace()).getKnots());
+                        
+                        // measures when competitor is passing the starting mark
+                        NavigableSet<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
+                        Speed competitorSpeedWhenPassingStart = null;
+                        Tack startTack = null;
+                        Distance distanceFromStarboardSideOfStartLineWhenPassingStart = null;
+                        trackedRace.lockForRead(competitorMarkPassings);
+                        try {
+                            if (!competitorMarkPassings.isEmpty()) {
+                                TimePoint competitorStartTime = competitorMarkPassings.iterator().next().getTimePoint();
+                                competitorSpeedWhenPassingStart = trackedRace.getTrack(competitor).getEstimatedSpeed(
+                                        competitorStartTime);
+                                startTack = trackedRace.getTack(competitor, competitorStartTime);
+                                distanceFromStarboardSideOfStartLineWhenPassingStart = trackedRace.getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor);
+                            }
+                        } finally {
+                            trackedRace.unlockAfterRead(competitorMarkPassings);
+                        }
+                        
+                        // Speed when passing start
+                        addNamedElementWithValue(competitor_node, "racestart_speed_when_passing_start_kn", competitorSpeedWhenPassingStart.getKnots());
+                        
+                        // start tack
+                        addNamedElementWithValue(competitor_node, "racestart_start_tack", startTack.toString());
+                        
+                        // distance from starboard side of startline when passing start
+                        addNamedElementWithValue(competitor_node, "racestart_dist_from_starboard_side_of_startline_when_passing_start_m", distanceFromStarboardSideOfStartLineWhenPassingStart.getMeters());
+                        
+                        // END OF START ANALYSIS
 
                     } catch (Exception ex) {
                             //competitor_data_node.removeContent(competitor_node); // if the competitor dataset is not complete, remove it from the list
@@ -300,6 +366,28 @@ public class RegattaDataPerRaceAction extends HttpAction {
         }
         return raceDistance;
     }
+    
+    private Distance getCourseLength(TrackedRace race) {
+        List<Leg> legs = race.getRace().getCourse().getLegs();
+        Distance raceDistance = new NauticalMileDistance(0);
+        for (Leg leg : legs) {
+            Waypoint from = leg.getFrom();
+            Iterable<MarkPassing> markPassings = race.getMarkPassingsInOrder(from);
+            Iterator<MarkPassing> markPassingsIterator = markPassings.iterator();
+            if (!markPassingsIterator.hasNext()) {
+                return null;
+            }
+            MarkPassing firstPassing = markPassingsIterator.next();
+            TimePoint timePointOfFirstPassing = firstPassing.getTimePoint();
+            Waypoint to = leg.getTo();
+            Position fromPos = race.getApproximatePosition(from, timePointOfFirstPassing);
+            Position toPos = race.getApproximatePosition(to, timePointOfFirstPassing);
+            Distance legDistance = fromPos.getDistance(toPos);
+            raceDistance = raceDistance.add(legDistance);
+        }
+        return raceDistance;
+    }
+
 
 
     private Map<Competitor, Map<Waypoint, Integer>> getRankAtWaypoint(TrackedRace trackedRace, TimePoint timePoint) {
@@ -353,6 +441,7 @@ public class RegattaDataPerRaceAction extends HttpAction {
 
             double sumWindSpeed = 0.0;
             double sumWindSpeedConfidence = 0.0;
+            double sumWindSpeedBeaufort = 0.0;
             int speedCounter = 0;
 
             int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis()) / resolutionInMilliseconds);
@@ -364,9 +453,11 @@ public class RegattaDataPerRaceAction extends HttpAction {
                 if (averagedWindWithConfidence != null) {
                     double windSpeedinKnots = averagedWindWithConfidence.getObject().getKnots();
                     double confidence = averagedWindWithConfidence.getConfidence();
+                    double windSpeedinBeaufort = averagedWindWithConfidence.getObject().getBeaufort();
 
                     sumWindSpeed += windSpeedinKnots;
                     sumWindSpeedConfidence += confidence;
+                    sumWindSpeedBeaufort += windSpeedinBeaufort;
 
                     speedCounter++;
                 }
@@ -375,8 +466,9 @@ public class RegattaDataPerRaceAction extends HttpAction {
             if (speedCounter > 0) {
                 double averageWindSpeed = sumWindSpeed / speedCounter;
                 double averageWindSpeedConfidence = sumWindSpeedConfidence / speedCounter;
+                double averageWindSpeedBeaufort = sumWindSpeedBeaufort / speedCounter;
 
-                result = new Pair<Double, Double>(averageWindSpeed, averageWindSpeedConfidence);
+                result = new Pair<Double, Double>(averageWindSpeed, averageWindSpeedBeaufort);
             }
         } else {
             result = new Pair<Double, Double>(0.0, 0.0);
