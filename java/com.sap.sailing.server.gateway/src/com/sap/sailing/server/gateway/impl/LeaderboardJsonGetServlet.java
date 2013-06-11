@@ -117,6 +117,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
             if (updateInterval == null) {
                 result = null;
             } else {
+                // no removeEldestEntry override required here; map is merged into another LinkedHashMap created in provideNewCacheValue
                 result = new LinkedHashMap<>();
                 for (Pair<TimePoint, ResultStates> timePointAndResultState : updateInterval.getTimePointsAndResultStates()) {
                     StringWriter sw = new StringWriter();
@@ -139,7 +140,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                     totalNumberOfCacheEntries -= oldCacheValue.size();
                 }
             } else {
-                result = new LinkedHashMap<Pair<TimePoint, ResultStates>, StringBuffer>() {
+                result = new LinkedHashMap<Pair<TimePoint, ResultStates>, StringBuffer>(16, 0.75f, /* access-based eviction */ true) {
                     private static final long serialVersionUID = -6197983565575024084L;
                     @Override
                     protected boolean removeEldestEntry(Entry<Pair<TimePoint, ResultStates>, StringBuffer> eldest) {

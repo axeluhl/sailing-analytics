@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelog;
 
+import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventComparator;
 import com.sap.sailing.domain.tracking.Track;
 
@@ -15,7 +16,7 @@ import com.sap.sailing.domain.tracking.Track;
  * Implementations should use the {@link RaceLogEventComparator} for sorting its content.
  * </p>
  */
-public interface RaceLog extends Track<RaceLogEvent> {
+public interface RaceLog extends Track<RaceLogEvent>, WithID {
     /**
      * Gets the current pass id.
      * 

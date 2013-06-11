@@ -70,6 +70,10 @@ public abstract class StoredTrackBasedTest extends TrackBasedTest {
                 + (competitor.getBoat().getSailID() == null ? "" : "-" + competitor.getBoat().getSailID()));
     }
     
+    public static ObjectInputStream getObjectInputStream(String fileNameWithinResources) throws FileNotFoundException, IOException {
+        return new ObjectInputStream(new FileInputStream(new File(RESOURCES+fileNameWithinResources)));
+    }
+    
     private Set<String> getCompetitorNamesOfStoredTracks(String regattaName) {
         Set<String> result = new HashSet<String>();
         File d = new File(RESOURCES);

@@ -18,7 +18,17 @@ import java.util.Set;
  */
 public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializable {
     private static final long serialVersionUID = -520930809792750648L;
-
+    
+    public interface UUIDGenerator {
+        String generateRandomUUID();
+    }
+    
+    /**
+     * A unique ID, obtained by applying <code>toString</code> to an object of type <code>java.util.UUID</code>.
+     * When {@link #clone} is called on this object, a new ID is generated for the result.
+     */
+    private String id;
+    
     /**
      * The competitor list, ordered ascending by total rank
      */
@@ -31,7 +41,7 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
     private Date timePointOfLastCorrectionsValidity;
 
     private String comment;
-
+    
     /**
      * Taken from the scoring scheme. Shall be used by the race columns to control their initial sort order.
      */
@@ -39,16 +49,38 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
 
     LeaderboardDTO() {} // for serialization
 
-    public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment, boolean higherScoreIsBetter) {
+    /**
+     * @param uuidGenerator used to provide the {@link #id ID} for this object (see also {@link #getId()}) and for any clones produced
+     * from it by the {@link #clone()} operation.
+     */
+    public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator) {
+        initCollections();
+        id = uuidGenerator.generateRandomUUID();
         this.timePointOfLastCorrectionsValidity = timePointOfLastCorrectionsValidity;
         this.comment = comment;
+        this.higherScoresIsBetter = higherScoreIsBetter;
+    }
+
+    private void initCollections() {
         competitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>();
         this.suppressedCompetitors = new HashSet<CompetitorDTO>();
-        this.higherScoresIsBetter = higherScoreIsBetter;
+    }
+    
+    public LeaderboardDTO(String id) {
+        initCollections();
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public Iterable<CompetitorDTO> getSuppressedCompetitors() {
         return suppressedCompetitors;
+    }
+    
+    protected void setSuppressedCompetitors(Set<CompetitorDTO> suppressedCompetitors) {
+        this.suppressedCompetitors = suppressedCompetitors;
     }
 
     public void setSuppressed(CompetitorDTO competitor, boolean suppressed) {
@@ -66,7 +98,15 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
     public void setCompetitorsFromBestToWorst(RaceColumnDTO raceColumn, List<CompetitorDTO> orderedCompetitors) {
         competitorOrderingPerRace.put(raceColumn, orderedCompetitors);
     }
+    
+    protected void setCompetitorOrderingPerRace(Map<RaceColumnDTO, List<CompetitorDTO>> competitorOrderingPerRace) {
+        this.competitorOrderingPerRace = competitorOrderingPerRace;
+    }
 
+    protected Map<RaceColumnDTO, List<CompetitorDTO>> getCompetitorOrderingPerRace() {
+        return competitorOrderingPerRace;
+    }
+    
     public List<CompetitorDTO> getCompetitorsFromBestToWorst(RaceColumnDTO raceColumn) {
         return competitorOrderingPerRace.get(raceColumn);
     }

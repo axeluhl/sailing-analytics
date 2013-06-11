@@ -36,7 +36,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public AbstractLeaderboardDTO() {
         races = new ArrayList<RaceColumnDTO>();
     }
-
+    
     public Set<BoatClassDTO> getBoatClasses() {
         Set<BoatClassDTO> result = new HashSet<BoatClassDTO>();
         for (CompetitorDTO competitor : rows.keySet()) {
@@ -85,20 +85,6 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
             }
         }
         return false;
-    }
-
-    public Double getTotalPoints(LeaderboardRowDTO object) {
-        Double totalPoints = object.carriedPoints == null ? null : object.carriedPoints;
-        for (Map.Entry<String, LeaderboardEntryDTO> e : object.fieldsByRaceColumnName.entrySet()) {
-            if (e.getValue().totalPoints != null && getOrCreateRaceColumn(e.getKey()).isValidInTotalScore()) {
-                if (totalPoints == null) {
-                    totalPoints = e.getValue().totalPoints;
-                } else {
-                    totalPoints += e.getValue().totalPoints;
-                }
-            }
-        }
-        return totalPoints;
     }
 
     public Double getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {

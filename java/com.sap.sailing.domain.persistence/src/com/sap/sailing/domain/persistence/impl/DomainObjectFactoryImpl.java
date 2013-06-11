@@ -83,7 +83,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
-import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
+import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -238,7 +238,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         if (result == null) {
             SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
-            ThresholdBasedResultDiscardingRule resultDiscardingRule = loadResultDiscardingRule(dbLeaderboard);
+            ThresholdBasedResultDiscardingRule resultDiscardingRule = loadResultDiscardingRule(dbLeaderboard, FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS);
             String regattaName = (String) dbLeaderboard.get(FieldNames.REGATTA_NAME.name());
             if (groupForMetaLeaderboard != null) {
                 result = new LeaderboardGroupMetaLeaderboard(groupForMetaLeaderboard, loadScoringScheme(dbLeaderboard), resultDiscardingRule);
@@ -314,17 +314,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     /**
-     * @param dbLeaderboard expects to find a field named {@link FieldNames#LEADERBOARD_DISCARDING_THRESHOLDS}
+     * @param dbObject expects to find a field identified by <code>field</code> which holds a {@link BasicDBList}
      */
-    private ThresholdBasedResultDiscardingRule loadResultDiscardingRule(DBObject dbLeaderboard) {
-        BasicDBList dbDiscardIndexResultsStartingWithHowManyRaces = (BasicDBList) dbLeaderboard
-                .get(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name());
+    private ThresholdBasedResultDiscardingRule loadResultDiscardingRule(DBObject dbObject, FieldNames field) {
+        BasicDBList dbDiscardIndexResultsStartingWithHowManyRaces = (BasicDBList) dbObject.get(field.name());
         int[] discardIndexResultsStartingWithHowManyRaces = new int[dbDiscardIndexResultsStartingWithHowManyRaces.size()];
         int i = 0;
         for (Object discardingThresholdAsObject : dbDiscardIndexResultsStartingWithHowManyRaces) {
             discardIndexResultsStartingWithHowManyRaces[i++] = (Integer) discardingThresholdAsObject;
         }
-        ThresholdBasedResultDiscardingRule resultDiscardingRule = new ResultDiscardingRuleImpl(
+        ThresholdBasedResultDiscardingRule resultDiscardingRule = new ThresholdBasedResultDiscardingRuleImpl(
                 discardIndexResultsStartingWithHowManyRaces);
         return resultDiscardingRule;
     }
@@ -907,16 +906,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Series loadSeries(DBObject dbSeries, TrackedRegattaRegistry trackedRegattaRegistry) {
         String name = (String) dbSeries.get(FieldNames.SERIES_NAME.name());
         boolean isMedal = (Boolean) dbSeries.get(FieldNames.SERIES_IS_MEDAL.name());
+        Boolean startsWithZeroScore = (Boolean) dbSeries.get(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name());
         final BasicDBList dbFleets = (BasicDBList) dbSeries.get(FieldNames.SERIES_FLEETS.name());
         Map<String, Fleet> fleetsByName = loadFleets(dbFleets);
         BasicDBList dbRaceColumns = (BasicDBList) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
         Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns, fleetsByName);
-        Series series = new SeriesImpl(
-                name, 
-                isMedal, 
-                fleetsByName.values(), 
-                raceColumnNames, 
-                trackedRegattaRegistry);
+        Series series = new SeriesImpl(name, isMedal, fleetsByName.values(), raceColumnNames, trackedRegattaRegistry);
+        if (dbSeries.get(FieldNames.SERIES_DISCARDING_THRESHOLDS.name()) != null) {
+            ThresholdBasedResultDiscardingRule resultDiscardingRule = loadResultDiscardingRule(dbSeries, FieldNames.SERIES_DISCARDING_THRESHOLDS);
+            series.setResultDiscardingRule(resultDiscardingRule);
+        }
+        if (startsWithZeroScore != null) {
+            series.setStartsWithZeroScore(startsWithZeroScore);
+        }
         loadRaceColumnRaceLinks(dbRaceColumns, series);
         return series;
     }
@@ -997,7 +999,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     @Override
     public RaceLog loadRaceLog(RaceLogIdentifier identifier) {
-        RaceLog result = new RaceLogImpl(RaceLogImpl.class.getSimpleName());
+        RaceLog result = new RaceLogImpl(RaceLogImpl.class.getSimpleName(), identifier.getIdentifier());
         try {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(identifier.getIdentifier().toString()));
