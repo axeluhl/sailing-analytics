@@ -228,10 +228,6 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
     }
 
     public void onRaceItemClicked(ManagedRace managedRace) {
-        if (infoFragment != null && infoFragment.getRace().equals(managedRace)) {
-            return;
-        }
-
         infoFragment = new RaceInfoFragment();
         infoFragment.setArguments(RaceFragment.createArguments(managedRace));
 
