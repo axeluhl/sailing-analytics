@@ -18,7 +18,17 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 public interface Regatta extends Named, WithID {
     ScoringScheme getScoringScheme();
     
+    /**
+     * Gets the course area for all races of this {@link Regatta}.
+     * @return the {@link CourseArea} object.
+     */
     CourseArea getDefaultCourseArea();
+
+    /**
+     * Sets the course area for all races of this {@link Regatta}.
+     * @param newCourseArea {@link CourseArea} to be set.
+     */
+    void setDefaultCourseArea(CourseArea newCourseArea);
     
     /**
      * A regatta consists of one or more series.
@@ -83,4 +93,11 @@ public interface Regatta extends Named, WithID {
     void addRaceColumnListener(RaceColumnListener listener);
 
     void removeRaceColumnListener(RaceColumnListener listener);
+    
+    /**
+     * @return whether this regatta defines its local per-series result discarding rules; if so, any leaderboard based
+     *         on the regatta has to respect this and has to use a result discarding rule implementation that
+     *         keeps discards local to each series rather than spreading them across the entire leaderboard.
+     */
+    boolean definesSeriesDiscardThresholds();
 }

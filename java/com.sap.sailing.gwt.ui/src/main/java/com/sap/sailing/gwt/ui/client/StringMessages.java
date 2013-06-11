@@ -344,8 +344,6 @@ public interface StringMessages extends Messages {
     String waypoint();
     String showAllCompetitors();
     String boatTails();
-    String maximalCount();
-    String maxVisibleCompetitorsCountMustBePositive();
     String resultImportUrls();
     String errorRefreshingResultImportUrlList(String message);
     String successfullyUpdatedResultImportUrls();
@@ -451,6 +449,7 @@ public interface StringMessages extends Messages {
     String sideToWhichMarkAtLegStartWasRounded();
     String raceIsLive(String raceName);
     String racesAreLive(String raceNames);
+    String scoringSchemeHighPointFirstGetsOne();
     String scoringSchemeHighPointFirstGetsTen();
     String knotsUnit();
     String averageJibeLossInMetersTooltip();
@@ -535,6 +534,18 @@ public interface StringMessages extends Messages {
     String currentTime();
     String tractracUsername();
     String tractracPassword();
+    String operatorEquals();
+    String operatorNotEqualTo();
+    String operatorLessThan();
+    String operatorLessThanEquals();
+    String operatorGreaterThan();
+    String operatorGreaterThanEquals();
+    String operatorContains();
+    String operatorNotContains();
+    String operatorStartsWith();
+    String operatorEndsWith();
+    String nationality();
+    String numberMustBePositive();
     String distanceToLineAtRaceStart();
     String speedOverGroundAtRaceStart();
     String speedOverGroundWhenPassingStart();
@@ -547,16 +558,100 @@ public interface StringMessages extends Messages {
     String starboardTack();
     String portSide();
     String starboardSide();
+    String pleaseEnterANumber();
+    String competitorsFilter();
     String flagStatus();
     String additionalInformation();
+    String actionAddFilter();
+    String actionEditFilter();
+    String availableFilters();
+    String createFilterHint();
     String windFixListingDescription();
     String noWindFixesAvailable();
     String distanceToStarboardEndOfStartlineWhenPassingStart();
     String distanceToStarboardEndOfStartlineWhenPassingStartTooltip();
+    String filterThisNameAlreadyExists();
+    String addAtLeastOneFilterCriteria();
+    String filterCriteria();
+    String selectAFilterCriteria();
+    String filterName();
+    String operator();
+    String value();
+    String nationalityMustBeISOorIOCcode();
+    String raceRank();
     String waypoints();
     String disableRaceFilter();
     String enableRaceFilter();
     String raceStatusColumn();
     String loading();
     String showHiddenRaces();
+    String selectedCompetitors();
+    String mediaDateFormatError(String expectedTimeFormat);
+    String filterNothing();
+    String topNCompetitorsByRaceRank(int n);
+    String topNCompetitorsByTotalRank(int n);
+    
+    String editRegatta();
+    String selectSailingEvent();
+    String selectCourseArea();
+
+    /*Start of simulator related messages*/
+    String simulator();
+    String optionsBar();
+    String update();
+
+    String setup();
+    String strength();
+    String oscillation();
+    String oscillating();
+    String amplitude();
+    String frequency();
+    String noise();
+
+    String sailing();
+    String optimality();
+    String maximumTurns();
+    String raceDirection();
+    String upWind();
+    String downWind();
+    String strategies();
+    String omniscient();
+    String opportunistic();
+    String mixed();
+    String maps();
+    String startEnd();
+    String racecourse();
+    String summary();
+    String replay();
+    String display();
+
+    String simulatorPolarHeader();
+    String show();
+    String hide();
+
+    String leftWind();
+    String rightWind();
+    String strategyOption1();
+    String strategyOption2();
+    String strategyOption3();
+    String legLabel();
+    String raceLabel();
+    String competitorLabel();
+
+    String freemode();
+    String whatIfCourse();
+    /*End of simulator related messages*/
+    
+    String courseAreaOverview();
+    String courseDesignOverview();
+    String regattaOverview();
+    String additionalSettings();
+    String showFollowingCourseAreas();
+    String showFollowingRegattas();
+    String showOnlyRacesOfSameDay();
+    String showOnlyCurrentlyRunningRaces();
+    String seriesDefinesResultDiscardingRule();
+    String addSeries();
+    String regattaDefinesResultDiscardingRules();
+    String startsWithZeroScore();
 }

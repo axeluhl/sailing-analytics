@@ -8,7 +8,7 @@ public abstract class AbstractSpeedImpl implements Speed {
 
     @Override
     public double getBeaufort() {
-        return Math.exp(Math.log(getKnots()*1.852/3.6 / 0.8360)*2/3);
+        return Math.exp(Math.log(getMetersPerSecond()/0.8360) * 2./3.);
     }
 
     @Override
@@ -47,5 +47,10 @@ public abstract class AbstractSpeedImpl implements Speed {
             return false;
         }
         return getMetersPerSecond() == ((Speed) object).getMetersPerSecond();
+    }
+
+    @Override
+    public double getKnots() {
+        return getKilometersPerHour() * 1000. / Mile.METERS_PER_NAUTICAL_MILE;
     }
 }

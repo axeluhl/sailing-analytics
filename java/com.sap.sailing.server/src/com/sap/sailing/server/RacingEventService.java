@@ -12,10 +12,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
-
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
@@ -34,6 +34,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -228,8 +229,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port, boolean canSendRequests)
             throws InterruptedException, UnknownHostException, IOException, ParseException;
 
-    boolean isRaceBeingTracked(RaceDefinition r);
-
     /**
      * Creates a new leaderboard with the <code>name</code> specified.
      * @param discardThresholds
@@ -380,6 +379,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param series the series must not have any {@link RaceColumn}s yet
      */
     Regatta createRegatta(String regattaBaseName, String boatClassName, Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId);
+    
+    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}
@@ -500,5 +501,23 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory();
 
     CourseArea getCourseArea(Serializable courseAreaId);
+
+    void mediaTrackAdded(MediaTrack mediaTrack);
+
+    void mediaTracksAdded(Collection<MediaTrack> mediaTracks);
+    
+    void mediaTrackTitleChanged(MediaTrack mediaTrack);
+
+    void mediaTrackUrlChanged(MediaTrack mediaTrack);
+
+    void mediaTrackStartTimeChanged(MediaTrack mediaTrack);
+
+    void mediaTrackDurationChanged(MediaTrack mediaTrack);
+
+    void mediaTrackDeleted(MediaTrack mediaTrack);
+
+    Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+
+    Collection<MediaTrack> getAllMediaTracks();
 
 }

@@ -17,10 +17,16 @@ import com.sap.sailing.selenium.test.adminconsole.pages.LeaderboardConfiguration
  *   D049941
  */
 public class TestLeaderboardCreation extends AbstractSeleniumTest {
+//    @Before
+//    public void clearDatabase() {
+//        DatabaseHelper.dropDatabase();
+//    }
+    
     @Test
     public void testCreateFlexibleLeaderboardWithDuplicateName() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanel leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+        leaderboardConfiguration.deleteLeaderboard("Humba Humba");
         {
             FlexibleLeaderboardCreationDialog dialog = leaderboardConfiguration.startCreatingFlexibleLeaderboard();
             dialog.setName("Humba Humba");

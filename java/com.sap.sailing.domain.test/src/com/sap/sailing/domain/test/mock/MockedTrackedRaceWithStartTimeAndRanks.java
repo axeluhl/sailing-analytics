@@ -1,12 +1,12 @@
 package com.sap.sailing.domain.test.mock;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -478,7 +478,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void detachRaceLog() {
+    public void detachRaceLog(Serializable identifier) {
         // TODO Auto-generated method stub
 
     }
@@ -490,19 +490,13 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public RaceLog getRaceLog() {
+    public RaceLog getRaceLog(Serializable identifier) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public void onCourseDesignChangedByRaceCommittee(CourseBase courseDesign) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void setCourseDesignChangedListener(CourseDesignChangedListener listener) {
+    public void addCourseDesignChangedListener(CourseDesignChangedListener listener) {
         // TODO Auto-generated method stub
         
     }
@@ -517,6 +511,12 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void detachAllRaceLogs() {
+        // TODO Auto-generated method stub
+        
     }
 
 }

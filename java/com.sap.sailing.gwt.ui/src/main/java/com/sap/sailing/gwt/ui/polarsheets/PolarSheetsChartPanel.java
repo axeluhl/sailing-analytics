@@ -15,49 +15,55 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize {
+public class PolarSheetsChartPanel extends DockLayoutPanel {
 
     private StringMessages stringMessages;
     private Chart chart;
     private Map<String, Series[]> seriesMap;
+    
+    private Map<Series, String> nameForSeries = new HashMap<Series, String>();
 
     public PolarSheetsChartPanel(StringMessages stringMessages) {
+        super(Unit.PCT);
         this.stringMessages = stringMessages;
-        setPixelSize(800, 800);
+        setSize("100%", "100%");
         chart = createPolarSheetChart();
         seriesMap = new HashMap<String, Series[]>();
-        setWidget(chart);
+        add(chart);
     }
 
     private Chart createPolarSheetChart() {
         Chart polarSheetChart = new Chart().setType(Series.Type.LINE)
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(1)).setZoomType(Chart.ZoomType.X_AND_Y)
-                .setPolar(true).setSize(800, 800);
+                .setPolar(true).setHeight100().setWidth100();
         polarSheetChart.setChartTitleText(stringMessages.polarSheetChart());
         polarSheetChart.getYAxis().setMin(0);
         return polarSheetChart;
     }
 
-    private void newSeriesArray(String name) {
+    private void newSeriesArray(String name, int steppingCount) {
         if (!seriesMap.containsKey(name)) {
-            Series[] seriesPerWindSpeed = new Series[13];
+            Series[] seriesPerWindSpeed = new Series[steppingCount];
             seriesMap.put(name, seriesPerWindSpeed);
         } else {
             // TODO exception handling
         }
     }
 
-    private void createSeriesForWindspeed(String name, int windSpeed) {
+    private void createSeriesForWindspeed(String name, int windSpeedLevel, int windSpeed) {
         Series[] seriesPerWindSpeed = seriesMap.get(name);
         Number[] forEachDeg = initializeDataForNewSeries();
-        seriesPerWindSpeed[windSpeed] = chart.createSeries().setPoints(forEachDeg);
-        seriesPerWindSpeed[windSpeed].setName(name + "-" + (windSpeed));
-        chart.addSeries(seriesPerWindSpeed[windSpeed]);
+        seriesPerWindSpeed[windSpeedLevel] = chart.createSeries().setPoints(forEachDeg);
+        String actualSeriesName = name + "-" + windSpeed;
+        seriesPerWindSpeed[windSpeedLevel].setName(actualSeriesName);
+        nameForSeries.put(seriesPerWindSpeed[windSpeedLevel],actualSeriesName);
+        chart.addSeries(seriesPerWindSpeed[windSpeedLevel]);
     }
 
     private Number[] initializeDataForNewSeries() {
@@ -66,11 +72,12 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
     }
 
     private void addValuesToSeries(String seriesId, PolarSheetsData result) {
+        int stepCount = result.getStepping().length;
         if (seriesMap.containsKey(seriesId)) {
-            for (int i = 0; i < 13; i++) {
+            for (int i = 0; i < stepCount; i++) {
                 if (hasSufficientDataForWindspeed(result.getDataCountPerAngleForWindspeed(i), result.getDataCount())) {
                     if (seriesMap.get(seriesId)[i] == null) {
-                        createSeriesForWindspeed(seriesId, i);
+                        createSeriesForWindspeed(seriesId, i, result.getStepping()[i]);
                     }
                     Series series = seriesMap.get(seriesId)[i];
                     series.setPoints(result.getAveragedPolarDataByWindSpeed()[i], false);
@@ -152,7 +159,7 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
             return;
         }
         if (!seriesMap.containsKey(id)) {
-            newSeriesArray(id);
+            newSeriesArray(id, result.getStepping().length);
         }
         addValuesToSeries(id, result);
         chart.redraw();
@@ -162,10 +169,31 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
         chart.setSeriesPlotOptions(new SeriesPlotOptions().setPointMouseOverEventHandler(pointMouseOverHandler));
     }
 
+    public Series[] getSeriesPerWindspeedForName(String name) {
+        return seriesMap.get(name);
+    }
+    
+    public String getNameForSeries(Series series) {
+        return nameForSeries.get(series);
+    }
+    
+    @Override
+    protected void onLoad() {
+        Timer timer = new Timer() {
+            
+            @Override
+            public void run() {
+                chart.setSizeToMatchContainer();
+            }
+        };
+        timer.schedule(200);
+        super.onLoad();
+    }
+    
     @Override
     public void onResize() {
         chart.setSizeToMatchContainer();
-        chart.redraw();
+        super.onResize();
     }
 
 }

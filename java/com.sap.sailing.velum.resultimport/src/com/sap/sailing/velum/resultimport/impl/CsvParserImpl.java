@@ -57,7 +57,7 @@ public class CsvParserImpl implements CsvParser {
         // G-PL;SEGELNR;STEUERMANN/-FRAU/CREW;CLUB;CLUB-ID;1.Wf;1.Wf;2.Wf;2.Wf;3.Wf;3.Wf;4.Wf;4.Wf;5.Wf;5.Wf;6.Wf;6.Wf;7.Wf;7.Wf;G-PKTE;G-PL;
         // 1;GER    951;Zachariassen, Gerd/Winter Hagen/Zachariassen, Cornelia;NRV/NRV/NRV;HA002/HA002/HA002;1;1,00;3;3,00;4;4,00;8;8,00;[11];[11,00];1;1,00;1;1,00;18,00;1;
         
-        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, "Cp1252"));
         String line = br.readLine();
         int startIndexForRacePoints = -1;
         int endIndexForRacePoints = -1;
@@ -146,7 +146,6 @@ public class CsvParserImpl implements CsvParser {
             @Override
             public Map<String, String> getMetadata() {
                 Map<String, String> result = new HashMap<>();
-//                result.put(ScoreCorrectionProviderImpl.BOATCLASS_NAME_METADATA_PROPERTY, "505");
                 return result;
             }
             

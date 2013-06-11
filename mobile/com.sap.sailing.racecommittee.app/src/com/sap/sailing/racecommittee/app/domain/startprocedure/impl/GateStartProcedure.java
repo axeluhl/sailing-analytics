@@ -12,7 +12,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.PassAwareRaceLog;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.racecommittee.app.R;
@@ -34,12 +34,12 @@ public class GateStartProcedure implements StartProcedure {
     public final static long startPhaseGolfDownStandardIntervalConstantSummand = 3 * 60 * 1000; // minutes * seconds * milliseconds
     
     private List<Long> startProcedureEventIntervals;
-    private PassAwareRaceLog raceLog;
+    private RaceLog raceLog;
     private StartProcedureListener raceStateChangedListener;
     private GateStartPhaseEventListener startPhaseEventListener;
     private GateStartRunningRaceEventListener runningRaceEventListener;
     
-    public GateStartProcedure(PassAwareRaceLog raceLog) {
+    public GateStartProcedure(RaceLog raceLog) {
         this.raceLog = raceLog;
         startProcedureEventIntervals = new ArrayList<Long>();
         raceStateChangedListener = null;
@@ -133,7 +133,7 @@ public class GateStartProcedure implements StartProcedure {
     }
     
     @Override
-    public void setChangeListener(StartProcedureListener raceStateChangedListener) {
+    public void setStartProcedureListener(StartProcedureListener raceStateChangedListener) {
         this.raceStateChangedListener = raceStateChangedListener;
     }
 
@@ -238,11 +238,6 @@ public class GateStartProcedure implements StartProcedure {
     }
 
     @Override
-    public void setIndividualRecallRemoval(TimePoint eventTime) {
-        
-    }
-
-    @Override
     public Class<? extends RaceFragment> getStartphaseFragment() {
         return GateStartPhaseFragment.class;
     }
@@ -263,31 +258,25 @@ public class GateStartProcedure implements StartProcedure {
     }
 
     @Override
-    public Pair<String, Long> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart) {
-        Pair<String, Long> result;
+    public Pair<String, List<Object>> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart) {
+        Pair<String, List<Object>> result;
+        List<Object> milisecondsList = new ArrayList<Object>();
         if (millisecondsTillStart < startPhasePapaDownInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_gate_class_over_golf_removed), millisecondsTillStart);
+            milisecondsList.add(millisecondsTillStart);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_gate_class_over_golf_removed), milisecondsList);
         } else if (millisecondsTillStart < startPhasePapaUpInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_gate_papa_removed), millisecondsTillStart - startPhasePapaDownInterval);
+            milisecondsList.add(millisecondsTillStart - startPhasePapaDownInterval);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_gate_papa_removed), milisecondsList);
         } else if (millisecondsTillStart < startPhaseClassOverGolfUpIntervall) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_gate_papa_display), millisecondsTillStart - startPhasePapaUpInterval);
+            milisecondsList.add(millisecondsTillStart - startPhasePapaUpInterval);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_gate_papa_display), milisecondsList);
         } else {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_gate_class_over_golf_display), millisecondsTillStart - startPhaseClassOverGolfUpIntervall);
+            milisecondsList.add(millisecondsTillStart - startPhaseClassOverGolfUpIntervall);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_gate_class_over_golf_display), milisecondsList);
         }
         return result;
     }
 
-    @Override
-    public void setIndividualRecall(TimePoint eventTime) {
-        
-    }
-
-    @Override
-    public void dispatchFiredIndividualRecallRemovalEvent(TimePoint individualRecallDisplayedTime, TimePoint eventTime) {
-        
-    }
-
-    @Override
     public void dispatchAutomaticGateClose(TimePoint eventTime) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.GOLF, Flags.NONE, /*isDisplayed*/false);
@@ -296,6 +285,30 @@ public class GateStartProcedure implements StartProcedure {
         if (runningRaceEventListener != null) {
             runningRaceEventListener.onGolfDown();
         }
+    }
+    
+    public void setGateLineOpeningTime(Long gateLineOpeningTimeInMinutes){
+        //TODO
+    }
+    
+    public void setPathfinder(String sailingId){
+        //TODO
+    }
+
+    @Override
+    public void handleStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public String getPathfinder() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Long getGateLineOpeningTime() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

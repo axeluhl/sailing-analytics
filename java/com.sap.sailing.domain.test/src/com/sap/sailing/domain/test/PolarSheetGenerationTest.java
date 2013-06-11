@@ -72,9 +72,9 @@ public class PolarSheetGenerationTest {
         
         PolarSheetsData data = resultContainer.getPolarData();
         Assert.assertEquals(4, data.getDataCount());
-        Assert.assertEquals(4.0, data.getAveragedPolarDataByWindSpeed()[1][45]);
-        Assert.assertEquals(2.0, data.getAveragedPolarDataByWindSpeed()[1][55]);
-        Assert.assertEquals(6.0, data.getAveragedPolarDataByWindSpeed()[1][30]);
+        Assert.assertEquals(4.0, data.getAveragedPolarDataByWindSpeed()[0][45]);
+        Assert.assertEquals(2.0, data.getAveragedPolarDataByWindSpeed()[0][55]);
+        Assert.assertEquals(6.0, data.getAveragedPolarDataByWindSpeed()[0][30]);
         
     }
     

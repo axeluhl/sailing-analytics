@@ -58,7 +58,7 @@
 		<servlet-name>RCCompetitors</servlet-name>
 		<url-pattern>/rc/competitors</url-pattern>
 	</servlet-mapping>
-	
+		
 	<!-- RACE COMMITTEE END -->
 
 	<servlet>
@@ -89,12 +89,29 @@
 	</servlet-mapping>
 	
 	<servlet>
+		<servlet-name>EventRaceStatesServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.EventRaceStatesJsonGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EventRaceStatesServlet</servlet-name>
+		<url-pattern>/eventRaceStates</url-pattern>
+	</servlet-mapping>
+		
+	<servlet>
 		<servlet-name>RegattasJsonGetServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.RegattasJsonGetServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>RegattasJsonGetServlet</servlet-name>
 		<url-pattern>/regattas</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>RegattaJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.RegattaJsonGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RegattaJsonGetServlet</servlet-name>
+		<url-pattern>/regatta</url-pattern>
 	</servlet-mapping>
 	
 	<servlet>

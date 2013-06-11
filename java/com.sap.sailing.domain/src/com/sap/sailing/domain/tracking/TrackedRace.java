@@ -7,7 +7,6 @@ import java.util.SortedSet;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -52,10 +51,12 @@ public interface TrackedRace extends Serializable {
 
     /**
      * Computes the estimated start time for this race (not to be confused with the {@link #getStartOfTracking()} time
-     * point which is expected to be before the race start time). When there are no {@link MarkPassing}s for the first
-     * mark, <code>null</code> is returned. If there are mark passings for the first mark and the start time is less
-     * than {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} before the first mark passing for the
-     * first mark. Otherwise, the first mark passing for the first mark minus
+     * point which is expected to be before the race start time). The highest precedence take the
+     * {@link #attachedRaceLogs race logs} and their start time events, followed by the field {@link #startTimeReceived}
+     * which can explicitly be set using {@link #setStartTimeReceived(TimePoint)}. When there are no {@link MarkPassing}s
+     * for the first mark, <code>null</code> is returned. If there are mark passings for the first mark and the start
+     * time is less than {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} before the first mark
+     * passing for the first mark. Otherwise, the first mark passing for the first mark minus
      * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} is returned as the race start time.
      * <p>
      * 
@@ -483,7 +484,12 @@ public interface TrackedRace extends Serializable {
     /**
      * Detaches the race log associated with this {@link TrackedRace}.
      */
-    void detachRaceLog();
+    void detachRaceLog(Serializable identifier);
+    
+    /**
+     * Detaches all {@link RaceLog} instances from this race
+     */
+    void detachAllRaceLogs();
     
     /**
      * Attaches the passed race log with this {@link TrackedRace}.
@@ -495,20 +501,13 @@ public interface TrackedRace extends Serializable {
      * Returns the attached race log event track for this race if any.
      * Otherwise <code>null</code>.
      */
-    RaceLog getRaceLog();
-
-    /**
-     * whenever a new course design is published by the race committee and the appropriate event occures in the race log, this method is 
-     * called to propagate the course design to the tracking provider.
-     * @param courseDesign the new course design to be published
-     */
-    void onCourseDesignChangedByRaceCommittee(CourseBase courseDesign);
+    RaceLog getRaceLog(Serializable identifier);
     
     /**
      * a setter for the listener on course design changes. The listener is mostly part of the tracking provider adapter.
      * @param listener the listener to operate with.
      */
-    void setCourseDesignChangedListener(CourseDesignChangedListener listener);
+    void addCourseDesignChangedListener(CourseDesignChangedListener listener);
 
     /**
      * For a competitor, computes the distance (TODO not yet clear whether over ground or projected onto wind direction)

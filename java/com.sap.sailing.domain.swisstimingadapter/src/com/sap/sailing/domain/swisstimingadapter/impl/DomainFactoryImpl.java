@@ -42,6 +42,8 @@ import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
+import com.sap.sailing.domain.swisstimingadapter.RaceType;
+import com.sap.sailing.domain.swisstimingadapter.RaceType.OlympicRaceCode;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -64,36 +66,23 @@ public class DomainFactoryImpl implements DomainFactory {
     private final static Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
     private final Map<String, Regatta> raceIDToRegattaCache;
     private final Map<Iterable<String>, ControlPoint> controlPointCache;
-    private final Map<String, BoatClass> olympicClassesByID;
-    private final BoatClass unknownBoatClass;
+    private final Map<String, RaceType> raceTypeByID;
+    private final RaceType unknownRaceType;
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
     
     public DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory baseDomainFactory) {
         this.baseDomainFactory = baseDomainFactory;
         raceIDToRegattaCache = new HashMap<String, Regatta>();
         controlPointCache = new HashMap<Iterable<String>, ControlPoint>();
-        olympicClassesByID = new HashMap<String, BoatClass>();
-        /*
-        SAM102000 Men's Windsurfer = Windsufer M�nner RS:X
-        SAW102000 Women's Windsurfer = Windsurfer Damen RS:X
-        SAM004000 Men's One Person Dinghy = Laser M�nner
-        SAW103000 Women's One Person Dinghy = Laser Damen Laser Radial
-        SAM002000 Men's One Person Dinghy Heavy = Finn Dinghy M�nner
-        SAM005000 Men's Two Person Dinghy = 470er M�nner
-        SAW005000 Women's Two Person Dinghy = 470er Damen
-        SAM009000 Men's Skiff = 49er M�nner
-        SAM007000 Men's Keelboat = Starboot M�nner 
-        SAW010000 Women's Match Racing = Matchrace Damen Elliott 6M (modified)
-        */
-        olympicClassesByID.put("102", baseDomainFactory.getOrCreateBoatClass("RS:X", /* typicallyStartsUpwind */ true));
-        olympicClassesByID.put("004", baseDomainFactory.getOrCreateBoatClass("Laser", /* typicallyStartsUpwind */ true));
-        olympicClassesByID.put("103", baseDomainFactory.getOrCreateBoatClass("Laser Radial", /* typicallyStartsUpwind */ true));
-        olympicClassesByID.put("002", baseDomainFactory.getOrCreateBoatClass("Finn", /* typicallyStartsUpwind */ true));
-        olympicClassesByID.put("005", baseDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true));
-        olympicClassesByID.put("009", baseDomainFactory.getOrCreateBoatClass("49er", /* alwaysStartsUpwind */ true));
-        olympicClassesByID.put("007", baseDomainFactory.getOrCreateBoatClass("Star", /* typicallyStartsUpwind */ true));
-        olympicClassesByID.put("010", baseDomainFactory.getOrCreateBoatClass("Elliott 6M", /* typicallyStartsUpwind */ true));
-        unknownBoatClass = baseDomainFactory.getOrCreateBoatClass("Unknown", /* typicallyStartsUpwind */ true);
+        raceTypeByID = new HashMap<String, RaceType>();
+        
+        for (OlympicRaceCode olympicRaceCode : OlympicRaceCode.values()) {
+            raceTypeByID.put(
+                    olympicRaceCode.swissTimingCode,
+                    new RaceTypeImpl(olympicRaceCode, baseDomainFactory.getOrCreateBoatClass(
+                            olympicRaceCode.boatClassName, olympicRaceCode.typicallyStartsUpwind)));
+        }
+        unknownRaceType = new RaceTypeImpl(OlympicRaceCode.UNKNOWN, baseDomainFactory.getOrCreateBoatClass("Unknown", OlympicRaceCode.UNKNOWN.typicallyStartsUpwind));
     }
 
     @Override
@@ -108,7 +97,7 @@ public class DomainFactoryImpl implements DomainFactory {
             result = raceIDToRegattaCache.get(raceID);
         }
         if (result == null) {
-            result = new RegattaImpl(raceLogStore, raceID, getOrCreateBoatClassFromRaceID(raceID), trackedRegattaRegistry,
+            result = new RegattaImpl(raceLogStore, raceID, getRaceTypeFromRaceID(raceID).getBoatClass(), trackedRegattaRegistry,
                     getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), raceID, null);
             logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+")");
             raceIDToRegattaCache.put(raceID, result);
@@ -117,26 +106,36 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Competitor getCompetitorByBoatIDAndBoatClass(String boatID, BoatClass boatClass) {
-        return baseDomainFactory.getExistingCompetitorById(getCompetitorID(boatID, boatClass));
+    public Competitor getCompetitorByBoatIDAndRaceType(String boatID, RaceType raceType) {
+        return baseDomainFactory.getExistingCompetitorById(getCompetitorID(boatID, raceType));
     }
 
-    private String getCompetitorID(String boatID, BoatClass boatClass) {
-        return boatID + "/" + boatClass.getName();
+    @Override
+    public Competitor getCompetitorByBoatIDAndRaceID(String boatID, String raceID) {
+        RaceType raceType = getRaceTypeFromRaceID(raceID);
+        if (raceType != null) {
+            return getCompetitorByBoatIDAndRaceType(boatID, raceType);
+        } else {
+            return null;
+        }
+    }
+
+    private String getCompetitorID(String boatID, RaceType raceType) {
+        return boatID + "/" + raceType.getRaceCode();
     }
     
     @Override
-    public Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass) {
-        Competitor result = getCompetitorByBoatIDAndBoatClass(competitor.getBoatID(), boatClass);
+    public Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, RaceType raceType) {
+        Competitor result = getCompetitorByBoatIDAndRaceType(competitor.getBoatID(), raceType);
         if (result == null) {
-            Boat boat = new BoatImpl(competitor.getName(), boatClass, competitor.getBoatID());
+            Boat boat = new BoatImpl(competitor.getName(), raceType.getBoatClass(), competitor.getBoatID());
             List<Person> teamMembers = new ArrayList<Person>();
             for (String teamMemberName : competitor.getName().split("[-+&]")) {
                 teamMembers.add(new PersonImpl(teamMemberName.trim(), getOrCreateNationality(competitor.getThreeLetterIOCCode()),
                         /* dateOfBirth */ null, teamMemberName.trim()));
             }
             Team team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
-            result = baseDomainFactory.getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), boatClass),
+            result = baseDomainFactory.getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), raceType),
                     competitor.getName(), team, boat);
         }
         return result;
@@ -144,8 +143,8 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Competitor getOrCreateCompetitor(String boatID, String threeLetterIOCCode, String name, 
-            BoatClass boatClass) {
-        return getOrCreateCompetitor(new CompetitorImpl(boatID, threeLetterIOCCode, name), boatClass);
+            RaceType raceType) {
+        return getOrCreateCompetitor(new CompetitorImpl(boatID, threeLetterIOCCode, name), raceType);
     }
 
     @Override
@@ -157,9 +156,9 @@ public class DomainFactoryImpl implements DomainFactory {
             waypoints.add(waypoint);
         }
         com.sap.sailing.domain.base.Course domainCourse = new CourseImpl("Course", waypoints);
-        BoatClass boatClass = getOrCreateBoatClassFromRaceID(raceID);
+        BoatClass boatClass = getRaceTypeFromRaceID(raceID).getBoatClass();
         logger.info("Creating RaceDefinitionImpl for race "+raceID);
-        RaceDefinition result = new RaceDefinitionImpl(raceID, domainCourse, boatClass, competitors);
+        RaceDefinition result = new RaceDefinitionImpl(regatta.getId().toString()+"/"+raceID, domainCourse, boatClass, competitors);
         regatta.addRace(result);
         return result;
     }
@@ -167,47 +166,36 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, Course course) {
         com.sap.sailing.domain.base.Course domainCourse = createCourse(race.getDescription(), course);
-        BoatClass boatClass = getOrCreateBoatClassFromRaceID(race.getRaceID());
-        Iterable<Competitor> competitors = createCompetitorList(startList, boatClass);
+        RaceType raceType = getRaceTypeFromRaceID(race.getRaceID());
+        Iterable<Competitor> competitors = createCompetitorList(startList, raceType);
         logger.info("Creating RaceDefinitionImpl for race "+race.getRaceID());
         RaceDefinition result = new RaceDefinitionImpl(race.getRaceID(), domainCourse,
-                boatClass, competitors);
+                raceType.getBoatClass(), competitors);
         regatta.addRace(result);
         return result;
     }
 
+    /**
+     * Returns the SwissTiming olympic race type or race type "UNKNOWN" when no corresponding olympic race type can be found.
+     * Will never return null neither throw a content-related exception.
+     */
     @Override
-    public BoatClass getOrCreateBoatClassFromRaceID(String raceID) {
-        BoatClass result;
-        /*
-            SAM102000 Men's Windsurfer = Windsurfer Maenner RS:X
-            SAW102000 Women's Windsurfer = Windsurfer Damen RS:X
-            SAM004000 Men's One Person Dinghy = Laser Maenner
-            SAW103000 Women's One Person Dinghy = Laser Damen Laser Radial
-            SAM002000 Men's One Person Dinghy Heavy = Finn Dinghy Maenner
-            SAM005000 Men's Two Person Dinghy = 470er Maenner
-            SAW005000 Women's Two Person Dinghy = 470er Damen
-            SAM009000 Men's Skiff = 49er Maenner
-            SAM007000 Men's Keelboat = Starboot Maenner 
-            SAW010000 Women's Match Racing = Matchrace Damen Elliott 6M (modified)
-         */
-        if (raceID.toUpperCase().startsWith("SA") && raceID.length() == 9) {
-            String classID = raceID.substring(3, 6);
-            result = olympicClassesByID.get(classID);
-            if (result == null) {
-                // unknown code
-                result = unknownBoatClass;
+    public RaceType getRaceTypeFromRaceID(String raceID) {
+        if (raceID != null && raceID.length() >= 6) {
+            String swissTimingRaceCode = raceID.substring(0, 6).toUpperCase();
+            RaceType result = raceTypeByID.get(swissTimingRaceCode);
+            if (result != null) {
+                return result;
             }
-        } else {
-            result = unknownBoatClass;
         }
-        return result;
+        //else 
+        return unknownRaceType;
     }
 
-    private Iterable<Competitor> createCompetitorList(StartList startList, BoatClass boatClass) {
+    private Iterable<Competitor> createCompetitorList(StartList startList, RaceType raceType) {
         List<Competitor> result = new ArrayList<Competitor>();
         for (com.sap.sailing.domain.swisstimingadapter.Competitor swissTimingCompetitor : startList.getCompetitors()) {
-            Competitor domainCompetitor = getOrCreateCompetitor(swissTimingCompetitor, boatClass);
+            Competitor domainCompetitor = getOrCreateCompetitor(swissTimingCompetitor, raceType);
             result.add(domainCompetitor);
         }
         return result;

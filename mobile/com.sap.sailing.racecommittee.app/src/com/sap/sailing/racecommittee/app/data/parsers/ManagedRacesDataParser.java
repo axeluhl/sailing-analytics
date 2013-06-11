@@ -14,8 +14,7 @@ import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
-import com.sap.sailing.domain.racelog.PassAwareRaceLog;
-import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
@@ -52,15 +51,12 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 			for (RaceRow raceRow : series.getRaceRows()) {
 				Fleet fleet = raceRow.getFleet();
 				for (RaceCell cell : raceRow.getCells()) {
-					PassAwareRaceLog log = cell.getRaceLog() instanceof PassAwareRaceLog ? 
-							(PassAwareRaceLog) cell.getRaceLog() : 
-								PassAwareRaceLogImpl.copy(cell.getRaceLog());
 					ManagedRace race = createManagedRace(
 							raceGroup, 
 							series, 
 							fleet, 
 							cell.getName(), 
-							log);
+							cell.getRaceLog());
 					target.add(race);
 				}
 			}
@@ -68,7 +64,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 	}
 
 	private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesWithRows series,
-			Fleet fleet, String name, PassAwareRaceLog raceLog) {
+			Fleet fleet, String name, RaceLog raceLog) {
 		return new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(name, 
 						new FleetIdentifierImpl(fleet, series, raceGroup)),

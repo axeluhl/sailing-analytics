@@ -5,13 +5,14 @@ import java.util.Date;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
 public class GPSFixDTO implements IsSerializable {
     public Date timepoint;
     public PositionDTO position;
     public SpeedWithBearingDTO speedWithBearing;
-    public WindDTO wind;
-    
+
     /**
      * tells if this fix was computed by extrapolation instead of having been captured by a device directly
      * or having been interpolated between captured fixes
@@ -31,6 +32,11 @@ public class GPSFixDTO implements IsSerializable {
      */
     public LegType legType;
     
+    /**
+     * degrees between boat's course over ground and the dampened true wind direction (from)
+     */
+    public Double degreesBoatToTheWind;
+    
     public GPSFixDTO() {}
 
     public GPSFixDTO(Date timepoint, PositionDTO position, SpeedWithBearingDTO speedWithBearing, WindDTO wind,
@@ -42,6 +48,9 @@ public class GPSFixDTO implements IsSerializable {
         this.tack = tack;
         this.legType = legType;
         this.extrapolated = extrapolated;
-        this.wind = wind;
+        if (speedWithBearing != null && wind != null) {
+            this.degreesBoatToTheWind = new DegreeBearingImpl(speedWithBearing.bearingInDegrees).getDifferenceTo(
+                    new DegreeBearingImpl(wind.dampenedTrueWindFromDeg)).getDegrees();
+        }
     }
 }

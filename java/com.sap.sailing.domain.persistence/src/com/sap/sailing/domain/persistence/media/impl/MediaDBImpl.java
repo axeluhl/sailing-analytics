@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.persistence.media.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -13,7 +11,6 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.QueryBuilder;
 import com.sap.sailing.domain.persistence.media.DBMediaTrack;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 
@@ -60,23 +57,6 @@ public class MediaDBImpl implements MediaDB {
         } catch (NullPointerException e) {
             // sometimes, for reasons yet to be clarified, ensuring an index on the name field causes an NPE
             throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public DBMediaTrack loadMediaTrack(String dbId) {
-        ObjectId objectId = new ObjectId(dbId);
-        DBCursor cursor = getVideoCollection().find(new BasicDBObject(DbNames.Fields._id.name(), objectId));
-        switch (cursor.count()) {
-        case 0:
-            throw new RuntimeException("Video not found with id: " + dbId);
-        case 1:
-            DBObject dbObject = cursor.next();
-            DBMediaTrack dbMediaTrack = createMediaObjectFromDB(dbObject);
-            return dbMediaTrack;
-        default:
-            throw new RuntimeException("Ambiguous videos not found with id: " + dbId);
-
         }
     }
 
@@ -150,52 +130,6 @@ public class MediaDBImpl implements MediaDB {
         update.append("$set", new BasicDBObject(DbNames.Fields.DURATION_IN_MILLIS.name(), durationInMillis));
 
         getVideoCollection().update(updateQuery, update);
-    }
-
-    @Override
-    public void saveChanges(String dbId, String title, String url, Date startTime, int durationInMillis) {
-        BasicDBObject updateQuery = new BasicDBObject();
-        updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
-
-        BasicDBObject updateObject = new BasicDBObject();
-        updateObject.append(DbNames.Fields.MEDIA_TITLE.name(), title);
-        updateObject.append(DbNames.Fields.MEDIA_URL.name(), url);
-        updateObject.append(DbNames.Fields.STARTTIME.name(), startTime);
-        updateObject.append(DbNames.Fields.DURATION_IN_MILLIS.name(), durationInMillis);
-        
-        BasicDBObject updateCommand = new BasicDBObject("$set", updateObject);
-
-        getVideoCollection().update(updateQuery, updateCommand);
-    }
-    
-    @Override
-    public Collection<DBMediaTrack> queryOverlappingMediaTracks(Date rangeStart, Date rangeEnd) {
-        if ((rangeStart != null) && (rangeEnd != null)) {
-            BasicDBObject startTimeCondition = new BasicDBObject();
-            startTimeCondition.put(DbNames.Fields.STARTTIME.name(), new BasicDBObject("$gt", rangeStart));
-            startTimeCondition.put(DbNames.Fields.STARTTIME.name(), new BasicDBObject("$lt", rangeEnd));
-            BasicDBObject endTimeCondition = new BasicDBObject();
-            
-            // Should actually be "AND greater than rangeStart - duration".
-            // However, using values calculated on server side turns out to be a nightmare with mongodb.
-            // Instead do the remaining filtering on client side...
-            endTimeCondition.put(DbNames.Fields.STARTTIME.name(), new BasicDBObject("$lt", rangeStart));
-    
-            DBObject query = QueryBuilder.start().or(startTimeCondition, endTimeCondition).get();
-            
-            DBCursor cursor = getVideoCollection().find(query).sort(sortByStartTimeAndTitle);
-            
-            List<DBMediaTrack> result = new ArrayList<>(cursor.count());
-            while (cursor.hasNext()) {
-                DBMediaTrack resultCandidate = createMediaObjectFromDB(cursor.next());
-                if (resultCandidate.durationInMillis > rangeStart.getTime() - resultCandidate.startTime.getTime()) {
-                    result.add(resultCandidate);
-                }
-            }
-            return result;
-        } else {
-            return Collections.emptyList();
-        }
     }
 
 }

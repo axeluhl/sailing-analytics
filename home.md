@@ -10,17 +10,25 @@ Like businesses, sailors need the latest information to make strategic decisions
 
 * [[Information about this Wiki and HowTo|wiki/howto]]
 * [[General Project Information|wiki/general-information]]
-* [[OnBoarding Information|wiki/onboarding]]
-* [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
+* Production Environment
+  * [[PIRONET (Hosting Provider, Emergency Procedures)|wiki/prionet-related-information]]
+  * [[Amazon EC2|wiki/amazon-ec2]]
   * [[Production Environment|wiki/production-environment]]
+  * [[TracTrac Lifecycle for Event Managers|wiki/tractrac-lifecycle]]
+* Information for Developers
+  * [[Cook Book|wiki/cook-book]]
+  * [[OnBoarding Information|wiki/onboarding]]
+  * [[Server Replication|wiki/server-replication]]
+  * [[Configure Races on Server|wiki/configure-races-on-server]]
   * [[Development Environment|wiki/development-environment]]
-* [[Server Replication|wiki/server-replication]]
-* [[Configure Races on Server|wiki/configure-races-on-server]]
-* [[Cook Book|wiki/cook-book]]
-* [[Planning|wiki/planning]]
-* Event Specifica
-  * [[General Planning|wiki/general-event-planning]]
-  * [[Extreme Sailing Series|wiki/extreme-sailing-series]]
+* General Information
+  * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
+  * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
+  * [[Inventar|wiki/inventar-liste]]
+* Planning and Event Information
+  * [[Project Planning (bigger development)|wiki/planning]]
+  * [[General Event Planning|wiki/general-event-planning]]
+  * [[Information about Extreme Sailing Series|wiki/extreme-sailing-series]]
 
 ### Internal services (not related to wiki but useful)
 
@@ -29,3 +37,4 @@ Like businesses, sailors need the latest information to make strategic decisions
 * [Maven Repository Browser](http://maven.sapsailing.com/maven/)
 * [Main Sailing Website](http://www.sapsailing.com)
 * [Visitor Statistics](http://analysis.sapsailing.com/)
+* [Traffic and CPU for app01](http://mrtg.sapsailing.com/)

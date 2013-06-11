@@ -1,13 +1,9 @@
 package com.sap.sailing.domain.swisstimingadapter.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.BindException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
@@ -17,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.After;
@@ -33,6 +30,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
@@ -56,6 +54,11 @@ import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class EndToEndListeningStoreAndFowardTest {
     private static final Logger logger = Logger.getLogger(EndToEndListeningStoreAndFowardTest.class.getName());
@@ -87,8 +90,20 @@ public class EndToEndListeningStoreAndFowardTest {
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         swissTimingAdapterPersistence.dropAllMessageData();
         swissTimingAdapterPersistence.dropAllRaceMasterData();
-        storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE,
-                swissTimingAdapterPersistence, mongoDBService);
+        storeAndForward = null;
+        for (int numberOfTries = 0; numberOfTries < 3 && storeAndForward == null; numberOfTries++) {
+            try {
+                storeAndForward = new StoreAndForward(RECEIVE_PORT, CLIENT_PORT, SwissTimingFactory.INSTANCE,
+                        swissTimingAdapterPersistence, mongoDBService);
+            } catch (BindException be) {
+                logger.log(Level.INFO, "Couldn't bind server socket in StoreAndForward"+
+                   (numberOfTries<2?". Trying again...":""), be);
+                if (numberOfTries == 2) {
+                    throw be;
+                }
+                Thread.sleep(100);
+            }
+        }
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
@@ -103,7 +118,7 @@ public class EndToEndListeningStoreAndFowardTest {
         final com.sap.sailing.domain.base.impl.DomainFactoryImpl baseDomainFactory = new com.sap.sailing.domain.base.impl.DomainFactoryImpl();
         racingEventService = new RacingEventServiceImpl(mongoDBService, SwissTimingFactory.INSTANCE,
                 new DomainFactoryImpl(baseDomainFactory),
-                new com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl(baseDomainFactory));
+                new com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl(baseDomainFactory), MediaDB.TEST_STUB);
         raceHandles = new ArrayList<RacesHandle>();
     }
 
@@ -114,7 +129,9 @@ public class EndToEndListeningStoreAndFowardTest {
             racingEventService.stopTracking(raceHandle.getRegatta());
         }
         logger.info("Calling StoreAndForward.stop() in tearDown");
-        storeAndForward.stop();
+        if (storeAndForward != null) {
+            storeAndForward.stop();
+        }
         logger.exiting(getClass().getName(), "tearDown");
     }
 

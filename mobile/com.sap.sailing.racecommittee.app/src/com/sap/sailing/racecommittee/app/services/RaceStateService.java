@@ -33,7 +33,7 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.RaceEventSender;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.racegroup.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 
 public class RaceStateService extends Service {
@@ -173,19 +173,17 @@ public class RaceStateService extends Service {
         }
         
         TimePoint eventTime = new MillisecondsTimePoint(intent.getExtras().getLong(AppConstants.RACING_EVENT_TIME));
-        
+
         if (getString(R.string.intentActionAlarmAction).equals(action)) {
             if (race.getState().getStartTime() != null) {
-                race.getState().getStartProcedure().dispatchFiredEventTimePoint(race.getState().getStartTime(), eventTime);
+                race.getState().getStartProcedure()
+                        .dispatchFiredEventTimePoint(race.getState().getStartTime(), eventTime);
             }
             managedIntents.get(race.getId()).remove(intent);
             return;
-        } else if (getString(R.string.intentActionIndividualRecallRemoval).equals(action)) {
-            race.getState().getStartProcedure().dispatchFiredIndividualRecallRemovalEvent(race.getState().getIndividualRecallDisplayedTime(), eventTime);
-        } else if (getString(R.string.intentActionAutomaticRaceEnd).equals(action)) {
-            race.getState().getStartProcedure().dispatchAutomaticRaceEndEvent(eventTime);
-        } else if (getString(R.string.intentActionAutomaticGateClose).equals(action)) {
-            race.getState().getStartProcedure().dispatchAutomaticGateClose(eventTime);
+        } else if (getString(R.string.intenStartProcedureSpecificAction).equals(action)) {
+            Integer eventId = intent.getExtras().getInt(AppConstants.STARTPROCEDURE_SPECIFIC_EVENT_ID);
+            race.getState().getStartProcedure().handleStartProcedureSpecificEvent(eventTime, eventId);
         }
     }
 
@@ -275,18 +273,30 @@ public class RaceStateService extends Service {
     }
 
     private void addIntentToAlarmManager(String action, ManagedRace managedRace, TimePoint eventFireTimePoint) {
-        PendingIntent pendingIntent = createPendingIntent(action, managedRace, eventFireTimePoint);
+        PendingIntent pendingIntent = createPendingIntent(action, managedRace, eventFireTimePoint, null);
+        managedIntents.get(managedRace.getId()).add(pendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, eventFireTimePoint.asMillis(), pendingIntent);
+        ExLog.i(TAG, "The alarm " + action + " will be fired at " + eventFireTimePoint);
+    }
+    
+    private void addIntentWithEventIdToAlarmManager(String action, ManagedRace managedRace, TimePoint eventFireTimePoint, Integer eventId) {
+        PendingIntent pendingIntent = createPendingIntent(action, managedRace, eventFireTimePoint, eventId);
         managedIntents.get(managedRace.getId()).add(pendingIntent);
         alarmManager.set(AlarmManager.RTC_WAKEUP, eventFireTimePoint.asMillis(), pendingIntent);
         ExLog.i(TAG, "The alarm " + action + " will be fired at " + eventFireTimePoint);
     }
 
-    private PendingIntent createPendingIntent(String action, ManagedRace managedRace, TimePoint eventFireTimePoint) {
+    private PendingIntent createPendingIntent(String action, ManagedRace managedRace, TimePoint eventFireTimePoint,
+            Integer eventId) {
         Intent intent = new Intent(action);
         intent.putExtra(EXTRAS_SERVICE_ID, serviceId);
         intent.putExtra(AppConstants.RACE_ID_KEY, managedRace.getId());
         intent.putExtra(AppConstants.RACING_EVENT_TIME, eventFireTimePoint.asMillis());
-        PendingIntent pendingIntent = PendingIntent.getService(this, alarmManagerRequestCode++, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        if (eventId != null) {
+            intent.putExtra(AppConstants.STARTPROCEDURE_SPECIFIC_EVENT_ID, eventId);
+        }
+        PendingIntent pendingIntent = PendingIntent.getService(this, alarmManagerRequestCode++, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
         return pendingIntent;
     }
     
@@ -315,23 +325,8 @@ public class RaceStateService extends Service {
         clearAlarms(race.getId());
     }
 
-    public void handleIndividualRecall(ManagedRace race, TimePoint individualRecallRemovalFireTimePoint) {
-        String action = getString(R.string.intentActionIndividualRecallRemoval);
-        scheduleEventTime(action, race, individualRecallRemovalFireTimePoint);
+    public void handleStartProcedureSpecificEvent(ManagedRace race, TimePoint startProcedureSpecificEventTimePoint, Integer eventId) {
+        String action = getString(R.string.intenStartProcedureSpecificAction);
+        addIntentWithEventIdToAlarmManager(action, race, startProcedureSpecificEventTimePoint, eventId);
     }
-
-    public void handleIndividualRecallRemoved(ManagedRace race) {
-        clearAlarms(race.getId());
-    }
-
-    public void handleAutomaticRaceEnd(ManagedRace race, TimePoint automaticRaceEnd) {
-        String action = getString(R.string.intentActionAutomaticRaceEnd);
-        scheduleEventTime(action, race, automaticRaceEnd);
-    }
-
-    public void handleGateLineOpeningTimeChanged(ManagedRace race, TimePoint gateCloseTimePoint) {
-        String action = getString(R.string.intentActionAutomaticGateClose);
-        scheduleEventTime(action, race, gateCloseTimePoint);
-    }
-
 }

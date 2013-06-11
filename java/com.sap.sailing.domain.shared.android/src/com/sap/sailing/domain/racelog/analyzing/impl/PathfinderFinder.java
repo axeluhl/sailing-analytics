@@ -18,20 +18,16 @@ public class PathfinderFinder extends RaceLogAnalyzer {
         } finally {
             this.raceLog.unlockAfterRead();
         }
-
         return pathfinderId;
     }
 
     private String searchForPathfinderId() {
         String pathfinderId = null;
-
         for (RaceLogEvent event : getPassEvents()) {
             if (event instanceof RaceLogPathfinderEvent) {
                 pathfinderId = ((RaceLogPathfinderEvent) event).getPathfinderId();
-
             }
         }
-
         return pathfinderId;
     }
 

@@ -26,7 +26,9 @@ public interface StartProcedure {
     
     void dispatchFiredEventTimePoint(TimePoint startTime, TimePoint eventTime);
     
-    void setChangeListener(StartProcedureListener listener);
+    void setStartProcedureListener(StartProcedureListener listener);
+    
+    void setRunningRaceEventListener(RunningRaceEventListener listener);
     
     void setFinishing(TimePoint eventTime);
     
@@ -40,22 +42,14 @@ public interface StartProcedure {
     
     void setGeneralRecall(TimePoint eventTime);
     
-    void setIndividualRecall(TimePoint eventTime);
-
-    void dispatchFiredIndividualRecallRemovalEvent(TimePoint individualRecallDisplayedTime, TimePoint eventTime);
-    
-    void setIndividualRecallRemoval(TimePoint eventTime);
-    
     Class<? extends RaceFragment> getStartphaseFragment();
     
     Class<? extends RaceFragment> getRunningRaceFragment();
     
     void setStartPhaseEventListener(StartPhaseEventListener listener);
     
-    Pair<String, Long> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart);
+    Pair<String, List<Object>> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart);
 
-    void dispatchAutomaticGateClose(TimePoint eventTime);
-
-    void setRunningRaceEventListener(RunningRaceEventListener listener);
+    void handleStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId);
 
 }
