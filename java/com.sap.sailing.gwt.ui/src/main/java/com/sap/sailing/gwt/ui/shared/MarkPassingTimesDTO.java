@@ -19,12 +19,12 @@ public class MarkPassingTimesDTO extends NamedDTO {
     }
 
     public MarkPassingTimesDTO(String name) {
-        this.name = name;
+        this.setName(name);
     }
 
     @Override
     public String toString() {
         return "MarkPassingTimesDTO [firstPassingDate=" + firstPassingDate + ", lastPassingDate=" + lastPassingDate
-                + ", name=" + name + "]";
+                + ", name=" + getName() + "]";
     }
 }

@@ -18,11 +18,11 @@ public class CompetitorSailNumbersFilter extends AbstractTextFilter<CompetitorDT
     @Override
     public boolean matches(CompetitorDTO competitor) {
         boolean result = false;
-        if(value != null && operator != null && competitor.sailID != null) {
+        if(value != null && operator != null && competitor.getSailID() != null) {
             switch (operator.getOperator()) {
             case Contains:
             case NotContains:
-                result = operator.matchValues(competitor.sailID, value);
+                result = operator.matchValues(competitor.getSailID(), value);
                 break;
             case Equals:
             case NotEqualTo:

@@ -138,28 +138,28 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         TextColumn<RegattaDTO> regattaNameColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
-                return regatta.name;
+                return regatta.getName();
             }
         };
         regattaNameColumn.setSortable(true);
         columnSortHandler.setComparator(regattaNameColumn, new Comparator<RegattaDTO>() {
             @Override
             public int compare(RegattaDTO r1, RegattaDTO r2) {
-                return r1.name.compareTo(r2.name);
+                return r1.getName().compareTo(r2.getName());
             }
         });
 
         TextColumn<RegattaDTO> regattaBoatClassColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
-                return regatta.boatClass != null ? regatta.boatClass.name : "";
+                return regatta.boatClass != null ? regatta.boatClass.getName() : "";
             }
         };
         regattaBoatClassColumn.setSortable(true);
         columnSortHandler.setComparator(regattaBoatClassColumn, new Comparator<RegattaDTO>() {
             @Override
             public int compare(RegattaDTO r1, RegattaDTO r2) {
-                return r1.boatClass.name.compareTo(r2.boatClass.name);
+                return r1.boatClass.getName().compareTo(r2.boatClass.getName());
             }
         });
 
@@ -171,7 +171,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
                 if (RegattaConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     editRegatta(regatta);
                 } else if (RegattaConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.name))) {
+                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {
                         removeRegatta(regatta);
                     }
                 }
@@ -194,9 +194,9 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
                 boolean failed = false;
                 for (String word : wordsToFilter) {
                     String textAsUppercase = word.toUpperCase().trim();
-                    if (!regattaDTO.name.toUpperCase().contains(textAsUppercase)
-                            && (regattaDTO.boatClass == null || !regattaDTO.boatClass.name.toUpperCase().contains(
-                                    textAsUppercase)) && !regattaDTO.name.toUpperCase().contains(textAsUppercase)) {
+                    if (!regattaDTO.getName().toUpperCase().contains(textAsUppercase)
+                            && (regattaDTO.boatClass == null || !regattaDTO.boatClass.getName().toUpperCase().contains(
+                                    textAsUppercase)) && !regattaDTO.getName().toUpperCase().contains(textAsUppercase)) {
                         failed = true;
                         break;
                     }
@@ -215,11 +215,11 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
     }
 
     private void removeRegatta(final RegattaDTO regatta) {
-        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
+        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         sailingService.removeRegatta(regattaIdentifier, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to remove regatta " + regatta.name + ": " + caught.getMessage());
+                errorReporter.reportError("Error trying to remove regatta " + regatta.getName() + ": " + caught.getMessage());
             }
 
             @Override
@@ -260,12 +260,12 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
     }
 
     private void commitEditedRegatta(final RegattaDTO editedRegatta) {
-        final RegattaIdentifier regattaName = new RegattaName(editedRegatta.name);
+        final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
         
         sailingService.updateRegatta(regattaName, editedRegatta.defaultCourseAreaIdAsString, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to update regatta " + editedRegatta.name + ": " + caught.getMessage());
+                errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName() + ": " + caught.getMessage());
             }
             
             @Override

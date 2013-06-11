@@ -101,8 +101,8 @@ public class TMDMessageQueue {
         // otherwise, this could lead to the "guessed time" to 
         while (i.hasNext()) {
             TMDMessageContents messageContents = i.next();
-            Competitor competitor = raceTracker.getDomainFactory().getCompetitorByBoatIDAndBoatClass(messageContents.getBoatID(),
-                    trackedRace.getRace().getBoatClass());
+            Competitor competitor = raceTracker.getDomainFactory().getCompetitorByBoatIDAndRaceID(messageContents.getBoatID(),
+                    messageContents.getRaceID());
             NavigableSet<MarkPassing> oldMarkPassings = trackedRace.getMarkPassings(competitor);
             TreeMap<Integer, MarkPassing> cleansedMarkPassingsForCompetitor = cleansedMarkPassings.get(competitor);
             if (cleansedMarkPassingsForCompetitor == null) {

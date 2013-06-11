@@ -28,7 +28,7 @@ public interface RaceColumnSelection {
      * A client may request a column to be selected. An implementation doesn't necessarily have to comply with this
      * request, particularly if it represents an implicit, automatic column selection.
      */
-    void requestRaceColumnSelection(String raceColumnName, RaceColumnDTO column);
+    void requestRaceColumnSelection(RaceColumnDTO column);
     
     /**
      * A client may request all columns to be de-selected. An implementation doesn't necessarily have to comply with this

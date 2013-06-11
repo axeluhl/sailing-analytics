@@ -29,21 +29,21 @@ public class BulkScoreCorrectionDTO implements IsSerializable {
     }
     
     public void addScoreUpdate(CompetitorDTO competitor, RaceColumnDTO raceColumn, double newScore) {
-        Map<String, Double> map = scoreUpdatesForRaceColumnByCompetitorIdAsString.get(competitor.idAsString);
+        Map<String, Double> map = scoreUpdatesForRaceColumnByCompetitorIdAsString.get(competitor.getIdAsString());
         if (map == null) {
             map = new HashMap<String, Double>();
-            scoreUpdatesForRaceColumnByCompetitorIdAsString.put(competitor.idAsString, map);
+            scoreUpdatesForRaceColumnByCompetitorIdAsString.put(competitor.getIdAsString(), map);
         }
-        map.put(raceColumn.name, newScore);
+        map.put(raceColumn.getName(), newScore);
     }
 
     public void addMaxPointsReasonUpdate(CompetitorDTO competitor, RaceColumnDTO raceColumn, MaxPointsReason newReason) {
-        Map<String, MaxPointsReason> map = maxPointsUpdatesForRaceColumnByCompetitorIdAsString.get(competitor.idAsString);
+        Map<String, MaxPointsReason> map = maxPointsUpdatesForRaceColumnByCompetitorIdAsString.get(competitor.getIdAsString());
         if (map == null) {
             map = new HashMap<String, MaxPointsReason>();
-            maxPointsUpdatesForRaceColumnByCompetitorIdAsString.put(competitor.idAsString, map);
+            maxPointsUpdatesForRaceColumnByCompetitorIdAsString.put(competitor.getIdAsString(), map);
         }
-        map.put(raceColumn.name, newReason);
+        map.put(raceColumn.getName(), newReason);
     }
     
     public Map<String, Map<String, MaxPointsReason>> getMaxPointsUpdatesForRaceColumnByCompetitorIdAsString() {

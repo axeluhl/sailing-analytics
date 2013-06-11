@@ -378,7 +378,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         RegattaDTO selectedRegatta = getSelectedRegatta();
         RegattaIdentifier regattaIdentifier = null;
         if (selectedRegatta != null) {
-            regattaIdentifier = new RegattaName(selectedRegatta.name);
+            regattaIdentifier = new RegattaName(selectedRegatta.getName());
         }
         sailingService.trackWithSwissTiming(
                 /* regattaToAddTo */ regattaIdentifier,
