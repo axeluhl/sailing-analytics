@@ -1,11 +1,10 @@
 package com.sap.sailing.server.replication.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import junit.framework.Assert;
@@ -237,6 +236,9 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         addAndValidate(masterLog, replicaLog, anotherRaceLogEvent);
     }
     
+    /**
+     * Validation is done based only on the identifier and type of the {@link RaceLogEvent}s.
+     */
     private void addAndValidate(RaceLog masterLog, RaceLog replicaLog, RaceLogEvent... addedEvents) throws InterruptedException {
         // 1. Check state of replica after initial load...
         assertLogsEqual(masterLog, replicaLog);
@@ -251,6 +253,9 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         assertLogsEqual(masterLog, replicaLog);
     }
 
+    /**
+     * Equality of the events is done based only on the identifier and type.
+     */
     private void assertLogsEqual(RaceLog masterLog, RaceLog replicaLog) {
         replicaLog.lockForRead();
         try {
@@ -265,17 +270,20 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         }
     }
 
+    /**
+     * Equality of the events is done based only on the {@link RaceLogEvent}'s identifier and type.
+     */
     private void assertEvents(Iterable<RaceLogEvent> expectedEvents, Iterable<RaceLogEvent> actualEvents) {
-        Collection<RaceLogEvent> expectedCollection = new ArrayList<>();
+        List<RaceLogEvent> expectedCollection = new ArrayList<>();
         Util.addAll(expectedEvents, expectedCollection);
         
-        Collection<RaceLogEvent> actualCollection = new ArrayList<>();
+        List<RaceLogEvent> actualCollection = new ArrayList<>();
         Util.addAll(actualEvents, actualCollection);
         
-        //assertEquals(expectedCollection.size(), actualCollection.size());
         assertEquals(Util.size(expectedEvents), Util.size(actualEvents));
-        for (RaceLogEvent event : expectedEvents) {
-            assertTrue(actualCollection.contains(event));
+        for (int i = 0; i < expectedCollection.size(); i++) {
+            assertEquals(expectedCollection.get(i).getClass(), actualCollection.get(i).getClass());
+            assertEquals(expectedCollection.get(i).getId(), actualCollection.get(i).getId());
         }
     }
 
