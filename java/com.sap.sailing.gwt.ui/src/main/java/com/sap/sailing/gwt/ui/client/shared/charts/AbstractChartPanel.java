@@ -18,6 +18,7 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
@@ -179,6 +180,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                 return dateFormatHoursMinutes.format(new Date(axisLabelsData.getValueAsLong()));
             }
         }));
+        timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1.5).setDashStyle(DashStyle.SOLID);
 
         if (compactChart) {
             chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
@@ -596,6 +598,10 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             return;
         }
 
+        if (allowTimeAdjust) {
+            updateTimePlotLine(date);
+        }
+        
         switch (timer.getPlayMode()) {
         case Live: {
             // is date before first cache entry or is cache empty?
@@ -622,6 +628,12 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             break;
         }
         }
+    }
+
+    private void updateTimePlotLine(Date date) {
+        chart.getXAxis().removePlotLine(timePlotLine);
+        timePlotLine.setValue(date.getTime());
+        chart.getXAxis().addPlotLines(timePlotLine);
     }
 
     @Override
