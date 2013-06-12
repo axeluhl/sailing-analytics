@@ -24,7 +24,7 @@ public class ProtestStartTmeFinderTest extends RaceLogAnalyzerTest<ProtestStartT
     public void testNullForNone() {
         RaceLogEvent event1 = createEvent(RaceLogEvent.class, 1);
         raceLog.add(event1);
-        assertNull(analyzer.getProtestStartTime());
+        assertNull(analyzer.analyze());
     }
     
     @Test
@@ -37,6 +37,6 @@ public class ProtestStartTmeFinderTest extends RaceLogAnalyzerTest<ProtestStartT
         raceLog.add(event2);
 
         raceLog.lockForRead();
-        assertEquals(event2.getProtestStartTime(), analyzer.getProtestStartTime());
+        assertEquals(event2.getProtestStartTime(), analyzer.analyze());
     }
 }

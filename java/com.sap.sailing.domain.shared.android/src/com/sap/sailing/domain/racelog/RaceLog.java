@@ -17,6 +17,9 @@ import com.sap.sailing.domain.tracking.Track;
  * </p>
  */
 public interface RaceLog extends Track<RaceLogEvent>, WithID {
+    
+    public static final int DefaultPassId = 0;
+    
     /**
      * Gets the current pass id.
      * 

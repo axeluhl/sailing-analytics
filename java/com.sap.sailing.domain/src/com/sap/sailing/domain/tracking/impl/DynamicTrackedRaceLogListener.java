@@ -58,13 +58,13 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     }
 
     private void analyzeStatus() {
-        /* RaceLogRaceStatus newStatus = */statusAnalyzer.getStatus();
+        /* RaceLogRaceStatus newStatus = */statusAnalyzer.analyze();
 
         // TODO: What can we do with the status? Should we use DynamicTrackedRace.setStatus?
     }
 
     private void analyzeCourseDesign() {
-        CourseBase courseDesign = courseDesignFinder.getLastCourseDesign();
+        CourseBase courseDesign = courseDesignFinder.analyze();
 
         // On the initial analyze step after attaching the RaceLog there might be no course design.
         if (courseDesign != null) {

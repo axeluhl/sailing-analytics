@@ -601,32 +601,32 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (raceLog != null) {
             
             StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
-            if (startTimeFinder.getStartTime() != null) {
-                raceInfoDTO.startTime = startTimeFinder.getStartTime().asDate();
+            if (startTimeFinder.analyze() != null) {
+                raceInfoDTO.startTime = startTimeFinder.analyze().asDate();
             }
 
             RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog);
-            raceInfoDTO.lastStatus = raceStatusAnalyzer.getStatus();
+            raceInfoDTO.lastStatus = raceStatusAnalyzer.analyze();
 
             PathfinderFinder pathfinderFinder = new PathfinderFinder(raceLog);
-            raceInfoDTO.pathfinderId = pathfinderFinder.getPathfinderId();
+            raceInfoDTO.pathfinderId = pathfinderFinder.analyze();
 
             GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
-            raceInfoDTO.gateLineOpeningTime = gateLineOpeningTimeFinder.getGateLineOpeningTime();
+            raceInfoDTO.gateLineOpeningTime = gateLineOpeningTimeFinder.analyze();
             
             if (raceLog.getLastRawFix() != null) {
                 raceInfoDTO.lastUpdateTime = raceLog.getLastRawFix().getTimePoint().asDate();
             }
             
             FinishedTimeFinder finishedTimeFinder = new FinishedTimeFinder(raceLog);
-            TimePoint finishedTime = finishedTimeFinder.getFinishedTime();
+            TimePoint finishedTime = finishedTimeFinder.analyze();
             if (finishedTime != null) {
                 raceInfoDTO.finishedTime = finishedTime.asDate();
             }
 
             LastFlagFinder lastFlagFinder = new LastFlagFinder(raceLog);
 
-            RaceLogFlagEvent lastFlagEvent = lastFlagFinder.getLastFlagEvent();
+            RaceLogFlagEvent lastFlagEvent = lastFlagFinder.analyze();
             if (lastFlagEvent != null) {
                 raceInfoDTO.lastUpperFlag = lastFlagEvent.getUpperFlag();
                 raceInfoDTO.lastLowerFlag = lastFlagEvent.getLowerFlag();
@@ -635,7 +635,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             
             AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
             
-            RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.getAbortingFlagEvent();
+            RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
             if (abortingFlagEvent != null) {
                 raceInfoDTO.isRaceAbortedInPassBefore = true;
                 
@@ -647,7 +647,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             
             LastPublishedCourseDesignFinder courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
-            raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(courseDesignFinder.getLastCourseDesign());
+            raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(courseDesignFinder.analyze());
         }
         raceInfoDTO.seriesName = seriesName;
         raceInfoDTO.raceName = raceColumn.getName();

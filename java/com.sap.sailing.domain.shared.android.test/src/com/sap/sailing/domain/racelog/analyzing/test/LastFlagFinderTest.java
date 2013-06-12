@@ -23,6 +23,6 @@ public class LastFlagFinderTest extends RaceLogAnalyzerTest<LastFlagFinder> {
         raceLog.add(event1);
         raceLog.add(event2);
 
-        assertEquals(event2, analyzer.getLastFlagEvent());
+        assertEquals(event2, analyzer.analyze());
     }
 }

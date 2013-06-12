@@ -4,26 +4,14 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 
-public class LastFlagFinder extends RaceLogAnalyzer {
+public class LastFlagFinder extends RaceLogAnalyzer<RaceLogFlagEvent> {
 
     public LastFlagFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
-    public RaceLogFlagEvent getLastFlagEvent() {
-        RaceLogFlagEvent lastFlagEvent = null;
-        
-        this.raceLog.lockForRead();
-        try {
-            lastFlagEvent = searchForLastFlagEvent();
-        } finally {
-            this.raceLog.unlockAfterRead();
-        }
-
-        return lastFlagEvent;
-    }
-
-    private RaceLogFlagEvent searchForLastFlagEvent() {
+    @Override
+    protected RaceLogFlagEvent performAnalyzation() {
         for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogFlagEvent) {
                 return (RaceLogFlagEvent) event;

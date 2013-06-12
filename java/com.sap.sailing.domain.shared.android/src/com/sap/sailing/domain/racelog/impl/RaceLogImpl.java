@@ -29,8 +29,6 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     private transient Set<RaceLogEventVisitor> listeners;
     private int currentPassId;
     
-    public static final int DefaultPassId = 0;
-    
     /**
      * Initializes a new {@link RaceLogImpl} with the default lock name.
      */

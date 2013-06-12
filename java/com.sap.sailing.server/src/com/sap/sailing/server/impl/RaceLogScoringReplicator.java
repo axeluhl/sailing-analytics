@@ -122,13 +122,13 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         numberOfCompetitorsInRace = getNumberOfCompetitorsInRace(raceColumn, fleet, numberOfCompetitorsInLeaderboard);
         
         ConfirmedFinishPositioningListFinder confirmedPositioningListFinder = new ConfirmedFinishPositioningListFinder(raceLog);
-        positioningList = confirmedPositioningListFinder.getFinishPositioningList();
+        positioningList = confirmedPositioningListFinder.analyze();
         
         if (positioningList == null) {
             // we expect this case for old sailing events such as ESS Singapore, Quingdao, where the confirmation event did not contain the finish
             // positioning list
             FinishPositioningListFinder positioningListFinder = new FinishPositioningListFinder(raceLog);
-            positioningList = positioningListFinder.getFinishPositioningList();
+            positioningList = positioningListFinder.analyze();
         }
         
         if (positioningList != null) {

@@ -108,7 +108,7 @@ public class RRS26StartPhaseFragment extends RaceFragment implements RRS26StartP
         StartModeChoosableStartProcedure startProcedure = (StartModeChoosableStartProcedure) this.getRace().getState().getStartProcedure();
         this.onStartModeFlagChosen(startProcedure.getCurrentStartModeFlag());
         LastFlagFinder lastFlagFinder = new LastFlagFinder(this.getRace().getRaceLog());
-        RaceLogFlagEvent lastFlagEvent = lastFlagFinder.getLastFlagEvent();
+        RaceLogFlagEvent lastFlagEvent = lastFlagFinder.analyze();
         if(lastFlagEvent != null){
             if(lastFlagEvent.getUpperFlag().equals(Flags.CLASS) && lastFlagEvent.isDisplayed()){
                 this.onClassUp();

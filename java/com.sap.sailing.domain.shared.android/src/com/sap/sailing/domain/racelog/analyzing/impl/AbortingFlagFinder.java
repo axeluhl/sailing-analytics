@@ -5,30 +5,17 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 
-public class AbortingFlagFinder extends RaceLogAnalyzer {
+public class AbortingFlagFinder extends RaceLogAnalyzer<RaceLogFlagEvent> {
 
     public AbortingFlagFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
-    public RaceLogFlagEvent getAbortingFlagEvent() {
-
+    @Override
+    protected RaceLogFlagEvent performAnalyzation() {
         RaceLogFlagEvent newFlagEvent = null;
 
-        this.raceLog.lockForRead();
-        try {
-            newFlagEvent = searchForAbortingFlagEvent();
-        } finally {
-            this.raceLog.unlockAfterRead();
-        }
-
-        return newFlagEvent;
-    }
-
-    private RaceLogFlagEvent searchForAbortingFlagEvent() {
-        RaceLogFlagEvent newFlagEvent = null;
-
-        if (raceLog.getCurrentPassId() > 0) {
+        if (raceLog.getCurrentPassId() > RaceLog.DefaultPassId) {
             int relevantPassId = raceLog.getCurrentPassId() - 1;
             for (RaceLogEvent event : getAllEvents()) {
                 if (event.getPassId() == relevantPassId) {
@@ -45,7 +32,7 @@ public class AbortingFlagFinder extends RaceLogAnalyzer {
         return newFlagEvent;
     }
 
-    private boolean isAbortingFlag(RaceLogFlagEvent flagEvent) {
+    private static boolean isAbortingFlag(RaceLogFlagEvent flagEvent) {
         return (flagEvent.getUpperFlag().equals(Flags.AP) && flagEvent.isDisplayed())
                 || (flagEvent.getUpperFlag().equals(Flags.NOVEMBER) && flagEvent.isDisplayed())
                 || (flagEvent.getUpperFlag().equals(Flags.FIRSTSUBSTITUTE) && flagEvent.isDisplayed());

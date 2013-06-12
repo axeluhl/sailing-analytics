@@ -183,7 +183,7 @@ public class ProtestTimeDialogFragment extends DialogFragment {
     private static boolean isFinishedToday(ManagedRace race) {
         if (race.getStatus().equals(RaceLogRaceStatus.FINISHED)) {
             FinishedTimeFinder analyzer = new FinishedTimeFinder(race.getRaceLog());
-            TimePoint finishedTime = analyzer.getFinishedTime();
+            TimePoint finishedTime = analyzer.analyze();
             if (finishedTime != null) {
                 Calendar finishedCalendar = Calendar.getInstance();
                 finishedCalendar.setTime(finishedTime.asDate());

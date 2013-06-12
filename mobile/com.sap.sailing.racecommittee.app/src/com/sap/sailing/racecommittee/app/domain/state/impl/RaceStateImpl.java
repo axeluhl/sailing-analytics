@@ -98,7 +98,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     @Override
     public StartProcedureType getStartProcedureType() {
-        StartProcedureType type = startProcedureTypeAnalyzer.getActiveStartProcedureType();
+        StartProcedureType type = startProcedureTypeAnalyzer.analyze();
         return type == null ? defaultStartProcedureType : type;
     }
 
@@ -120,7 +120,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     public TimePoint getStartTime() {
-        return startTimeFinder.getStartTime();
+        return startTimeFinder.analyze();
     }
 
     public void setStartTime(TimePoint newStartTime) {
@@ -140,7 +140,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     
     @Override
     public void createNewStartProcedure(StartProcedureType type) {
-        if (!type.equals(startProcedureTypeAnalyzer.getActiveStartProcedureType())) {
+        if (!type.equals(startProcedureTypeAnalyzer.analyze())) {
 
             RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartProcedureChangedEvent(MillisecondsTimePoint.now(), raceLog.getCurrentPassId(), type);
             this.raceLog.add(event);
@@ -152,12 +152,12 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     public TimePoint getFinishedTime() {
-        return finishedTimeFinder.getFinishedTime();
+        return finishedTimeFinder.analyze();
     }
     
     @Override
     public CourseBase getCourseDesign() {
-        return lastCourseDesignFinder.getLastCourseDesign();
+        return lastCourseDesignFinder.analyze();
     }
  
     public void setCourseDesign(CourseBase newCourseData) {
@@ -212,7 +212,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     public RaceLogRaceStatus updateStatus() {
-        setStatus(statusAnalyzer.getStatus());
+        setStatus(statusAnalyzer.analyze());
         return getStatus();
     }
 
@@ -222,7 +222,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     @Override
     public TimePoint getFinishingStartTime() {
-        return finishingTimeFinder.getFinishingTime();
+        return finishingTimeFinder.analyze();
     }
 
     @Override
@@ -235,7 +235,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     
     @Override
     public List<Triple<Serializable, String, MaxPointsReason>> getFinishPositioningList() {
-        return finishPositioningListFinder.getFinishPositioningList();
+        return finishPositioningListFinder.analyze();
     }
     
     @Override
@@ -258,7 +258,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     @Override
     public TimePoint getProtestStartTime() {
-        return protestStartTimeAnalyzer.getProtestStartTime();
+        return protestStartTimeAnalyzer.analyze();
     }
 
     @Override

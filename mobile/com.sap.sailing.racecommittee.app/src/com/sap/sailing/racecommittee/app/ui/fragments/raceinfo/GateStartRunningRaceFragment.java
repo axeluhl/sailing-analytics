@@ -69,8 +69,8 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
 
         boolean golfFlagTakenDown = false;
         LastFlagFinder lastFlagFinder = new LastFlagFinder(getRace().getRaceLog());
-        if (lastFlagFinder.getLastFlagEvent() != null) {
-            golfFlagTakenDown = lastFlagFinder.getLastFlagEvent().getUpperFlag().equals(Flags.GOLF) && !lastFlagFinder.getLastFlagEvent().isDisplayed();
+        if (lastFlagFinder.analyze() != null) {
+            golfFlagTakenDown = lastFlagFinder.analyze().getUpperFlag().equals(Flags.GOLF) && !lastFlagFinder.analyze().isDisplayed();
         }
         displayGolfFlag(!golfFlagTakenDown);
         

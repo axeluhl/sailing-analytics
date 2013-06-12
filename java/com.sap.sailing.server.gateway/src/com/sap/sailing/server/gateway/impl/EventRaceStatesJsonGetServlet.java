@@ -112,8 +112,8 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
         boolean result = false;
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
-            TimePoint startTime = new StartTimeFinder(raceLog).getStartTime();
-            TimePoint finishedTime = new FinishedTimeFinder(raceLog).getFinishedTime();
+            TimePoint startTime = new StartTimeFinder(raceLog).analyze();
+            TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
             
             result = RaceStateOfSameDayHelper.isRaceStateOfSameDay(startTime, finishedTime, now);
         }
@@ -131,20 +131,20 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
             JSONObject raceLogStateJson = new JSONObject();
             result.put("raceState", raceLogStateJson);
             StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
-            raceLogStateJson.put("startTime", startTimeFinder.getStartTime() != null ? startTimeFinder.getStartTime().toString() : null);
+            raceLogStateJson.put("startTime", startTimeFinder.analyze() != null ? startTimeFinder.analyze().toString() : null);
             FinishedTimeFinder finishedTimeFinder = new FinishedTimeFinder(raceLog);
-            raceLogStateJson.put("endTime", finishedTimeFinder.getFinishedTime() != null ? finishedTimeFinder.getFinishedTime().toString() : null);
+            raceLogStateJson.put("endTime", finishedTimeFinder.analyze() != null ? finishedTimeFinder.analyze().toString() : null);
             RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog);
-            RaceLogRaceStatus lastStatus = raceStatusAnalyzer.getStatus();
+            RaceLogRaceStatus lastStatus = raceStatusAnalyzer.analyze();
             raceLogStateJson.put("lastStatus", lastStatus.name());
             PathfinderFinder pathfinderFinder = new PathfinderFinder(raceLog);
-            raceLogStateJson.put("pathfinderId", pathfinderFinder.getPathfinderId());
+            raceLogStateJson.put("pathfinderId", pathfinderFinder.analyze());
             GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
-            raceLogStateJson.put("gateLineOpeningTime", gateLineOpeningTimeFinder.getGateLineOpeningTime());
+            raceLogStateJson.put("gateLineOpeningTime", gateLineOpeningTimeFinder.analyze());
             AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
-            RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.getAbortingFlagEvent();
+            RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
             LastFlagFinder lastFlagFinder = new LastFlagFinder(raceLog);
-            RaceLogFlagEvent lastFlagEvent = lastFlagFinder.getLastFlagEvent();
+            RaceLogFlagEvent lastFlagEvent = lastFlagFinder.analyze();
             if (lastFlagEvent != null) {
                 setLastFlagField(raceLogStateJson, lastFlagEvent.getUpperFlag().name(), lastFlagEvent.getLowerFlag().name(), lastFlagEvent.isDisplayed());
             } else if (lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED) && abortingFlagEvent != null) {
