@@ -530,7 +530,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             List<CompetitorDTO> previousCompetitorsFromBestToWorstForRaceColumn = previousVersion.getCompetitorsFromBestToWorst(raceColumn.getName());
             if (Util.equalsWithNull(competitorsFromBestToWorstForRaceColumn, previousCompetitorsFromBestToWorstForRaceColumn)) {
                 raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged.add(raceColumn.getName());
-                competitorOrderingPerRaceColumnName.remove(raceColumn);
+                competitorOrderingPerRaceColumnName.remove(raceColumn.getName());
             } else {
                 // try at least partial compaction
                 List<CompetitorDTO> compactedCompetitorsFromBestToWorstForRaceColumn = new ArrayList<CompetitorDTO>();
