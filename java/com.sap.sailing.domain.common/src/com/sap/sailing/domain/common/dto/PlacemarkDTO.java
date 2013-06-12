@@ -46,12 +46,12 @@ public class PlacemarkDTO extends NamedDTO {
      * @return The placemark as string with the format '<code>countryCode</code> , <code>name</code>'
      */
     public String asString() {
-        return countryCode + ", " + name;
+        return countryCode + ", " + getName();
     }
     
     @Override
     public String toString() {
-        return countryCode + ", " + name + ", " + population + ", " + position.toString();
+        return countryCode + ", " + getName() + ", " + population + ", " + position.toString();
     }
 
     @Override

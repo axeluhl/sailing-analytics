@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -39,6 +38,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
+import com.sap.sailing.domain.swisstimingadapter.RaceType;
 import com.sap.sailing.domain.swisstimingreplayadapter.CompetitorStatus;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayListener;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayParser;
@@ -83,6 +83,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
      */
     private String currentRaceID;
 
+    private RaceType currentRaceType;
+    
     /**
      * Reference time point for time specifications
      */
@@ -158,10 +160,6 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
         return trackedRacePerRaceID.values();
     }
 
-    private BoatClass getCurrentBoatClass() {
-        return domainFactory.getOrCreateBoatClassFromRaceID(currentRaceID);
-    }
-
     @Override
     public void referenceTimestamp(long referenceTimestampMillis) {
         referenceTimePoint = new MillisecondsTimePoint(referenceTimestampMillis);
@@ -175,6 +173,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     @Override
     public void raceID(String raceID) {
         currentRaceID = raceID;
+        currentRaceType = domainFactory.getRaceTypeFromRaceID(currentRaceID);
     }
 
     private boolean isValid(int threeByteValue) {
@@ -236,7 +235,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             short ctPoints_x10_Winner) {
         if (boatType == BoatType.Competitor) {
             Competitor competitor = domainFactory.getOrCreateCompetitor(sailNumberOrTrackerID, threeLetterIOCCode.trim(), name.trim(),
-                    getCurrentBoatClass());
+                    currentRaceType);
             Set<Competitor> competitorsOfCurrentRace = competitorsPerRaceID.get(currentRaceID);
             if (competitorsOfCurrentRace == null) {
                 competitorsOfCurrentRace = new HashSet<>();

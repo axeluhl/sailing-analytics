@@ -83,7 +83,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         // sort the regatta names
         List<String> sortedRegattaNames = new ArrayList<String>();
         for (RegattaDTO regatta : existingRegattas) {
-            sortedRegattaNames.add(regatta.name);
+            sortedRegattaNames.add(regatta.getName());
         }
         Collections.sort(sortedRegattaNames);
         
@@ -102,7 +102,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
     @Override
     protected LeaderboardDescriptor getResult() {
         LeaderboardDescriptor leaderboard = super.getResult();
-        leaderboard.setRegattaName(getSelectedRegatta() != null ? getSelectedRegatta().name : null);
+        leaderboard.setRegattaName(getSelectedRegatta() != null ? getSelectedRegatta().getName() : null);
         return leaderboard;
     }
 
@@ -132,7 +132,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         if (selIndex > 0) { // the zero index represents the 'no selection' text
             String itemText = regattaListBox.getItemText(selIndex);
             for (RegattaDTO regattaDTO : existingRegattas) {
-                if (regattaDTO.name.equals(itemText)) {
+                if (regattaDTO.getName().equals(itemText)) {
                     result = regattaDTO;
                     break;
                 }

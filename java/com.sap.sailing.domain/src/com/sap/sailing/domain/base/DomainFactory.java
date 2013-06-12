@@ -93,11 +93,9 @@ public interface DomainFactory extends SharedDomainFactory {
 
     CompetitorDTO convertToCompetitorDTO(Competitor c);
 
-    FleetDTO convertToFleetDTO(Series series, Fleet fleet);
+    FleetDTO convertToFleetDTO(Fleet fleet);
 
-    FleetDTO convertToFleetDTO(RaceColumn raceColumn, Fleet fleet);
-
-    RaceDTO createRaceDTO(TrackedRegattaRegistry trackedRegattaRegistry, boolean b, RegattaAndRaceIdentifier raceIdentifier, TrackedRace trackedRace);
+    RaceDTO createRaceDTO(TrackedRegattaRegistry trackedRegattaRegistry, boolean withGeoLocationData, RegattaAndRaceIdentifier raceIdentifier, TrackedRace trackedRace);
 
     PlacemarkDTO convertToPlacemarkDTO(Placemark placemark);
 

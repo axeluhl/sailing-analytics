@@ -138,7 +138,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                     public void onSuccess(Void result) {
                         System.out.println("Added column to leaderboard.");
                         RaceColumnDTO race = new RaceColumnDTO(/* isValidInTotalScore */ null);
-                        race.name = COLUMN1_NAME;
+                        race.setName(COLUMN1_NAME);
                         race.setMedalRace(false);
                         leaderboardPanel.addColumn(leaderboardPanel.createRaceColumn(race));
                         linkTrackedRace();

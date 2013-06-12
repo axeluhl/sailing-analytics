@@ -182,7 +182,7 @@ public interface StringMessages extends Messages {
     String actionEditScores();
     String actionOpenBrowser();
     String actionRemove();
-    String actionEditRaces();
+    String actionEditSeries();
     String actionRaceEdit();
     String actionRaceUnlink();
     String actionRaceRemove();
@@ -586,6 +586,7 @@ public interface StringMessages extends Messages {
     String loading();
     String showHiddenRaces();
     String selectedCompetitors();
+    String mediaDateFormatError(String expectedTimeFormat);
     String filterNothing();
     String topNCompetitorsByRaceRank(int n);
     String topNCompetitorsByTotalRank(int n);

@@ -554,13 +554,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             Map<String, CourseMarkOverlay> toRemoveCourseMarks = new HashMap<String, CourseMarkOverlay>(courseMarkOverlays);
             if (courseDTO.marks != null) {
                 for (MarkDTO markDTO : courseDTO.marks) {
-                    CourseMarkOverlay courseMarkOverlay = courseMarkOverlays.get(markDTO.name);
+                    CourseMarkOverlay courseMarkOverlay = courseMarkOverlays.get(markDTO.getName());
                     if (courseMarkOverlay == null) {
                         courseMarkOverlay = createCourseMarkOverlay(markDTO);
                         courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
                         courseMarkOverlay.setBuoyZoneRadiusInMeter(settings.getBuoyZoneRadiusInMeters());
-                        courseMarkOverlays.put(markDTO.name, courseMarkOverlay);
-                        markDTOs.put(markDTO.name, markDTO);
+                        courseMarkOverlays.put(markDTO.getName(), courseMarkOverlay);
+                        markDTOs.put(markDTO.getName(), markDTO);
                         map.addOverlay(courseMarkOverlay);
                         courseMarkOverlay.setPaneZIndex(RaceMapOverlaysZIndexes.COURSEMARK_ZINDEX);
                     } else {
@@ -568,7 +568,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
                         courseMarkOverlay.setBuoyZoneRadiusInMeter(settings.getBuoyZoneRadiusInMeters());
                         courseMarkOverlay.redraw(true);
-                        toRemoveCourseMarks.remove(markDTO.name);
+                        toRemoveCourseMarks.remove(markDTO.getName());
                     }
                 }
             }
@@ -742,7 +742,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
                     double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible
                                                           // area of the map; bug 616
-                    double distanceFromBoatPositionInKm = visibleLeaderInfo.getB().boatClass.getHullLengthInMeters() / 1000.; // one hull length
+                    double distanceFromBoatPositionInKm = visibleLeaderInfo.getB().getBoatClass().getHullLengthInMeters() / 1000.; // one hull length
                     // implement and use Position.translateRhumb()
                     double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
                     LatLng boatPosition = LatLng.newInstance(lastBoatFix.position.latDeg, lastBoatFix.position.lngDeg);
@@ -1065,7 +1065,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private Widget getInfoWindowContent(MarkDTO markDTO) {
         VerticalPanel vPanel = new VerticalPanel();
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.mark(), markDTO.name));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.mark(), markDTO.getName()));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), formatPosition(markDTO.position.latDeg, markDTO.position.lngDeg)));
         return vPanel;
     }
@@ -1084,8 +1084,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private Widget getInfoWindowContent(CompetitorDTO competitorDTO, GPSFixDTO lastFix) {
         final VerticalPanel vPanel = new VerticalPanel();
         vPanel.setWidth("350px");
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.competitor(), competitorDTO.name));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.sailNumber(), competitorDTO.sailID));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.competitor(), competitorDTO.getName()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.sailNumber(), competitorDTO.getSailID()));
         Integer rank = null;
         if (quickRanks != null) {
             for (QuickRankDTO quickRank : quickRanks) {
@@ -1219,7 +1219,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         result.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
             @Override
             public void onMouseOver(PolylineMouseOverEvent event) {
-                map.setTitle(competitorDTO.sailID + ", " + competitorDTO.name);
+                map.setTitle(competitorDTO.getSailID() + ", " + competitorDTO.getName());
             }
         });
         result.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
