@@ -74,7 +74,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, regatta);
-        addAndValidate(masterLog, replicaLog);
+        addAndValidateEventIds(masterLog, replicaLog);
     }
     
     @Test
@@ -91,7 +91,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
-        addAndValidate(masterLog, replicaLog);
+        addAndValidateEventIds(masterLog, replicaLog);
     }
     
     @Test
@@ -107,7 +107,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
-        addAndValidate(masterLog, replicaLog, raceLogEvent);
+        addAndValidateEventIds(masterLog, replicaLog, raceLogEvent);
     }
     
     @Test
@@ -122,7 +122,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         
         RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
-        addAndValidate(masterLog, replicaLog, raceLogEvent);
+        addAndValidateEventIds(masterLog, replicaLog, raceLogEvent);
     }
 
     @Test
@@ -139,7 +139,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
-        addAndValidate(masterLog, replicaLog, anotherRaceLogEvent);
+        addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
     }
     
     @Test
@@ -160,7 +160,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
         
         anotherRaceLogEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(), 43, createCourseData());
-        addAndValidate(masterLog, replicaLog, anotherRaceLogEvent);
+        addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
         
         compareReplicatedCourseDesignEvent(replicaLog, (RaceLogCourseDesignChangedEvent) anotherRaceLogEvent);
     }
@@ -178,7 +178,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         
         RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
-        addAndValidate(masterLog, replicaLog, anotherRaceLogEvent);
+        addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
     }
     
     @Test
@@ -197,7 +197,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         
         RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
         anotherRaceLogEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(), 43, createCourseData());
-        addAndValidate(masterLog, replicaLog, anotherRaceLogEvent);
+        addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
         compareReplicatedCourseDesignEvent(replicaLog, (RaceLogCourseDesignChangedEvent) anotherRaceLogEvent);
     }
     
@@ -233,15 +233,15 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         Thread.sleep(3000);
         
         RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
-        addAndValidate(masterLog, replicaLog, anotherRaceLogEvent);
+        addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
     }
     
     /**
      * Validation is done based only on the identifier and type of the {@link RaceLogEvent}s.
      */
-    private void addAndValidate(RaceLog masterLog, RaceLog replicaLog, RaceLogEvent... addedEvents) throws InterruptedException {
+    private void addAndValidateEventIds(RaceLog masterLog, RaceLog replicaLog, RaceLogEvent... addedEvents) throws InterruptedException {
         // 1. Check state of replica after initial load...
-        assertLogsEqual(masterLog, replicaLog);
+        assertEqualsOnId(masterLog, replicaLog);
         
         // 2. ... add all incoming events...
         for (RaceLogEvent event : addedEvents) {
@@ -250,18 +250,18 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         // 3. ... and give replication some time to deliver messages.
         Thread.sleep(3000);
         
-        assertLogsEqual(masterLog, replicaLog);
+        assertEqualsOnId(masterLog, replicaLog);
     }
 
     /**
      * Equality of the events is done based only on the identifier and type.
      */
-    private void assertLogsEqual(RaceLog masterLog, RaceLog replicaLog) {
+    private void assertEqualsOnId(RaceLog masterLog, RaceLog replicaLog) {
         replicaLog.lockForRead();
         try {
             masterLog.lockForRead();
             try {
-                assertEvents(masterLog.getRawFixes(), replicaLog.getRawFixes());
+                assertEqualsOnId(masterLog.getRawFixes(), replicaLog.getRawFixes());
             } finally {
                 masterLog.unlockAfterRead();
             }
@@ -273,7 +273,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
     /**
      * Equality of the events is done based only on the {@link RaceLogEvent}'s identifier and type.
      */
-    private void assertEvents(Iterable<RaceLogEvent> expectedEvents, Iterable<RaceLogEvent> actualEvents) {
+    private void assertEqualsOnId(Iterable<RaceLogEvent> expectedEvents, Iterable<RaceLogEvent> actualEvents) {
         List<RaceLogEvent> expectedCollection = new ArrayList<>();
         Util.addAll(expectedEvents, expectedCollection);
         
