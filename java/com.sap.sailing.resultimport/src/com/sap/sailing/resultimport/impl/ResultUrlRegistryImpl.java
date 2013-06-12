@@ -1,6 +1,7 @@
 package com.sap.sailing.resultimport.impl;
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -35,7 +36,13 @@ public class ResultUrlRegistryImpl implements ResultUrlRegistry {
 
     @Override
     public Iterable<URL> getResultUrls(String resultProviderName) {
-        return resultUrls.get(resultProviderName);
+        Iterable<URL> result;
+        if(resultUrls.containsKey(resultProviderName)) {
+            result = resultUrls.get(resultProviderName);
+        } else {
+            result = Collections.emptySet();
+        }
+        return result;
     }
 
     @Override

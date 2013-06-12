@@ -217,7 +217,8 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
-import com.sap.sailing.resultimport.UrlResultProvider;
+import com.sap.sailing.resultimport.ResultUrlProvider;
+import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
@@ -2585,18 +2586,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<String> getUrlResultProviderNames() {
         List<String> result = new ArrayList<String>();
         for (ScoreCorrectionProvider scp : getScoreCorrectionProviders()) {
-            if (scp instanceof UrlResultProvider) {
+            if (scp instanceof ResultUrlProvider) {
             	result.add(scp.getName());
             }
         }
         return result;
     }
 
-    private UrlResultProvider getUrlBasedScoreCorrectionProvider(String resultProviderName) {
-    	UrlResultProvider result = null;
+    private ResultUrlProvider getUrlBasedScoreCorrectionProvider(String resultProviderName) {
+        ResultUrlProvider result = null;
         for (ScoreCorrectionProvider scp : getScoreCorrectionProviders()) {
-            if (scp instanceof UrlResultProvider && scp.getName().equals(resultProviderName)) {
-            	result = (UrlResultProvider) scp;
+            if (scp instanceof ResultUrlProvider && scp.getName().equals(resultProviderName)) {
+            	result = (ResultUrlProvider) scp;
             	break;
             }
         }
@@ -2606,10 +2607,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<String> getResultImportUrls(String resultProviderName) {
         List<String> result = new ArrayList<String>();
-
-        UrlResultProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         if (urlBasedScoreCorrectionProvider != null) {
-            Iterable<URL> allUrls = urlBasedScoreCorrectionProvider.getAllUrls();
+            Iterable<URL> allUrls = ResultUrlRegistry.INSTANCE.getResultUrls(resultProviderName);
             for (URL url : allUrls) {
                 result.add(url.toString());
             }
@@ -2619,19 +2619,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeResultImportURLs(String resultProviderName, Set<String> toRemove) throws Exception {
-        UrlResultProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         if (urlBasedScoreCorrectionProvider != null) {
             for (String urlToRemove : toRemove) {
-            	urlBasedScoreCorrectionProvider.removeResultUrl(new URL(urlToRemove));
+                ResultUrlRegistry.INSTANCE.unregisterResultUrl(resultProviderName, new URL(urlToRemove));
             }
         }
     }
 
     @Override
     public void addResultImportUrl(String resultProviderName, String url) throws Exception {
-        UrlResultProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         if (urlBasedScoreCorrectionProvider != null) {
-        	urlBasedScoreCorrectionProvider.registerResultUrl(new URL(url));
+            ResultUrlRegistry.INSTANCE.registerResultUrl(resultProviderName, new URL(url));
         }
     }    
 
