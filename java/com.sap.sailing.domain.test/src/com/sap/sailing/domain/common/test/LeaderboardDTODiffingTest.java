@@ -233,7 +233,7 @@ public class LeaderboardDTODiffingTest {
     @Test
     public void testCompetitorOrderingInRaceChange() {
         RaceColumnDTO r9 = newVersion.getRaceColumnByName("R9");
-        Map<RaceColumnDTO, List<CompetitorDTO>> newCompetitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>(newVersion.getCompetitorOrderingPerRace());
+        Map<String, List<CompetitorDTO>> newCompetitorOrderingPerRace = new HashMap<String, List<CompetitorDTO>>(newVersion.getCompetitorOrderingPerRaceColumnName());
         newVersion.setCompetitorOrderingPerRace(newCompetitorOrderingPerRace);
         List<CompetitorDTO> newOrdering = new ArrayList<CompetitorDTO>(newVersion.getCompetitorsFromBestToWorst(r9));
         newVersion.setCompetitorsFromBestToWorst(r9, newOrdering);
