@@ -133,7 +133,7 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
     }
 
     private void addUrl() {
-        final DataEntryDialog<String> dialog = new TextfieldEntryDialog(stringMessages.addResultImportUrl(),
+        final TextfieldEntryDialog dialog = new TextfieldEntryDialog(stringMessages.addResultImportUrl(),
                 stringMessages.addResultImportUrl(), stringMessages.add(), stringMessages.cancel(), "http://",
                 new DataEntryDialog.Validator<String>() {
                     @Override
@@ -167,6 +167,7 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
                 });
             }
         });
+        dialog.getEntryField().setVisibleLength(100);
         dialog.show();
     }
 
