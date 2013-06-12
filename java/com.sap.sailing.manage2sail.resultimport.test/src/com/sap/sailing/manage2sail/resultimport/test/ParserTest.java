@@ -38,10 +38,11 @@ import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 public class ParserTest {
     private static final String SAMPLE_INPUT_NAME_29er = "YES_29er_XRR.xml";
     private static final String SAMPLE_INPUT_NAME_420 = "YES_420_XRR.xml";
+    private static final String SAMPLE_INPUT_NAME_470 = "YES_470_XRR.xml";
     private static final String YES_EVENT_NAME = "YES - Young Europeans Sailing 2013";
     private static final String ISAF_ID_29ER = "29ER";
     private static final String ISAF_ID_420 = "420";
-    
+    private static final String ISAF_ID_470 = "470";
     
     private static final String RESOURCES = "resources/";
 
@@ -59,12 +60,19 @@ public class ParserTest {
             public Iterable<ResultDocumentDescriptor> getResultDocumentDescriptors() throws IOException {
                 try {
                     List<ResultDocumentDescriptor> result = new ArrayList<ResultDocumentDescriptor>();
+
                     Date _29erDate = DatatypeConverter.parseDateTime("2013-06-10T07:55:08.000Z").getTime();
-                    Date _420Date = DatatypeConverter.parseDateTime("2013-06-10T07:55:08.000Z").getTime();
                     result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_29er),
                             null, new MillisecondsTimePoint(_29erDate), YES_EVENT_NAME , null, ISAF_ID_29ER));
+
+                    Date _420Date = DatatypeConverter.parseDateTime("2013-06-10T07:55:08.000Z").getTime();
                     result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_420),
                             null, new MillisecondsTimePoint(_420Date), YES_EVENT_NAME , null, ISAF_ID_420));
+
+                    Date _470Date = DatatypeConverter.parseDateTime("2013-06-10T07:55:08.000Z").getTime();
+                    result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_470),
+                            null, new MillisecondsTimePoint(_470Date), YES_EVENT_NAME , null, ISAF_ID_470));
+                    
                     return result;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -80,6 +88,9 @@ public class ParserTest {
 
         RegattaResults r2 = ParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_420), YES_EVENT_NAME).parse();
         assertNotNull(r2);
+
+        RegattaResults r3 = ParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_470), YES_EVENT_NAME).parse();
+        assertNotNull(r3);
     }
 
     @Test
@@ -92,7 +103,7 @@ public class ParserTest {
         Set<Pair<String, TimePoint>> resultsForYES = hasResultsFor.get(YES_EVENT_NAME);
         assertNotNull(resultsForYES);
 
-        assertEquals(2, resultsForYES.size());
+        assertEquals(3, resultsForYES.size());
     }
     
     @Test
