@@ -29,8 +29,8 @@ public class RaceCourseDTO implements IsSerializable {
         Map<String, MarkDTO> marks = new HashMap<String, MarkDTO>();
         for(WaypointDTO waypoint: waypoints) {
             for(MarkDTO mark: waypoint.marks) {
-                if(!marks.containsKey(mark.name)) {
-                    marks.put(mark.name, mark);
+                if(!marks.containsKey(mark.getName())) {
+                    marks.put(mark.getName(), mark);
                 }
             }
         }

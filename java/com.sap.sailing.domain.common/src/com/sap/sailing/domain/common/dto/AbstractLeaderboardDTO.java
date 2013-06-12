@@ -36,11 +36,11 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public AbstractLeaderboardDTO() {
         races = new ArrayList<RaceColumnDTO>();
     }
-
+    
     public Set<BoatClassDTO> getBoatClasses() {
         Set<BoatClassDTO> result = new HashSet<BoatClassDTO>();
         for (CompetitorDTO competitor : rows.keySet()) {
-            result.add(competitor.boatClass);
+            result.add(competitor.getBoatClass());
         }
         return result;
     }
@@ -51,7 +51,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
 
     public String getDisplayName(CompetitorDTO competitor) {
         if (competitorDisplayNames == null || competitorDisplayNames.get(competitor) == null) {
-            return competitor.name;
+            return competitor.getName();
         } else {
             return competitorDisplayNames.get(competitor);
         }
@@ -121,7 +121,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         RaceColumnDTO result = getRaceColumnByName(raceColumnName);
         if (result == null) {
             result = new RaceColumnDTO(/* isValidInTotalScore */ true);
-            result.name = raceColumnName;
+            result.setName(raceColumnName);
             races.add(result);
         }
         return result;
@@ -151,7 +151,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         raceColumnDTO.setExplicitFactor(explicitFactor);
         boolean contains = false;
         for (FleetDTO fleet : raceColumnDTO.getFleets()) {
-            if (fleet.name.equals(fleetDTO.name)) {
+            if (fleet.getName().equals(fleetDTO.getName())) {
                 contains = true;
                 break;
             }
@@ -167,7 +167,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
 
     public RaceColumnDTO createEmptyRaceColumn(String raceColumnName, boolean medalRace, boolean isValidInTotalScore) {
         RaceColumnDTO raceColumn = new RaceColumnDTO(isValidInTotalScore);
-        raceColumn.name = raceColumnName;
+        raceColumn.setName(raceColumnName);
         raceColumn.setMedalRace(medalRace);
         races.add(raceColumn);
         return raceColumn;

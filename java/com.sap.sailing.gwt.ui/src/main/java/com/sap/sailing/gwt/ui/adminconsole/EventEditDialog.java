@@ -12,9 +12,9 @@ public class EventEditDialog extends EventDialog {
             StringMessages stringConstants, DialogCallback<EventDTO> callback) {
         super(new EventParameterValidator(stringConstants, otherExistingEvents), stringConstants, callback);
 
-        nameEntryField = createTextBox(event.name);
+        nameEntryField = createTextBox(event.getName());
         nameEntryField.setWidth("200px");
-        venueEntryField = createTextBox(event.venue.name);
+        venueEntryField = createTextBox(event.venue.getName());
         venueEntryField.setWidth("200px");
         publicationUrlEntryField = createTextBox(event.publicationUrl);
         publicationUrlEntryField.setWidth("200px");
@@ -24,7 +24,7 @@ public class EventEditDialog extends EventDialog {
 
         if (event.venue.getCourseAreas() != null && event.venue.getCourseAreas().size() > 0) {
             for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
-                addCourseAreaWidget(courseArea.name, false);
+                addCourseAreaWidget(courseArea.getName(), false);
             }
 
         }

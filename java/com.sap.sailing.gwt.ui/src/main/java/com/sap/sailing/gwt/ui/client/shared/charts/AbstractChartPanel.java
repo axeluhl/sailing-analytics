@@ -371,7 +371,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     private Series getOrCreateCompetitorDataSeries(final CompetitorDTO competitor) {
         Series result = dataSeriesByCompetitor.get(competitor);
         if (result == null) {
-            result = chart.createSeries().setType(Series.Type.LINE).setName(competitor.name);
+            result = chart.createSeries().setType(Series.Type.LINE).setName(competitor.getName());
             result.setPlotOptions(new LinePlotOptions()
                     .setLineWidth(LINE_WIDTH)
                     .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
@@ -392,7 +392,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         Series result = markPassingSeriesByCompetitor.get(competitor);
         if (result == null) {
             result = chart.createSeries().setType(Series.Type.SCATTER)
-                    .setName(stringMessages.markPassing() + " " + competitor.name);
+                    .setName(stringMessages.markPassing() + " " + competitor.getName());
             result.setPlotOptions(new ScatterPlotOptions().setColor(competitorSelectionProvider.getColor(competitor))
                     .setSelected(true));
             markPassingSeriesByCompetitor.put(competitor, result);

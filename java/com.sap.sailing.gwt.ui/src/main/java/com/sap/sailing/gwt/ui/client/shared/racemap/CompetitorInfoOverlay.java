@@ -60,16 +60,16 @@ public class CompetitorInfoOverlay extends CanvasOverlay {
     protected void redraw(boolean force) {
         if (boatFix != null) {
             LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
-            String infoText = competitorDTO.sailID;
+            String infoText = competitorDTO.getSailID();
             if(infoText == null || infoText.isEmpty()) {
-            	infoText = competitorDTO.name;
+            	infoText = competitorDTO.getName();
             }
 
             Context2d context2d = getCanvas().getContext2d();
             CssColor grayTransparentColor = CssColor.make("rgba(255,255,255,0.75)");
 
             context2d.setFont("12px bold Verdana sans-serif");
-            TextMetrics measureText = context2d.measureText(competitorDTO.sailID);
+            TextMetrics measureText = context2d.measureText(competitorDTO.getSailID());
             double textWidth = measureText.getWidth();
 
             canvasWidth = (int) textWidth + 17;
@@ -93,7 +93,7 @@ public class CompetitorInfoOverlay extends CanvasOverlay {
 
             context2d.beginPath();
             context2d.setFillStyle("black");
-            context2d.fillText(competitorDTO.sailID, 8, 14);
+            context2d.fillText(competitorDTO.getSailID(), 8, 14);
             context2d.stroke(); 
 
             Point boatPositionInPx = getMap().convertLatLngToDivPixel(latLngPosition);

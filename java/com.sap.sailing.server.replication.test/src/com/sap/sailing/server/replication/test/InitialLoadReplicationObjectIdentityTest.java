@@ -3,10 +3,13 @@ package com.sap.sailing.server.replication.test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.hamcrest.core.Is.is;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +28,8 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.mongodb.MongoDBService;
@@ -99,6 +104,14 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         assertNotNull(master.getLeaderboardGroupByName(leaderBoardGroupName));
         assertNull(replica.getLeaderboardGroupByName(leaderBoardGroupName));
         
+        /* Media Library */
+        MediaTrack mediaTrack1 = new MediaTrack("title-1", "url", new Date(), 1, MimeType.mp4);
+        master.mediaTrackAdded(mediaTrack1);
+        MediaTrack mediaTrack2 = new MediaTrack("title-2", "url", new Date(), 1, MimeType.ogv);
+        master.mediaTrackAdded(mediaTrack2);
+        MediaTrack mediaTrack3 = new MediaTrack("title-3", "url", new Date(), 1, MimeType.mp4);
+        master.mediaTrackAdded(mediaTrack3);
+        
         /* fire up replication */
         performReplicationSetup();
         ReplicationMasterDescriptor the_master = replicationDescriptorPair.getB(); /* master descriptor */
@@ -116,6 +129,10 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         assertNotNull(replica.getLeaderboardGroupByName(leaderBoardGroupName));
         assertNotNull(replica.getLeaderboardByName(leaderboardName));
         assertTrue(replica.getAllRegattas().iterator().hasNext());
+        
+        //System.out.println("InitialLoadReplicationObjectIdentityTest.testInitialLoad - replica.getAllMediaTracks: " + replica.getAllMediaTracks());
+        
+        assertThat(replica.getAllMediaTracks().size(), is(3));
     }
 
     @Test
