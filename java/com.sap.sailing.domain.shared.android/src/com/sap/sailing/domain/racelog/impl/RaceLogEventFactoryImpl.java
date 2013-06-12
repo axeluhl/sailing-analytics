@@ -123,14 +123,15 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
 
     @Override
     public RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint timePoint,
-            Serializable id, List<Competitor> competitors, int passId) {
+            Serializable id, List<Competitor> competitors, int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
         return new RaceLogFinishPositioningConfirmedEventImpl(MillisecondsTimePoint.now(), timePoint, id, competitors,
-                passId);
+                passId, positionedCompetitors);
     }
 
     @Override
-    public RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint timePoint, int passId) {
-        return createFinishPositioningConfirmedEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId);
+    public RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint timePoint, int passId,
+            List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
+        return createFinishPositioningConfirmedEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId, positionedCompetitors);
     }
 
     @Override

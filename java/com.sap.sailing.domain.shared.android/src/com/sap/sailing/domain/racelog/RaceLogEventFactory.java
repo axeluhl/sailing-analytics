@@ -57,9 +57,10 @@ public interface RaceLogEventFactory {
             List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
 
     RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint timePoint, Serializable id,
-            List<Competitor> competitors, int passId);
+            List<Competitor> competitors, int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
 
-    RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint timePoint, int passId);
+    RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint timePoint, int passId, 
+            List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
 
     RaceLogPathfinderEvent createPathfinderEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors,
             int passId, String pathfinderId);

@@ -1084,7 +1084,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     private RaceLogEvent loadRaceLogFinishPositioningConfirmedEvent(TimePoint createdAt, TimePoint timePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-        return raceLogEventFactory.createFinishPositioningConfirmedEvent(createdAt, timePoint, id, competitors, passId);
+        BasicDBList dbPositionedCompetitorList = (BasicDBList) dbObject.get(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name());
+        List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = null;
+        //When a confirmation event is loaded that does not contain the positioned competitors (this is the case for the ESS events in
+        //Singapore and Quingdao) then null should be set for the positionedCompetitors, which is evaluated later on.
+        if (dbPositionedCompetitorList != null) {
+            positionedCompetitors = loadPositionedCompetitors(dbPositionedCompetitorList);
+        }
+            
+        return raceLogEventFactory.createFinishPositioningConfirmedEvent(createdAt, timePoint, id, competitors, passId, positionedCompetitors);
     }
 
     private RaceLogEvent loadRaceLogFinishPositioningListChangedEvent(TimePoint createdAt, TimePoint timePoint,

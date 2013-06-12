@@ -116,7 +116,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testChoosesFinishPositioningConfirmedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createFinishPositioningConfirmedEvent(null, 0);
+        RaceLogEvent event = factory.createFinishPositioningConfirmedEvent(null, 0, null);
         serializer.serialize(event);
         verify(finishPositioningConfirmedEventSerializer).serialize(event);
     }

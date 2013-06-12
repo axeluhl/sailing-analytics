@@ -242,7 +242,9 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public void setFinishPositioningConfirmed() {
         TimePoint eventTime = MillisecondsTimePoint.now();
         
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(eventTime, raceLog.getCurrentPassId());
+        List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = getFinishPositioningList();
+        
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(eventTime, raceLog.getCurrentPassId(), positionedCompetitors);
         this.raceLog.add(event);
     }
 

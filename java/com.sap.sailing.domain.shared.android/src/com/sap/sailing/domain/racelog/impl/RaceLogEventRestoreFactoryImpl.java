@@ -71,8 +71,8 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
 
     @Override
     public RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint createdAt,
-            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId) {
-        return new RaceLogFinishPositioningConfirmedEventImpl(createdAt, logicalTimePoint, id, competitors, passId);
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
+        return new RaceLogFinishPositioningConfirmedEventImpl(createdAt, logicalTimePoint, id, competitors, passId, positionedCompetitors);
     }
 
     @Override

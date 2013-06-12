@@ -742,6 +742,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(finishPositioningConfirmedEvent, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningConfirmedEvent.class.getSimpleName());
+        
+        result.put(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name(), storePositionedCompetitors(finishPositioningConfirmedEvent.getPositionedCompetitors()));
 
         return result;
     }
@@ -759,10 +761,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private BasicDBList storePositionedCompetitors(List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
         BasicDBList dbList = new BasicDBList();
         
-        for (Triple<Serializable, String, MaxPointsReason> competitorPair : positionedCompetitors) {
-            dbList.add(storePositionedCompetitor(competitorPair));
+        if (positionedCompetitors != null) {
+            for (Triple<Serializable, String, MaxPointsReason> competitorPair : positionedCompetitors) {
+                dbList.add(storePositionedCompetitor(competitorPair));
+            }
         }
-        
+
         return dbList;
     }
     
