@@ -18,4 +18,12 @@ public abstract class RaceLogAnalyzer {
     protected Iterable<RaceLogEvent> getAllEvents() {
         return raceLog.getRawFixes();
     }
+    
+    protected Iterable<RaceLogEvent> getPassEventsDescending() {
+        return raceLog.getFixesDescending();
+    }
+    
+    protected Iterable<RaceLogEvent> getAllEventsDescending() {
+        return raceLog.getRawFixesDescending();
+    }
 }

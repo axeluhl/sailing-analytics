@@ -21,15 +21,13 @@ public class ProtestStartTimeFinder extends RaceLogAnalyzer {
     }
 
     private TimePoint searchForStartTime() {
-        TimePoint result = null;
-        
         for (RaceLogEvent event : getPassEvents()) {
             if (event instanceof RaceLogProtestStartTimeEvent) {
-                result = ((RaceLogProtestStartTimeEvent) event).getProtestStartTime();
+                TimePoint result = ((RaceLogProtestStartTimeEvent) event).getProtestStartTime();
+                return result;
             }
         }
-        
-        return result;
+        return null;
     }
 
 }

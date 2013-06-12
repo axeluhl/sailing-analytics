@@ -47,4 +47,8 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
      * Checks if the race log is empty.
      */
     boolean isEmpty();
+
+    Iterable<RaceLogEvent> getRawFixesDescending();
+
+    Iterable<RaceLogEvent> getFixesDescending();
 }

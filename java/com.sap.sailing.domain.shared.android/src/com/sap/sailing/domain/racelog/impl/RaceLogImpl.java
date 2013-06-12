@@ -141,4 +141,14 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         listeners = new HashSet<RaceLogEventVisitor>();
     }
 
+    @Override
+    public Iterable<RaceLogEvent> getRawFixesDescending() {
+        return getRawFixes().descendingSet();
+    }
+    
+    @Override
+    public Iterable<RaceLogEvent> getFixesDescending() {
+        return getFixes().descendingSet();
+    }
+
 }

@@ -146,6 +146,50 @@ public class RaceLogTest {
         verify(listener, never()).visit(event);
     }
     
+    @Test
+    public void testRawFixesDescending() {
+        RaceLogEvent event1 = mock(RaceLogEvent.class);
+        RaceLogEvent event2 = mock(RaceLogEvent.class);
+        RaceLogEvent event3 = mock(RaceLogEvent.class);
+        
+        when(event1.getTimePoint()).thenReturn(new MillisecondsTimePoint(1));
+        when(event2.getTimePoint()).thenReturn(new MillisecondsTimePoint(2));
+        when(event3.getTimePoint()).thenReturn(new MillisecondsTimePoint(3));
+        
+        raceLog.add(event1);
+        raceLog.add(event2);
+        raceLog.add(event3);
+        
+        raceLog.lockForRead();
+        assertEquals(event3, Util.get(raceLog.getRawFixesDescending(), 0));
+        assertEquals(event2, Util.get(raceLog.getRawFixesDescending(), 1));
+        assertEquals(event1, Util.get(raceLog.getRawFixesDescending(), 2));
+        raceLog.unlockAfterRead();
+    }
+    
+    @Test
+    public void testFixesDescending() {
+        RaceLogEvent event1 = mock(RaceLogEvent.class);
+        RaceLogEvent event2 = mock(RaceLogEvent.class);
+        RaceLogEvent event3 = mock(RaceLogEvent.class);
+        
+        when(event1.getPassId()).thenReturn(1);
+        when(event1.getTimePoint()).thenReturn(new MillisecondsTimePoint(1));
+        when(event2.getPassId()).thenReturn(1);
+        when(event2.getTimePoint()).thenReturn(new MillisecondsTimePoint(2));
+        when(event3.getPassId()).thenReturn(0);
+        when(event3.getTimePoint()).thenReturn(new MillisecondsTimePoint(3));
+        
+        raceLog.add(event1);
+        raceLog.add(event2);
+        raceLog.add(event3);
+        
+        raceLog.lockForRead();
+        assertEquals(event2, Util.get(raceLog.getFixesDescending(), 0));
+        assertEquals(event1, Util.get(raceLog.getFixesDescending(), 1));
+        raceLog.unlockAfterRead();
+    }
+    
     private class VisitFlagEventAnswer implements Answer<Object> {
         @Override
         public Object answer(InvocationOnMock invocation) throws Throwable {

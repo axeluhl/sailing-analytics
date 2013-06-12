@@ -14,20 +14,20 @@ public class AbortingFlagFinder extends RaceLogAnalyzer {
     public RaceLogFlagEvent getAbortingFlagEvent() {
 
         RaceLogFlagEvent newFlagEvent = null;
-        
+
         this.raceLog.lockForRead();
         try {
             newFlagEvent = searchForAbortingFlagEvent();
         } finally {
             this.raceLog.unlockAfterRead();
         }
-        
+
         return newFlagEvent;
     }
 
     private RaceLogFlagEvent searchForAbortingFlagEvent() {
         RaceLogFlagEvent newFlagEvent = null;
-        
+
         if (raceLog.getCurrentPassId() > 0) {
             int relevantPassId = raceLog.getCurrentPassId() - 1;
             for (RaceLogEvent event : getAllEvents()) {
@@ -41,10 +41,10 @@ public class AbortingFlagFinder extends RaceLogAnalyzer {
                 }
             }
         }
-        
+
         return newFlagEvent;
     }
-    
+
     private boolean isAbortingFlag(RaceLogFlagEvent flagEvent) {
         return (flagEvent.getUpperFlag().equals(Flags.AP) && flagEvent.isDisplayed())
                 || (flagEvent.getUpperFlag().equals(Flags.NOVEMBER) && flagEvent.isDisplayed())
