@@ -129,7 +129,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     }
     
     @Test
-    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogProtestStartTimeEvent() {        
+    public void testStoreAndRetrieveRegattaWithRaceLogProtestStartTimeEvent() {        
         RaceLogProtestStartTimeEvent expectedEvent = RaceLogEventFactory.INSTANCE.createProtestStartTimeEvent(now, 0, MillisecondsTimePoint.now());
 
         addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
@@ -151,7 +151,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     }
     
     @Test
-    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogStartProcedureChangedEvent() {        
+    public void testStoreAndRetrieveRegattaWithRaceLogStartProcedureChangedEvent() {        
         RaceLogStartProcedureChangedEvent expectedEvent = RaceLogEventFactory.INSTANCE.createStartProcedureChangedEvent(now, 0, StartProcedureType.ESS);
 
        addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
@@ -173,7 +173,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     }
     
     @Test
-    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogPathfinderEvent() {        
+    public void testStoreAndRetrieveRegattaWithRaceLogPathfinderEvent() {        
         RaceLogPathfinderEvent expectedEvent = RaceLogEventFactory.INSTANCE.createPathfinderEvent(now, 0, "GER 20");
 
        addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
@@ -195,7 +195,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     }
     
     @Test
-    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogGateLineOpeningTimeEvent() {        
+    public void testStoreAndRetrieveRegattaWithRaceLogGateLineOpeningTimeEvent() {        
         RaceLogGateLineOpeningTimeEvent expectedEvent = RaceLogEventFactory.INSTANCE.createGateLineOpeningTimeEvent(now, 0, 1234l);
 
        addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
@@ -217,7 +217,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     }
 
     @Test
-    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogPassChangeEvent() {        
+    public void testStoreAndRetrieveRegattaWithRaceLogPassChangeEvent() {        
         RaceLogPassChangeEvent event = RaceLogEventFactory.INSTANCE.createPassChangeEvent(now, 0);
 
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
@@ -238,7 +238,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     }
     
     @Test
-    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogFinishPositioningListChangeEvent() {
+    public void testStoreAndRetrieveRegattaWithRaceLogFinishPositioningListChangeEvent() {
         Competitor storedCompetitor = DomainFactory.INSTANCE.createCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", null, null);
         List<Triple<Serializable, String, MaxPointsReason>> storedPositioningList = new ArrayList<Triple<Serializable, String, MaxPointsReason>>();
         storedPositioningList.add(new Triple<Serializable, String, MaxPointsReason>(storedCompetitor.getId(), storedCompetitor.getName(), MaxPointsReason.NONE));
@@ -268,7 +268,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     }
     
     @Test
-    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogFinishPositioningConfirmedEvent() {   
+    public void testStoreAndRetrieveRegattaWithRaceLogFinishPositioningConfirmedEvent() {   
         Competitor storedCompetitor = DomainFactory.INSTANCE.createCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", null, null);
         List<Triple<Serializable, String, MaxPointsReason>> storedPositioningList = new ArrayList<Triple<Serializable, String, MaxPointsReason>>();
         storedPositioningList.add(new Triple<Serializable, String, MaxPointsReason>(storedCompetitor.getId(), storedCompetitor.getName(), MaxPointsReason.NONE));
@@ -298,7 +298,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     }
     
     @Test
-    public void testStoreAndRetrieveSimpleLeaderboardWithBackwardsCompatibleRaceLogFinishPositioningConfirmedEvent() {
+    public void testStoreAndRetrieveRegattaWithBackwardsCompatibleRaceLogFinishPositioningConfirmedEvent() {
         RaceLogFinishPositioningConfirmedEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, 0, null);
 
         createAndStoreOldRaceLogFinishPositioningConfirmedEventDBEntry();
@@ -343,7 +343,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     }
     
     @Test
-    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogCourseAreaChangeEvent() {
+    public void testStoreAndRetrieveRegattaWithRaceLogCourseAreaChangeEvent() {
         final UUID uuid = UUID.randomUUID();
         RaceLogCourseAreaChangedEvent event = RaceLogEventFactory.INSTANCE.createCourseAreaChangedEvent(now, 0, uuid);
 
@@ -366,7 +366,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     }
 
     @Test
-    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogRaceStatusEvent() {
+    public void testStoreAndRetrieveRegattaWithRaceLogRaceStatusEvent() {
 
         RaceLogRaceStatusEvent event = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(now, 0, RaceLogRaceStatus.SCHEDULED);
 
@@ -389,7 +389,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     }
 
     @Test
-    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogStartTimeEvent() {
+    public void testStoreAndRetrieveRegattaWithRaceLogStartTimeEvent() {
 
         RaceLogStartTimeEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now, 0, now);
 
@@ -413,7 +413,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     }
 
     @Test
-    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogFlagEvent() {
+    public void testStoreAndRetrieveRegattaWithRaceLogFlagEvent() {
 
         RaceLogFlagEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(now, 0, Flags.FIRSTSUBSTITUTE, Flags.NONE, true);
 
@@ -437,7 +437,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     }
     
     @Test
-    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogCourseDesignChangedEvent() {
+    public void testStoreAndRetrieveRegattaWithRaceLogCourseDesignChangedEvent() {
         CourseBase course = createCourseBase();
         RaceLogCourseDesignChangedEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now, 0, course);
 
