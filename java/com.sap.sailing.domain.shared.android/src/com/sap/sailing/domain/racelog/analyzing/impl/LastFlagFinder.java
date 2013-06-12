@@ -24,15 +24,12 @@ public class LastFlagFinder extends RaceLogAnalyzer {
     }
 
     private RaceLogFlagEvent searchForLastFlagEvent() {
-        RaceLogFlagEvent lastFlagEvent = null;
-        
-        for (RaceLogEvent event : getPassEvents()) {
+        for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogFlagEvent) {
-                lastFlagEvent = (RaceLogFlagEvent) event;
+                return (RaceLogFlagEvent) event;
             }
         }
-        
-        return lastFlagEvent;
+        return null;
     }
 
 }
