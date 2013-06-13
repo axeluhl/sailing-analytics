@@ -38,7 +38,7 @@ public class GateStartProcedure implements StartProcedure {
     private final static long startPhasePapaDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseClassOverGolfDownInterval = 0 * 60 * 1000; // minutes * seconds * milliseconds
     public final static long startPhaseGolfDownStandardInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
-    public final static long startPhaseGolfDownStandardIntervalConstantSummand = 0 * 60 * 1000; // minutes * seconds *
+    public final static long startPhaseGolfDownStandardIntervalConstantSummand = 3 * 60 * 1000; // minutes * seconds *
                                                                                                 // milliseconds
 
     // list of start procedure specific event id's
