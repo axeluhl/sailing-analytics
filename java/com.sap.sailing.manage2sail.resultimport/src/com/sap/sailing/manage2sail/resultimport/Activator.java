@@ -26,7 +26,7 @@ public class Activator implements BundleActivator {
         bundleContext.registerService(ScoreCorrectionProvider.class, service, /* properties */null);
         
         ResultUrlRegistry.INSTANCE.registerResultUrl(ScoreCorrectionProviderImpl.NAME, new URL(MANAGE2SAIL_TEST_URL));
-        // ResultUrlRegistry.INSTANCE.registerResultUrl(ScoreCorrectionProviderImpl.NAME, new URL(MANAGE2SAIL_PROD_URL));
+        ResultUrlRegistry.INSTANCE.registerResultUrl(ScoreCorrectionProviderImpl.NAME, new URL(MANAGE2SAIL_PROD_URL));
         
         createAnAllCertificatesTrustingManagerforSSL();
     }

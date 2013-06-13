@@ -3,9 +3,6 @@ package com.sap.sailing.manage2sail.resultimport;
 import java.net.URL;
 import java.util.Date;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.TimePoint;
-
 public class RegattaResultDescriptor {
     private String id;
     private String isafId;
@@ -18,22 +15,7 @@ public class RegattaResultDescriptor {
     private URL htmlUrl;
     private Date publishedAt;
     private Boolean isFinal;
-    
-    public String getBoatClass() {
-        String result = isafId;
-        if(result == null) {
-            result = className;
-        }
-        if(result == null) {
-            result = name;
-        }
-        return result;
-    }
-    
-    public TimePoint getLastModified() {
-        return publishedAt != null ? new MillisecondsTimePoint(publishedAt) : null;
-    }
-    
+
     public String getId() {
         return id;
     }

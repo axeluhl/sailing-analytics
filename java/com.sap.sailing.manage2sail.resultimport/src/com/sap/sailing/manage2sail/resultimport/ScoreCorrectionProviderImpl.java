@@ -61,8 +61,8 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
         Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String,TimePoint>>>();
         try {
             for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
-                String boatClass = resultDocDescr.getBoatClass();
                 String eventName = resultDocDescr.getEventName() != null ? resultDocDescr.getEventName() : resultDocDescr.getRegattaName();
+                String boatClass = resultDocDescr.getBoatClass();
                 if(boatClass != null && eventName != null) {
                     Set<Pair<String, TimePoint>> eventResultsSet = result.get(eventName);
                     if(eventResultsSet == null) {
@@ -85,8 +85,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
         try {
             RegattaResults regattaResults = parser.parse();
             TimePoint timePoint = XRRParserUtil.calculateTimePointForRegattaResults(regattaResults);
-//            if ((timePoint == null && timePointPublished == null)
-//                    || (timePoint != null && timePoint.equals(timePointPublished))) {
+            if ((timePoint == null && timePointPublished == null) || (timePoint != null && timePoint.equals(timePointPublished))) {
                 for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
                     if (o instanceof Event) {
                         Event event = (Event) o;
@@ -102,7 +101,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
                             }
                         }
                     }
-//                }
+                }
             }
         } catch (JAXBException e) {
             logger.info("Parse error during XRR import. Ignoring document " + parser.toString());
