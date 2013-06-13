@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SystemInformationPanel;
 import com.sap.sailing.gwt.ui.client.shared.panels.UserStatusPanel;
+import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class AdminConsoleEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
@@ -109,6 +110,9 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.add(replicationPanel, stringMessages.replication(), /* asHTML */ false);
         final MediaPanel mediaPanel = new MediaPanel(mediaService, this, stringMessages);
         tabPanel.add(mediaPanel, stringMessages.mediaPanel(), /* asHTML */ false);
+        
+        final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(stringMessages);
+        tabPanel.add(masterDataImportPanel, stringMessages.masterDataImportPanel(), /* asHTML */ false);
         
         tabPanel.selectTab(0);
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
