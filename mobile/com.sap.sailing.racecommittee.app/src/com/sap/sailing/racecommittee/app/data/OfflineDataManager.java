@@ -26,10 +26,10 @@ import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
-import com.sap.sailing.domain.racelog.PassAwareRaceLog;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
+import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
@@ -73,7 +73,7 @@ public class OfflineDataManager extends DataManager {
         competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", null, null));
 
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
-        PassAwareRaceLog log = new PassAwareRaceLogImpl();
+        RaceLog log = new RaceLogImpl(UUID.randomUUID());
         log.add(factory.createStartTimeEvent(
                 new MillisecondsTimePoint(new Date().getTime() - 2000), 
                 1,
@@ -93,7 +93,7 @@ public class OfflineDataManager extends DataManager {
                         StartProcedureType.ESS,
                         log);
 
-        log = new PassAwareRaceLogImpl();
+        log = new RaceLogImpl(UUID.randomUUID());
         /*log.add(factory.createStartTimeEvent(
 				new MillisecondsTimePoint(new Date()), 
 				1,
@@ -110,7 +110,7 @@ public class OfflineDataManager extends DataManager {
                         StartProcedureType.ESS,
                         log);
 
-        log = new PassAwareRaceLogImpl();
+        log = new RaceLogImpl(UUID.randomUUID());
         /*log.add(factory.createRaceStatusEvent(
 				new MillisecondsTimePoint(new Date()), 
 				5,

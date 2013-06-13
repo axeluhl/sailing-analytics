@@ -28,9 +28,6 @@ import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
-import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.RaceColumnInSeries;
-import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.CountryCode;
@@ -45,6 +42,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
@@ -56,6 +54,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10LastBreaksTie;
+import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets1LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
@@ -320,6 +319,8 @@ public class DomainFactoryImpl implements DomainFactory {
             return new HighPointExtremeSailingSeriesOverall();
         case HIGH_POINT_LAST_BREAKS_TIE:
             return new HighPointLastBreaksTie();
+        case HIGH_POINT_FIRST_GETS_ONE:
+            return new HighPointFirstGets1LastBreaksTie();
         case HIGH_POINT_FIRST_GETS_TEN:
             return new HighPointFirstGets10LastBreaksTie();
         case LOW_POINT_WINNER_GETS_ZERO:
@@ -333,7 +334,7 @@ public class DomainFactoryImpl implements DomainFactory {
         CompetitorDTO competitorDTO = weakCompetitorDTOCache.get(c);
         if (competitorDTO == null) {
             CountryCode countryCode = c.getTeam().getNationality().getCountryCode();
-            competitorDTO = new CompetitorDTO(c.getName(), countryCode == null ? ""
+            competitorDTO = new CompetitorDTOImpl(c.getName(), countryCode == null ? ""
                     : countryCode.getTwoLetterISOCode(),
                     countryCode == null ? "" : countryCode.getThreeLetterIOCCode(), countryCode == null ? ""
                             : countryCode.getName(), c.getBoat().getSailID(), c.getId().toString(),
@@ -345,17 +346,8 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public FleetDTO convertToFleetDTO(Series series, Fleet fleet) {
-        return new FleetDTO(fleet.getName(), series.getName(), fleet.getOrdering(), fleet.getColor());
-    }
-
-    @Override
-    public FleetDTO convertToFleetDTO(RaceColumn raceColumn, Fleet fleet) {
-        String seriesNameOfFleet = null;
-        if (raceColumn instanceof RaceColumnInSeries) {
-            seriesNameOfFleet = ((RaceColumnInSeries) raceColumn).getSeries().getName();
-        }            
-        return new FleetDTO(fleet.getName(), seriesNameOfFleet, fleet.getOrdering(), fleet.getColor());
+    public FleetDTO convertToFleetDTO(Fleet fleet) {
+        return new FleetDTO(fleet.getName(), fleet.getOrdering(), fleet.getColor());
     }
 
     @Override

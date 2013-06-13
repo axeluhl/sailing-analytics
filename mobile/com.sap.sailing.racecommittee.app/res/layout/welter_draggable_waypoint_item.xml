@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/Welter.Cell.Draggable.Waypoint.Item"
     android:layout_width="fill_parent"
-    android:layout_height="80dp"
+    android:layout_height="60dp"
     android:background="@drawable/list_selector"
     android:gravity="center_vertical"
     android:orientation="horizontal"
@@ -11,7 +11,7 @@
     <ImageView
         android:id="@id/drag_handle"
         android:layout_width="50dp"
-        android:layout_height="80dp"
+        android:layout_height="match_parent"
         android:layout_weight="0"
         android:background="@drawable/drag_symbol"
         android:contentDescription="@string/drag_handle_description" />
@@ -19,7 +19,7 @@
     <LinearLayout
         android:id="@+id/Welter.Cell.Draggable.Waypoint.Item.columnOne"
         android:layout_width="100dp"
-        android:layout_height="80dp"
+        android:layout_height="match_parent"
         android:gravity="center_horizontal|center_vertical"
         android:orientation="vertical" >
 
@@ -38,22 +38,23 @@
             android:padding="5dp"
             android:textColor="@drawable/text_selector"
             android:textIsSelectable="false"
-            android:textSize="9pt" />
+            android:textSize="5pt" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/Welter.Cell.Draggable.Waypoint.Item.txtRoundingDirection"
-        android:layout_width="100dp"
+        android:layout_width="85dp"
         android:layout_height="match_parent"
+        android:gravity="center"
         android:padding="5dp"
         android:textColor="@drawable/text_selector"
         android:textIsSelectable="false"
-        android:textSize="9pt" />
+        android:textSize="7pt" />
 
     <LinearLayout
         android:id="@+id/Welter.Cell.Draggable.Waypoint.Item.columnThree"
         android:layout_width="100dp"
-        android:layout_height="80dp"
+        android:layout_height="match_parent"
         android:gravity="center_horizontal|center_vertical"
         android:orientation="vertical" >
 
@@ -72,7 +73,7 @@
             android:padding="5dp"
             android:textColor="@drawable/text_selector"
             android:textIsSelectable="false"
-            android:textSize="9pt" />
+            android:textSize="5pt" />
     </LinearLayout>
 
 </LinearLayout>

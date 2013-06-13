@@ -24,6 +24,19 @@ public class IndividualRecallFinder extends RaceLogAnalyzer {
 
         return displayedTime;
     }
+    
+    public TimePoint getIndividualRecallDisplayedRemovalTime() {
+        TimePoint removalTime = null;
+        
+        this.raceLog.lockForRead();
+        try {
+            removalTime = searchForIndividualRecallRemovalTime();
+        } finally {
+            this.raceLog.unlockAfterRead();
+        }
+
+        return removalTime;
+    }
 
     private TimePoint searchForIndividualRecallDisplayedTime() {
         TimePoint displayedTime = null;
@@ -33,14 +46,27 @@ public class IndividualRecallFinder extends RaceLogAnalyzer {
                 RaceLogFlagEvent flagEvent = (RaceLogFlagEvent) event;
                 if (flagEvent.getUpperFlag().equals(Flags.XRAY) && flagEvent.isDisplayed()) {
                     displayedTime = flagEvent.getTimePoint();
-                } else if (flagEvent.getUpperFlag().equals(Flags.XRAY) && !flagEvent.isDisplayed()) {
-                    displayedTime = null;
                 }
-                
             }
         }
         
         return displayedTime;
     }
+    
+    private TimePoint searchForIndividualRecallRemovalTime() {
+        TimePoint removalTime = null;
+        
+        for (RaceLogEvent event : getPassEvents()) {
+            if (event instanceof RaceLogFlagEvent) {
+                RaceLogFlagEvent flagEvent = (RaceLogFlagEvent) event;
+                if (flagEvent.getUpperFlag().equals(Flags.XRAY) && !flagEvent.isDisplayed()) {
+                    removalTime = flagEvent.getTimePoint();
+                }
+            }
+        }
+        
+        return removalTime;
+    }
+
 
 }

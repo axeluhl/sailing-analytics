@@ -224,13 +224,13 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     }
 
     @Override
-    public List<WindPatternDTO> getWindPatterns() {
-        return wpDisplayManager.getWindPatterns();
+    public List<WindPatternDTO> getWindPatterns(char mode) {
+        return wpDisplayManager.getWindPatterns(mode);
     }
 
     @Override
     public WindPatternDisplay getWindPatternDisplay(WindPatternDTO pattern) {
-        WindPatternDisplay display = wpDisplayManager.getDisplay(WindPattern.valueOf(pattern.name));
+        WindPatternDisplay display = wpDisplayManager.getDisplay(WindPattern.valueOf(pattern.getName()));
         try {
             return display;
         } catch (Exception e) {
@@ -283,7 +283,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         RaceMapDataDTO rcDTO = simulatedPaths.raceMapDataDTO;
 
         for (PathDTO path : pathDTOs) {
-            if (path.name.equals(POLYLINE_PATH_NAME)) {
+            if (path.getName().equals(POLYLINE_PATH_NAME)) {
                 continue;
             }
 

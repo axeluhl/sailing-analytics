@@ -47,8 +47,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private WindFieldCanvasOverlay windFieldCanvasOverlay;
     private WindGridCanvasOverlay windGridCanvasOverlay;
     private WindLineCanvasOverlay windLineCanvasOverlay;
+    public RegattaAreaCanvasOverlay regattaAreaCanvasOverlay;
     private List<PathCanvasOverlay> replayPathCanvasOverlays;
-    private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
+    public RaceCourseCanvasOverlay raceCourseCanvasOverlay;
     private PathLegendCanvasOverlay legendCanvasOverlay;
     private List<TimeListenerWithStoppingCriteria> timeListeners;
     private SimulatorServiceAsync simulatorSvc;
@@ -121,7 +122,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             for (int index = 0; index < noOfPaths; ++index) {
 
                 currentPath = paths[index];
-                pathName = currentPath.name;
+                pathName = currentPath.getName();
                 color = colorPalette.getColor(noOfPaths - 1 - index);
 
                 if (pathName.equals("Polyline")) {
@@ -262,7 +263,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.raceCourseCanvasOverlay = null;
         this.timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
         this.initializeData();
-        this.parent = parent;
+        this.parent = parent;    
     }
 
     public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, Timer timer,
@@ -304,7 +305,6 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             public void run() {
                 mapw = new MapWidget();
                 // mapw.setUI(SimulatorMapOptions.newInstance());
-                mapw.setZoomLevel(13);
                 // mapw.setSize("100%", "650px");
                 // mapw.setSize("100%", "80%");
 
@@ -317,23 +317,50 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 mapw.setScrollWheelZoomEnabled(true);
                 // mapw.setContinuousZoom(true);
                 mapw.setTitle(stringMessages.simulator() + " " + stringMessages.map());
-                PositionDTO kiel = new PositionDTO(54.46195148135232, 10.1513671875);
-                //PositionDTO trave = new PositionDTO(54.007063, 10.838356); // 53.978276,10.880156);//53.968015,10.891331);
-                PositionDTO initialMapPosition = kiel; 
-                LatLng position = LatLng.newInstance(initialMapPosition.latDeg, initialMapPosition.lngDeg);
-                mapw.panTo(position);
+                
+                if (mode == SailingSimulatorUtil.freestyle) {
+                    mapw.setZoomLevel(14);                	
+                } else if (mode == SailingSimulatorUtil.event) {
+                	mapw.setZoomLevel(12);
+                }
+
                 // mapw.panTo(LatLng.newInstance(0, 0));
                 add(mapw, 0, 0);
                 mapw.setSize("100%", "100%");
-
+                
+                initializeOverlays();
+                
                 dataInitialized = true;
+
+                if (mode == SailingSimulatorUtil.freestyle) {
+                	LatLng kiel = LatLng.newInstance(54.43450,10.19559167); // regatta area for TV on Kieler Woche
+                	//LatLng trave = LatLng.newInstance(54.007063, 10.838356); // in front of Timmendorfer Strand
+                	mapw.setCenter(kiel);
+                }
+
             }
         });
     }
 
     private void initializeOverlays() {
+    	
+    	if (this.mode == SailingSimulatorUtil.event) {
+    		if (regattaAreaCanvasOverlay == null) {
+    			mapw.setContinuousZoom(true);
+    			regattaAreaCanvasOverlay = new RegattaAreaCanvasOverlay(this);
+    			mapw.addOverlay(regattaAreaCanvasOverlay);
+    			regattaAreaCanvasOverlay.setVisible(true);
+    		}
+    	}
+    	
         this.raceCourseCanvasOverlay = new RaceCourseCanvasOverlay();
         this.raceCourseCanvasOverlay.getCanvas().getElement().setClassName("raceCourse");
+
+        if (this.mode == SailingSimulatorUtil.event) {
+        	this.regattaAreaCanvasOverlay.raceCourseCanvasOverlay = this.raceCourseCanvasOverlay;
+        	this.regattaAreaCanvasOverlay.updateRaceCourse(0, 0);
+        }
+    	
         // System.out.println("RaceCourseCanvasOverlay z-index: " +
         // this.raceCourseCanvasOverlay.getCanvas().getElement().getStyle().getZIndex());
         this.mapw.addOverlay(this.raceCourseCanvasOverlay);
@@ -642,6 +669,14 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
     }
 
+    public void clearOverlays() {
+        if (this.replayPathCanvasOverlays != null) {
+            this.removeOverlays();
+            this.timeListeners.clear();
+            this.replayPathCanvasOverlays.clear();
+        }
+    }
+    
     public void refreshView(ViewName name, WindPatternDisplay windPatternDisplay, SimulatorUISelectionDTO selection, boolean force) {
 
         if (!this.overlaysInitialized) {
@@ -652,11 +687,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             this.raceCourseCanvasOverlay.setSelected(false);
             this.windParams.setKeepState(!force);
             if (force) {
-                if (this.replayPathCanvasOverlays != null) {
-                    this.removeOverlays();
-                    this.timeListeners.clear();
-                    this.replayPathCanvasOverlays.clear();
-                }
+            	this.clearOverlays();
             }
             switch (name) {
             case SUMMARY:
@@ -741,4 +772,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
     }
 
+    public MapWidget getMap() {
+    	return this.mapw;
+    }
+    
 }

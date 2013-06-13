@@ -17,6 +17,31 @@ public class PlacemarkOrderDTO extends NamedDTO {
         this.placemarks = new ArrayList<PlacemarkDTO>(placemarks);
     }
     
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((placemarks == null) ? 0 : placemarks.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PlacemarkOrderDTO other = (PlacemarkOrderDTO) obj;
+        if (placemarks == null) {
+            if (other.placemarks != null)
+                return false;
+        } else if (!placemarks.equals(other.placemarks))
+            return false;
+        return true;
+    }
+
     public List<PlacemarkDTO> getPlacemarks() {
         return placemarks;
     }

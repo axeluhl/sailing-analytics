@@ -44,6 +44,53 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertNull(replicatedRegatta.getDefaultCourseArea());        
         assertTrue(regattaId.equals(replicatedRegatta.getId()));
     }
+    
+    @Test
+    public void testUpdateSpecificRegattaReplication() throws InterruptedException {
+        Regatta replicatedRegatta;
+        
+        final UUID alphaCourseAreaId = UUID.randomUUID();
+        final UUID tvCourseAreaId = UUID.randomUUID();
+        
+        Event event = master.addEvent("Event", "Venue", ".", true, UUID.randomUUID(), Collections.<String>emptyList());
+        master.addCourseArea(event.getId(), "Alpha", alphaCourseAreaId);
+        master.addCourseArea(event.getId(), "TV", tvCourseAreaId);
+        
+        UUID currentCourseAreaId = null;
+        Regatta masterRegatta = master.createRegatta("Kiel Week 2012", "49er", UUID.randomUUID(), Collections.<Series>emptyList(),
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), currentCourseAreaId);
+        
+        // Test for 'null'
+        master.updateRegatta(new RegattaName(masterRegatta.getName()), currentCourseAreaId);
+        Thread.sleep(1000);
+        replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
+        assertNotNull(replicatedRegatta);
+        assertNull(replicatedRegatta.getDefaultCourseArea());
+        
+        // Test for 'alpha'
+        currentCourseAreaId = alphaCourseAreaId;
+        master.updateRegatta(new RegattaName(masterRegatta.getName()), currentCourseAreaId);
+        Thread.sleep(1000);
+        replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
+        assertNotNull(replicatedRegatta);
+        assertEquals(currentCourseAreaId, replicatedRegatta.getDefaultCourseArea().getId());
+        
+        // Test for 'tv'
+        currentCourseAreaId = tvCourseAreaId;
+        master.updateRegatta(new RegattaName(masterRegatta.getName()), currentCourseAreaId);
+        Thread.sleep(1000);
+        replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
+        assertNotNull(replicatedRegatta);
+        assertEquals(currentCourseAreaId, replicatedRegatta.getDefaultCourseArea().getId());
+        
+        // Test back to 'null'
+        currentCourseAreaId = null;
+        master.updateRegatta(new RegattaName(masterRegatta.getName()), currentCourseAreaId);
+        Thread.sleep(1000);
+        replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
+        assertNotNull(replicatedRegatta);
+        assertNull(replicatedRegatta.getDefaultCourseArea());
+    }
 
     @Test
     public void testDefaultRegattaReplication() throws InterruptedException {

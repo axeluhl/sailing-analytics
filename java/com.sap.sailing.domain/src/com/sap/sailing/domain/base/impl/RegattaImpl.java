@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
-
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -24,8 +23,8 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -48,7 +47,9 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final ScoringScheme scoringScheme;
     private final Serializable id;
     private transient RaceLogStore raceLogStore;
-    private final CourseArea courseArea;
+    
+    // Can be changed...
+    private CourseArea defaultCourseArea;
 
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
@@ -105,7 +106,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         }
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
-        this.courseArea = courseArea;       
+        this.defaultCourseArea = courseArea;       
     }
 
     private void registerRaceLogsOnRaceColumns(Series series) {
@@ -268,6 +269,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
     
     @Override
+    public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
+        raceColumnListeners.notifyListenersAboutIsStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
+    }
+
+    @Override
     public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
         return raceColumnListeners.canAddRaceColumnToContainer(raceColumn);
     }
@@ -300,8 +306,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
-    public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
-            ThresholdBasedResultDiscardingRule newDiscardingRule) {
+    public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule) {
         raceColumnListeners.notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
     }
 
@@ -332,7 +337,27 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public CourseArea getDefaultCourseArea() {
-        return courseArea;
+        return defaultCourseArea;
+    }
+
+    @Override
+    public void setDefaultCourseArea(CourseArea newCourseArea) {
+        this.defaultCourseArea = newCourseArea;
+    }
+
+    /**
+     * @return whether this regatta defines its local per-series result discarding rules; if so, any leaderboard based
+     *         on the regatta has to respect this and has to use a result discarding rule implementation that
+     *         keeps discards local to each series rather than spreading them across the entire leaderboard.
+     */
+    @Override
+    public boolean definesSeriesDiscardThresholds() {
+        for (Series s : series) {
+            if (s.definesSeriesDiscardThresholds()) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
