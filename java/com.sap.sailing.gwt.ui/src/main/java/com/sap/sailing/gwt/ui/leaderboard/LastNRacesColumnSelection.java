@@ -45,7 +45,7 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
     }
 
     @Override
-    public void requestRaceColumnSelection(String raceColumnName, RaceColumnDTO column) {
+    public void requestRaceColumnSelection(RaceColumnDTO column) {
         // no-op
     }
 
@@ -111,7 +111,7 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
 
     private boolean hasScoreCorrections(LeaderboardDTO leaderboard, RaceColumnDTO column) {
         for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : leaderboard.rows.entrySet()) {
-            LeaderboardEntryDTO entry = e.getValue().fieldsByRaceColumnName.get(column.name);
+            LeaderboardEntryDTO entry = e.getValue().fieldsByRaceColumnName.get(column.getName());
             if (entry != null && entry.hasScoreCorrection()) {
                 return true;
             }

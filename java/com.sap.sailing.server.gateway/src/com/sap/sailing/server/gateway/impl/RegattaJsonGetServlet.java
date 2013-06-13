@@ -13,12 +13,9 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SeriesJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 
 public class RegattaJsonGetServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = -5280787192024697254L;
@@ -37,8 +34,7 @@ public class RegattaJsonGetServlet extends AbstractJsonHttpServlet {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Regatta " + regattaName + " not found");
             } else {
                 SeriesJsonSerializer seriesJsonSerializer = new SeriesJsonSerializer(new FleetJsonSerializer(new ColorJsonSerializer()));
-                CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(new TeamJsonSerializer(new PersonJsonSerializer()));
-                JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, competitorJsonSerializer);
+                JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, null);
                 JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
 
                 setJsonResponseHeader(response);

@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
 
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
@@ -21,7 +24,7 @@ public class SettingsActivity extends PreferenceActivity {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.layout.settings_view);
         
-        ListPreference startProcedurePreference = (ListPreference) findPreference("defaultStartProcedureType");
+        final ListPreference startProcedurePreference = (ListPreference) findPreference("defaultStartProcedureType");
         
         List<CharSequence> entries = new ArrayList<CharSequence>();
         List<CharSequence> entryValues = new ArrayList<CharSequence>();
@@ -32,6 +35,20 @@ public class SettingsActivity extends PreferenceActivity {
         
         startProcedurePreference.setEntries(entries.toArray(new CharSequence[0]));
         startProcedurePreference.setEntryValues(entryValues.toArray(new CharSequence[0]));
+        
+        CheckBoxPreference overrideStartProcedurePreference = (CheckBoxPreference) findPreference("overrideDefaultStartProcedureType");
+        startProcedurePreference.setEnabled(overrideStartProcedurePreference.isChecked());
+        
+        overrideStartProcedurePreference.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Boolean isChecked = (Boolean) newValue;
+                startProcedurePreference.setEnabled(isChecked.booleanValue());
+                return true;
+            }
+        });
+        
+        
     }
     
 }

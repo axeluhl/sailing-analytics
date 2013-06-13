@@ -122,7 +122,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             for (int index = 0; index < noOfPaths; ++index) {
 
                 currentPath = paths[index];
-                pathName = currentPath.name;
+                pathName = currentPath.getName();
                 color = colorPalette.getColor(noOfPaths - 1 - index);
 
                 if (pathName.equals("Polyline")) {

@@ -20,6 +20,7 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
@@ -162,6 +163,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 return dateFormatHoursMinutes.format(new Date(axisLabelsData.getValueAsLong()));
             }
         }));
+        timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1.5).setDashStyle(DashStyle.SOLID);
 
         chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false)
                 .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
@@ -245,6 +247,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 }
             }
         }
+        
         chart.redraw();
     }
 
@@ -504,6 +507,8 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         if(!isVisible()) {
             return;
         }
+
+        updateTimePlotLine(date);
         
         switch(timer.getPlayMode()) {
             case Live:
@@ -534,6 +539,12 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             }
         }
      }
+
+    private void updateTimePlotLine(Date date) {
+        chart.getXAxis().removePlotLine(timePlotLine);
+        timePlotLine.setValue(date.getTime());
+        chart.getXAxis().addPlotLines(timePlotLine);
+    }
 
     @Override
     public void onResize() {

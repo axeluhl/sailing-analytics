@@ -16,8 +16,8 @@ import com.sap.sailing.racecommittee.app.utils.MarkImageHelper;
 
 public class MarkGridAdapter extends ArrayAdapter<Mark> {
 
-    public MarkGridAdapter(Context context, int textViewResourceId, List<Mark> marks) {
-        super(context, textViewResourceId, marks);
+    public MarkGridAdapter(Context context, List<Mark> marks) {
+        super(context, 0, marks);
     }
 
     @Override

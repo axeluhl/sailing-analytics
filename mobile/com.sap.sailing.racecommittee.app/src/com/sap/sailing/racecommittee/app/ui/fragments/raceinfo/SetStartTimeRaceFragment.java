@@ -3,9 +3,11 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.util.Calendar;
 import java.util.Date;
 
+import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -14,10 +16,10 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -28,6 +30,7 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
 public class SetStartTimeRaceFragment extends RaceFragment {
@@ -47,6 +50,8 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     protected Button btSetTime;
     protected Button btPostpone;
     protected TextView textInfoText;
+    
+    protected DatePickerFragment datePicker;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,6 +62,9 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         isReset = getArguments().getBoolean(AppConstants.RESET_TIME_FRAGMENT_IS_RESET);
+        
+        datePicker = new DatePickerFragment();
+        setupDatePicker();
 
         spinnerStartProcedure = (Spinner) getView().findViewById(R.id.race_reset_time_spinner_procedure);
         setupStartProcedureSpinner();
@@ -69,7 +77,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
         btSetDate.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getActivity(), "Not implemented yet.", Toast.LENGTH_SHORT).show();
+                datePicker.show(getFragmentManager(), "datePicker");
             }
         });
 
@@ -90,6 +98,29 @@ public class SetStartTimeRaceFragment extends RaceFragment {
         });
 
         textInfoText = (TextView) getView().findViewById(R.id.race_reset_time_text_infotext);
+    }
+
+    private void setupDatePicker() {
+        datePicker.setOnDateSetListener(new OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int day) {
+                Calendar startDate = Calendar.getInstance();
+                startDate.set(year, month, day);
+                Calendar today = Calendar.getInstance();
+                
+                if (startDate.get(Calendar.YEAR) == today.get(Calendar.YEAR)
+                        && startDate.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)) {
+                    btSetDate.setText("Today");
+                } else {
+                    String dateString = DateFormat.getDateFormat(getActivity()).format(startDate.getTime());
+                    btSetDate.setText(dateString);
+                }
+            }
+        });
+        final Calendar today = Calendar.getInstance();
+        datePicker.setCurrentYear(today.get(Calendar.YEAR));
+        datePicker.setCurrentMonth(today.get(Calendar.MONTH));
+        datePicker.setCurrentDay(today.get(Calendar.DAY_OF_MONTH));
     }
 
     private void setupTimePicker() {
@@ -152,9 +183,9 @@ public class SetStartTimeRaceFragment extends RaceFragment {
 
     private Date getStartTime() {
         Calendar newStartTimeCal = Calendar.getInstance();
-        // newStartTimeCal.set(Calendar.YEAR, 0);
-        // newStartTimeCal.set(Calendar.MONTH, 0);
-        // newStartTimeCal.set(Calendar.DAY_OF_MONTH, 0);
+        newStartTimeCal.set(Calendar.YEAR, datePicker.getCurrentYear());
+        newStartTimeCal.set(Calendar.MONTH, datePicker.getCurrentMonth());
+        newStartTimeCal.set(Calendar.DAY_OF_MONTH, datePicker.getCurrentDay());
         newStartTimeCal.set(Calendar.HOUR_OF_DAY, pickerTime.getCurrentHour());
         newStartTimeCal.set(Calendar.MINUTE, pickerTime.getCurrentMinute());
         newStartTimeCal.set(Calendar.SECOND, 0);
@@ -186,7 +217,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
             timeText += String.format("%d day%s, ", diff[0], diff[0] > 1 ? "s" : "");
         }
         if (diff[1] > 0) {
-            timeText += String.format("%d hours%s, ", diff[1], diff[1] > 1 ? "s" : "");
+            timeText += String.format("%d hour%s, ", diff[1], diff[1] > 1 ? "s" : "");
         }
         if (diff[2] > 0) {
             timeText += String.format("%d minute%s, ", diff[2], diff[2] > 1 ? "s" : "");
@@ -203,8 +234,6 @@ public class SetStartTimeRaceFragment extends RaceFragment {
             ExLog.i(ExLog.RACE_SET_TIME, getRace().getId().toString(), getActivity());
         }
         setStartTime(getStartTime());
-
-        // TODO: start course designer activity!
     }
 
     private void setStartTime(Date newStartTime) {

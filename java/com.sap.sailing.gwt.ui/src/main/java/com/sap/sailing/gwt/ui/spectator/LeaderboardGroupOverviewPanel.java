@@ -225,9 +225,9 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/Spectator.html?"+
                         (showRaceDetails ? "showRaceDetails=true&" : "") +
-                        "leaderboardGroupName=" + group.name + "&root=overview"
+                        "leaderboardGroupName=" + group.getName() + "&root=overview"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                return ANCHORTEMPLATE.anchor(link, group.name);
+                return ANCHORTEMPLATE.anchor(link, group.getName());
             }
         };
         groupsNameColumn.setSortable(true);
@@ -291,7 +291,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         groupsListHandler.setComparator(groupsNameColumn, new Comparator<LeaderboardGroupDTO>() {
             @Override
             public int compare(LeaderboardGroupDTO g1, LeaderboardGroupDTO g2) {
-                return g1.name.compareTo(g2.name);
+                return g1.getName().compareTo(g2.getName());
             }
         });
         groupsListHandler.setComparator(groupsStartDateColumn, new Comparator<LeaderboardGroupDTO>() {
@@ -354,7 +354,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
-                        + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
+                        + "&leaderboardGroupName=" + selectedGroup.getName() + "&root=overview"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.anchor(link, leaderboard.name);
             }
@@ -447,7 +447,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                         String debugParam = Window.Location.getParameter("gwt.codesvr");
                         String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName="
                                 + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName() + "&regattaName="
-                                + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.name
+                                + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.getName()
                                 + "&root=overview"
                                 + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                         name = ANCHORTEMPLATE.anchor(link, raceDisplayName);
@@ -608,7 +608,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                     location.split("\\s"));
         }
         if (result && name != null && name.length() > 0) {
-            result = textContainsStringsToCheck(forGroup.name, name.split("\\s"));
+            result = textContainsStringsToCheck(forGroup.getName(), name.split("\\s"));
         }
         if (result && onlyLiveCheckBox.getValue()) {
             result = forGroup.hasLiveRace();

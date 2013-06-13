@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class NamedDTO implements Serializable {
     private static final long serialVersionUID = -6620231501480297257L;
-    public String name;
+    private String name;
 
     public NamedDTO() {}
     
@@ -14,14 +14,14 @@ public class NamedDTO implements Serializable {
     
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
         return result;
     }
 
@@ -34,12 +34,20 @@ public class NamedDTO implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         NamedDTO other = (NamedDTO) obj;
-        if (name == null) {
-            if (other.name != null)
+        if (getName() == null) {
+            if (other.getName() != null)
                 return false;
-        } else if (!name.equals(other.name))
+        } else if (!getName().equals(other.getName()))
             return false;
         return true;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
     
 }

@@ -182,7 +182,7 @@ public interface StringMessages extends Messages {
     String actionEditScores();
     String actionOpenBrowser();
     String actionRemove();
-    String actionEditRaces();
+    String actionEditSeries();
     String actionRaceEdit();
     String actionRaceUnlink();
     String actionRaceRemove();
@@ -449,6 +449,7 @@ public interface StringMessages extends Messages {
     String sideToWhichMarkAtLegStartWasRounded();
     String raceIsLive(String raceName);
     String racesAreLive(String raceNames);
+    String scoringSchemeHighPointFirstGetsOne();
     String scoringSchemeHighPointFirstGetsTen();
     String knotsUnit();
     String averageJibeLossInMetersTooltip();
@@ -585,9 +586,14 @@ public interface StringMessages extends Messages {
     String loading();
     String showHiddenRaces();
     String selectedCompetitors();
+    String mediaDateFormatError(String expectedTimeFormat);
     String filterNothing();
     String topNCompetitorsByRaceRank(int n);
     String topNCompetitorsByTotalRank(int n);
+    
+    String editRegatta();
+    String selectSailingEvent();
+    String selectCourseArea();
 
     /*Start of simulator related messages*/
     String simulator();
@@ -635,4 +641,17 @@ public interface StringMessages extends Messages {
     String freemode();
     String whatIfCourse();
     /*End of simulator related messages*/
+    
+    String courseAreaOverview();
+    String courseDesignOverview();
+    String regattaOverview();
+    String additionalSettings();
+    String showFollowingCourseAreas();
+    String showFollowingRegattas();
+    String showOnlyRacesOfSameDay();
+    String showOnlyCurrentlyRunningRaces();
+    String seriesDefinesResultDiscardingRule();
+    String addSeries();
+    String regattaDefinesResultDiscardingRules();
+    String startsWithZeroScore();
 }

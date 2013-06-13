@@ -25,6 +25,9 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrack.MediaType;
+import com.sap.sailing.domain.common.media.MediaTrack.Status;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.PlayStateListener;
@@ -32,9 +35,6 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
-import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
-import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack.MediaType;
-import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack.Status;
 import com.sap.sailing.gwt.ui.raceboard.MediaSelectionDialog.MediaSelectionListener;
 import com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer.PopupCloseListener;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -143,10 +143,10 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
     native void addLoadMetadataHandler(MediaElement mediaElement, MediaTrack mediaTrack) /*-{ 
         var that = this;
         mediaElement.addEventListener('loadedmetadata', function() {
-            that.@com.sap.sailing.gwt.ui.raceboard.MediaSelector::loadedmetadata(Lcom/sap/sailing/gwt/ui/client/shared/media/MediaTrack;)(mediaTrack);
+            that.@com.sap.sailing.gwt.ui.raceboard.MediaSelector::loadedmetadata(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
         });
         mediaElement.addEventListener('error', function() {
-            that.@com.sap.sailing.gwt.ui.raceboard.MediaSelector::mediaError(Lcom/sap/sailing/gwt/ui/client/shared/media/MediaTrack;)(mediaTrack);
+            that.@com.sap.sailing.gwt.ui.raceboard.MediaSelector::mediaError(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
         });
     }-*/;
     

@@ -227,7 +227,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             if (markPassingTimesDTO.firstPassingDate != null) {
                 long markerTime = markPassingTimesDTO.firstPassingDate.getTime();
                 if(!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
-                    timeSlider.addMarker(markPassingTimesDTO.name, new Double(markerTime));
+                    timeSlider.addMarker(markPassingTimesDTO.getName(), new Double(markerTime));
                 }
             }
         }

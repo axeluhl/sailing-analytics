@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -32,6 +33,8 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     private boolean isMedal;
     private Regatta regatta;
     private final RaceColumnListeners raceColumnListeners;
+    private ThresholdBasedResultDiscardingRule resultDiscardingRule;
+    private boolean startsWithZeroScore;
     
     /**
      * @param fleets
@@ -136,31 +139,52 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
 
     @Override
     public void moveRaceColumnUp(String raceColumnName) {
+        boolean didFirstColumnChange = false; // if it changes and the series starts scoring with zero, notify the change
         // start at second element because first can't be moved up
         for (int i=1; i<raceColumns.size(); i++) {
             RaceColumnInSeries rc = raceColumns.get(i);
             if (rc.getName().equals(raceColumnName)) {
                 raceColumns.remove(i);
+                if (i==1) {
+                    didFirstColumnChange = true;
+                }
                 raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(rc);
                 raceColumns.add(i-1, rc);
                 raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(rc);
                 break;
             }
         }
+        if (didFirstColumnChange && startsWithZeroScore) {
+            notifyIsStartsWithZeroScoreChangedForFirstTwoColumns();
+        }
+    }
+
+    private void notifyIsStartsWithZeroScoreChangedForFirstTwoColumns() {
+        final RaceColumnInSeries first = raceColumns.get(0);
+        raceColumnListeners.notifyListenersAboutIsStartsWithZeroScoreChanged(first, first.isStartsWithZeroScore());
+        final RaceColumnInSeries second = raceColumns.get(1);
+        raceColumnListeners.notifyListenersAboutIsStartsWithZeroScoreChanged(second, second.isStartsWithZeroScore());
     }
 
     @Override
     public void moveRaceColumnDown(String raceColumnName) {
+        boolean didFirstColumnChange = false; // if it changes and the series starts scoring with zero, notify the change
         // end at second-last element because last can't be moved down
         for (int i=0; i<raceColumns.size()-1; i++) {
             RaceColumnInSeries rc = raceColumns.get(i);
             if (rc.getName().equals(raceColumnName)) {
                 raceColumns.remove(i);
+                if (i==0) {
+                    didFirstColumnChange = true;
+                }
                 raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(rc);
                 raceColumns.add(i+1, rc);
                 raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(rc);
                 break;
             }
+        }
+        if (didFirstColumnChange && startsWithZeroScore) {
+            notifyIsStartsWithZeroScoreChangedForFirstTwoColumns();
         }
     }
 
@@ -209,6 +233,11 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         raceColumnListeners.notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
     }
 
+    @Override
+    public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
+        raceColumnListeners.notifyListenersAboutIsStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
+    }
+
     /**
      * A series listens on its columns; individual columns, however, don't ask whether they can be added; the series itself does.
      * 
@@ -245,8 +274,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     }
 
     @Override
-    public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
-            ThresholdBasedResultDiscardingRule newDiscardingRule) {
+    public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule) {
         raceColumnListeners.notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
     }
 
@@ -259,4 +287,48 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     public boolean isTransient() {
         return false;
     }
+
+    @Override
+    public ThresholdBasedResultDiscardingRule getResultDiscardingRule() {
+        return resultDiscardingRule;
+    }
+
+    @Override
+    public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        this.resultDiscardingRule = resultDiscardingRule;
+    }
+
+    @Override
+    public boolean definesSeriesDiscardThresholds() {
+        return getResultDiscardingRule() != null;
+    }
+
+    @Override
+    public boolean isStartsWithZeroScore() {
+        return startsWithZeroScore;
+    }
+
+    /**
+     * @return <code>null</code> if the series doesn't currently have any columns
+     */
+    private RaceColumn getFirstRaceColumn() {
+        RaceColumn result = null;
+        if (!raceColumns.isEmpty()) {
+            result = raceColumns.get(0);
+        }
+        return result;
+    }
+    
+    @Override
+    public void setStartsWithZeroScore(boolean startsWithZeroScore) {
+        boolean oldStartsWithZeroScore = this.startsWithZeroScore;
+        if (oldStartsWithZeroScore != startsWithZeroScore) {
+            this.startsWithZeroScore = startsWithZeroScore;
+            RaceColumn firstRaceColumnInSeries = getFirstRaceColumn();
+            if (firstRaceColumnInSeries != null) {
+                raceColumnListeners.notifyListenersAboutIsStartsWithZeroScoreChanged(firstRaceColumnInSeries, startsWithZeroScore);
+            }
+        }
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test.mock;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -8,6 +9,8 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 
@@ -33,6 +36,11 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
 
     private class MockedRaceDefinition implements RaceDefinition {
         private static final long serialVersionUID = 6812543850545870357L;
+        private final Course course;
+        
+        public MockedRaceDefinition() {
+            course = new CourseImpl("Test Course", Arrays.asList(new Waypoint[0]));
+        }
         
         @Override
         public String getName() {
@@ -41,7 +49,7 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
 
         @Override
         public Course getCourse() {
-            return null;
+            return course;
         }
 
         @Override

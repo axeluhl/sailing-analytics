@@ -152,7 +152,23 @@ public abstract class DataEntryDialog<T> {
      * @param initialValue initial value to show in text box; <code>null</code> is permissible
      */
     public TextBox createTextBox(String initialValue) {
+        return createTextBoxInternal(initialValue, 30);
+    }
+
+    /**
+     * Creates a text box with a key-up listener attached which ensures the value is updated after each
+     * key-up event and the entire dialog is {@link #validate() validated} in this case.
+     * 
+     * @param initialValue initial value to show in text box; <code>null</code> is permissible
+     * @param visibleLength the visible length of the text box
+     */
+    public TextBox createTextBox(String initialValue, int visibleLength) {
+        return createTextBoxInternal(initialValue, visibleLength);
+    }
+        
+    private TextBox createTextBoxInternal(String initialValue, int visibleLength) {
         TextBox textBox = new TextBox();
+        textBox.setVisibleLength(visibleLength);
         textBox.setText(initialValue == null ? "" : initialValue);
         AbstractEntryPoint.addFocusUponKeyUpToggler(textBox);
         textBox.addChangeHandler(new ChangeHandler() {
@@ -368,7 +384,7 @@ public abstract class DataEntryDialog<T> {
     }
 
     public void alignAllPanelWidgetsVertically(HorizontalPanel panel, HasVerticalAlignment.VerticalAlignmentConstant alignment) {
-        for(int i = 0; i < panel.getWidgetCount(); i++) {
+        for (int i = 0; i < panel.getWidgetCount(); i++) {
             panel.setCellVerticalAlignment(panel.getWidget(i), alignment);
         }
     }

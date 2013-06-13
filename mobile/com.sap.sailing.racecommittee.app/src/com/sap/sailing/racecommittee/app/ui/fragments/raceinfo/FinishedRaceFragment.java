@@ -3,20 +3,31 @@
  */
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.io.File;
 import java.util.Date;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.utils.MailHelper;
 
 public class FinishedRaceFragment extends RaceFragment {
 
@@ -27,7 +38,8 @@ public class FinishedRaceFragment extends RaceFragment {
     TextView timeLimitView;
     TextView protestStartTimeView;
 
-    // / TODO: some time limit time is missing?! Dunno why it exists...
+    File finisherImageFile;
+    static int FINISHER_IMAGE_REQUEST_CODE = 1337;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -37,6 +49,8 @@ public class FinishedRaceFragment extends RaceFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        createFinisherImageFile();
 
         headerView = (TextView) getView().findViewById(R.id.textFinishedRace);
         startTimeView = (TextView) getView().findViewById(R.id.textFinishedRaceStarted);
@@ -51,10 +65,9 @@ public class FinishedRaceFragment extends RaceFragment {
         finishTimeView.setText(getFinishTimeText());
         timeLimitView.setText(getTimeLimitText());
         protestStartTimeView.setText(getProtestStartTimeText());
-        
+
         Button positioningButton = (Button) getView().findViewById(R.id.buttonPositioning);
         positioningButton.setOnClickListener(new OnClickListener() {
-            
             @Override
             public void onClick(View v) {
                 PositioningFragment fragment = new PositioningFragment();
@@ -62,6 +75,36 @@ public class FinishedRaceFragment extends RaceFragment {
                 fragment.show(getFragmentManager(), null);
             }
         });
+
+        ImageButton cameraButton = (ImageButton) getView().findViewById(R.id.buttonCamera);
+        cameraButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(finisherImageFile));
+                startActivityForResult(intent, FINISHER_IMAGE_REQUEST_CODE);
+            }
+        });
+    }
+
+    private void createFinisherImageFile() {
+        File imageDirectory = new File(Environment.getExternalStorageDirectory() + AppConstants.ApplicationFolder);
+        imageDirectory.mkdirs();
+        finisherImageFile = new File(imageDirectory, "image.jpg");
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == FINISHER_IMAGE_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                String recipient = preferences.getString("mailRecipientPreference", getString(R.string.settings_advanced_mail_default));
+                MailHelper.send(new String[] { recipient },
+                        String.format("[Race Committee] %s", getRace().getId()),
+                        String.format("Results for race %s are attached.", getRace().getId()),
+                        Uri.fromFile(finisherImageFile), getActivity());
+            }
+        }
     }
 
     private CharSequence getProtestStartTimeText() {
@@ -75,14 +118,13 @@ public class FinishedRaceFragment extends RaceFragment {
         if (startTime == null || firstBoatTime == null) {
             return null;
         }
-        return firstBoatTime.plus((long)((firstBoatTime.asMillis() - startTime.asMillis()) * 0.75));
+        return firstBoatTime.plus((long) ((firstBoatTime.asMillis() - startTime.asMillis()) * 0.75));
     }
 
     private CharSequence getTimeLimitText() {
         TimePoint timeLimit = getTimeLimit();
         if (timeLimit != null) {
-            return String.format(getString(R.string.race_time_limit),
-                    getFormattedTime(timeLimit.asDate()));
+            return String.format(getString(R.string.race_time_limit), getFormattedTime(timeLimit.asDate()));
         }
         return getString(R.string.empty);
     }
@@ -128,14 +170,10 @@ public class FinishedRaceFragment extends RaceFragment {
     }
 
     @Override
-    public void notifyTick() {
-        
-    }
-    
-    @Override
     public void onStart() {
         super.onStart();
-        ExLog.w(FinishedRaceFragment.class.getName(), String.format("Fragment %s is now shown", FinishedRaceFragment.class.getName()));
+        ExLog.w(FinishedRaceFragment.class.getName(),
+                String.format("Fragment %s is now shown", FinishedRaceFragment.class.getName()));
     }
 
 }

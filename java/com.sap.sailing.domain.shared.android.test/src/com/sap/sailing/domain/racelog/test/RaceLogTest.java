@@ -28,7 +28,7 @@ public class RaceLogTest {
     
     @Before
     public void setUp() {
-        raceLog = new RaceLogImpl("testlock");
+        raceLog = new RaceLogImpl("testlock", "test-identifier");
     }
     
     @Test(expected = IllegalStateException.class)
@@ -41,6 +41,10 @@ public class RaceLogTest {
         raceLog.lockForRead();
         assertEquals(0, Util.size(raceLog.getRawFixes()));
         raceLog.unlockAfterRead();
+    }
+    
+    public void testIdentifier() {
+        assertEquals("test-identifier", raceLog.getId());
     }
     
     @Test

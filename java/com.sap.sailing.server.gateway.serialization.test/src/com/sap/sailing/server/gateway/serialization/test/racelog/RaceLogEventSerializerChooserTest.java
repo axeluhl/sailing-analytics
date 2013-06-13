@@ -135,7 +135,7 @@ public class RaceLogEventSerializerChooserTest {
     @Test
     public void testStartProcedureTypeChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createStartProcedureChangedEvent(null, 0, StartProcedureType.GateStart);
+        RaceLogEvent event = factory.createStartProcedureChangedEvent(null, 0, StartProcedureType.ESS);
         assertEquals(startProcedureTypeChangedEventSerializer, chooser.getSerializer(event));
     }
 

@@ -386,7 +386,7 @@ public class SimulatorMainPanel extends SimplePanel {
             @Override
             public void onSuccess(List<WindPatternDTO> patterns) {
                 for (WindPatternDTO p : patterns) {
-                    if ((mode != SailingSimulatorUtil.freestyle)||(!p.name.equals("MEASURED"))) {
+                    if ((mode != SailingSimulatorUtil.freestyle)||(!p.getName().equals("MEASURED"))) {
                         patternSelector.addItem(p.getDisplayName());
                         patternNameDTOMap.put(p.getDisplayName(), p);
                     }
@@ -735,7 +735,7 @@ public class SimulatorMainPanel extends SimplePanel {
                 }
 
                 boatClasses = boatClassesAndMsg.getBoatClassDTOs();
-                chart.setChartTitleText(boatClasses[selectedBoatClass].name);
+                chart.setChartTitleText(boatClasses[selectedBoatClass].getName());
             }
         });
 
@@ -1072,7 +1072,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
                 boatClasses = response.getBoatClassDTOs();
                 for (int i = 0; i < boatClasses.length; ++i) {
-                    boatClassSelector.addItem(boatClasses[i].name);
+                    boatClassSelector.addItem(boatClasses[i].getName());
                 }
                 boatClassSelector.setItemSelected(3, true); // polar diagram 49er STG
                 loadPolarDiagramData(3);

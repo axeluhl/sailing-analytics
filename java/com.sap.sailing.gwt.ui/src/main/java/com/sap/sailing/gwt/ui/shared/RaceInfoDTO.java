@@ -9,17 +9,18 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 
 public class RaceInfoDTO implements IsSerializable {
     public String raceName;
-    public String fleet;
-    public boolean hasEvents;
+    public String fleetName;
+    public int fleetOrdering;
     public Date startTime;
     public RaceLogRaceStatus lastStatus;
     public Flags lastUpperFlag;
     public Flags lastLowerFlag;
-    public boolean displayed;
+    public boolean isLastFlagDisplayed;
     public RaceCourseDTO lastCourseDesign;
     public RaceIdentifier raceIdentifier;
     public String pathfinderId;
     public Long gateLineOpeningTime;
+    public boolean isRaceAbortedInPassBefore;
     // for GWT serialization
     public RaceInfoDTO() { }
     

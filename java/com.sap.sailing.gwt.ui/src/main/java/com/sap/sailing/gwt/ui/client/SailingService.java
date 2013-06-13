@@ -23,7 +23,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -115,14 +115,14 @@ public interface SailingService extends RemoteService {
 
     public List<String> getLeaderboardNames() throws Exception;
     
-    LeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
-            Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails) throws Exception;
+    IncrementalOrFullLeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
+            Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, String previousLeaderboardId) throws Exception;
 
     List<StrippedLeaderboardDTO> getLeaderboards();
     
     List<StrippedLeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta);
     
-    void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds);
+    StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds, String newCourseAreaIdAsString);
 
     StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, String courseAreaId);
 
@@ -143,12 +143,16 @@ public interface SailingService extends RemoteService {
     void moveLeaderboardColumnDown(String leaderboardName, String columnName);
     
     RegattaDTO createRegatta(String regattaName, String boatClassName, 
-            LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
+            LinkedHashMap<String, Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType, String defaultCourseAreaId);
     
     void removeRegatta(RegattaIdentifier regattaIdentifier);
     
+    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId);
+    
     List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
+
+    void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal, int[] resultDiscardingThresholds, boolean startsWithZeroScore);
 
     RaceColumnInSeriesDTO addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
@@ -297,4 +301,6 @@ public interface SailingService extends RemoteService {
     List<RegattaOverviewEntryDTO> getRegattaOverviewEntriesForEvent(String eventIdAsString);
     
     EventDTO getEventByIdAsString(String eventIdAsString);
+    
+    String getBuildVersion();
 }

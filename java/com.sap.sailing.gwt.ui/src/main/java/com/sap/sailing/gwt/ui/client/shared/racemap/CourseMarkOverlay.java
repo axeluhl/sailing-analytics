@@ -111,7 +111,7 @@ public class CourseMarkOverlay extends CanvasOverlay {
     }
 
     private String getTitle() {
-        return mark.name;
+        return mark.getName();
     }
     
     public boolean isShowBuoyZone() {
