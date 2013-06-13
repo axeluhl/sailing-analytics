@@ -35,7 +35,7 @@ public class FleetDTO extends NamedDTO {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
+        result = prime * result + ((color == null) ? 0 : color.hashCode());
         result = prime * result + orderNo;
         return result;
     }
@@ -49,10 +49,10 @@ public class FleetDTO extends NamedDTO {
         if (getClass() != obj.getClass())
             return false;
         FleetDTO other = (FleetDTO) obj;
-        if (getName() == null) {
-            if (other.getName() != null)
+        if (color == null) {
+            if (other.color != null)
                 return false;
-        } else if (!getName().equals(other.getName()))
+        } else if (!color.equals(other.color))
             return false;
         if (orderNo != other.orderNo)
             return false;

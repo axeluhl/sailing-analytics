@@ -405,7 +405,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             } else {
                 // apply the old column selections again
                 for (String oldNameOfRaceColumnToShow : oldNamesOfRaceColumnsToShow) {
-                    raceColumnSelection.requestRaceColumnSelection(getLeaderboard().getRaceColumnByName(oldNameOfRaceColumnToShow));
+                    final RaceColumnDTO raceColumnByName = getLeaderboard().getRaceColumnByName(oldNameOfRaceColumnToShow);
+                    if (raceColumnByName != null) {
+                        raceColumnSelection.requestRaceColumnSelection(raceColumnByName);
+                    }
                 }
                 if (newSettings.getNamesOfRacesToShow() != null) {
                     raceColumnSelection.requestClear();
