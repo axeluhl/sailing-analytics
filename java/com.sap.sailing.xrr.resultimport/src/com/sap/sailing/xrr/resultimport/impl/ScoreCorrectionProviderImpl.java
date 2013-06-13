@@ -1,7 +1,6 @@
 package com.sap.sailing.xrr.resultimport.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,16 +10,14 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBException;
-import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.impl.AbstractDocumentBasedScoreCorrectionProvider;
 import com.sap.sailing.xrr.resultimport.Parser;
@@ -54,7 +51,7 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
         for (Parser parser : getAllRegattaResults()) {
             try {
                 RegattaResults regattaResult = parser.parse();
-                TimePoint timePoint = getTimePointForRegattaResults(regattaResult);
+                TimePoint timePoint = XRRParserUtil.calculateTimePointForRegattaResults(regattaResult);
                 for (Object o : regattaResult.getPersonOrBoatOrTeam()) {
                     if (o instanceof Event) {
                         Event event = (Event) o;
@@ -80,25 +77,13 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
         return result;
     }
 
-    private TimePoint getTimePointForRegattaResults(RegattaResults regattaResult) {
-        XMLGregorianCalendar date = regattaResult.getDate();
-        XMLGregorianCalendar time = regattaResult.getTime();
-        date.setHour(time.getHour());
-        date.setMinute(time.getMinute());
-        date.setSecond(time.getSecond());
-        date.setMillisecond(time.getMillisecond());
-        date.setTimezone(0);
-        TimePoint timePoint = new MillisecondsTimePoint(date.toGregorianCalendar().getTime());
-        return timePoint;
-    }
-
     @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
             TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException {
         for (Parser parser : getAllRegattaResults()) {
             try {
                 RegattaResults regattaResults = parser.parse();
-                TimePoint timePoint = getTimePointForRegattaResults(regattaResults);
+                TimePoint timePoint = XRRParserUtil.calculateTimePointForRegattaResults(regattaResults);
                 if ((timePoint == null && timePointPublished == null)
                         || (timePoint != null && timePoint.equals(timePointPublished))) {
                     for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
@@ -129,8 +114,8 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
     private Iterable<Parser> getAllRegattaResults() throws SAXException, IOException,
             ParserConfigurationException {
         List<Parser> result = new ArrayList<>();
-        for (Triple<InputStream, String, TimePoint> is : getResultDocumentProvider().getDocumentsAndNamesAndLastModified()) {
-            Parser parser = parserFactory.createParser(is.getA(), is.getB());
+        for (ResultDocumentDescriptor resultDocDescr : getResultDocumentProvider().getResultDocumentDescriptors()) {
+            Parser parser = parserFactory.createParser(resultDocDescr.getInputStream(), resultDocDescr.getDocumentName());
             result.add(parser);
         }
         return result;
