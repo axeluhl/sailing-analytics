@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.racelog.courseDesigner;
+package com.sap.sailing.domain.common.coursedesign;
 
 import java.util.EnumMap;
 import java.util.Map;
