@@ -14,7 +14,8 @@ import android.widget.TextView;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagFinder;
+import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartRunningRaceEventListener;
@@ -68,9 +69,10 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
         flagToBeDisplayed = (ImageView) getView().findViewById(R.id.flagToBeDisplayed);
 
         boolean golfFlagTakenDown = false;
-        LastFlagFinder lastFlagFinder = new LastFlagFinder(getRace().getRaceLog());
-        if (lastFlagFinder.analyze() != null) {
-            golfFlagTakenDown = lastFlagFinder.analyze().getUpperFlag().equals(Flags.GOLF) && !lastFlagFinder.analyze().isDisplayed();
+        LastFlagsFinder lastFlagFinder = new LastFlagsFinder(getRace().getRaceLog());
+        RaceLogFlagEvent lastFlag = LastFlagsFinder.getMostRecent(lastFlagFinder.analyze());
+        if (lastFlag != null) {
+            golfFlagTakenDown = lastFlag.getUpperFlag().equals(Flags.GOLF) && !lastFlag.isDisplayed();
         }
         displayGolfFlag(!golfFlagTakenDown);
         

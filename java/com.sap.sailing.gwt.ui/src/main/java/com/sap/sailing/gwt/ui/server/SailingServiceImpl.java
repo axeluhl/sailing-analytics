@@ -147,7 +147,7 @@ import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
@@ -624,14 +624,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceInfoDTO.finishedTime = finishedTime.asDate();
             }
 
-            LastFlagFinder lastFlagFinder = new LastFlagFinder(raceLog);
+            LastFlagsFinder lastFlagFinder = new LastFlagsFinder(raceLog);
 
-            RaceLogFlagEvent lastFlagEvent = lastFlagFinder.analyze();
+            RaceLogFlagEvent lastFlagEvent = LastFlagsFinder.getMostRecent(lastFlagFinder.analyze());
             if (lastFlagEvent != null) {
                 raceInfoDTO.lastUpperFlag = lastFlagEvent.getUpperFlag();
                 raceInfoDTO.lastLowerFlag = lastFlagEvent.getLowerFlag();
                 raceInfoDTO.isLastFlagDisplayed = lastFlagEvent.isDisplayed();
             }
+            
             
             AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
             

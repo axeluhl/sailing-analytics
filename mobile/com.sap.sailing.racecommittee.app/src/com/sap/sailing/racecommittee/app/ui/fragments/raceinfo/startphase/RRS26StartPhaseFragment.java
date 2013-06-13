@@ -18,7 +18,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartModeChoosableStartProcedure;
@@ -107,8 +107,8 @@ public class RRS26StartPhaseFragment extends RaceFragment implements RRS26StartP
     private void setupUi() {
         StartModeChoosableStartProcedure startProcedure = (StartModeChoosableStartProcedure) this.getRace().getState().getStartProcedure();
         this.onStartModeFlagChosen(startProcedure.getCurrentStartModeFlag());
-        LastFlagFinder lastFlagFinder = new LastFlagFinder(this.getRace().getRaceLog());
-        RaceLogFlagEvent lastFlagEvent = lastFlagFinder.analyze();
+        LastFlagsFinder lastFlagFinder = new LastFlagsFinder(this.getRace().getRaceLog());
+        RaceLogFlagEvent lastFlagEvent = LastFlagsFinder.getMostRecent(lastFlagFinder.analyze());
         if(lastFlagEvent != null){
             if(lastFlagEvent.getUpperFlag().equals(Flags.CLASS) && lastFlagEvent.isDisplayed()){
                 this.onClassUp();

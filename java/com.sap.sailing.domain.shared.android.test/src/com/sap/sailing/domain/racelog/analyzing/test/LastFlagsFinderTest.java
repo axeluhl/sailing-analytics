@@ -1,8 +1,11 @@
 package com.sap.sailing.domain.racelog.analyzing.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -20,13 +23,11 @@ public class LastFlagsFinderTest extends RaceLogAnalyzerTest<LastFlagsFinder> {
     }
 
     @Test
-    public void testEmptyListForNone() {
+    public void testNullForNoFlag() {
         RaceLogEvent event1 = createEvent(RaceLogEvent.class, 1);
         raceLog.add(event1);
 
-        List<RaceLogFlagEvent> result = analyzer.analyze(); 
-        assertNotNull(result);
-        assertEquals(0, result.size());
+        assertNull(analyzer.analyze());
     }
     
     @Test
@@ -108,5 +109,64 @@ public class LastFlagsFinderTest extends RaceLogAnalyzerTest<LastFlagsFinder> {
         assertEquals(event4, result.get(0));
         assertEquals(event3, result.get(1));
         assertEquals(event2, result.get(2));
+    }
+    
+    @Test
+    public void testGetMostRecentDisplayedNullOnNull() {
+        assertNull(LastFlagsFinder.getMostRecent(null));
+    }
+    
+    @Test
+    public void testGetMostRecentDisplayedNullOnEmpty() {
+        assertNull(LastFlagsFinder.getMostRecent(new ArrayList<RaceLogFlagEvent>()));
+    }
+    
+    @Test
+    public void testGetMostRecentDisplayedDisplayedOverRemoved() {
+        List<RaceLogFlagEvent> events = new ArrayList<RaceLogFlagEvent>();
+        RaceLogFlagEvent event1 = createEvent(RaceLogFlagEvent.class, 1);
+        when(event1.isDisplayed()).thenReturn(false);
+        RaceLogFlagEvent event2 = createEvent(RaceLogFlagEvent.class, 1);
+        when(event2.isDisplayed()).thenReturn(true);
+        
+        events.add(event1);
+        events.add(event2);
+        
+        assertEquals(event2, LastFlagsFinder.getMostRecent(events));
+        
+        // order independent?
+        Collections.reverse(events);
+        assertEquals(event2, LastFlagsFinder.getMostRecent(events));
+    }
+    
+    @Test
+    public void testGetMostRecentDisplayedMultipleDisplayedOverRemoved() {
+        List<RaceLogFlagEvent> events = new ArrayList<RaceLogFlagEvent>();
+        RaceLogFlagEvent event1 = createEvent(RaceLogFlagEvent.class, 1);
+        when(event1.isDisplayed()).thenReturn(false);
+        RaceLogFlagEvent event2 = createEvent(RaceLogFlagEvent.class, 1, "a");
+        when(event2.isDisplayed()).thenReturn(true);
+        RaceLogFlagEvent event3 = createEvent(RaceLogFlagEvent.class, 1, "b");
+        when(event3.isDisplayed()).thenReturn(true);
+        
+        events.add(event1);
+        events.add(event2);
+        events.add(event3);
+        
+        assertEquals(event3, LastFlagsFinder.getMostRecent(events));
+    }
+    
+    @Test
+    public void testGetMostRecentDisplayedMultipleRemoved() {
+        List<RaceLogFlagEvent> events = new ArrayList<RaceLogFlagEvent>();
+        RaceLogFlagEvent event1 = createEvent(RaceLogFlagEvent.class, 1, "a");
+        when(event1.isDisplayed()).thenReturn(false);
+        RaceLogFlagEvent event2 = createEvent(RaceLogFlagEvent.class, 1, "b");
+        when(event2.isDisplayed()).thenReturn(false);
+        
+        events.add(event1);
+        events.add(event2);
+        
+        assertEquals(event2, LastFlagsFinder.getMostRecent(events));
     }
 }
