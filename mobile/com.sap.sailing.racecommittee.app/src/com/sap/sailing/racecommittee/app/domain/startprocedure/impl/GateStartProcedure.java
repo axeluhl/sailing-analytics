@@ -23,6 +23,8 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureLis
 import com.sap.sailing.racecommittee.app.domain.startprocedure.UserRequiredActionPerformedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ClassicCourseDesignDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseGateLineOpeningTimeDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChoosePathFinderDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishedRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishingRaceFragment;
@@ -38,11 +40,20 @@ public class GateStartProcedure implements StartProcedure {
     public final static long startPhaseGolfDownStandardInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
     public final static long startPhaseGolfDownStandardIntervalConstantSummand = 3 * 60 * 1000; // minutes * seconds * milliseconds
     
+    // list of start procedure specific event id's
+    private static final Integer GOLF_REMOVAL_EVENT_ID = 1;
+    
     private List<Long> startProcedureEventIntervals;
     private RaceLog raceLog;
     private StartProcedureListener raceStateChangedListener;
     private GateStartPhaseEventListener startPhaseEventListener;
     private GateStartRunningRaceEventListener runningRaceEventListener;
+    private UserRequiredActionPerformedListener userRequiredActionPerformedListener;
+    
+    private String pathFinder  = null;
+    private Long gateLineOpeningTime = startPhaseGolfDownStandardInterval;
+    private boolean isPathFinderSet = false;
+    private boolean isGateLineOpeningTimeChosen = false;
     
     public GateStartProcedure(RaceLog raceLog) {
         this.raceLog = raceLog;
@@ -132,8 +143,24 @@ public class GateStartProcedure implements StartProcedure {
                 raceLog.getCurrentPassId(), Flags.CLASS, Flags.GOLF, /*isDisplayed*/false);
         raceLog.add(essOneDownEvent);
         
+        if (startPhaseEventListener != null) {
+            startPhaseEventListener.onClassOverGolfDown();
+        }
+        
         if (raceStateChangedListener != null) {
             raceStateChangedListener.onRaceStarted(eventTime);
+        }
+        
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.GOLF, Flags.NONE, /* isDisplayed */
+                false);
+        raceLog.add(event);
+
+        TimePoint golfRemovalFireTimePoint = eventTime.plus(startPhaseGolfDownStandardIntervalConstantSummand+this.getGateLineOpeningTime());
+
+        if (raceStateChangedListener != null) {
+            raceStateChangedListener.onStartProcedureSpecificEvent(golfRemovalFireTimePoint,
+                    GOLF_REMOVAL_EVENT_ID);
         }
     }
     
@@ -282,7 +309,7 @@ public class GateStartProcedure implements StartProcedure {
         return result;
     }
 
-    public void dispatchAutomaticGateClose(TimePoint eventTime) {
+    public void setGolfRemoval(TimePoint eventTime) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.GOLF, Flags.NONE, /*isDisplayed*/false);
         raceLog.add(event);
@@ -291,29 +318,49 @@ public class GateStartProcedure implements StartProcedure {
             runningRaceEventListener.onGolfDown();
         }
     }
-    
-    public void setGateLineOpeningTime(Long gateLineOpeningTimeInMinutes){
-        //TODO
+    public void setGateLineOpeningTime(Long gateLineOpeningTimeInMiliseconds){
+        this.gateLineOpeningTime = gateLineOpeningTimeInMiliseconds;
+        this.isGateLineOpeningTimeChosen = true;
+        if (startPhaseEventListener != null) {
+            startPhaseEventListener.onGateLineOpeningTimeSet();
+        }
+        if (userRequiredActionPerformedListener != null) {
+            userRequiredActionPerformedListener.onUserRequiredActionPerformed();
+        }
     }
-    
     public void setPathfinder(String sailingId){
-        //TODO
+        this.pathFinder = sailingId;
+        this.isPathFinderSet = true;
+        if (startPhaseEventListener != null) {
+            startPhaseEventListener.onPathFinderSet();
+        }
+        if (userRequiredActionPerformedListener != null) {
+            userRequiredActionPerformedListener.onUserRequiredActionPerformed();
+        }
     }
 
     @Override
     public void handleStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
-        // TODO Auto-generated method stub
-        
+        if (eventId.equals(GOLF_REMOVAL_EVENT_ID)) {
+            setGolfRemoval(eventTime);
+        }
+
     }
 
     public String getPathfinder() {
-        // TODO Auto-generated method stub
-        return null;
+        return pathFinder;
     }
 
     public Long getGateLineOpeningTime() {
-        // TODO Auto-generated method stub
-        return null;
+        return gateLineOpeningTime;
+    }
+    
+    public boolean isPathFinderSet() {
+        return isPathFinderSet;
+    }
+
+    public boolean isGateLineOpeningTimeChosen() {
+        return isGateLineOpeningTimeChosen;
     }
     
     @Override
@@ -328,7 +375,18 @@ public class GateStartProcedure implements StartProcedure {
     
     @Override
     public List<Class<? extends RaceDialogFragment>> checkForUserActionRequiredActions(MillisecondsTimePoint newStartTime, UserRequiredActionPerformedListener listener) {
-        return new ArrayList<Class<? extends RaceDialogFragment>>();
+        List<Class<? extends RaceDialogFragment>> actionList = new ArrayList<Class<? extends RaceDialogFragment>>();
+        if (MillisecondsTimePoint.now().after(newStartTime)
+                && !isPathFinderSet) {
+            actionList.add(RaceChoosePathFinderDialog.class);
+            this.userRequiredActionPerformedListener = listener;
+        }
+        if (MillisecondsTimePoint.now().after(newStartTime)
+                && !isGateLineOpeningTimeChosen) {
+            actionList.add(RaceChooseGateLineOpeningTimeDialog.class);
+            this.userRequiredActionPerformedListener = listener;
+        }
+        return actionList;
     }
     
     @Override

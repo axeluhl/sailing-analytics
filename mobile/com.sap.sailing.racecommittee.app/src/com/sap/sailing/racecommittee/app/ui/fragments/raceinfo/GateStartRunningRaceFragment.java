@@ -22,7 +22,7 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartRun
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortTypeSelectionDialog;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseLineOpeningTimeDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseGateLineOpeningTimeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChoosePathFinderDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
@@ -68,6 +68,23 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
         displayedFlag = (ImageView) getView().findViewById(R.id.currentlyDisplayedFlag);
         flagToBeDisplayed = (ImageView) getView().findViewById(R.id.flagToBeDisplayed);
 
+        setupUi();
+        
+        getRace().getState().getStartProcedure().setRunningRaceEventListener(this);
+        
+        if(getRace().getState().getStartProcedure() instanceof GateStartProcedure){
+            if(!((GateStartProcedure) getRace().getState().getStartProcedure()).isPathFinderSet()){
+                showPathFinderDialog();
+            }
+            if(!((GateStartProcedure) getRace().getState().getStartProcedure()).isGateLineOpeningTimeChosen()){
+                showGateLineOpeningTimeDialog();
+            }
+        }
+        
+        
+    }
+
+    private void setupUi() {
         boolean golfFlagTakenDown = false;
         LastFlagsFinder lastFlagFinder = new LastFlagsFinder(getRace().getRaceLog());
         RaceLogFlagEvent lastFlag = LastFlagsFinder.getMostRecent(lastFlagFinder.analyze());
@@ -75,19 +92,6 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
             golfFlagTakenDown = lastFlag.getUpperFlag().equals(Flags.GOLF) && !lastFlag.isDisplayed();
         }
         displayGolfFlag(!golfFlagTakenDown);
-        
-        getRace().getState().getStartProcedure().setRunningRaceEventListener(this);
-        
-        if(getRace().getState().getStartProcedure() instanceof GateStartProcedure){
-            if(((GateStartProcedure) getRace().getState().getStartProcedure()).getPathfinder()==null){
-                showPathFinderDialog();
-            }
-            if(((GateStartProcedure) getRace().getState().getStartProcedure()).getGateLineOpeningTime()==null){
-                showLineOpeningTimeDialog();
-            }
-        }
-        
-        
     }
 
     private void displayGolfFlag(boolean golfFlagDisplayed) {
@@ -197,9 +201,9 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
         fragment.show(fragmentManager, null);
     }
 
-    private void showLineOpeningTimeDialog() {
+    private void showGateLineOpeningTimeDialog() {
         FragmentManager fragmentManager = getFragmentManager();
-        RaceDialogFragment fragment = new RaceChooseLineOpeningTimeDialog();
+        RaceDialogFragment fragment = new RaceChooseGateLineOpeningTimeDialog();
         Bundle args = getRecentArguments();
         fragment.setArguments(args);
         fragment.show(fragmentManager, null);
