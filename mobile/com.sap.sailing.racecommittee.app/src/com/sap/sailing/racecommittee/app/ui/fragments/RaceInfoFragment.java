@@ -163,7 +163,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
                 getRace().getState().onRaceAborted(MillisecondsTimePoint.now());
             }
         })
-        .setNegativeButton("CANCEL",
+        .setNegativeButton("Cancel",
                 new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 ExLog.i(ExLog.RACE_RESET_NO, getRace().getId().toString(), getActivity());
