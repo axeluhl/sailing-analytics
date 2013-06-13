@@ -9,13 +9,13 @@ import com.google.gwt.media.client.Video;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer.PopupCloseListener;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.client.shared.controls.dialog.WindowBox;
-import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
 
 public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements VideoPlayer, CloseHandler<PopupPanel>, MediaSynchAdapter {
 
@@ -46,13 +46,6 @@ public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements 
         FlowPanel rootPanel = new FlowPanel();
         rootPanel.addStyleName("FUCK");
         if (mediaControl != null) {
-            
-            
-            // HTML videoFrame = new
-            // HTML("<iframe class=\"youtube-player\" type=\"text/html\" width=\"640\" height=\"385\" src=\"http://www.youtube.com/embed/dP15zlyra3c?html5=1\" frameborder=\"0\"></iframe>");
-            //
-            // SimplePanel videoFrameHolder = new SimplePanel();
-            // videoFrameHolder.add(videoFrame);
             
             rootPanel.add(mediaControl);
             
@@ -125,39 +118,32 @@ public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements 
 
     @Override
     public void save() {
-        mediaService.saveChanges(this.getMediaTrack(), new AsyncCallback<Void>() {
-            
-            @Override
-            public void onSuccess(Void result) {
-                //nothing to do
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(caught.toString());
-            }
-        });
+        
+        if (backupVideoTrack.startTime != getMediaTrack().startTime) {
+            mediaService.updateStartTime(getMediaTrack(), new AsyncCallback<Void>() {
+
+                @Override
+                public void onSuccess(Void result) {
+                    // nothing to do
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError(caught.toString());
+                }
+            });
+        }
     }
 
     @Override
     public void discard() {
-        getMediaTrack().title = backupVideoTrack.title;
-        getMediaTrack().url = backupVideoTrack.url;
+// For now, only start time can be changed.        
+//        getMediaTrack().title = backupVideoTrack.title;
+//        getMediaTrack().url = backupVideoTrack.url;
+//        getMediaTrack().durationInMillis = backupVideoTrack.durationInMillis;
         getMediaTrack().startTime = backupVideoTrack.startTime;
-        getMediaTrack().durationInMillis = backupVideoTrack.durationInMillis;
     }
 
-//    @Override
-//    protected void onMediaTimeUpdate() {
-//        if (mediaSynchControl != null) {
-//            long currentMediaTime = getMediaTrack().startTime.getTime() + getCurrentMediaTimeMillis();
-//            long currentRaceTime = raceTimer.getTime().getTime();
-//            long currentOffset = currentMediaTime - currentRaceTime;
-//            mediaSynchControl.offsetChanged(currentOffset);
-//        }
-//        
-//    }
-    
     @Override
     public void pauseRace() {
         raceTimer.pause();

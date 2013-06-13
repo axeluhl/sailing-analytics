@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.media.client.MediaBase;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.media.shared.AbstractMediaPlayer;
-import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
 
 abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
     

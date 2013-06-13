@@ -84,6 +84,7 @@ import com.sap.sailing.gwt.ui.shared.UserDTO;
 public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, RaceSelectionChangeListener {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
+    private final UserDTO user;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final RaceBoardViewConfiguration raceboardViewConfiguration;
@@ -136,6 +137,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
+        this.user = theUser;
         this.stringMessages = stringMessages;
         this.raceboardViewConfiguration = raceboardViewConfiguration;
         this.raceSelectionProvider = theRaceSelectionProvider;

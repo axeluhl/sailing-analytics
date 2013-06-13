@@ -26,6 +26,4 @@ public interface MediaService extends RemoteService {
 
     void updateDuration(MediaTrack mediaTrack);
 
-    void saveChanges(MediaTrack mediaTrack);
-
 }

@@ -25,6 +25,9 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrack.MediaType;
+import com.sap.sailing.domain.common.media.MediaTrack.Status;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -41,9 +44,6 @@ import com.sap.sailing.gwt.ui.client.media.popup.VideoWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.YoutubeWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
-import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
-import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack.MediaType;
-import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack.Status;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 
@@ -153,13 +153,13 @@ public class MediaSelector implements /* RaceTimesInfoProviderListener, */PlaySt
 				.addEventListener(
 						'loadedmetadata',
 						function() {
-							that.@com.sap.sailing.gwt.ui.client.media.MediaSelector::loadedmetadata(Lcom/sap/sailing/gwt/ui/client/shared/media/MediaTrack;)(mediaTrack);
+							that.@com.sap.sailing.gwt.ui.client.media.MediaSelector::loadedmetadata(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
 						});
 		mediaElement
 				.addEventListener(
 						'error',
 						function() {
-							that.@com.sap.sailing.gwt.ui.client.media.MediaSelector::mediaError(Lcom/sap/sailing/gwt/ui/client/shared/media/MediaTrack;)(mediaTrack);
+							that.@com.sap.sailing.gwt.ui.client.media.MediaSelector::mediaError(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
 						});
     }-*/;
 

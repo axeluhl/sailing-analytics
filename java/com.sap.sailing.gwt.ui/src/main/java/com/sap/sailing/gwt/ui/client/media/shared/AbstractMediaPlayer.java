@@ -2,7 +2,8 @@ package com.sap.sailing.gwt.ui.client.media.shared;
 
 import java.util.Date;
 
-import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrack;
+
 
 public abstract class AbstractMediaPlayer implements MediaPlayer {
 
