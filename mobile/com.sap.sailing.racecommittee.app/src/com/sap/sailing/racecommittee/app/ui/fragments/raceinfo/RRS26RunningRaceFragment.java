@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.StartModeChoosableStartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.RRS26RunningRaceEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.RRS26StartProcedure;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
@@ -33,6 +34,7 @@ public class RRS26RunningRaceFragment extends RaceFragment implements RRS26Runni
     private ImageView individualRecallFlag;
     private TextView individualRecallLabel;
     ImageButton abortingFlagButton;
+    ImageButton individualRecallButton;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -70,7 +72,7 @@ public class RRS26RunningRaceFragment extends RaceFragment implements RRS26Runni
         });
         
         
-        ImageButton individualRecallButton = (ImageButton) getView().findViewById(R.id.individualRecallButton);
+        individualRecallButton = (ImageButton) getView().findViewById(R.id.individualRecallButton);
         individualRecallButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 TimePoint now = MillisecondsTimePoint.now();
@@ -88,6 +90,10 @@ public class RRS26RunningRaceFragment extends RaceFragment implements RRS26Runni
     }
 
     private void setupUi() {
+        StartModeChoosableStartProcedure startProcedure = (StartModeChoosableStartProcedure) this.getRace().getState().getStartProcedure();
+        if(startProcedure.getCurrentStartModeFlag().equals(Flags.BLACK)){
+            removeIndividualRecallButton();
+        }
         LastFlagsFinder lastFlagFinder = new LastFlagsFinder(this.getRace().getRaceLog());
         RaceLogFlagEvent lastFlagEvent = LastFlagsFinder.getMostRecent(lastFlagFinder.analyze());
         if(lastFlagEvent != null){
@@ -203,9 +209,12 @@ public class RRS26RunningRaceFragment extends RaceFragment implements RRS26Runni
     
     private void setIndividualRecallRemovedInView() {
         moveImageDown(individualRecallFlag);
-        //setXrayCountdownLabel();
-        String setIndividualRecallUp = getActivity().getResources().getString(R.string.choose_xray_flag_up);
-        individualRecallLabel.setText(setIndividualRecallUp);
+        removeIndividualRecallButton();
+    }
+
+    private void removeIndividualRecallButton() {
+        individualRecallLabel.setVisibility(View.GONE);
+        individualRecallButton.setVisibility(View.GONE);
     }
 
     protected void moveImageUp(ImageView image) {
