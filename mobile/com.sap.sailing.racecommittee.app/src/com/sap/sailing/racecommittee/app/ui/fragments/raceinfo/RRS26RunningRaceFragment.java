@@ -16,6 +16,9 @@ import android.widget.TextView;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.RRS26RunningRaceEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.RRS26StartProcedure;
@@ -81,6 +84,21 @@ public class RRS26RunningRaceFragment extends RaceFragment implements RRS26Runni
                 }
             }
         });
+        setupUi();
+    }
+
+    private void setupUi() {
+        LastFlagsFinder lastFlagFinder = new LastFlagsFinder(this.getRace().getRaceLog());
+        RaceLogFlagEvent lastFlagEvent = LastFlagsFinder.getMostRecent(lastFlagFinder.analyze());
+        if(lastFlagEvent != null){
+            if(lastFlagEvent.getUpperFlag().equals(Flags.XRAY)){
+                if(lastFlagEvent.isDisplayed()){
+                    onIndividualRecall();
+                } else {
+                    onIndividualRecallRemoval();
+                }
+            }
+        }
     }
 
     private void showDisplayGeneralRecallDialog() {
