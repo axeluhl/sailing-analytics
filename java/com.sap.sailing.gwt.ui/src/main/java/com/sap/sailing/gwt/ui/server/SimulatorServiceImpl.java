@@ -224,8 +224,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     }
 
     @Override
-    public List<WindPatternDTO> getWindPatterns() {
-        return wpDisplayManager.getWindPatterns();
+    public List<WindPatternDTO> getWindPatterns(char mode) {
+        return wpDisplayManager.getWindPatterns(mode);
     }
 
     @Override
