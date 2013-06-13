@@ -9,7 +9,9 @@ public interface WindPatternDisplayManager {
         
     static WindPatternDisplayManager INSTANCE = new WindPatternDisplayManagerImpl();
     
-    public List<WindPatternDTO> getWindPatterns();
+    public void setMode(char mode);
+    
+    public List<WindPatternDTO> getWindPatterns(char mode);
     
     public WindPatternDisplay getDisplay(WindPattern windPattern);
 

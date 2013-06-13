@@ -182,7 +182,7 @@ public interface StringMessages extends Messages {
     String actionEditScores();
     String actionOpenBrowser();
     String actionRemove();
-    String actionEditRaces();
+    String actionEditSeries();
     String actionRaceEdit();
     String actionRaceUnlink();
     String actionRaceRemove();

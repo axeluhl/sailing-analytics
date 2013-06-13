@@ -163,9 +163,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
 
     private RaceDTO findRace(String regattaName, String raceName, List<RegattaDTO> regattas) {
         for (RegattaDTO regattaDTO : regattas) {
-            if (regattaDTO.name.equals(regattaName)) {
+            if (regattaDTO.getName().equals(regattaName)) {
                 for (RaceDTO raceDTO : regattaDTO.races) {
-                    if (raceDTO.name.equals(raceName)) {
+                    if (raceDTO.getName().equals(raceName)) {
                         return raceDTO;
                     }
                 }
@@ -192,7 +192,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
 
     private FlowPanel createLogoAndTitlePanel(RaceBoardPanel raceBoardPanel) {
         globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(regattaName, selectedRace.name, stringMessages, this) {
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(regattaName, selectedRace.getName(), stringMessages, this) {
             @Override
             public void onResize() {
                 super.onResize();

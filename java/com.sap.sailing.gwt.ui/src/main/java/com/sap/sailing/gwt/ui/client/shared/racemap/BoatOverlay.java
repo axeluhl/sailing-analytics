@@ -40,8 +40,8 @@ public class BoatOverlay extends CanvasOverlay {
     public BoatOverlay(CompetitorDTO competitorDTO) {
         super();
         this.competitorDTO = competitorDTO;
-        this.boatClass = competitorDTO.boatClass;
-        this.boatClassImageData = BoatClassImageDataResolver.resolveBoatClassImages(boatClass.name);
+        this.boatClass = competitorDTO.getBoatClass();
+        this.boatClassImageData = BoatClassImageDataResolver.resolveBoatClassImages(boatClass.getName());
     }
 
     @Override
@@ -76,7 +76,7 @@ public class BoatOverlay extends CanvasOverlay {
     }
 
     private String getTitle() {
-        return competitorDTO.sailID + ", " + competitorDTO.name;
+        return competitorDTO.getSailID() + ", " + competitorDTO.getName();
     }
     
     public GPSFixDTO getBoatFix() {
