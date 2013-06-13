@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.FragmentManager;
@@ -52,7 +51,7 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
     protected Button btSetTime;
     protected Button btPostpone;
     protected TextView textInfoText;
-    
+
     protected DatePickerFragment datePicker;
 
     @Override
@@ -64,7 +63,7 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         isReset = getArguments().getBoolean(AppConstants.RESET_TIME_FRAGMENT_IS_RESET);
-        
+
         datePicker = new DatePickerFragment();
         setupDatePicker();
 
@@ -109,7 +108,7 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
                 Calendar startDate = Calendar.getInstance();
                 startDate.set(year, month, day);
                 Calendar today = Calendar.getInstance();
-                
+
                 if (startDate.get(Calendar.YEAR) == today.get(Calendar.YEAR)
                         && startDate.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)) {
                     btSetDate.setText("Today");
@@ -240,30 +239,28 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
 
     private void setStartTime(Date newStartTime) {
         getRace().getState().createNewStartProcedure(selectedStartProcedureType);
-        List<Class<? extends RaceDialogFragment>> actionList = getRace().getState().getStartProcedure()
+        Class<? extends RaceDialogFragment> action = getRace().getState().getStartProcedure()
                 .checkForUserActionRequiredActions(new MillisecondsTimePoint(newStartTime), this);
-        if (actionList.isEmpty()) {
+        if (action == null) {
             getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime));
         } else {
-            for (Class<? extends RaceDialogFragment> actionFragment : actionList) {
-                FragmentManager fragmentManager = getFragmentManager();
+            FragmentManager fragmentManager = getFragmentManager();
 
-                RaceDialogFragment fragment;
-                try {
-                    fragment = actionFragment.newInstance();
-                    Bundle args = getRecentArguments();
-                    fragment.setArguments(args);
+            RaceDialogFragment fragment;
+            try {
+                fragment = action.newInstance();
+                Bundle args = getRecentArguments();
+                fragment.setArguments(args);
 
-                    fragment.show(fragmentManager, "userActionRequiredDialog");
-                } catch (java.lang.InstantiationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
+                fragment.show(fragmentManager, "userActionRequiredDialog");
+            } catch (java.lang.InstantiationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
+
         }
 
     }

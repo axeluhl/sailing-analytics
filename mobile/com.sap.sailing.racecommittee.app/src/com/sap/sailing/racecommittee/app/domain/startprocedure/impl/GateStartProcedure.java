@@ -32,36 +32,37 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartRunningR
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.GateStartPhaseFragment;
 
 public class GateStartProcedure implements StartProcedure {
-    
+
     private final static long startPhaseClassOverGolfUpIntervall = 8 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhasePapaUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhasePapaDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseClassOverGolfDownInterval = 0 * 60 * 1000; // minutes * seconds * milliseconds
     public final static long startPhaseGolfDownStandardInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
-    public final static long startPhaseGolfDownStandardIntervalConstantSummand = 3 * 60 * 1000; // minutes * seconds * milliseconds
-    
+    public final static long startPhaseGolfDownStandardIntervalConstantSummand = 0 * 60 * 1000; // minutes * seconds *
+                                                                                                // milliseconds
+
     // list of start procedure specific event id's
     private static final Integer GOLF_REMOVAL_EVENT_ID = 1;
-    
+
     private List<Long> startProcedureEventIntervals;
     private RaceLog raceLog;
     private StartProcedureListener raceStateChangedListener;
     private GateStartPhaseEventListener startPhaseEventListener;
     private GateStartRunningRaceEventListener runningRaceEventListener;
     private UserRequiredActionPerformedListener userRequiredActionPerformedListener;
-    
-    private String pathFinder  = null;
+
+    private String pathFinder = null;
     private Long gateLineOpeningTime = startPhaseGolfDownStandardInterval;
     private boolean isPathFinderSet = false;
     private boolean isGateLineOpeningTimeChosen = false;
-    
+
     public GateStartProcedure(RaceLog raceLog) {
         this.raceLog = raceLog;
         startProcedureEventIntervals = new ArrayList<Long>();
         raceStateChangedListener = null;
         startPhaseEventListener = null;
         runningRaceEventListener = null;
-        
+
         startProcedureEventIntervals.add(startPhaseClassOverGolfUpIntervall);
         startProcedureEventIntervals.add(startPhasePapaUpInterval);
         startProcedureEventIntervals.add(startPhasePapaDownInterval);
@@ -76,7 +77,7 @@ public class GateStartProcedure implements StartProcedure {
     @Override
     public List<TimePoint> getAutomaticEventFireTimePoints(TimePoint startTime) {
         List<TimePoint> triggerTimePoints = new ArrayList<TimePoint>();
-        
+
         for (Long interval : startProcedureEventIntervals) {
             triggerTimePoints.add(startTime.minus(interval));
         }
@@ -86,7 +87,7 @@ public class GateStartProcedure implements StartProcedure {
     @Override
     public void dispatchFiredEventTimePoint(TimePoint startTime, TimePoint eventTime) {
         long interval = startTime.asMillis() - eventTime.asMillis();
-        
+
         if (interval == startPhaseClassOverGolfUpIntervall) {
             handleClassOverGolfUp(eventTime);
         } else if (interval == startPhasePapaUpInterval) {
@@ -100,25 +101,27 @@ public class GateStartProcedure implements StartProcedure {
 
     private void handleClassOverGolfUp(TimePoint eventTime) {
         TimePoint startPhaseTimePoint = eventTime;
-        
+
         if (raceStateChangedListener != null) {
             raceStateChangedListener.onRaceStartphaseEntered(startPhaseTimePoint);
         }
 
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(startPhaseTimePoint, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
-                raceLog.getCurrentPassId(), Flags.CLASS, Flags.GOLF, /*isDisplayed*/true);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(startPhaseTimePoint, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.CLASS, Flags.GOLF, /* isDisplayed */
+                true);
         raceLog.add(event);
-        
+
         if (startPhaseEventListener != null) {
             startPhaseEventListener.onClassOverGolfUp();
         }
     }
 
     private void handlePapaUp(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
-                raceLog.getCurrentPassId(), Flags.PAPA, Flags.NONE, /*isDisplayed*/true);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.PAPA, Flags.NONE, /* isDisplayed */
+                true);
         raceLog.add(event);
-        
+
         if (startPhaseEventListener != null) {
             startPhaseEventListener.onPapaUp();
         }
@@ -126,11 +129,12 @@ public class GateStartProcedure implements StartProcedure {
 
     private void handlePapaDown(TimePoint eventTime) {
         TimePoint papaDownTimepoint = eventTime;
-        
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(papaDownTimepoint, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
-                raceLog.getCurrentPassId(), Flags.PAPA, Flags.NONE, /*isDisplayed*/false);
+
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(papaDownTimepoint, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.PAPA, Flags.NONE, /* isDisplayed */
+                false);
         raceLog.add(event);
-        
+
         if (startPhaseEventListener != null) {
             startPhaseEventListener.onPapaDown();
         }
@@ -138,32 +142,28 @@ public class GateStartProcedure implements StartProcedure {
 
     private void handleClassOverGolfDown(TimePoint eventTime) {
         TimePoint essOneDownTimePoint = eventTime;
-        
-        RaceLogEvent essOneDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(essOneDownTimePoint, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
-                raceLog.getCurrentPassId(), Flags.CLASS, Flags.GOLF, /*isDisplayed*/false);
+
+        RaceLogEvent essOneDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(essOneDownTimePoint,
+                UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.CLASS,
+                Flags.GOLF, /* isDisplayed */false);
         raceLog.add(essOneDownEvent);
-        
+
         if (startPhaseEventListener != null) {
             startPhaseEventListener.onClassOverGolfDown();
         }
-        
+
         if (raceStateChangedListener != null) {
             raceStateChangedListener.onRaceStarted(eventTime);
         }
-        
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.GOLF, Flags.NONE, /* isDisplayed */
-                false);
-        raceLog.add(event);
 
-        TimePoint golfRemovalFireTimePoint = eventTime.plus(startPhaseGolfDownStandardIntervalConstantSummand+this.getGateLineOpeningTime());
+        TimePoint golfRemovalFireTimePoint = eventTime.plus(startPhaseGolfDownStandardIntervalConstantSummand
+                + this.getGateLineOpeningTime());
 
         if (raceStateChangedListener != null) {
-            raceStateChangedListener.onStartProcedureSpecificEvent(golfRemovalFireTimePoint,
-                    GOLF_REMOVAL_EVENT_ID);
+            raceStateChangedListener.onStartProcedureSpecificEvent(golfRemovalFireTimePoint, GOLF_REMOVAL_EVENT_ID);
         }
     }
-    
+
     @Override
     public void setStartProcedureListener(StartProcedureListener raceStateChangedListener) {
         this.raceStateChangedListener = raceStateChangedListener;
@@ -181,21 +181,22 @@ public class GateStartProcedure implements StartProcedure {
         } else {
             resultTime = now;
         }
-        
+
         return resultTime;
     }
 
     @Override
     public void setFinishing(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
-                raceLog.getCurrentPassId(), Flags.BLUE, Flags.NONE, /*isDisplayed*/true);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.BLUE, Flags.NONE, /* isDisplayed */
+                true);
         raceLog.add(event);
-        
+
         if (raceStateChangedListener != null) {
             raceStateChangedListener.onRaceFinishing(eventTime);
         }
     }
-    
+
     @Override
     public void dispatchAutomaticRaceEndEvent(TimePoint automaticRaceEnd) {
 
@@ -203,10 +204,11 @@ public class GateStartProcedure implements StartProcedure {
 
     @Override
     public void setFinished(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
-                raceLog.getCurrentPassId(), Flags.BLUE, Flags.NONE, /*isDisplayed*/false);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.BLUE, Flags.NONE, /* isDisplayed */
+                false);
         raceLog.add(event);
-        
+
         if (raceStateChangedListener != null) {
             raceStateChangedListener.onRaceFinished(eventTime);
         }
@@ -225,11 +227,12 @@ public class GateStartProcedure implements StartProcedure {
         }
     }
 
-    private void handleAPUp(TimePoint eventTime, Flags lowerFlag) {        
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
-                raceLog.getCurrentPassId(), Flags.AP, lowerFlag, /*isDisplayed*/true);
+    private void handleAPUp(TimePoint eventTime, Flags lowerFlag) {
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.AP, lowerFlag, /* isDisplayed */
+                true);
         raceLog.add(event);
-        
+
         if (raceStateChangedListener != null) {
             raceStateChangedListener.onRaceAborted(eventTime);
         }
@@ -249,10 +252,11 @@ public class GateStartProcedure implements StartProcedure {
     }
 
     private void handleNovemberUp(TimePoint eventTime, Flags lowerFlag) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
-                raceLog.getCurrentPassId(), Flags.NOVEMBER, lowerFlag, /*isDisplayed*/true);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.NOVEMBER, lowerFlag, /* isDisplayed */
+                true);
         raceLog.add(event);
-        
+
         if (raceStateChangedListener != null) {
             raceStateChangedListener.onRaceAborted(eventTime);
         }
@@ -260,10 +264,11 @@ public class GateStartProcedure implements StartProcedure {
 
     @Override
     public void setGeneralRecall(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
-                raceLog.getCurrentPassId(), Flags.FIRSTSUBSTITUTE, Flags.NONE, /*isDisplayed*/true);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.FIRSTSUBSTITUTE, Flags.NONE, /* isDisplayed */
+                true);
         raceLog.add(event);
-        
+
         if (raceStateChangedListener != null) {
             raceStateChangedListener.onRaceAborted(eventTime);
         }
@@ -273,7 +278,7 @@ public class GateStartProcedure implements StartProcedure {
     public Class<? extends RaceFragment> getStartphaseFragment() {
         return GateStartPhaseFragment.class;
     }
-    
+
     @Override
     public Class<? extends RaceFragment> getRunningRaceFragment() {
         return GateStartRunningRaceFragment.class;
@@ -283,7 +288,7 @@ public class GateStartProcedure implements StartProcedure {
     public void setStartPhaseEventListener(StartPhaseEventListener listener) {
         startPhaseEventListener = (GateStartPhaseEventListener) listener;
     }
-    
+
     @Override
     public void setRunningRaceEventListener(RunningRaceEventListener listener) {
         runningRaceEventListener = (GateStartRunningRaceEventListener) listener;
@@ -295,30 +300,39 @@ public class GateStartProcedure implements StartProcedure {
         List<Object> milisecondsList = new ArrayList<Object>();
         if (millisecondsTillStart < startPhasePapaDownInterval) {
             milisecondsList.add(millisecondsTillStart);
-            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_gate_class_over_golf_removed), milisecondsList);
+            result = new Pair<String, List<Object>>(context.getResources().getString(
+                    R.string.race_startphase_gate_class_over_golf_removed), milisecondsList);
         } else if (millisecondsTillStart < startPhasePapaUpInterval) {
             milisecondsList.add(millisecondsTillStart - startPhasePapaDownInterval);
-            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_gate_papa_removed), milisecondsList);
+            result = new Pair<String, List<Object>>(context.getResources().getString(
+                    R.string.race_startphase_gate_papa_removed), milisecondsList);
         } else if (millisecondsTillStart < startPhaseClassOverGolfUpIntervall) {
             milisecondsList.add(millisecondsTillStart - startPhasePapaUpInterval);
-            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_gate_papa_display), milisecondsList);
+            result = new Pair<String, List<Object>>(context.getResources().getString(
+                    R.string.race_startphase_gate_papa_display), milisecondsList);
         } else {
             milisecondsList.add(millisecondsTillStart - startPhaseClassOverGolfUpIntervall);
-            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_gate_class_over_golf_display), milisecondsList);
+            result = new Pair<String, List<Object>>(context.getResources().getString(
+                    R.string.race_startphase_gate_class_over_golf_display), milisecondsList);
         }
         return result;
     }
 
     public void setGolfRemoval(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
-                raceLog.getCurrentPassId(), Flags.GOLF, Flags.NONE, /*isDisplayed*/false);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.GOLF, Flags.NONE, /* isDisplayed */
+                false);
         raceLog.add(event);
-        
+
         if (runningRaceEventListener != null) {
             runningRaceEventListener.onGolfDown();
         }
     }
-    public void setGateLineOpeningTime(Long gateLineOpeningTimeInMiliseconds){
+
+    public void setGateLineOpeningTime(Long gateLineOpeningTimeInMiliseconds) {
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createGateLineOpeningTimeEvent(MillisecondsTimePoint.now(),
+                raceLog.getCurrentPassId(), gateLineOpeningTimeInMiliseconds);
+        raceLog.add(event);
         this.gateLineOpeningTime = gateLineOpeningTimeInMiliseconds;
         this.isGateLineOpeningTimeChosen = true;
         if (startPhaseEventListener != null) {
@@ -328,7 +342,12 @@ public class GateStartProcedure implements StartProcedure {
             userRequiredActionPerformedListener.onUserRequiredActionPerformed();
         }
     }
-    public void setPathfinder(String sailingId){
+
+    public void setPathfinder(String sailingId) {
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createPathfinderEvent(MillisecondsTimePoint.now(),
+                raceLog.getCurrentPassId(), sailingId);
+        raceLog.add(event);
+
         this.pathFinder = sailingId;
         this.isPathFinderSet = true;
         if (startPhaseEventListener != null) {
@@ -354,7 +373,7 @@ public class GateStartProcedure implements StartProcedure {
     public Long getGateLineOpeningTime() {
         return gateLineOpeningTime;
     }
-    
+
     public boolean isPathFinderSet() {
         return isPathFinderSet;
     }
@@ -362,7 +381,7 @@ public class GateStartProcedure implements StartProcedure {
     public boolean isGateLineOpeningTimeChosen() {
         return isGateLineOpeningTimeChosen;
     }
-    
+
     @Override
     public Class<? extends RaceFragment> getFinishingRaceFragment() {
         return FinishingRaceFragment.class;
@@ -372,23 +391,21 @@ public class GateStartProcedure implements StartProcedure {
     public Class<? extends RaceFragment> getFinishedRaceFragment() {
         return FinishedRaceFragment.class;
     }
-    
+
     @Override
-    public List<Class<? extends RaceDialogFragment>> checkForUserActionRequiredActions(MillisecondsTimePoint newStartTime, UserRequiredActionPerformedListener listener) {
-        List<Class<? extends RaceDialogFragment>> actionList = new ArrayList<Class<? extends RaceDialogFragment>>();
-        if (MillisecondsTimePoint.now().after(newStartTime)
-                && !isPathFinderSet) {
-            actionList.add(RaceChoosePathFinderDialog.class);
+    public Class<? extends RaceDialogFragment> checkForUserActionRequiredActions(
+            MillisecondsTimePoint newStartTime, UserRequiredActionPerformedListener listener) {
+        if (MillisecondsTimePoint.now().after(newStartTime) && !isPathFinderSet) {
             this.userRequiredActionPerformedListener = listener;
+            return RaceChoosePathFinderDialog.class;
         }
-        if (MillisecondsTimePoint.now().after(newStartTime)
-                && !isGateLineOpeningTimeChosen) {
-            actionList.add(RaceChooseGateLineOpeningTimeDialog.class);
+        if (MillisecondsTimePoint.now().after(newStartTime) && !isGateLineOpeningTimeChosen) {
             this.userRequiredActionPerformedListener = listener;
+            return RaceChooseGateLineOpeningTimeDialog.class;
         }
-        return actionList;
+        return null;
     }
-    
+
     @Override
     public Class<? extends RaceDialogFragment> getCourseDesignDialog() {
         return ClassicCourseDesignDialogFragment.class;

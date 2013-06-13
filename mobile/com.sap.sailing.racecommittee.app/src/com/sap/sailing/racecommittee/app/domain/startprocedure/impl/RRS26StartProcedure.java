@@ -403,15 +403,14 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     }
 
     @Override
-    public List<Class<? extends RaceDialogFragment>> checkForUserActionRequiredActions(
+    public Class<? extends RaceDialogFragment> checkForUserActionRequiredActions(
             MillisecondsTimePoint newStartTime, UserRequiredActionPerformedListener listener) {
-        List<Class<? extends RaceDialogFragment>> actionList = new ArrayList<Class<? extends RaceDialogFragment>>();
         if (MillisecondsTimePoint.now().after(newStartTime.minus(startPhaseStartModeUpInterval))
                 && !startModeFlagChosen) {
-            actionList.add(RaceChooseStartModeDialog.class);
             this.userRequiredActionPerformedListener = listener;
+            return RaceChooseStartModeDialog.class;
         }
-        return actionList;
+        return null;
     }
 
     @Override
