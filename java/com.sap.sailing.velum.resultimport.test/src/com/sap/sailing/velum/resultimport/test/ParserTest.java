@@ -23,9 +23,10 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsFor
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.resultimport.RegattaResults;
+import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
+import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
 import com.sap.sailing.velum.resultimport.CsvParserFactory;
 import com.sap.sailing.velum.resultimport.impl.ScoreCorrectionProviderImpl;
 
@@ -46,13 +47,13 @@ public class ParserTest {
     private ResultDocumentProvider getTestDocumentProvider() {
         return new ResultDocumentProvider() {
             @Override
-            public Iterable<Triple<InputStream, String, TimePoint>> getDocumentsAndNamesAndLastModified() throws FileNotFoundException {
+            public Iterable<ResultDocumentDescriptor> getResultDocumentDescriptors() throws IOException {
                 try {
-                    List<Triple<InputStream, String, TimePoint>> result = new ArrayList<>();
+                    List<ResultDocumentDescriptor> result = new ArrayList<>();
                     TimePoint now = MillisecondsTimePoint.now();
-                    result.add(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_NIXDORF_POKAL_4WF), SAMPLE_INPUT_NAME_NIXDORF_POKAL_4WF, now));
-                    result.add(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_NIXDORF_POKAL_FINAL), SAMPLE_INPUT_NAME_NIXDORF_POKAL_FINAL, now));
-                    result.add(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_STARIDM_4WF), SAMPLE_INPUT_NAME_STARIDM_4WF, now));
+                    result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_NIXDORF_POKAL_4WF), SAMPLE_INPUT_NAME_NIXDORF_POKAL_4WF, now));
+                    result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_NIXDORF_POKAL_FINAL), SAMPLE_INPUT_NAME_NIXDORF_POKAL_FINAL, now));
+                    result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_STARIDM_4WF), SAMPLE_INPUT_NAME_STARIDM_4WF, now));
                     return result;
                 } catch (IOException e) {
                     throw new RuntimeException(e);

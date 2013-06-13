@@ -11,8 +11,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -28,9 +29,10 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.resultimport.RegattaResults;
+import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
+import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
 
 public class BarbadosResultImportTest {
     private static final MillisecondsTimePoint NOW = MillisecondsTimePoint.now();
@@ -53,9 +55,11 @@ public class BarbadosResultImportTest {
         spreadsheet = new BarbadosResultSpreadsheet(getInputStream(SAMPLE_INPUT_NAME_EMPTY_RESULTS));
         scp = new ScoreCorrectionProviderImpl(new ResultDocumentProvider() {
             @Override
-            public Iterable<Triple<InputStream, String, TimePoint>> getDocumentsAndNamesAndLastModified() throws IOException {
-                return Collections.singleton(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_EMPTY_RESULTS),
+            public Iterable<ResultDocumentDescriptor> getResultDocumentDescriptors() throws IOException {
+                List<ResultDocumentDescriptor> result = new ArrayList<>();
+                result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_EMPTY_RESULTS),
                         SAMPLE_INPUT_NAME_EMPTY_RESULTS, NOW));
+                return result;
             }
         });
     }
@@ -114,9 +118,11 @@ public class BarbadosResultImportTest {
     public void testResultsThroughScoreCorrectionProviderWithSomeExperimentalResults() throws Exception {
         ScoreCorrectionProviderImpl scp2 = new ScoreCorrectionProviderImpl(new ResultDocumentProvider() {
             @Override
-            public Iterable<Triple<InputStream, String, TimePoint>> getDocumentsAndNamesAndLastModified() throws IOException {
-                return Collections.singleton(new Triple<InputStream, String, TimePoint>(getInputStream(SAMPLE_INPUT_NAME_SOME_RESULTS),
+            public Iterable<ResultDocumentDescriptor> getResultDocumentDescriptors() throws IOException {
+                List<ResultDocumentDescriptor> result = new ArrayList<>();
+                result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_SOME_RESULTS),
                         SAMPLE_INPUT_NAME_SOME_RESULTS, NOW));
+                return result;
             }
         });
         Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scp2.getHasResultsForBoatClassFromDateByEventName();

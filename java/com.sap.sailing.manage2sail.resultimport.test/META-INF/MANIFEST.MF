@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Manage2Sail result import tests
+Bundle-SymbolicName: com.sap.sailing.manage2sail.resultimport.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: org.osgi.framework;version="1.5.0"
+Fragment-Host: com.sap.sailing.manage2sail.resultimport
+Require-Bundle: org.junit4;bundle-version="4.8.2"
