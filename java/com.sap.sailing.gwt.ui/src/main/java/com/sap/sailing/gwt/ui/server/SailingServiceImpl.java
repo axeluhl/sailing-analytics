@@ -388,16 +388,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<ScoreCorrectionProviderDTO> getScoreCorrectionProviderDTOs() throws Exception {
-        List<ScoreCorrectionProviderDTO> result = new ArrayList<ScoreCorrectionProviderDTO>();
-        final Iterable<ScoreCorrectionProvider> services = getScoreCorrectionProviders();
-        for (ScoreCorrectionProvider scoreCorrectionProvider : services) {
-            result.add(createScoreCorrectionProviderDTO((ScoreCorrectionProvider) scoreCorrectionProvider));
+    public Iterable<String> getScoreCorrectionProviderNames() {
+        List<String> result = new ArrayList<String>();
+        for (ScoreCorrectionProvider scoreCorrectionProvider : getAllScoreCorrectionProviders()) {
+            result.add(scoreCorrectionProvider.getName());
         }
         return result;
     }
 
-    private Iterable<ScoreCorrectionProvider> getScoreCorrectionProviders() {
+    @Override
+    public ScoreCorrectionProviderDTO getScoreCorrectionsOfProvider(String providerName) throws Exception {
+        ScoreCorrectionProviderDTO result = null;
+        for (ScoreCorrectionProvider scoreCorrectionProvider : getAllScoreCorrectionProviders()) {
+            if(scoreCorrectionProvider.getName().equals(providerName)) {
+                result = convertScoreCorrectionProviderDTO(scoreCorrectionProvider);
+                break;
+            }
+        }
+        return result;
+    }
+
+    private Iterable<ScoreCorrectionProvider> getAllScoreCorrectionProviders() {
         final Object[] services = scoreCorrectionProviderServiceTracker.getServices();
         List<ScoreCorrectionProvider> result = new ArrayList<ScoreCorrectionProvider>();
         if (services != null) {
@@ -408,7 +419,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    private ScoreCorrectionProviderDTO createScoreCorrectionProviderDTO(ScoreCorrectionProvider scoreCorrectionProvider)
+    private ScoreCorrectionProviderDTO convertScoreCorrectionProviderDTO(ScoreCorrectionProvider scoreCorrectionProvider)
             throws Exception {
         Map<String, Set<Pair<String, Date>>> hasResultsForBoatClassFromDateByEventName = new HashMap<String, Set<Pair<String,Date>>>();
         for (Map.Entry<String, Set<Pair<String, TimePoint>>> e : scoreCorrectionProvider
@@ -2648,7 +2659,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public RegattaScoreCorrectionDTO getScoreCorrections(String scoreCorrectionProviderName, String eventName,
             String boatClassName, Date timePointWhenResultPublished) throws Exception {
         RegattaScoreCorrectionDTO result = null;
-        for (ScoreCorrectionProvider scp : getScoreCorrectionProviders()) {
+        for (ScoreCorrectionProvider scp : getAllScoreCorrectionProviders()) {
             if (scp.getName().equals(scoreCorrectionProviderName)) {
                 result = createScoreCorrection(scp.getScoreCorrections(eventName, boatClassName,
                         new MillisecondsTimePoint(timePointWhenResultPublished)));
@@ -2680,7 +2691,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<String> getUrlResultProviderNames() {
         List<String> result = new ArrayList<String>();
-        for (ScoreCorrectionProvider scp : getScoreCorrectionProviders()) {
+        for (ScoreCorrectionProvider scp : getAllScoreCorrectionProviders()) {
             if (scp instanceof ResultUrlProvider) {
             	result.add(scp.getName());
             }
@@ -2690,7 +2701,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private ResultUrlProvider getUrlBasedScoreCorrectionProvider(String resultProviderName) {
         ResultUrlProvider result = null;
-        for (ScoreCorrectionProvider scp : getScoreCorrectionProviders()) {
+        for (ScoreCorrectionProvider scp : getAllScoreCorrectionProviders()) {
             if (scp instanceof ResultUrlProvider && scp.getName().equals(resultProviderName)) {
             	result = (ResultUrlProvider) scp;
             	break;
