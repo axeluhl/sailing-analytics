@@ -62,7 +62,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
     private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesBase series, Fleet fleet, String name,
             RaceLog raceLog) {
         return new ManagedRaceImpl(new ManagedRaceIdentifierImpl(name,
-                new FleetIdentifierImpl(fleet, series, raceGroup)), StartProcedureType.ESS, raceLog);
+                new FleetIdentifierImpl(fleet, series, raceGroup)), StartProcedureType.RRS26, raceLog);
 
     }
 
