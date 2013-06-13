@@ -141,7 +141,7 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
         raceLog.add(event);
 
         if (startPhaseEventListener != null) {
-            startPhaseEventListener.onStartModeUp(this.startModeFlag);
+            startPhaseEventListener.onStartModeDown(this.startModeFlag);
         }
     }
 
