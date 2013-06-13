@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -78,6 +78,8 @@
 		<module>com.sap.sailing.velum.resultimport.test</module>
 		<module>com.sap.sailing.sailwave.resultimport</module>
 		<module>com.sap.sailing.sailwave.resultimport.test</module>
+		<module>com.sap.sailing.manage2sail.resultimport</module>
+		<module>com.sap.sailing.manage2sail.resultimport.test</module>
 		<module>com.sap.sailing.selenium.test</module>
 		<module>org.openqa.selenium.osgi</module>
 		<module>com.sap.sailing.monitoring</module>
