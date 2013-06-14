@@ -124,8 +124,8 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             public void onValueChange(ValueChangeEvent<Double> newValue) {
                 if (timeSlider.getCurrentValue() != null) {
                     if (TimePanel.this.timer.getPlayMode() == PlayModes.Live) {
-                        // TODO bug 1372 only do this if canReplayWhileLive==true; otherwise pause and only allow going back to live
-                        // put timer into replay mode when user explicitly adjusts time; avoids having to press pause first
+                        // if canReplayWhileLive==false, playStateChanged(...) will ensure that the timer is paused when
+                        // reaching Replay mode
                         TimePanel.this.timer.setPlayMode(PlayModes.Replay);
                     }
                     TimePanel.this.timer.setTime(timeSlider.getCurrentValue().longValue());
