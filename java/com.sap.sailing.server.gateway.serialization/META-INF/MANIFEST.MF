@@ -16,6 +16,7 @@ Export-Package: com.sap.sailing.server.gateway.deserialization,
  com.sap.sailing.server.gateway.serialization,
  com.sap.sailing.server.gateway.serialization.coursedata.impl,
  com.sap.sailing.server.gateway.serialization.impl,
+ com.sap.sailing.server.gateway.serialization.masterdata.impl,
  com.sap.sailing.server.gateway.serialization.racegroup.impl,
  com.sap.sailing.server.gateway.serialization.racelog,
  com.sap.sailing.server.gateway.serialization.racelog.impl
