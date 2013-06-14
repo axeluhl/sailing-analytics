@@ -401,8 +401,8 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     @Override
-    public List<Class<? extends RaceDialogFragment>> checkForUserActionRequiredActions(MillisecondsTimePoint newStartTime, UserRequiredActionPerformedListener listener) {
-        return new ArrayList<Class<? extends RaceDialogFragment>>();
+    public Class<? extends RaceDialogFragment> checkForUserActionRequiredActions(MillisecondsTimePoint newStartTime, UserRequiredActionPerformedListener listener) {
+        return null;
     }
 
     @Override
