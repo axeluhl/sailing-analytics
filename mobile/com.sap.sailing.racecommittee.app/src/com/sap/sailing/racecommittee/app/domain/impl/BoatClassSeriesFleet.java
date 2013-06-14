@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
+package com.sap.sailing.racecommittee.app.domain.impl;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Fleet;
@@ -62,6 +62,20 @@ public class BoatClassSeriesFleet {
 
     public Fleet getFleet() {
         return fleet;
+    }
+    
+
+    private final static String DEFAULT = "Default";
+    
+    public String getDisplayName() {
+        String result = getBoatClass().getName();
+        if (!getSeries().getName().equals(DEFAULT)) {
+            result += " - " + getSeries().getName();
+        }
+        if (!getFleet().getName().equals(DEFAULT)) {
+            result += " - " + getFleet().getName();
+        }
+        return result;
     }
 
     @Override

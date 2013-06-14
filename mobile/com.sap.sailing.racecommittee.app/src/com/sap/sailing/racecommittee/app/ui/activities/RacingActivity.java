@@ -107,7 +107,7 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
         }
 
         setupActionBar(courseArea);
-        // unload and unregister from aaaaaaall races here!
+        // unload and unregister from all races here!
         unloadAllRaces();
         loadRaces(courseArea);
         // StaticVibrator.prepareVibrator(this);

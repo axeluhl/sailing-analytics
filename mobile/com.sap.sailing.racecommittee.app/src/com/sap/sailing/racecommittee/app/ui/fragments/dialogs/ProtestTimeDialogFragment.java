@@ -20,7 +20,6 @@ import android.widget.ListView;
 import android.widget.TimePicker;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
@@ -28,6 +27,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 
 public class ProtestTimeDialogFragment extends DialogFragment {
 
@@ -213,17 +213,17 @@ public class ProtestTimeDialogFragment extends DialogFragment {
 
     private static class ManagedRaceItem {
 
+        private BoatClassSeriesFleet group;
         private ManagedRace race;
 
         public ManagedRaceItem(ManagedRace race) {
             this.race = race;
+            this.group = new BoatClassSeriesFleet(race);
         }
 
         @Override
         public String toString() {
-            RaceGroup group = race.getRaceGroup();
-            return String.format("%s %s %s %s", group.getBoatClass() == null ? group.getName() : group.getBoatClass()
-                    .getName(), race.getSeries().getName(), race.getFleet().getName(), race.getRaceName());
+            return String.format("%s - %s", group.getDisplayName(), race.getRaceName());
         }
 
     }
