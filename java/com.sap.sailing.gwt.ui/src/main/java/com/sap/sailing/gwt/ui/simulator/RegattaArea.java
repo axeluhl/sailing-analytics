@@ -9,6 +9,7 @@ public class RegattaArea {
 	LatLng centerPos;
 	LatLng edgePos;
 	String color;
+	String colorText;
 	
 
 	public RegattaArea(String name, LatLng centerPos, double radius, String color) {
@@ -17,6 +18,16 @@ public class RegattaArea {
 		this.centerPos = centerPos;		
 		this.edgePos = this.getEdgePoint(centerPos, radius);
 		this.color = color;
+		this.colorText = color;
+	}
+	
+	public RegattaArea(String name, LatLng centerPos, double radius, String color, String colorText) {
+		this.name = name;
+		this.radius = radius;
+		this.centerPos = centerPos;		
+		this.edgePos = this.getEdgePoint(centerPos, radius);
+		this.color = color;
+		this.colorText = colorText;
 	}
 	
 	protected LatLng getEdgePoint(LatLng pos, double dist) {
