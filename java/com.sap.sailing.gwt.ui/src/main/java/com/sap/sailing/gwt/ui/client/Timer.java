@@ -341,5 +341,9 @@ public class Timer {
     public long getLiveTimePointInMillis() {
         return System.currentTimeMillis() - getLivePlayDelayInMillis() + millisecondsClientIsBehindServer;
     }
+    
+    public Date getLiveTimePointAsDate() {
+        return new Date(getLiveTimePointInMillis());
+    }
 
 }

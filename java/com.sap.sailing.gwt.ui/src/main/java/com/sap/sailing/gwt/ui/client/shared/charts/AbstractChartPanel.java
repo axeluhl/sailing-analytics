@@ -296,8 +296,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             Series markPassingSeries = getOrCreateCompetitorMarkPassingSeries(competitor);
             CompetitorRaceDataDTO competitorData = chartData.getCompetitorData(competitor);
             if (competitorData != null) {
-                // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
-                Date toDate = new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis());
+                Date toDate = timer.getLiveTimePointAsDate();
                 List<Triple<String, Date, Double>> markPassingsData = competitorData.getMarkPassingsData();
                 List<Point> markPassingPoints = new ArrayList<Point>();
                 for (Triple<String, Date, Double> markPassingData : markPassingsData) {

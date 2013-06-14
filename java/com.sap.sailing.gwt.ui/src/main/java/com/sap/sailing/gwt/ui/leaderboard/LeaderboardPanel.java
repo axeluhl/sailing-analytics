@@ -2414,6 +2414,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         return getLeaderboardTable().getDataProvider();
     }
 
+    /**
+     * @param date
+     *            ignored; may be <code>null</code>. The time for loading the leaderboard is determined using
+     *            {@link #getLeaderboardDisplayDate()}.
+     */
     @Override
     public void timeChanged(Date date) {
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
