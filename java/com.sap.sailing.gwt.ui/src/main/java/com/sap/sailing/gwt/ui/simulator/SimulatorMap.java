@@ -357,7 +357,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.raceCourseCanvasOverlay.getCanvas().getElement().setClassName("raceCourse");
 
         if (this.mode == SailingSimulatorUtil.event) {
-        	this.regattaAreaCanvasOverlay.raceCourseCanvasOverlay = this.raceCourseCanvasOverlay;
+        	this.regattaAreaCanvasOverlay.setRaceCourseCanvas(this.raceCourseCanvasOverlay);
         	this.regattaAreaCanvasOverlay.updateRaceCourse(0, 0);
         }
     	
@@ -774,6 +774,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     public MapWidget getMap() {
     	return this.mapw;
+    }
+    
+    public SimulatorMainPanel getMainPanel() {
+    	return this.parent;
     }
     
 }
