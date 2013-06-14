@@ -237,13 +237,10 @@ public class RaceStateService extends Service {
             state.getRaceLog().addListener(logListener);
 
             // ... register on state changes!
-            RaceStateChangedListener stateListener = new RaceStateListener(this, race);
-            RaceStateEventListener eventListener = new RaceStateListener(this, race);
-            state.registerStateChangeListener(stateListener);
+            RaceStateEventListener eventListener = new RaceStateServiceListener(this, race);
             state.registerStateEventListener(eventListener);
 
             this.registeredLogListeners.put(race, logListener);
-            this.registeredStateChangeListeners.put(race, stateListener);
             this.registeredStateEventListeners.put(race, eventListener);
             
             ExLog.i(TAG, "Race " + race.getId() + " registered.");

@@ -23,8 +23,7 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
+import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -161,26 +160,9 @@ public interface SailingServiceAsync {
 
     void getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<CoursePositionsDTO> asyncCallback);
 
-    /**
-     * Returns a {@link LeaderboardDTO} will information about all races, their points and competitor display names
-     * filled in. The column details are filled for the races whose named are provided in
-     * <code>namesOfRacesForWhichToLoadLegDetails</code>.
-     * 
-     * @param date
-     *            the time point for the leaderboard data to retrieve, or <code>null</code> for "live mode" which means
-     *            that the server will produce whatever it has ready for the currently active live delay set on the
-     *            server; in live mode, data served may be taken from caches that lag up to a few seconds.
-     * @param namesOfRaceColumnsForWhichToLoadLegDetails
-     *            if <code>null</code>, no {@link LeaderboardEntryDTO#legDetails leg details} will be present in the
-     *            result ({@link LeaderboardEntryDTO#legDetails} will be <code>null</code> for all
-     *            {@link LeaderboardEntryDTO} objects contained). Otherwise, the {@link LeaderboardEntryDTO#legDetails}
-     *            list will contain one entry per leg of the race {@link com.sap.sailing.domain.base.Course} for those race columns whose
-     *            {@link com.sap.sailing.domain.base.RaceColumn#getType() name} is contained in <code>namesOfRacesForWhichToLoadLegDetails</code>.
-     *            For all other columns, {@link LeaderboardEntryDTO#legDetails} is <code>null</code>.
-     */
     void getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            AsyncCallback<LeaderboardDTO> callback);
+            String previousLeaderboardId, AsyncCallback<IncrementalOrFullLeaderboardDTO> callback);
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
@@ -377,7 +359,9 @@ public interface SailingServiceAsync {
     void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);
 
-    void getScoreCorrectionProviderDTOs(AsyncCallback<Iterable<ScoreCorrectionProviderDTO>> callback);
+    void getScoreCorrectionProviderNames(AsyncCallback<Iterable<String>> callback);
+
+    void getScoreCorrectionsOfProvider(String providerName, AsyncCallback<ScoreCorrectionProviderDTO> callback);
 
     void getScoreCorrections(String scoreCorrectionProviderName, String eventName, String boatClassName,
             Date timePointWhenResultPublished, AsyncCallback<RegattaScoreCorrectionDTO> asyncCallback);

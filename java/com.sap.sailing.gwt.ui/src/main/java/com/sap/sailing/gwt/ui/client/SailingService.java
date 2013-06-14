@@ -23,7 +23,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -116,8 +116,8 @@ public interface SailingService extends RemoteService {
 
     public List<String> getLeaderboardNames() throws Exception;
     
-    LeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
-            Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails) throws Exception;
+    IncrementalOrFullLeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
+            Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, String previousLeaderboardId) throws Exception;
 
     List<StrippedLeaderboardDTO> getLeaderboards();
     
@@ -247,7 +247,9 @@ public interface SailingService extends RemoteService {
 
     EventDTO getEventByName(String eventName);
 
-    Iterable<ScoreCorrectionProviderDTO> getScoreCorrectionProviderDTOs() throws Exception;
+    Iterable<String> getScoreCorrectionProviderNames();
+
+    ScoreCorrectionProviderDTO getScoreCorrectionsOfProvider(String providerName) throws Exception;
 
     RegattaScoreCorrectionDTO getScoreCorrections(String scoreCorrectionProviderName, String eventName, String boatClassName,
             Date timePointWhenResultPublished) throws Exception;

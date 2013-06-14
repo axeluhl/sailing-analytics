@@ -8,15 +8,23 @@ import com.sap.sailing.gwt.ui.shared.windpattern.WindPattern;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
+import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 
 public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager {
 
+	char mode = 'f';
+	
     public WindPatternDisplayManagerImpl() {
-
+    };
+    
+    @Override
+    public void setMode(char mode) {
+    	this.mode = mode;    	
     }
 
     @Override
-    public List<WindPatternDTO> getWindPatterns() {
+    public List<WindPatternDTO> getWindPatterns(char mode) {
+    	this.setMode(mode);
         List<WindPatternDTO> list = new ArrayList<WindPatternDTO>();
         for (WindPattern w : WindPattern.values()) {
             list.add(new WindPatternDTO(w.name(), w.getDisplayName()));
@@ -68,17 +76,29 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
     }
 
     private void addOscillationParameters(WindPatternDisplay display) {
-        WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("baseWindSpeed",
-                "Base Speed (kn)", 2, 22, 12,10);    
-        display.addSetting(windSpeedSetting);
-        WindPatternSetting<Double> baseWindBearing = new WindPatternSettingSliderBar("baseWindBearing",
-                "Average Direction (Degrees)", -20, 20, 0,10);
-        display.addSetting(baseWindBearing);
-        WindPatternSetting<Double> leftWindSpeed = new WindPatternSettingSliderBar("leftWindSpeed",
-                "Speed Left Side (%)", 0, 200, 100,10);
-        display.addSetting(leftWindSpeed);
-        WindPatternSetting<Double> middleWindSpeed = new WindPatternSettingSliderBar("middleWindSpeed",
-                "Speed Middle (%)", 0, 200, 100,10);
+    	if (mode == SailingSimulatorUtil.event) {
+    		WindPatternSetting<Double> windBearingSetting = new WindPatternSettingSliderBar("windBearing",
+    				"Base Bearing (Degrees)", 0, 360, 0, 36);
+    		display.addSetting(windBearingSetting);
+    		WindPatternSetting<Double> baseWindBearing = new WindPatternSettingSliderBar("baseWindBearing",
+    				"Race Course Diff (Degrees)", -20, 20, 0,10);
+    		display.addSetting(baseWindBearing);
+    		WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("baseWindSpeed",
+    				"Base Speed (kn)", 2, 22, 12,10);    
+    		display.addSetting(windSpeedSetting);
+    	} else {
+    		WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("baseWindSpeed",
+    				"Base Speed (kn)", 2, 22, 12,10);    
+    		display.addSetting(windSpeedSetting);
+    		WindPatternSetting<Double> baseWindBearing = new WindPatternSettingSliderBar("baseWindBearing",
+    				"Average Direction (Degrees)", -20, 20, 0,10);
+    		display.addSetting(baseWindBearing);
+    	}
+    	WindPatternSetting<Double> leftWindSpeed = new WindPatternSettingSliderBar("leftWindSpeed",
+    			"Speed Left Side (%)", 0, 200, 100,10);
+    	display.addSetting(leftWindSpeed);
+    	WindPatternSetting<Double> middleWindSpeed = new WindPatternSettingSliderBar("middleWindSpeed",
+    			"Speed Middle (%)", 0, 200, 100,10);
         display.addSetting(middleWindSpeed);
         WindPatternSetting<Double> rightWindSpeed = new WindPatternSettingSliderBar("rightWindSpeed",
                 "Speed Right Side (%)", 0, 200, 100,10);

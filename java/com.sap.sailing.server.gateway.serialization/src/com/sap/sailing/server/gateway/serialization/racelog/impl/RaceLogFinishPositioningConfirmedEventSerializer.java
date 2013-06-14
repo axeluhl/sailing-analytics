@@ -1,8 +1,14 @@
 package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
+import java.io.Serializable;
+import java.util.List;
+
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -10,6 +16,11 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 public class RaceLogFinishPositioningConfirmedEventSerializer extends BaseRaceLogEventSerializer {
 
     public static final String VALUE_CLASS = RaceLogFinishPositioningConfirmedEvent.class.getSimpleName();
+    
+    public static final String FIELD_POSITIONED_COMPETITORS = "positionedCompetitors";
+    public static final String FIELD_COMPETITOR_ID = "competitorId";
+    public static final String FIELD_COMPETITOR_NAME = "competitorName";
+    public static final String FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON = "maxPointsReason";
     
     public RaceLogFinishPositioningConfirmedEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
         super(competitorSerializer);
@@ -25,8 +36,25 @@ public class RaceLogFinishPositioningConfirmedEventSerializer extends BaseRaceLo
         RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent = (RaceLogFinishPositioningConfirmedEvent) object;
 
         JSONObject result = super.serialize(finishPositioningConfirmedEvent);
+        
+        result.put(FIELD_POSITIONED_COMPETITORS, serializePositionedCompetitors(finishPositioningConfirmedEvent.getPositionedCompetitors()));
 
         return result;
+    }
+    
+    private JSONArray serializePositionedCompetitors(List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
+        JSONArray jsonPositionedCompetitors = new JSONArray();
+        
+        for (Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positionedCompetitors) {
+            JSONObject jsonPositionedCompetitor = new JSONObject();
+            
+            jsonPositionedCompetitor.put(FIELD_COMPETITOR_ID, positionedCompetitor.getA().toString());
+            jsonPositionedCompetitor.put(FIELD_COMPETITOR_NAME, positionedCompetitor.getB());
+            jsonPositionedCompetitor.put(FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON, positionedCompetitor.getC().name());
+            jsonPositionedCompetitors.add(jsonPositionedCompetitor);
+        }
+        
+        return jsonPositionedCompetitors;
     }
 
 }

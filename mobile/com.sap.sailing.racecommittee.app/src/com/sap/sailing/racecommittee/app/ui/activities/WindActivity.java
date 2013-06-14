@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -16,6 +17,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
@@ -76,26 +78,34 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
         btnSend.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
-                try{
-                InMemoryDataStore.INSTANCE.setLastWindSpeed(Double.valueOf(windSpeed.getText().toString().replace(",", ".")));
-                InMemoryDataStore.INSTANCE.setLastWindDirection(Integer.valueOf(windDirection.getText().toString()));
-                InMemoryDataStore.INSTANCE.setLastLatitude(Double.valueOf(latitude.getText().toString()));
-                InMemoryDataStore.INSTANCE.setLastLongitude(Double.valueOf(longitude.getText().toString()));
-                }catch (NumberFormatException nfe){
+                try {
+                    InMemoryDataStore.INSTANCE.setLastWindSpeed(Double.valueOf(windSpeed.getText().toString()
+                            .replace(",", ".")));
+                    InMemoryDataStore.INSTANCE.setLastWindDirection(Integer.valueOf(windDirection.getText().toString()));
+                    LatLng lastWindPosition = new LatLng(Double.valueOf(latitude.getText().toString()), Double
+                            .valueOf(longitude.getText().toString()));
+                    InMemoryDataStore.INSTANCE.setLastWindPosition(lastWindPosition);
+                    // TODO uses domain Wind and send result to calling activity instead of using InMemoryDataStore
+                    // Wind windMeasurement = new WindImpl();
+                    Intent returnIntent = new Intent();
+                    setResult(RESULT_OK, returnIntent);
+                    finish();
+                } catch (NumberFormatException nfe) {
                     Toast.makeText(WindActivity.this, "The entered information is not valid", Toast.LENGTH_LONG).show();
                     ExLog.i(this.getClass().getCanonicalName(), nfe.getMessage());
                 }
-                finish();
             }
         });
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
-        
-        windSpeed.setText(InMemoryDataStore.INSTANCE.getLastWindSpeed()+"");
-        windDirection.setText(InMemoryDataStore.INSTANCE.getLastWindDirection()+"");
-        latitude.setText(InMemoryDataStore.INSTANCE.getLastLatitude()+"");
-        longitude.setText(InMemoryDataStore.INSTANCE.getLastLongitude()+"");
+
+        windSpeed.setText(InMemoryDataStore.INSTANCE.getLastWindSpeed() + "");
+        windDirection.setText(InMemoryDataStore.INSTANCE.getLastWindDirection() + "");
+        if (InMemoryDataStore.INSTANCE.getLastWindPosition() != null) {
+            latitude.setText(InMemoryDataStore.INSTANCE.getLastWindPosition().latitude + "");
+            longitude.setText(InMemoryDataStore.INSTANCE.getLastWindPosition().longitude + "");
+        }
     }
 
     DecimalFormat speedFormat = new DecimalFormat("##.0");
@@ -118,7 +128,7 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
         BigDecimal round = decimal.setScale(precision, BigDecimal.ROUND_UP);
         return round.floatValue();
     }
-    
+
     @Override
     protected void onPause() {
         locationManager.removeUpdates(this);

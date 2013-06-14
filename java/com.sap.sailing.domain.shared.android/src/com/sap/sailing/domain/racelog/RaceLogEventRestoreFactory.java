@@ -39,7 +39,8 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
             List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
 
     RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint createdAt,
-            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId);
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, 
+            List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
 
     RaceLogPathfinderEvent createPathfinderEvent(TimePoint createdAt, TimePoint logicalTimePoint, Serializable id,
             List<Competitor> competitors, int passId, String pathfinderId);
@@ -49,4 +50,7 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
 
     RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint createdAt, TimePoint timePoint,
             Serializable id, List<Competitor> competitors, int passId, StartProcedureType type);
+    
+    RaceLogProtestStartTimeEvent createProtestStartTimeEvent(TimePoint createdAt, TimePoint timePoint,
+            Serializable id, List<Competitor> competitors, int passId, TimePoint protestStartTime);
 }

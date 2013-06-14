@@ -4,25 +4,14 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 
-public class GateLineOpeningTimeFinder extends RaceLogAnalyzer {
+public class GateLineOpeningTimeFinder extends RaceLogAnalyzer<Long> {
 
     public GateLineOpeningTimeFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
-    public Long getGateLineOpeningTime() {
-        Long gateLineOpeningTime;
-        this.raceLog.lockForRead();
-        try {
-            gateLineOpeningTime = searchForGateLineOpeningTime();
-        } finally {
-            this.raceLog.unlockAfterRead();
-        }
-
-        return gateLineOpeningTime;
-    }
-
-    private Long searchForGateLineOpeningTime() {
+    @Override
+    protected Long performAnalyzation() {
         Long gateLineOpeningTime = null;
 
         for (RaceLogEvent event : getPassEvents()) {

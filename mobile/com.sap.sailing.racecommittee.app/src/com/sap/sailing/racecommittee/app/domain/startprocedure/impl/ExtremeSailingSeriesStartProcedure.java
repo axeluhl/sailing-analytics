@@ -16,7 +16,8 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallDisplayedFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallRemovedFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.racecommittee.app.R;
@@ -54,7 +55,8 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     private EssStartPhaseEventListener startPhaseEventListener;
     private EssRunningRaceEventListener runningRaceEventListener;
     
-    private IndividualRecallFinder individualRecallFinder;
+    private IndividualRecallDisplayedFinder individualRecallDisplayedFinder;
+    private IndividualRecallRemovedFinder individualRecallRemovedFinder;
     
     public ExtremeSailingSeriesStartProcedure(RaceLog raceLog) {
         this.raceLog = raceLog;
@@ -68,8 +70,9 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         startProcedureEventIntervals.add(startPhaseESSTwoUpInterval);
         startProcedureEventIntervals.add(startPhaseESSOneUpInterval);
         startProcedureEventIntervals.add(startPhaseESSOneDownInterval);
-        
-        individualRecallFinder  = new IndividualRecallFinder(raceLog);
+
+        individualRecallDisplayedFinder = new IndividualRecallDisplayedFinder(raceLog);
+        individualRecallRemovedFinder = new IndividualRecallRemovedFinder(raceLog);
     }
 
     @Override
@@ -197,7 +200,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         raceLog.add(event);
         
         StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
-        long raceDuration = eventTime.asMillis()-startTimeFinder.getStartTime().asMillis();
+        long raceDuration = eventTime.asMillis()-startTimeFinder.analyze().asMillis();
         
         TimePoint automaticRaceEnd = eventTime.plus((long) (raceDuration*essAutomaticRaceFinishMultiplyer));
         
@@ -209,7 +212,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     @Override
     public void dispatchAutomaticRaceEndEvent(TimePoint automaticRaceEnd) {
         RaceStatusAnalyzer analyzer = new RaceStatusAnalyzer(raceLog);
-        if(analyzer.getStatus().equals(RaceLogRaceStatus.FINISHING)) {
+        if(analyzer.analyze().equals(RaceLogRaceStatus.FINISHING)) {
             //setFinished(automaticRaceEnd);
         }
     }
@@ -313,9 +316,9 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
     
     public boolean isIndividualRecallDisplayed() {
-        if(this.individualRecallFinder.getIndividualRecallDisplayedTime() != null){
-            if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime() != null){
-                if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime().after(this.individualRecallFinder.getIndividualRecallDisplayedTime())){
+        if(this.individualRecallDisplayedFinder.analyze() != null){
+            if(this.individualRecallRemovedFinder.analyze() != null){
+                if(this.individualRecallRemovedFinder.analyze().after(this.individualRecallDisplayedFinder.analyze())){
                     return false;
                 }
             }
@@ -325,9 +328,9 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
     
     public boolean isIndividualRecallRemoved() {
-        if(this.individualRecallFinder.getIndividualRecallDisplayedTime()!=null){
-            if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime()!=null){
-                if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime().after(this.individualRecallFinder.getIndividualRecallDisplayedTime())){
+        if(this.individualRecallDisplayedFinder.analyze()!=null){
+            if(this.individualRecallRemovedFinder.analyze()!=null){
+                if(this.individualRecallRemovedFinder.analyze().after(this.individualRecallDisplayedFinder.analyze())){
                     return true;
                 }
             }
@@ -398,8 +401,8 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     @Override
-    public List<Class<? extends RaceDialogFragment>> checkForUserActionRequiredActions(MillisecondsTimePoint newStartTime, UserRequiredActionPerformedListener listener) {
-        return new ArrayList<Class<? extends RaceDialogFragment>>();
+    public Class<? extends RaceDialogFragment> checkForUserActionRequiredActions(MillisecondsTimePoint newStartTime, UserRequiredActionPerformedListener listener) {
+        return null;
     }
 
     @Override

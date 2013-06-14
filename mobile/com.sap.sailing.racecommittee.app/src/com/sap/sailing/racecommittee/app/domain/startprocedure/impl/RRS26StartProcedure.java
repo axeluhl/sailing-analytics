@@ -16,7 +16,8 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallDisplayedFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallRemovedFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.RunningRaceEventListener;
@@ -53,7 +54,8 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     private RRS26RunningRaceEventListener runningRaceEventListener;
     private UserRequiredActionPerformedListener userRequiredActionPerformedListener;
 
-    private IndividualRecallFinder individualRecallFinder;
+    private IndividualRecallDisplayedFinder individualRecallDisplayedFinder;
+    private IndividualRecallRemovedFinder individualRecallRemovedFinder;
     private Flags startModeFlag = Flags.PAPA;
     private String boatClassName = "";
     private boolean startModeFlagChosen = false;
@@ -70,7 +72,8 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
         startProcedureEventIntervals.add(startPhaseStartModeDownInterval);
         startProcedureEventIntervals.add(startPhaseClassDownInterval);
 
-        individualRecallFinder = new IndividualRecallFinder(raceLog);
+        individualRecallDisplayedFinder = new IndividualRecallDisplayedFinder(raceLog);
+        individualRecallRemovedFinder = new IndividualRecallRemovedFinder(raceLog);
     }
 
     @Override
@@ -138,7 +141,7 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
         raceLog.add(event);
 
         if (startPhaseEventListener != null) {
-            startPhaseEventListener.onStartModeUp(this.startModeFlag);
+            startPhaseEventListener.onStartModeDown(this.startModeFlag);
         }
     }
 
@@ -152,7 +155,7 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
         if (startPhaseEventListener != null) {
             startPhaseEventListener.onClassDown();
         }
-        
+
         if (raceStateChangedListener != null) {
             raceStateChangedListener.onRaceStarted(eventTime);
         }
@@ -194,7 +197,7 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     @Override
     public void dispatchAutomaticRaceEndEvent(TimePoint automaticRaceEnd) {
         RaceStatusAnalyzer analyzer = new RaceStatusAnalyzer(raceLog);
-        if (analyzer.getStatus().equals(RaceLogRaceStatus.FINISHING)) {
+        if (analyzer.analyze().equals(RaceLogRaceStatus.FINISHING)) {
             // setFinished(automaticRaceEnd);
         }
     }
@@ -290,7 +293,7 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     }
 
     public void setIndividualRecallRemoval(TimePoint eventTime) {
-        if (this.getIndividualRecallDisplayed()) {
+        if (isIndividualRecallDisplayed()) {
             RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
                     Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, /* isDisplayed */
                     false);
@@ -300,19 +303,6 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
                 runningRaceEventListener.onIndividualRecallRemoval();
             }
         }
-    }
-
-    public boolean getIndividualRecallDisplayed() {
-        if (this.individualRecallFinder.getIndividualRecallDisplayedTime() != null) {
-            if (this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime() != null) {
-                if (this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime().after(
-                        this.individualRecallFinder.getIndividualRecallDisplayedTime())) {
-                    return false;
-                }
-            }
-            return true;
-        } else
-            return false;
     }
 
     @Override
@@ -376,10 +366,10 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     public void setStartModeFlag(Flags startModeFlag) {
         this.startModeFlag = startModeFlag;
         this.startModeFlagChosen = true;
-        if(startPhaseEventListener!=null){
+        if (startPhaseEventListener != null) {
             startPhaseEventListener.onStartModeFlagChosen(startModeFlag);
         }
-        if(userRequiredActionPerformedListener != null){
+        if (userRequiredActionPerformedListener != null) {
             userRequiredActionPerformedListener.onUserRequiredActionPerformed();
         }
     }
@@ -390,9 +380,10 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     }
 
     public boolean isIndividualRecallDisplayed() {
-        if(this.individualRecallFinder.getIndividualRecallDisplayedTime() != null){
-            if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime() != null){
-                if(this.individualRecallFinder.getIndividualRecallDisplayedRemovalTime().after(this.individualRecallFinder.getIndividualRecallDisplayedTime())){
+        if (this.individualRecallDisplayedFinder.analyze() != null) {
+            if (this.individualRecallRemovedFinder.analyze() != null) {
+                if (this.individualRecallRemovedFinder.analyze().after(
+                        this.individualRecallDisplayedFinder.analyze())) {
                     return false;
                 }
             }
@@ -400,7 +391,7 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
         }
         return false;
     }
-    
+
     @Override
     public Class<? extends RaceFragment> getFinishingRaceFragment() {
         return RRS26FinishingRaceFragment.class;
@@ -410,17 +401,18 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     public Class<? extends RaceFragment> getFinishedRaceFragment() {
         return RRS26FinishedRaceFragment.class;
     }
-    
+
     @Override
-    public List<Class<? extends RaceDialogFragment>> checkForUserActionRequiredActions(MillisecondsTimePoint newStartTime, UserRequiredActionPerformedListener listener) {
-        List<Class<? extends RaceDialogFragment>>  actionList = new ArrayList<Class<? extends RaceDialogFragment>>();
-        if(MillisecondsTimePoint.now().after(newStartTime.minus(startPhaseStartModeUpInterval)) && !startModeFlagChosen){
-            actionList.add(RaceChooseStartModeDialog.class);
+    public Class<? extends RaceDialogFragment> checkForUserActionRequiredActions(
+            MillisecondsTimePoint newStartTime, UserRequiredActionPerformedListener listener) {
+        if (MillisecondsTimePoint.now().after(newStartTime.minus(startPhaseStartModeUpInterval))
+                && !startModeFlagChosen) {
             this.userRequiredActionPerformedListener = listener;
+            return RaceChooseStartModeDialog.class;
         }
-        return actionList;
+        return null;
     }
-    
+
     @Override
     public Class<? extends RaceDialogFragment> getCourseDesignDialog() {
         return ClassicCourseDesignDialogFragment.class;

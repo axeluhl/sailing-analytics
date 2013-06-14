@@ -658,12 +658,12 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 // in case no regatta has been selected we check if there would be a matching regatta
                 for (RegattaDTO regatta : getAvailableRegattas()) {
                     if ((tracTracBoatClassName == null && regatta.boatClass == null) ||
-                            (regatta.boatClass != null && tracTracBoatClassName.equalsIgnoreCase(regatta.boatClass.name))) {
+                            (regatta.boatClass != null && tracTracBoatClassName.equalsIgnoreCase(regatta.boatClass.getName()))) {
                         return false;
                     }
                 }
             } else {
-                if (!tracTracBoatClassName.equalsIgnoreCase(selectedRegatta.boatClass.name)) {
+                if (!tracTracBoatClassName.equalsIgnoreCase(selectedRegatta.boatClass.getName())) {
                     return false;
                 }
             }
@@ -680,7 +680,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         RegattaDTO selectedRegatta = getSelectedRegatta();
         RegattaIdentifier regattaIdentifier = null;
         if (selectedRegatta != null) {
-            regattaIdentifier = new RegattaName(selectedRegatta.name);
+            regattaIdentifier = new RegattaName(selectedRegatta.getName());
         }
         // Check if the assigned regatta makes sense
         List<TracTracRaceRecordDTO> allRaces = this.raceList.getList();
@@ -698,8 +698,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             builder.append("WARNING\n");
             if (selectedRegatta != null) {
                 builder.append(this.stringMessages.boatClassDoesNotMatchSelectedRegatta(
-                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.name,
-                        selectedRegatta.name));
+                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName(),
+                        selectedRegatta.getName()));
             } else {
                 builder.append(this.stringMessages.regattaExistForSelectedBoatClass());
             }

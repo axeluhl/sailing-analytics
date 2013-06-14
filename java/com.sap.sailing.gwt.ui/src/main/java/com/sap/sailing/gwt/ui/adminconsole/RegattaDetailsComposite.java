@@ -101,7 +101,7 @@ public class RegattaDetailsComposite extends Composite {
         TextColumn<SeriesDTO> seriesNameColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
-                return series.name;
+                return series.getName();
             }
         };
 
@@ -147,7 +147,7 @@ public class RegattaDetailsComposite extends Composite {
                 int fleetsCount = series.getFleets().size();
                 int i = 1;
                 for(FleetDTO fleet: series.getFleets()) {
-                    result += fleet.name;
+                    result += fleet.getName();
                     result += "(" + fleet.getOrderNo() + ") ";
                     if (i < fleetsCount) {
                         result += ", ";
@@ -237,26 +237,26 @@ public class RegattaDetailsComposite extends Composite {
         final boolean isStartsWithZeroScoreChanged = series.isStartsWithZeroScore() != seriesDescriptor.isStartsWithZeroScore();
         final boolean seriesResultDiscardingThresholdsChanged = !Arrays.equals(series.getDiscardThresholds(),
                 seriesDescriptor.getResultDiscardingThresholds());
-        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
+        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
         final List<String> raceColumnsToAdd = new ArrayList<String>();
         final List<String> raceColumnsToRemove = new ArrayList<String>();
         
         for (RaceColumnDTO newRaceColumn : newRaceColumns) {
             if (!existingRaceColumns.contains(newRaceColumn)) {
-                raceColumnsToAdd.add(newRaceColumn.name);
+                raceColumnsToAdd.add(newRaceColumn.getName());
             }
         }
         for (RaceColumnDTO existingRaceColumn : existingRaceColumns) {
             if (!newRaceColumns.contains(existingRaceColumn)) {
-                raceColumnsToRemove.add(existingRaceColumn.name);
+                raceColumnsToRemove.add(existingRaceColumn.getName());
             }
         }
-        sailingService.addRaceColumnsToSeries(regattaIdentifier, series.name, raceColumnsToAdd, new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
+        sailingService.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnsToAdd, new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to add race columns "
-                            + raceColumnsToAdd + " to series " + series.name
+                            + raceColumnsToAdd + " to series " + series.getName()
                             + ": " + caught.getMessage());
 
                 }
@@ -267,11 +267,11 @@ public class RegattaDetailsComposite extends Composite {
                 }
             });
         
-        sailingService.removeRaceColumnsFromSeries(regattaIdentifier, series.name, raceColumnsToRemove, new AsyncCallback<Void>() {
+        sailingService.removeRaceColumnsFromSeries(regattaIdentifier, series.getName(), raceColumnsToRemove, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error trying to remove race columns "
-                        + raceColumnsToAdd + " from series " + series.name
+                        + raceColumnsToAdd + " from series " + series.getName()
                         + ": " + caught.getMessage());
             }
 
@@ -281,13 +281,13 @@ public class RegattaDetailsComposite extends Composite {
             }
         });
         if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged) {
-            sailingService.updateSeries(regattaIdentifier, series.name, seriesDescriptor.isMedal(),
+            sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.isMedal(),
                     seriesDescriptor.getResultDiscardingThresholds(), seriesDescriptor.isStartsWithZeroScore(),
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError("Error trying to remove race columns "
-                                    + raceColumnsToAdd + " from series " + series.name
+                                    + raceColumnsToAdd + " from series " + series.getName()
                                     + ": " + caught.getMessage());
                         }
 
@@ -301,8 +301,8 @@ public class RegattaDetailsComposite extends Composite {
 
     private void updateRegattaDetails() {
         if (regatta != null) {
-            regattaName.setText(regatta.name);
-            boatClassName.setText(regatta.boatClass != null ? regatta.boatClass.name : "");
+            regattaName.setText(regatta.getName());
+            boatClassName.setText(regatta.boatClass != null ? regatta.boatClass.getName() : "");
             defaultCourseArea.setText(regatta.defaultCourseAreaIdAsString == null ? "" : regatta.defaultCourseAreaName);
             ScoringSchemeType scoringScheme = regatta.scoringScheme;
             String scoringSystemText = scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);               

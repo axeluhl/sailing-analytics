@@ -5,7 +5,7 @@ import android.os.Bundle;
 
 import com.sap.sailing.racecommittee.app.R;
 
-public class LoadFailedDialog extends FragmentDialogFragment {
+public class LoadFailedDialog extends FragmentAttachedDialogFragment {
     private static final String ARGS_ERROR_MSG = LoadFailedDialog.class.getName() + ".errorMessage";
 
     public static LoadFailedDialog create(String errorMessage) {

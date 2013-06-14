@@ -19,6 +19,7 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.analyzing.impl.ConfirmedFinishPositioningListFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishPositioningListFinder;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -116,12 +117,20 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         
         int numberOfCompetitorsInLeaderboard = Util.size(leaderboard.getCompetitors());
         int numberOfCompetitorsInRace;
+        List<Triple<Serializable, String, MaxPointsReason>> positioningList;
         
         numberOfCompetitorsInRace = getNumberOfCompetitorsInRace(raceColumn, fleet, numberOfCompetitorsInLeaderboard);
         
-        FinishPositioningListFinder positioningListFinder = new FinishPositioningListFinder(raceLog);
-
-        List<Triple<Serializable, String, MaxPointsReason>> positioningList = positioningListFinder.getFinishPositioningList();
+        ConfirmedFinishPositioningListFinder confirmedPositioningListFinder = new ConfirmedFinishPositioningListFinder(raceLog);
+        positioningList = confirmedPositioningListFinder.analyze();
+        
+        if (positioningList == null) {
+            // we expect this case for old sailing events such as ESS Singapore, Quingdao, where the confirmation event did not contain the finish
+            // positioning list
+            FinishPositioningListFinder positioningListFinder = new FinishPositioningListFinder(raceLog);
+            positioningList = positioningListFinder.analyze();
+        }
+        
         if (positioningList != null) {
             for (Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positioningList) {
                 Competitor competitor = DomainFactory.INSTANCE.getExistingCompetitorById(positionedCompetitor.getA());

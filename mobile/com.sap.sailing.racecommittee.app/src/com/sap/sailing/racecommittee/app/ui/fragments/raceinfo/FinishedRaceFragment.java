@@ -25,8 +25,11 @@ import android.widget.TextView;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.state.RaceState;
+import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PositioningFragment;
 import com.sap.sailing.racecommittee.app.utils.MailHelper;
 
 public class FinishedRaceFragment extends RaceFragment {
@@ -64,7 +67,7 @@ public class FinishedRaceFragment extends RaceFragment {
         firstBoatFinishedView.setText(getFirstBoatFinishedTimeText());
         finishTimeView.setText(getFinishTimeText());
         timeLimitView.setText(getTimeLimitText());
-        protestStartTimeView.setText(getProtestStartTimeText());
+        updateProtestStartTimeLabel();
 
         Button positioningButton = (Button) getView().findViewById(R.id.buttonPositioning);
         positioningButton.setOnClickListener(new OnClickListener() {
@@ -87,6 +90,26 @@ public class FinishedRaceFragment extends RaceFragment {
         });
     }
 
+    private void updateProtestStartTimeLabel() {
+        protestStartTimeView.setText(getProtestStartTimeText());
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        ExLog.i(FinishedRaceFragment.class.getName(),
+                String.format("Fragment %s is now shown", FinishedRaceFragment.class.getName()));
+        
+        getRace().getState().registerStateChangeListener(stateListener);
+    }
+    
+    @Override
+    public void onStop() {
+        getRace().getState().unregisterStateChangeListener(stateListener);
+        super.onStop();
+    }
+    
+
     private void createFinisherImageFile() {
         File imageDirectory = new File(Environment.getExternalStorageDirectory() + AppConstants.ApplicationFolder);
         imageDirectory.mkdirs();
@@ -108,7 +131,10 @@ public class FinishedRaceFragment extends RaceFragment {
     }
 
     private CharSequence getProtestStartTimeText() {
-        // TODO Currently no protest time...
+        TimePoint protestStartTime = getRace().getState().getProtestStartTime();
+        if (protestStartTime != null) {
+            return String.format(getString(R.string.protest_start_time), getFormattedTime(protestStartTime.asDate()));
+        }
         return getString(R.string.empty);
     }
 
@@ -168,12 +194,25 @@ public class FinishedRaceFragment extends RaceFragment {
     private String getFormattedTimePart(int timePart) {
         return (timePart < 10) ? "0" + timePart : String.valueOf(timePart);
     }
+    
+    private RaceStateChangedListener stateListener = new RaceStateChangedListener() {
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        ExLog.w(FinishedRaceFragment.class.getName(),
-                String.format("Fragment %s is now shown", FinishedRaceFragment.class.getName()));
-    }
+        @Override
+        public void onRaceStateProtestStartTimeChanged(RaceState state) {
+            if (getRace().getState().equals(state)) {
+                updateProtestStartTimeLabel();
+            }
+        }
+        
+        @Override
+        public void onRaceStateCourseDesignChanged(RaceState state) {
+            // not my business
+        }
+        
+        @Override
+        public void onRaceStateStatusChanged(RaceState state) {
+            // not my business
+        }
+    };
 
 }

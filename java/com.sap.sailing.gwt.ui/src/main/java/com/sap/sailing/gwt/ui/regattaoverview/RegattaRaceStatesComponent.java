@@ -357,7 +357,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         if (raceGroupDTOs != null) {
             for (RaceGroupDTO raceGroup : raceGroupDTOs) {
                 for (RaceGroupSeriesDTO series : raceGroup.getSeries()) {
-                    if (!series.name.equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME)) {
+                    if (!series.getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME)) {
                         result = true;
                         break;
                     }
@@ -373,7 +373,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             for (RaceGroupDTO raceGroup : raceGroupDTOs) {
                 for (RaceGroupSeriesDTO series : raceGroup.getSeries()) {
                     for (FleetDTO fleet : series.getFleets()) {
-                        if (!fleet.name.equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
+                        if (!fleet.getName().equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
                             result = true;
                             break;
                         }
@@ -470,7 +470,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private void fillVisibleRegattasInSettingsIfEmpty() {
         if (settings.getVisibleRegattas().isEmpty() && raceGroupDTOs != null) {
             for (RaceGroupDTO raceGroup : raceGroupDTOs) {
-                settings.getVisibleRegattas().add(raceGroup.name);
+                settings.getVisibleRegattas().add(raceGroup.getName());
             }
         }
     }

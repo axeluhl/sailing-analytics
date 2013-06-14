@@ -229,7 +229,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     private Map<String, CompetitorDTO> canonicalizeLeaderboardSailIDs(LeaderboardDTO leaderboard) {
         Map<String, CompetitorDTO> result = new HashMap<String, CompetitorDTO>();
         for (CompetitorDTO competitor : leaderboard.competitors) {
-            String canonicalizedSailID = canonicalizeSailID(competitor.sailID.trim(), competitor.threeLetterIocCountryCode.trim());
+            String canonicalizedSailID = canonicalizeSailID(competitor.getSailID().trim(), competitor.getThreeLetterIocCountryCode().trim());
             if (canonicalizedSailID != null) {
                 result.put(canonicalizedSailID, competitor);
             }
@@ -286,7 +286,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
         int c = 1;
         for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
             VerticalPanel vp = new VerticalPanel();
-            vp.add(new Label(raceColumn.name));
+            vp.add(new Label(raceColumn.getName()));
             vp.add(raceNameOrNumberChoosers.get(raceColumn));
             vp.add(raceColumnCheckboxes.get(raceColumn));
             grid.setWidget(0, c, vp);
@@ -297,13 +297,13 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
             String officialSailID = getSelectedString(officialSailIDChoosers, competitor);
             int column = 0;
             VerticalPanel vp = new VerticalPanel();
-            vp.add(new Label(competitor.sailID+" "+competitor.name));
+            vp.add(new Label(competitor.getSailID()+" "+competitor.getName()));
             vp.add(this.officialSailIDChoosers.get(competitor));
             vp.add(competitorCheckboxes.get(competitor));
             grid.setWidget(row, column++, vp);
             LeaderboardRowDTO leaderboardRow = leaderboard.rows.get(competitor);
             for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-                LeaderboardEntryDTO entry = leaderboardRow.fieldsByRaceColumnName.get(raceColumn.name);
+                LeaderboardEntryDTO entry = leaderboardRow.fieldsByRaceColumnName.get(raceColumn.getName());
                 String raceNameOrNumber = getSelectedString(raceNameOrNumberChoosers, raceColumn);
                 VerticalPanel cell = new VerticalPanel();
                 cell.add(new Label(entry.netPoints+"/"+entry.totalPoints+"/"+entry.reasonForMaxPoints+

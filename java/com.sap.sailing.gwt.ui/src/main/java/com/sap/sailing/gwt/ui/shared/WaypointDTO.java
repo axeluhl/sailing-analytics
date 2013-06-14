@@ -18,7 +18,7 @@ public class WaypointDTO extends NamedDTO {
     
     public WaypointDTO(String name, ControlPointDTO controlPoint, List<MarkDTO> marks, NauticalSide passingSide) {
         super(name);
-        this.name = name;
+        this.setName(name);
         this.marks = marks;
         this.controlPoint = controlPoint;
         this.passingSide = passingSide;

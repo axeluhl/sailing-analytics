@@ -20,6 +20,7 @@ import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
+import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
@@ -70,8 +71,8 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
 
     @Override
     public RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint createdAt,
-            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId) {
-        return new RaceLogFinishPositioningConfirmedEventImpl(createdAt, logicalTimePoint, id, competitors, passId);
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
+        return new RaceLogFinishPositioningConfirmedEventImpl(createdAt, logicalTimePoint, id, competitors, passId, positionedCompetitors);
     }
 
     @Override
@@ -90,6 +91,12 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
     public RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint createdAt, TimePoint timePoint,
             Serializable id, List<Competitor> competitors, int passId, StartProcedureType type) {
         return new RaceLogStartProcedureChangedEventImpl(createdAt, timePoint, id, competitors, passId, type);
+    }
+
+    @Override
+    public RaceLogProtestStartTimeEvent createProtestStartTimeEvent(TimePoint createdAt, TimePoint timePoint,
+            Serializable id, List<Competitor> competitors, int passId, TimePoint protestStartTime) {
+        return new RaceLogProtestStartTimeEventImpl(createdAt, timePoint, id, competitors, passId, protestStartTime);
     }
 
 

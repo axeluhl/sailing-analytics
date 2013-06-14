@@ -64,7 +64,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         courseAreaPanel.add(courseAreaGrid);
         
         for (CourseAreaDTO courseAreaDTO : courseAreas) {
-            CheckBox checkBox = dialog.createCheckbox(courseAreaDTO.name);
+            CheckBox checkBox = dialog.createCheckbox(courseAreaDTO.getName());
             checkBox.setValue(Util.contains(initialSettings.getVisibleCourseAreas(), courseAreaDTO.id));
             courseAreaCheckBoxMap.put(courseAreaDTO.id, checkBox);
             
@@ -98,8 +98,8 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         
         for (RaceGroupDTO raceGroup : raceGroups) {
             CheckBox checkBox = dialog.createCheckbox(raceGroup.displayName);
-            checkBox.setValue(Util.contains(initialSettings.getVisibleRegattas(), raceGroup.name));
-            regattaCheckBoxMap.put(raceGroup.name, checkBox);
+            checkBox.setValue(Util.contains(initialSettings.getVisibleRegattas(), raceGroup.getName()));
+            regattaCheckBoxMap.put(raceGroup.getName(), checkBox);
             
             regattaGrid.setWidget(rowIndex, columnIndex++, checkBox);
             if(columnIndex == maxRegattasPerRow) {

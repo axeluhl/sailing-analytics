@@ -262,8 +262,8 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
     }
     
     private void fillEventAndVenueName() {
-        eventNameLabel.setText(eventDTO.name);
-        venueNameLabel.setText(eventDTO.venue.name);
+        eventNameLabel.setText(eventDTO.getName());
+        venueNameLabel.setText(eventDTO.venue.getName());
     }
 
     protected void setEvent(EventDTO event) {

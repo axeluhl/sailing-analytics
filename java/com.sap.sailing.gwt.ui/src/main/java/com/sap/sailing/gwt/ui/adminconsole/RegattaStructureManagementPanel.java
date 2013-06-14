@@ -123,19 +123,19 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         for (SeriesDTO seriesDTO : newRegatta.series) {
             List<Triple<String, Integer, Color>> fleets = new ArrayList<Triple<String, Integer, Color>>();
             for(FleetDTO fleetDTO : seriesDTO.getFleets()) {
-                Triple<String, Integer, Color> fleetTriple = new Triple<String, Integer, Color>(fleetDTO.name, fleetDTO.getOrderNo(), fleetDTO.getColor());
+                Triple<String, Integer, Color> fleetTriple = new Triple<String, Integer, Color>(fleetDTO.getName(), fleetDTO.getOrderNo(), fleetDTO.getColor());
                 fleets.add(fleetTriple);
             }
             Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]> seriesPair =
                     new Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>(
                     fleets, new Pair<Boolean, Boolean>(seriesDTO.isMedal(), seriesDTO.isStartsWithZeroScore()), seriesDTO.getDiscardThresholds());
-            seriesStructure.put(seriesDTO.name, seriesPair);
+            seriesStructure.put(seriesDTO.getName(), seriesPair);
         }
-        sailingService.createRegatta(newRegatta.name, newRegatta.boatClass==null?null:newRegatta.boatClass.name, seriesStructure, true,
+        sailingService.createRegatta(newRegatta.getName(), newRegatta.boatClass==null?null:newRegatta.boatClass.getName(), seriesStructure, true,
                 newRegatta.scoringScheme, newRegatta.defaultCourseAreaIdAsString, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to create new regatta " + newRegatta.name + ": " + t.getMessage());
+                errorReporter.reportError("Error trying to create new regatta " + newRegatta.getName() + ": " + t.getMessage());
             }
 
             @Override

@@ -52,7 +52,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     }
     
     public String getRaceColumnName() {
-        return name;
+        return getName();
     }
     
     public Double getExplicitFactor() {
@@ -199,11 +199,19 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = 1;
+        int result = super.hashCode();
+        long temp;
+        temp = Double.doubleToLongBits(effectiveFactor);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        result = prime * result + ((explicitFactor == null) ? 0 : explicitFactor.hashCode());
         result = prime * result + ((fleets == null) ? 0 : fleets.hashCode());
+        result = prime * result + ((isValidInTotalScore == null) ? 0 : isValidInTotalScore.hashCode());
         result = prime * result + (medalRace ? 1231 : 1237);
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((racesPerFleet == null) ? 0 : racesPerFleet.hashCode());
+        result = prime * result
+                + ((trackedRaceIdentifiersPerFleet == null) ? 0 : trackedRaceIdentifiersPerFleet.hashCode());
+        result = prime * result
+                + ((whenLastTrackedRaceWasLiveByFleet == null) ? 0 : whenLastTrackedRaceWasLiveByFleet.hashCode());
         return result;
     }
 
@@ -211,31 +219,48 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (obj == null)
+        if (!super.equals(obj))
             return false;
         if (getClass() != obj.getClass())
             return false;
         RaceColumnDTO other = (RaceColumnDTO) obj;
+        if (Double.doubleToLongBits(effectiveFactor) != Double.doubleToLongBits(other.effectiveFactor))
+            return false;
+        if (explicitFactor == null) {
+            if (other.explicitFactor != null)
+                return false;
+        } else if (!explicitFactor.equals(other.explicitFactor))
+            return false;
         if (fleets == null) {
             if (other.fleets != null)
                 return false;
         } else if (!fleets.equals(other.fleets))
             return false;
-        if (medalRace != other.medalRace)
-            return false;
-        if (name == null) {
-            if (other.name != null)
+        if (isValidInTotalScore == null) {
+            if (other.isValidInTotalScore != null)
                 return false;
-        } else if (!name.equals(other.name))
+        } else if (!isValidInTotalScore.equals(other.isValidInTotalScore))
+            return false;
+        if (medalRace != other.medalRace)
             return false;
         if (racesPerFleet == null) {
             if (other.racesPerFleet != null)
                 return false;
         } else if (!racesPerFleet.equals(other.racesPerFleet))
             return false;
+        if (trackedRaceIdentifiersPerFleet == null) {
+            if (other.trackedRaceIdentifiersPerFleet != null)
+                return false;
+        } else if (!trackedRaceIdentifiersPerFleet.equals(other.trackedRaceIdentifiersPerFleet))
+            return false;
+        if (whenLastTrackedRaceWasLiveByFleet == null) {
+            if (other.whenLastTrackedRaceWasLiveByFleet != null)
+                return false;
+        } else if (!whenLastTrackedRaceWasLiveByFleet.equals(other.whenLastTrackedRaceWasLiveByFleet))
+            return false;
         return true;
     }
-
+    
     public void setEffectiveFactor(double effectiveFactor) {
         this.effectiveFactor = effectiveFactor;
     }
