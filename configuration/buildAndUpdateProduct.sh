@@ -374,10 +374,11 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     # Make sure this script is up2date at least for the next run
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
-    echo $VERSION_INFO > $ACDIR/configuration/jetty/version.txt
-
     # make sure to save the information from env.sh
     . $ACDIR/env.sh
+
+    echo "$VERSION_INFO-$MONGDB_PORT-$MEMORY-$REPLICATION_CHANNEL" > $ACDIR/configuration/jetty/version.txt
+
     sed -i "s/mongo.port=.*$/mongo.port=$MONGODB_PORT/g" $ACDIR/configuration/config.ini
     sed -i "s/expedition.udp.port=.*$/expedition.udp.port=$EXPEDITION_PORT/g" $ACDIR/configuration/config.ini
     sed -i "s/replication.exchangeName=.*$/replication.exchangeName=$REPLICATION_CHANNEL/g" $ACDIR/configuration/config.ini

@@ -38,7 +38,7 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
      */
     private List<CompetitorDTO> suppressedCompetitors;
 
-    private Map<RaceColumnDTO, List<CompetitorDTO>> competitorOrderingPerRace;
+    private Map<String, List<CompetitorDTO>> competitorOrderingPerRaceColumnName;
 
     private Date timePointOfLastCorrectionsValidity;
 
@@ -64,7 +64,7 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
     }
 
     private void initCollections() {
-        competitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>();
+        competitorOrderingPerRaceColumnName = new HashMap<String, List<CompetitorDTO>>();
         this.suppressedCompetitors = new ArrayList<CompetitorDTO>();
     }
     
@@ -100,20 +100,28 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
         return higherScoresIsBetter;
     }
 
-    public void setCompetitorsFromBestToWorst(RaceColumnDTO raceColumn, List<CompetitorDTO> orderedCompetitors) {
-        competitorOrderingPerRace.put(raceColumn, orderedCompetitors);
+    public void setCompetitorsFromBestToWorst(String raceColumnName, List<CompetitorDTO> orderedCompetitors) {
+        competitorOrderingPerRaceColumnName.put(raceColumnName, orderedCompetitors);
     }
     
-    public void setCompetitorOrderingPerRace(Map<RaceColumnDTO, List<CompetitorDTO>> competitorOrderingPerRace) {
-        this.competitorOrderingPerRace = competitorOrderingPerRace;
+    public void setCompetitorsFromBestToWorst(RaceColumnDTO raceColumn, List<CompetitorDTO> newOrdering) {
+        setCompetitorsFromBestToWorst(raceColumn.getName(), newOrdering);
+    }
+    
+    public void setCompetitorOrderingPerRace(Map<String, List<CompetitorDTO>> competitorOrderingPerRaceColumnName) {
+        this.competitorOrderingPerRaceColumnName = competitorOrderingPerRaceColumnName;
     }
 
-    public Map<RaceColumnDTO, List<CompetitorDTO>> getCompetitorOrderingPerRace() {
-        return competitorOrderingPerRace;
+    public Map<String, List<CompetitorDTO>> getCompetitorOrderingPerRaceColumnName() {
+        return competitorOrderingPerRaceColumnName;
     }
     
+    public List<CompetitorDTO> getCompetitorsFromBestToWorst(String raceColumnName) {
+        return competitorOrderingPerRaceColumnName.get(raceColumnName);
+    }
+
     public List<CompetitorDTO> getCompetitorsFromBestToWorst(RaceColumnDTO raceColumn) {
-        return competitorOrderingPerRace.get(raceColumn);
+        return competitorOrderingPerRaceColumnName.get(raceColumn.getName());
     }
 
     public int getRank(CompetitorDTO competitor) {
