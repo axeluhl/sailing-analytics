@@ -232,7 +232,9 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     }
     
     @Override
-    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo, long millisecondsClientIsBehindServer) {
+        raceboardTimer.setMillisecondsClientIsCurrentlyBehindServer(millisecondsClientIsBehindServer);
+        leaderboardTimer.setMillisecondsClientIsCurrentlyBehindServer(millisecondsClientIsBehindServer);
         if (currentLiveRace != null) {
             RaceTimesInfoDTO currentRaceTimes = raceTimesInfo.get(currentLiveRace);
 

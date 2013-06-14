@@ -152,9 +152,10 @@ public class CompareCompetitorsChartDialog extends DialogBoxExt implements RaceT
     }
     
     @Override
-    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos, long millisecondsClientIsBehindServer) {
+        timer.setMillisecondsClientIsCurrentlyBehindServer(millisecondsClientIsBehindServer);
         RegattaAndRaceIdentifier selectedRace = getSelectedRace();
-        if(selectedRace != null) {
+        if (selectedRace != null) {
             updateMinMax(raceTimesInfos.get(selectedRace));
         }
     }

@@ -242,7 +242,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
     
     @Override
-    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos, long millisecondsClientIsBehindServer) {
+        timer.setMillisecondsClientIsCurrentlyBehindServer(millisecondsClientIsBehindServer);
         updateTimeInfo(raceTimesInfos.get(selectedRace));
     }
 }

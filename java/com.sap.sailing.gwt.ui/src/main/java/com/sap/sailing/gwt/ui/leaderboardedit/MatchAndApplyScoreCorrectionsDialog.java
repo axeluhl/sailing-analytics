@@ -419,6 +419,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                 @Override
                 public void onSuccess(Void result) {
                     Window.setStatus(stringMessages.successfullyUpdatedScores());
+                    // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
                     leaderboardPanel.timeChanged(new Date()); // reload leaderboard contents to reflect changes
                     // leaderboard panel sets busy indicator to non-busy after done with updating
                 }

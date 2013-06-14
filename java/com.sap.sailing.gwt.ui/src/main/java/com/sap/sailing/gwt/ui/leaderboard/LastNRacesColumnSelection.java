@@ -41,7 +41,7 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
         this.numberOfLastRacesToShow = numberOfLastRacesToShow;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
-        raceTimesInfosReceived(raceTimesInfoProvider.getRaceTimesInfos());
+        raceTimesInfosReceived(raceTimesInfoProvider.getRaceTimesInfos(), /* millisecondsClientIsBehindServer is guessed here */ 0);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
     }
 
     @Override
-    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo, long millisecondsClientIsBehindServer) {
         this.raceTimesInfo = raceTimesInfo;
     }
 

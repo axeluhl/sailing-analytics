@@ -515,7 +515,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             // wait for the first update and adjust leaderboard once the race times have been received
             final RaceTimesInfoProviderListener raceTimesInfoProviderListener = new RaceTimesInfoProviderListener() {
                 @Override
-                public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
+                public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo, long millisecondsClientIsBehindServer) {
+                    timer.setMillisecondsClientIsCurrentlyBehindServer(millisecondsClientIsBehindServer);
                     updateLeaderboard(getLeaderboard());
                     getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener(this);
                 }

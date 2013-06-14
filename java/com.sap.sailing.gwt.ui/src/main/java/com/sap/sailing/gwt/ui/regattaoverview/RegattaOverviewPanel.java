@@ -196,6 +196,7 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         mainPanel.add(flexTable);
         mainPanel.add(grid);
         
+        // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
         onUpdateUI(new Date());
     }
 

@@ -74,6 +74,7 @@ public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
         if(race.trackedRace != null && race.trackedRace.startOfTracking != null) {
             timeBox = createDateBox(race.trackedRace.startOfTracking.getTime(), 20);
         } else {
+            // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
             Date now = new Date();
             timeBox = createDateBox(now.getTime(), 20);
         }

@@ -281,7 +281,7 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
     }
     
     @Override
-    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo, long millisecondsClientIsBehindServer) {
         // TODO Auto-generated method stub
 
     }

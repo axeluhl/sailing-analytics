@@ -7,6 +7,6 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 public interface RaceTimesInfoProviderListener {
 
-    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo);
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo, long millisecondsClientIsBehindServer);
     
 }

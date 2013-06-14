@@ -30,7 +30,7 @@ public class Timer {
     private Date time;
 
     /**
-     * The time delay to the current point in time in millisseconds which
+     * The time delay to the current point in time in milliseconds which
      * will only be used in {@link PlayModes#Live} play mode.  
      */
     private long livePlayDelayInMillis;
@@ -87,6 +87,20 @@ public class Timer {
     private boolean delaySetExplicity;
     
     /**
+     * The clocks of a client cannot be expected to be synchronized to the same time source as the server clock.
+     * Therefore, there is a good chance for a significant time difference between client and server. While this does
+     * not matter in replay mode where the client requests data for some arbitrary point in time, in live mode the
+     * client at least should display the server time reasonably correct. Times in requests to the server in live mode
+     * shall always be encoded as <code>null</code> to tell the server to use its server time. This will also help
+     * improve the chances for cache hits.<p>
+     * 
+     * The time difference is maintained by applying an exponential moving average across the time differences announced through
+     * {@link #setMillisecondsClientIsCurrentlyBehindServer}. The field starts out with 0 as default value, implying the client
+     * clock has exactly the same time as the server clock.
+     */
+    private long millisecondsClientIsBehindServer;
+    
+    /**
      * The timer can run in two different modes: Live and Replay
      * 'Live' means the timer is used for a real time event
      * 'Replay' means the timer is used for an already finished event in the past 
@@ -112,6 +126,7 @@ public class Timer {
      */
     public Timer(PlayModes playMode, long refreshInterval) {
         this.refreshInterval = refreshInterval;
+        // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
         time = new Date();
         timeListeners = new HashSet<TimeListener>();
         playStateListeners = new HashSet<PlayStateListener>();
@@ -136,6 +151,11 @@ public class Timer {
     
     public void removePlayStateListener(PlayStateListener listener) {
         playStateListeners.remove(listener);
+    }
+    
+    public void setMillisecondsClientIsCurrentlyBehindServer(long milliseconds) {
+        final double exponentialMovingAverageFactor = 0.5;
+        millisecondsClientIsBehindServer = (long) (millisecondsClientIsBehindServer * exponentialMovingAverageFactor + (1.-exponentialMovingAverageFactor) * milliseconds);
     }
     
     public void setTime(long timePointAsMillis) {
@@ -222,7 +242,7 @@ public class Timer {
             playState = PlayStates.Playing;
             if (playMode == PlayModes.Live) {
                 // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"; the server needs to tell the client its time
-                setTime(System.currentTimeMillis()-livePlayDelayInMillis);
+                setTime(System.currentTimeMillis()-livePlayDelayInMillis+millisecondsClientIsBehindServer);
             }
             if (autoAdvance) {
                 startAutoAdvance();
@@ -292,6 +312,7 @@ public class Timer {
         if (this.livePlayDelayInMillis != delayInMilliseconds) {
             this.livePlayDelayInMillis = delayInMilliseconds;
             if (getPlayMode() == PlayModes.Live) {
+                // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
                 setTime(new Date().getTime() - delayInMilliseconds);
             }
         }

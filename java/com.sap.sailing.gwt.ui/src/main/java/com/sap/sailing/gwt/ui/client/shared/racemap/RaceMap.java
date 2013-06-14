@@ -340,7 +340,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     @Override
-    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos, long millisecondsClientIsBehindServer) {
+        timer.setMillisecondsClientIsCurrentlyBehindServer(millisecondsClientIsBehindServer);
         this.lastRaceTimesInfo = raceTimesInfos.get(selectedRaces.get(0));        
     }
 
