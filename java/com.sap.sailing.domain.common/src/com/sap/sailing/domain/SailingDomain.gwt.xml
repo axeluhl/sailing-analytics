@@ -5,4 +5,5 @@
   <source path='common/impl'/>
   <source path='common/racelog'/>
   <source path='common/filter'/>
+  <source path='common/media'/>
 </module>

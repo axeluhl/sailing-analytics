@@ -47,7 +47,7 @@ import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 
-public class MediaSelector implements /* RaceTimesInfoProviderListener, */PlayStateListener, TimeListener,
+public class MediaSelector implements PlayStateListener, TimeListener,
         AsyncCallback<Collection<MediaTrack>>, MediaSelectionListener, CloseHandler<Window>, ClosingHandler {
 
     private final CheckBox toggleMediaButton;
