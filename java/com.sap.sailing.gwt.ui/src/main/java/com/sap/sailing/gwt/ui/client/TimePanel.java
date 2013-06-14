@@ -395,7 +395,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         switch (playMode) {
         case Live:
             playModeLabel.setText(stringMessages.playModeLive());
-            timeDelayLabel.setText(stringMessages.timeDelay() + ": " + timer.getCurrentDelayInMillis() / 1000 + " s");
+            timeDelayLabel.setText(stringMessages.timeDelay() + ": " + timer.getLivePlayDelayInMillis() / 1000 + " s");
             timeDelayLabel.setVisible(true);
             timeSlider.setEnabled(true);
             playSpeedBox.setEnabled(false);

@@ -242,7 +242,7 @@ public class Timer {
             playState = PlayStates.Playing;
             if (playMode == PlayModes.Live) {
                 // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"; the server needs to tell the client its time
-                setTime(System.currentTimeMillis()-livePlayDelayInMillis+millisecondsClientIsBehindServer);
+                setTime(System.currentTimeMillis()-getLivePlayDelayInMillis()+millisecondsClientIsBehindServer);
             }
             if (autoAdvance) {
                 startAutoAdvance();
@@ -264,7 +264,7 @@ public class Timer {
                     } else {
                         // play mode is Live; quantize to make cache hits more likely
                         // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
-                        newTime = quantizeTimeStamp(System.currentTimeMillis() - getLivePlayDelayInMillis()); 
+                        newTime = quantizeTimeStamp(System.currentTimeMillis() - getLivePlayDelayInMillis() + millisecondsClientIsBehindServer); 
                     }
                     setTime(newTime);
                 }
@@ -316,16 +316,6 @@ public class Timer {
                 setTime(new Date().getTime() - delayInMilliseconds);
             }
         }
-    }
-    
-    /**
-     * Tells how much the timer is currently behind "now." Note that this is not the same as asking
-     * {@link #getLivePlayDelayInMillis()} which tells the delay that will be established if the timer is put
-     * into live mode.
-     */
-    public long getCurrentDelayInMillis() {
-        // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
-        return System.currentTimeMillis() - getTime().getTime();
     }
     
     public long getLivePlayDelayInMillis() {
