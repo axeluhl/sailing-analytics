@@ -118,6 +118,7 @@ public class SmartFutureCacheDeadlockTest {
         // and the locks from the readerThread will be propagated to the computing thread
         reader.performAndWait(Command.GET_LATEST_FROM_CACHE);
         try {
+            Thread.sleep(1000);
             assertNotNull(computingThread);
         } finally {
             reader.performAndWait(Command.UNLOCK_AFTER_READ); // this shall unblock the writer
