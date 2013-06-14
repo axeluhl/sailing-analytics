@@ -18,9 +18,13 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Team;
+import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -61,7 +65,8 @@ public class MasterDataByLeaderboardGroupJsonGetServlet extends AbstractJsonHttp
         JSONObject jsonLeaderboardGroup = new JSONObject();
         jsonLeaderboardGroup.put("name", leaderboardGroup.getName());
         jsonLeaderboardGroup.put("description", leaderboardGroup.getDescription());
-        jsonLeaderboardGroup.put("overallLeaderboard", createJsonForLeaderboard(leaderboardGroup.getOverallLeaderboard()));
+        jsonLeaderboardGroup.put("overallLeaderboard",
+                createJsonForLeaderboard(leaderboardGroup.getOverallLeaderboard()));
         jsonLeaderboardGroup.put("leaderboards", createJsonArrayForLeaderboards(leaderboardGroup.getLeaderboards()));
 
         return jsonLeaderboardGroup;
@@ -82,10 +87,55 @@ public class MasterDataByLeaderboardGroupJsonGetServlet extends AbstractJsonHttp
         }
         JSONObject jsonLeaderboard = new JSONObject();
         jsonLeaderboard.put("name", leaderboard.getName());
-        jsonLeaderboard.put("scoreCorrection", createJsonForScoreCorrection(leaderboard.getScoreCorrection()));
+        jsonLeaderboard.put("scoreCorrection", createJsonForScoreCorrection(leaderboard));
         jsonLeaderboard.put("competitors", createJsonArrayForCompetitors(leaderboard.getAllCompetitors()));
+        jsonLeaderboard.put("raceColumns", createJsonArrayForRaceColumns(leaderboard.getRaceColumns()));
 
         return jsonLeaderboard;
+    }
+
+    private JSONArray createJsonArrayForRaceColumns(Iterable<RaceColumn> raceColumns) {
+        JSONArray jsonRaceColumns = new JSONArray();
+        for (RaceColumn raceColumn : raceColumns) {
+            JSONObject jsonRaceColumn = createJsonForRaceColumn(raceColumn);
+            jsonRaceColumns.add(jsonRaceColumn);
+        }
+        return jsonRaceColumns;
+    }
+
+    private JSONObject createJsonForRaceColumn(RaceColumn raceColumn) {
+        JSONObject jsonRaceColumn = new JSONObject();
+        jsonRaceColumn.put("name", raceColumn.getName());
+        jsonRaceColumn.put("medalRace", raceColumn.isMedalRace());
+        jsonRaceColumn.put("fleets", createJsonArrayForFleets(raceColumn.getFleets()));
+        return jsonRaceColumn;
+    }
+
+    private Object createJsonArrayForFleets(Iterable<? extends Fleet> fleets) {
+        JSONArray jsonFleets = new JSONArray();
+        for (Fleet fleet : fleets) {
+            JSONObject jsonFleet = createJsonForFleet(fleet);
+            jsonFleets.add(jsonFleet);
+        }
+        return jsonFleets;
+    }
+
+    private JSONObject createJsonForFleet(Fleet fleet) {
+        JSONObject jsonFleet = new JSONObject();
+        jsonFleet.put("name", fleet.getName());
+        jsonFleet.put("color", createJsonForColor(fleet.getColor()));
+        jsonFleet.put("ordering", fleet.getOrdering());
+        return jsonFleet;
+    }
+
+    private JSONObject createJsonForColor(Color color) {
+        JSONObject jsonColor = new JSONObject();
+        Triple<Integer, Integer, Integer> rgb = color.getAsRGB();
+        jsonColor.put("r", rgb.getA());
+        jsonColor.put("g", rgb.getB());
+        jsonColor.put("b", rgb.getC());
+        
+        return jsonColor;
     }
 
     private JSONArray createJsonArrayForCompetitors(Iterable<Competitor> allCompetitors) {
@@ -157,12 +207,47 @@ public class MasterDataByLeaderboardGroupJsonGetServlet extends AbstractJsonHttp
         return jsonBoatClass;
     }
 
-    private JSONObject createJsonForScoreCorrection(SettableScoreCorrection scoreCorrection) {
+    private JSONObject createJsonForScoreCorrection(Leaderboard leaderboard) {
+        SettableScoreCorrection correction = leaderboard.getScoreCorrection();
         JSONObject jsonScoreCorrection = new JSONObject();
-        jsonScoreCorrection.put("comment", scoreCorrection.getComment());
-        // TODO per competitor and race column
-        // jsonScoreCorrection.put("comment", scoreCorrection.);
+        jsonScoreCorrection.put("comment", correction.getComment());
+        jsonScoreCorrection.put("timePoint", correction.getTimePointOfLastCorrectionsValidity());
+        jsonScoreCorrection.put("forRaceColumns",
+                createJSONArrayForScoreCorrectionsForRaceColumns(correction, leaderboard));
+
         return jsonScoreCorrection;
+    }
+
+    private JSONArray createJSONArrayForScoreCorrectionsForRaceColumns(SettableScoreCorrection correction,
+            Leaderboard leaderboard) {
+        JSONArray scoreCorrectionsForRaceColumns = new JSONArray();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            if (correction.hasCorrectionFor(raceColumn)) {
+                JSONObject scoreCorrectionsForRaceColumn = new JSONObject();
+                scoreCorrectionsForRaceColumn.put("raceColumnName", raceColumn.getName());
+                scoreCorrectionsForRaceColumn.put("forCompetitors",
+                        createJsonForScoreCorrectionsForRaceColumnAndCompetitors(correction, raceColumn, leaderboard));
+                scoreCorrectionsForRaceColumns.add(scoreCorrectionsForRaceColumn);
+            }
+
+        }
+
+        return scoreCorrectionsForRaceColumns;
+    }
+
+    private JSONArray createJsonForScoreCorrectionsForRaceColumnAndCompetitors(SettableScoreCorrection correction,
+            RaceColumn raceColumn, Leaderboard leaderboard) {
+        JSONArray scoreCorrectionsForCompetitors = new JSONArray();
+        for (Competitor competitor : leaderboard.getAllCompetitors()) {
+            JSONObject scoreCorrectionForCompetitor = new JSONObject();
+            scoreCorrectionForCompetitor.put("explicitScoreCorrection",
+                    correction.getExplicitScoreCorrection(competitor, raceColumn));
+            scoreCorrectionForCompetitor.put("maxPointsReason",
+                    correction.getMaxPointsReason(competitor, raceColumn));
+            scoreCorrectionsForCompetitors.add(scoreCorrectionForCompetitor);
+        }
+
+        return scoreCorrectionsForCompetitors;
     }
 
 }
