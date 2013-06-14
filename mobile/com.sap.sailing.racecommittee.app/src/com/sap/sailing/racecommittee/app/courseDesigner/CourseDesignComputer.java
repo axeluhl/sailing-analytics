@@ -1,10 +1,10 @@
 package com.sap.sailing.racecommittee.app.courseDesigner;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.sap.sailing.domain.common.racelog.courseDesigner.BoatClassType;
-import com.sap.sailing.domain.common.racelog.courseDesigner.CourseLayout;
-import com.sap.sailing.domain.common.racelog.courseDesigner.NumberOfRounds;
-import com.sap.sailing.domain.common.racelog.courseDesigner.TargetTime;
+import com.sap.sailing.domain.common.coursedesign.BoatClassType;
+import com.sap.sailing.domain.common.coursedesign.CourseLayout;
+import com.sap.sailing.domain.common.coursedesign.NumberOfRounds;
+import com.sap.sailing.domain.common.coursedesign.TargetTime;
 
 public class CourseDesignComputer {
     private LatLng startBoatPosition;

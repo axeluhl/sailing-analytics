@@ -31,6 +31,8 @@ public class FinishingRaceFragment extends RaceFragment {
     private ImageButton abortingFlagButton;
     private ImageButton blueFlagButton;
     
+    PositioningFragment positioningFragment;
+    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.race_finishing_view, container, false);
@@ -47,7 +49,7 @@ public class FinishingRaceFragment extends RaceFragment {
         blueFlagButton = (ImageButton) getView().findViewById(R.id.blueFlagButton);
         abortingFlagButton = (ImageButton) getView().findViewById(R.id.abortingFlagButton);
         
-        PositioningFragment positioningFragment = new PositioningFragment();
+        positioningFragment = new PositioningFragment();
         positioningFragment.setArguments(PositioningFragment.createArguments(getRace()));
         getFragmentManager().beginTransaction().add(R.id.innerFragmentHolder, positioningFragment, null).commit();
         

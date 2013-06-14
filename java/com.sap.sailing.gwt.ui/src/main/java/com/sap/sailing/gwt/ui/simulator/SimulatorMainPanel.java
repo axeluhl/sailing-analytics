@@ -135,6 +135,18 @@ public class SimulatorMainPanel extends SimplePanel {
             sliderBar.setTitle(SimulatorMainPanel.formatSliderValue(sliderBar.getCurrentValue()));
             logger.info("Slider value : " + arg0.getValue());
             setting.setValue(arg0.getValue());
+            if (setting.getDisplayName().equals("Base Bearing (Degrees)")) {
+            	simulatorMap.clearOverlays();
+            	//System.out.println("Wind Base Bearing: "+setting.getValue());
+            	simulatorMap.regattaAreaCanvasOverlay.updateRaceCourse(1, (Double) setting.getValue());
+	            simulatorMap.raceCourseCanvasOverlay.redraw(true);
+            }
+            if (setting.getDisplayName().equals("Race Course Diff (Degrees)")) {
+            	simulatorMap.clearOverlays();
+            	//System.out.println("Wind Base Bearing: "+setting.getValue());
+            	simulatorMap.regattaAreaCanvasOverlay.updateRaceCourse(2, (Double) setting.getValue());
+	            simulatorMap.raceCourseCanvasOverlay.redraw(true);
+            }
             if (autoUpdate) {
                 update();
             }
@@ -313,9 +325,9 @@ public class SimulatorMainPanel extends SimplePanel {
         }
         
         mainPanel.forceLayout();
-        
+        simulatorMap.getMap().checkResizeAndCenter();
+
     }
-    
     
     private void createOptionsPanelTop() {
         HorizontalPanel optionsPanel = new HorizontalPanel();
@@ -364,7 +376,7 @@ public class SimulatorMainPanel extends SimplePanel {
         Label pattern = new Label(stringMessages.pattern());
         hp.add(pattern);
 
-        simulatorSvc.getWindPatterns(new AsyncCallback<List<WindPatternDTO>>() {
+        simulatorSvc.getWindPatterns(mode, new AsyncCallback<List<WindPatternDTO>>() {
 
             @Override
             public void onFailure(Throwable message) {
@@ -381,6 +393,9 @@ public class SimulatorMainPanel extends SimplePanel {
                 }
                 if (mode == SailingSimulatorUtil.measured) {
                     patternSelector.setItemSelected(patternSelector.getItemCount()-1, true);
+                    patternSelectorHandler.onChange(null);
+                } else {
+                    patternSelector.setItemSelected(1, true);
                     patternSelectorHandler.onChange(null);
                 }
             }
@@ -483,19 +498,29 @@ public class SimulatorMainPanel extends SimplePanel {
 
         mapOptions.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
-        initCourseInputButton();
-
-        if (mode != SailingSimulatorUtil.measured) {
+        if ((mode != SailingSimulatorUtil.measured)&&(mode != SailingSimulatorUtil.event)) {
+        	initCourseInputButton();
             mapOptions.add(courseInputButton);
         }
+        
         mapOptions.add(busyIndicator);
         rightPanel.add(mapOptions);
 
         initDisplayOptions(mapOptions);
+        if (mode == SailingSimulatorUtil.event) {
+        	summaryButton.setValue(true);
+        	replayButton.setValue(false);
+        	windDisplayButton.setValue(false);
+        }
 
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
                 windParams, busyIndicator, mode, this);
-        simulatorMap.setSize("100%", "100%");
+        //simulatorMap.setSize("100%", "100%");
+        //simulatorMap.getElement().getStyle().setProperty("position", "relative");
+        simulatorMap.getElement().getStyle().setProperty("height", "calc(100% - 45px)");
+        simulatorMap.getElement().getStyle().setProperty("width", "100%");
+        //simulatorMap.getElement().getStyle().setProperty("left", "0px");
+        //simulatorMap.getElement().getStyle().setProperty("right", "0px");
 
         this.rightPanel.add(this.simulatorMap);
     }
@@ -805,6 +830,7 @@ public class SimulatorMainPanel extends SimplePanel {
             this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, selection, true);
         } else if (this.summaryButton.getValue()) {
             this.showTimePanel(false);
+        	this.simulatorMap.regattaAreaCanvasOverlay.redraw(true);
             this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selection, true);
         } else if (this.replayButton.getValue()) {
             this.showTimePanel(true);

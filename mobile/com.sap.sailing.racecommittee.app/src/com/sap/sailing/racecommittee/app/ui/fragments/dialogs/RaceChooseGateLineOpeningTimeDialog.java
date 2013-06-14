@@ -13,7 +13,7 @@ import android.widget.Toast;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartProcedure;
 
-public class RaceChooseLineOpeningTimeDialog extends RaceDialogFragment {
+public class RaceChooseGateLineOpeningTimeDialog extends RaceDialogFragment {
 
     public interface GateLineOpeningTimeSelectionListener {
         public void onLineOpeningTimeSelected();

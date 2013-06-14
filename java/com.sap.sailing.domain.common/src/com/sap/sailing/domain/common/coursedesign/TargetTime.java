@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.racelog.courseDesigner;
+package com.sap.sailing.domain.common.coursedesign;
 
 public enum TargetTime {
     thirty(30),
