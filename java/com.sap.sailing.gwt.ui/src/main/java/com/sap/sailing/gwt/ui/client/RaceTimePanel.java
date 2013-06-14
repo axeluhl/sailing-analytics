@@ -100,23 +100,18 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     public void onTimeZoomReset() {
         super.onTimeZoomReset();
         timeSlider.setZoomed(false);
-        
         timeSlider.setMinValue(new Double(timeRangeProvider.getFromTime().getTime()), false);
         timeSlider.setMaxValue(new Double(timeRangeProvider.getToTime().getTime()), false);
         timeSlider.setCurrentValue(new Double(timer.getTime().getTime()), true);
-        
-//        updateMinMax(this.lastRaceTimesInfo);
         timeSlider.clearMarkersAndLabelsAndTicks();
         redrawAllMarkers(lastRaceTimesInfo);
     }
 
     @Override
     protected boolean isLiveModeToBeMadePossible() {
-        long livePlayDelayInMillis = timer.getLivePlayDelayInMillis();
         long eventTimeoutTolerance = 60 * 1000; // 60s
         long timeBeforeRaceStartTolerance = 3 * 60 * 1000; // 3min
-        // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
-        long liveTimePointInMillis = System.currentTimeMillis() - livePlayDelayInMillis;
+        long liveTimePointInMillis = timer.getLiveTimePointInMillis();
         RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null ? raceTimesInfoProvider.getRaceTimesInfo(selectedRace) : null;
         return lastRaceTimesInfo != null &&
                 lastRaceTimesInfo.newestTrackingEvent != null &&
@@ -138,7 +133,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
         super.playStateChanged(playState, playMode);
-        
         switch (playMode) {
         case Replay:
             autoAdjustPlayMode = false;

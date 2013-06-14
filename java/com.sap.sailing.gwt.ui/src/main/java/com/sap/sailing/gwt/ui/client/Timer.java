@@ -242,7 +242,7 @@ public class Timer {
             playState = PlayStates.Playing;
             if (playMode == PlayModes.Live) {
                 // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"; the server needs to tell the client its time
-                setTime(System.currentTimeMillis()-getLivePlayDelayInMillis()+millisecondsClientIsBehindServer);
+                setTime(getLiveTimePointInMillis());
             }
             if (autoAdvance) {
                 startAutoAdvance();
@@ -264,7 +264,7 @@ public class Timer {
                     } else {
                         // play mode is Live; quantize to make cache hits more likely
                         // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
-                        newTime = quantizeTimeStamp(System.currentTimeMillis() - getLivePlayDelayInMillis() + millisecondsClientIsBehindServer); 
+                        newTime = quantizeTimeStamp(getLiveTimePointInMillis()); 
                     }
                     setTime(newTime);
                 }
@@ -337,4 +337,9 @@ public class Timer {
     public void setAutoAdvance(boolean autoAdvance) {
         this.autoAdvance = autoAdvance;
     }
+
+    public long getLiveTimePointInMillis() {
+        return System.currentTimeMillis() - getLivePlayDelayInMillis() + millisecondsClientIsBehindServer;
+    }
+
 }
