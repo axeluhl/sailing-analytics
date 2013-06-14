@@ -1,7 +1,5 @@
 package com.sap.sailing.xrr.resultimport.impl;
 
-import java.util.TimeZone;
-
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -25,10 +23,8 @@ public class XRRParserUtil {
             if(time.getTimezone() != DatatypeConstants.FIELD_UNDEFINED) {
                 date.setTimezone(time.getTimezone());
             } else {
-                // fallback is to take the timezone of the server
-                TimeZone serverTimezone = TimeZone.getDefault();
-                int timeZoneOffsetInMinutes = (serverTimezone.getOffset(date.getMillisecond()) + serverTimezone.getDSTSavings()) / 60000; 
-                date.setTimezone(timeZoneOffsetInMinutes);
+                // fallback is to take the UTC
+                date.setTimezone(0);
             }
         }
 
