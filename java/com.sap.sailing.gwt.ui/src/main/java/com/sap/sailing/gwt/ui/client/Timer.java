@@ -221,6 +221,7 @@ public class Timer {
         if (playState != PlayStates.Playing) {
             playState = PlayStates.Playing;
             if (playMode == PlayModes.Live) {
+                // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"; the server needs to tell the client its time
                 setTime(System.currentTimeMillis()-livePlayDelayInMillis);
             }
             if (autoAdvance) {
@@ -242,6 +243,7 @@ public class Timer {
                         newTime += (long) playSpeedFactor * refreshInterval;
                     } else {
                         // play mode is Live; quantize to make cache hits more likely
+                        // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
                         newTime = quantizeTimeStamp(System.currentTimeMillis() - getLivePlayDelayInMillis()); 
                     }
                     setTime(newTime);
@@ -301,6 +303,7 @@ public class Timer {
      * into live mode.
      */
     public long getCurrentDelayInMillis() {
+        // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
         return System.currentTimeMillis() - getTime().getTime();
     }
     

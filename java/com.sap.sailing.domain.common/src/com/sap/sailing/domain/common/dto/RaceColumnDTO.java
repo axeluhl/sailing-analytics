@@ -148,6 +148,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
      */
     public boolean isLive(FleetDTO fleet) {
         boolean result = false;
+        // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
         final long now = System.currentTimeMillis();
         Date whenLastTrackedRaceWasLive = getWhenLastTrackedRaceWasLive(fleet);
         if (whenLastTrackedRaceWasLive != null && whenLastTrackedRaceWasLive.getTime() > now - TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS) {

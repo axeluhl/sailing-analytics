@@ -19,6 +19,7 @@ public class RaceTimePanelSettingsDialogComponent extends TimePanelSettingsDialo
         labelAndTDelayForLiveBoxPanel.add(delayForLiveMode);
         RaceTimesInfoDTO raceTimesInfo = initialSettings.getRaceTimesInfo();
         if (raceTimesInfo != null && raceTimesInfo.startOfRace != null) {
+            // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
             long delayforLiveModeInMs = System.currentTimeMillis() - raceTimesInfo.getStartOfRace().getTime();
             labelAndTDelayForLiveBoxPanel.add(new Label(delayforLiveModeInMs / 1000 + " s"));
         }

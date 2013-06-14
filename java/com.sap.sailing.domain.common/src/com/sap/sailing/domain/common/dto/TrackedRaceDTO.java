@@ -21,6 +21,7 @@ public class TrackedRaceDTO implements Serializable {
     
     public boolean isLive() {
         long eventTimeoutTolerance = 60 * 1000; // 60s
+        // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
         long liveTimePointInMillis = System.currentTimeMillis() - delayToLiveInMs;
         boolean live = timePointOfNewestEvent != null
                 && liveTimePointInMillis < timePointOfNewestEvent.getTime() + eventTimeoutTolerance
