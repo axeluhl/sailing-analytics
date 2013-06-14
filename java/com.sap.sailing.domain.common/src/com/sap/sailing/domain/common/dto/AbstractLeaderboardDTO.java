@@ -185,6 +185,10 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public List<RaceColumnDTO> getRaceList() {
         return races;
     }
+    
+    public void setRaceList(List<RaceColumnDTO> raceList) {
+        this.races = raceList;
+    }
 
     public boolean raceListContains(String raceColumnName) {
         return getRaceColumnByName(raceColumnName) != null;
