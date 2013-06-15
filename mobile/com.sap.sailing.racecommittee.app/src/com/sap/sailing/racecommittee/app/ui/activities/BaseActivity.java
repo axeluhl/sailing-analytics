@@ -13,7 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
@@ -141,7 +141,7 @@ public abstract class BaseActivity extends Activity {
     }
 
     private String getLiveIconText() {
-        return String.format("Connected to: %s\n%s", AppConstants.getServerBaseURL(this), sendingServiceStatus);
+        return String.format("Connected to: %s\n%s", AppPreferences.getServerBaseURL(this), sendingServiceStatus);
     }
 
     protected void fadeActivity(Class<?> activity) {

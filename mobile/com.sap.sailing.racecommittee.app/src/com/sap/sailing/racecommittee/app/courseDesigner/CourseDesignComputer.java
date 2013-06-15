@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.courseDesigner;
+package com.sap.sailing.racecommittee.app.coursedesigner;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.sap.sailing.domain.common.coursedesign.BoatClassType;

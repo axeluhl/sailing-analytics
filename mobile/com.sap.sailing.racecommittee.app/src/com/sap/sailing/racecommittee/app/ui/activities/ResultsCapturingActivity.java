@@ -6,11 +6,9 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.TypedValue;
 import android.view.View;
@@ -21,6 +19,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.PhotoAdapter;
 import com.sap.sailing.racecommittee.app.utils.MailHelper;
@@ -93,10 +92,7 @@ public class ResultsCapturingActivity extends BaseActivity {
 
             @Override
             public void onClick(View v) {
-                SharedPreferences preferences = PreferenceManager
-                        .getDefaultSharedPreferences(ResultsCapturingActivity.this);
-                String recipient = preferences.getString("mailRecipientPreference",
-                        getString(R.string.settings_advanced_mail_default));
+                String recipient = AppPreferences.getMailRecipient(ResultsCapturingActivity.this);
                 MailHelper.send(new String[] { recipient }, getSubjectText(), getBodyText(), listAdapter.getItems(),
                         ResultsCapturingActivity.this);
                 finish();

@@ -32,7 +32,7 @@ import com.sap.sailing.domain.common.coursedesign.CourseLayout;
 import com.sap.sailing.domain.common.coursedesign.NumberOfRounds;
 import com.sap.sailing.domain.common.coursedesign.TargetTime;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.courseDesigner.CourseDesignComputer;
+import com.sap.sailing.racecommittee.app.coursedesigner.CourseDesignComputer;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;

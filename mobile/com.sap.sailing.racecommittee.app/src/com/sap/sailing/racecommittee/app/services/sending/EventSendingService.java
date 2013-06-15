@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.IBinder;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
@@ -91,7 +92,7 @@ public class EventSendingService extends Service implements EventSendingListener
     public static Intent createEventIntent(Context context, ManagedRace race, Serializable serializedEvent) {
         String url = String.format(
                 "%s/sailingserver/rc/racelog?leaderboard=%s&raceColumn=%s&fleet=%s", 
-                AppConstants.getServerBaseURL(context),
+                AppPreferences.getServerBaseURL(context),
                 URLEncoder.encode(race.getRaceGroup().getName()),
                 URLEncoder.encode(race.getName()),
                 URLEncoder.encode(race.getFleet().getName()));
@@ -183,7 +184,7 @@ public class EventSendingService extends Service implements EventSendingListener
     }
 
     private void sendEvent(Intent intent) {
-        if (!AppConstants.isSendingActive(this)) {
+        if (!AppPreferences.isSendingActive(this)) {
             ExLog.i(TAG, "Sending deactivated. Event will not be sent to server.");
         } else {
             EventSenderTask task = new EventSenderTask(this);

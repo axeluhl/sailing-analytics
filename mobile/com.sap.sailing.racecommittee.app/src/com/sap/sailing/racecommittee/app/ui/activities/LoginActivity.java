@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogFragmentButtonListener;
@@ -114,11 +115,11 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         switch (loginDialog.getSelectedLoginType()) {
         case OFFICER:
             ExLog.i(TAG, "Communication with backend is active.");
-            AppConstants.setSendingActive(this, true);
+            AppPreferences.setSendingActive(this, true);
             break;
         case VIEWER:
             ExLog.i(TAG, "Communication with backend is inactive.");
-            AppConstants.setSendingActive(this, false);
+            AppPreferences.setSendingActive(this, false);
             break;
         default:
             Toast.makeText(this, "Invalid login type. Ignoring.", Toast.LENGTH_SHORT).show();
