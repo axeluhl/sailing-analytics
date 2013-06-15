@@ -598,7 +598,7 @@ public interface StringMessages extends Messages {
     /*Start of simulator related messages*/
     String simulator();
     String optionsBar();
-    String update();
+    String simulateButton();
 
     String setup();
     String strength();
