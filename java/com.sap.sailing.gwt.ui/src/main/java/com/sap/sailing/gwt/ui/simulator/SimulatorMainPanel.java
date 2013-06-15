@@ -38,6 +38,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -63,9 +64,18 @@ import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 
 public class SimulatorMainPanel extends SimplePanel {
 
+	private class resizableFlowPanel extends FlowPanel implements RequiresResize {
+
+		@Override
+		public void onResize() {
+	        simulatorMap.getMap().checkResizeAndCenter();
+		}
+		
+	}
+	
     private DockLayoutPanel mainPanel;
     private FlowPanel leftPanel;
-    private FlowPanel rightPanel;
+    private resizableFlowPanel rightPanel;
     private VerticalPanel windPanel;
 
     private Button updateButton;
@@ -237,7 +247,7 @@ public class SimulatorMainPanel extends SimplePanel {
         this.setSize("100%", "100%");
         
         leftPanel = new FlowPanel();
-        rightPanel = new FlowPanel();
+        rightPanel = new resizableFlowPanel();
         patternSelector = new ListBox();
         patternSelectorHandler = new PatternSelectorHandler();
         patternSelector.addChangeHandler(patternSelectorHandler);
@@ -289,14 +299,18 @@ public class SimulatorMainPanel extends SimplePanel {
 
         createOptionsPanelTop();
         createOptionsPanel();
-        createMapOptionsPanel();
 
         fullTimePanel = this.createTimePanel();
 
         mainPanel = new DockLayoutPanel(Unit.PX);
+        
         mainPanel.setSize("100%", "100%");        
         mainPanel.addWest(leftPanel, 470);
         mainPanel.addSouth(fullTimePanel, 90);
+        mainPanel.setWidgetHidden(fullTimePanel, true);
+        
+        createMapOptionsPanel(); // add map-options to mainPanel-North
+
         mainPanel.add(rightPanel);
         this.setWidget(mainPanel);        
 
@@ -304,29 +318,9 @@ public class SimulatorMainPanel extends SimplePanel {
 
     }
 
-    private void showTimePanel(boolean visible) {
-        
-        boolean isContained = mainPanel.getWidgetIndex(fullTimePanel) >= 0;
-        
-        if (visible) {
-            
-            if (!isContained) {
-                fullTimePanel.setVisible(true);
-                mainPanel.insertSouth(fullTimePanel, 90, null);
-            }
-            
-        } else {
-            
-            if (isContained) {
-                mainPanel.remove(fullTimePanel);
-                fullTimePanel.setVisible(false);
-            }
-            
-        }
-        
-        mainPanel.forceLayout();
-        simulatorMap.getMap().checkResizeAndCenter();
-
+    public void showTimePanel(boolean visible) {
+        mainPanel.setWidgetHidden(fullTimePanel, !visible);
+        mainPanel.forceLayout(); // trigger onResize() on child panels, relevant for map resize & center
     }
     
     private void createOptionsPanelTop() {
@@ -395,7 +389,7 @@ public class SimulatorMainPanel extends SimplePanel {
                     patternSelector.setItemSelected(patternSelector.getItemCount()-1, true);
                     patternSelectorHandler.onChange(null);
                 } else {
-                    patternSelector.setItemSelected(1, true);
+                    patternSelector.setItemSelected(0, true);
                     patternSelectorHandler.onChange(null);
                 }
             }
@@ -504,7 +498,8 @@ public class SimulatorMainPanel extends SimplePanel {
         }
         
         mapOptions.add(busyIndicator);
-        rightPanel.add(mapOptions);
+        //rightPanel.add(mapOptions);
+        mainPanel.addNorth(mapOptions, 45);
 
         initDisplayOptions(mapOptions);
         if (mode == SailingSimulatorUtil.event) {
@@ -515,12 +510,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
                 windParams, busyIndicator, mode, this);
-        //simulatorMap.setSize("100%", "100%");
-        //simulatorMap.getElement().getStyle().setProperty("position", "relative");
-        simulatorMap.getElement().getStyle().setProperty("height", "calc(100% - 45px)");
-        simulatorMap.getElement().getStyle().setProperty("width", "100%");
-        //simulatorMap.getElement().getStyle().setProperty("left", "0px");
-        //simulatorMap.getElement().getStyle().setProperty("right", "0px");
+        simulatorMap.setSize("100%", "100%");
 
         this.rightPanel.add(this.simulatorMap);
     }
