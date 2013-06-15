@@ -17,7 +17,6 @@ import android.os.IBinder;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.receiver.ConnectivityChangedReceiver;
@@ -101,7 +100,7 @@ public class EventSendingService extends Service implements EventSendingListener
     }
     
     public static Intent createEventIntent(Context context, String url, Serializable raceId, Serializable serializedEvent) {
-        Intent eventIntent = new Intent(context.getString(R.string.intentActionSendEvent));
+        Intent eventIntent = new Intent(AppConstants.INTENT_ACTION_SEND_EVENT);
         eventIntent.putExtra(AppConstants.RACE_ID_KEY, raceId);
         eventIntent.putExtra(AppConstants.EXTRAS_SERIALIZED_EVENT, serializedEvent);
         eventIntent.putExtra(AppConstants.EXTRAS_URL, url);
@@ -143,9 +142,9 @@ public class EventSendingService extends Service implements EventSendingListener
 
     private void handleCommand(Intent intent, int startId) {
         String action = intent.getAction();
-        if (action.equals(getString(R.string.intentActionSendSavedIntents))) {
+        if (action.equals(AppConstants.INTENT_ACTION_SEND_SAVED_INTENTS)) {
             handleDelayedEvents();
-        } else if (action.equals(getString(R.string.intentActionSendEvent))) {
+        } else if (action.equals(AppConstants.INTENT_ACTION_SEND_EVENT)) {
             handleSendEvents(intent);
         }
     }

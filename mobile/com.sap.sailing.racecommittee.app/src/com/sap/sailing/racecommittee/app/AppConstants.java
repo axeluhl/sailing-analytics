@@ -20,6 +20,13 @@ public class AppConstants {
     public final static String OPTIONAL_EXTRAS  = "optionalExtra";
     public final static String FLAG_KEY = "raceFlag";
     public final static String EXTRAS_WIND_FIX = "windfix";
+    
+    public final static String INTENT_ACTION_REGISTER_RACE = "com.sap.sailing.racecommittee.app.action.registerRace";
+    public final static String INTENT_ACTION_CLEAR_RACES = "com.sap.sailing.racecommittee.app.action.clearRaces";
+    public final static String INTENT_ACTION_SEND_SAVED_INTENTS = "com.sap.sailing.racecommittee.app.action.sendSavedIntents";
+    public final static String INTENT_ACTION_SEND_EVENT = "com.sap.sailing.racecommittee.app.action.sendEvent";
+    public final static String INTENT_ACTION_ALARM_ACTION = "com.sap.sailing.racecommittee.app.action.alarmAction";
+    public final static String INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION = "com.sap.sailing.racecommittee.app.action.startProcedureSpecificAction";
 
     public final static String ApplicationFolder = "/racecommittee";
 

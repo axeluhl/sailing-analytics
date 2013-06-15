@@ -100,7 +100,7 @@
 		    <TextView
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
-		        android:text="Your position" />
+		        android:text="@string/your_position" />
 		    
 		    <EditText
 		        android:id="@+id/et_position_lat"
@@ -123,14 +123,14 @@
 		        android:layout_height="wrap_content"
 		        android:layout_marginTop="18dp"
 		        android:layout_marginBottom="9dp"
-		        android:text="5. Send data to server"
+		        android:text="@string/store_wind_entry"
 		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
 	       	
 		    <Button 
 		        android:id="@+id/btn_wind_send"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
-		        android:text="Save"
+		        android:text="@string/store_wind"
 		        android:layout_gravity="center"/>
 	        
 	    </LinearLayout>
