@@ -1,14 +1,9 @@
 package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
@@ -48,7 +43,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
@@ -72,7 +66,6 @@ import com.sap.sailing.gwt.ui.leaderboard.CompetitorFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
-import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 
 /**
  * An editable version of the {@link LeaderboardPanel} which allows a user to enter carried / accumulated
@@ -576,7 +569,19 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         importAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                performImport(stringMessages);
+                sailingService.getScoreCorrectionProviderNames(new AsyncCallback<Iterable<String>>() {
+                    @Override
+                    public void onSuccess(Iterable<String> providerNames) {
+                        ResultSelectionAndApplyDialog dialog = new ResultSelectionAndApplyDialog(EditableLeaderboardPanel.this, providerNames, getSailingService(), 
+                                getStringMessages(), getErrorReporter());
+                        dialog.show();
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error getting the score correction providers: " + caught.getMessage());
+                    }
+                });
             }
         });
 
@@ -680,70 +685,6 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         getLeaderboard().setComment(lastScoreCorrectionComment);
         getLeaderboard().setTimePointOfLastCorrectionsValidity(lastScoreCorrectionTime);
         updateLeaderboard(getLeaderboard());
-    }
-
-    private void performImport(final StringMessages stringMessages) {
-        getBusyIndicator().setBusy(true);
-        getSailingService().getScoreCorrectionProviderDTOs(new AsyncCallback<Iterable<ScoreCorrectionProviderDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                EditableLeaderboardPanel.this.getBusyIndicator().setBusy(false);
-                getErrorReporter().reportError(stringMessages.errorLoadingScoreCorrectionProviders(caught.getMessage()));
-            }
-
-            @Override
-            public void onSuccess(Iterable<ScoreCorrectionProviderDTO> result) {
-                EditableLeaderboardPanel.this.getBusyIndicator().setBusy(false);
-                showScoreCorrectionSelectionDialog(result);
-            }
-        });
-    }
-
-    private void showScoreCorrectionSelectionDialog(Iterable<ScoreCorrectionProviderDTO> result) {
-        List<Triple<String, String, Pair<String, Date>>> providerNameAndEventNameBoatClassNameCapturedWhen =
-                new ArrayList<Triple<String,String, Pair<String,Date>>>();
-        for (ScoreCorrectionProviderDTO scp : result) {
-            for (Entry<String, Set<Pair<String, Date>>> e : scp.getHasResultsForBoatClassFromDateByEventName().entrySet()) {
-                for (Pair<String, Date> se : e.getValue()) {
-                    providerNameAndEventNameBoatClassNameCapturedWhen.add(new Triple<String, String, Pair<String, Date>>(
-                            scp.getName(), e.getKey(), se));
-                }
-            }
-        }
-        sortOfficialResultsByRelevance(providerNameAndEventNameBoatClassNameCapturedWhen);
-        new ResultSelectionAndApplyDialog(this, getSailingService(), getStringMessages(),
-                providerNameAndEventNameBoatClassNameCapturedWhen, getErrorReporter()).show();
-    }
-
-    private void sortOfficialResultsByRelevance(
-            List<Triple<String, String, Pair<String, Date>>> providerNameAndEventNameBoatClassNameCapturedWhen) {
-        final Set<BoatClassDTO> boatClasses = getLeaderboard().getBoatClasses();
-        final Set<String> lowercaseBoatClassNames = new HashSet<String>();
-        for (BoatClassDTO boatClass : boatClasses) {
-            lowercaseBoatClassNames.add(boatClass.getName().toLowerCase());
-        }
-        Collections.sort(providerNameAndEventNameBoatClassNameCapturedWhen, new Comparator<Triple<String, String, Pair<String, Date>>>() {
-            @Override
-            public int compare(Triple<String, String, Pair<String, Date>> o1,
-                    Triple<String, String, Pair<String, Date>> o2) {
-                int result;
-                // TODO consider looking for longest common substring to handle things like "470 M" vs. "470 Men"
-                if (lowercaseBoatClassNames.contains(o1.getC().getA().toLowerCase())) {
-                    if (lowercaseBoatClassNames.contains(o2.getC().getA().toLowerCase())) {
-                        // both don't seem to have the right boat class; compare by time stamp; newest first
-                        result = o2.getC().getB().compareTo(o1.getC().getB());
-                    } else {
-                        result = -1; // o1 scores "better", comes first, because it has the right boat class name
-                    }
-                } else if (o2.getC().getA() != null && lowercaseBoatClassNames.contains(o2.getC().getA().toLowerCase())) {
-                    result = 1;
-                } else {
-                    // both don't seem to have the right boat class; compare by time stamp; newest first
-                    result = o2.getC().getB().compareTo(o1.getC().getB());
-                }
-                return result;
-            }
-        });
     }
 
     /**

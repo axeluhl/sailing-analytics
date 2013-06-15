@@ -1,6 +1,5 @@
 package com.sap.sailing.velum.resultimport.impl;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,8 +11,8 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.resultimport.RegattaResults;
+import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.impl.AbstractDocumentBasedScoreCorrectionProvider;
 import com.sap.sailing.resultimport.impl.RegattaScoreCorrectionsImpl;
@@ -77,8 +76,8 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
 
     private Iterable<CsvParser> getAllRegattaResults() throws Exception {
         List<CsvParser> result = new ArrayList<>();
-        for (Triple<InputStream, String, TimePoint> is : getResultDocumentProvider().getDocumentsAndNamesAndLastModified()) {
-            CsvParser parser = parserFactory.createParser(is.getA(), is.getB(), is.getC());
+        for (ResultDocumentDescriptor resultDocDescr : getResultDocumentProvider().getResultDocumentDescriptors()) {
+            CsvParser parser = parserFactory.createParser(resultDocDescr.getInputStream(), resultDocDescr.getDocumentName(), resultDocDescr.getLastModified());
             result.add(parser);
         }
         return result;
