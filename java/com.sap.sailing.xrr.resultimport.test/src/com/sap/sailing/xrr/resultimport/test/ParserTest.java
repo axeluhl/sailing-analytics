@@ -97,7 +97,8 @@ public class ParserTest {
         Calendar cal = new GregorianCalendar(2013, /* 3 means April; zero-based */ 3, 3, 11, 20, 23);
         cal.setTimeZone(TimeZone.getTimeZone("UTC"));
         TimePoint expectedTimePoint = new MillisecondsTimePoint(cal.getTime());
-        assertEquals(expectedTimePoint, hasResultsFor.get("Star Men").iterator().next().getB());
+        TimePoint xrrTimePoint = hasResultsFor.get("Star Men").iterator().next().getB();
+        assertEquals(expectedTimePoint, xrrTimePoint);
         assertTrue(hasResultsFor.containsKey("Laser Men"));
     }
     
