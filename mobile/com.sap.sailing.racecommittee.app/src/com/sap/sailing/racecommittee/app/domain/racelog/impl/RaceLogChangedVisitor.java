@@ -13,6 +13,7 @@ import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.racecommittee.app.domain.racelog.RaceLogChangedListener;
 
 public class RaceLogChangedVisitor implements RaceLogEventVisitor {
@@ -74,6 +75,11 @@ public class RaceLogChangedVisitor implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogProtestStartTimeEvent event) {
+        listener.eventAdded(event);
+    }
+
+    @Override
+    public void visit(RaceLogWindFixEvent event) {
         listener.eventAdded(event);
     }
 

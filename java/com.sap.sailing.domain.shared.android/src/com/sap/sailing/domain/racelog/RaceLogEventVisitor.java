@@ -25,4 +25,6 @@ public interface RaceLogEventVisitor {
     public void visit(RaceLogStartProcedureChangedEvent event);
 
     public void visit(RaceLogProtestStartTimeEvent event);
+    
+    public void visit(RaceLogWindFixEvent event);
 }

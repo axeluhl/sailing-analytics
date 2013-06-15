@@ -264,9 +264,9 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     
     @Override
     public void setWindFix(Wind windFix) {
-        //TimePoint eventTime = MillisecondsTimePoint.now();
-        //RaceLogEvent event = RaceLogEventFactory.INSTANCE.createWindFixEvent(eventTime, raceLog.getCurrentPassId(), windFix);
-        //this.raceLog.add(event);
+        TimePoint eventTime = MillisecondsTimePoint.now();
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createWindFixEvent(eventTime, raceLog.getCurrentPassId(), windFix);
+        this.raceLog.add(event);
     }
 
     @Override

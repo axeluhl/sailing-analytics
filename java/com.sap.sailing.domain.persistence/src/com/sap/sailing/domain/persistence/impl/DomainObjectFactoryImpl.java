@@ -105,6 +105,7 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
@@ -1052,9 +1053,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogStartProcedureChangedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogProtestStartTimeEvent.class.getSimpleName())) {
             return loadRaceLogRaceLogProtestStartTimeEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogWindFixEvent.class.getSimpleName())) {
+            return loadRaceLogRaceLogWindFixEvent(createdAt, timePoint, id, passId, competitors, dbObject);
         }
 
         throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
+    }
+
+    private RaceLogEvent loadRaceLogRaceLogWindFixEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,
+            Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        Wind wind = loadWind((DBObject) dbObject.get(FieldNames.WIND.name()));
+        return raceLogEventFactory.createWindFixEvent(createdAt, timePoint, id, competitors, passId, wind);
     }
 
     private RaceLogEvent loadRaceLogRaceLogProtestStartTimeEvent(TimePoint createdAt, TimePoint timePoint,
