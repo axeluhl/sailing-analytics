@@ -29,6 +29,7 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> gateLineOpeningTimeEventSerializer;
     private JsonSerializer<RaceLogEvent> startProcedureTypeChangedEventSerializer;
     private JsonSerializer<RaceLogEvent> protestStartTimeEventSerializer;
+    private JsonSerializer<RaceLogEvent> windFixEventSerializer;
 
     private RaceLogEventFactory factory;
 
@@ -47,12 +48,13 @@ public class RaceLogEventSerializerTest {
         gateLineOpeningTimeEventSerializer = mock(JsonSerializer.class);
         startProcedureTypeChangedEventSerializer = mock(JsonSerializer.class);
         protestStartTimeEventSerializer = mock(JsonSerializer.class);
+        windFixEventSerializer = mock(JsonSerializer.class);
 
         serializer = new RaceLogEventSerializer(flagEventSerializer, startTimeSerializer, raceStatusSerializer,
                 courseAreaChangedEventSerializer, passChangedSerializer, courseDesignChangedEventSerializer,
                 finishPositioningListChangedEventSerializer, finishPositioningConfirmedEventSerializer,
                 pathfinderEventSerializer, gateLineOpeningTimeEventSerializer,
-                startProcedureTypeChangedEventSerializer, protestStartTimeEventSerializer);
+                startProcedureTypeChangedEventSerializer, protestStartTimeEventSerializer, windFixEventSerializer);
 
         factory = RaceLogEventFactory.INSTANCE;
     }
@@ -151,6 +153,14 @@ public class RaceLogEventSerializerTest {
         RaceLogEvent event = factory.createProtestStartTimeEvent(null, 0, null);
         serializer.serialize(event);
         verify(protestStartTimeEventSerializer).serialize(event);
+    }
+    
+    @Test
+    public void testWindFixSerializer() {
+        // we use the real event type here because we do not want to re-implement the dispatching.
+        RaceLogEvent event = factory.createWindFixEvent(null, 0, null);
+        serializer.serialize(event);
+        verify(windFixEventSerializer).serialize(event);
     }
 
 }

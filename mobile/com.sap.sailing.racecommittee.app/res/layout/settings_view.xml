@@ -24,11 +24,11 @@
             android:key="overrideDefaultStartProcedureType"
             android:defaultValue="false"
             android:summary="Check the box if races should use the start procedure type defined below as a default"
-            android:title="Override default start procedure type" />
+            android:title="@string/override_default_start_procedure_type" />
         
         <ListPreference
             android:key="defaultStartProcedureType"
-            android:title="Overwrite default start procedure type"
+            android:title="@string/override_default_start_procedure_type"
             android:summary="Races will use selected start procedure type as a default. For this option to be active override checkbox has to be enabled."
             />
 

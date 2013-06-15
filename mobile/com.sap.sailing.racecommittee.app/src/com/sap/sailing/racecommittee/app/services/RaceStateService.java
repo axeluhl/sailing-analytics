@@ -157,12 +157,12 @@ public class RaceStateService extends Service {
         String action = intent.getAction();
         ExLog.i(TAG, String.format("Command action '%s' received.", action));
         
-        if (getString(R.string.intentActionClearRaces).equals(action)) {
+        if (AppConstants.INTENT_ACTION_CLEAR_RACES.equals(action)) {
             handleClearRaces(intent);
             return;
         }
         
-        if (getString(R.string.intentActionRegisterRace).equals(action)) {
+        if (AppConstants.INTENT_ACTION_REGISTER_RACE.equals(action)) {
             handleRegisterRace(intent);
             return;
         }
@@ -181,14 +181,14 @@ public class RaceStateService extends Service {
         
         TimePoint eventTime = new MillisecondsTimePoint(intent.getExtras().getLong(AppConstants.RACING_EVENT_TIME));
 
-        if (getString(R.string.intentActionAlarmAction).equals(action)) {
+        if (AppConstants.INTENT_ACTION_ALARM_ACTION.equals(action)) {
             if (race.getState().getStartTime() != null) {
                 race.getState().getStartProcedure()
                         .dispatchFiredEventTimePoint(race.getState().getStartTime(), eventTime);
             }
             managedIntents.get(race.getId()).remove(intent);
             return;
-        } else if (getString(R.string.intenStartProcedureSpecificAction).equals(action)) {
+        } else if (AppConstants.INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION.equals(action)) {
             Integer eventId = intent.getExtras().getInt(AppConstants.STARTPROCEDURE_SPECIFIC_EVENT_ID);
             race.getState().getStartProcedure().handleStartProcedureSpecificEvent(eventTime, eventId);
         }
@@ -268,7 +268,7 @@ public class RaceStateService extends Service {
         //formerly state.getStartTime().plus(1) don't know why
         
         List<TimePoint> fireTimePoints = race.getState().getStartProcedure().getAutomaticEventFireTimePoints(startTime);
-        String action = getString(R.string.intentActionAlarmAction);
+        String action = AppConstants.INTENT_ACTION_ALARM_ACTION;
         for (TimePoint eventFireTimePoint : fireTimePoints) {
             scheduleEventTime(action, race, eventFireTimePoint);
         }
@@ -333,7 +333,7 @@ public class RaceStateService extends Service {
     }
 
     public void handleStartProcedureSpecificEvent(ManagedRace race, TimePoint startProcedureSpecificEventTimePoint, Integer eventId) {
-        String action = getString(R.string.intenStartProcedureSpecificAction);
+        String action = AppConstants.INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION;
         addIntentWithEventIdToAlarmManager(action, race, startProcedureSpecificEventTimePoint, eventId);
     }
 }

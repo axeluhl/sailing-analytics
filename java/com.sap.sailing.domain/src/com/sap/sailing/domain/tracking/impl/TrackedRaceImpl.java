@@ -1595,13 +1595,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             if (!bearingClustersDownwind[0].isEmpty() && !bearingClustersDownwind[1].isEmpty()) {
                 BearingWithConfidence<TimePoint> average0 = bearingClustersDownwind[0].getAverage(timePoint);
                 BearingWithConfidence<TimePoint> average1 = bearingClustersDownwind[1].getAverage(timePoint);
-                double downwindConfidence = Math.min(average0.getConfidence(), average1.getConfidence());
                 downwindNumberOfRelevantBoats = Math.min(bearingClustersDownwind[0].size(),
                         bearingClustersDownwind[1].size());
-                confidence = Math.min(confidence, downwindConfidence)
+                confidence = Math.min(average0.getConfidence(), average1.getConfidence())
                         * getRace().getBoatClass().getDownwindWindEstimationConfidence(downwindNumberOfRelevantBoats);
                 downwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject().middle(
-                        average1.getObject()), downwindConfidence, timePoint);
+                        average1.getObject()), confidence, timePoint);
             }
             numberOfBoatsRelevantForEstimate = upwindNumberOfRelevantBoats + downwindNumberOfRelevantBoats;
             BearingWithConfidenceCluster<TimePoint> resultCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);

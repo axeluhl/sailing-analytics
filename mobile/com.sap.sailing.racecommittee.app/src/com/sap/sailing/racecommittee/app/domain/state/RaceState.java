@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureListener;
 
@@ -148,5 +149,10 @@ public interface RaceState extends StartProcedureListener {
     RaceLogRaceStatus getStatus();
 
     void createNewStartProcedure(StartProcedureType selectedStartProcedureType);
+
+    /**
+     * Sets a new wind fix.
+     */
+    void setWindFix(Wind windFix);
 
 }

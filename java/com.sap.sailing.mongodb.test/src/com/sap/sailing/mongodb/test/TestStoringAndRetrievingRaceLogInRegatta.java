@@ -61,6 +61,8 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.tracking.Wind;
 
 public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest {
 
@@ -453,6 +455,29 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
             assertEquals(event.getPassId(), courseDesignEvent.getPassId());
             assertEquals(event.getId(), courseDesignEvent.getId());
             compareCourseData(event.getCourseDesign(), courseDesignEvent.getCourseDesign());
+            assertEquals(1, Util.size(loadedRaceLog.getFixes()));
+        } finally {
+            loadedRaceLog.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testStoreAndRetrieveRegattaWithRaceLogWindFixEvent() {
+        Wind wind = createWindFix();
+        RaceLogWindFixEvent event = RaceLogEventFactory.INSTANCE.createWindFixEvent(now, 0, wind);
+
+        addAndStoreRaceLogEvent(regatta, raceColumnName, event);
+
+        RaceLog loadedRaceLog = retrieveRaceLog();
+
+        loadedRaceLog.lockForRead();
+        try {
+            RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
+            RaceLogWindFixEvent windEvent = (RaceLogWindFixEvent) loadedEvent;
+            assertEquals(event.getTimePoint(), windEvent.getTimePoint());
+            assertEquals(event.getPassId(), windEvent.getPassId());
+            assertEquals(event.getId(), windEvent.getId());
+            compareWind(event.getWindFix(), windEvent.getWindFix());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
             loadedRaceLog.unlockAfterRead();

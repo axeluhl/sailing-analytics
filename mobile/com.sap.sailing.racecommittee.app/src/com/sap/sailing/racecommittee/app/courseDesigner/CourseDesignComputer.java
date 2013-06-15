@@ -1,17 +1,19 @@
-package com.sap.sailing.racecommittee.app.courseDesigner;
+package com.sap.sailing.racecommittee.app.coursedesigner;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.sap.sailing.domain.common.coursedesign.BoatClassType;
-import com.sap.sailing.domain.common.coursedesign.CourseLayout;
-import com.sap.sailing.domain.common.coursedesign.NumberOfRounds;
-import com.sap.sailing.domain.common.coursedesign.TargetTime;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.coursedesign.BoatClassType;
+import com.sap.sailing.domain.coursedesign.CourseDesign;
+import com.sap.sailing.domain.coursedesign.CourseLayouts;
+import com.sap.sailing.domain.coursedesign.NumberOfRounds;
+import com.sap.sailing.domain.coursedesign.TargetTime;
 
 public class CourseDesignComputer {
     private LatLng startBoatPosition;
     private Double windSpeed;
     private Integer windDirection;
     private BoatClassType boatClass;
-    private CourseLayout courseLayout;
+    private CourseLayouts courseLayout;
     private NumberOfRounds numberOfRounds;
     private TargetTime targetTime;
 
@@ -51,11 +53,11 @@ public class CourseDesignComputer {
         return this;
     }
 
-    public CourseLayout getCourseLayout() {
+    public CourseLayouts getCourseLayout() {
         return courseLayout;
     }
 
-    public CourseDesignComputer setCourseLayout(CourseLayout courseLayout) {
+    public CourseDesignComputer setCourseLayout(CourseLayouts courseLayout) {
         this.courseLayout = courseLayout;
         return this;
     }
@@ -78,10 +80,21 @@ public class CourseDesignComputer {
         return this;
     }
 
-    public CourseDesignComputer compute() {
-        if(startBoatPosition != null && windSpeed != null && windDirection != null && boatClass != null && courseLayout != null && numberOfRounds != null && targetTime != null)
-            return null;
-        else
+    public CourseDesign compute() {
+        CourseDesign computedCourseDesign = null;
+        if (startBoatPosition != null && windSpeed != null && windDirection != null && boatClass != null
+                && courseLayout != null && numberOfRounds != null && targetTime != null) {
+            try {
+                computedCourseDesign = courseLayout.getCourseDesignFactoryClass().newInstance()
+                        .createCourseDesign(new DegreePosition(startBoatPosition.latitude, startBoatPosition.longitude), windSpeed, windDirection, boatClass, courseLayout, numberOfRounds, targetTime);
+            } catch (InstantiationException e) {
+                
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        } else
             throw new IllegalStateException("At least one mandatory parameter was not set in the computer!");
-     }
+        return computedCourseDesign;
+    }
 }

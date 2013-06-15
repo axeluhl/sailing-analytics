@@ -17,12 +17,15 @@ import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
 
 public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, RaceLogEventVisitor {
 
@@ -44,7 +47,10 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
                 new RaceLogPathfinderEventSerializer(competitorSerializer),
                 new RaceLogGateLineOpeningTimeEventSerializer(competitorSerializer),
                 new RaceLogStartProcedureChangedEventSerializer(competitorSerializer),
-                new RaceLogProtestStartTimeEventSerializer(competitorSerializer));
+                new RaceLogProtestStartTimeEventSerializer(competitorSerializer),
+                new RaceLogWindFixEventSerializer(competitorSerializer, 
+                        new WindJsonSerializer(
+                                new PositionJsonSerializer())));
     }
 
     private final JsonSerializer<RaceLogEvent> flagEventSerializer;
@@ -59,6 +65,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     private final JsonSerializer<RaceLogEvent> gateLineOpeningTimeEventSerializer;
     private final JsonSerializer<RaceLogEvent> startProcedureChangedEventSerializer;
     private final JsonSerializer<RaceLogEvent> protestStartTimeEventSerializer;
+    private final JsonSerializer<RaceLogEvent> windFixEventSerializer;
     
     private JsonSerializer<RaceLogEvent> chosenSerializer;
 
@@ -74,7 +81,8 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
             JsonSerializer<RaceLogEvent> pathfinderEventSerializer,
             JsonSerializer<RaceLogEvent> gateLineOpeningTimeEventSerializer,
             JsonSerializer<RaceLogEvent> startProcedureChangedEventSerializer,
-            JsonSerializer<RaceLogEvent> protestStartTimeEventSerializer) {
+            JsonSerializer<RaceLogEvent> protestStartTimeEventSerializer,
+            JsonSerializer<RaceLogEvent> windFixEventSerializer) {
         this.flagEventSerializer = flagEventSerializer;
         this.startTimeSerializer = startTimeSerializer;
         this.raceStatusSerializer = raceStatusSerializer;
@@ -87,6 +95,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
         this.gateLineOpeningTimeEventSerializer = gateLineOpeningTimeEventSerializer;
         this.startProcedureChangedEventSerializer = startProcedureChangedEventSerializer;
         this.protestStartTimeEventSerializer = protestStartTimeEventSerializer;
+        this.windFixEventSerializer = windFixEventSerializer;
         
         this.chosenSerializer = null;
     }
@@ -165,6 +174,11 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     @Override
     public void visit(RaceLogProtestStartTimeEvent event) {
         chosenSerializer = protestStartTimeEventSerializer;
+    }
+
+    @Override
+    public void visit(RaceLogWindFixEvent event) {
+        chosenSerializer = windFixEventSerializer;
     }
 
 }

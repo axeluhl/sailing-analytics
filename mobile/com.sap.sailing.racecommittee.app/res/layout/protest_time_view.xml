@@ -14,7 +14,7 @@
 
         <ListView
             android:id="@+id/protest_time_races_list"
-            android:layout_width="300dp"
+            android:layout_width="400dp"
             android:layout_height="match_parent"
             android:verticalSpacing="5dp" />
         

@@ -3,7 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.comparators;
 import java.util.Comparator;
 
 import com.sap.sailing.domain.common.impl.NaturalComparator;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.BoatClassSeriesFleet;
+import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 
 public class BoatClassSeriesDataFleetComparator implements Comparator<BoatClassSeriesFleet> {
 
