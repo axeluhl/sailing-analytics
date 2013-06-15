@@ -31,6 +31,8 @@ import com.sap.sailing.domain.common.coursedesign.CourseDesign;
 import com.sap.sailing.domain.common.coursedesign.CourseLayout;
 import com.sap.sailing.domain.common.coursedesign.NumberOfRounds;
 import com.sap.sailing.domain.common.coursedesign.TargetTime;
+import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.coursedesigner.CourseDesignComputer;
 import com.sap.sailing.racecommittee.app.data.DataStore;
@@ -38,6 +40,9 @@ import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
 
 public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
+
+    private static int WIND_ACTIVITY_REQUEST_CODE = 7331;
+
     private MapView mMapView;
     private GoogleMap courseAreaMap;
     private Bundle mBundle;
@@ -64,7 +69,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
 
     public ClassicCourseDesignDialogFragment() {
         super();
-        // handle map bug - https://code.google.com/p/gmaps-api-issues/issues/detail?id=4865
+        // handle bug "Dark overlay of MapFragment in Activity with Dialog theme" - https://code.google.com/p/gmaps-api-issues/issues/detail?id=4865
         this.setStyle(DialogFragment.STYLE_NORMAL, R.style.Theme_DimDisabledDialog);
     }
 
@@ -103,7 +108,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             @Override
             public void onClick(View arg0) {
                 Intent intent = new Intent(getActivity(), WindActivity.class);
-                startActivityForResult(intent, 1);
+                startActivityForResult(intent, WIND_ACTIVITY_REQUEST_CODE);
                 getActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             }
 
@@ -129,16 +134,25 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         // TODO make use of activity result instead of just handling the callback
-        if (requestCode == 1) {
+        if (requestCode == WIND_ACTIVITY_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
+                if (data.getExtras().containsKey(AppConstants.EXTRAS_WIND_FIX)) {
+                    Wind windFix = (Wind) data.getSerializableExtra(AppConstants.EXTRAS_WIND_FIX);
+                    onWindEntered(windFix);
+                }
                 recomputeCourseDesign();
             }
         }
-    }// onActivityResult
+    }
+
+    private void onWindEntered(Wind windFix) {
+        getRace().getState().setWindFix(windFix);
+        //TODO integrate the wind fix into the course designer
+    }
 
     private CourseDesign recomputeCourseDesign() {
         try{
-        courseDesignComputer.compute();
+            courseDesignComputer.compute();
         }catch (IllegalStateException ise){
             Toast.makeText(
                     getActivity(),
@@ -148,7 +162,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         Toast.makeText(
                 getActivity(),
                 "" + ds.getLastWindPosition() + ds.getLastWindDirection() + ds.getLastWindSpeed() + selectedBoatClass
-                        + selectedCourseLayout + selectedNumberOfRounds + selectedTargetTime, Toast.LENGTH_LONG).show();
+                + selectedCourseLayout + selectedNumberOfRounds + selectedTargetTime, Toast.LENGTH_LONG).show();
         return null;
 
     }
@@ -276,11 +290,11 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             tempCanvas.drawBitmap(bmpOriginal, 0, 0, null);
 
             courseAreaMap.addMarker(new MarkerOptions()
-                    .position(ds.getLastWindPosition())
-                    .icon(BitmapDescriptorFactory.fromBitmap(bmResult))
-                    .draggable(false)
-                    .title(ds.getLastWindPosition() + ", " + ds.getLastWindSpeed() + "kn, " + ds.getLastWindDirection()
-                            + "°"));
+            .position(ds.getLastWindPosition())
+            .icon(BitmapDescriptorFactory.fromBitmap(bmResult))
+            .draggable(false)
+            .title(ds.getLastWindPosition() + ", " + ds.getLastWindSpeed() + "kn, " + ds.getLastWindDirection()
+                    + "°"));
         }
         recomputeCourseDesign();
 
