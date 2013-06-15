@@ -6,12 +6,12 @@ import java.util.Map;
 import java.util.TreeMap;
 @SuppressWarnings("serial")
 public enum BoatClassType {
-    boatClass470erMen("470er Men", new HashMap<CourseLayout, Integer>() {
+    boatClass470erMen("470er Men", new HashMap<CourseLayouts, Integer>() {
         {
-            put(CourseLayoutsTrapezoid.innerLoopTrapezoid60, 60);
-            put(CourseLayoutsTrapezoid.outerLoopTrapezoid60, 60);
-            put(CourseLayoutsLeewardWindWard.windWardLeewardLeeward, 30);
-            put(CourseLayoutsLeewardWindWard.windWardLeewardWindward, 30);
+            put(TrapezoidCourseLayouts.innerLoopTrapezoid60, 60);
+            put(TrapezoidCourseLayouts.outerLoopTrapezoid60, 60);
+            put(LeewardWindWardCourseLayouts.windWardLeewardLeeward, 30);
+            put(LeewardWindWardCourseLayouts.windWardLeewardWindward, 30);
         }
     }, new TreeMap<WindRange, Map<PointOfSail, Float>>() {
         {
@@ -45,12 +45,12 @@ public enum BoatClassType {
             });
         }
     }, 290),
-    boatClass470eromen("470er Women", new HashMap<CourseLayout, Integer>() {
+    boatClass470eromen("470er Women", new HashMap<CourseLayouts, Integer>() {
         {
-            put(CourseLayoutsTrapezoid.innerLoopTrapezoid60, 60);
-            put(CourseLayoutsTrapezoid.outerLoopTrapezoid60, 60);
-            put(CourseLayoutsLeewardWindWard.windWardLeewardLeeward, 30);
-            put(CourseLayoutsLeewardWindWard.windWardLeewardWindward, 30);
+            put(TrapezoidCourseLayouts.innerLoopTrapezoid60, 60);
+            put(TrapezoidCourseLayouts.outerLoopTrapezoid60, 60);
+            put(LeewardWindWardCourseLayouts.windWardLeewardLeeward, 30);
+            put(LeewardWindWardCourseLayouts.windWardLeewardWindward, 30);
         }
     }, new TreeMap<WindRange, Map<PointOfSail, Float>>() {
         {
@@ -84,10 +84,10 @@ public enum BoatClassType {
             });
         }
     }, 110),
-    boatClass49er("49er", new HashMap<CourseLayout, Integer>() {
+    boatClass49er("49er", new HashMap<CourseLayouts, Integer>() {
         {
-            put(CourseLayoutsLeewardWindWard.windWardLeewardLeeward, 30);
-            put(CourseLayoutsLeewardWindWard.windWardLeewardWindward, 30);
+            put(LeewardWindWardCourseLayouts.windWardLeewardLeeward, 30);
+            put(LeewardWindWardCourseLayouts.windWardLeewardWindward, 30);
         }
     }, new TreeMap<WindRange, Map<PointOfSail, Float>>() {
         {
@@ -119,10 +119,10 @@ public enum BoatClassType {
     }, 255);
 
     private String displayName;
-    private Map<CourseLayout, Integer> possipleCourseLayoutsWithStandardTargetTime;
+    private Map<CourseLayouts, Integer> possipleCourseLayoutsWithStandardTargetTime;
     private Integer startLineLengthInMeters;
 
-    private BoatClassType(String displayName, Map<CourseLayout, Integer> possipleCourseLayoutsWithStandardTargetTime,
+    private BoatClassType(String displayName, Map<CourseLayouts, Integer> possipleCourseLayoutsWithStandardTargetTime,
             Map<WindRange, Map<PointOfSail, Float>> boatSpeedTable, Integer startLineLengthInMeters) {
         this.displayName = displayName;
         this.possipleCourseLayoutsWithStandardTargetTime = possipleCourseLayoutsWithStandardTargetTime;
@@ -134,7 +134,7 @@ public enum BoatClassType {
         return displayName;
     }
 
-    public Map<CourseLayout, Integer> getPossibleCourseLayoutsWithTargetTime() {
+    public Map<CourseLayouts, Integer> getPossibleCourseLayoutsWithTargetTime() {
         return possipleCourseLayoutsWithStandardTargetTime;
     }
 

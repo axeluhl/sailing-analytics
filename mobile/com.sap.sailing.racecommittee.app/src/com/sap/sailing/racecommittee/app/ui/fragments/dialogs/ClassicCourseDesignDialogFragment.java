@@ -25,10 +25,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sap.sailing.domain.coursedesign.BoatClassType;
 import com.sap.sailing.domain.coursedesign.CourseDesign;
-import com.sap.sailing.domain.coursedesign.CourseLayout;
+import com.sap.sailing.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.domain.coursedesign.TargetTime;
 import com.sap.sailing.racecommittee.app.R;
@@ -53,11 +54,11 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
 
     private CourseDesignComputer courseDesignComputer;
 
-    private ArrayAdapter<CourseLayout> courseLayoutAdapter;
+    private ArrayAdapter<CourseLayouts> courseLayoutAdapter;
 
     // TODO determine this by given race
     private BoatClassType selectedBoatClass = BoatClassType.boatClass470erMen;
-    private CourseLayout selectedCourseLayout = (CourseLayout) BoatClassType.boatClass470erMen
+    private CourseLayouts selectedCourseLayout = (CourseLayouts) BoatClassType.boatClass470erMen
             .getPossibleCourseLayoutsWithTargetTime().keySet().toArray().clone()[0];
     private NumberOfRounds selectedNumberOfRounds = NumberOfRounds.TWO;
     private TargetTime selectedTargetTime = TargetTime.thirty;
@@ -119,10 +120,10 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         setupTargetTimeSpinner();
 
         DataStore ds = InMemoryDataStore.INSTANCE;
-        courseDesignComputer= new CourseDesignComputer().setStartBoatPosition(ds.getLastWindPosition()).setWindDirection(ds.getLastWindDirection())
-                .setWindSpeed(ds.getLastWindSpeed()).setBoatClass(selectedBoatClass)
-                .setCourseLayout(selectedCourseLayout).setNumberOfRounds(selectedNumberOfRounds)
-                .setTargetTime(selectedTargetTime);
+        courseDesignComputer = new CourseDesignComputer().setStartBoatPosition(ds.getLastWindPosition())
+                .setWindDirection(ds.getLastWindDirection()).setWindSpeed(ds.getLastWindSpeed())
+                .setBoatClass(selectedBoatClass).setCourseLayout(selectedCourseLayout)
+                .setNumberOfRounds(selectedNumberOfRounds).setTargetTime(selectedTargetTime);
         setUpMapIfNeeded(getView());
     }
 
@@ -131,25 +132,27 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         // TODO make use of activity result instead of just handling the callback
         if (requestCode == 1) {
             if (resultCode == Activity.RESULT_OK) {
+                DataStore ds = InMemoryDataStore.INSTANCE;
+                courseDesignComputer = courseDesignComputer.setStartBoatPosition(ds.getLastWindPosition())
+                        .setWindDirection(ds.getLastWindDirection()).setWindSpeed(ds.getLastWindSpeed());
                 recomputeCourseDesign();
             }
         }
     }// onActivityResult
 
     private CourseDesign recomputeCourseDesign() {
-        try{
-        courseDesignComputer.compute();
-        }catch (IllegalStateException ise){
-            Toast.makeText(
-                    getActivity(),
-                    ise.getMessage(), Toast.LENGTH_LONG).show();
+        CourseDesign courseDesign = null;
+        try {
+            courseDesign = courseDesignComputer.compute();
+        } catch (IllegalStateException ise) {
+            Toast.makeText(getActivity(), ise.getMessage(), Toast.LENGTH_LONG).show();
         }
-        DataStore ds = InMemoryDataStore.INSTANCE;
-        Toast.makeText(
-                getActivity(),
-                "" + ds.getLastWindPosition() + ds.getLastWindDirection() + ds.getLastWindSpeed() + selectedBoatClass
-                        + selectedCourseLayout + selectedNumberOfRounds + selectedTargetTime, Toast.LENGTH_LONG).show();
-        return null;
+        /*
+         * DataStore ds = InMemoryDataStore.INSTANCE; Toast.makeText( getActivity(), "" + ds.getLastWindPosition() +
+         * ds.getLastWindDirection() + ds.getLastWindSpeed() + selectedBoatClass + selectedCourseLayout +
+         * selectedNumberOfRounds + selectedTargetTime, Toast.LENGTH_LONG).show()
+         */;
+        return courseDesign;
 
     }
 
@@ -178,14 +181,14 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     private void setupCourseLayoutSpinner() {
-        courseLayoutAdapter = new ArrayAdapter<CourseLayout>(getActivity(),
+        courseLayoutAdapter = new ArrayAdapter<CourseLayouts>(getActivity(),
                 android.R.layout.simple_spinner_dropdown_item);
         courseLayoutAdapter.addAll(selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet());
         spinnerCourseLayout.setAdapter(courseLayoutAdapter);
         spinnerCourseLayout.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-                selectedCourseLayout = (CourseLayout) adapterView.getItemAtPosition(position);
+                selectedCourseLayout = (CourseLayouts) adapterView.getItemAtPosition(position);
                 recomputeCourseDesign();
             }
 
@@ -282,7 +285,14 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
                     .title(ds.getLastWindPosition() + ", " + ds.getLastWindSpeed() + "kn, " + ds.getLastWindDirection()
                             + "°"));
         }
-        recomputeCourseDesign();
+        CourseDesign courseDesign = recomputeCourseDesign();
+        if (courseDesign != null) {
+            LatLng pinEndPosition = new LatLng(courseDesign.getPinEnd().getPosition().getLatDeg(), courseDesign
+                    .getPinEnd().getPosition().getLngDeg());
+            courseAreaMap.addMarker(new MarkerOptions().position(pinEndPosition)
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.buoy_red)).draggable(false)
+                    .title(courseDesign.getPinEnd().getName()));
+        }
 
     }
 

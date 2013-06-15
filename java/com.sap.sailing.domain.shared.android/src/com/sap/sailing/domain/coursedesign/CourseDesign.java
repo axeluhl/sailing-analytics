@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.coursedesign;
 
-public class CourseDesign {
-    
+public interface CourseDesign {
+    PositionedMark getPinEnd();
+    public void setPinEnd(PositionedMark pinEnd);
 }
