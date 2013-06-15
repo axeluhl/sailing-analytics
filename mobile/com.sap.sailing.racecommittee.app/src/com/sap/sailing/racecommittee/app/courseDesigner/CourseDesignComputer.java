@@ -1,10 +1,11 @@
 package com.sap.sailing.racecommittee.app.courseDesigner;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.sap.sailing.domain.common.coursedesign.BoatClassType;
-import com.sap.sailing.domain.common.coursedesign.CourseLayout;
-import com.sap.sailing.domain.common.coursedesign.NumberOfRounds;
-import com.sap.sailing.domain.common.coursedesign.TargetTime;
+import com.sap.sailing.domain.coursedesign.BoatClassType;
+import com.sap.sailing.domain.coursedesign.CourseDesign;
+import com.sap.sailing.domain.coursedesign.CourseLayout;
+import com.sap.sailing.domain.coursedesign.NumberOfRounds;
+import com.sap.sailing.domain.coursedesign.TargetTime;
 
 public class CourseDesignComputer {
     private LatLng startBoatPosition;
@@ -78,10 +79,19 @@ public class CourseDesignComputer {
         return this;
     }
 
-    public CourseDesignComputer compute() {
+    public CourseDesign compute() {
         if(startBoatPosition != null && windSpeed != null && windDirection != null && boatClass != null && courseLayout != null && numberOfRounds != null && targetTime != null)
             return null;
         else
             throw new IllegalStateException("At least one mandatory parameter was not set in the computer!");
      }
+    
+    private LatLng getLatLngForGivenPointDistanceAndBearing(LatLng givenPoint, int ditanceInMeters, float bearingInDegree){
+        final int earthRadiusInMeters = 6371000;
+        double lat = Math.asin( Math.sin(givenPoint.latitude)*Math.cos(ditanceInMeters/earthRadiusInMeters) + 
+                Math.cos(givenPoint.latitude)*Math.sin(ditanceInMeters/earthRadiusInMeters)*Math.cos(bearingInDegree) );
+  double lon = givenPoint.longitude + Math.atan2(Math.sin(bearingInDegree)*Math.sin(ditanceInMeters/earthRadiusInMeters)*Math.cos(givenPoint.latitude), 
+                       Math.cos(ditanceInMeters/earthRadiusInMeters)-Math.sin(givenPoint.latitude)*Math.sin(lat));
+        return new LatLng(lat, lon);
+    }
 }

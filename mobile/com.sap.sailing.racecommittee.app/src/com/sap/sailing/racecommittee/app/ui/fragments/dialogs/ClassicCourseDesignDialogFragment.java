@@ -26,11 +26,11 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.sap.sailing.domain.common.coursedesign.BoatClassType;
-import com.sap.sailing.domain.common.coursedesign.CourseDesign;
-import com.sap.sailing.domain.common.coursedesign.CourseLayout;
-import com.sap.sailing.domain.common.coursedesign.NumberOfRounds;
-import com.sap.sailing.domain.common.coursedesign.TargetTime;
+import com.sap.sailing.domain.coursedesign.BoatClassType;
+import com.sap.sailing.domain.coursedesign.CourseDesign;
+import com.sap.sailing.domain.coursedesign.CourseLayout;
+import com.sap.sailing.domain.coursedesign.NumberOfRounds;
+import com.sap.sailing.domain.coursedesign.TargetTime;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.courseDesigner.CourseDesignComputer;
 import com.sap.sailing.racecommittee.app.data.DataStore;
@@ -56,8 +56,8 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private ArrayAdapter<CourseLayout> courseLayoutAdapter;
 
     // TODO determine this by given race
-    private BoatClassType selectedBoatClass = BoatClassType.boatClass470er;
-    private CourseLayout selectedCourseLayout = (CourseLayout) BoatClassType.boatClass470er
+    private BoatClassType selectedBoatClass = BoatClassType.boatClass470erMen;
+    private CourseLayout selectedCourseLayout = (CourseLayout) BoatClassType.boatClass470erMen
             .getPossibleCourseLayoutsWithTargetTime().keySet().toArray().clone()[0];
     private NumberOfRounds selectedNumberOfRounds = NumberOfRounds.TWO;
     private TargetTime selectedTargetTime = TargetTime.thirty;

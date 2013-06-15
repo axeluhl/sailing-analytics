@@ -1,19 +1,18 @@
-package com.sap.sailing.domain.common.coursedesign;
+package com.sap.sailing.domain.coursedesign;
 
-public enum CourseLayout {
+public enum CourseLayoutsLeewardWindWard implements CourseLayout{
     windWardLeewardWindward("Windward/Leeward with Windward finish", "W"),
-    windWardLeewardLeeward("Windward/Leeward with Leeward finish", "W"),
-    innerLoopTrapezoid("Trapezoid Inner Loop", "I"),
-    outerLoopTrapezoid("Trapezoid Outer Loop", "O");
+    windWardLeewardLeeward("Windward/Leeward with Leeward finish", "L");
     
     private String displayName;
     private String shortName;
-
+    
+    @Override
     public String getShortName() {
         return shortName;
     }
 
-    private CourseLayout(String displayName, String shortName){
+    private CourseLayoutsLeewardWindWard(String displayName, String shortName){
         this.displayName = displayName;
         this.shortName = shortName;
     }
