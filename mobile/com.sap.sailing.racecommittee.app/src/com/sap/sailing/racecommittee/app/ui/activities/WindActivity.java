@@ -11,6 +11,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
@@ -71,7 +72,11 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 float speed = round(progress / 10.0f, 1);
-                windSpeedEditText.setText(speedFormat.format(speed));
+                int displayedValue = Integer.getInteger(windSpeedEditText.getText().toString(), 0).intValue();
+                int progressValue = Float.valueOf(speed).intValue();
+                if (displayedValue != progressValue) {
+                    windSpeedEditText.setText(speedFormat.format(speed));
+                }
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {
@@ -91,6 +96,7 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
                         Toast.makeText(WindActivity.this, R.string.wind_location_or_fields_not_valid, Toast.LENGTH_LONG).show();
                         return;
                     }
+                    saveEntriesInPreferences(wind);
                     Intent resultData = new Intent();
                     resultData.putExtra(AppConstants.EXTRAS_WIND_FIX, wind);
                     setResult(RESULT_OK, resultData);
@@ -103,11 +109,29 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
 
         });
         
+        windSpeedEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
+
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    windSpeedSeekBar.setProgress(Double.valueOf(windSpeedEditText.getText().toString()).intValue() * 10);
+                }
+            }
+            
+        });
+        
         speedFormat = new DecimalFormat("##.0");
         bearingFormat = new DecimalFormat("###");
         
-        windSpeedEditText.setText(speedFormat.format(AppPreferences.getWindSpeed(getBaseContext())));
+        double enteredWindSpeed = AppPreferences.getWindSpeed(getBaseContext());
+        windSpeedSeekBar.setProgress(Double.valueOf(enteredWindSpeed).intValue() * 10);
+        windSpeedEditText.setText(speedFormat.format(enteredWindSpeed));
         windBearingEditText.setText(bearingFormat.format(AppPreferences.getWindBearing(getBaseContext())));
+    }
+
+    protected void saveEntriesInPreferences(Wind wind) {
+        AppPreferences.setWindBearing(getBaseContext(), wind.getBearing().getDegrees());
+        AppPreferences.setWindSpeed(getBaseContext(), wind.getKnots());
     }
 
     @Override

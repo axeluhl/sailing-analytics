@@ -81,7 +81,7 @@
 	        	android:layout_height="wrap_content"
 	        	android:inputType="numberDecimal"
 	        	android:hint="@string/in_degrees"
-	        	android:minWidth="200dp"/>
+	        	android:minWidth="200dp" />
 		    
 		    <TextView
 		        android:layout_width="wrap_content"
@@ -107,7 +107,11 @@
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:hint="@string/latitude" 
-		        android:minWidth="200dp">
+		        android:minWidth="200dp"
+		        android:clickable="false" 
+        		android:cursorVisible="false" 
+        		android:focusable="false" 
+        		android:focusableInTouchMode="false">
 		    </EditText>
 		    
 		    <EditText
@@ -115,16 +119,12 @@
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:hint="@string/longitude" 
-		        android:minWidth="200dp">
+		        android:minWidth="200dp"
+		        android:clickable="false" 
+        		android:cursorVisible="false" 
+        		android:focusable="false" 
+        		android:focusableInTouchMode="false">
 		    </EditText>
-		    
-	       	<TextView
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:layout_marginTop="18dp"
-		        android:layout_marginBottom="9dp"
-		        android:text="@string/store_wind_entry"
-		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
 	       	
 		    <Button 
 		        android:id="@+id/btn_wind_send"
