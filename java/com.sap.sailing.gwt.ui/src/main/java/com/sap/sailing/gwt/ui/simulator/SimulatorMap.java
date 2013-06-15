@@ -350,6 +350,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     			regattaAreaCanvasOverlay = new RegattaAreaCanvasOverlay(this);
     			mapw.addOverlay(regattaAreaCanvasOverlay);
     			regattaAreaCanvasOverlay.setVisible(true);
+    			//parent.showTimePanel(false);
     		}
     	}
     	

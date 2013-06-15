@@ -275,7 +275,7 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 			context2d.setFillStyle(colorText);
 			
 			double fontsize = 14.0 + (32.0-14.0)*(getMap().getZoomLevel() - 11.0)/(14.0-11.0);
-			context2d.setFont("bold "+fontsize+"px Calibri");
+			context2d.setFont("normal "+fontsize+"px Calibri");
 	        //TextMetrics txtmet = context2d.measureText(name);
 			context2d.setTextAlign(TextAlign.CENTER);
 			context2d.fillText(name, centerPoint.getX() - this.getWidgetPosLeft(), centerPoint.getY()+0.32*fontsize - this.getWidgetPosTop());
