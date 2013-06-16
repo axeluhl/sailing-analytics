@@ -12,7 +12,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 
-public class WindWardLeewardCourseDesignFactoryImpl extends AbstractCourseDesignFactory {
+public class WindwardLeewardCourseDesignFactoryImpl extends AbstractCourseDesignFactory {
     private final int LUV_BUOY1_ANGLE_TO_WIND  = 0;
     private final int LUV_BUOY2_ANGLE_TO_WIND  = 100;
     private final Distance LUV_BUOY1_TO_LUV_BUOY2_DISTANCE  = new NauticalMileDistance(0.03);
