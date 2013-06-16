@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.coursedesign;
 
+import java.util.Set;
+
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 
@@ -13,4 +15,9 @@ public interface CourseDesign {
     
     PositionedMark getPinEnd();
     public void setPinEnd(PositionedMark pinEnd);
+    
+    Position getReferencePoint();
+    public void setReferencePoint(Position referencePoint);
+    void setCourseDesignSpecificMarks(Set<PositionedMark> courseDesignSpecificMarks);
+    Set<PositionedMark> getCourseDesignSpecificMarks();
 }

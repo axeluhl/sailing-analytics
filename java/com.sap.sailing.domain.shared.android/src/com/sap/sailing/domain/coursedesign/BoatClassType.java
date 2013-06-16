@@ -120,13 +120,23 @@ public enum BoatClassType {
 
     private String displayName;
     private Map<CourseLayouts, Integer> possipleCourseLayoutsWithStandardTargetTime;
+    private Map<WindRange, Map<PointOfSail, Float>> boatSpeedTable;
     private Integer startLineLengthInMeters;
 
     private BoatClassType(String displayName, Map<CourseLayouts, Integer> possipleCourseLayoutsWithStandardTargetTime,
             Map<WindRange, Map<PointOfSail, Float>> boatSpeedTable, Integer startLineLengthInMeters) {
         this.displayName = displayName;
         this.possipleCourseLayoutsWithStandardTargetTime = possipleCourseLayoutsWithStandardTargetTime;
+        this.boatSpeedTable = boatSpeedTable;
         this.startLineLengthInMeters = startLineLengthInMeters;
+    }
+
+    public Map<WindRange, Map<PointOfSail, Float>> getBoatSpeedTable() {
+        return boatSpeedTable;
+    }
+
+    public void setBoatSpeedTable(Map<WindRange, Map<PointOfSail, Float>> boatSpeedTable) {
+        this.boatSpeedTable = boatSpeedTable;
     }
 
     @Override

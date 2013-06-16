@@ -32,6 +32,7 @@ import com.sap.sailing.domain.coursedesign.BoatClassType;
 import com.sap.sailing.domain.coursedesign.CourseDesign;
 import com.sap.sailing.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.domain.coursedesign.NumberOfRounds;
+import com.sap.sailing.domain.coursedesign.PositionedMark;
 import com.sap.sailing.domain.coursedesign.TargetTime;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.tracking.Wind;
@@ -168,12 +169,9 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
                 drawMap(courseDesignComputer.compute());
             } catch (IllegalStateException ise) {
                 Toast.makeText(getActivity(), ise.getMessage(), Toast.LENGTH_LONG).show();
+            } catch (IllegalArgumentException iae) {
+                Toast.makeText(getActivity(), iae.getMessage(), Toast.LENGTH_LONG).show();
             }
-            /*
-             * DataStore ds = InMemoryDataStore.INSTANCE; Toast.makeText( getActivity(), "" + ds.getLastWindPosition() +
-             * ds.getLastWindDirection() + ds.getLastWindSpeed() + selectedBoatClass + selectedCourseLayout +
-             * selectedNumberOfRounds + selectedTargetTime, Toast.LENGTH_LONG).show()
-             */;
     }
 
     private void setupBoatClassSpinner() {
@@ -311,12 +309,19 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
                 .icon(BitmapDescriptorFactory.fromBitmap(bmResult))
                 .draggable(false)
                 .title(position2LatLng(courseDesign.getStartBoatPosition()) + ", " + courseDesign.getWindSpeed()
-                        + "kn, " + courseDesign.getWindDirection() + "°"));
+                        + "kn, " + courseDesign.getWindDirection()));
         LatLng pinEndPosition = new LatLng(courseDesign.getPinEnd().getPosition().getLatDeg(), courseDesign.getPinEnd()
                 .getPosition().getLngDeg());
         courseAreaMap.addMarker(new MarkerOptions().position(pinEndPosition)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.buoy_red)).draggable(false)
                 .title(courseDesign.getPinEnd().getName()));
+        
+        for(PositionedMark mark : courseDesign.getCourseDesignSpecificMarks()){
+            LatLng markPosition = new LatLng(mark.getPosition().getLatDeg(), mark.getPosition().getLngDeg());
+            courseAreaMap.addMarker(new MarkerOptions().position(markPosition)
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_cone)).draggable(false)
+                    .title(mark.getName()));
+        }
 
     }
 

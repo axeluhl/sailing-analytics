@@ -16,6 +16,10 @@ public class WindRange implements Comparable<WindRange>{
     public Integer getUpperBound() {
         return upperBound;
     }
+    
+    public boolean isInRange(Double windSpeed){
+        return (lowerBound <= windSpeed && windSpeed <= upperBound) ? true : false;
+    }
 
     @Override
     public int compareTo(WindRange o) {
