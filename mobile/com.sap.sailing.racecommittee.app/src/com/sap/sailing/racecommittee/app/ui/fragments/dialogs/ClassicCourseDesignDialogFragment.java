@@ -317,7 +317,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         LatLng pinEndPosition = new LatLng(courseDesign.getPinEnd().getPosition().getLatDeg(), courseDesign.getPinEnd()
                 .getPosition().getLngDeg());
         courseAreaMap.addMarker(new MarkerOptions().position(pinEndPosition)
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.buoy_red)).draggable(false)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.buoy_red_big)).draggable(false)
                 .title(courseDesign.getPinEnd().getName()));
         
         for(PositionedMark mark : courseDesign.getCourseDesignSpecificMarks()){
@@ -331,11 +331,11 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
 
     private BitmapDescriptor getImageForMark(PositionedMark mark) {
         if(mark.getType().equals(MarkType.BUOY)){
-            return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black);
+            return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_big);
         } else if(mark.getType().equals(MarkType.FINISHBOAT)){
-            return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_finish);
+            return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_finish_big);
         } else
-        return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_finish);
+        return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_big);
     }
 
     private LatLng position2LatLng(Position p) {
