@@ -61,13 +61,14 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private CourseDesignComputer courseDesignComputer;
 
     private ArrayAdapter<CourseLayouts> courseLayoutAdapter;
+    private ArrayAdapter<TargetTime> targetTimeAdapter;
 
     // TODO determine this by given race
     private BoatClassType selectedBoatClass = BoatClassType.boatClass470erMen;
-    private CourseLayouts selectedCourseLayout = (CourseLayouts) BoatClassType.boatClass470erMen
+    private CourseLayouts selectedCourseLayout = (CourseLayouts) selectedBoatClass
             .getPossibleCourseLayoutsWithTargetTime().keySet().toArray().clone()[0];
     private NumberOfRounds selectedNumberOfRounds = NumberOfRounds.TWO;
-    private TargetTime selectedTargetTime = TargetTime.thirty;
+    private TargetTime selectedTargetTime = selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().get(selectedCourseLayout);
 
     public ClassicCourseDesignDialogFragment() {
         super();
@@ -216,6 +217,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 selectedCourseLayout = (CourseLayouts) adapterView.getItemAtPosition(position);
                 courseDesignComputer.setCourseLayout(selectedCourseLayout);
+                spinnerTargetTime.setSelection(targetTimeAdapter.getPosition(selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().get(selectedCourseLayout)));
                 recomputeCourseDesign();
             }
 
@@ -248,9 +250,9 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     private void setupTargetTimeSpinner() {
-        ArrayAdapter<TargetTime> adapter = new ArrayAdapter<TargetTime>(getActivity(),
+        targetTimeAdapter = new ArrayAdapter<TargetTime>(getActivity(),
                 android.R.layout.simple_spinner_dropdown_item, TargetTime.values());
-        spinnerTargetTime.setAdapter(adapter);
+        spinnerTargetTime.setAdapter(targetTimeAdapter);
         spinnerTargetTime.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
@@ -264,7 +266,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             }
         });
 
-        spinnerNumberOfRounds.setSelection(adapter.getPosition(selectedTargetTime));
+        spinnerNumberOfRounds.setSelection(targetTimeAdapter.getPosition(selectedTargetTime));
     }
 
     @Override

@@ -10,13 +10,15 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 
 public class WindWardLeeWardCourseDesignFactoryImpl extends AbstractCourseDesignFactory {
     private final int LUV_BUOY1_ANGLE_TO_WIND  = 0;
     private final int LUV_BUOY2_ANGLE_TO_WIND  = 100;
     private final Distance LUV_BUOY1_TO_LUV_BUOY2_DISTANCE  = new NauticalMileDistance(0.03);
+    private final int GATE_LENGTH_TO_HULL_LENGTH_FACTOR = 10;
+    private final int GATE_4S_WIND_ANGLE = 270;
+    private final int GATE_4P_WIND_ANGLE = 90;
     @Override
     public CourseDesign createCourseDesign(Position startBoatPosition, Double windSpeed, Bearing windDirection,
             BoatClassType boatClass, CourseLayouts courseLayout, NumberOfRounds numberOfRounds, TargetTime targetTime) {
@@ -33,6 +35,16 @@ public class WindWardLeeWardCourseDesignFactoryImpl extends AbstractCourseDesign
             Bearing windDirection, BoatClassType boatClass, CourseLayouts courseLayout, NumberOfRounds numberOfRounds,
             TargetTime targetTime) {
         Set<PositionedMark> result = new HashSet<PositionedMark>();
+        
+        //gate calculation
+        result.add(new PositionedMarkImpl("4S" , getPositionForGivenPointDistanceAndBearing(
+                this.product.getReferencePoint(), boatClass.getHullLength().scale(GATE_LENGTH_TO_HULL_LENGTH_FACTOR/2),
+                windDirection.add(new DegreeBearingImpl(GATE_4S_WIND_ANGLE)))));
+        result.add(new PositionedMarkImpl("4P" , getPositionForGivenPointDistanceAndBearing(
+                this.product.getReferencePoint(), boatClass.getHullLength().scale(GATE_LENGTH_TO_HULL_LENGTH_FACTOR/2),
+                windDirection.add(new DegreeBearingImpl(GATE_4P_WIND_ANGLE)))));
+        
+        //luv buoy calculation
         Map<PointOfSail, Float> speedTable = null;
         for (Entry<WindRange, Map<PointOfSail, Float>> windRangeToSpeedTable : boatClass.getBoatSpeedTable().entrySet()) {
             if (windRangeToSpeedTable.getKey().isInRange(windSpeed)) {
@@ -50,9 +62,9 @@ public class WindWardLeeWardCourseDesignFactoryImpl extends AbstractCourseDesign
                 this.product.getReferencePoint(), legDistance,
                 windDirection.add(new DegreeBearingImpl(LUV_BUOY1_ANGLE_TO_WIND)));
         DecimalFormat legLengthFormat = new DecimalFormat("0.00");
-        result.add(new PositionedMarkImpl("luv buoy 1 "+legLengthFormat.format(legDistance.getNauticalMiles()) , luvBuoyPosition));
+        result.add(new PositionedMarkImpl("1A "+legLengthFormat.format(legDistance.getNauticalMiles()) , luvBuoyPosition));
         
-        result.add(new PositionedMarkImpl("luv buoy 2" , getPositionForGivenPointDistanceAndBearing(
+        result.add(new PositionedMarkImpl("1" , getPositionForGivenPointDistanceAndBearing(
                 luvBuoyPosition, LUV_BUOY1_TO_LUV_BUOY2_DISTANCE,
                 windDirection.add(new DegreeBearingImpl(LUV_BUOY2_ANGLE_TO_WIND)))));
         

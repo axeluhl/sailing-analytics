@@ -4,14 +4,17 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 @SuppressWarnings("serial")
 public enum BoatClassType {
-    boatClass470erMen("470er Men", new HashMap<CourseLayouts, Integer>() {
+    boatClass470erMen("470er Men", new HashMap<CourseLayouts, TargetTime>() {
         {
-            put(TrapezoidCourseLayouts.innerLoopTrapezoid60, 60);
-            put(TrapezoidCourseLayouts.outerLoopTrapezoid60, 60);
-            put(WindWardLeeWardCourseLayouts.windWardLeewardLeeward, 30);
-            put(WindWardLeeWardCourseLayouts.windWardLeewardWindward, 30);
+            put(TrapezoidCourseLayouts.innerLoopTrapezoid60, TargetTime.sixty);
+            put(TrapezoidCourseLayouts.outerLoopTrapezoid60, TargetTime.sixty);
+            put(WindWardLeeWardCourseLayouts.windWardLeewardLeeward, TargetTime.thirty);
+            put(WindWardLeeWardCourseLayouts.windWardLeewardWindward, TargetTime.thirty);
         }
     }, new TreeMap<WindRange, Map<PointOfSail, Float>>() {
         {
@@ -44,13 +47,13 @@ public enum BoatClassType {
                 }
             });
         }
-    }, 290),
-    boatClass470eromen("470er Women", new HashMap<CourseLayouts, Integer>() {
+    }, new MeterDistance(4.7), new MeterDistance(290)),
+    boatClass470eromen("470er Women", new HashMap<CourseLayouts, TargetTime>() {
         {
-            put(TrapezoidCourseLayouts.innerLoopTrapezoid60, 60);
-            put(TrapezoidCourseLayouts.outerLoopTrapezoid60, 60);
-            put(WindWardLeeWardCourseLayouts.windWardLeewardLeeward, 30);
-            put(WindWardLeeWardCourseLayouts.windWardLeewardWindward, 30);
+            put(TrapezoidCourseLayouts.innerLoopTrapezoid60, TargetTime.sixty);
+            put(TrapezoidCourseLayouts.outerLoopTrapezoid60, TargetTime.sixty);
+            put(WindWardLeeWardCourseLayouts.windWardLeewardLeeward, TargetTime.thirty);
+            put(WindWardLeeWardCourseLayouts.windWardLeewardWindward, TargetTime.thirty);
         }
     }, new TreeMap<WindRange, Map<PointOfSail, Float>>() {
         {
@@ -83,11 +86,11 @@ public enum BoatClassType {
                 }
             });
         }
-    }, 110),
-    boatClass49er("49er", new HashMap<CourseLayouts, Integer>() {
+    }, new MeterDistance(4.7), new MeterDistance(110)),
+    boatClass49er("49er", new HashMap<CourseLayouts, TargetTime>() {
         {
-            put(WindWardLeeWardCourseLayouts.windWardLeewardLeeward, 30);
-            put(WindWardLeeWardCourseLayouts.windWardLeewardWindward, 30);
+            put(WindWardLeeWardCourseLayouts.windWardLeewardLeeward, TargetTime.thirty);
+            put(WindWardLeeWardCourseLayouts.windWardLeewardWindward, TargetTime.thirty);
         }
     }, new TreeMap<WindRange, Map<PointOfSail, Float>>() {
         {
@@ -116,27 +119,25 @@ public enum BoatClassType {
                 }
             });
         }
-    }, 255);
+    }, new MeterDistance(4.9), new MeterDistance(255));
 
     private String displayName;
-    private Map<CourseLayouts, Integer> possipleCourseLayoutsWithStandardTargetTime;
+    private Map<CourseLayouts, TargetTime> possipleCourseLayoutsWithStandardTargetTime;
     private Map<WindRange, Map<PointOfSail, Float>> boatSpeedTable;
-    private Integer startLineLengthInMeters;
+    private Distance hullLength;
+    private Distance startLineLength;
 
-    private BoatClassType(String displayName, Map<CourseLayouts, Integer> possipleCourseLayoutsWithStandardTargetTime,
-            Map<WindRange, Map<PointOfSail, Float>> boatSpeedTable, Integer startLineLengthInMeters) {
+    private BoatClassType(String displayName, Map<CourseLayouts, TargetTime> possipleCourseLayoutsWithStandardTargetTime,
+            Map<WindRange, Map<PointOfSail, Float>> boatSpeedTable, Distance hullLength, Distance startLineLengthInMeters) {
         this.displayName = displayName;
         this.possipleCourseLayoutsWithStandardTargetTime = possipleCourseLayoutsWithStandardTargetTime;
         this.boatSpeedTable = boatSpeedTable;
-        this.startLineLengthInMeters = startLineLengthInMeters;
+        this.hullLength = hullLength;
+        this.startLineLength = startLineLengthInMeters;
     }
 
     public Map<WindRange, Map<PointOfSail, Float>> getBoatSpeedTable() {
         return boatSpeedTable;
-    }
-
-    public void setBoatSpeedTable(Map<WindRange, Map<PointOfSail, Float>> boatSpeedTable) {
-        this.boatSpeedTable = boatSpeedTable;
     }
 
     @Override
@@ -144,11 +145,15 @@ public enum BoatClassType {
         return displayName;
     }
 
-    public Map<CourseLayouts, Integer> getPossibleCourseLayoutsWithTargetTime() {
+    public Map<CourseLayouts, TargetTime> getPossibleCourseLayoutsWithTargetTime() {
         return possipleCourseLayoutsWithStandardTargetTime;
     }
+    
+    public Distance getHullLength() {
+        return hullLength;
+    }
 
-    public Integer getStartLineLengthInMeters() {
-        return startLineLengthInMeters;
+    public Distance getStartLineLength() {
+        return startLineLength;
     }
 }
