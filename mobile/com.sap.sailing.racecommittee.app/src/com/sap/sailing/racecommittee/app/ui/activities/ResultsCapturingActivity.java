@@ -1,28 +1,32 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.io.File;
+import java.io.FileOutputStream;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
+import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
+import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.PhotoAdapter;
+import com.sap.sailing.racecommittee.app.ui.views.CameraPreview;
 import com.sap.sailing.racecommittee.app.utils.MailHelper;
 
 public class ResultsCapturingActivity extends BaseActivity {
@@ -30,6 +34,8 @@ public class ResultsCapturingActivity extends BaseActivity {
 
     private static String ARGUMENTS_KEY_SUBJECT = "subject";
     private static String ARGUMENTS_KEY_TEXT = "text";
+
+    private Camera camera;
 
     private int currentImageIndex;
     private File currentImageFile;
@@ -64,9 +70,15 @@ public class ResultsCapturingActivity extends BaseActivity {
         footer.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(currentImageFile));
-                startActivityForResult(intent, FINISHER_IMAGE_REQUEST_CODE);
+                /*
+                 * Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE); intent.putExtra(MediaStore.EXTRA_OUTPUT,
+                 * Uri.fromFile(currentImageFile)); startActivityForResult(intent, FINISHER_IMAGE_REQUEST_CODE);
+                 */
+                if (camera != null) {
+                    camera.takePicture(null, null, pictureHandler);
+                } else {
+                    Toast.makeText(ResultsCapturingActivity.this, "No camera found.", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -90,7 +102,6 @@ public class ResultsCapturingActivity extends BaseActivity {
 
         Button sendButton = (Button) findViewById(R.id.results_capturing_view_button_send);
         sendButton.setOnClickListener(new OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 SharedPreferences preferences = PreferenceManager
@@ -102,6 +113,40 @@ public class ResultsCapturingActivity extends BaseActivity {
                 finish();
             }
         });
+    }
+    
+    @Override
+    protected void onResume() {
+        setupCamera();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        if (camera != null) {
+            ((FrameLayout) findViewById(R.id.results_capturing_view_camera_preview)).removeAllViews();
+            camera.release();
+            camera = null;
+        }
+        super.onPause();
+    }
+
+    private void setupCamera() {
+        int cameraId = -1;
+        for (int i = 0; i < Camera.getNumberOfCameras(); i++) {
+            CameraInfo info = new CameraInfo();
+            Camera.getCameraInfo(i, info);
+            if (info.facing == CameraInfo.CAMERA_FACING_BACK) {
+                cameraId = i;
+                break;
+            }
+        }
+        if (cameraId >= 0) {
+            camera = Camera.open(cameraId);
+            CameraPreview preview = new CameraPreview(this, camera);
+            FrameLayout view = (FrameLayout) findViewById(R.id.results_capturing_view_camera_preview);
+            view.addView(preview);
+        }
     }
 
     private String getSubjectText() {
@@ -122,15 +167,11 @@ public class ResultsCapturingActivity extends BaseActivity {
         return true;
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == FINISHER_IMAGE_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                listAdapter.addPhoto(Uri.fromFile(currentImageFile));
-                createAndAdvanceImageFile();
-            }
-        }
-    }
+    /*
+     * @Override public void onActivityResult(int requestCode, int resultCode, Intent data) { if (requestCode ==
+     * FINISHER_IMAGE_REQUEST_CODE) { if (resultCode == Activity.RESULT_OK) {
+     * listAdapter.addPhoto(Uri.fromFile(currentImageFile)); createAndAdvanceImageFile(); } } }
+     */
 
     private void setupListView() {
         TextView header = new TextView(this);
@@ -155,4 +196,21 @@ public class ResultsCapturingActivity extends BaseActivity {
         imageDirectory.mkdirs();
         return new File(imageDirectory, String.format("image_%d.jpg", index));
     }
+
+    private PictureCallback pictureHandler = new PictureCallback() {
+
+        @Override
+        public void onPictureTaken(byte[] data, Camera camera) {
+            Toast.makeText(ResultsCapturingActivity.this, "Image incoming.", Toast.LENGTH_LONG).show();
+            try {
+                FileOutputStream fos = new FileOutputStream(currentImageFile);
+                fos.write(data);
+                fos.close();
+                Toast.makeText(ResultsCapturingActivity.this, "image file ok.", Toast.LENGTH_LONG).show();
+                createAndAdvanceImageFile();
+            } catch (Exception e) {
+                Toast.makeText(ResultsCapturingActivity.this, "Error writing image file.", Toast.LENGTH_LONG).show();
+            }
+        }
+    };
 }
