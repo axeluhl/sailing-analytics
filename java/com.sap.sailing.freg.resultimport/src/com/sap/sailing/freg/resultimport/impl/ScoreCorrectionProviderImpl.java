@@ -2,69 +2,43 @@ package com.sap.sailing.freg.resultimport.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
+import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.resultimport.RegattaResults;
-import com.sap.sailing.resultimport.ResultDocumentProvider;
-import com.sap.sailing.resultimport.UrlResultProvider;
-import com.sap.sailing.resultimport.impl.AbstractDocumentBasedScoreCorrectionProvider;
+import com.sap.sailing.resultimport.ResultUrlProvider;
+import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.resultimport.impl.RegattaScoreCorrectionsImpl;
 
-public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorrectionProvider implements UrlResultProvider {
+public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, ResultUrlProvider {
     private static final long serialVersionUID = 5853404150107387702L;
+    public static final String PROVIDER_NAME = "FREG HTML Score Importer";
     
-    private final Set<URL> allUrls;
+    private final ResultUrlRegistry resultUrlRegistry;
 
-    public ScoreCorrectionProviderImpl() throws MalformedURLException {
-        this(new HashSet<URL>());
-        /*
-         * For testing, consider using the following URLs:
-         *   allUrls.add(new URL("http://www.axel-uhl.de/freg/freg_html_export_sample.html"));
-         *   allUrls.add(new URL("http://www.axel-uhl.de/freg/eurocup_29er_29e.htm"));
-         */
-    }
-
-    private ScoreCorrectionProviderImpl(final Set<URL> allUrls) {
-        super(new ResultDocumentProvider() {
-            @Override
-            public Iterable<Triple<InputStream, String, TimePoint>> getDocumentsAndNamesAndLastModified() throws IOException {
-                List<Triple<InputStream, String, TimePoint>> result = new ArrayList<>();
-                for (URL url : allUrls) {
-                    URLConnection conn;
-                    conn = url.openConnection();
-                    result.add(new Triple<InputStream, String, TimePoint>((InputStream) conn.getContent(), url.toString(),
-                            new MillisecondsTimePoint(conn.getLastModified())));
-                }
-                return result;
-            }
-        });
-        this.allUrls = allUrls;
+    public ScoreCorrectionProviderImpl(ResultUrlRegistry resultUrlRegistry) {
+        this.resultUrlRegistry = resultUrlRegistry;
     }
 
     @Override
     public String getName() {
-        return "FREG HTML Score Importer";
+        return PROVIDER_NAME;
     }
     
     @Override
     public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() {
         Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String,TimePoint>>>();
         FregHtmlParser parser = new FregHtmlParser();
-        for (URL url : getAllUrls()) {
+        for (URL url : getUrls()) {
             URLConnection conn;
             try {
                 conn = url.openConnection();
@@ -94,15 +68,15 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
     }
 
     @Override
-    public Iterable<URL> getAllUrls() {
-        return Collections.unmodifiableSet(allUrls);
+    public Iterable<URL> getUrls() {
+        return resultUrlRegistry.getResultUrls(PROVIDER_NAME);
     }
 
     @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
             TimePoint timePoint) throws Exception {
         FregHtmlParser parser = new FregHtmlParser();
-        for (URL url : getAllUrls()) {
+        for (URL url : getUrls()) {
             final URLConnection conn = url.openConnection();
             RegattaResults regattaResult = parser.getRegattaResults((InputStream) conn.getContent());
             if ((boatClassName == null && getBoatClassName(regattaResult) == null) ||
@@ -112,15 +86,4 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
         }
         return null;
     }
-
-    @Override
-    public void registerResultUrl(URL url) {
-        allUrls.add(url);
-    }
-
-    @Override
-    public void removeResultUrl(URL url) {
-        allUrls.remove(url);
-    }
-
 }

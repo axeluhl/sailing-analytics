@@ -358,7 +358,9 @@ public interface SailingServiceAsync {
     void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);
 
-    void getScoreCorrectionProviderDTOs(AsyncCallback<Iterable<ScoreCorrectionProviderDTO>> callback);
+    void getScoreCorrectionProviderNames(AsyncCallback<Iterable<String>> callback);
+
+    void getScoreCorrectionsOfProvider(String providerName, AsyncCallback<ScoreCorrectionProviderDTO> callback);
 
     void getScoreCorrections(String scoreCorrectionProviderName, String eventName, String boatClassName,
             Date timePointWhenResultPublished, AsyncCallback<RegattaScoreCorrectionDTO> asyncCallback);

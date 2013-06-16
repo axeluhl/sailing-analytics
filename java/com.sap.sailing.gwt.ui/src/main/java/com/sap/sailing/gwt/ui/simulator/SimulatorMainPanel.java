@@ -806,7 +806,10 @@ public class SimulatorMainPanel extends SimplePanel {
 
     private void initUpdateButton() {
 
-        this.updateButton = new Button(stringMessages.update());
+        this.updateButton = new Button(stringMessages.simulateButton());
+        if (mode == SailingSimulatorUtil.event) {
+        	this.updateButton.setEnabled(true);
+        }
         this.updateButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
@@ -815,6 +818,10 @@ public class SimulatorMainPanel extends SimplePanel {
         });
     }
 
+    public void setUpdateButtonEnabled(boolean enabled) {
+    	this.updateButton.setEnabled(enabled);
+    }
+    
     private void update() {
 
         // int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
