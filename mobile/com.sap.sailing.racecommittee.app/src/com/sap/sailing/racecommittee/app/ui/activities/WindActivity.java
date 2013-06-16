@@ -5,6 +5,7 @@ import java.text.DecimalFormat;
 
 import android.content.Context;
 import android.content.Intent;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -64,10 +65,13 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
         windSpeedSeekBar = (SeekBar) findViewById(R.id.seekbar_wind_speed);
         sendButton = (Button) findViewById(R.id.btn_wind_send);
         
-        currentLocation = null;
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FIVE_SEC, EVERY_POSITION_CHANGE, this);
-
+        Criteria crit = new Criteria();
+        crit.setAccuracy(Criteria.ACCURACY_FINE);
+        String provider = locationManager.getBestProvider(crit, true);
+        onLocationChanged(locationManager.getLastKnownLocation(provider));
+        
         windSpeedSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -86,7 +90,6 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
             }
         });
 
-        sendButton.setEnabled(false);
         sendButton.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
@@ -120,7 +123,7 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
             
         });
         
-        speedFormat = new DecimalFormat("##.0");
+        speedFormat = new DecimalFormat("#0.0");
         bearingFormat = new DecimalFormat("###");
         
         double enteredWindSpeed = AppPreferences.getWindSpeed(getBaseContext());
@@ -158,7 +161,6 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
         currentLocation = location;
         latitudeEditText.setText(String.valueOf(location.getLatitude()));
         longitudeEditText.setText(String.valueOf(location.getLongitude()));
-        sendButton.setEnabled(true);
     }
 
     @Override
@@ -188,7 +190,7 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
         }
         
         Position currentPosition = new DegreePosition(currentLocation.getLatitude(), currentLocation.getLongitude());
-        double windSpeed = Double.valueOf(windSpeedEditText.getText().toString());
+        double windSpeed = Double.valueOf(windSpeedEditText.getText().toString().replace(",", "."));
         double windBearing = Double.valueOf(windBearingEditText.getText().toString());
         Bearing bearing = new DegreeBearingImpl(windBearing);
         SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(windSpeed, bearing);

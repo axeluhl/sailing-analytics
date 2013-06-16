@@ -9,6 +9,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.coursedesign.CourseDesign;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;

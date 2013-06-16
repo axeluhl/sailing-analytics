@@ -27,17 +27,17 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursedesign.BoatClassType;
 import com.sap.sailing.domain.coursedesign.CourseDesign;
 import com.sap.sailing.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.domain.coursedesign.TargetTime;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.coursedesigner.CourseDesignComputer;
-import com.sap.sailing.racecommittee.app.data.DataStore;
-import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
 
 public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
@@ -70,7 +70,8 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
 
     public ClassicCourseDesignDialogFragment() {
         super();
-        // handle bug "Dark overlay of MapFragment in Activity with Dialog theme" - https://code.google.com/p/gmaps-api-issues/issues/detail?id=4865
+        // handle bug "Dark overlay of MapFragment in Activity with Dialog theme" -
+        // https://code.google.com/p/gmaps-api-issues/issues/detail?id=4865
         this.setStyle(DialogFragment.STYLE_NORMAL, R.style.Theme_DimDisabledDialog);
     }
 
@@ -94,7 +95,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getDialog().setTitle(getActivity().getText(R.string.course_design_dialog_title));
-
+        setUpMapIfNeeded(getView());
         publishButton = (Button) getView().findViewById(R.id.publishCourseDesignButton);
         publishButton.setOnClickListener(new OnClickListener() {
 
@@ -114,7 +115,11 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             }
 
         });
-
+        
+        courseDesignComputer = new CourseDesignComputer().setBoatClass(selectedBoatClass)
+                .setCourseLayout(selectedCourseLayout).setNumberOfRounds(selectedNumberOfRounds)
+                .setTargetTime(selectedTargetTime);
+        
         spinnerBoatClass = (Spinner) getView().findViewById(R.id.classic_course_designer_boat_class);
         setupBoatClassSpinner();
         spinnerCourseLayout = (Spinner) getView().findViewById(R.id.classic_course_designer_course_layout);
@@ -124,12 +129,17 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         spinnerTargetTime = (Spinner) getView().findViewById(R.id.classic_course_designer_target_time);
         setupTargetTimeSpinner();
 
-        DataStore ds = InMemoryDataStore.INSTANCE;
-        courseDesignComputer = new CourseDesignComputer().setStartBoatPosition(ds.getLastWindPosition())
-                .setWindDirection(ds.getLastWindDirection()).setWindSpeed(ds.getLastWindSpeed())
-                .setBoatClass(selectedBoatClass).setCourseLayout(selectedCourseLayout)
-                .setNumberOfRounds(selectedNumberOfRounds).setTargetTime(selectedTargetTime);
-        setUpMapIfNeeded(getView());
+        LastWindFixFinder lastWindFixFinder = new LastWindFixFinder(getRace().getRaceLog());
+        Wind lastWind = lastWindFixFinder.analyze();
+
+        if (lastWind != null) {
+            courseDesignComputer.setWindSpeed(lastWind.getKnots());
+            courseDesignComputer.setWindDirection(lastWind.getBearing());
+            courseDesignComputer.setStartBoatPosition(lastWind.getPosition());
+            recomputeCourseDesign();
+        } else {
+            Toast.makeText(getActivity(), "Set the wind information, please!", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -141,33 +151,29 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
                     Wind windFix = (Wind) data.getSerializableExtra(AppConstants.EXTRAS_WIND_FIX);
                     onWindEntered(windFix);
                 }
-                DataStore ds = InMemoryDataStore.INSTANCE;
-                courseDesignComputer = courseDesignComputer.setStartBoatPosition(ds.getLastWindPosition())
-                        .setWindDirection(ds.getLastWindDirection()).setWindSpeed(ds.getLastWindSpeed());
-                recomputeCourseDesign();
             }
         }
     }
 
     private void onWindEntered(Wind windFix) {
         getRace().getState().setWindFix(windFix);
-        //TODO integrate the wind fix into the course designer
+        courseDesignComputer.setStartBoatPosition(windFix.getPosition());
+        courseDesignComputer.setWindDirection(windFix.getBearing());
+        courseDesignComputer.setWindSpeed(windFix.getKnots());
+        recomputeCourseDesign();
     }
 
-    private CourseDesign recomputeCourseDesign() {
-        CourseDesign courseDesign = null;
-        try {
-            courseDesign = courseDesignComputer.compute();
-        } catch (IllegalStateException ise) {
-            Toast.makeText(getActivity(), ise.getMessage(), Toast.LENGTH_LONG).show();
-        }
-        /*
-         * DataStore ds = InMemoryDataStore.INSTANCE; Toast.makeText( getActivity(), "" + ds.getLastWindPosition() +
-         * ds.getLastWindDirection() + ds.getLastWindSpeed() + selectedBoatClass + selectedCourseLayout +
-         * selectedNumberOfRounds + selectedTargetTime, Toast.LENGTH_LONG).show()
-         */;
-        return courseDesign;
-
+    private void recomputeCourseDesign() {
+            try {
+                drawMap(courseDesignComputer.compute());
+            } catch (IllegalStateException ise) {
+                Toast.makeText(getActivity(), ise.getMessage(), Toast.LENGTH_LONG).show();
+            }
+            /*
+             * DataStore ds = InMemoryDataStore.INSTANCE; Toast.makeText( getActivity(), "" + ds.getLastWindPosition() +
+             * ds.getLastWindDirection() + ds.getLastWindSpeed() + selectedBoatClass + selectedCourseLayout +
+             * selectedNumberOfRounds + selectedTargetTime, Toast.LENGTH_LONG).show()
+             */;
     }
 
     private void setupBoatClassSpinner() {
@@ -178,9 +184,17 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 selectedBoatClass = (BoatClassType) adapterView.getItemAtPosition(position);
+                
+                //update possible course layouts
                 courseLayoutAdapter.clear();
                 courseLayoutAdapter.addAll(selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet());
                 courseLayoutAdapter.notifyDataSetChanged();
+                selectedCourseLayout = (CourseLayouts) selectedBoatClass
+                        .getPossibleCourseLayoutsWithTargetTime().keySet().toArray().clone()[0];
+                spinnerCourseLayout.setSelection(courseLayoutAdapter.getPosition(selectedCourseLayout));
+                
+                
+                courseDesignComputer.setBoatClass(selectedBoatClass);
                 if (selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet().contains(selectedCourseLayout)) {
                     recomputeCourseDesign();
                 }
@@ -203,6 +217,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 selectedCourseLayout = (CourseLayouts) adapterView.getItemAtPosition(position);
+                courseDesignComputer.setCourseLayout(selectedCourseLayout);
                 recomputeCourseDesign();
             }
 
@@ -222,6 +237,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 selectedNumberOfRounds = (NumberOfRounds) adapterView.getItemAtPosition(position);
+                courseDesignComputer.setNumberOfRounds(selectedNumberOfRounds);
                 recomputeCourseDesign();
             }
 
@@ -241,6 +257,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 selectedTargetTime = (TargetTime) adapterView.getItemAtPosition(position);
+                courseDesignComputer.setTargetTime(selectedTargetTime);
                 recomputeCourseDesign();
             }
 
@@ -256,7 +273,6 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     public void onResume() {
         super.onResume();
         mMapView.onResume();
-        setUpMap();
     }
 
     @Override
@@ -273,41 +289,39 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private void setUpMapIfNeeded(View inflatedView) {
         if (courseAreaMap == null) {
             courseAreaMap = ((MapView) inflatedView.findViewById(R.id.mapView)).getMap();
-            if (courseAreaMap != null) {
-                setUpMap();
-            }
+            courseAreaMap.getUiSettings().setRotateGesturesEnabled(false);
         }
     }
 
-    private void setUpMap() {
+    private void drawMap(CourseDesign courseDesign) {
         courseAreaMap.clear();
-        DataStore ds = InMemoryDataStore.INSTANCE;
-        if (ds.getLastWindPosition() != null && ds.getLastWindDirection() != null && ds.getLastWindSpeed() != null) {
-            courseAreaMap.animateCamera(CameraUpdateFactory.newLatLngZoom(ds.getLastWindPosition(), 17.0f));
+        courseAreaMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                position2LatLng(courseDesign.getStartBoatPosition()), 16.0f));
 
-            Bitmap bmpOriginal = BitmapFactory.decodeResource(this.getResources(), R.drawable.boat);
-            Bitmap bmResult = Bitmap.createBitmap(bmpOriginal.getHeight(), bmpOriginal.getHeight(),
-                    Bitmap.Config.ARGB_8888);
-            Canvas tempCanvas = new Canvas(bmResult);
-            tempCanvas.rotate(ds.getLastWindDirection(), bmpOriginal.getWidth() / 2, bmpOriginal.getHeight() / 2);
-            tempCanvas.drawBitmap(bmpOriginal, 0, 0, null);
+        Bitmap bmpOriginal = BitmapFactory.decodeResource(this.getResources(), R.drawable.boat);
+        Bitmap bmResult = Bitmap
+                .createBitmap(bmpOriginal.getHeight(), bmpOriginal.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas tempCanvas = new Canvas(bmResult);
+        tempCanvas.rotate((float) courseDesign.getWindDirection().getDegrees(), bmpOriginal.getWidth() / 2,
+                bmpOriginal.getHeight() / 2);
+        tempCanvas.drawBitmap(bmpOriginal, 0, 0, null);
 
-            courseAreaMap.addMarker(new MarkerOptions()
-            .position(ds.getLastWindPosition())
-            .icon(BitmapDescriptorFactory.fromBitmap(bmResult))
-            .draggable(false)
-            .title(ds.getLastWindPosition() + ", " + ds.getLastWindSpeed() + "kn, " + ds.getLastWindDirection()
-                    + "°"));
-        }
-        CourseDesign courseDesign = recomputeCourseDesign();
-        if (courseDesign != null) {
-            LatLng pinEndPosition = new LatLng(courseDesign.getPinEnd().getPosition().getLatDeg(), courseDesign
-                    .getPinEnd().getPosition().getLngDeg());
-            courseAreaMap.addMarker(new MarkerOptions().position(pinEndPosition)
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.buoy_red)).draggable(false)
-                    .title(courseDesign.getPinEnd().getName()));
-        }
+        courseAreaMap.addMarker(new MarkerOptions()
+                .position(position2LatLng(courseDesign.getStartBoatPosition()))
+                .icon(BitmapDescriptorFactory.fromBitmap(bmResult))
+                .draggable(false)
+                .title(position2LatLng(courseDesign.getStartBoatPosition()) + ", " + courseDesign.getWindSpeed()
+                        + "kn, " + courseDesign.getWindDirection() + "°"));
+        LatLng pinEndPosition = new LatLng(courseDesign.getPinEnd().getPosition().getLatDeg(), courseDesign.getPinEnd()
+                .getPosition().getLngDeg());
+        courseAreaMap.addMarker(new MarkerOptions().position(pinEndPosition)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.buoy_red)).draggable(false)
+                .title(courseDesign.getPinEnd().getName()));
 
+    }
+
+    private LatLng position2LatLng(Position p) {
+        return new LatLng(p.getLatDeg(), p.getLngDeg());
     }
 
     @Override
