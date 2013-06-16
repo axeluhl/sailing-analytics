@@ -24,9 +24,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursedesign.BoatClassType;
 import com.sap.sailing.domain.coursedesign.CourseDesign;
@@ -191,9 +193,9 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
                 selectedCourseLayout = (CourseLayouts) selectedBoatClass
                         .getPossibleCourseLayoutsWithTargetTime().keySet().toArray().clone()[0];
                 spinnerCourseLayout.setSelection(courseLayoutAdapter.getPosition(selectedCourseLayout));
-                
-                
+
                 courseDesignComputer.setBoatClass(selectedBoatClass);
+                courseDesignComputer.setCourseLayout(selectedCourseLayout);
                 if (selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet().contains(selectedCourseLayout)) {
                     recomputeCourseDesign();
                 }
@@ -296,7 +298,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private void drawMap(CourseDesign courseDesign) {
         courseAreaMap.clear();
         courseAreaMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                position2LatLng(courseDesign.getStartBoatPosition()), 16.0f));
+                position2LatLng(courseDesign.getStartBoatPosition()), 14.0f));
 
         Bitmap bmpOriginal = BitmapFactory.decodeResource(this.getResources(), R.drawable.boat);
         Bitmap bmResult = Bitmap
@@ -310,7 +312,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
                 .position(position2LatLng(courseDesign.getStartBoatPosition()))
                 .icon(BitmapDescriptorFactory.fromBitmap(bmResult))
                 .draggable(false)
-                .title(position2LatLng(courseDesign.getStartBoatPosition()) + ", " + courseDesign.getWindSpeed()
+                .title("signal boat, "+courseDesign.getStartBoatPosition() + ", " + courseDesign.getWindSpeed()
                         + "kn, " + courseDesign.getWindDirection()));
         LatLng pinEndPosition = new LatLng(courseDesign.getPinEnd().getPosition().getLatDeg(), courseDesign.getPinEnd()
                 .getPosition().getLngDeg());
@@ -321,10 +323,19 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         for(PositionedMark mark : courseDesign.getCourseDesignSpecificMarks()){
             LatLng markPosition = new LatLng(mark.getPosition().getLatDeg(), mark.getPosition().getLngDeg());
             courseAreaMap.addMarker(new MarkerOptions().position(markPosition)
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_cone)).draggable(false)
+                    .icon(getImageForMark(mark)).draggable(false)
                     .title(mark.getName()));
         }
 
+    }
+
+    private BitmapDescriptor getImageForMark(PositionedMark mark) {
+        if(mark.getType().equals(MarkType.BUOY)){
+            return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black);
+        } else if(mark.getType().equals(MarkType.FINISHBOAT)){
+            return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_finish);
+        } else
+        return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_finish);
     }
 
     private LatLng position2LatLng(Position p) {

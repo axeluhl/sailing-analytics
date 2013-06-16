@@ -40,7 +40,7 @@ public abstract class AbstractCourseDesignFactory implements CourseDesignFactory
 
     protected void setPinEnd(BoatClassType boatClass, Position startBoatPosition, Bearing windDirection) {
         
-        PositionedMark pinEnd = new PositionedMarkImpl("pinEnd", getPositionForGivenPointDistanceAndBearing(
+        PositionedMark pinEnd = new PositionedMarkImpl("start pin", getPositionForGivenPointDistanceAndBearing(
                 startBoatPosition, boatClass.getStartLineLength(),
                 windDirection.add(new DegreeBearingImpl(ANGLE_OF_START_LINE_TO_WIND))));
         product.setPinEnd(pinEnd);

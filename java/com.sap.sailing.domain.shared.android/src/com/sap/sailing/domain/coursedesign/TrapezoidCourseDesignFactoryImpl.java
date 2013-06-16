@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
@@ -22,6 +23,8 @@ public class TrapezoidCourseDesignFactoryImpl extends AbstractCourseDesignFactor
     private final int GATE_LENGTH_TO_HULL_LENGTH_FACTOR = 10;
     private final int GATE_XS_WIND_ANGLE = 270;
     private final int GATE_XP_WIND_ANGLE = 90;
+    private final int FINISH_S_WIND_ANGLE = 180;
+    private final int FINISH_P_WIND_ANGLE = 0;
 
     @Override
     public CourseDesign createCourseDesign(Position startBoatPosition, Double windSpeed, Bearing windDirection,
@@ -73,7 +76,7 @@ public class TrapezoidCourseDesignFactoryImpl extends AbstractCourseDesignFactor
         Position luvBuoyPosition = getPositionForGivenPointDistanceAndBearing(this.product.getReferencePoint(),
                 legDistance, windDirection.add(new DegreeBearingImpl(LUV_BUOY_ANGLE_TO_WIND_OFFSET)));
         DecimalFormat legLengthFormat = new DecimalFormat("0.00");
-        result.add(new PositionedMarkImpl("1 " + legLengthFormat.format(legDistance.getNauticalMiles()),
+        result.add(new PositionedMarkImpl("1 (leg:" + legLengthFormat.format(legDistance.getNauticalMiles())+" nm)",
                 luvBuoyPosition));
 
         // reach leg
@@ -91,9 +94,21 @@ public class TrapezoidCourseDesignFactoryImpl extends AbstractCourseDesignFactor
         result.add(new PositionedMarkImpl("3S", getPositionForGivenPointDistanceAndBearing(downWindGateMid, boatClass
                 .getHullLength().scale(GATE_LENGTH_TO_HULL_LENGTH_FACTOR / 2), windDirection.add(new DegreeBearingImpl(
                 GATE_XS_WIND_ANGLE)))));
-        result.add(new PositionedMarkImpl("4P", getPositionForGivenPointDistanceAndBearing(downWindGateMid, boatClass
+        result.add(new PositionedMarkImpl("3P", getPositionForGivenPointDistanceAndBearing(downWindGateMid, boatClass
                 .getHullLength().scale(GATE_LENGTH_TO_HULL_LENGTH_FACTOR / 2), windDirection.add(new DegreeBearingImpl(
                 GATE_XP_WIND_ANGLE)))));
+
+        // finish gate
+        Position finishGateMid = getPositionForGivenPointDistanceAndBearing(downWindGateMid, FINISH_LEG_LENGTH,
+                windDirection.add(new DegreeBearingImpl(BUOY2_ANGLE_TO_WIND
+                        -((TrapezoidCourseLayouts) courseLayout).getReachAngle())));
+
+        result.add(new PositionedMarkImpl("FS", getPositionForGivenPointDistanceAndBearing(finishGateMid, boatClass
+                .getStartLineLength().scale(0.5), windDirection.add(new DegreeBearingImpl(
+                        FINISH_S_WIND_ANGLE+((TrapezoidCourseLayouts) courseLayout).getReachAngle()))), MarkType.FINISHBOAT));
+        result.add(new PositionedMarkImpl("FP", getPositionForGivenPointDistanceAndBearing(finishGateMid, boatClass
+                .getStartLineLength().scale(0.5), windDirection.add(new DegreeBearingImpl(
+                        FINISH_P_WIND_ANGLE+((TrapezoidCourseLayouts) courseLayout).getReachAngle()))), MarkType.FINISHBOAT));
 
         return result;
     }
