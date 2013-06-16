@@ -87,6 +87,45 @@ public enum BoatClassType {
             });
         }
     }, new MeterDistance(4.7), new MeterDistance(110)),
+    boatClassLaserMen("Laser Men", new HashMap<CourseLayouts, TargetTime>() {
+        {
+            put(TrapezoidCourseLayouts.innerLoopTrapezoid70, TargetTime.sixty);
+            put(TrapezoidCourseLayouts.outerLoopTrapezoid70, TargetTime.sixty);
+            put(WindWardLeeWardCourseLayouts.windWardLeewardLeeward, TargetTime.thirty);
+            put(WindWardLeeWardCourseLayouts.windWardLeewardWindward, TargetTime.thirty);
+        }
+    }, new TreeMap<WindRange, Map<PointOfSail, Float>>() {
+        {
+            put(new WindRange(5, 8), new EnumMap<PointOfSail, Float>(PointOfSail.class) {
+                {
+                    put(PointOfSail.Upwind, 20f);
+                    put(PointOfSail.Downwind, 17f);
+                    put(PointOfSail.Reach, 12f);
+                }
+            });
+            put(new WindRange(8, 12), new EnumMap<PointOfSail, Float>(PointOfSail.class) {
+                {
+                    put(PointOfSail.Upwind, 18.5f);
+                    put(PointOfSail.Downwind, 12f);
+                    put(PointOfSail.Reach, 9f);
+                }
+            });
+            put(new WindRange(12, 15), new EnumMap<PointOfSail, Float>(PointOfSail.class) {
+                {
+                    put(PointOfSail.Upwind, 15.5f);
+                    put(PointOfSail.Downwind, 9.5f);
+                    put(PointOfSail.Reach, 6.5f);
+                }
+            });
+            put(new WindRange(15, 99), new EnumMap<PointOfSail, Float>(PointOfSail.class) {
+                {
+                    put(PointOfSail.Upwind, 14.5f);
+                    put(PointOfSail.Downwind, 8.5f);
+                    put(PointOfSail.Reach, 6f);
+                }
+            });
+        }
+    }, new MeterDistance(2.24), new MeterDistance(280)),
     boatClass49er("49er", new HashMap<CourseLayouts, TargetTime>() {
         {
             put(WindWardLeeWardCourseLayouts.windWardLeewardLeeward, TargetTime.thirty);
