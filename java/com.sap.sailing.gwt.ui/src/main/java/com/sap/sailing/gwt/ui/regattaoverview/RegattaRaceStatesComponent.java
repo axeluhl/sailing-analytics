@@ -9,7 +9,11 @@ import java.util.List;
 import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -28,6 +32,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -69,6 +74,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private final RegattaRaceStatesSettings settings; 
     
     private static RegattaRaceStatesTableResources tableRes = GWT.create(RegattaRaceStatesTableResources.class);
+    
+    private final static String LOCAL_STORAGE_REGATTA_OVERVIEW_KEY = "sailingAnalytics.regattaOverview.settings";
 
     public RegattaRaceStatesComponent(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final StringMessages stringMessages, final String eventIdAsString, final RegattaOverviewRaceSelectionProvider raceSelectionProvider, RegattaRaceStatesSettings settings) {
@@ -83,7 +90,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         this.raceGroupDTOs = null;
 
         this.settings = new RegattaRaceStatesSettings();
-        updateSettings(settings);
+        loadAndSetSettings(settings);
+        //updateSettings(settings);
         
         mainPanel = new VerticalPanel();
         setWidth("100%");
@@ -107,6 +115,14 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         setWidget(mainPanel);
     }
 
+    private void loadAndSetSettings(RegattaRaceStatesSettings settings) {
+        RegattaRaceStatesSettings loadedSettings = loadRegattaRaceStatesSettings();
+        if (loadedSettings != null) {
+            settings = loadedSettings;
+        }
+        updateSettings(settings);
+    }
+    
     protected List<RegattaOverviewEntryDTO> getSelectedRaces() {
         List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
         if (regattaOverviewDataProvider != null) {
@@ -459,6 +475,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         }
         
         refreshTableWithNewSettings();
+        storeRegattaRaceStatesSettings(settings);
     }
 
     private void refreshTableWithNewSettings() {
@@ -512,5 +529,36 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         }
         fillVisibleRegattasInSettingsIfEmpty();
         refreshTableWithNewSettings();
+    }
+    
+    private void storeRegattaRaceStatesSettings(RegattaRaceStatesSettings settings) {
+        Storage localStorage = Storage.getLocalStorageIfSupported();
+        if (localStorage != null) {
+            // delete old value
+            localStorage.removeItem(LOCAL_STORAGE_REGATTA_OVERVIEW_KEY);
+            
+            //store settings
+            GwtJsonDeSerializer<RegattaRaceStatesSettings> serializer = new RegattaRaceStatesSettingsJsonDeSerializer();
+            JSONObject settingsAsJson = serializer.serialize(settings);
+            localStorage.setItem(LOCAL_STORAGE_REGATTA_OVERVIEW_KEY, settingsAsJson.toString());
+        }
+    }
+    
+    private RegattaRaceStatesSettings loadRegattaRaceStatesSettings() {
+        RegattaRaceStatesSettings loadedSettings = null;
+        Storage localStorage = Storage.getLocalStorageIfSupported();
+        
+        if (localStorage != null) {
+            String jsonAsLocalStore = localStorage.getItem(LOCAL_STORAGE_REGATTA_OVERVIEW_KEY);
+            if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
+                GwtJsonDeSerializer<RegattaRaceStatesSettings> deserializer = new RegattaRaceStatesSettingsJsonDeSerializer();
+                JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
+                if(value.isObject() != null) {
+                    loadedSettings = deserializer.deserialize((JSONObject) value);
+                }
+                
+            }
+        }
+        return loadedSettings;
     }
 }

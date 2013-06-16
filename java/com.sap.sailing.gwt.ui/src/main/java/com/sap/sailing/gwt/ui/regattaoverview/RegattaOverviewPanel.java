@@ -39,6 +39,7 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
     
     private final SailingServiceAsync sailingService;
     protected final StringMessages stringMessages;
+    protected final ErrorReporter errorReporter;
     
     private final String eventIdAsString;
     private EventDTO eventDTO;
@@ -72,6 +73,7 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
             String eventIdAsString, RegattaRaceStatesSettings settings) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
+        this.errorReporter = errorReporter;
         this.eventIdAsString = eventIdAsString;
         
         this.eventDTO = null;
@@ -286,7 +288,8 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
 
             @Override
             protected void handleFailure(Throwable cause) {
-                // TODO error message
+                errorReporter.reportError("Error trying to load regattas for event with id " + eventIdAsString + " : "
+                        + cause.getMessage());
             }
 
             @Override
