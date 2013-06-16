@@ -4,12 +4,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -27,6 +33,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -46,6 +53,20 @@ import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
  * Each entry shows what flags are currently displayed, what start time the race has and additional information, e.g. for Gate start.
  */
 public class RegattaRaceStatesComponent extends SimplePanel implements Component<RegattaRaceStatesSettings>, EventAndRaceGroupAvailabilityListener {
+    interface AnchorTemplates extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
+        SafeHtml cell(String url, String displayName);
+    }
+
+    private static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
+
+    public static class AnchorCell extends AbstractCell<SafeHtml> {
+
+        @Override
+        public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
+            sb.append(safeHtml);
+        }
+    }
 
     private List<RegattaOverviewEntryDTO> allEntries;
 
@@ -219,10 +240,19 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
         });
 
-        TextColumn<RegattaOverviewEntryDTO> raceNameColumn = new TextColumn<RegattaOverviewEntryDTO>() {
+        AnchorCell anchorCell = new AnchorCell();
+        Column<RegattaOverviewEntryDTO, SafeHtml> raceNameColumn = new Column<RegattaOverviewEntryDTO, SafeHtml>(anchorCell) {
             @Override
-            public String getValue(RegattaOverviewEntryDTO entryDTO) {
-                return entryDTO.raceInfo.raceName;
+            public SafeHtml getValue(RegattaOverviewEntryDTO entryDTO) {
+                Map<String, String> raceLinkParameters = new HashMap<String, String>();
+                raceLinkParameters.put("leaderboardName", entryDTO.regattaName);
+                raceLinkParameters.put("raceName", entryDTO.raceInfo.raceName);
+                raceLinkParameters.put("canReplayDuringLiveRaces", "true");
+                raceLinkParameters.put("regattaName", entryDTO.regattaName);
+                raceLinkParameters.put("leaderboardGroupName", "???");
+                String raceBoardLink = EntryPointLinkFactory.createRaceBoardLink(raceLinkParameters);                
+                
+                return ANCHORTEMPLATE.cell(raceBoardLink, entryDTO.raceInfo.raceName);
             }
         };
         raceNameColumn.setSortable(true);
