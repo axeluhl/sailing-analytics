@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
+import java.text.DecimalFormat;
+
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Intent;
@@ -70,7 +72,8 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private CourseLayouts selectedCourseLayout = (CourseLayouts) selectedBoatClass
             .getPossibleCourseLayoutsWithTargetTime().keySet().toArray().clone()[0];
     private NumberOfRounds selectedNumberOfRounds = NumberOfRounds.TWO;
-    private TargetTime selectedTargetTime = selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().get(selectedCourseLayout);
+    private TargetTime selectedTargetTime = selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().get(
+            selectedCourseLayout);
 
     public ClassicCourseDesignDialogFragment() {
         super();
@@ -119,11 +122,11 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             }
 
         });
-        
+
         courseDesignComputer = new CourseDesignComputer().setBoatClass(selectedBoatClass)
                 .setCourseLayout(selectedCourseLayout).setNumberOfRounds(selectedNumberOfRounds)
                 .setTargetTime(selectedTargetTime);
-        
+
         spinnerBoatClass = (Spinner) getView().findViewById(R.id.classic_course_designer_boat_class);
         setupBoatClassSpinner();
         spinnerCourseLayout = (Spinner) getView().findViewById(R.id.classic_course_designer_course_layout);
@@ -168,13 +171,13 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     private void recomputeCourseDesign() {
-            try {
-                drawMap(courseDesignComputer.compute());
-            } catch (IllegalStateException ise) {
-                Toast.makeText(getActivity(), ise.getMessage(), Toast.LENGTH_LONG).show();
-            } catch (IllegalArgumentException iae) {
-                Toast.makeText(getActivity(), iae.getMessage(), Toast.LENGTH_LONG).show();
-            }
+        try {
+            drawMap(courseDesignComputer.compute());
+        } catch (IllegalStateException ise) {
+            Toast.makeText(getActivity(), ise.getMessage(), Toast.LENGTH_LONG).show();
+        } catch (IllegalArgumentException iae) {
+            Toast.makeText(getActivity(), iae.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     private void setupBoatClassSpinner() {
@@ -185,13 +188,13 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 selectedBoatClass = (BoatClassType) adapterView.getItemAtPosition(position);
-                
-                //update possible course layouts
+
+                // update possible course layouts
                 courseLayoutAdapter.clear();
                 courseLayoutAdapter.addAll(selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet());
                 courseLayoutAdapter.notifyDataSetChanged();
-                selectedCourseLayout = (CourseLayouts) selectedBoatClass
-                        .getPossibleCourseLayoutsWithTargetTime().keySet().toArray().clone()[0];
+                selectedCourseLayout = (CourseLayouts) selectedBoatClass.getPossibleCourseLayoutsWithTargetTime()
+                        .keySet().toArray().clone()[0];
                 spinnerCourseLayout.setSelection(courseLayoutAdapter.getPosition(selectedCourseLayout));
 
                 courseDesignComputer.setBoatClass(selectedBoatClass);
@@ -219,7 +222,8 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 selectedCourseLayout = (CourseLayouts) adapterView.getItemAtPosition(position);
                 courseDesignComputer.setCourseLayout(selectedCourseLayout);
-                spinnerTargetTime.setSelection(targetTimeAdapter.getPosition(selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().get(selectedCourseLayout)));
+                spinnerTargetTime.setSelection(targetTimeAdapter.getPosition(selectedBoatClass
+                        .getPossibleCourseLayoutsWithTargetTime().get(selectedCourseLayout)));
                 recomputeCourseDesign();
             }
 
@@ -252,8 +256,8 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     private void setupTargetTimeSpinner() {
-        targetTimeAdapter = new ArrayAdapter<TargetTime>(getActivity(),
-                android.R.layout.simple_spinner_dropdown_item, TargetTime.values());
+        targetTimeAdapter = new ArrayAdapter<TargetTime>(getActivity(), android.R.layout.simple_spinner_dropdown_item,
+                TargetTime.values());
         spinnerTargetTime.setAdapter(targetTimeAdapter);
         spinnerTargetTime.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
@@ -312,30 +316,46 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
                 .position(position2LatLng(courseDesign.getStartBoatPosition()))
                 .icon(BitmapDescriptorFactory.fromBitmap(bmResult))
                 .draggable(false)
-                .title("signal boat, "+courseDesign.getStartBoatPosition() + ", " + courseDesign.getWindSpeed()
+                .title("signal boat, " + courseDesign.getStartBoatPosition() + ", " + courseDesign.getWindSpeed()
                         + "kn, " + courseDesign.getWindDirection()));
         LatLng pinEndPosition = new LatLng(courseDesign.getPinEnd().getPosition().getLatDeg(), courseDesign.getPinEnd()
                 .getPosition().getLngDeg());
         courseAreaMap.addMarker(new MarkerOptions().position(pinEndPosition)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.buoy_red_big)).draggable(false)
                 .title(courseDesign.getPinEnd().getName()));
-        
-        for(PositionedMark mark : courseDesign.getCourseDesignSpecificMarks()){
+
+        for (PositionedMark mark : courseDesign.getCourseDesignSpecificMarks()) {
             LatLng markPosition = new LatLng(mark.getPosition().getLatDeg(), mark.getPosition().getLngDeg());
-            courseAreaMap.addMarker(new MarkerOptions().position(markPosition)
-                    .icon(getImageForMark(mark)).draggable(false)
-                    .title(mark.getName()));
+            courseAreaMap.addMarker(new MarkerOptions()
+                    .position(markPosition)
+                    .icon(getImageForMark(mark))
+                    .draggable(false)
+                    .title(makeMarkDescription(mark, courseDesign.getReferencePoint())));
         }
 
     }
 
+    private String makeMarkDescription(PositionedMark mark, Position referencePoint) {
+        DecimalFormat distanceFormat = new DecimalFormat("0.00");
+        DecimalFormat bearingFormat = new DecimalFormat("0.00");
+        StringBuilder description = new StringBuilder();
+        description.append("mark: ");
+        description.append(mark.getName());
+        description.append(", bearing: ");
+        description.append(bearingFormat.format(mark.getBearingFrom(referencePoint).getDegrees()));
+        description.append("°, distance: ");
+        description.append(distanceFormat.format(mark.getDistanceFromPosition(referencePoint).getNauticalMiles()));
+        description.append("nm");
+        return description.toString();
+    }
+
     private BitmapDescriptor getImageForMark(PositionedMark mark) {
-        if(mark.getType().equals(MarkType.BUOY)){
+        if (mark.getType().equals(MarkType.BUOY)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_big);
-        } else if(mark.getType().equals(MarkType.FINISHBOAT)){
+        } else if (mark.getType().equals(MarkType.FINISHBOAT)) {
             return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_finish_big);
         } else
-        return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_big);
+            return BitmapDescriptorFactory.fromResource(R.drawable.buoy_black_big);
     }
 
     private LatLng position2LatLng(Position p) {
