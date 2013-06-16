@@ -613,8 +613,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (raceLog != null) {
             
             StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
-            if (startTimeFinder.analyze() != null) {
-                raceInfoDTO.startTime = startTimeFinder.analyze().asDate();
+            TimePoint startTime = startTimeFinder.analyze();
+            if (startTime != null) {
+                raceInfoDTO.startTime = startTime.asDate();
             }
 
             RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog);

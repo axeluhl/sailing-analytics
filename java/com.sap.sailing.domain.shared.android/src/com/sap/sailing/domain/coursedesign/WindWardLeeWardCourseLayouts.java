@@ -24,6 +24,6 @@ public enum WindWardLeeWardCourseLayouts implements CourseLayouts{
 
     @Override
     public Class<? extends CourseDesignFactory> getCourseDesignFactoryClass() {
-        return WindWardLeeWardCourseDesignFactoryImpl.class;
+        return WindWardLeewardCourseDesignFactoryImpl.class;
     }
 }
