@@ -26,18 +26,18 @@ public abstract class FlagAlphabetInterpretationTemplate {
             if (upperFlag != null) {
                 if (upperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
                     statusText = getTextForFirstSubstituteFlag();
-                } else if (upperFlag.equals(Flags.AP) && isDisplayed) {
-                    statusText = getTextForAnsweringPennantFlag();
                 } else if (upperFlag.equals(Flags.AP) && lowerFlag.equals(Flags.ALPHA) && isDisplayed) {
                     statusText = getTextForAnsweringPennantWithAlphaFlags();
                 } else if (upperFlag.equals(Flags.AP) && lowerFlag.equals(Flags.HOTEL) && isDisplayed) {
                     statusText = getTextForAnsweringPennantWithHotelFlags();
-                } else if (upperFlag.equals(Flags.NOVEMBER) && isDisplayed) {
-                    statusText = getTextForNovemberFlag();
+                } else if (upperFlag.equals(Flags.AP) && isDisplayed) {
+                    statusText = getTextForAnsweringPennantFlag();
                 } else if (upperFlag.equals(Flags.NOVEMBER) && lowerFlag.equals(Flags.ALPHA) && isDisplayed) {
                     statusText = getTextForNovemberWithAlphaFlags();
                 } else if (upperFlag.equals(Flags.NOVEMBER) && lowerFlag.equals(Flags.HOTEL) && isDisplayed) {
                     statusText = getTextForNovemberWithHotelFlags();
+                } else if (upperFlag.equals(Flags.NOVEMBER) && isDisplayed) {
+                    statusText = getTextForNovemberFlag();
                 }
             }
         }
