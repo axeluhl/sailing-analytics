@@ -13,13 +13,12 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 
 public class TrapezoidCourseDesignFactoryImpl extends AbstractCourseDesignFactory {
-    
-    //we use 0.67 here, because also ISAF doesn't calculate with 1/3
+
+    // we use 0.67 here, because also ISAF doesn't calculate with 1/3
     private final double REACH_LEG_FACTOR = 0.67;
     private final Distance FINISH_LEG_LENGTH = new NauticalMileDistance(0.15);
-    private final int LUV_BUOY1_ANGLE_TO_WIND = 0;
-    private final int LUV_BUOY2_ANGLE_TO_WIND = 100;
-    private final Distance LUV_BUOY1_TO_LUV_BUOY2_DISTANCE = new NauticalMileDistance(0.03);
+    private final int LUV_BUOY_ANGLE_TO_WIND_OFFSET = 0;
+    private final int BUOY2_ANGLE_TO_WIND = 180;
     private final int GATE_LENGTH_TO_HULL_LENGTH_FACTOR = 10;
     private final int GATE_XS_WIND_ANGLE = 270;
     private final int GATE_XP_WIND_ANGLE = 90;
@@ -61,7 +60,9 @@ public class TrapezoidCourseDesignFactoryImpl extends AbstractCourseDesignFactor
             throw new IllegalArgumentException(
                     "There was no speed diagram for the given boat class and the given wind.");
         }
-        
+
+        // alternate form of:
+        // number_of_rounds*(leg_length*upwind_speed)+number_of_rounds*(leg_length*d)+(REACH_LEG_FACTOR*leg_length*reach_speed)+FINISH_LEG_LENGTH*reach_speed=target_time
         double legLength = (targetTime.getTimeInMinutes() - FINISH_LEG_LENGTH.getNauticalMiles()
                 * speedTable.get(PointOfSail.Reach))
                 / (speedTable.get(PointOfSail.Downwind) * numberOfRounds.getNumberOfRounds()
@@ -70,10 +71,29 @@ public class TrapezoidCourseDesignFactoryImpl extends AbstractCourseDesignFactor
 
         Distance legDistance = new NauticalMileDistance(legLength);
         Position luvBuoyPosition = getPositionForGivenPointDistanceAndBearing(this.product.getReferencePoint(),
-                legDistance, windDirection.add(new DegreeBearingImpl(LUV_BUOY1_ANGLE_TO_WIND)));
+                legDistance, windDirection.add(new DegreeBearingImpl(LUV_BUOY_ANGLE_TO_WIND_OFFSET)));
         DecimalFormat legLengthFormat = new DecimalFormat("0.00");
         result.add(new PositionedMarkImpl("1 " + legLengthFormat.format(legDistance.getNauticalMiles()),
                 luvBuoyPosition));
+
+        // reach leg
+        Position topReachBuoy = getPositionForGivenPointDistanceAndBearing(
+                luvBuoyPosition,
+                legDistance.scale(REACH_LEG_FACTOR),
+                windDirection.add(new DegreeBearingImpl(BUOY2_ANGLE_TO_WIND
+                        + ((TrapezoidCourseLayouts) courseLayout).getReachAngle())));
+        result.add(new PositionedMarkImpl("2", topReachBuoy));
+
+        // downwind gate
+        Position downWindGateMid = getPositionForGivenPointDistanceAndBearing(topReachBuoy, legDistance,
+                windDirection.add(new DegreeBearingImpl(BUOY2_ANGLE_TO_WIND)));
+
+        result.add(new PositionedMarkImpl("3S", getPositionForGivenPointDistanceAndBearing(downWindGateMid, boatClass
+                .getHullLength().scale(GATE_LENGTH_TO_HULL_LENGTH_FACTOR / 2), windDirection.add(new DegreeBearingImpl(
+                GATE_XS_WIND_ANGLE)))));
+        result.add(new PositionedMarkImpl("4P", getPositionForGivenPointDistanceAndBearing(downWindGateMid, boatClass
+                .getHullLength().scale(GATE_LENGTH_TO_HULL_LENGTH_FACTOR / 2), windDirection.add(new DegreeBearingImpl(
+                GATE_XP_WIND_ANGLE)))));
 
         return result;
     }

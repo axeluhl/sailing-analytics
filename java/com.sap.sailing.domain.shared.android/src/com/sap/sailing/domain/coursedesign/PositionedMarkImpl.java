@@ -13,37 +13,17 @@ public class PositionedMarkImpl extends MarkImpl implements PositionedMark {
     private Position position;
 
     public PositionedMarkImpl(String name, Position position) {
-        super(name);
+        this(name, position, MarkType.BUOY);
+    }
+    
+    public PositionedMarkImpl(String name, Position position, MarkType markType) {
+        super(name, name, markType, null, null, null);
         this.position = position;
     }
 
     @Override
     public Position getPosition() {
         return this.position;
-    }
-
-    @Override
-    public String getColor() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getShape() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getPattern() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public MarkType getType() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }
