@@ -1,12 +1,7 @@
-package com.sap.sailing.racecommittee.app.coursedesigner;
+package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.coursedesign.BoatClassType;
-import com.sap.sailing.domain.coursedesign.CourseDesign;
-import com.sap.sailing.domain.coursedesign.CourseLayouts;
-import com.sap.sailing.domain.coursedesign.NumberOfRounds;
-import com.sap.sailing.domain.coursedesign.TargetTime;
 
 public class CourseDesignComputer {
     private Position startBoatPosition;

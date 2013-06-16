@@ -30,17 +30,17 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.coursedesign.BoatClassType;
-import com.sap.sailing.domain.coursedesign.CourseDesign;
-import com.sap.sailing.domain.coursedesign.CourseLayouts;
-import com.sap.sailing.domain.coursedesign.NumberOfRounds;
-import com.sap.sailing.domain.coursedesign.PositionedMark;
-import com.sap.sailing.domain.coursedesign.TargetTime;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.coursedesigner.CourseDesignComputer;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseDesign;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseDesignComputer;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.PositionedMark;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.TargetTime;
 import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
 
 public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {

@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.coursedesign;
+package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
 public enum TrapezoidCourseLayouts implements CourseLayouts{
     innerLoopTrapezoid60("Trapezoid 60° Inner Loop", "I", 60),

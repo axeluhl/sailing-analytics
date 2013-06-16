@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.coursedesign;
+package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
 import java.text.DecimalFormat;
 import java.util.HashSet;

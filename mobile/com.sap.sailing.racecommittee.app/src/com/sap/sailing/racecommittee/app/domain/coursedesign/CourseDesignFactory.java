@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.coursedesign;
+package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;

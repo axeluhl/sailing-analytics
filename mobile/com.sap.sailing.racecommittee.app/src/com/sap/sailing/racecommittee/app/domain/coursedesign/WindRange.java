@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.coursedesign;
+package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
 public class WindRange implements Comparable<WindRange>{
     private final Integer lowerBound;
