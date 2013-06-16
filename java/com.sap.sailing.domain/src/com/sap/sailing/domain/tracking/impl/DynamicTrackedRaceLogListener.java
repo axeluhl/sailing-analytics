@@ -15,6 +15,7 @@ import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -132,6 +133,12 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     @Override
     public void visit(RaceLogProtestStartTimeEvent event) {
         
+    }
+
+    @Override
+    public void visit(RaceLogWindFixEvent event) {
+        // TODO handle a new wind fix entered by the race committee
+        // add the wind fix to the race committee WindTrack
     }
 
 }

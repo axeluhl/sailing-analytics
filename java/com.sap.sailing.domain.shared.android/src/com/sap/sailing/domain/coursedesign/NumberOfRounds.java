@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.coursedesign;
+package com.sap.sailing.domain.coursedesign;
 
 public enum NumberOfRounds {
     TWO(2),

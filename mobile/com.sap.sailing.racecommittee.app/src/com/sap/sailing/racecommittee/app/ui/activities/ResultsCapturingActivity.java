@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.PhotoAdapter;
 import com.sap.sailing.racecommittee.app.ui.views.CameraPreview;
@@ -104,10 +105,7 @@ public class ResultsCapturingActivity extends BaseActivity {
         sendButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferences preferences = PreferenceManager
-                        .getDefaultSharedPreferences(ResultsCapturingActivity.this);
-                String recipient = preferences.getString("mailRecipientPreference",
-                        getString(R.string.settings_advanced_mail_default));
+				String recipient = AppPreferences.getMailRecipient(ResultsCapturingActivity.this);
                 MailHelper.send(new String[] { recipient }, getSubjectText(), getBodyText(), listAdapter.getItems(),
                         ResultsCapturingActivity.this);
                 finish();

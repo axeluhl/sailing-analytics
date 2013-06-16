@@ -1,0 +1,90 @@
+package com.sap.sailing.server.gateway.serialization.test.racelog;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import org.json.simple.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogWindFixEventDeserializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogWindFixEventSerializer;
+
+public class RaceLogWindFixEventSerializerTest {
+    
+    private RaceLogWindFixEventSerializer serializer;
+    private RaceLogWindFixEventDeserializer deserializer;
+    private RaceLogWindFixEvent event;
+    private TimePoint now;
+    
+    @Before
+    public void setUp() {
+        SharedDomainFactory factory = DomainFactory.INSTANCE;
+        serializer = new RaceLogWindFixEventSerializer(new CompetitorJsonSerializer(new TeamJsonSerializer(new PersonJsonSerializer())), 
+                new WindJsonSerializer(new PositionJsonSerializer()));
+        deserializer = new RaceLogWindFixEventDeserializer(new CompetitorDeserializer(factory), 
+                new WindJsonDeserializer(new PositionJsonDeserializer()));
+
+        now = MillisecondsTimePoint.now();
+        
+        event = RaceLogEventFactory.INSTANCE.createWindFixEvent(now, 0, createWindFix());
+    }
+
+    @Test
+    public void testSerializeAndDeserializeRaceLogWindFixEvent() throws JsonDeserializationException {
+        JSONObject jsonWindFixEvent = serializer.serialize(event);
+        RaceLogWindFixEvent deserializedEvent = (RaceLogWindFixEvent) deserializer.deserialize(jsonWindFixEvent);
+        
+        assertEquals(event.getId(), deserializedEvent.getId());
+        assertEquals(event.getPassId(), deserializedEvent.getPassId());
+        assertEquals(event.getTimePoint(), deserializedEvent.getTimePoint());
+        assertEquals(0, Util.size(event.getInvolvedBoats()));
+        assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
+        
+        compareWind(event.getWindFix(), deserializedEvent.getWindFix());
+    }
+    
+    private void compareWind(Wind serializedWindFix, Wind deserializedWindFix) {
+        assertEquals(serializedWindFix.getTimePoint(), deserializedWindFix.getTimePoint());
+        assertNotNull(serializedWindFix.getPosition());
+        assertNotNull(deserializedWindFix.getPosition());
+        assertEquals(serializedWindFix.getPosition().getLatDeg(), deserializedWindFix.getPosition().getLatDeg(), 0);
+        assertEquals(serializedWindFix.getPosition().getLngDeg(), deserializedWindFix.getPosition().getLngDeg(), 0);
+        assertEquals(serializedWindFix.getKnots(), deserializedWindFix.getKnots(), 0);
+        assertNotNull(serializedWindFix.getBearing());
+        assertNotNull(deserializedWindFix.getBearing());
+        assertEquals(serializedWindFix.getBearing().getDegrees(), deserializedWindFix.getBearing().getDegrees(), 0);
+    }
+
+    private Wind createWindFix() {
+        Position position = new DegreePosition(23.0313, 2.2344);
+        Bearing bearing = new DegreeBearingImpl(25.5);
+        SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(10.4, bearing);
+        return new WindImpl(position, now, speedBearing);
+    }
+    
+}

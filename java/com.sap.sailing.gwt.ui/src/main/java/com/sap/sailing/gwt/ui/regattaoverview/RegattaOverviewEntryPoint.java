@@ -45,8 +45,8 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
         List<String> visibleCourseAreas = new ArrayList<String>();
         List<String> visibleRegattas = new ArrayList<String>();
         
-        boolean showOnlyCurrentlyRunningRaces = Window.Location.getParameter(PARAM_ONLY_RUNNING_RACES) != null 
-                && Window.Location.getParameter(PARAM_ONLY_RUNNING_RACES).equalsIgnoreCase("true");
+        boolean showOnlyCurrentlyRunningRaces = Window.Location.getParameter(PARAM_ONLY_RUNNING_RACES) == null 
+                || !Window.Location.getParameter(PARAM_ONLY_RUNNING_RACES).equalsIgnoreCase("false");
         
         boolean showOnlyRacesOfSameDay = Window.Location.getParameter(PARAM_ONLY_RACES_OF_SAME_DAY) != null 
                 && Window.Location.getParameter(PARAM_ONLY_RACES_OF_SAME_DAY).equalsIgnoreCase("true");

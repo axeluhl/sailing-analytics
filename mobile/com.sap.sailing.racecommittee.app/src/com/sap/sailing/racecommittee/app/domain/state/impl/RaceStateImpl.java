@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.coursedesign.CourseDesign;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
@@ -26,6 +27,7 @@ import com.sap.sailing.domain.racelog.analyzing.impl.ProtestStartTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartProcedureTypeAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.domain.racelog.RaceLogChangedListener;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
@@ -159,7 +161,8 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public CourseBase getCourseDesign() {
         return lastCourseDesignFinder.analyze();
     }
- 
+    
+    @Override
     public void setCourseDesign(CourseBase newCourseData) {
         TimePoint eventTime = MillisecondsTimePoint.now();
         
@@ -169,7 +172,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         
         fireCourseDesignChanged();
     }
-
+    
     @Override
     public void onRaceAborted(TimePoint eventTime) {
         /*RaceLogEvent abortEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.UNSCHEDULED);
@@ -260,6 +263,13 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public TimePoint getProtestStartTime() {
         return protestStartTimeAnalyzer.analyze();
     }
+    
+    @Override
+    public void setWindFix(Wind windFix) {
+        TimePoint eventTime = MillisecondsTimePoint.now();
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createWindFixEvent(eventTime, raceLog.getCurrentPassId(), windFix);
+        this.raceLog.add(event);
+    }
 
     @Override
     public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
@@ -313,4 +323,5 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public void unregisterStateEventListener(RaceStateEventListener listener) {
         stateEventListeners.remove(listener);
     }
+
 }

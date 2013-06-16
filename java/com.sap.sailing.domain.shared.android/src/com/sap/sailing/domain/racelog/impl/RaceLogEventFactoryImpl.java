@@ -26,6 +26,8 @@ import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.tracking.Wind;
 
 public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
 
@@ -185,6 +187,17 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
             TimePoint protestStartTime) {
         return createProtestStartTimeEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId,
                 protestStartTime);
+    }
+
+    @Override
+    public RaceLogWindFixEvent createWindFixEvent(TimePoint timePoint, int passId, Wind wind) {
+        return createWindFixEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId, wind);
+    }
+
+    @Override
+    public RaceLogWindFixEvent createWindFixEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors,
+            int passId, Wind wind) {
+        return new RaceLogWindFixEventImpl(MillisecondsTimePoint.now(), timePoint, id, competitors, passId, wind);
     }
 
 }

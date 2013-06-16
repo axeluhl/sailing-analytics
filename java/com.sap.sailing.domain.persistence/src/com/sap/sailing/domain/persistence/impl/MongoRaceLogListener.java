@@ -18,6 +18,7 @@ import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 
 public class MongoRaceLogListener implements RaceLogEventVisitor {
 
@@ -104,6 +105,12 @@ public class MongoRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogProtestStartTimeEvent event) {
+        DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
+        storeEventInCollection(object);
+    }
+
+    @Override
+    public void visit(RaceLogWindFixEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         storeEventInCollection(object);
     }

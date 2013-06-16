@@ -3,7 +3,6 @@ package com.sap.sailing.racecommittee.app.data;
 import java.io.Serializable;
 import java.util.Collection;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
@@ -36,11 +35,4 @@ public interface DataStore {
     
     public CourseBase getLastPublishedCourseDesign();
     public void setLastPublishedCourseDesign(CourseBase courseData);
-    
-    public LatLng getLastWindPosition();
-    public void setLastWindPosition(LatLng lastWindPosition);
-    public Integer getLastWindDirection();
-    public void setLastWindDirection(Integer lastWindDirection);
-    public Double getLastWindSpeed();
-    public void setLastWindSpeed(Double lastWindSpeed);
 }
