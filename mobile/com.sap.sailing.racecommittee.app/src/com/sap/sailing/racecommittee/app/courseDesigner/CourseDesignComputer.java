@@ -1,7 +1,7 @@
 package com.sap.sailing.racecommittee.app.coursedesigner;
 
-import com.google.android.gms.maps.model.LatLng;
-import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursedesign.BoatClassType;
 import com.sap.sailing.domain.coursedesign.CourseDesign;
 import com.sap.sailing.domain.coursedesign.CourseLayouts;
@@ -9,19 +9,19 @@ import com.sap.sailing.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.domain.coursedesign.TargetTime;
 
 public class CourseDesignComputer {
-    private LatLng startBoatPosition;
+    private Position startBoatPosition;
     private Double windSpeed;
-    private Integer windDirection;
+    private Bearing windDirection;
     private BoatClassType boatClass;
     private CourseLayouts courseLayout;
     private NumberOfRounds numberOfRounds;
     private TargetTime targetTime;
 
-    public LatLng getStartBoatPosition() {
+    public Position getStartBoatPosition() {
         return startBoatPosition;
     }
 
-    public CourseDesignComputer setStartBoatPosition(LatLng startBoatPosition) {
+    public CourseDesignComputer setStartBoatPosition(Position startBoatPosition) {
         this.startBoatPosition = startBoatPosition;
         return this;
     }
@@ -35,11 +35,11 @@ public class CourseDesignComputer {
         return this;
     }
 
-    public Integer getWindDirection() {
+    public Bearing getWindDirection() {
         return windDirection;
     }
 
-    public CourseDesignComputer setWindDirection(Integer windDirection) {
+    public CourseDesignComputer setWindDirection(Bearing windDirection) {
         this.windDirection = windDirection;
         return this;
     }
@@ -86,7 +86,7 @@ public class CourseDesignComputer {
                 && courseLayout != null && numberOfRounds != null && targetTime != null) {
             try {
                 computedCourseDesign = courseLayout.getCourseDesignFactoryClass().newInstance()
-                        .createCourseDesign(new DegreePosition(startBoatPosition.latitude, startBoatPosition.longitude), windSpeed, windDirection, boatClass, courseLayout, numberOfRounds, targetTime);
+                        .createCourseDesign(startBoatPosition, windSpeed, windDirection, boatClass, courseLayout, numberOfRounds, targetTime);
             } catch (InstantiationException e) {
                 
                 e.printStackTrace();

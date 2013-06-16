@@ -9,7 +9,6 @@ public enum TrapezoidCourseLayouts implements CourseLayouts{
     private String displayName;
     private String shortName;
     private Integer reachAngle;
-    private Class<? extends CourseDesignFactory> courseDesignFactoryClass;
 
     public Integer getReachAngle() {
         return reachAngle;
@@ -32,6 +31,6 @@ public enum TrapezoidCourseLayouts implements CourseLayouts{
     
     @Override
     public Class<? extends CourseDesignFactory> getCourseDesignFactoryClass() {
-        return this.courseDesignFactoryClass;
+        return TrapezoidCourseDesignFactoryImpl.class;
     }
 }
