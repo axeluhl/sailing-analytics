@@ -429,7 +429,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     @Override
     public SettingsDialogComponent<RegattaRaceStatesSettings> getSettingsDialogComponent() {
-        return new RegattaRaceStatesSettingsDialogComponent(settings, stringMessages, 
+        return new RegattaRaceStatesSettingsDialogComponent(settings, stringMessages, eventIdAsString,
                 Collections.unmodifiableList(eventDTO.venue.getCourseAreas()),
                 Collections.unmodifiableList(raceGroupDTOs));
     }

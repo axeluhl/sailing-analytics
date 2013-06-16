@@ -654,4 +654,6 @@ public interface StringMessages extends Messages {
     String addSeries();
     String regattaDefinesResultDiscardingRules();
     String startsWithZeroScore();
+    String regattaOverviewConfiguration();
+    String asLink();
 }

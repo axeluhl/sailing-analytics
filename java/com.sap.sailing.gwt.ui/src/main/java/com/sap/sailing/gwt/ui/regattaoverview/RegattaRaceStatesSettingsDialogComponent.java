@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -24,6 +25,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
 
     private final StringMessages stringMessages;
     private final RegattaRaceStatesSettings initialSettings;
+    private final String eventIdAsString;
     private final List<CourseAreaDTO> courseAreas;
     private final List<RaceGroupDTO> raceGroups;
 
@@ -31,17 +33,20 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     private CheckBox showOnlyCurrentlyRunningRacesCheckBox;
     private final Map<String, CheckBox> courseAreaCheckBoxMap;
     private final Map<String, CheckBox> regattaCheckBoxMap;
+    private final Anchor resultingLink;
     
     private final static String SETTINGS_DIALOG_COMPONENT = "SettingsDialogComponent";
     
     public RegattaRaceStatesSettingsDialogComponent(RegattaRaceStatesSettings settings, StringMessages stringMessages, 
-            List<CourseAreaDTO> courseAreas, List<RaceGroupDTO> raceGroups) {
+            String eventIdAsString, List<CourseAreaDTO> courseAreas, List<RaceGroupDTO> raceGroups) {
         this.stringMessages = stringMessages;
         this.initialSettings = settings;
+        this.eventIdAsString = eventIdAsString;
         this.courseAreas = courseAreas;
         this.raceGroups = raceGroups;
         this.courseAreaCheckBoxMap = new HashMap<String, CheckBox>();
         this.regattaCheckBoxMap = new HashMap<String, CheckBox>();
+        this.resultingLink = new Anchor(stringMessages.asLink());
     }
 
     private FlowPanel fillCourseAreaWidget(DataEntryDialog<?> dialog) {
@@ -131,19 +136,20 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         
         additionalSettingsPanel.add(getShowOnlyRacesOfSameDayWidget(dialog));
         additionalSettingsPanel.add(getShowOnlyCurrentlyRunningRacesWidget(dialog));
-        
+
         return flowPanel;
     }
 
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
-        VerticalPanel vp = new VerticalPanel();
+        VerticalPanel verticalPanel = new VerticalPanel();
         
-        vp.add(fillCourseAreaWidget(dialog));
-        vp.add(fillRegattaNamesWidget(dialog));
-        vp.add(getAdditionalSettingsWidget(dialog));
+        verticalPanel.add(fillCourseAreaWidget(dialog));
+        verticalPanel.add(fillRegattaNamesWidget(dialog));
+        verticalPanel.add(getAdditionalSettingsWidget(dialog));
+        verticalPanel.add(resultingLink);
         
-        return vp;
+        return verticalPanel;
     }
 
     @Override
@@ -171,8 +177,11 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     public Validator<RegattaRaceStatesSettings> getValidator() {
         return new Validator<RegattaRaceStatesSettings>() {
             @Override
-            public String getErrorMessage(RegattaRaceStatesSettings valueToValidate) {
+            public String getErrorMessage(RegattaRaceStatesSettings settings) {
                 String errorMessage = null;
+                if (errorMessage == null) {
+                    updateLinkUrl(eventIdAsString, settings);
+                }
                 return errorMessage;
             }
         };
@@ -181,6 +190,18 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     @Override
     public FocusWidget getFocusWidget() {
         return null;
+    }
+    
+    private void updateLinkUrl(String eventIdAsString, RegattaRaceStatesSettings settings) {
+        boolean isSetVisibleCourseAreasInUrl = true;
+        boolean isSetVisibleRegattasInUrl = true;
+        if (settings.getVisibleCourseAreas().size() == courseAreas.size()) {
+            isSetVisibleCourseAreasInUrl = false;
+        }
+        if (settings.getVisibleRegattas().size() == raceGroups.size()) {
+            isSetVisibleRegattasInUrl = false;
+        }
+        resultingLink.setHref(RegattaOverviewEntryPoint.getUrl(eventIdAsString, settings, isSetVisibleCourseAreasInUrl, isSetVisibleRegattasInUrl));
     }
 
 }
