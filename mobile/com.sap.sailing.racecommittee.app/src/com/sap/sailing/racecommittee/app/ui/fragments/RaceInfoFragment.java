@@ -26,7 +26,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 
-
 public class RaceInfoFragment extends RaceFragment implements RaceStateChangedListener, RaceInfoListener {
     private final static String TAG = RaceInfoFragment.class.getName();
 
@@ -36,12 +35,12 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     private TextView fleetInfoHeader;
     private TextView raceInfoHeader;
     private TextView courseInfoHeader;
-    
+
     private View resetRaceDialogView;
 
     public RaceInfoFragment() {
         this.infoFragmentChooser = null;
-        this.infoFragment = null;	// will be set later by switchToInfoFragment()
+        this.infoFragment = null; // will be set later by switchToInfoFragment()
     }
 
     @Override
@@ -52,7 +51,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        
+
         // decide on start procedure...
         this.infoFragmentChooser = new RaceInfoFragmentChooser();
 
@@ -61,9 +60,8 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         this.courseInfoHeader = (TextView) getView().findViewById(R.id.courseInfoHeader);
 
         courseInfoHeader.setText(getString(R.string.running_on_unknown));
-        fleetInfoHeader.setText(String.format("%s - %s", 
-                getRace().getRaceGroup().getName(), 
-                getRace().getFleet().getName()));
+        fleetInfoHeader.setText(String.format("%s - %s", getRace().getRaceGroup().getName(), getRace().getFleet()
+                .getName()));
         raceInfoHeader.setText(String.format("%s", getRace().getName()));
 
         courseInfoHeader.setOnClickListener(new OnClickListener() {
@@ -106,15 +104,13 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     protected void switchToInfoFragment() {
         RaceFragment newInfoFragment = infoFragmentChooser.choose(getRace());
         if (infoFragment == null || !newInfoFragment.getClass().equals(infoFragment.getClass())) {
-            switchToInfoFragment(newInfoFragment);            
+            switchToInfoFragment(newInfoFragment);
         }
     }
 
     protected void switchToInfoFragment(RaceFragment choosenFragment) {
-        ExLog.i(TAG, String.format("Choosed a %s fragment for race %s with status %s", 
-                choosenFragment.getClass().getName(), 
-                getRace().getId(), 
-                getRace().getStatus()));
+        ExLog.i(TAG, String.format("Choosed a %s fragment for race %s with status %s", choosenFragment.getClass()
+                .getName(), getRace().getId(), getRace().getStatus()));
 
         this.infoFragment = choosenFragment;
         displayInfoFragment();
@@ -136,7 +132,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
             fragment = getRace().getState().getStartProcedure().getCourseDesignDialog().newInstance();
             Bundle args = getRecentArguments();
             fragment.setArguments(args);
-            
+
             fragment.show(fragmentManager, "courseDesignDialogFragment");
         } catch (java.lang.InstantiationException e) {
             // TODO Auto-generated catch block
@@ -150,26 +146,21 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     private void showRaceResetConfirmationDialog() {
         prepareResetRaceView();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setView(resetRaceDialogView)
-        .setTitle(R.string.race_reset_confirmation_title)
-        .setIcon(R.drawable.ic_dialog_alert_holo_light)
-        .setCancelable(true)
-        .setPositiveButton("Reset anyway",
-                new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                ExLog.i(ExLog.RACE_RESET_YES, getRace().getId().toString(), getActivity());
-                ExLog.w(TAG, String.format("Race %s is selected for reset.", getRace().getId()));
+        builder.setView(resetRaceDialogView).setTitle(R.string.race_reset_confirmation_title)
+                .setIcon(R.drawable.ic_dialog_alert_holo_light).setCancelable(true)
+                .setPositiveButton("Reset anyway", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        ExLog.i(ExLog.RACE_RESET_YES, getRace().getId().toString(), getActivity());
+                        ExLog.w(TAG, String.format("Race %s is selected for reset.", getRace().getId()));
 
-                getRace().getState().onRaceAborted(MillisecondsTimePoint.now());
-            }
-        })
-        .setNegativeButton("Cancel",
-                new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                ExLog.i(ExLog.RACE_RESET_NO, getRace().getId().toString(), getActivity());
-                dialog.cancel();
-            }
-        });
+                        getRace().getState().onRaceAborted(MillisecondsTimePoint.now());
+                    }
+                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        ExLog.i(ExLog.RACE_RESET_NO, getRace().getId().toString(), getActivity());
+                        dialog.cancel();
+                    }
+                });
         AlertDialog alert = builder.create();
         ExLog.i(ExLog.RACE_RESET_DIALOG_BUTTON, getRace().getId().toString(), getActivity());
         alert.show();
@@ -181,18 +172,20 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         TextView raceInfoView = (TextView) resetRaceDialogView.findViewById(R.id.textRaceResetRaceInfo);
 
         ManagedRace race = getRace();
-        raceInfoView.setText(String.format("%s - %s - %s", race.getRaceGroup().getName(), race.getFleet().getName(), race.getRaceName()));
+        raceInfoView.setText(String.format("%s - %s - %s", race.getRaceGroup().getName(), race.getFleet().getName(),
+                race.getRaceName()));
     }
 
     private void updateCourseDesignLabel() {
         if (getRace().getState().getCourseDesign() != null) {
 
             CourseBase courseDesign = getRace().getState().getCourseDesign();
-            if (Util.isEmpty(courseDesign.getWaypoints())) {
+            if (courseDesign.getName() != null) {
+                courseInfoHeader.setText(String.format(getString(R.string.running_on_course), courseDesign.getName()));
+            } else if (Util.isEmpty(courseDesign.getWaypoints())) {
                 courseInfoHeader.setText(getString(R.string.running_on_unknown));
             } else {
-                courseInfoHeader.setText(String.format(
-                        getString(R.string.course_design_number_waypoints),
+                courseInfoHeader.setText(String.format(getString(R.string.course_design_number_waypoints),
                         Util.size(courseDesign.getWaypoints())));
             }
         } else {
