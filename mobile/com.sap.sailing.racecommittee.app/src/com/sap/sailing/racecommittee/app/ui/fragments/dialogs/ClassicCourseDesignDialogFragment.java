@@ -30,12 +30,16 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseDesign;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseDesignComputer;
@@ -97,6 +101,18 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         return view;
 
     }
+    
+    protected void sendCourseDataAndDismiss(CourseBase courseDesign) {
+        getRace().getState().setCourseDesign(courseDesign);
+        saveChangedCourseDesignInCache(courseDesign);
+        dismiss();
+    }
+
+    private void saveChangedCourseDesignInCache(CourseBase courseDesign) {
+        if (!Util.isEmpty(courseDesign.getWaypoints())) {
+            InMemoryDataStore.INSTANCE.setLastPublishedCourseDesign(courseDesign);
+        }
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -107,6 +123,8 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         publishButton.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
+                CourseBase courseBase = new CourseDataImpl(selectedCourseLayout.getShortName()+selectedNumberOfRounds.getNumberOfRounds());
+                sendCourseDataAndDismiss(courseBase);
             }
 
         });
@@ -151,7 +169,6 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // TODO make use of activity result instead of just handling the callback
         if (requestCode == WIND_ACTIVITY_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 if (data.getExtras().containsKey(AppConstants.EXTRAS_WIND_FIX)) {
