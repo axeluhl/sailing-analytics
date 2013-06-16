@@ -43,7 +43,7 @@
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
 		        android:progress="100"
-		        android:max="400"
+		        android:max="250"
 		        android:padding="18dp" />
 	       	
 	    </LinearLayout>
