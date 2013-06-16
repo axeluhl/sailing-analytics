@@ -6,8 +6,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.cell.client.ClickableTextCell;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -19,12 +23,17 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -41,6 +50,7 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
+import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 
 /**
  * This component shows a table displaying the current state of races for a given event. 
@@ -261,7 +271,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
         };
         
-        TextColumn<RegattaOverviewEntryDTO> raceCourseColumn = new TextColumn<RegattaOverviewEntryDTO>() {
+        Column<RegattaOverviewEntryDTO, String> raceCourseColumn = new Column<RegattaOverviewEntryDTO, String>(new ClickableTextCell()) {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
                 String courseName = "-";
@@ -271,6 +281,20 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return courseName;
             }
         };
+        raceCourseColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, String>() {
+
+            @Override
+            public void update(int index, RegattaOverviewEntryDTO object, String value) {
+                if (object.raceInfo.lastCourseDesign.waypoints.size() > 0) {
+                    DialogBox courseViewDialogBox = createCourseViewDialogBox(object.raceInfo);
+                    courseViewDialogBox.center();
+                    courseViewDialogBox.setGlassEnabled(true);
+                    courseViewDialogBox.setAnimationEnabled(true);
+                    courseViewDialogBox.show();
+                }
+            }
+
+        });
         raceCourseColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         Column<RegattaOverviewEntryDTO, ImageResource> lastUpperFlagColumn = new Column<RegattaOverviewEntryDTO, ImageResource>(
@@ -529,5 +553,56 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
         }
         return loadedSettings;
+    }
+    
+    private DialogBox createCourseViewDialogBox(RaceInfoDTO raceInfoDTO) {
+        // Create a dialog box and set the caption text
+        final DialogBox dialogBox = new DialogBox();
+        dialogBox.setText(stringMessages.courseLayout());
+
+        // Create a table to layout the content
+        VerticalPanel dialogContents = new VerticalPanel();
+        dialogContents.setSpacing(4);
+        dialogBox.setWidget(dialogContents);
+        
+        Label courseNameLabel = new Label(raceInfoDTO.lastCourseName);
+        dialogContents.add(courseNameLabel);
+        
+        Grid waypointGrid = new Grid(raceInfoDTO.lastCourseDesign.waypoints.size(), 1);
+        dialogContents.add(waypointGrid);
+        for (int i = 0; i < raceInfoDTO.lastCourseDesign.waypoints.size(); i++) {
+            WaypointDTO waypoint = raceInfoDTO.lastCourseDesign.waypoints.get(i);
+            waypointGrid.setText(i, 0, getWaypointNameLabel(waypoint));
+        }
+        
+        // Add a close button at the bottom of the dialog
+        Button closeButton = new Button(stringMessages.ok());
+        closeButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                dialogBox.hide();
+            }
+        });
+        dialogContents.add(closeButton);
+        dialogContents.setCellHorizontalAlignment(
+                closeButton, HasHorizontalAlignment.ALIGN_CENTER);
+
+        return dialogBox;
+    }
+    
+    private String getWaypointNameLabel(WaypointDTO waypointDTO) {
+        String result = waypointDTO.getName();
+        result += (waypointDTO.passingSide == null) ? "" : ", to " + getNauticalSideAsText(waypointDTO.passingSide);
+        return result;
+    }
+    
+    private String getNauticalSideAsText(NauticalSide passingSide) {
+        switch (passingSide) {
+        case PORT:
+            return stringMessages.portSide();
+        case STARBOARD:
+            return stringMessages.starboardSide();
+        default:
+            return "";
+        }
     }
 }
