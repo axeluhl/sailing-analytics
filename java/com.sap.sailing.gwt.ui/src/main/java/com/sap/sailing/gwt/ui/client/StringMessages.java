@@ -656,4 +656,17 @@ public interface StringMessages extends Messages {
     String startsWithZeroScore();
     String regattaOverviewConfiguration();
     String asLink();
+    String raceIsRunning();
+    String raceIsRunningWithEarlyStarters();
+    String raceIsFinishing();
+    String raceIsFinished();
+    String raceIsScheduled();
+    String raceIsInStartphase();
+    String generalRecall();
+    String startPostponed();
+    String startPostponedNoMoreRacingToday();
+    String startPostponedFurtherSignalsAshore();
+    String raceAbandoned();
+    String raceAbandonedNoMoreRacingToday();
+    String raceAbandonedFurtherSignalsAshore();
 }

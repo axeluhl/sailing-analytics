@@ -35,8 +35,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
@@ -76,7 +74,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private TextColumn<RegattaOverviewEntryDTO> seriesNameColumn;
     private TextColumn<RegattaOverviewEntryDTO> fleetNameColumn;
 
-    private final RegattaRaceStatesSettings settings; 
+    private final RegattaRaceStatesSettings settings;
+    private final FlagAlphabetInterpreter flagInterpreter;
     
     private static RegattaRaceStatesTableResources tableRes = GWT.create(RegattaRaceStatesTableResources.class);
     
@@ -92,7 +91,9 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         
         this.eventDTO = null;
         this.raceGroupDTOs = null;
-
+        
+        this.flagInterpreter = new FlagAlphabetInterpreter(stringMessages);
+        
         this.settings = new RegattaRaceStatesSettings();
         loadAndSetSettings(settings);
         //updateSettings(settings);
@@ -267,7 +268,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         TextColumn<RegattaOverviewEntryDTO> raceStatusColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
-                return getStatusText(entryDTO.raceInfo);
+                return flagInterpreter.getMeaningOfRaceStateAndFlags(entryDTO.raceInfo.lastStatus, entryDTO.raceInfo.lastUpperFlag, 
+                        entryDTO.raceInfo.lastLowerFlag, entryDTO.raceInfo.isLastFlagDisplayed);
             }
         };
         
@@ -396,39 +398,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
         }
         return result;
-    }
-
-    private String getStatusText(RaceInfoDTO raceInfo) {
-        //TODO i8n
-        String statusText = "";
-        if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING) && raceInfo.lastUpperFlag.equals(Flags.XRAY)
-                && raceInfo.isLastFlagDisplayed) {
-            statusText = "Race is running (had early starters)";
-        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING) && raceInfo.lastUpperFlag.equals(Flags.XRAY)
-                && !raceInfo.isLastFlagDisplayed) {
-            statusText = "Race is running";
-        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING)) {
-            statusText = "Race is running";
-        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.FINISHING)) {
-            statusText = "Race is finishing";
-        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
-            statusText = "Race is finished";
-        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.SCHEDULED)) {
-            statusText = "Race is scheduled";
-        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.STARTPHASE)) {
-            statusText = "Race in start phase";
-        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
-            statusText = stringMessages.noStarttimeAnnouncedYet();
-        } else if (raceInfo.lastUpperFlag == null) {
-            statusText = "";
-        } else if (raceInfo.lastUpperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
-            statusText = "General recall";
-        } else if (raceInfo.lastUpperFlag.equals(Flags.AP) && raceInfo.isLastFlagDisplayed) {
-            statusText = "Start postponed";
-        } else if (raceInfo.lastUpperFlag.equals(Flags.NOVEMBER) && raceInfo.isLastFlagDisplayed) {
-            statusText = "Start abandoned";
-        }
-        return statusText;
     }
 
     @Override
