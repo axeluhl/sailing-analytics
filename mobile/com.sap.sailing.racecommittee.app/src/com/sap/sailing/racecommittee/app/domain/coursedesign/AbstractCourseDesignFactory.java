@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.coursedesign;
+package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
 import java.util.Set;
 
@@ -7,7 +7,6 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 
 public abstract class AbstractCourseDesignFactory implements CourseDesignFactory {
@@ -41,16 +40,15 @@ public abstract class AbstractCourseDesignFactory implements CourseDesignFactory
 
     protected void setPinEnd(BoatClassType boatClass, Position startBoatPosition, Bearing windDirection) {
         
-        PositionedMark pinEnd = new PositionedMarkImpl("pinEnd", getPositionForGivenPointDistanceAndBearing(
-                startBoatPosition, new MeterDistance(boatClass.getStartLineLengthInMeters()),
+        PositionedMark pinEnd = new PositionedMarkImpl("start pin (start line length: "+boatClass.getStartLineLength().getMeters()+"m)", getPositionForGivenPointDistanceAndBearing(
+                startBoatPosition, boatClass.getStartLineLength(),
                 windDirection.add(new DegreeBearingImpl(ANGLE_OF_START_LINE_TO_WIND))));
         product.setPinEnd(pinEnd);
     }
 
     protected void setReferencePoint(BoatClassType boatClass, Position startBoatPosition, Bearing windDirection) {
-        double halfOfStatLineLength = boatClass.getStartLineLengthInMeters()/2;
         Position startLineMid = getPositionForGivenPointDistanceAndBearing(
-                startBoatPosition, new MeterDistance(halfOfStatLineLength),
+                startBoatPosition, boatClass.getStartLineLength().scale(0.5),
                 windDirection.add(new DegreeBearingImpl(ANGLE_OF_START_LINE_TO_WIND)));
         Position referencePoint = getPositionForGivenPointDistanceAndBearing(
                 startLineMid, REFERENCE_POINT_DISTANCE_FROM_START_LINE,
