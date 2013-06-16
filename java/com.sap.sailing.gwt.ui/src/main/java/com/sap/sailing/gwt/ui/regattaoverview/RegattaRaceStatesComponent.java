@@ -24,9 +24,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -54,7 +51,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private List<RegattaOverviewEntryDTO> allEntries;
 
-    private final SelectionModel<RegattaOverviewEntryDTO> raceSelectionModel;
     private final CellTable<RegattaOverviewEntryDTO> regattaOverviewTable;
     private ListDataProvider<RegattaOverviewEntryDTO> regattaOverviewDataProvider;
     private final VerticalPanel mainPanel;
@@ -63,7 +59,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     private final String eventIdAsString;
-    private final RegattaOverviewRaceSelectionProvider raceSelectionProvider;
     private final FlagImageResolver flagImageResolver;
     
     private EventDTO eventDTO;
@@ -78,11 +73,10 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private final static String LOCAL_STORAGE_REGATTA_OVERVIEW_KEY = "sailingAnalytics.regattaOverview.settings";
 
     public RegattaRaceStatesComponent(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            final StringMessages stringMessages, final String eventIdAsString, final RegattaOverviewRaceSelectionProvider raceSelectionProvider, RegattaRaceStatesSettings settings) {
+            final StringMessages stringMessages, final String eventIdAsString, RegattaRaceStatesSettings settings) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.eventIdAsString = eventIdAsString;
-        this.raceSelectionProvider = raceSelectionProvider;
         this.flagImageResolver = new FlagImageResolver();
         this.allEntries = new ArrayList<RegattaOverviewEntryDTO>();
         
@@ -99,18 +93,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         regattaOverviewDataProvider = new ListDataProvider<RegattaOverviewEntryDTO>();
         regattaOverviewTable = createRegattaTable();
 
-        raceSelectionModel = new SingleSelectionModel<RegattaOverviewEntryDTO>();
-        raceSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                showSelectedRaces();
-            }
-
-        });
-
-        regattaOverviewTable.setSelectionModel(raceSelectionModel);
-
         mainPanel.add(regattaOverviewTable);
         setWidget(mainPanel);
     }
@@ -121,18 +103,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             settings = loadedSettings;
         }
         updateSettings(settings);
-    }
-    
-    protected List<RegattaOverviewEntryDTO> getSelectedRaces() {
-        List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
-        if (regattaOverviewDataProvider != null) {
-            for (RegattaOverviewEntryDTO race : regattaOverviewDataProvider.getList()) {
-                if (raceSelectionModel.isSelected(race)) {
-                    result.add(race);
-                }
-            }
-        }
-        return result;
     }
 
     public void onUpdateServer(Date time) {
@@ -290,15 +260,18 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return getStatusText(entryDTO.raceInfo);
             }
         };
-        raceStatusColumn.setSortable(true);
-        regattaOverviewListHandler.setComparator(raceStatusColumn, new Comparator<RegattaOverviewEntryDTO>() {
-
+        
+        TextColumn<RegattaOverviewEntryDTO> raceCourseColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
-            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
-                return left.raceInfo.lastStatus.compareTo(right.raceInfo.lastStatus);
+            public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                String courseName = "-";
+                if (entryDTO.raceInfo.lastCourseName != null) {
+                    courseName = entryDTO.raceInfo.lastCourseName;
+                }
+                return courseName;
             }
-
-        });
+        };
+        raceCourseColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         Column<RegattaOverviewEntryDTO, ImageResource> lastUpperFlagColumn = new Column<RegattaOverviewEntryDTO, ImageResource>(
                 new ImageResourceCell()) {
@@ -355,6 +328,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         table.addColumn(raceNameColumn, stringMessages.race());
         table.addColumn(raceStartTimeColumn, stringMessages.startTime());
         table.addColumn(raceStatusColumn, stringMessages.status());
+        table.addColumn(raceCourseColumn, stringMessages.course());
         table.addColumn(lastUpperFlagColumn, stringMessages.lastUpperFlag());
         table.addColumn(lastLowerFlagColumn, stringMessages.lastLowerFlag());
         table.addColumn(lastFlagDirectionColumn, stringMessages.flagStatus());
@@ -398,11 +372,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
         }
         return result;
-    }
- 
-    private void showSelectedRaces() {
-        List<RegattaOverviewEntryDTO> selectedRaces = getSelectedRaces();
-        RegattaRaceStatesComponent.this.raceSelectionProvider.setSelection(selectedRaces);
     }
 
     private String getStatusText(RaceInfoDTO raceInfo) {
