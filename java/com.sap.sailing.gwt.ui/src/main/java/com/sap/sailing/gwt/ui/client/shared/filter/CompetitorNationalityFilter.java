@@ -22,21 +22,21 @@ public class CompetitorNationalityFilter extends AbstractTextFilter<CompetitorDT
             switch (operator.getOperator()) {
             case Contains:
             case Equals:
-                if(value.length() == 2 && competitor.twoLetterIsoCountryCode != null && 
-                    competitor.twoLetterIsoCountryCode.equalsIgnoreCase(value)) {
+                if(value.length() == 2 && competitor.getTwoLetterIsoCountryCode() != null && 
+                    competitor.getTwoLetterIsoCountryCode().equalsIgnoreCase(value)) {
                     result = true;
-                } else if(value.length() == 3 && competitor.threeLetterIocCountryCode != null && 
-                        competitor.threeLetterIocCountryCode.equalsIgnoreCase(value)) {
+                } else if(value.length() == 3 && competitor.getThreeLetterIocCountryCode() != null && 
+                        competitor.getThreeLetterIocCountryCode().equalsIgnoreCase(value)) {
                     result = true;
                 }
                 break;
             case NotContains:
             case NotEqualTo:
-                if(value.length() == 2 && competitor.twoLetterIsoCountryCode != null && 
-                    !competitor.twoLetterIsoCountryCode.equalsIgnoreCase(value)) {
+                if(value.length() == 2 && competitor.getTwoLetterIsoCountryCode() != null && 
+                    !competitor.getTwoLetterIsoCountryCode().equalsIgnoreCase(value)) {
                     result = true;
-                } else if(value.length() == 3 && competitor.threeLetterIocCountryCode != null && 
-                        !competitor.threeLetterIocCountryCode.equalsIgnoreCase(value)) {
+                } else if(value.length() == 3 && competitor.getThreeLetterIocCountryCode() != null && 
+                        !competitor.getThreeLetterIocCountryCode().equalsIgnoreCase(value)) {
                     result = true;
                 }
                 break;

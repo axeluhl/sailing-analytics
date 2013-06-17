@@ -60,7 +60,7 @@ public class RaceCourseComposite extends Composite {
         TextColumn<WaypointDTO> waypointNameColumn = new TextColumn<WaypointDTO>() {
             @Override
             public String getValue(WaypointDTO waypointDTO) {
-                String result = waypointDTO.name;
+                String result = waypointDTO.getName();
                 result += (waypointDTO.passingSide == null) ? "" : ", to " + getNauticalSideAsText(waypointDTO.passingSide);
                 return result;
             }

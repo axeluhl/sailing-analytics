@@ -11,7 +11,8 @@ public class FlexibleLeaderboardCreateDialog extends FlexibleLeaderboardDialog {
 
     public FlexibleLeaderboardCreateDialog(Collection<StrippedLeaderboardDTO> existingLeaderboards, StringMessages stringMessages,
             Collection<EventDTO> existingEvents, ErrorReporter errorReporter, DialogCallback<LeaderboardDescriptor> callback) {
-        super(stringMessages.createFlexibleLeaderboard(), new LeaderboardDescriptor(), stringMessages, existingEvents, errorReporter, new FlexibleLeaderboardDialog.LeaderboardParameterValidator(stringMessages, existingLeaderboards), callback);
+        super(stringMessages.createFlexibleLeaderboard(), new LeaderboardDescriptor(), stringMessages, existingEvents,
+                errorReporter, new FlexibleLeaderboardDialog.LeaderboardParameterValidator(stringMessages, existingLeaderboards), callback);
         nameTextBox = createTextBox(null);
         nameTextBox.ensureDebugId("LeaderboardNameField");
         displayNameTextBox = createTextBox(null);
@@ -20,6 +21,6 @@ public class FlexibleLeaderboardCreateDialog extends FlexibleLeaderboardDialog {
 
         scoringSchemeListBox = createScoringSchemeListBox(this, stringMessages);
         sailingEventsListBox = createSailingEventListBox();
-        discardThresholdBoxes = initEmptyDiscardThresholdBoxes(this);
+        discardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);
     }
 }

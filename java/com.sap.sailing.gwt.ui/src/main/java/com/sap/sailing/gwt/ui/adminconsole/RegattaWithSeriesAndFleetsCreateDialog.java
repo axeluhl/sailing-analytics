@@ -35,13 +35,13 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
         @Override
         public String getErrorMessage(RegattaDTO regattaToValidate) {
             String errorMessage = null;
-            boolean nameNotEmpty = regattaToValidate.name != null && regattaToValidate.name.length() > 0;
+            boolean nameNotEmpty = regattaToValidate.getName() != null && regattaToValidate.getName().length() > 0;
             boolean boatClassNotEmpty = regattaToValidate.boatClass != null
-                    && regattaToValidate.boatClass.name.length() > 0;
+                    && regattaToValidate.boatClass.getName().length() > 0;
 
             boolean unique = true;
             for (RegattaDTO regatta : existingRegattas) {
-                if (regatta.name.equals(regattaToValidate.name)) {
+                if (regatta.getName().equals(regattaToValidate.getName())) {
                     unique = false;
                     break;
                 }
@@ -61,7 +61,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                 boolean seriesNameNotEmpty = true;
 
                 for (SeriesDTO series : seriesToValidate) {
-                    seriesNameNotEmpty = series.name != null && series.name.length() > 0;
+                    seriesNameNotEmpty = series.getName() != null && series.getName().length() > 0;
                     if (!seriesNameNotEmpty) {
                         break;
                     }
@@ -73,7 +73,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
 
                 HashSet<String> setToFindDuplicates = new HashSet<String>();
                 for (SeriesDTO series : seriesToValidate) {
-                    if (!setToFindDuplicates.add(series.name)) {
+                    if (!setToFindDuplicates.add(series.getName())) {
                         seriesUnique = false;
                         break;
                     }
@@ -106,7 +106,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {
         panel.add(createHeadlineLabel(stringMessages.series()));
         panel.add(seriesGrid);
-        Button addSeriesButton = new Button("Add series");
+        Button addSeriesButton = new Button(stringMessages.addSeries());
         addSeriesButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -143,7 +143,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             seriesLabel.setWordWrap(false);
             seriesLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
             seriesGrid.setWidget(i * 2, 0, seriesLabel);
-            seriesGrid.setHTML(i * 2, 1, seriesDTO.name);
+            seriesGrid.setHTML(i * 2, 1, seriesDTO.getName());
             if (seriesDTO.getFleets() != null && seriesDTO.getFleets().size() > 0) {
                 seriesGrid.setHTML(i * 2 + 1, 1, seriesDTO.getFleets().size() + " fleets: "
                         + seriesDTO.getFleets().toString());

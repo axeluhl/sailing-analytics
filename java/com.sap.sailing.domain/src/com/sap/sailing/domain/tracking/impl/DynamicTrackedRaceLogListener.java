@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
@@ -17,14 +16,11 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
-import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 
 public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     private DynamicTrackedRace trackedRace;
-
-    private StartTimeFinder startTimeFinder;
 
     private RaceStatusAnalyzer statusAnalyzer;
 
@@ -36,7 +32,8 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     public void addTo(RaceLog raceLog) {
         raceLog.addListener(this);
-        startTimeFinder = new StartTimeFinder(raceLog);
+        trackedRace.invalidateStartTime();
+        trackedRace.invalidateEndTime();
         courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
         statusAnalyzer = new RaceStatusAnalyzer(raceLog);
         analyze();
@@ -49,26 +46,14 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         // Maybe something like this is needed:
         // TODO:
         // ??? trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0));
-        raceLog.removeListener(this);
+        if (raceLog != null) {
+            raceLog.removeListener(this);
+        }
     }
 
     private void analyze() {
-        analyzeStartTime();
         analyzeStatus();
         analyzeCourseDesign();
-    }
-
-    private void analyzeStartTime() {
-        TimePoint startTime = startTimeFinder.getStartTime();
-
-        // Because this code can be triggered by an obsolete (delayed) event or on an empty pass...
-        // ... the current pass's start time might be null
-        if (startTime != null) {
-            // ... or setStartTimeReceived(TimePoint) might be called more than once with the same start time.
-            trackedRace.setStartTimeReceived(startTime);
-        } else {
-            // TODO: Can we somehow withdraw a previously set start time?
-        }
     }
 
     private void analyzeStatus() {
@@ -90,13 +75,11 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogPassChangeEvent event) {
-        analyzeStartTime();
         analyzeStatus();
     }
 
     @Override
     public void visit(RaceLogStartTimeEvent event) {
-        analyzeStartTime();
         analyzeStatus();
     }
 

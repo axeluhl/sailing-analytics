@@ -25,7 +25,7 @@ import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
+import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 
 public class OfflineSerializationTest extends AbstractSerializationTest {
     /**
@@ -81,8 +81,8 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
     @Test
     public void testSerializingResultDiscardingRuleImpl() throws ClassNotFoundException, IOException {
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
-        ResultDiscardingRuleImpl rdri = new ResultDiscardingRuleImpl(new int[] { 5, 8 });
-        ResultDiscardingRuleImpl clone = cloneBySerialization(rdri, receiverDomainFactory);
+        ThresholdBasedResultDiscardingRuleImpl rdri = new ThresholdBasedResultDiscardingRuleImpl(new int[] { 5, 8 });
+        ThresholdBasedResultDiscardingRuleImpl clone = cloneBySerialization(rdri, receiverDomainFactory);
         assertTrue(Arrays.equals(rdri.getDiscardIndexResultsStartingWithHowManyRaces(),
                 clone.getDiscardIndexResultsStartingWithHowManyRaces()));
     }
