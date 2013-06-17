@@ -21,6 +21,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -110,8 +111,6 @@ public class SimulatorMainPanel extends SimplePanel {
     private StringMessages stringMessages;
     private SimulatorServiceAsync simulatorSvc;
     private ErrorReporter errorReporter;
-    private int xRes;
-    private int yRes;
     private boolean autoUpdate;
     private char mode;
 
@@ -231,8 +230,6 @@ public class SimulatorMainPanel extends SimplePanel {
         this.simulatorSvc = svc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        this.xRes = xRes;
-        this.yRes = yRes;
         this.autoUpdate = autoUpdate;
         this.mode = mode;
         this.isOmniscient = new CheckBox(this.stringMessages.omniscient(), true);
@@ -272,6 +269,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
         directionSelector = new ListBox();
         directionSelector.getElement().getStyle().setProperty("width", "215px");
+        
         windParams = new WindFieldGenParamsDTO();
         windParams.setMode(mode);
         windParams.setShowArrows(showArrows);
@@ -279,9 +277,9 @@ public class SimulatorMainPanel extends SimplePanel {
         windParams.setShowLines(showLines);
         windParams.setSeedLines(seedLines);
         windParams.setShowStreamlets(showStreamlets);
+        this.setDefaultTimeSettings();
 
         timer = new Timer(PlayModes.Replay, 1000l);
-
         TimeRangeWithZoomProvider timeRangeProvider = new TimeRangeWithZoomModel();
         initTimer();
         timer.setTime(windParams.getStartTime().getTime());
@@ -296,6 +294,12 @@ public class SimulatorMainPanel extends SimplePanel {
         // LogoAndTitlePanel(stringMessages.simulator(), stringMessages);
         // logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         // this.addNorth(logoAndTitlePanel, 68);
+
+        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
+                windParams, busyIndicator, mode, this);
+        simulatorMap.setSize("100%", "100%");
+
+        this.rightPanel.add(this.simulatorMap);
 
         createOptionsPanelTop();
         createOptionsPanel();
@@ -316,6 +320,19 @@ public class SimulatorMainPanel extends SimplePanel {
 
         this.polarDiagramDialogBox = this.createPolarDiagramDialogBox();
 
+    }
+
+    public void setDefaultTimeSettings() {
+        Date defaultNow = new Date();
+    	DateTimeFormat fmt = DateTimeFormat.getFormat("Z"); 
+        NumberFormat df = NumberFormat.getDecimalFormat();
+        int utcOffSet = (int) df.parse(fmt.format(defaultNow))/100; // default time zone offset versus UTC
+        long epochTime = (defaultNow.getTime()/86400000)*86400000 - utcOffSet*3600000; // today, midnight in default time zone
+
+        Date startTime = new Date(epochTime);
+        Date timeStep = new Date(15 * 1000);
+        Date endTime = new Date(startTime.getTime() + 10 * 60 * 1000);
+        windParams.setDefaultTimeSettings(startTime, timeStep, endTime);
     }
 
     public void showTimePanel(boolean visible) {
@@ -508,11 +525,6 @@ public class SimulatorMainPanel extends SimplePanel {
         	windDisplayButton.setValue(false);
         }
 
-        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
-                windParams, busyIndicator, mode, this);
-        simulatorMap.setSize("100%", "100%");
-
-        this.rightPanel.add(this.simulatorMap);
     }
 
     // initialize timer with a default time span based on windParams
