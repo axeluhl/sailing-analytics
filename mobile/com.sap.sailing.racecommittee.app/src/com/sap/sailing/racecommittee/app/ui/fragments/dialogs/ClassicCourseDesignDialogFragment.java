@@ -345,8 +345,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
                 .position(position2LatLng(courseDesign.getStartBoatPosition()))
                 .icon(BitmapDescriptorFactory.fromBitmap(bmResult))
                 .draggable(false)
-                .title("signal boat, " + courseDesign.getStartBoatPosition() + ", " + courseDesign.getWindSpeed()
-                        + "kn, " + courseDesign.getWindDirection()));
+                .title(courseDesign.getCourseDesignDescription())).showInfoWindow();
         LatLng pinEndPosition = new LatLng(courseDesign.getPinEnd().getPosition().getLatDeg(), courseDesign.getPinEnd()
                 .getPosition().getLngDeg());
         courseAreaMap.addMarker(new MarkerOptions().position(pinEndPosition)

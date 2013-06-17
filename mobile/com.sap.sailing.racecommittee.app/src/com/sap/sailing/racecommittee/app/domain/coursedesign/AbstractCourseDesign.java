@@ -13,7 +13,18 @@ public abstract class AbstractCourseDesign implements CourseDesign{
     PositionedMark pinEnd;
     Position referencePoint;
     Set<PositionedMark> courseDesignSpecificMarks = new HashSet<PositionedMark>();
+    String courseDesignDescription = "";
     
+    @Override
+    public String getCourseDesignDescription() {
+        return courseDesignDescription;
+    }
+    
+    @Override
+    public void setCourseDesignDescription(String courseDesignDescription) {
+        this.courseDesignDescription = courseDesignDescription;
+    }
+
     @Override
     public Set<PositionedMark> getCourseDesignSpecificMarks() {
         return courseDesignSpecificMarks;
