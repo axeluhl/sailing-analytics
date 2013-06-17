@@ -151,6 +151,15 @@ To ensure availability and to be able to separate servers holding historical dat
 <td>N/A</td>
 <td>14890</td>
 </tr>
+<tr>
+<td>RACECOMMITTEE_APP</td>
+<td>7777</td>
+<td>10201</td>
+<td>/opt/mongodb/data/mongodb-live</td>
+<td>sapsailinganalytics-racecommitteeapp</td>
+<td>2010</td>
+<td>14777</td>
+</tr>
 </table>
 
 ### Apache

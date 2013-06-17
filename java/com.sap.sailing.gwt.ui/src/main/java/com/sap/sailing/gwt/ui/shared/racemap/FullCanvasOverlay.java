@@ -82,9 +82,11 @@ public abstract class FullCanvasOverlay extends CanvasOverlay {
         
         Context2d context2d = canvas.getContext2d();
         drawPoint(x, y);
-        context2d.setFillStyle(textColor);
-        context2d.fillText(text, x, y);
-       
+        if (getMap().getZoomLevel() >= 11) {
+        	context2d.setFillStyle(textColor);
+        	context2d.fillText(text, x, y);
+        }
+
     }
     
     /**
@@ -112,10 +114,16 @@ public abstract class FullCanvasOverlay extends CanvasOverlay {
     protected void drawCircleWithText(double x, double y, double radius, String color, String text) {
         
         Context2d context2d = canvas.getContext2d();
+        context2d.setGlobalAlpha(0.9f);
         drawCircle(x, y,radius,color);
-        context2d.setFillStyle(textColor);
-        context2d.setFont("normal 12pt Calibri");
-        context2d.fillText(text, x + 10., y + 4.);
+        context2d.setGlobalAlpha(1.0f);
+        if (getMap().getZoomLevel() >= 11) {
+        	context2d.setFillStyle(textColor);
+			double fontsize = 9.0 + (12.0-9.0)*(getMap().getZoomLevel() - 10.0)/(12.0-10.0);
+        	context2d.setFont("normal "+fontsize+"px Calibri");
+        	context2d.fillText(text, x + 0.7*fontsize, y + 0.3*fontsize);
+        	//System.out.println("ZoomLevel: "+getMap().getZoomLevel()+", Fontsize: "+fontsize);
+        }
        
     }
     

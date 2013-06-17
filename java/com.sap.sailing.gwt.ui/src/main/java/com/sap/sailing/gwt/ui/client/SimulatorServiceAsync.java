@@ -27,7 +27,7 @@ public interface SimulatorServiceAsync {
 
     void getWindField(WindFieldGenParamsDTO params, WindPatternDisplay display, AsyncCallback<WindFieldDTO> callback);
 
-    void getWindPatterns(AsyncCallback<List<WindPatternDTO>> callback);
+    void getWindPatterns(char mode, AsyncCallback<List<WindPatternDTO>> callback);
 
     void getWindPatternDisplay(WindPatternDTO pattern, AsyncCallback<WindPatternDisplay> callback);
 

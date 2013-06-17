@@ -67,6 +67,14 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
 
     private Set<String> raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged;
     
+    /**
+     * For each index in this object's {@link #getRaceList()}, either has <code>-1</code> meaning that the element at the respective index
+     * is properly set because it has changed compared to the previous version, or it has a non-negative index pointing to the previous
+     * leaderboard's {@link #getRaceList()} result which has an unchanged {@link RaceColumnDTO} at that index which is to be
+     * set in this object's {@link #getRaceList()} during {@link #applyThisToPreviousVersionByUpdatingThis(LeaderboardDTO) expansion}.
+     */
+    private int[] indexOfUnchangedRaceColumnDTOsInPrevious;
+    
     private transient Cloner cloner;
     
     /**
@@ -363,7 +371,13 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 }
                 competitorDisplayNames = expandedCompetitorDisplayNames;
             }
-            // TODO ensure that the races collection has all the necessary RaceColumnDTO objects before looking them up by name
+            if (indexOfUnchangedRaceColumnDTOsInPrevious != null) {
+                for (int i=0; i<indexOfUnchangedRaceColumnDTOsInPrevious.length; i++) {
+                    if (indexOfUnchangedRaceColumnDTOsInPrevious[i] != -1) {
+                        getRaceList().set(i, previousVersion.getRaceList().get(indexOfUnchangedRaceColumnDTOsInPrevious[i]));
+                    }
+                }
+            }
             Set<String> columnNamesForWhichToExpandCompetitorOrderingPerRace = new HashSet<String>(getCompetitorOrderingPerRaceColumnName().keySet());
             for (String raceColumnNameForWhichCompetitorOrderingPerRaceUnchanged : raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged) {
                 // be on the safe side regarding the equals/hashCode implementation of RaceColumnDTO and look it up by name for old and new version
@@ -604,6 +618,24 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         rows = newRows.isEmpty() ? null : newRows;
         if (legDetailsUnchanged != null) {
             legDetailsUnchanged.compact(); // compacts even those columns where the *last* entry was one with a null leg index
+        }
+        if (getRaceList() != null) {
+            List<RaceColumnDTO> newRaceList = new ArrayList<RaceColumnDTO>(getRaceList().size());
+            indexOfUnchangedRaceColumnDTOsInPrevious = new int[getRaceList().size()];
+            boolean changed = false;
+            for (int raceIndex=0; raceIndex<getRaceList().size(); raceIndex++) {
+                int previousIndex = previousVersion.getRaceList().indexOf(getRaceList().get(raceIndex));
+                indexOfUnchangedRaceColumnDTOsInPrevious[raceIndex] = previousIndex;
+                if (previousIndex != -1) {
+                    newRaceList.add(null);
+                    changed = true;
+                } else {
+                    newRaceList.add(getRaceList().get(raceIndex));
+                }
+            }
+            if (changed) {
+                setRaceList(newRaceList);
+            }
         }
         return this;
     }

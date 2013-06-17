@@ -38,4 +38,8 @@ public class TextfieldEntryDialog extends DataEntryDialog<String> {
     protected String getResult() {
         return entryField.getText();
     }
+
+    public TextBox getEntryField() {
+        return entryField;
+    }
 }
