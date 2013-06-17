@@ -1,5 +1,6 @@
 package com.sap.sailing.server.gateway.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -264,5 +265,49 @@ public class LeaderboardJsonExportTest extends AbstractJsonExportTest {
         System.out.println("requestTimepoint2: " + requestTimepoint2.toString());
         assertFalse(requestTimepoint.equals(requestTimepoint2));
     }
- 
+
+    @Test
+    public void testExportLeaderboardWithMaxCompetitorsCountAsJson() throws Exception {
+        dropAndCreateRegatta();
+        Integer maxCompetitorsCount = 2;
+        
+        Map<String, String> requestParameters = new HashMap<>();
+        requestParameters.put("leaderboardName", regatta.getName());      
+        requestParameters.put("resultState", LeaderboardJsonGetServlet.ResultStates.Final.name());      
+        requestParameters.put("maxCompetitorsCount", maxCompetitorsCount.toString());      
+        
+        String jsonString = callJsonHttpServlet(new LeaderboardJsonGetServlet(), "GET", requestParameters);
+        
+        Object obj= JSONValue.parse(jsonString);
+        JSONObject jsonObject = (JSONObject) obj;
+        
+        String jsonLeaderboardName = (String) jsonObject.get("name");
+        String jsonResultState = (String) jsonObject.get("resultState");
+        
+        assertTrue(regattaLeaderboard.getName().equals(jsonLeaderboardName));
+        assertTrue(LeaderboardJsonGetServlet.ResultStates.Final.name().equals(jsonResultState));
+
+        TimePoint resultTimePoint = parseTimepointFromJsonString((String) jsonObject.get("resultTimepoint"));
+        assertNull(resultTimePoint);
+        
+        regattaLeaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(MillisecondsTimePoint.now());    
+        jsonString = callJsonHttpServlet(new LeaderboardJsonGetServlet(), "GET", requestParameters);
+        
+        obj= JSONValue.parse(jsonString);
+        jsonObject = (JSONObject) obj;
+
+        JSONArray jsonCompetitors = (JSONArray) jsonObject.get("competitors");
+        assertEquals((Integer) jsonCompetitors.size(), maxCompetitorsCount);
+        
+        Thread.sleep(100);
+        requestParameters.put("maxCompetitorsCount", null);      
+
+        jsonString = callJsonHttpServlet(new LeaderboardJsonGetServlet(), "GET", requestParameters);
+        
+        obj= JSONValue.parse(jsonString);
+        jsonObject = (JSONObject) obj;
+
+        jsonCompetitors = (JSONArray) jsonObject.get("competitors");
+        assertEquals(jsonCompetitors.size(), 4);
+     }
 }
