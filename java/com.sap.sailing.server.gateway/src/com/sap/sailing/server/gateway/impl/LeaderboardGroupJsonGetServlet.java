@@ -81,7 +81,7 @@ public class LeaderboardGroupJsonGetServlet extends AbstractJsonHttpServlet {
                             JSONObject jsonSeries = new JSONObject();
                             jsonSeries.put("name", series.getName());
                             jsonSeries.put("isMedalSeries", series.isMedal());
-
+                            jsonSeries.put("startsWithZeroScore", series.isStartsWithZeroScore());
                             JSONArray jsonFleetsEntries = new JSONArray();
                             jsonSeries.put("fleets", jsonFleetsEntries);
                             for(Fleet fleet: series.getFleets()) {
