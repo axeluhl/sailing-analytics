@@ -86,8 +86,9 @@ public class OnlineDataManager extends DataManager {
     }
 
     protected void reloadEvents(LoadClient<Collection<EventBase>> client) {
+        SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
         DataParser<Collection<EventBase>> parser = new EventsDataParser(new EventBaseJsonDeserializer(
-                new VenueJsonDeserializer(new CourseAreaJsonDeserializer())));
+                new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory))));
         DataHandler<Collection<EventBase>> handler = new EventsDataHandler(this, client);
 
         try {
