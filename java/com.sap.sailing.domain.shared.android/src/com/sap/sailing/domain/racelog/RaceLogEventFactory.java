@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
+import com.sap.sailing.domain.tracking.Wind;
 
 public interface RaceLogEventFactory {
     RaceLogEventFactory INSTANCE = new RaceLogEventFactoryImpl();
@@ -83,5 +84,10 @@ public interface RaceLogEventFactory {
             List<Competitor> competitors, int passId, TimePoint protestStartTime);
 
     RaceLogProtestStartTimeEvent createProtestStartTimeEvent(TimePoint timePoint, int passId, TimePoint protestStartTime);
+
+    RaceLogWindFixEvent createWindFixEvent(TimePoint eventTime, int currentPassId, Wind wind);
+    
+    RaceLogWindFixEvent createWindFixEvent(TimePoint timePoint, Serializable id,
+            List<Competitor> competitors, int passId, Wind wind);
 
 }

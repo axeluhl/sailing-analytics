@@ -1,7 +1,10 @@
-package com.sap.sailing.domain.common.coursedesign;
+package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
 public enum TargetTime {
+    twenty(20),
     thirty(30),
+    fourty(40),
+    fifty(50),
     sixty(60);
     
     private final Integer timeInMinutes;

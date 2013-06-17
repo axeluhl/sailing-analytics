@@ -7,14 +7,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.ActivityInfo;
 import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
@@ -70,7 +69,6 @@ public abstract class BaseActivity extends Activity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options_menu, menu);
         menuItemLive = menu.findItem(R.id.options_menu_live);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         return true;
     }
 
@@ -143,7 +141,7 @@ public abstract class BaseActivity extends Activity {
     }
 
     private String getLiveIconText() {
-        return String.format("Connected to: %s\n%s", AppConstants.getServerBaseURL(this), sendingServiceStatus);
+        return String.format("Connected to: %s\n%s", AppPreferences.getServerBaseURL(this), sendingServiceStatus);
     }
 
     protected void fadeActivity(Class<?> activity) {

@@ -613,8 +613,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (raceLog != null) {
             
             StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
-            if (startTimeFinder.analyze() != null) {
-                raceInfoDTO.startTime = startTimeFinder.analyze().asDate();
+            TimePoint startTime = startTimeFinder.analyze();
+            if (startTime != null) {
+                raceInfoDTO.startTime = startTime.asDate();
             }
 
             RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog);
@@ -660,7 +661,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             
             LastPublishedCourseDesignFinder courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
-            raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(courseDesignFinder.analyze());
+            CourseBase lastCourse = courseDesignFinder.analyze();
+            raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(lastCourse);
+            if (lastCourse != null) {
+                raceInfoDTO.lastCourseName = lastCourse.getName();
+            }
         }
         raceInfoDTO.seriesName = seriesName;
         raceInfoDTO.raceName = raceColumn.getName();
@@ -3006,15 +3011,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Collections.sort(entryList, new RegattaRaceStatesComparator());
             result.addAll(entryList);
             if (showOnlyCurrentlyRunningRaces) {
-                int numberOfFinishedRaces = 0;
-                
+                List<RegattaOverviewEntryDTO> finishedEntries = new ArrayList<RegattaOverviewEntryDTO>();
                 for (RegattaOverviewEntryDTO entry : entryList) {
                     if (!RaceLogRaceStatus.isActive(entry.raceInfo.lastStatus)) {
                         if (entry.raceInfo.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
-                            if (numberOfFinishedRaces > 0) {
-                                result.remove(entry);
-                            }
-                            numberOfFinishedRaces++;
+                            finishedEntries.add(entry);
                         } else if (entry.raceInfo.lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
                             //don't filter when the race is unscheduled and aborted before
                             if (!entry.raceInfo.isRaceAbortedInPassBefore) {
@@ -3023,6 +3024,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             
                         }
                     }
+                }
+                if (!finishedEntries.isEmpty()) {
+                    //keep the last finished race in the list to be shown
+                    int indexOfLastElement = finishedEntries.size() - 1;
+                    finishedEntries.remove(indexOfLastElement);
+                    
+                    //... and remove all other finished races
+                    result.removeAll(finishedEntries);
                 }
             }
         }

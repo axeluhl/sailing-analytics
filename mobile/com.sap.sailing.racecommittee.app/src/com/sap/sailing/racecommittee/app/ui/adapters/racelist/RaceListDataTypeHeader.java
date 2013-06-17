@@ -3,11 +3,11 @@ package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
+import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 
 public class RaceListDataTypeHeader implements RaceListDataType {
 
     private BoatClassSeriesFleet data;
-    private final static String DEFAULT = "Default";
 
     public RaceListDataTypeHeader(BoatClassSeriesFleet data) {
         this.data = data;
@@ -29,14 +29,8 @@ public class RaceListDataTypeHeader implements RaceListDataType {
         return data.getFleet();
     }
 
+    @Override
     public String toString() {
-        String result = getBoatClass().getName();
-        if (!getSeries().getName().equals(DEFAULT)) {
-            result += " - " + getSeries().getName();
-        }
-        if (!getFleet().getName().equals(DEFAULT)) {
-            result += " - " + getFleet().getName();
-        }
-        return result;
+        return data.getDisplayName();
     }
 }

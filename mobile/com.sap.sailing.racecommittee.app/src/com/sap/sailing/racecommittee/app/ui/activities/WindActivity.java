@@ -3,7 +3,9 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
@@ -11,50 +13,79 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.model.LatLng;
+import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 
 public class WindActivity extends BaseActivity implements CompassDirectionListener, LocationListener {
 
+    private final static int FIVE_SEC = 5000;
+    private final static int EVERY_POSITION_CHANGE = 0;
+
     CompassView compassView;
-    EditText windDirection;
-    EditText windSpeed;
-    EditText latitude;
-    EditText longitude;
-    SeekBar seekWindSpeed;
-    Button btnGps;
-    Button btnSend;
+    EditText windBearingEditText;
+    EditText windSpeedEditText;
+    EditText latitudeEditText;
+    EditText longitudeEditText;
+    SeekBar windSpeedSeekBar;
+    Button sendButton;
     LocationManager locationManager;
+    Location currentLocation;
+    DecimalFormat speedFormat;
+    DecimalFormat bearingFormat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.wind_view);
 
-        compassView = (CompassView) findViewById(R.id.compassView1);
-        windDirection = (EditText) findViewById(R.id.et_wind_direction);
-        windSpeed = (EditText) findViewById(R.id.et_wind_speed);
-        latitude = (EditText) findViewById(R.id.et_position_lat);
-        longitude = (EditText) findViewById(R.id.et_position_lon);
-        seekWindSpeed = (SeekBar) findViewById(R.id.sb_wind_speed);
-        btnGps = (Button) findViewById(R.id.btn_wind_query_gps);
-        btnSend = (Button) findViewById(R.id.btn_wind_send);
+        compassView = (CompassView) findViewById(R.id.compassView);
+        windBearingEditText = (EditText) findViewById(R.id.editTextWindDirection);
+        windSpeedEditText = (EditText) findViewById(R.id.editTextWindSpeed);
+        latitudeEditText = (EditText) findViewById(R.id.et_position_lat);
+        longitudeEditText = (EditText) findViewById(R.id.et_position_lon);
+        windSpeedSeekBar = (SeekBar) findViewById(R.id.seekbar_wind_speed);
+        sendButton = (Button) findViewById(R.id.btn_wind_send);
 
-        seekWindSpeed.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            buildAlertMessageNoGps();
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FIVE_SEC, EVERY_POSITION_CHANGE, this);
+        
+        //        Criteria crit = new Criteria();
+        //        crit.setAccuracy(Criteria.ACCURACY_FINE);
+        //        String provider = locationManager.getBestProvider(crit, true);
+        //        onLocationChanged(locationManager.getLastKnownLocation(provider));
+
+        windSpeedSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 float speed = round(progress / 10.0f, 1);
-                windSpeed.setText(speedFormat.format(speed));
+                int displayedValue = Integer.getInteger(windSpeedEditText.getText().toString(), 0).intValue();
+                int progressValue = Float.valueOf(speed).intValue();
+                if (displayedValue != progressValue) {
+                    windSpeedEditText.setText(speedFormat.format(speed));
+                }
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {
@@ -64,52 +95,72 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
             }
         });
 
-        btnGps.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                LocationManager locationManager = (LocationManager) WindActivity.this
-                        .getSystemService(Context.LOCATION_SERVICE);
-                Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                latitude.setText(loc.getLatitude() + "");
-                longitude.setText(loc.getLongitude() + "");
-            }
-        });
-
-        btnSend.setOnClickListener(new OnClickListener() {
+        sendButton.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
                 try {
-                    InMemoryDataStore.INSTANCE.setLastWindSpeed(Double.valueOf(windSpeed.getText().toString()
-                            .replace(",", ".")));
-                    InMemoryDataStore.INSTANCE.setLastWindDirection(Integer.valueOf(windDirection.getText().toString()));
-                    LatLng lastWindPosition = new LatLng(Double.valueOf(latitude.getText().toString()), Double
-                            .valueOf(longitude.getText().toString()));
-                    InMemoryDataStore.INSTANCE.setLastWindPosition(lastWindPosition);
-                    // TODO uses domain Wind and send result to calling activity instead of using InMemoryDataStore
-                    // Wind windMeasurement = new WindImpl();
-                    Intent returnIntent = new Intent();
-                    setResult(RESULT_OK, returnIntent);
+                    Wind wind = getResultingWindFix();
+                    if (wind == null) {
+                        Toast.makeText(WindActivity.this, R.string.wind_location_or_fields_not_valid, Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    saveEntriesInPreferences(wind);
+                    Intent resultData = new Intent();
+                    resultData.putExtra(AppConstants.EXTRAS_WIND_FIX, wind);
+                    setResult(RESULT_OK, resultData);
                     finish();
                 } catch (NumberFormatException nfe) {
-                    Toast.makeText(WindActivity.this, "The entered information is not valid", Toast.LENGTH_LONG).show();
+                    Toast.makeText(WindActivity.this, R.string.wind_speed_direction_not_a_valid_number, Toast.LENGTH_LONG).show();
                     ExLog.i(this.getClass().getCanonicalName(), nfe.getMessage());
                 }
             }
+
+        });
+        sendButton.setEnabled(false);
+
+        windSpeedEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
+
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    windSpeedSeekBar.setProgress(Double.valueOf(windSpeedEditText.getText().toString()).intValue() * 10);
+                }
+            }
+
         });
 
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, this);
+        speedFormat = new DecimalFormat("#0.0");
+        bearingFormat = new DecimalFormat("###");
 
-        windSpeed.setText(InMemoryDataStore.INSTANCE.getLastWindSpeed() + "");
-        windDirection.setText(InMemoryDataStore.INSTANCE.getLastWindDirection() + "");
-        if (InMemoryDataStore.INSTANCE.getLastWindPosition() != null) {
-            latitude.setText(InMemoryDataStore.INSTANCE.getLastWindPosition().latitude + "");
-            longitude.setText(InMemoryDataStore.INSTANCE.getLastWindPosition().longitude + "");
-        }
+        double enteredWindSpeed = AppPreferences.getWindSpeed(getBaseContext());
+        windSpeedSeekBar.setProgress(Double.valueOf(enteredWindSpeed).intValue() * 10);
+        windSpeedEditText.setText(speedFormat.format(enteredWindSpeed));
+        windBearingEditText.setText(bearingFormat.format(AppPreferences.getWindBearing(getBaseContext())));
     }
 
-    DecimalFormat speedFormat = new DecimalFormat("##.0");
-    DecimalFormat directionFormat = new DecimalFormat("###");
+    private void buildAlertMessageNoGps() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+        .setCancelable(false)
+        .setPositiveButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
+            public void onClick(final DialogInterface dialog, final int id) {
+                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            }
+        })
+        .setNegativeButton(getResources().getString(R.string.no), new DialogInterface.OnClickListener() {
+            public void onClick(final DialogInterface dialog, final int id) {
+                dialog.cancel();
+            }
+        });
+        final AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+
+    protected void saveEntriesInPreferences(Wind wind) {
+        AppPreferences.setWindBearing(getBaseContext(), wind.getBearing().getDegrees());
+        AppPreferences.setWindSpeed(getBaseContext(), wind.getKnots());
+    }
 
     @Override
     protected void onStart() {
@@ -118,15 +169,10 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
         compassView.setDirectionListener(this);
     }
 
+    @Override
     public void onDirectionChanged(float degree) {
         float direction = round(degree, 0);
-        windDirection.setText(directionFormat.format(direction));
-    }
-
-    public static float round(float unrounded, int precision) {
-        BigDecimal decimal = new BigDecimal(unrounded);
-        BigDecimal round = decimal.setScale(precision, BigDecimal.ROUND_UP);
-        return round.floatValue();
+        windBearingEditText.setText(bearingFormat.format(direction));
     }
 
     @Override
@@ -137,25 +183,43 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
 
     @Override
     public void onLocationChanged(Location location) {
-
+        currentLocation = location;
+        latitudeEditText.setText(String.valueOf(location.getLatitude()));
+        longitudeEditText.setText(String.valueOf(location.getLongitude()));
+        sendButton.setEnabled(true);
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-        // TODO Auto-generated method stub
-
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FIVE_SEC, EVERY_POSITION_CHANGE, this);
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        // TODO Auto-generated method stub
+    }
 
+    protected static float round(float unrounded, int precision) {
+        BigDecimal decimal = new BigDecimal(unrounded);
+        BigDecimal round = decimal.setScale(precision, BigDecimal.ROUND_UP);
+        return round.floatValue();
+    }
+
+    private Wind getResultingWindFix() throws NumberFormatException {
+        if (currentLocation == null || windSpeedEditText.getText().toString().isEmpty() || windBearingEditText.getText().toString().isEmpty()) {
+            return null;
+        }
+
+        Position currentPosition = new DegreePosition(currentLocation.getLatitude(), currentLocation.getLongitude());
+        double windSpeed = Double.valueOf(windSpeedEditText.getText().toString().replace(",", "."));
+        double windBearing = Double.valueOf(windBearingEditText.getText().toString());
+        Bearing bearing = new DegreeBearingImpl(windBearing);
+        SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(windSpeed, bearing);
+
+        return new WindImpl(currentPosition, MillisecondsTimePoint.now(), speedBearing);
     }
 
 }

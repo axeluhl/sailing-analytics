@@ -107,7 +107,7 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
         }
 
         setupActionBar(courseArea);
-        // unload and unregister from aaaaaaall races here!
+        // unload and unregister from all races here!
         unloadAllRaces();
         loadRaces(courseArea);
         // StaticVibrator.prepareVibrator(this);
@@ -163,7 +163,7 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
     }
 
     private void unloadAllRaces() {
-        Intent intent = new Intent(getString(R.string.intentActionClearRaces));
+        Intent intent = new Intent(AppConstants.INTENT_ACTION_CLEAR_RACES);
         this.startService(intent);
     }
 
@@ -201,7 +201,7 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
         // he should decide whether these races are already
         // registered or not.
         for (ManagedRace race : races) {
-            Intent registerIntent = new Intent(getString(R.string.intentActionRegisterRace));
+            Intent registerIntent = new Intent(AppConstants.INTENT_ACTION_REGISTER_RACE);
             registerIntent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
             this.startService(registerIntent);
         }

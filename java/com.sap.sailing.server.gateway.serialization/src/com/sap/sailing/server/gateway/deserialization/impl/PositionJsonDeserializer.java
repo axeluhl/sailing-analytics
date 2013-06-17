@@ -8,7 +8,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 
-public class PositionDeserializer implements JsonDeserializer<Position> {
+public class PositionJsonDeserializer implements JsonDeserializer<Position> {
 
     public Position deserialize(JSONObject object) throws JsonDeserializationException {
         Number latitudeDeg = (Number) object.get(PositionJsonSerializer.FIELD_LATITUDE_DEG);

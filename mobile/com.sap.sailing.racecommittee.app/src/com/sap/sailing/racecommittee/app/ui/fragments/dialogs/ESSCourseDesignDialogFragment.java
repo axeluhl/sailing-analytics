@@ -326,7 +326,8 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     protected CourseBase convertCourseElementsToACourseData() throws IllegalStateException, IllegalArgumentException {
-        CourseBase design = new CourseDataImpl("CourseTemplate");
+        //TODO find a proper name for the highly flexible ESS courses to be shown on the regatta overview page
+        CourseBase design = new CourseDataImpl("Course template");
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
 
         for (CourseListDataElement courseElement : courseElements) {
