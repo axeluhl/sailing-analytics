@@ -40,7 +40,7 @@
             android:value="@string/GoogleMapsKey" />
 
         <activity
-            android:name=".ui.activities.LoginActivity" >
+            android:name=".ui.activities.LoginActivity" android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -48,13 +48,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.activities.RacingActivity" >
+            android:name=".ui.activities.RacingActivity" android:screenOrientation="landscape">
         </activity>
-        <activity android:name=".ui.activities.ResultsCapturingActivity" >
+        <activity android:name=".ui.activities.ResultsCapturingActivity" android:screenOrientation="landscape">
         </activity>
-        <activity android:name=".ui.activities.WindActivity" >
+        <activity android:name=".ui.activities.WindActivity" android:screenOrientation="landscape">
         </activity>
-        <activity android:name=".ui.activities.SettingsActivity" >
+        <activity android:name=".ui.activities.SettingsActivity" android:screenOrientation="landscape">
         </activity>
 
         <service
