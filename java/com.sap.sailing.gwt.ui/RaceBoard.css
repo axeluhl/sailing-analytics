@@ -10,6 +10,9 @@
       clear: both;
       visibility: hidden;
 */
+
+iframe {display: block; width: 100%; height: 100%; border: none; overflow-y: auto; overflow-x: hidden;}
+
 .clear {
 	clear: both;
 	font-size: 1px;
@@ -381,38 +384,24 @@ img.openColumn {
   background: transparent url(images/min-4panel.png) left top no-repeat;
 }
 
-.gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-minimize:hover {
-  /*display: block;
-  height: 12px;
-  width: 12px;*/  
-  background: transparent url(images/min-4panel.png) left top no-repeat;
-}
-
-.gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-minimize:hover {
-  background: transparent url(images/min-4panel.png) right top no-repeat;
-}
-
-.gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-maximize {
-  /*display: block;
-  height: 12px;
-  width: 12px;*/  
-  background: transparent url(images/min-4panel.png) left bottom no-repeat;
-}
-
-.gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-maximize:hover {
-  background: transparent url(images/min-4panel.png) right bottom no-repeat;
-}
-
 .gwt-extras-WindowBox .dialogBottomRightInner {
 	width: 10px;
 	height: 10px;
 	background: url(images/resize_arrow.png) center center no-repeat;
 }
 
-.media-synch-control {
+.gwt-extras-WindowBox .media-synch-control {
 	background: #efefef;
 	padding: 10px;
 	margin: 10px 0 10px 0;
+}
+
+.gwt-extras-WindowBox .media-synch-control:after { 
+   content: "."; 
+   visibility: hidden; 
+   display: block; 
+   height: 0; 
+   clear: both;
 }
 
 .gwt-extras-WindowBox .offset-panel {
@@ -426,7 +415,10 @@ img.openColumn {
 .gwt-extras-WindowBox .confirm-button {
 	margin: 0 5px 0 0;
 }
+
+.gwt-extras-WindowBox .video-root-panel {
+	display: inline-block;
+}
 /*******************************************************************************
  * End of CSS for WindowBox component.
  ******************************************************************************/
-

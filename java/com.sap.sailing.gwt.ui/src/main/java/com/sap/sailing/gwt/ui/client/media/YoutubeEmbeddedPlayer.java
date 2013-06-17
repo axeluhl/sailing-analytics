@@ -42,8 +42,11 @@ public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoP
         backupVideoTrack = new MediaTrack(null, videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.durationInMillis, videoTrack.mimeType);
 
         FlowPanel rootPanel = new FlowPanel();
+        rootPanel.addStyleName("video-root-panel");
+
         if (showSynchControls) {
             mediaSynchControl = new MediaSynchControl(this);
+            mediaSynchControl.widget().addStyleName("media-synch-control");
             rootPanel.add(mediaSynchControl.widget());
         }
 
