@@ -29,7 +29,7 @@ public class TrapezoidCourseDesignFactoryImpl extends AbstractCourseDesignFactor
     @Override
     public CourseDesign createCourseDesign(Position startBoatPosition, Double windSpeed, Bearing windDirection,
             BoatClassType boatClass, CourseLayouts courseLayout, NumberOfRounds numberOfRounds, TargetTime targetTime) {
-        this.product = new WindwardLeewardCourseDesignImpl();
+        this.product = new WindWardLeeWardCourseDesignImpl();
         this.initializeCourseDesign(startBoatPosition, windSpeed, windDirection, boatClass, courseLayout,
                 numberOfRounds, targetTime);
         this.finalizeCourseDesign(startBoatPosition, windSpeed, windDirection, boatClass, courseLayout, numberOfRounds,

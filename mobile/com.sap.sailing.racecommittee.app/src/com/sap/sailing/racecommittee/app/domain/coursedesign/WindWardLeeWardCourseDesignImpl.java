@@ -2,7 +2,7 @@ package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
 
 
-public class WindwardLeewardCourseDesignImpl extends AbstractCourseDesign {
+public class WindWardLeeWardCourseDesignImpl extends AbstractCourseDesign {
 
 
 }
