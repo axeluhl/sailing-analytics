@@ -3,9 +3,10 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -36,10 +37,10 @@ import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 
 public class WindActivity extends BaseActivity implements CompassDirectionListener, LocationListener {
-    
+
     private final static int FIVE_SEC = 5000;
     private final static int EVERY_POSITION_CHANGE = 0;
-    
+
     CompassView compassView;
     EditText windBearingEditText;
     EditText windSpeedEditText;
@@ -64,14 +65,18 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
         longitudeEditText = (EditText) findViewById(R.id.et_position_lon);
         windSpeedSeekBar = (SeekBar) findViewById(R.id.seekbar_wind_speed);
         sendButton = (Button) findViewById(R.id.btn_wind_send);
-        
+
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            buildAlertMessageNoGps();
+        }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FIVE_SEC, EVERY_POSITION_CHANGE, this);
-        Criteria crit = new Criteria();
-        crit.setAccuracy(Criteria.ACCURACY_FINE);
-        String provider = locationManager.getBestProvider(crit, true);
-        onLocationChanged(locationManager.getLastKnownLocation(provider));
         
+        //        Criteria crit = new Criteria();
+        //        crit.setAccuracy(Criteria.ACCURACY_FINE);
+        //        String provider = locationManager.getBestProvider(crit, true);
+        //        onLocationChanged(locationManager.getLastKnownLocation(provider));
+
         windSpeedSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -111,7 +116,8 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
             }
 
         });
-        
+        sendButton.setEnabled(false);
+
         windSpeedEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
 
             @Override
@@ -120,17 +126,36 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
                     windSpeedSeekBar.setProgress(Double.valueOf(windSpeedEditText.getText().toString()).intValue() * 10);
                 }
             }
-            
+
         });
-        
+
         speedFormat = new DecimalFormat("#0.0");
         bearingFormat = new DecimalFormat("###");
-        
+
         double enteredWindSpeed = AppPreferences.getWindSpeed(getBaseContext());
         windSpeedSeekBar.setProgress(Double.valueOf(enteredWindSpeed).intValue() * 10);
         windSpeedEditText.setText(speedFormat.format(enteredWindSpeed));
         windBearingEditText.setText(bearingFormat.format(AppPreferences.getWindBearing(getBaseContext())));
     }
+
+    private void buildAlertMessageNoGps() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+        .setCancelable(false)
+        .setPositiveButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
+            public void onClick(final DialogInterface dialog, final int id) {
+                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            }
+        })
+        .setNegativeButton(getResources().getString(R.string.no), new DialogInterface.OnClickListener() {
+            public void onClick(final DialogInterface dialog, final int id) {
+                dialog.cancel();
+            }
+        });
+        final AlertDialog alert = builder.create();
+        alert.show();
+    }
+
 
     protected void saveEntriesInPreferences(Wind wind) {
         AppPreferences.setWindBearing(getBaseContext(), wind.getBearing().getDegrees());
@@ -161,40 +186,39 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
         currentLocation = location;
         latitudeEditText.setText(String.valueOf(location.getLatitude()));
         longitudeEditText.setText(String.valueOf(location.getLongitude()));
+        sendButton.setEnabled(true);
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, FIVE_SEC, EVERY_POSITION_CHANGE, this);
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-
     }
-    
+
     protected static float round(float unrounded, int precision) {
         BigDecimal decimal = new BigDecimal(unrounded);
         BigDecimal round = decimal.setScale(precision, BigDecimal.ROUND_UP);
         return round.floatValue();
     }
-    
+
     private Wind getResultingWindFix() throws NumberFormatException {
         if (currentLocation == null || windSpeedEditText.getText().toString().isEmpty() || windBearingEditText.getText().toString().isEmpty()) {
             return null;
         }
-        
+
         Position currentPosition = new DegreePosition(currentLocation.getLatitude(), currentLocation.getLongitude());
         double windSpeed = Double.valueOf(windSpeedEditText.getText().toString().replace(",", "."));
         double windBearing = Double.valueOf(windBearingEditText.getText().toString());
         Bearing bearing = new DegreeBearingImpl(windBearing);
         SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(windSpeed, bearing);
-        
+
         return new WindImpl(currentPosition, MillisecondsTimePoint.now(), speedBearing);
     }
 

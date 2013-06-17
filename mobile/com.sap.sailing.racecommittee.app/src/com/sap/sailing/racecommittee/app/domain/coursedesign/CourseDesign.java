@@ -20,4 +20,7 @@ public interface CourseDesign {
     public void setReferencePoint(Position referencePoint);
     void setCourseDesignSpecificMarks(Set<PositionedMark> courseDesignSpecificMarks);
     Set<PositionedMark> getCourseDesignSpecificMarks();
+    
+    String getCourseDesignDescription();
+    void setCourseDesignDescription(String courseDesignDescription);
 }

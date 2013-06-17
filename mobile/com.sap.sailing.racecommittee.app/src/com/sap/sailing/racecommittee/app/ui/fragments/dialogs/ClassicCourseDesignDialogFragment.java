@@ -60,6 +60,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private final static String TAG = ClassicCourseDesignDialogFragment.class.getName();
 
     private Button publishButton;
+    private Button unpublishButton;
     private ImageButton windButton;
     private Spinner spinnerBoatClass;
     private Spinner spinnerCourseLayout;
@@ -125,6 +126,17 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             public void onClick(View arg0) {
                 CourseBase courseBase = new CourseDataImpl(selectedCourseLayout.getShortName()+selectedNumberOfRounds.getNumberOfRounds());
                 sendCourseDataAndDismiss(courseBase);
+            }
+
+        });
+        
+        unpublishButton = (Button) getView().findViewById(R.id.unpublishCourseDesignButton);
+        unpublishButton.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                CourseBase emptyCourse = new CourseDataImpl("Unknown");
+                sendCourseDataAndDismiss(emptyCourse);
             }
 
         });
@@ -333,8 +345,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
                 .position(position2LatLng(courseDesign.getStartBoatPosition()))
                 .icon(BitmapDescriptorFactory.fromBitmap(bmResult))
                 .draggable(false)
-                .title("signal boat, " + courseDesign.getStartBoatPosition() + ", " + courseDesign.getWindSpeed()
-                        + "kn, " + courseDesign.getWindDirection()));
+                .title(courseDesign.getCourseDesignDescription())).showInfoWindow();
         LatLng pinEndPosition = new LatLng(courseDesign.getPinEnd().getPosition().getLatDeg(), courseDesign.getPinEnd()
                 .getPosition().getLngDeg());
         courseAreaMap.addMarker(new MarkerOptions().position(pinEndPosition)

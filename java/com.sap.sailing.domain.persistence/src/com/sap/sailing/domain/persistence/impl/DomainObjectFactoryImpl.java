@@ -1118,7 +1118,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private RaceLogCourseDesignChangedEvent loadRaceLogCourseDesignChangedEvent(TimePoint createdAt, TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-        CourseBase courseData = loadCourseData((BasicDBList) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()));
+        String courseName = (String) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN_NAME.name());
+        CourseBase courseData = loadCourseData((BasicDBList) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()), courseName);
         return raceLogEventFactory.createCourseDesignChangedEvent(createdAt, timePoint, id, competitors, passId, courseData);
     }
 
@@ -1185,8 +1186,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return raceLogEventFactory.createRaceStatusEvent(createdAt, timePoint, id, competitors, passId, nextStatus);
     }
     
-    private CourseBase loadCourseData(BasicDBList dbCourseList) {
-        CourseBase courseData = new CourseDataImpl("TemplateCourse");
+    private CourseBase loadCourseData(BasicDBList dbCourseList, String courseName) {
+        if (courseName == null) {
+            courseName = "Course template";
+        }
+        CourseBase courseData = new CourseDataImpl(courseName);
         int i = 0;
         for (Object object : dbCourseList) {
             DBObject dbObject  = (DBObject) object;

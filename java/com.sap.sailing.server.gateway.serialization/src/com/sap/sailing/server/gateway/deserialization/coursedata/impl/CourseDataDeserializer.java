@@ -26,7 +26,7 @@ public class CourseDataDeserializer implements JsonDeserializer<CourseBase> {
 
     @Override
     public CourseBase deserialize(JSONObject object) throws JsonDeserializationException {
-        String courseName = object.get(CourseBaseJsonSerializer.FIELD_NAME).toString();
+        String courseName = (String) object.get(CourseBaseJsonSerializer.FIELD_NAME);
         JSONArray jsonWaypoints = (JSONArray) object.get(CourseBaseJsonSerializer.FIELD_WAYPOINTS);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         

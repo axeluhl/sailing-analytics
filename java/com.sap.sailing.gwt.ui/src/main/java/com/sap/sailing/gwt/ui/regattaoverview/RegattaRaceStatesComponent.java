@@ -6,28 +6,37 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.cell.client.ClickableTextCell;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -39,6 +48,7 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
+import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 
 /**
  * This component shows a table displaying the current state of races for a given event. 
@@ -49,7 +59,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private List<RegattaOverviewEntryDTO> allEntries;
 
-    private final SelectionModel<RegattaOverviewEntryDTO> raceSelectionModel;
     private final CellTable<RegattaOverviewEntryDTO> regattaOverviewTable;
     private ListDataProvider<RegattaOverviewEntryDTO> regattaOverviewDataProvider;
     private final VerticalPanel mainPanel;
@@ -58,7 +67,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     private final String eventIdAsString;
-    private final RegattaOverviewRaceSelectionProvider raceSelectionProvider;
     private final FlagImageResolver flagImageResolver;
     
     private EventDTO eventDTO;
@@ -66,24 +74,29 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private TextColumn<RegattaOverviewEntryDTO> seriesNameColumn;
     private TextColumn<RegattaOverviewEntryDTO> fleetNameColumn;
 
-    private final RegattaRaceStatesSettings settings; 
+    private final RegattaRaceStatesSettings settings;
+    private final FlagAlphabetInterpreter flagInterpreter;
     
     private static RegattaRaceStatesTableResources tableRes = GWT.create(RegattaRaceStatesTableResources.class);
+    
+    private final static String LOCAL_STORAGE_REGATTA_OVERVIEW_KEY = "sailingAnalytics.regattaOverview.settings";
 
     public RegattaRaceStatesComponent(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            final StringMessages stringMessages, final String eventIdAsString, final RegattaOverviewRaceSelectionProvider raceSelectionProvider, RegattaRaceStatesSettings settings) {
+            final StringMessages stringMessages, final String eventIdAsString, RegattaRaceStatesSettings settings) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.eventIdAsString = eventIdAsString;
-        this.raceSelectionProvider = raceSelectionProvider;
         this.flagImageResolver = new FlagImageResolver();
         this.allEntries = new ArrayList<RegattaOverviewEntryDTO>();
         
         this.eventDTO = null;
         this.raceGroupDTOs = null;
-
+        
+        this.flagInterpreter = new FlagAlphabetInterpreter(stringMessages);
+        
         this.settings = new RegattaRaceStatesSettings();
-        updateSettings(settings);
+        loadAndSetSettings(settings);
+        //updateSettings(settings);
         
         mainPanel = new VerticalPanel();
         setWidth("100%");
@@ -91,32 +104,16 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         regattaOverviewDataProvider = new ListDataProvider<RegattaOverviewEntryDTO>();
         regattaOverviewTable = createRegattaTable();
 
-        raceSelectionModel = new SingleSelectionModel<RegattaOverviewEntryDTO>();
-        raceSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                showSelectedRaces();
-            }
-
-        });
-
-        regattaOverviewTable.setSelectionModel(raceSelectionModel);
-
         mainPanel.add(regattaOverviewTable);
         setWidget(mainPanel);
     }
 
-    protected List<RegattaOverviewEntryDTO> getSelectedRaces() {
-        List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
-        if (regattaOverviewDataProvider != null) {
-            for (RegattaOverviewEntryDTO race : regattaOverviewDataProvider.getList()) {
-                if (raceSelectionModel.isSelected(race)) {
-                    result.add(race);
-                }
-            }
+    private void loadAndSetSettings(RegattaRaceStatesSettings settings) {
+        RegattaRaceStatesSettings loadedSettings = loadRegattaRaceStatesSettings();
+        if (loadedSettings != null) {
+            settings = loadedSettings;
         }
-        return result;
+        updateSettings(settings);
     }
 
     public void onUpdateServer(Date time) {
@@ -271,18 +268,36 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         TextColumn<RegattaOverviewEntryDTO> raceStatusColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
-                return getStatusText(entryDTO.raceInfo);
+                return flagInterpreter.getMeaningOfRaceStateAndFlags(entryDTO.raceInfo.lastStatus, entryDTO.raceInfo.lastUpperFlag, 
+                        entryDTO.raceInfo.lastLowerFlag, entryDTO.raceInfo.isLastFlagDisplayed);
             }
         };
-        raceStatusColumn.setSortable(true);
-        regattaOverviewListHandler.setComparator(raceStatusColumn, new Comparator<RegattaOverviewEntryDTO>() {
+        
+        Column<RegattaOverviewEntryDTO, String> raceCourseColumn = new Column<RegattaOverviewEntryDTO, String>(new ClickableTextCell()) {
+            @Override
+            public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                String courseName = "-";
+                if (entryDTO.raceInfo.lastCourseName != null) {
+                    courseName = entryDTO.raceInfo.lastCourseName;
+                }
+                return courseName;
+            }
+        };
+        raceCourseColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, String>() {
 
             @Override
-            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
-                return left.raceInfo.lastStatus.compareTo(right.raceInfo.lastStatus);
+            public void update(int index, RegattaOverviewEntryDTO object, String value) {
+                if (object.raceInfo.lastCourseDesign.waypoints.size() > 0) {
+                    DialogBox courseViewDialogBox = createCourseViewDialogBox(object.raceInfo);
+                    courseViewDialogBox.center();
+                    courseViewDialogBox.setGlassEnabled(true);
+                    courseViewDialogBox.setAnimationEnabled(true);
+                    courseViewDialogBox.show();
+                }
             }
 
         });
+        raceCourseColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         Column<RegattaOverviewEntryDTO, ImageResource> lastUpperFlagColumn = new Column<RegattaOverviewEntryDTO, ImageResource>(
                 new ImageResourceCell()) {
@@ -339,6 +354,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         table.addColumn(raceNameColumn, stringMessages.race());
         table.addColumn(raceStartTimeColumn, stringMessages.startTime());
         table.addColumn(raceStatusColumn, stringMessages.status());
+        table.addColumn(raceCourseColumn, stringMessages.course());
         table.addColumn(lastUpperFlagColumn, stringMessages.lastUpperFlag());
         table.addColumn(lastLowerFlagColumn, stringMessages.lastLowerFlag());
         table.addColumn(lastFlagDirectionColumn, stringMessages.flagStatus());
@@ -383,44 +399,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         }
         return result;
     }
- 
-    private void showSelectedRaces() {
-        List<RegattaOverviewEntryDTO> selectedRaces = getSelectedRaces();
-        RegattaRaceStatesComponent.this.raceSelectionProvider.setSelection(selectedRaces);
-    }
-
-    private String getStatusText(RaceInfoDTO raceInfo) {
-        //TODO i8n
-        String statusText = "";
-        if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING) && raceInfo.lastUpperFlag.equals(Flags.XRAY)
-                && raceInfo.isLastFlagDisplayed) {
-            statusText = "Race is running (had early starters)";
-        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING) && raceInfo.lastUpperFlag.equals(Flags.XRAY)
-                && !raceInfo.isLastFlagDisplayed) {
-            statusText = "Race is running";
-        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING)) {
-            statusText = "Race is running";
-        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.FINISHING)) {
-            statusText = "Race is finishing";
-        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
-            statusText = "Race is finished";
-        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.SCHEDULED)) {
-            statusText = "Race is scheduled";
-        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.STARTPHASE)) {
-            statusText = "Race in start phase";
-        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
-            statusText = stringMessages.noStarttimeAnnouncedYet();
-        } else if (raceInfo.lastUpperFlag == null) {
-            statusText = "";
-        } else if (raceInfo.lastUpperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
-            statusText = "General recall";
-        } else if (raceInfo.lastUpperFlag.equals(Flags.AP) && raceInfo.isLastFlagDisplayed) {
-            statusText = "Start postponed";
-        } else if (raceInfo.lastUpperFlag.equals(Flags.NOVEMBER) && raceInfo.isLastFlagDisplayed) {
-            statusText = "Start abandoned";
-        }
-        return statusText;
-    }
 
     @Override
     public boolean hasSettings() {
@@ -429,7 +407,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     @Override
     public SettingsDialogComponent<RegattaRaceStatesSettings> getSettingsDialogComponent() {
-        return new RegattaRaceStatesSettingsDialogComponent(settings, stringMessages, 
+        return new RegattaRaceStatesSettingsDialogComponent(settings, stringMessages, eventIdAsString,
                 Collections.unmodifiableList(eventDTO.venue.getCourseAreas()),
                 Collections.unmodifiableList(raceGroupDTOs));
     }
@@ -459,6 +437,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         }
         
         refreshTableWithNewSettings();
+        storeRegattaRaceStatesSettings(settings);
     }
 
     private void refreshTableWithNewSettings() {
@@ -512,5 +491,87 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         }
         fillVisibleRegattasInSettingsIfEmpty();
         refreshTableWithNewSettings();
+    }
+    
+    private void storeRegattaRaceStatesSettings(RegattaRaceStatesSettings settings) {
+        Storage localStorage = Storage.getLocalStorageIfSupported();
+        if (localStorage != null) {
+            // delete old value
+            localStorage.removeItem(LOCAL_STORAGE_REGATTA_OVERVIEW_KEY);
+            
+            //store settings
+            GwtJsonDeSerializer<RegattaRaceStatesSettings> serializer = new RegattaRaceStatesSettingsJsonDeSerializer();
+            JSONObject settingsAsJson = serializer.serialize(settings);
+            localStorage.setItem(LOCAL_STORAGE_REGATTA_OVERVIEW_KEY, settingsAsJson.toString());
+        }
+    }
+    
+    private RegattaRaceStatesSettings loadRegattaRaceStatesSettings() {
+        RegattaRaceStatesSettings loadedSettings = null;
+        Storage localStorage = Storage.getLocalStorageIfSupported();
+        
+        if (localStorage != null) {
+            String jsonAsLocalStore = localStorage.getItem(LOCAL_STORAGE_REGATTA_OVERVIEW_KEY);
+            if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
+                GwtJsonDeSerializer<RegattaRaceStatesSettings> deserializer = new RegattaRaceStatesSettingsJsonDeSerializer();
+                JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
+                if(value.isObject() != null) {
+                    loadedSettings = deserializer.deserialize((JSONObject) value);
+                }
+                
+            }
+        }
+        return loadedSettings;
+    }
+    
+    private DialogBox createCourseViewDialogBox(RaceInfoDTO raceInfoDTO) {
+        // Create a dialog box and set the caption text
+        final DialogBox dialogBox = new DialogBox();
+        dialogBox.setText(stringMessages.courseLayout());
+
+        // Create a table to layout the content
+        VerticalPanel dialogContents = new VerticalPanel();
+        dialogContents.setSpacing(4);
+        dialogBox.setWidget(dialogContents);
+        
+        Label courseNameLabel = new Label(raceInfoDTO.lastCourseName);
+        dialogContents.add(courseNameLabel);
+        
+        Grid waypointGrid = new Grid(raceInfoDTO.lastCourseDesign.waypoints.size(), 1);
+        dialogContents.add(waypointGrid);
+        for (int i = 0; i < raceInfoDTO.lastCourseDesign.waypoints.size(); i++) {
+            WaypointDTO waypoint = raceInfoDTO.lastCourseDesign.waypoints.get(i);
+            waypointGrid.setText(i, 0, getWaypointNameLabel(waypoint));
+        }
+        
+        // Add a close button at the bottom of the dialog
+        Button closeButton = new Button(stringMessages.ok());
+        closeButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                dialogBox.hide();
+            }
+        });
+        dialogContents.add(closeButton);
+        dialogContents.setCellHorizontalAlignment(
+                closeButton, HasHorizontalAlignment.ALIGN_CENTER);
+
+        return dialogBox;
+    }
+    
+    private String getWaypointNameLabel(WaypointDTO waypointDTO) {
+        String result = waypointDTO.getName();
+        result += (waypointDTO.passingSide == null) ? "" : ", to " + getNauticalSideAsText(waypointDTO.passingSide);
+        return result;
+    }
+    
+    private String getNauticalSideAsText(NauticalSide passingSide) {
+        switch (passingSide) {
+        case PORT:
+            return stringMessages.portSide();
+        case STARBOARD:
+            return stringMessages.starboardSide();
+        default:
+            return "";
+        }
     }
 }
