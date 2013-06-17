@@ -6,4 +6,5 @@ import com.sap.sailing.domain.common.Position;
 
 public interface CourseDesignFactory {
     CourseDesign createCourseDesign(Position startBoatPosition, Double windSpeed, Bearing windDirection, BoatClassType boatClass, CourseLayouts courseLayout, NumberOfRounds numberOfRounds, TargetTime targetTime);
+
 }

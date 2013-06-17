@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
-import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,14 +24,17 @@ public class TrapezoidCourseDesignFactoryImpl extends AbstractCourseDesignFactor
     private final int GATE_XP_WIND_ANGLE = 90;
     private final int FINISH_S_WIND_ANGLE = 180;
     private final int FINISH_P_WIND_ANGLE = 0;
+    private Distance legDistance;
 
     @Override
     public CourseDesign createCourseDesign(Position startBoatPosition, Double windSpeed, Bearing windDirection,
             BoatClassType boatClass, CourseLayouts courseLayout, NumberOfRounds numberOfRounds, TargetTime targetTime) {
-        this.product = new WindwardLeewardCourseDesignImpl();
+        this.product = new WindWardLeeWardCourseDesignImpl();
         this.initializeCourseDesign(startBoatPosition, windSpeed, windDirection, boatClass, courseLayout,
                 numberOfRounds, targetTime);
         this.finalizeCourseDesign(startBoatPosition, windSpeed, windDirection, boatClass, courseLayout, numberOfRounds,
+                targetTime);
+        setCourseDesignDescription(startBoatPosition, windSpeed, windDirection, boatClass, courseLayout, numberOfRounds,
                 targetTime);
         return this.product;
     }
@@ -72,11 +74,10 @@ public class TrapezoidCourseDesignFactoryImpl extends AbstractCourseDesignFactor
                         + (speedTable.get(PointOfSail.Upwind) * numberOfRounds.getNumberOfRounds()) + REACH_LEG_FACTOR
                         * speedTable.get(PointOfSail.Reach));
 
-        Distance legDistance = new NauticalMileDistance(legLength);
+        legDistance = new NauticalMileDistance(legLength);
         Position luvBuoyPosition = getPositionForGivenPointDistanceAndBearing(this.product.getReferencePoint(),
                 legDistance, windDirection.add(new DegreeBearingImpl(LUV_BUOY_ANGLE_TO_WIND_OFFSET)));
-        DecimalFormat legLengthFormat = new DecimalFormat("0.00");
-        result.add(new PositionedMarkImpl("1 (leg:" + legLengthFormat.format(legDistance.getNauticalMiles())+" nm)",
+        result.add(new PositionedMarkImpl("1",
                 luvBuoyPosition));
 
         // reach leg
@@ -111,5 +112,23 @@ public class TrapezoidCourseDesignFactoryImpl extends AbstractCourseDesignFactor
                         FINISH_P_WIND_ANGLE+((TrapezoidCourseLayouts) courseLayout).getReachAngle()))), MarkType.FINISHBOAT));
 
         return result;
+    }
+
+    @Override
+    protected void setCourseDesignDescription(Position startBoatPosition, Double windSpeed, Bearing windDirection,
+            BoatClassType boatClass, CourseLayouts courseLayout, NumberOfRounds numberOfRounds, TargetTime targetTime) {
+        StringBuffer courseDesignDescription = new StringBuffer();
+        courseDesignDescription.append(boatClass.toString());
+        courseDesignDescription.append(", course: ");
+        courseDesignDescription.append(courseLayout.getShortName());
+        courseDesignDescription.append(numberOfRounds);
+        courseDesignDescription.append(", target time: ");
+        courseDesignDescription.append(targetTime.getTimeInMinutes());
+        courseDesignDescription.append(" min, upwind leg: ");
+        courseDesignDescription.append(distanceFormat.format(legDistance.getNauticalMiles()));
+        courseDesignDescription.append(" nm, reach leg: ");
+        courseDesignDescription.append(distanceFormat.format(legDistance.scale(REACH_LEG_FACTOR).getNauticalMiles()));
+        courseDesignDescription.append(" nm");
+        this.product.setCourseDesignDescription(courseDesignDescription.toString());
     }
 }

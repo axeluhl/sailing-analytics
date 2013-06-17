@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
+import java.text.DecimalFormat;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.Bearing;
@@ -13,10 +14,13 @@ public abstract class AbstractCourseDesignFactory implements CourseDesignFactory
     protected CourseDesign product;
     private final int ANGLE_OF_START_LINE_TO_WIND = 270;
     private final Distance REFERENCE_POINT_DISTANCE_FROM_START_LINE = new NauticalMileDistance(0.05);
+    DecimalFormat distanceFormat = new DecimalFormat("0.00");
     
     abstract protected Set<PositionedMark> computeDesignSpecificMarks(Position startBoatPosition, Double windSpeed, Bearing windDirection,
             BoatClassType boatClass, CourseLayouts courseLayout, NumberOfRounds numberOfRounds, TargetTime targetTime);
-
+    abstract protected void setCourseDesignDescription(Position startBoatPosition, Double windSpeed,
+            Bearing windDirection, BoatClassType boatClass, CourseLayouts courseLayout, NumberOfRounds numberOfRounds,
+            TargetTime targetTime);
     @Override
     public abstract CourseDesign createCourseDesign(Position startBoatPosition, Double windSpeed,
             Bearing windDirection, BoatClassType boatClass, CourseLayouts courseLayout, NumberOfRounds numberOfRounds,
@@ -40,7 +44,7 @@ public abstract class AbstractCourseDesignFactory implements CourseDesignFactory
 
     protected void setPinEnd(BoatClassType boatClass, Position startBoatPosition, Bearing windDirection) {
         
-        PositionedMark pinEnd = new PositionedMarkImpl("start pin (start line length: "+boatClass.getStartLineLength().getMeters()+"m)", getPositionForGivenPointDistanceAndBearing(
+        PositionedMark pinEnd = new PositionedMarkImpl("start pin, start line length: "+boatClass.getStartLineLength().getMeters()+"m", getPositionForGivenPointDistanceAndBearing(
                 startBoatPosition, boatClass.getStartLineLength(),
                 windDirection.add(new DegreeBearingImpl(ANGLE_OF_START_LINE_TO_WIND))));
         product.setPinEnd(pinEnd);
