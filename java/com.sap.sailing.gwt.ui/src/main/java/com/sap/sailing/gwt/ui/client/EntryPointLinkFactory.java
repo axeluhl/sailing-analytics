@@ -10,7 +10,7 @@ public class EntryPointLinkFactory {
         return createEntryPointLink("/gwt/RaceBoard.html", parameters);
     }
 
-    public static String createLeaderboardBoardLink(Map<String, String> parameters) {
+    public static String createLeaderboardLink(Map<String, String> parameters) {
         return createEntryPointLink("/gwt/Leaderboard.html", parameters);
     }
 

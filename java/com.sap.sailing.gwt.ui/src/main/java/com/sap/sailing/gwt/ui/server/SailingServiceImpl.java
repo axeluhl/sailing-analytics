@@ -672,6 +672,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         raceInfoDTO.fleetName = fleet.getName();
         raceInfoDTO.fleetOrdering = fleet.getOrdering();
         raceInfoDTO.raceIdentifier = raceColumn.getRaceIdentifier(fleet);
+        raceInfoDTO.isTracked = raceColumn.getTrackedRace(fleet) != null ? true : false;
+
         return raceInfoDTO;
     }
 
