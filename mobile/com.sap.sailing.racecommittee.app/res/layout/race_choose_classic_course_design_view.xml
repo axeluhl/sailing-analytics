@@ -93,10 +93,10 @@
                 android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
 
             <Button
-                android:id="@+id/takePreviousCourseDesignButton"
+                android:id="@+id/unpublishCourseDesignButton"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:text="@string/take_previous"
+                android:text="@string/unpublish"
                 android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
         </LinearLayout>
 

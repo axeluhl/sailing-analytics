@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
-import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -75,8 +74,7 @@ public class TrapezoidCourseDesignFactoryImpl extends AbstractCourseDesignFactor
         Distance legDistance = new NauticalMileDistance(legLength);
         Position luvBuoyPosition = getPositionForGivenPointDistanceAndBearing(this.product.getReferencePoint(),
                 legDistance, windDirection.add(new DegreeBearingImpl(LUV_BUOY_ANGLE_TO_WIND_OFFSET)));
-        DecimalFormat legLengthFormat = new DecimalFormat("0.00");
-        result.add(new PositionedMarkImpl("1 (leg:" + legLengthFormat.format(legDistance.getNauticalMiles())+" nm)",
+        result.add(new PositionedMarkImpl("1",
                 luvBuoyPosition));
 
         // reach leg

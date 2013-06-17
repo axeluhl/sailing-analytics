@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
-import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,8 +60,7 @@ public class WindWardLeeWardCourseDesignFactoryImpl extends AbstractCourseDesign
         Position luvBuoyPosition = getPositionForGivenPointDistanceAndBearing(
                 this.product.getReferencePoint(), legDistance,
                 windDirection.add(new DegreeBearingImpl(LUV_BUOY1_ANGLE_TO_WIND)));
-        DecimalFormat legLengthFormat = new DecimalFormat("0.00");
-        result.add(new PositionedMarkImpl("1A (leg:" + legLengthFormat.format(legDistance.getNauticalMiles())+" nm)", luvBuoyPosition));
+        result.add(new PositionedMarkImpl("1A", luvBuoyPosition));
         
         result.add(new PositionedMarkImpl("1" , getPositionForGivenPointDistanceAndBearing(
                 luvBuoyPosition, LUV_BUOY1_TO_LUV_BUOY2_DISTANCE,

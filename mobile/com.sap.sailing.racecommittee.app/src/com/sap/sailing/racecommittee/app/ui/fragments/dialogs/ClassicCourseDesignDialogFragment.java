@@ -60,6 +60,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private final static String TAG = ClassicCourseDesignDialogFragment.class.getName();
 
     private Button publishButton;
+    private Button unpublishButton;
     private ImageButton windButton;
     private Spinner spinnerBoatClass;
     private Spinner spinnerCourseLayout;
@@ -125,6 +126,17 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             public void onClick(View arg0) {
                 CourseBase courseBase = new CourseDataImpl(selectedCourseLayout.getShortName()+selectedNumberOfRounds.getNumberOfRounds());
                 sendCourseDataAndDismiss(courseBase);
+            }
+
+        });
+        
+        unpublishButton = (Button) getView().findViewById(R.id.unpublishCourseDesignButton);
+        unpublishButton.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                CourseBase emptyCourse = new CourseDataImpl("Unknown");
+                sendCourseDataAndDismiss(emptyCourse);
             }
 
         });
