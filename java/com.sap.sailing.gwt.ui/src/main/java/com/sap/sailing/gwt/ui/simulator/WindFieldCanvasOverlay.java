@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
+import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.ToolTip;
 import com.sap.sailing.gwt.ui.simulator.util.WindFieldMapMouseMoveHandler;
@@ -47,14 +48,16 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     protected String arrowHeadColor = "Blue";
     protected WindFieldMapMouseMoveHandler mmHandler;
     protected double arrowLength = 15;
+    protected WindFieldGenParamsDTO windParams = null;
 
     private Timer timer;
 
     private static Logger logger = Logger.getLogger(WindFieldCanvasOverlay.class.getName());
 
-    public WindFieldCanvasOverlay(final Timer timer) {
+    public WindFieldCanvasOverlay(final Timer timer, final WindFieldGenParamsDTO windParams) {
         super();
         this.timer = timer;
+        this.windParams = windParams;
         init();
     }
 
@@ -118,7 +121,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
     @Override
     protected Overlay copy() {
-        return new WindFieldCanvasOverlay(this.timer);
+        return new WindFieldCanvasOverlay(this.timer, this.windParams);
     }
 
     @Override
