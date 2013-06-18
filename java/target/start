@@ -3,6 +3,12 @@
 # source variables
 . `pwd`/env.sh
 
+# make some checks
+if [[ ! -d "$JAVA_HOME" ]]; then
+    echo "Could not find $JAVA_HOME. Aborting..."
+    exit
+fi
+
 scriptdir=`dirname "$0"`
 LIB_DIR=`pwd`/native-libraries
 echo Script directory is $scriptdir and LIB_DIR is $LIB_DIR
