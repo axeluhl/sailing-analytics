@@ -16,6 +16,12 @@ if [[ ! -d "$JAVA_HOME" ]]; then
     echo "Using Java from $JAVA_BINARY"
 fi
 
+TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$SERVER_PORT"`
+if [[ $TELNET_ACTIVE != "" ]]; then
+        echo "There is something already running on port $SERVER_PORT. Perhaps your server that has not been stopped?"
+        exit
+fi
+
 scriptdir=`dirname "$0"`
 LIB_DIR=`pwd`/native-libraries
 
@@ -32,5 +38,12 @@ if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
         exit
 fi
 
-echo "Started $SERVER_NAME on port $TELNET_PORT - use telnet localhost $TELNET_PORT to connect to the OSGi console. Logs should be found in logs/sailing0.log.0"
-
+echo "Configuration for this server is:"
+echo "SERVER_NAME: $SERVER_NAME"
+echo "SERVER_PORT: $SERVER_PORT"
+echo "MEMORY: $MEMORY"
+echo "TELNET_PORT: $TELNET_PORT"
+echo "MONGODB_PORT: $MONGODB_PORT"
+echo "EXPEDITION_PORT: $EXPEDITION_PORT"
+echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
+echo "Started $SERVER_NAME - use telnet localhost $TELNET_PORT to connect to the OSGi console. Logs should be found in logs/sailing0.log.0"
