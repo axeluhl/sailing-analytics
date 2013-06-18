@@ -312,7 +312,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     @Override
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         ThresholdBasedResultDiscardingRule oldResultDiscardingRule = this.resultDiscardingRule;
-        if (!oldResultDiscardingRule.equals(resultDiscardingRule)) {
+        if (!Util.equalsWithNull(oldResultDiscardingRule, resultDiscardingRule)) {
             this.resultDiscardingRule = resultDiscardingRule;
             raceColumnListeners.notifyListenersAboutResultDiscardingRuleChanged(oldResultDiscardingRule, resultDiscardingRule);
         }

@@ -318,14 +318,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      */
     private ThresholdBasedResultDiscardingRule loadResultDiscardingRule(DBObject dbObject, FieldNames field) {
         BasicDBList dbDiscardIndexResultsStartingWithHowManyRaces = (BasicDBList) dbObject.get(field.name());
-        int[] discardIndexResultsStartingWithHowManyRaces = new int[dbDiscardIndexResultsStartingWithHowManyRaces.size()];
-        int i = 0;
-        for (Object discardingThresholdAsObject : dbDiscardIndexResultsStartingWithHowManyRaces) {
-            discardIndexResultsStartingWithHowManyRaces[i++] = (Integer) discardingThresholdAsObject;
+        final ThresholdBasedResultDiscardingRule result;
+        if (dbDiscardIndexResultsStartingWithHowManyRaces == null) {
+            result = null;
+        } else {
+            int[] discardIndexResultsStartingWithHowManyRaces = new int[dbDiscardIndexResultsStartingWithHowManyRaces
+                    .size()];
+            int i = 0;
+            for (Object discardingThresholdAsObject : dbDiscardIndexResultsStartingWithHowManyRaces) {
+                discardIndexResultsStartingWithHowManyRaces[i++] = (Integer) discardingThresholdAsObject;
+            }
+            result = new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces);
         }
-        ThresholdBasedResultDiscardingRule resultDiscardingRule = new ThresholdBasedResultDiscardingRuleImpl(
-                discardIndexResultsStartingWithHowManyRaces);
-        return resultDiscardingRule;
+        return result;
     }
 
     private CourseArea loadCourseAreaFromEvents(DBObject dbObject) {
