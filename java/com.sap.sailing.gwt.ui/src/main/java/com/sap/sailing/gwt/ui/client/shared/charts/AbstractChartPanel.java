@@ -230,7 +230,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                         hideLoading();
 
                         if (result != null) {
-                            if (result.isEmpty()) {
+                            if (result.isEmpty() && chartContainsNoData()) {
                                 setWidget(noDataFoundLabel);
                             } else {
                                 updateChartSeries(result, append);
@@ -252,6 +252,15 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                 });
         asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
 
+    }
+    
+    private boolean chartContainsNoData() {
+        for (Series competitorSeries : dataSeriesByCompetitor.values()) {
+            if (competitorSeries.getPoints().length != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

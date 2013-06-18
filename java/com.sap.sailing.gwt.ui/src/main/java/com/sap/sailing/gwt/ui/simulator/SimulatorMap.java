@@ -136,7 +136,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     WindFieldDTO pathWindDTO = new WindFieldDTO();
                     pathWindDTO.setMatrix(currentPath.getPoints());
 
-                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(pathName, timer);
+                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(pathName, timer, windParams);
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.pathColor = color;
 
@@ -350,6 +350,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     			regattaAreaCanvasOverlay = new RegattaAreaCanvasOverlay(this);
     			mapw.addOverlay(regattaAreaCanvasOverlay);
     			regattaAreaCanvasOverlay.setVisible(true);
+    			//parent.showTimePanel(false);
     		}
     	}
     	
@@ -357,7 +358,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.raceCourseCanvasOverlay.getCanvas().getElement().setClassName("raceCourse");
 
         if (this.mode == SailingSimulatorUtil.event) {
-        	this.regattaAreaCanvasOverlay.raceCourseCanvasOverlay = this.raceCourseCanvasOverlay;
+        	this.regattaAreaCanvasOverlay.setRaceCourseCanvas(this.raceCourseCanvasOverlay);
         	this.regattaAreaCanvasOverlay.updateRaceCourse(0, 0);
         }
     	
@@ -366,13 +367,13 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.mapw.addOverlay(this.raceCourseCanvasOverlay);
 
         if (this.windParams.isShowArrows()) {
-            this.windFieldCanvasOverlay = new WindFieldCanvasOverlay(this.timer);
+            this.windFieldCanvasOverlay = new WindFieldCanvasOverlay(this.timer, this.windParams);
         }
         if (this.windParams.isShowStreamlets()) {
             this.windStreamletsCanvasOverlay = new WindStreamletsCanvasOverlay(this.timer, this.xRes, this.yRes);
         }
         if (this.windParams.isShowGrid()) {
-            this.windGridCanvasOverlay = new WindGridCanvasOverlay(this.timer, this.xRes, this.yRes);
+            this.windGridCanvasOverlay = new WindGridCanvasOverlay(this.timer, this.windParams, this.xRes, this.yRes);
         }
         if (windParams.isShowLines()) {
             this.windLineCanvasOverlay = new WindLineCanvasOverlay(this.timer);
@@ -626,12 +627,12 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             }
         }
     }
-
+    
     private void refreshWindDisplayView(WindPatternDisplay windPatternDisplay, boolean force) {
 
         if (force) {
             // removeOverlays();
-            this.windParams.setDefaultTimeSettings();
+            this.parent.setDefaultTimeSettings();
             this.generateWindField(windPatternDisplay, true);
             // timeListeners.clear();
             // timeListeners.add(windFieldCanvasOverlay);
@@ -663,7 +664,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 }
 
             } else {
-                this.windParams.setDefaultTimeSettings();
+                this.parent.setDefaultTimeSettings();
                 this.generateWindField(windPatternDisplay, true);
             }
         }
@@ -774,6 +775,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     public MapWidget getMap() {
     	return this.mapw;
+    }
+    
+    public SimulatorMainPanel getMainPanel() {
+    	return this.parent;
     }
     
 }

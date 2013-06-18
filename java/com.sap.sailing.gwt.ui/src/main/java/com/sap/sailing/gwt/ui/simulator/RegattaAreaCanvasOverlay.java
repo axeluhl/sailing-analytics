@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.simulator;
 import java.util.ArrayList;
 
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.canvas.dom.client.Context2d.TextAlign;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.event.MapMoveEndHandler;
 import com.google.gwt.maps.client.event.PolygonClickHandler;
@@ -15,43 +16,30 @@ import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
 
 public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 
-	SimulatorMap simulatorMap;
-    public RaceCourseCanvasOverlay raceCourseCanvasOverlay;
-	ArrayList<RegattaArea> regAreas;
-	boolean pan;
-	RegattaArea currentRegArea = null;
-	double raceBearing = 0.0;
-	double diffBearing = 0.0;
+	private SimulatorMap simulatorMap;
+    private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
+	private ArrayList<RegattaArea> regAreas;
+	private boolean pan;
+	private RegattaArea currentRegArea = null;
+	private double raceBearing = 0.0;
+	private double diffBearing = 0.0;
 
-	public RegattaAreaCanvasOverlay(SimulatorMap simMap) {
-
+	public RegattaAreaCanvasOverlay(SimulatorMap simulatorMap) {
 		super();
-
-		simulatorMap = simMap;
-		//System.out.println("Maps version: "+Maps.getVersion());
-
-		/*this.canvas.addMouseUpHandler(new MouseUpHandler() {
-	        public void onMouseUp(MouseUpEvent event) {
-	          int mousex = event.getRelativeX(canvas.getElement());
-	          int mousey = event.getRelativeY(canvas.getElement());
-	          System.out.println("Mouse x:"+mousex+" y:"+mousey);
-	        }
-	      });*/
-
+		this.simulatorMap = simulatorMap;
 	}
 
+	
 	@Override
 	protected Overlay copy() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	
 	@Override
 	protected void initialize(final MapWidget map) {
 		super.initialize(map);
-
-		//drawRegattaAreas();
-		setVisible(true);
 
 		LatLng cPos;
 		regAreas = new ArrayList<RegattaArea>();
@@ -64,11 +52,11 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 		
 		// Golf
 		cPos = LatLng.newInstance(54.41985556,10.19454167);
-		regAreas.add(new RegattaArea("Golf", cPos, 0.35, "#F1F3EF"));
+		regAreas.add(new RegattaArea("Golf", cPos, 0.35, "#F1F3EF","silver"));
 
-		// Foxtrott
+		// Foxtrot
 		cPos = LatLng.newInstance(54.445775,10.29223889);
-		regAreas.add(new RegattaArea("Foxtrott", cPos, 0.65, "#B4287C"));
+		regAreas.add(new RegattaArea("Foxtrot", cPos, 0.65, "#B4287C"));
 
 		// India
 		cPos = LatLng.newInstance(54.44803611,10.20863611);
@@ -82,9 +70,9 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 		cPos = LatLng.newInstance(54.47640278,10.20090556);
 		regAreas.add(new RegattaArea("Echo", cPos, 0.60, "#1CADD9"));
 		
-		// Klio
+		// Kilo
 		cPos = LatLng.newInstance(54.47808889,10.24033889);
-		regAreas.add(new RegattaArea("Klio", cPos, 0.55, "#9FC269"));
+		regAreas.add(new RegattaArea("Kilo", cPos, 0.55, "#9FC269"));
 
 		// Charlie
 		cPos = LatLng.newInstance(54.49327222,10.17525833);
@@ -101,6 +89,8 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 		// Alfa
 		cPos = LatLng.newInstance(54.52905,10.18515278);
 		regAreas.add(new RegattaArea("Alfa", cPos, 1.00, "#D9699B"));
+
+		setVisible(true);
 
 		int regIdx = 0;
 		for(RegattaArea regArea : regAreas) {
@@ -137,109 +127,26 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 
 		clear();
 
-		//Circle circle = new Circle();
-		//getMap().addOverlay(circle);
-
-
-		/*if (windDTOList != null && windDTOList.size() > 1) {
-            if (windDTOList.size() != xRes * yRes) {
-                logger.warning("Error in WindGridCanvasOverlay wind field is not rectangular.");
-                return;
-            }
-            // createPositionGrid(windDTOList);
-            // createGridCell();
-            updatePositionGrid(windDTOList);
-            drawGridCell();
-
-            final String title = "Wind Grid at " + windDTOList.size() + " points.";
-            getCanvas().setTitle(title);
-        }*/
-
-		//LatLng positionLatLng = LatLng.newInstance(54.425022,10.183382);
-		//final Point blPoint = getMap().convertLatLngToDivPixel(positionLatLng);
-
-		//Position posCenter = new DegreePosition(54.425022,10.183382);
-		//Position posBorder = posCenter.translateGreatCircle(new DegreeBearingImpl(90.0), new MeterDistance(100.0));
-
-		//Gold
-		//54.43439444	10.19659167
-		//54.43428611	10.21073333
-
-		/*LatLng tvPos1 = LatLng.newInstance(54.4344,10.19659167);
-        LatLng tvPos2 = LatLng.newInstance(54.43443056,10.21093611);
-
-        LatLng golfPos1 = LatLng.newInstance(54.41985556,10.19454167);
-        LatLng golfPos2 = LatLng.newInstance(54.41984167,10.20470556);
-
-        LatLng foxPos1 = LatLng.newInstance(54.445775,10.29223889);
-        LatLng foxPos2 = LatLng.newInstance(54.44591667,10.30548333);*/
-
 		LatLng cPos = LatLng.newInstance(54.4344,10.19659167);
 		Point centerPoint = getMap().convertLatLngToDivPixel(cPos);
 		Point borderPoint = getMap().convertLatLngToDivPixel(this.getEdgePoint(cPos, 0.015));
-		Point diffPoint = Point.newInstance(centerPoint.getX()-borderPoint.getX(), centerPoint.getY()-borderPoint.getY());
-		double pxStroke = Math.sqrt(diffPoint.getX()*diffPoint.getX() + diffPoint.getY()*diffPoint.getY());
-
-		//LatLng cPos = null;
-
+		double pxStroke = Math.pow(2.0, (getMap().getZoomLevel()-10.0)/2.0);
+		
 		final Context2d context2d = canvas.getContext2d();
 		context2d.setLineWidth(3);
 		context2d.setStrokeStyle("Black");
 
-		//String[] colors = {"#EAB75A","#F1F3EF","#B4287C","#774741","#818585","#1CADD9","#9FC269","#0A5998","#179E8B","#CE3032","#D9699B"};
-
-		//LatLng positionLatLng = LatLng.newInstance(lat1/Math.PI*180,lon1/Math.PI*180);
-		//Point centerPoint = getMap().convertLatLngToDivPixel(positionLatLng);
-
-		//positionLatLng = LatLng.newInstance(lat2/Math.PI*180,lon2/Math.PI*180);
-		//Point borderPoint = getMap().convertLatLngToDivPixel(positionLatLng);
-
-
-		/*positionLatLng = LatLng.newInstance(54.422925,10.192738);
-        final Point tlPoint = getMap().convertLatLngToDivPixel(positionLatLng);
-
-        positionLatLng = LatLng.newInstance(54.420228,10.184755);
-        final Point trPoint = getMap().convertLatLngToDivPixel(positionLatLng);*/
-
-		/*
-		 * Uncomment to see the center of the grid for debug drawCircle(blPoint.getX()-this.getWidgetPosLeft(),
-		 * blPoint.getY()-this.getWidgetPosTop(),2,"red"); drawCircle(brPoint.getX()-this.getWidgetPosLeft(),
-		 * brPoint.getY()-this.getWidgetPosTop(),2,"red"); drawCircle(tlPoint.getX()-this.getWidgetPosLeft(),
-		 * tlPoint.getY()-this.getWidgetPosTop(),2,"red"); drawCircle(trPoint.getX()-this.getWidgetPosLeft(),
-		 * trPoint.getY()-this.getWidgetPosTop(),2,"red");
-		 */
-
 		for(RegattaArea regArea : regAreas) {
-			//System.out.println("regArea"+regArea);
 			centerPoint = getMap().convertLatLngToDivPixel(regArea.centerPos);
 			borderPoint = getMap().convertLatLngToDivPixel(regArea.edgePos);
 			drawRegattaAreaBackground(context2d, centerPoint, borderPoint, regArea.color, pxStroke);
 		}
 
 		for(RegattaArea regArea : regAreas) {
-			//System.out.println("regArea"+regArea);
 			centerPoint = getMap().convertLatLngToDivPixel(regArea.centerPos);
 			borderPoint = getMap().convertLatLngToDivPixel(regArea.edgePos);
-			drawRegattaArea(regArea.name, context2d, centerPoint, borderPoint, regArea.color, pxStroke);
+			drawRegattaArea(regArea.name, context2d, centerPoint, borderPoint, regArea.color, regArea.colorText, pxStroke);
 		}
-
-		/*centerPoint = getMap().convertLatLngToDivPixel(golfPos1);
-        borderPoint = getMap().convertLatLngToDivPixel(golfPos2);
-        drawRegattaArea(context2d, centerPoint, borderPoint);
-
-        centerPoint = getMap().convertLatLngToDivPixel(foxPos1);
-        borderPoint = getMap().convertLatLngToDivPixel(foxPos2);
-        drawRegattaArea(context2d, centerPoint, borderPoint);*/
-
-		/*context2d.beginPath();
-        context2d.moveTo(blPoint.getX() - this.getWidgetPosLeft(), blPoint.getY() - this.getWidgetPosTop());
-        context2d.lineTo(brPoint.getX() - this.getWidgetPosLeft(), brPoint.getY() - this.getWidgetPosTop());
-        context2d.lineTo(trPoint.getX() - this.getWidgetPosLeft(), trPoint.getY() - this.getWidgetPosTop());
-        context2d.lineTo(tlPoint.getX() - this.getWidgetPosLeft(), tlPoint.getY() - this.getWidgetPosTop());
-        context2d.lineTo(blPoint.getX() - this.getWidgetPosLeft(), blPoint.getY() - this.getWidgetPosTop());
-        context2d.closePath();*/
-
-		// context2d.stroke(); // Dont show the lines
 
 	}
 
@@ -265,43 +172,34 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 			a += step;
 		}
 
-		// transparent circles to make regatta areas clickable
+		// transparent circle-like polygons to make regatta areas clickable
 		Polygon circle = new Polygon(circlePoints, "white", 1, 0.0, "green", 0.0);
 
 		final int regIdxFinal = regIdx;
 
 		/*circle.addPolygonMouseOverHandler( new PolygonMouseOverHandler() {
-			7public void onMouseOver(PolygonMouseOverEvent e) {
+			public void onMouseOver(PolygonMouseOverEvent e) {
 				System.out.println("MouseOver: "+name);
 			}
 		});*/
 				
 		circle.addPolygonClickHandler( new PolygonClickHandler() {
 			public void onClick(PolygonClickEvent e) {
+				//System.out.println("Click: "+currentRegArea.name);
 				RegattaArea newRegArea = regAreas.get(regIdxFinal);
+
 				if (newRegArea != currentRegArea) {
 					currentRegArea = newRegArea;
-				//System.out.println("Click: "+currentRegArea.name);
-				simulatorMap.clearOverlays();
-				//MapWidget map = getMap();
-				//map.setContinuousZoom(true);
-				//map.setZoomLevel(14);
-				//map.zoomIn();
-				//map.panTo(regArea.centerPos);
-				//map.setCenter(map.getCenter(), 14);
-
-				updateRaceCourse(0,0);
-	            raceCourseCanvasOverlay.redraw(true);
-	            //removeOverlays();
-	            // pathCanvasOverlays.clear();
-	            //replayPathCanvasOverlays.clear();
-	            //colorPalette.reset();
+					simulatorMap.clearOverlays();
+					updateRaceCourse(0,0);
+					raceCourseCanvasOverlay.redraw(true);
 				}
+				
 				pan = true;
 				map.panTo(currentRegArea.centerPos);
 			}
 		});
-			
+
 		getMap().addOverlay(circle);
 		getMap().addMapMoveEndHandler( new MapMoveEndHandler() {
 			public void onMoveEnd(MapMoveEndEvent event) {
@@ -314,11 +212,8 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 					}
 				}
 
-				//synchronized(map) {
-				//	map.notify();
-				//}
 			};	
-			});
+		});
 		circle.setVisible(true);
 	}
 
@@ -329,15 +224,17 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 			diffBearing = bearing;			
 		}
 		if (currentRegArea != null) {
+			//simulatorMap.getMainPanel().setUpdateButtonEnabled(true);
 			raceCourseCanvasOverlay.startPoint = getDistantPoint(currentRegArea.centerPos, 0.9*currentRegArea.radius, 180.0 + raceBearing - diffBearing);
 			raceCourseCanvasOverlay.endPoint = getDistantPoint(currentRegArea.centerPos, 0.9*currentRegArea.radius, 0.0 + raceBearing - diffBearing);
+		} else {
+			//simulatorMap.getMainPanel().setUpdateButtonEnabled(false);
 		}
 	}
 	
 	
 	protected void drawRegattaAreaBackground(Context2d context2d, Point centerPoint, Point borderPoint, String color, double pxStroke) {
 
-		//context2d.setFillStyle("#a6c2dd");
 		Point diffPoint = Point.newInstance(centerPoint.getX()-borderPoint.getX(), centerPoint.getY()-borderPoint.getY());
 		double pxRadius = Math.sqrt(diffPoint.getX()*diffPoint.getX() + diffPoint.getY()*diffPoint.getY());
 
@@ -351,21 +248,12 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 	}
 
 
-	protected void drawRegattaArea(String name, Context2d context2d, Point centerPoint, Point borderPoint, String color, double pxStroke) {
+	protected void drawRegattaArea(String name, Context2d context2d, Point centerPoint, Point borderPoint, String color, String colorText, double pxStroke) {
 
-		//context2d.setFillStyle("#a6c2dd");
 		Point diffPoint = Point.newInstance(centerPoint.getX()-borderPoint.getX(), centerPoint.getY()-borderPoint.getY());
 		double pxRadius = Math.sqrt(diffPoint.getX()*diffPoint.getX() + diffPoint.getY()*diffPoint.getY());
 
-		/*context2d.setGlobalAlpha(1.0f);
-    	context2d.setFillStyle("#a6bfde"); // Google Blue
-    	context2d.beginPath();
-    	context2d.arc(centerPoint.getX() - this.getWidgetPosLeft(), centerPoint.getY() - this.getWidgetPosTop(), pxRadius*1.2, 0.0, 2*Math.PI);
-    	context2d.closePath();
-    	context2d.fill();*/
-
 		context2d.setGlobalAlpha(1.0f);
-		//context2d.setFillStyle("#a6bfde"); // Google Blue
 		context2d.setFillStyle("#DEDEDE");
 		context2d.setLineWidth(pxStroke);
 		context2d.setStrokeStyle(color);
@@ -378,12 +266,23 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 		context2d.setGlobalAlpha(0.4f);
 		context2d.setFillStyle(color);
 		context2d.beginPath();
-		//diffPoint = Point.newInstance(centerPoint.getX()-borderPoint.getX(), centerPoint.getY()-borderPoint.getY());
-		//pxRadius = Math.sqrt(diffPoint.getX()*diffPoint.getX() + diffPoint.getY()*diffPoint.getY());
 		context2d.arc(centerPoint.getX() - this.getWidgetPosLeft(), centerPoint.getY() - this.getWidgetPosTop(), pxRadius, 0.0, 2*Math.PI);
 		context2d.closePath();
 		context2d.fill();
 
+		if (getMap().getZoomLevel() >= 11) {
+			context2d.setGlobalAlpha(0.8f);
+			context2d.setFillStyle(colorText);
+			
+			double fontsize = 14.0 + (32.0-14.0)*(getMap().getZoomLevel() - 11.0)/(14.0-11.0);
+			context2d.setFont("normal "+fontsize+"px Calibri");
+	        //TextMetrics txtmet = context2d.measureText(name);
+			context2d.setTextAlign(TextAlign.CENTER);
+			context2d.fillText(name, centerPoint.getX() - this.getWidgetPosLeft(), centerPoint.getY()+0.32*fontsize - this.getWidgetPosTop());
+			
+			context2d.setGlobalAlpha(1.0f);
+		}
+		
 	}
 
 	protected LatLng getEdgePoint(LatLng pos, double dist) {
@@ -411,4 +310,8 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 		return result;
 	}
 
+	public void setRaceCourseCanvas(RaceCourseCanvasOverlay rcCanvas) {
+		this.raceCourseCanvasOverlay = rcCanvas;
+	}
+	
 }

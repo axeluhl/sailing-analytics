@@ -6,12 +6,16 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class SeriesJsonSerializer implements JsonSerializer<Series> {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_FLEETS = "fleets";
     public static final String FIELD_RACES = "races";
+    public static final String FIELD_TRACKED_RACES = "trackedRaces";
+    public static final String FIELD_STARTS_WITH_ZERO_SCORE = "startsWithZeroScore";
+    public static final String FIELD_IS_MEDAL_SERIES = "isMedalSeries";
 
     private final JsonSerializer<Fleet> fleetSerializer;
 
@@ -23,6 +27,8 @@ public class SeriesJsonSerializer implements JsonSerializer<Series> {
         JSONObject result = new JSONObject();
         
         result.put(FIELD_NAME, series.getName());
+        result.put(FIELD_IS_MEDAL_SERIES, series.isMedal());
+        result.put(FIELD_STARTS_WITH_ZERO_SCORE, series.isStartsWithZeroScore());
 
         JSONArray fleetsJson = new JSONArray();
         for (Fleet fleet : series.getFleets()) {
@@ -31,10 +37,36 @@ public class SeriesJsonSerializer implements JsonSerializer<Series> {
         result.put(FIELD_FLEETS, fleetsJson);
 
         JSONArray racesJson = new JSONArray();
-        for(RaceColumn raceColumn: series.getRaceColumns()) {
+        for (RaceColumn raceColumn : series.getRaceColumns()) {
             racesJson.add(raceColumn.getName());
         }
         result.put(FIELD_RACES, racesJson);
+
+        JSONObject trackedRacesJson = new JSONObject();
+        JSONArray trackedFleetsJson = new JSONArray();
+        for (Fleet fleet : series.getFleets()) {
+            JSONObject trackedFleetJson = new JSONObject();
+            trackedFleetJson.put(FIELD_NAME, fleet.getName());
+            JSONArray racesPerFleetJson = new JSONArray();
+            for (RaceColumn raceColumn : series.getRaceColumns()) {
+                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                JSONObject raceColumnJson = new JSONObject();
+                raceColumnJson.put(FIELD_NAME, raceColumn.getName());
+                raceColumnJson.put("isMedalRace" , raceColumn.isMedalRace());
+                if (trackedRace != null) {
+                    raceColumnJson.put("isTracked", true);
+                    raceColumnJson.put("trackedRaceName", trackedRace.getRace().getName());
+                } else {
+                    raceColumnJson.put("isTracked", false);
+                    raceColumnJson.put("trackedRaceName", null);
+                }
+                racesPerFleetJson.add(raceColumnJson);
+            }
+            trackedFleetJson.put(FIELD_RACES, racesPerFleetJson);
+            trackedFleetsJson.add(trackedFleetJson);
+        }
+        trackedRacesJson.put(FIELD_FLEETS, trackedFleetsJson);        
+        result.put(FIELD_TRACKED_RACES, trackedRacesJson);        
         
         return result;
     }
