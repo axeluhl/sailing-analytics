@@ -168,8 +168,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
          RegExp YOUTUBE_ID_REGEX = RegExp.compile("^.*(youtu.be/|v/|u/\\w/|embed/|watch\\?v=|\\&v=)([^#\\&\\?]*).*"); // from http://stackoverflow.com/questions/3452546/javascript-regex-how-to-get-youtube-video-id-from-url, mantish Mar 4 at 15:33
          RegExp HTTP_FTP_REGEX = RegExp.compile("^(http|ftp).*"); // starting with http, https or ftp
          MatchResult match = YOUTUBE_ID_REGEX.exec(url);
-         int groupCount = match.getGroupCount();
-        if (groupCount == 3) {
+         if ((match != null) && (match.getGroupCount() == 3)) {
              return match.getGroup(2);
          } else if (HTTP_FTP_REGEX.exec(url) == null) { //--> doesn't start with either http, https or ftp --> supposed to be a naked youtube id   
              return url;
