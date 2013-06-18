@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -23,6 +25,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Grid;
@@ -35,6 +38,8 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.gwt.ui.client.AnchorCell;
+import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
@@ -175,10 +180,17 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
         });
 
-        TextColumn<RegattaOverviewEntryDTO> regattaNameColumn = new TextColumn<RegattaOverviewEntryDTO>() {
+        AnchorCell leaderboardAnchorCell = new AnchorCell();
+        Column<RegattaOverviewEntryDTO, Anchor> regattaNameColumn = new Column<RegattaOverviewEntryDTO, Anchor>(leaderboardAnchorCell) {
             @Override
-            public String getValue(RegattaOverviewEntryDTO entryDTO) {
-                return entryDTO.regattaDisplayName;
+            public Anchor getValue(RegattaOverviewEntryDTO entryDTO) {
+                Map<String, String> leaderboardLinkParameters = new HashMap<String, String>();
+                leaderboardLinkParameters.put("name", entryDTO.regattaName);
+                leaderboardLinkParameters.put("showRaceDetails", String.valueOf(true));
+                leaderboardLinkParameters.put("displayName", entryDTO.regattaDisplayName);
+                String leaderboardLink = EntryPointLinkFactory.createLeaderboardLink(leaderboardLinkParameters);                
+                Anchor result = new Anchor(entryDTO.regattaDisplayName, leaderboardLink);
+                return result;
             }
         };
         regattaNameColumn.setSortable(true);
@@ -216,10 +228,24 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
         });
 
-        TextColumn<RegattaOverviewEntryDTO> raceNameColumn = new TextColumn<RegattaOverviewEntryDTO>() {
+        AnchorCell raceCell = new AnchorCell();
+        Column<RegattaOverviewEntryDTO, Anchor> raceNameColumn = new Column<RegattaOverviewEntryDTO, Anchor>(raceCell) {
             @Override
-            public String getValue(RegattaOverviewEntryDTO entryDTO) {
-                return entryDTO.raceInfo.raceName;
+            public Anchor getValue(RegattaOverviewEntryDTO entryDTO) {
+                Anchor result = null;
+                if (entryDTO.raceInfo.raceIdentifier != null && entryDTO.raceInfo.isTracked) {
+                    Map<String, String> raceLinkParameters = new HashMap<String, String>();
+                    raceLinkParameters.put("leaderboardName", entryDTO.regattaName);
+                    raceLinkParameters.put("raceName", entryDTO.raceInfo.raceIdentifier.getRaceName());
+                    raceLinkParameters.put("canReplayDuringLiveRaces", "true");
+                    raceLinkParameters.put("regattaName", entryDTO.regattaName);
+                    String raceBoardLink = EntryPointLinkFactory.createRaceBoardLink(raceLinkParameters);                
+                    result = new Anchor(entryDTO.raceInfo.raceName, raceBoardLink);
+                } else {
+                    result = new Anchor(entryDTO.raceInfo.raceName);
+                    result.setEnabled(false);
+                }
+                return result;
             }
         };
         raceNameColumn.setSortable(true);
