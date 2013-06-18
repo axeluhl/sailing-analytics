@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.masterdataimport;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
@@ -38,6 +41,7 @@ public class MasterDataImportPanel extends VerticalPanel {
      * TODO: use string messages
      */
     private final StringMessages stringMessages;
+    private String currentHost;
 
     public MasterDataImportPanel(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -78,6 +82,101 @@ public class MasterDataImportPanel extends VerticalPanel {
                 fireIdRequestsAndFillLists();
             }
         });
+
+        importLeaderboardGroupsButton.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                importLeaderboardGroups();
+            }
+        });
+    }
+
+    protected void importLeaderboardGroups() {
+        String getMasterDataUrl = createGetMasterDataForLgsUrl(currentHost);
+        if (!isValidUrl(getMasterDataUrl, false)) {
+            showErrorAlert("Not a valid URL for fetching leaderboardgroups masterdata: " + getMasterDataUrl);
+            return;
+        }
+
+        RequestBuilder getLgsMasterDataRequestBuilder = new RequestBuilder(RequestBuilder.GET, getMasterDataUrl);
+        JSONArray groupNames = createLeaderBoardGroupNamesFromListBox();
+        getLgsMasterDataRequestBuilder.setRequestData(groupNames.toString());
+        getLgsMasterDataRequestBuilder.setCallback(new RequestCallback() {
+
+            @Override
+            public void onResponseReceived(Request request, Response response) {
+                if (response.getStatusCode() != 200) {
+                    showErrorAlert("GET leaderboardgroups master data request failed with error code: "
+                            + response.getStatusCode());
+                    return;
+                }
+                fireLegsImportRequest(response);
+            }
+
+            @Override
+            public void onError(Request request, Throwable exception) {
+                showErrorAlert("GET leaderboardgroups master data request failed with Server error: "
+                        + exception.getLocalizedMessage());
+            }
+        });
+        try {
+            getLgsMasterDataRequestBuilder.send();
+        } catch (RequestException e) {
+            showErrorAlert("GET leaderboardgroups request failed: " + e.getLocalizedMessage());
+        }
+    }
+
+    protected void fireLegsImportRequest(Response response) {
+        RequestBuilder postLgsMasterDataRequestBuilder = new RequestBuilder(RequestBuilder.POST,
+                createPostLgsMasterDataUrl());
+        postLgsMasterDataRequestBuilder.setRequestData(response.getText());
+        postLgsMasterDataRequestBuilder.setCallback(new RequestCallback() {
+
+            @Override
+            public void onResponseReceived(Request request, Response response) {
+                // TODO Remove, just for initial testing
+                showErrorAlert("SUCCESS");
+            }
+
+            @Override
+            public void onError(Request request, Throwable exception) {
+                showErrorAlert("POST leaderboardgroups master data request failed with Server error: "
+                        + exception.getLocalizedMessage());
+            }
+        });
+        try {
+            postLgsMasterDataRequestBuilder.send();
+        } catch (RequestException e) {
+            showErrorAlert("POST leaderboardgroups master data request failed with Server error: "
+                    + e.getLocalizedMessage());
+        }
+    }
+
+    private String createPostLgsMasterDataUrl() {
+        return "http:// " + Window.Location.getHost() + "/sailingserver/masterdata/leaderboardgroups";
+    }
+
+    private JSONArray createLeaderBoardGroupNamesFromListBox() {
+        List<String> names = new ArrayList<String>();
+        for (int i = 0; i < leaderboardgroupListBox.getItemCount(); i++) {
+            if (leaderboardgroupListBox.isItemSelected(i)) {
+                names.add(currentHost);
+            }
+        }
+        JSONArray leaderBoardGroupNames = new JSONArray();
+        for (int i = 0; i < names.size(); i++) {
+            leaderBoardGroupNames.set(i, new JSONString(names.get(i)));
+        }
+
+        return leaderBoardGroupNames;
+    }
+
+    private String createGetMasterDataForLgsUrl(String host) {
+        StringBuffer urlBuffer = new StringBuffer(host);
+        appendHttpAndSlashIfNeeded(host, urlBuffer);
+        urlBuffer.append("sailingserver/masterdata/leaderboardgroups");
+        return urlBuffer.toString();
     }
 
     protected void fireIdRequestsAndFillLists() {
@@ -89,7 +188,8 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     private void fireLgIdRequestAndFillList(String host) {
-        String getLgsUrl = createGetLgsUrl(host);
+        currentHost = host;
+        final String getLgsUrl = createGetLgsUrl(host);
         if (!isValidUrl(getLgsUrl, false)) {
             showErrorAlert("Not a valid URL for fetching leaderboardgroups: " + getLgsUrl);
             return;
@@ -100,7 +200,8 @@ public class MasterDataImportPanel extends VerticalPanel {
             @Override
             public void onResponseReceived(Request request, Response response) {
                 if (response.getStatusCode() != 200) {
-                    showErrorAlert("GET leaderboardgroups request failed with error code: " + response.getStatusCode());
+                    showErrorAlert("GET leaderboardgroups request failed with error code: " + response.getStatusCode()
+                            + " For url: " + getLgsUrl);
                 }
                 int itemCount = leaderboardgroupListBox.getItemCount();
                 for (int i = itemCount - 1; i >= 0; i--) {
@@ -115,7 +216,8 @@ public class MasterDataImportPanel extends VerticalPanel {
 
             @Override
             public void onError(Request request, Throwable exception) {
-                showErrorAlert("GET leaderboardgroups request failed with Server error: " + exception.getLocalizedMessage());
+                showErrorAlert("GET leaderboardgroups request failed with Server error: "
+                        + exception.getLocalizedMessage());
             }
         });
         try {
@@ -142,7 +244,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     private void fireEventIdRequestAndFillList(String host) {
-        String getEventsUrl = createGetEventsUrl(host);
+        final String getEventsUrl = createGetEventsUrl(host);
         if (!isValidUrl(getEventsUrl, false)) {
             showErrorAlert("Not a valid URL for fetching events: " + getEventsUrl);
             return;
@@ -153,7 +255,8 @@ public class MasterDataImportPanel extends VerticalPanel {
             @Override
             public void onResponseReceived(Request request, Response response) {
                 if (response.getStatusCode() != 200) {
-                    showErrorAlert("GET events request failed with error code: " + response.getStatusCode());
+                    showErrorAlert("GET events request failed with error code: " + response.getStatusCode()
+                            + " For url: " + getEventsUrl);
                 }
                 int itemCount = eventListBox.getItemCount();
                 for (int i = itemCount - 1; i >= 0; i--) {

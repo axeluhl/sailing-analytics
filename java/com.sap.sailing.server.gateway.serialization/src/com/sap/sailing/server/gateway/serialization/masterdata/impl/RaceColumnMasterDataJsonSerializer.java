@@ -10,6 +10,10 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RaceColumnMasterDataJsonSerializer implements JsonSerializer<RaceColumn> {
     
+    public static final String FIELD_RACE_LOG = "raceLog";
+    public static final String FIELD_FLEETS = "fleets";
+    public static final String FIELD_MEDAL_RACE = "medalRace";
+    public static final String FIELD_NAME = "name";
     private final JsonSerializer<Fleet> fleetSerializer;
     private final JsonSerializer<RaceLog> raceLogSerializer;
     
@@ -24,9 +28,9 @@ public class RaceColumnMasterDataJsonSerializer implements JsonSerializer<RaceCo
     @Override
     public JSONObject serialize(RaceColumn raceColumn) {
         JSONObject jsonRaceColumn = new JSONObject();
-        jsonRaceColumn.put("name", raceColumn.getName());
-        jsonRaceColumn.put("medalRace", raceColumn.isMedalRace());
-        jsonRaceColumn.put("fleets", createJsonArrayForFleets(raceColumn));
+        jsonRaceColumn.put(FIELD_NAME, raceColumn.getName());
+        jsonRaceColumn.put(FIELD_MEDAL_RACE, raceColumn.isMedalRace());
+        jsonRaceColumn.put(FIELD_FLEETS, createJsonArrayForFleets(raceColumn));
         return jsonRaceColumn;
     }
 
@@ -41,7 +45,7 @@ public class RaceColumnMasterDataJsonSerializer implements JsonSerializer<RaceCo
     }
 
     private void addRaceLog(JSONObject jsonFleet, RaceLog raceLog) {
-        jsonFleet.put("raceLog", raceLogSerializer.serialize(raceLog));
+        jsonFleet.put(FIELD_RACE_LOG, raceLogSerializer.serialize(raceLog));
     }
 
 }

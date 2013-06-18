@@ -183,7 +183,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>MasterDataByLeaderboardGroupJsonGetServlet</servlet-name>
-		<url-pattern>/masterdataexport/leaderboardgroups</url-pattern>
+		<url-pattern>/masterdata/leaderboardgroups</url-pattern>
 	</servlet-mapping>
  
 	<servlet id="jsp">

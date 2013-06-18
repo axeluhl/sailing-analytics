@@ -10,6 +10,12 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class CompetitorMasterDataJsonSerializer implements JsonSerializer<Competitor> {
     
+    public static final String FIELD_BOAT_CLASS = "boatClass";
+    public static final String FIELD_SAIL_ID = "sailID";
+    public static final String FIELD_TEAM = "team";
+    public static final String FIELD_BOAT = "boat";
+    public static final String FIELD_ID = "id";
+    public static final String FIELD_NAME = "name";
     private final JsonSerializer<BoatClass> boatClassSerializer;
     private final JsonSerializer<Team> teamSerializer;
     
@@ -29,18 +35,18 @@ public class CompetitorMasterDataJsonSerializer implements JsonSerializer<Compet
             return null;
         }
         JSONObject jsonCompetitor = new JSONObject();
-        jsonCompetitor.put("name", competitor.getName());
-        jsonCompetitor.put("id", competitor.getId().toString());
-        jsonCompetitor.put("boat", createJsonForBoat(competitor.getBoat()));
-        jsonCompetitor.put("team", teamSerializer.serialize(competitor.getTeam()));
+        jsonCompetitor.put(FIELD_NAME, competitor.getName());
+        jsonCompetitor.put(FIELD_ID, competitor.getId().toString());
+        jsonCompetitor.put(FIELD_BOAT, createJsonForBoat(competitor.getBoat()));
+        jsonCompetitor.put(FIELD_TEAM, teamSerializer.serialize(competitor.getTeam()));
         return jsonCompetitor;
     }
     
     private JSONObject createJsonForBoat(Boat boat) {
         JSONObject jsonBoat = new JSONObject();
-        jsonBoat.put("name", boat.getName());
-        jsonBoat.put("sailID", boat.getSailID());
-        jsonBoat.put("boatClass", boatClassSerializer.serialize(boat.getBoatClass()));
+        jsonBoat.put(FIELD_NAME, boat.getName());
+        jsonBoat.put(FIELD_SAIL_ID, boat.getSailID());
+        jsonBoat.put(FIELD_BOAT_CLASS, boatClassSerializer.serialize(boat.getBoatClass()));
         return jsonBoat;
     }
 

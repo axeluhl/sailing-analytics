@@ -14,6 +14,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
@@ -21,6 +22,10 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogSerializ
 
 public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<LeaderboardGroup> {
 
+    public static final String FIELD_LEADERBOARDS = "leaderboards";
+    public static final String FIELD_OVERALL_LEADERBOARD = "overallLeaderboard";
+    public static final String FIELD_DESCRIPTION = "description";
+    public static final String FIELD_NAME = "name";
     private final JsonSerializer<Leaderboard> leadboardSerializer;
 
     /**
@@ -28,7 +33,8 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
      * data may be lost in the process of serialization
      */
     public LeaderboardGroupMasterDataJsonSerializer() {
-        PersonJsonSerializer personSerializer = new PersonJsonSerializer();
+        NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
+        PersonJsonSerializer personSerializer = new PersonJsonSerializer(nationalityJsonSerializer);
         TeamJsonSerializer teamSerializer = new TeamJsonSerializer(personSerializer);
         BoatClassJsonSerializer boatClassSerializer = new BoatClassJsonSerializer();
         CompetitorMasterDataJsonSerializer competitorSerializer = new CompetitorMasterDataJsonSerializer(
@@ -48,11 +54,11 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
     @Override
     public JSONObject serialize(LeaderboardGroup leaderboardGroup) {
         JSONObject jsonLeaderboardGroup = new JSONObject();
-        jsonLeaderboardGroup.put("name", leaderboardGroup.getName());
-        jsonLeaderboardGroup.put("description", leaderboardGroup.getDescription());
-        jsonLeaderboardGroup.put("overallLeaderboard",
+        jsonLeaderboardGroup.put(FIELD_NAME, leaderboardGroup.getName());
+        jsonLeaderboardGroup.put(FIELD_DESCRIPTION, leaderboardGroup.getDescription());
+        jsonLeaderboardGroup.put(FIELD_OVERALL_LEADERBOARD,
                 leadboardSerializer.serialize(leaderboardGroup.getOverallLeaderboard()));
-        jsonLeaderboardGroup.put("leaderboards", createJsonArrayForLeaderboards(leaderboardGroup.getLeaderboards()));
+        jsonLeaderboardGroup.put(FIELD_LEADERBOARDS, createJsonArrayForLeaderboards(leaderboardGroup.getLeaderboards()));
 
         return jsonLeaderboardGroup;
     }
