@@ -3,13 +3,11 @@ package com.sap.sailing.gwt.ui.client;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -26,6 +24,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
@@ -346,14 +345,14 @@ public interface SailingServiceAsync {
             AsyncCallback<Void> callback);
 
     void createRegatta(String regattaName, String boatClassName,
-            LinkedHashMap<String, Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType, String defaultCourseAreaId, AsyncCallback<RegattaDTO> callback);
+            RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
+            ScoringSchemeType scoringSchemeType, String defaultCourseAreaId, AsyncCallback<RegattaDTO> callback);
 
     void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<List<RaceColumnInSeriesDTO>> callback);
     
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal, int[] resultDiscardingThresholds,
-            boolean startsWithZeroScore, AsyncCallback<Void> callback);
+            boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward, AsyncCallback<Void> callback);
 
     void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);
