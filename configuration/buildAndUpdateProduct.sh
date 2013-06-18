@@ -346,6 +346,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
         cp -v $PROJECT_HOME/java/target/start $ACDIR/
         cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+        cp -v $PROJECT_HOME/java/target/status $ACDIR/
     fi
 
     if [ ! -f $ACDIR/no-overwrite ]; then
@@ -360,6 +361,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
         cp -v $PROJECT_HOME/java/target/start $ACDIR/
         cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+        cp -v $PROJECT_HOME/java/target/status $ACDIR/
         cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
 
         cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR

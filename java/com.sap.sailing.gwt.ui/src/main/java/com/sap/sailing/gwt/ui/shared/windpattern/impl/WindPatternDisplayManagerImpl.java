@@ -27,6 +27,9 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
     	this.setMode(mode);
         List<WindPatternDTO> list = new ArrayList<WindPatternDTO>();
         for (WindPattern w : WindPattern.values()) {
+        	if (((w == WindPattern.MEASURED)||(w == WindPattern.NONE))&&(mode == SailingSimulatorUtil.event)) {
+        		continue;
+        	}
             list.add(new WindPatternDTO(w.name(), w.getDisplayName()));
         }
         return list;
@@ -57,6 +60,14 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
     }
 
     private void addBlastParameters(WindPatternDisplay display) {
+    	if (mode == SailingSimulatorUtil.event) {
+    		WindPatternSetting<Double> windBearingSetting = new WindPatternSettingSliderBar("windBearing",
+    				"Base Bearing (Degrees)", 0, 360, 0, 36);
+    		display.addSetting(windBearingSetting);
+    		WindPatternSetting<Double> baseWindBearing = new WindPatternSettingSliderBar("baseWindBearing",
+    				"Race Course Diff (Degrees)", -20, 20, 0,10);
+    		display.addSetting(baseWindBearing);
+    	}
         WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("baseWindSpeed",
                 "Base Speed (kn)", 2, 22, 12,10);
         display.addSetting(windSpeedSetting);

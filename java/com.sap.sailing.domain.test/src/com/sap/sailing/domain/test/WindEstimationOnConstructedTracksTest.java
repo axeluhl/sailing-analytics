@@ -134,13 +134,13 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
         CombinedWindTrackImpl combinedTrack = new CombinedWindTrackImpl(getTrackedRace(), WindSourceType.COMBINED.getBaseConfidence());
         Wind combinedWindDirection = combinedTrack.getAveragedWind(/* position */ null, now);
-        //Since the course layout makes a wind estimation around 7° and the confidence of the cluster based wind estimation is not
+        //Since the course layout makes a wind estimation around 7ï¿½ and the confidence of the cluster based wind estimation is not
         // way higher that that of the course layout wind, we will not end up with exactly 180 deg.
         assertEquals(180.2, combinedWindDirection.getBearing().getDegrees(), 0.1);
     }
 
     /**
-     * See <a href="http://sapcoe-app01.pironet-ndh.com/show_bug.cgi?id=166">bug #166</a>
+     * See <a href="http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=166">bug #166</a>
      */
     @Test
     public void testWindEstimationCacheInvalidationAfterLegTypeChange() throws NoWindException {
