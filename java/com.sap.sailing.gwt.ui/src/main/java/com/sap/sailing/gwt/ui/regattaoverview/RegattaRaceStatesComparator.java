@@ -9,7 +9,6 @@ public class RegattaRaceStatesComparator implements Comparator<RegattaOverviewEn
 
     @Override
     public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
-        //TODO this comparator should first call a comparator that compares the RaceGroupDTOs, then the raceNames in this comparator
         int result = left.courseAreaName.compareTo(right.courseAreaName);
         if (result == 0) {
             if (left.regattaDisplayName != null && right.regattaDisplayName != null) {
