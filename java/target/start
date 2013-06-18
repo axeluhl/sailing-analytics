@@ -4,13 +4,33 @@
 . `pwd`/env.sh
 
 # make some checks
+JAVA_BINARY=$JAVA_HOME/bin/java
 if [[ ! -d "$JAVA_HOME" ]]; then
-    echo "Could not find $JAVA_HOME. Aborting..."
-    exit
+    echo "Could not find $JAVA_BINARY set in env.sh. Trying to find the correct one..."
+    JAVA_VERSION=$(java -version 2>&1 | sed 's/java version "\(.*\)\.\(.*\)\..*"/\1\2/; 1q')
+    if [ "$JAVA_VERSION" -lt 17 ]; then
+        echo "The current Java version ($JAVA_VERSION) does not match the requirements (>= 1.7)."
+        exit
+    fi
+    JAVA_BINARY=`which java`
+    echo "Using Java from $JAVA_BINARY"
 fi
 
 scriptdir=`dirname "$0"`
 LIB_DIR=`pwd`/native-libraries
-echo Script directory is $scriptdir and LIB_DIR is $LIB_DIR
-nohup "$JAVA_HOME/bin/java" -XX:+UseMembar -D$SERVER_NAME -Dcom.sap.sailing.server.name=$SERVER_NAME -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar -console $TELNET_PORT -configuration ./ -clean 2>/dev/null >/dev/null &
-echo "Started $SERVER_NAME on port $TELNET_PORT - use telnet localhost $TELNET_PORT to connect to the OSGi console"
+
+echo "Script directory is $scriptdir and LIB_DIR is $LIB_DIR"
+
+nohup $JAVA_BINARY -XX:+UseMembar -D$SERVER_NAME -Dcom.sap.sailing.server.name=$SERVER_NAME -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar -console $TELNET_PORT -configuration ./ -clean 2>/dev/null >/dev/null &
+
+echo "Starting server..."
+sleep 2
+
+TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$TELNET_PORT"`
+if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
+        echo "Something went wrong with startup. Please check the logs..."
+        exit
+fi
+
+echo "Started $SERVER_NAME on port $TELNET_PORT - use telnet localhost $TELNET_PORT to connect to the OSGi console. Logs should be found in logs/sailing0.log.0"
+
