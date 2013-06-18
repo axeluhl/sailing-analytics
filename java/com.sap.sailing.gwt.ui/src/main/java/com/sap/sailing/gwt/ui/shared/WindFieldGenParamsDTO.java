@@ -42,7 +42,6 @@ public class WindFieldGenParamsDTO implements IsSerializable {
 
     
     public WindFieldGenParamsDTO() {
-        setDefaultTimeSettings();
     }
 
     public PositionDTO getNorthWest() {
@@ -101,15 +100,10 @@ public class WindFieldGenParamsDTO implements IsSerializable {
         this.timeStep = timeStep;
     }
 
-    @SuppressWarnings("deprecation")
-    public void setDefaultTimeSettings() {
-        startTime = new Date();// new Date(0);
-        startTime.setHours(0);
-        startTime.setMinutes(0);
-        startTime.setSeconds(0);
-
-        timeStep = new Date(20 * 1000);
-        endTime = new Date(startTime.getTime() + 10 * 60 * 1000);
+    public void setDefaultTimeSettings(Date startTime, Date timeStep, Date endTime) {
+    	this.startTime = startTime;
+    	this.timeStep = timeStep;
+    	this.endTime = endTime;    	
     }
 
     public char getMode() {
