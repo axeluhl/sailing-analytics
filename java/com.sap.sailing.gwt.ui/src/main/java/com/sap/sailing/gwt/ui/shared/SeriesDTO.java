@@ -24,6 +24,7 @@ public class SeriesDTO extends NamedDTO {
         this.isMedal = isMedal;
         this.startsWithZeroScore = startsWithZeroScore;
         this.discardThresholds = discardThresholds;
+        this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
     }
     
     public boolean isMedal() {

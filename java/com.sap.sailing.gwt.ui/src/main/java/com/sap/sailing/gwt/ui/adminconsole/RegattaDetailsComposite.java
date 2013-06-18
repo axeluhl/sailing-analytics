@@ -119,6 +119,13 @@ public class RegattaDetailsComposite extends Composite {
             }
         };
 
+        TextColumn<SeriesDTO> isFirstColumnIsNonDiscardableCarryForwardColumn = new TextColumn<SeriesDTO>() {
+            @Override
+            public String getValue(SeriesDTO series) {
+                return series.isFirstColumnIsNonDiscardableCarryForward() ? stringMessages.yes() : stringMessages.no();
+            }
+        };
+
         TextColumn<SeriesDTO> racesColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
@@ -200,6 +207,7 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(racesColumn, stringMessages.races());
         table.addColumn(fleetsColumn, stringMessages.fleets());
         table.addColumn(discardsColumn, stringMessages.discarding());
+        table.addColumn(isFirstColumnIsNonDiscardableCarryForwardColumn, stringMessages.firstRaceIsNonDiscardableCarryForward());
         table.addColumn(startsWithZeroScoreColumn, stringMessages.startsWithZeroScore());
         table.addColumn(seriesActionColumn, stringMessages.actions());
         
@@ -235,8 +243,9 @@ public class RegattaDetailsComposite extends Composite {
         final List<RaceColumnDTO> newRaceColumns = seriesDescriptor.getRaces();
         final boolean isMedalChanged = series.isMedal() != seriesDescriptor.isMedal();
         final boolean isStartsWithZeroScoreChanged = series.isStartsWithZeroScore() != seriesDescriptor.isStartsWithZeroScore();
+        final boolean isFirstColumnIsNonDiscardableCarryForwardChanged = series.isFirstColumnIsNonDiscardableCarryForward() != seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward();
         final boolean seriesResultDiscardingThresholdsChanged = !Arrays.equals(series.getDiscardThresholds(),
-                seriesDescriptor.getResultDiscardingThresholds());
+                seriesDescriptor.getResultDiscardingThresholds());       
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
         final List<String> raceColumnsToAdd = new ArrayList<String>();
@@ -280,7 +289,7 @@ public class RegattaDetailsComposite extends Composite {
                 regattaRefresher.fillRegattas();
             }
         });
-        if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged) {
+        if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged || isFirstColumnIsNonDiscardableCarryForwardChanged) {
             sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.isMedal(),
                     seriesDescriptor.getResultDiscardingThresholds(), seriesDescriptor.isStartsWithZeroScore(),
                     seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
