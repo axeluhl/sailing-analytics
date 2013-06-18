@@ -12,6 +12,8 @@ public class SeriesJsonSerializer implements JsonSerializer<Series> {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_FLEETS = "fleets";
     public static final String FIELD_RACES = "races";
+    public static final String FIELD_STARTS_WITH_ZERO_SCORE = "startsWithZeroScore";
+    public static final String FIELD_IS_MEDAL_SERIES = "isMedalSeries";
 
     private final JsonSerializer<Fleet> fleetSerializer;
 
@@ -23,6 +25,8 @@ public class SeriesJsonSerializer implements JsonSerializer<Series> {
         JSONObject result = new JSONObject();
         
         result.put(FIELD_NAME, series.getName());
+        result.put(FIELD_IS_MEDAL_SERIES, series.isMedal());
+        result.put(FIELD_STARTS_WITH_ZERO_SCORE, series.isStartsWithZeroScore());
 
         JSONArray fleetsJson = new JSONArray();
         for (Fleet fleet : series.getFleets()) {
