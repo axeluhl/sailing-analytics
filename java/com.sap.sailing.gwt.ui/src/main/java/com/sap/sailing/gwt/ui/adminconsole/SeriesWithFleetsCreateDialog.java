@@ -34,6 +34,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     private TextBox nameEntryField;
     private CheckBox isMedalSeriesCheckbox;
     private CheckBox startsWithZeroScoreCheckbox;
+    private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
     private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
     private DiscardThresholdBoxes discardThresholdBoxes;
 
@@ -111,6 +112,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         nameEntryField.setVisibleLength(40);
         isMedalSeriesCheckbox = createCheckbox(stringMessages.medalSeries());
         startsWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());
+        firstColumnIsNonDiscardableCarryForwardCheckbox = createCheckbox(stringMessages.firstRaceIsNonDiscardableCarryForward());
         useSeriesResultDiscardingThresholdsCheckbox = createCheckbox(stringMessages.seriesDefinesResultDiscardingRule());
         useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -181,6 +183,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         series.setName(nameEntryField.getText());
         series.setMedal(isMedalSeriesCheckbox.getValue());
         series.setStartsWithZeroScore(startsWithZeroScoreCheckbox.getValue());
+        series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForwardCheckbox.getValue());
         List<FleetDTO> fleets = new ArrayList<FleetDTO>();
         int fleetsCount = fleetNameEntryFields.size();
         for(int i = 0; i < fleetsCount; i++) {
@@ -222,14 +225,15 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(5, 2);
+        Grid formGrid = new Grid(6, 2);
         panel.add(formGrid);
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 1, isMedalSeriesCheckbox);
         formGrid.setWidget(2, 1, startsWithZeroScoreCheckbox);
-        formGrid.setWidget(3, 1, useSeriesResultDiscardingThresholdsCheckbox);
-        formGrid.setWidget(4, 1, discardThresholdBoxes.getWidget());
+        formGrid.setWidget(3, 1, firstColumnIsNonDiscardableCarryForwardCheckbox);
+        formGrid.setWidget(4, 1, useSeriesResultDiscardingThresholdsCheckbox);
+        formGrid.setWidget(5, 1, discardThresholdBoxes.getWidget());
         panel.add(createHeadlineLabel(stringMessages.fleets()));
         panel.add(fleetsGrid);
         Button addFleetButton = new Button(stringMessages.addFleet());

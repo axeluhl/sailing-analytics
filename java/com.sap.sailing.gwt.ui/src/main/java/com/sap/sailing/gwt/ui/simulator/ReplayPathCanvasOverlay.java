@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
+import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 
 public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
 
@@ -14,8 +15,8 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
     private static Logger logger = Logger.getLogger(ReplayPathCanvasOverlay.class.getName());
     private List<SimulatorWindDTO> windDTOToDraw;
 
-    public ReplayPathCanvasOverlay(final String name, final Timer timer) {
-        super(name, timer);
+    public ReplayPathCanvasOverlay(final String name, final Timer timer, WindFieldGenParamsDTO windParams) {
+        super(name, timer, windParams);
         this.displayWindAlongPath = false;
         windDTOToDraw = null;
         //this.timer.addTimeListener(this);

@@ -56,4 +56,5 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
     public Iterable<Fleet> getFleets() {
         return fleets;
     }
+
 }
