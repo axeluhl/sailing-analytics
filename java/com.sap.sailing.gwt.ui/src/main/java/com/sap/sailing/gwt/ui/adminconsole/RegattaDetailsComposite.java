@@ -283,6 +283,7 @@ public class RegattaDetailsComposite extends Composite {
         if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged) {
             sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.isMedal(),
                     seriesDescriptor.getResultDiscardingThresholds(), seriesDescriptor.isStartsWithZeroScore(),
+                    seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {

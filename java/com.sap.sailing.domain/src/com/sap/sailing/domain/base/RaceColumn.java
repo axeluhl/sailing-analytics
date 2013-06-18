@@ -157,6 +157,8 @@ public interface RaceColumn extends Named {
      * the total points at this column with zero.
      */
     boolean isStartsWithZeroScore();
+    
+    boolean isDiscardable();
 
     /**
      * @param factor if <code>null</code>, {@link #getFactor()} will again compute a default value; otherwise, {@link #getFactor()} will

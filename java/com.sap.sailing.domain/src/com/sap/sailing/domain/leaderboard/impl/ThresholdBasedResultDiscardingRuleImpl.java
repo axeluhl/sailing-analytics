@@ -74,7 +74,7 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
                 }
             };
             for (RaceColumn raceColumn : raceColumnsToConsider) {
-                if (!raceColumn.isMedalRace()) {
+                if (raceColumn.isDiscardable()) {
                     sortedRaces.add(raceColumn);
                 }
             }

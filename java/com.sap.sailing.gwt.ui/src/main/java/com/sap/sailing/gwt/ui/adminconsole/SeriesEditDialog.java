@@ -30,6 +30,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     private Button addRacesBtn;
     private CheckBox isMedalCheckbox;
     private CheckBox startWithZeroScoreCheckbox;
+    private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
     private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
     private final List<TextBox> raceNameEntryFields;
     private final List<Button> raceNameDeleteButtons;
@@ -160,8 +161,9 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             races.add(raceColumnDTO);
         }
         return new SeriesDescriptor(selectedSeries, races, isMedalCheckbox.getValue(),
-                useSeriesResultDiscardingThresholdsCheckbox.getValue() ?
-                        discardThresholdBoxes.getDiscardThresholds() : null, startWithZeroScoreCheckbox.getValue());
+                useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds()
+                        : null, startWithZeroScoreCheckbox.getValue(),
+                firstColumnIsNonDiscardableCarryForwardCheckbox.getValue());
     }
 
     private RaceColumnDTO findRaceColumnInSeriesByName(SeriesDTO series, String raceColumnName) {
@@ -195,6 +197,9 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         startWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());
         startWithZeroScoreCheckbox.setValue(selectedSeries.isStartsWithZeroScore());
         additionalWidgetPanel.add(startWithZeroScoreCheckbox);
+        firstColumnIsNonDiscardableCarryForwardCheckbox = createCheckbox(stringMessages.firstRaceIsNonDiscardableCarryForward());
+        firstColumnIsNonDiscardableCarryForwardCheckbox.setValue(selectedSeries.isFirstColumnIsNonDiscardableCarryForward());
+        additionalWidgetPanel.add(firstColumnIsNonDiscardableCarryForwardCheckbox);
         useSeriesResultDiscardingThresholdsCheckbox = createCheckbox(stringMessages.seriesDefinesResultDiscardingRule());
         useSeriesResultDiscardingThresholdsCheckbox.setValue(selectedSeries.getDiscardThresholds() != null);
         useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {

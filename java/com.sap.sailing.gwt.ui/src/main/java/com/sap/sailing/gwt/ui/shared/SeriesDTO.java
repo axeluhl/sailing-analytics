@@ -13,10 +13,11 @@ public class SeriesDTO extends NamedDTO {
     private boolean isMedal;
     private int[] discardThresholds;
     private Boolean startsWithZeroScore;
+    private boolean firstColumnIsNonDiscardableCarryForward;
     
     public SeriesDTO() {}
     
-    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, int[] discardThresholds, boolean startsWithZeroScore) {
+    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, int[] discardThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward) {
         super(name);
         this.fleets = fleets;
         this.raceColumns = raceColumns;
@@ -72,5 +73,9 @@ public class SeriesDTO extends NamedDTO {
 
     public void setStartsWithZeroScore(Boolean startsWithZeroScore) {
         this.startsWithZeroScore = startsWithZeroScore;
+    }
+
+    public boolean isFirstColumnIsNonDiscardableCarryForward() {
+        return firstColumnIsNonDiscardableCarryForward;
     }
 }
