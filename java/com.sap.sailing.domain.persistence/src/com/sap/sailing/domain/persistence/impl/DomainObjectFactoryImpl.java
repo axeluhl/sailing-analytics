@@ -38,7 +38,6 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
@@ -83,8 +82,8 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
-import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
+import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -330,26 +329,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return resultDiscardingRule;
     }
 
-    private CourseArea loadCourseAreaFromEvents(DBObject dbObject) {
-        Serializable courseAreaId = (Serializable) dbObject.get(FieldNames.COURSE_AREA_ID.name());
-        CourseArea result;
-        if (courseAreaId == null) {
-            result = null;
-        } else {
-            UUID courseAreaUuid = UUID.fromString(courseAreaId.toString());
-            Iterable<Event> allEvents = loadAllEvents();
-            result = null;
-            for (Event event : allEvents) {
-                for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                    if (courseArea.getId().equals(courseAreaUuid)) {
-                        result = courseArea;
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
     /**
      * @return <code>null</code> if the regatta cannot be resolved; otherwise the leaderboard for the regatta specified
      */
@@ -379,7 +358,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final ScoringScheme scoringScheme = loadScoringScheme(dbLeaderboard);
             RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                     new MongoObjectFactoryImpl(database), this);
-            CourseArea courseArea = loadCourseAreaFromEvents(dbLeaderboard);
+            
+            Serializable courseAreaId = (Serializable) dbLeaderboard.get(FieldNames.COURSE_AREA_ID.name());
+            CourseArea courseArea = null;
+            if (courseAreaId != null) {
+                UUID courseAreaUuid = UUID.fromString(courseAreaId.toString());
+                courseArea = DomainFactory.INSTANCE.getExistingCourseAreaById(courseAreaUuid);
+            }
+            
             result = new FlexibleLeaderboardImpl(raceLogStore, (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME
                     .name()), scoreCorrection, resultDiscardingRule, scoringScheme, courseArea);
             // For a FlexibleLeaderboard, fleets are owned by the leaderboard's RaceColumn objects. We need to manage
@@ -836,7 +822,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private CourseArea loadCourseArea(DBObject courseAreaDBObject) {
         String name = (String) courseAreaDBObject.get(FieldNames.COURSE_AREA_NAME.name());
         Serializable id = (Serializable) courseAreaDBObject.get(FieldNames.COURSE_AREA_ID.name());
-        return new CourseAreaImpl(name, id);
+        return DomainFactory.INSTANCE.getOrCreateCourseArea(id, name);
     }
 
     @Override
@@ -878,7 +864,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                     new MongoObjectFactoryImpl(database), 
                     this);
-            CourseArea courseArea = loadCourseAreaFromEvents(dbRegatta);
+            
+            Serializable courseAreaId = (Serializable) dbRegatta.get(FieldNames.COURSE_AREA_ID.name());
+            CourseArea courseArea = null;
+            if (courseAreaId != null) {
+                UUID courseAreaUuid = UUID.fromString(courseAreaId.toString());
+                courseArea = DomainFactory.INSTANCE.getExistingCourseAreaById(courseAreaUuid);
+            }
+            
             result = new RegattaImpl(raceLogStore, baseName, boatClass, series, /* persistent */ true, loadScoringScheme(dbRegatta), id, courseArea);
         }
         return result;

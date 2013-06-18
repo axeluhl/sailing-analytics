@@ -2558,7 +2558,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (event != null) {
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
                 for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
-                    if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea().equals(courseArea)) {
+                    if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea() == courseArea) {
                         RaceGroupDTO raceGroup = new RaceGroupDTO(leaderboard.getName());
                         raceGroup.courseAreaIdAsString = courseArea.getId().toString();
                         raceGroup.displayName = getRegattaNameFromLeaderboard(leaderboard);
