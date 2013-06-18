@@ -274,7 +274,6 @@ public class LeaderboardJsonExportTest extends AbstractJsonExportTest {
         Map<String, String> requestParameters = new HashMap<>();
         requestParameters.put("leaderboardName", regatta.getName());      
         requestParameters.put("resultState", LeaderboardJsonGetServlet.ResultStates.Final.name());      
-        requestParameters.put("maxCompetitorsCount", maxCompetitorsCount.toString());      
         
         String jsonString = callJsonHttpServlet(new LeaderboardJsonGetServlet(), "GET", requestParameters);
         
@@ -291,22 +290,32 @@ public class LeaderboardJsonExportTest extends AbstractJsonExportTest {
         assertNull(resultTimePoint);
         
         regattaLeaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(MillisecondsTimePoint.now());    
+
+        // first call for 'all' competitors
+        requestParameters.put("maxCompetitorsCount", null);      
         jsonString = callJsonHttpServlet(new LeaderboardJsonGetServlet(), "GET", requestParameters);
-        
         obj= JSONValue.parse(jsonString);
         jsonObject = (JSONObject) obj;
-
         JSONArray jsonCompetitors = (JSONArray) jsonObject.get("competitors");
+        assertEquals(jsonCompetitors.size(), 4);
+
+        Thread.sleep(100);
+
+        // second call with maxCompetitorsCount set
+        requestParameters.put("maxCompetitorsCount", maxCompetitorsCount.toString());      
+        jsonString = callJsonHttpServlet(new LeaderboardJsonGetServlet(), "GET", requestParameters);
+        obj= JSONValue.parse(jsonString);
+        jsonObject = (JSONObject) obj;
+        jsonCompetitors = (JSONArray) jsonObject.get("competitors");
         assertEquals((Integer) jsonCompetitors.size(), maxCompetitorsCount);
         
         Thread.sleep(100);
-        requestParameters.put("maxCompetitorsCount", null);      
 
+        // third call for 'all' competitors
+        requestParameters.put("maxCompetitorsCount", null);      
         jsonString = callJsonHttpServlet(new LeaderboardJsonGetServlet(), "GET", requestParameters);
-        
         obj= JSONValue.parse(jsonString);
         jsonObject = (JSONObject) obj;
-
         jsonCompetitors = (JSONArray) jsonObject.get("competitors");
         assertEquals(jsonCompetitors.size(), 4);
      }
