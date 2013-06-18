@@ -75,6 +75,10 @@ public class SeriesDTO extends NamedDTO {
     public void setStartsWithZeroScore(Boolean startsWithZeroScore) {
         this.startsWithZeroScore = startsWithZeroScore;
     }
+    
+    public void setFirstColumnIsNonDiscardableCarryForward(boolean firstColumnIsNonDiscardableCarryForward) {
+        this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
+    }
 
     public boolean isFirstColumnIsNonDiscardableCarryForward() {
         return firstColumnIsNonDiscardableCarryForward;

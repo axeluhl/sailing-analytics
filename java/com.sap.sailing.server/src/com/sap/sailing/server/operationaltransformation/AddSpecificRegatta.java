@@ -53,6 +53,7 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
                 s.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(e.getValue().getDiscardingThresholds()));
             }
             s.setStartsWithZeroScore(e.getValue().isStartsWithZero());
+            s.setFirstColumnIsNonDiscardableCarryForward(e.getValue().isFirstColumnIsNonDiscardableCarryForward());
             result.add(s);
         }
         return result;
