@@ -251,6 +251,7 @@ public class RegattaDetailsComposite extends Composite {
         final List<String> raceColumnsToAdd = new ArrayList<String>();
         final List<String> raceColumnsToRemove = new ArrayList<String>();
         
+        // TODO see bug 1447: the resulting order currently doesn't necessarily match the order of races in this dialog!
         for (RaceColumnDTO newRaceColumn : newRaceColumns) {
             if (!existingRaceColumns.contains(newRaceColumn)) {
                 raceColumnsToAdd.add(newRaceColumn.getName());

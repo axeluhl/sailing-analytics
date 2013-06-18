@@ -168,9 +168,9 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
 
     private RaceColumnDTO findRaceColumnInSeriesByName(SeriesDTO series, String raceColumnName) {
         RaceColumnDTO result = null;
-        if(series != null) {
-            for(RaceColumnDTO raceColumn: series.getRaceColumns()) {
-                if(raceColumn.getName().equals(raceColumnName)) {
+        if (series != null) {
+            for (RaceColumnDTO raceColumn : series.getRaceColumns()) {
+                if (raceColumn.getName().equals(raceColumnName)) {
                     result = raceColumn;
                     break;
                 }
