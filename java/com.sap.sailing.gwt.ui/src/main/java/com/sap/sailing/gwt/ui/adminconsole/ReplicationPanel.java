@@ -8,7 +8,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -17,6 +16,7 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.IntegerBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
@@ -143,7 +143,7 @@ public class ReplicationPanel extends FlowPanel {
         
         public AddReplicationDialog(final Validator<Triple<Pair<String, String>, Integer, Integer>> validator,
                 final DialogCallback<Triple<Pair<String, String>, Integer, Integer>> callback) {
-            super(stringMessages.add(), stringMessages.enterMaster(),
+            super(stringMessages.connect(), stringMessages.enterMaster(),
                     stringMessages.ok(), stringMessages.cancel(), validator, callback);
             hostnameEntryField = createTextBox("localhost");
             exchangenameEntryField = createTextBox("sapsailinganalytics");
