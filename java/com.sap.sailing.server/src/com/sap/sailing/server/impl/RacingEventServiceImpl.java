@@ -1807,7 +1807,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public CourseArea addCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId) {
-        CourseArea courseArea = com.sap.sailing.domain.base.DomainFactory.INSTANCE.getOrCreateCourseArea(courseAreaId, courseAreaName);
+        CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaId, courseAreaName);
         synchronized (eventsById) {
             if (!eventsById.containsKey(eventId)) {
                 throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
