@@ -84,4 +84,10 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     public boolean isStartsWithZeroScore() {
         return false;
     }
+
+    @Override
+    public boolean isDiscardable() {
+        return !isMedalRace();
+    }
+
 }

@@ -234,6 +234,11 @@ public class LeaderboardCacheManager {
                 }
 
                 @Override
+                public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
+                    removeFromCache(leaderboard);
+                }
+
+                @Override
                 public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
                     return true;
                 }
