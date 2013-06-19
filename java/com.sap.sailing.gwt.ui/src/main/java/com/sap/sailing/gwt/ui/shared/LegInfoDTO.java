@@ -20,7 +20,7 @@ public class LegInfoDTO extends NamedDTO {
 
     @Override
     public String toString() {
-        return "LegInfoDTO [name=" + name + ", legNumber=" + legNumber
+        return "LegInfoDTO [name=" + getName() + ", legNumber=" + legNumber
                 + ", legType=" + legType + ", legBearingInDegrees="
                 + legBearingInDegrees + "]";
     }

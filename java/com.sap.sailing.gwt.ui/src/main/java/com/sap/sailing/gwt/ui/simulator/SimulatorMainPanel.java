@@ -21,6 +21,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -38,6 +39,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -63,9 +65,18 @@ import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 
 public class SimulatorMainPanel extends SimplePanel {
 
+	private class resizableFlowPanel extends FlowPanel implements RequiresResize {
+
+		@Override
+		public void onResize() {
+	        simulatorMap.getMap().checkResizeAndCenter();
+		}
+		
+	}
+	
     private DockLayoutPanel mainPanel;
     private FlowPanel leftPanel;
-    private FlowPanel rightPanel;
+    private resizableFlowPanel rightPanel;
     private VerticalPanel windPanel;
 
     private Button updateButton;
@@ -100,8 +111,6 @@ public class SimulatorMainPanel extends SimplePanel {
     private StringMessages stringMessages;
     private SimulatorServiceAsync simulatorSvc;
     private ErrorReporter errorReporter;
-    private int xRes;
-    private int yRes;
     private boolean autoUpdate;
     private char mode;
 
@@ -135,6 +144,18 @@ public class SimulatorMainPanel extends SimplePanel {
             sliderBar.setTitle(SimulatorMainPanel.formatSliderValue(sliderBar.getCurrentValue()));
             logger.info("Slider value : " + arg0.getValue());
             setting.setValue(arg0.getValue());
+            if (setting.getDisplayName().equals("Base Bearing (Degrees)")) {
+            	simulatorMap.clearOverlays();
+            	//System.out.println("Wind Base Bearing: "+setting.getValue());
+            	simulatorMap.regattaAreaCanvasOverlay.updateRaceCourse(1, (Double) setting.getValue());
+	            simulatorMap.raceCourseCanvasOverlay.redraw(true);
+            }
+            if (setting.getDisplayName().equals("Race Course Diff (Degrees)")) {
+            	simulatorMap.clearOverlays();
+            	//System.out.println("Wind Base Bearing: "+setting.getValue());
+            	simulatorMap.regattaAreaCanvasOverlay.updateRaceCourse(2, (Double) setting.getValue());
+	            simulatorMap.raceCourseCanvasOverlay.redraw(true);
+            }
             if (autoUpdate) {
                 update();
             }
@@ -209,8 +230,6 @@ public class SimulatorMainPanel extends SimplePanel {
         this.simulatorSvc = svc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        this.xRes = xRes;
-        this.yRes = yRes;
         this.autoUpdate = autoUpdate;
         this.mode = mode;
         this.isOmniscient = new CheckBox(this.stringMessages.omniscient(), true);
@@ -225,7 +244,7 @@ public class SimulatorMainPanel extends SimplePanel {
         this.setSize("100%", "100%");
         
         leftPanel = new FlowPanel();
-        rightPanel = new FlowPanel();
+        rightPanel = new resizableFlowPanel();
         patternSelector = new ListBox();
         patternSelectorHandler = new PatternSelectorHandler();
         patternSelector.addChangeHandler(patternSelectorHandler);
@@ -250,6 +269,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
         directionSelector = new ListBox();
         directionSelector.getElement().getStyle().setProperty("width", "215px");
+        
         windParams = new WindFieldGenParamsDTO();
         windParams.setMode(mode);
         windParams.setShowArrows(showArrows);
@@ -257,9 +277,9 @@ public class SimulatorMainPanel extends SimplePanel {
         windParams.setShowLines(showLines);
         windParams.setSeedLines(seedLines);
         windParams.setShowStreamlets(showStreamlets);
+        this.setDefaultTimeSettings();
 
         timer = new Timer(PlayModes.Replay, 1000l);
-
         TimeRangeWithZoomProvider timeRangeProvider = new TimeRangeWithZoomModel();
         initTimer();
         timer.setTime(windParams.getStartTime().getTime());
@@ -275,16 +295,26 @@ public class SimulatorMainPanel extends SimplePanel {
         // logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         // this.addNorth(logoAndTitlePanel, 68);
 
+        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
+                windParams, busyIndicator, mode, this);
+        simulatorMap.setSize("100%", "100%");
+
+        this.rightPanel.add(this.simulatorMap);
+
         createOptionsPanelTop();
         createOptionsPanel();
-        createMapOptionsPanel();
 
         fullTimePanel = this.createTimePanel();
 
         mainPanel = new DockLayoutPanel(Unit.PX);
+        
         mainPanel.setSize("100%", "100%");        
         mainPanel.addWest(leftPanel, 470);
         mainPanel.addSouth(fullTimePanel, 90);
+        mainPanel.setWidgetHidden(fullTimePanel, true);
+        
+        createMapOptionsPanel(); // add map-options to mainPanel-North
+
         mainPanel.add(rightPanel);
         this.setWidget(mainPanel);        
 
@@ -292,30 +322,23 @@ public class SimulatorMainPanel extends SimplePanel {
 
     }
 
-    private void showTimePanel(boolean visible) {
-        
-        boolean isContained = mainPanel.getWidgetIndex(fullTimePanel) >= 0;
-        
-        if (visible) {
-            
-            if (!isContained) {
-                fullTimePanel.setVisible(true);
-                mainPanel.insertSouth(fullTimePanel, 90, null);
-            }
-            
-        } else {
-            
-            if (isContained) {
-                mainPanel.remove(fullTimePanel);
-                fullTimePanel.setVisible(false);
-            }
-            
-        }
-        
-        mainPanel.forceLayout();
-        
+    public void setDefaultTimeSettings() {
+        Date defaultNow = new Date();
+    	DateTimeFormat fmt = DateTimeFormat.getFormat("Z"); 
+        NumberFormat df = NumberFormat.getDecimalFormat();
+        int utcOffSet = (int) df.parse(fmt.format(defaultNow))/100; // default time zone offset versus UTC
+        long epochTime = (defaultNow.getTime()/86400000)*86400000 - utcOffSet*3600000; // today, midnight in default time zone
+
+        Date startTime = new Date(epochTime);
+        Date timeStep = new Date(15 * 1000);
+        Date endTime = new Date(startTime.getTime() + 10 * 60 * 1000);
+        windParams.setDefaultTimeSettings(startTime, timeStep, endTime);
     }
-    
+
+    public void showTimePanel(boolean visible) {
+        mainPanel.setWidgetHidden(fullTimePanel, !visible);
+        mainPanel.forceLayout(); // trigger onResize() on child panels, relevant for map resize & center
+    }
     
     private void createOptionsPanelTop() {
         HorizontalPanel optionsPanel = new HorizontalPanel();
@@ -364,7 +387,7 @@ public class SimulatorMainPanel extends SimplePanel {
         Label pattern = new Label(stringMessages.pattern());
         hp.add(pattern);
 
-        simulatorSvc.getWindPatterns(new AsyncCallback<List<WindPatternDTO>>() {
+        simulatorSvc.getWindPatterns(mode, new AsyncCallback<List<WindPatternDTO>>() {
 
             @Override
             public void onFailure(Throwable message) {
@@ -374,13 +397,16 @@ public class SimulatorMainPanel extends SimplePanel {
             @Override
             public void onSuccess(List<WindPatternDTO> patterns) {
                 for (WindPatternDTO p : patterns) {
-                    if ((mode != SailingSimulatorUtil.freestyle)||(!p.name.equals("MEASURED"))) {
+                    if ((mode != SailingSimulatorUtil.freestyle)||(!p.getName().equals("MEASURED"))) {
                         patternSelector.addItem(p.getDisplayName());
                         patternNameDTOMap.put(p.getDisplayName(), p);
                     }
                 }
                 if (mode == SailingSimulatorUtil.measured) {
                     patternSelector.setItemSelected(patternSelector.getItemCount()-1, true);
+                    patternSelectorHandler.onChange(null);
+                } else {
+                    patternSelector.setItemSelected(0, true);
                     patternSelectorHandler.onChange(null);
                 }
             }
@@ -483,21 +509,22 @@ public class SimulatorMainPanel extends SimplePanel {
 
         mapOptions.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
-        initCourseInputButton();
-
-        if (mode != SailingSimulatorUtil.measured) {
+        if ((mode != SailingSimulatorUtil.measured)&&(mode != SailingSimulatorUtil.event)) {
+        	initCourseInputButton();
             mapOptions.add(courseInputButton);
         }
+        
         mapOptions.add(busyIndicator);
-        rightPanel.add(mapOptions);
+        //rightPanel.add(mapOptions);
+        mainPanel.addNorth(mapOptions, 45);
 
         initDisplayOptions(mapOptions);
+        if (mode == SailingSimulatorUtil.event) {
+        	summaryButton.setValue(true);
+        	replayButton.setValue(false);
+        	windDisplayButton.setValue(false);
+        }
 
-        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
-                windParams, busyIndicator, mode, this);
-        simulatorMap.setSize("100%", "100%");
-
-        this.rightPanel.add(this.simulatorMap);
     }
 
     // initialize timer with a default time span based on windParams
@@ -710,7 +737,7 @@ public class SimulatorMainPanel extends SimplePanel {
                 }
 
                 boatClasses = boatClassesAndMsg.getBoatClassDTOs();
-                chart.setChartTitleText(boatClasses[selectedBoatClass].name);
+                chart.setChartTitleText(boatClasses[selectedBoatClass].getName());
             }
         });
 
@@ -781,7 +808,10 @@ public class SimulatorMainPanel extends SimplePanel {
 
     private void initUpdateButton() {
 
-        this.updateButton = new Button(stringMessages.update());
+        this.updateButton = new Button(stringMessages.simulateButton());
+        if (mode == SailingSimulatorUtil.event) {
+        	this.updateButton.setEnabled(true);
+        }
         this.updateButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
@@ -790,6 +820,10 @@ public class SimulatorMainPanel extends SimplePanel {
         });
     }
 
+    public void setUpdateButtonEnabled(boolean enabled) {
+    	this.updateButton.setEnabled(enabled);
+    }
+    
     private void update() {
 
         // int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
@@ -805,6 +839,7 @@ public class SimulatorMainPanel extends SimplePanel {
             this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, selection, true);
         } else if (this.summaryButton.getValue()) {
             this.showTimePanel(false);
+        	this.simulatorMap.regattaAreaCanvasOverlay.redraw(true);
             this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selection, true);
         } else if (this.replayButton.getValue()) {
             this.showTimePanel(true);
@@ -1046,7 +1081,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
                 boatClasses = response.getBoatClassDTOs();
                 for (int i = 0; i < boatClasses.length; ++i) {
-                    boatClassSelector.addItem(boatClasses[i].name);
+                    boatClassSelector.addItem(boatClasses[i].getName());
                 }
                 boatClassSelector.setItemSelected(3, true); // polar diagram 49er STG
                 loadPolarDiagramData(3);

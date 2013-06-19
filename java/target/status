@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# source variables
+. `pwd`/env.sh
+
+TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$SERVER_PORT"`
+if [[ $TELNET_ACTIVE != "" ]]; then
+    echo "Server $SERVER_NAME is running on $SERVER_PORT (or some other daemon)"
+    echo "Configuration for this server is:"
+    echo "SERVER_NAME: $SERVER_NAME"
+    echo "SERVER_PORT: $SERVER_PORT"
+    echo "MEMORY: $MEMORY"
+    echo "TELNET_PORT: $TELNET_PORT"
+    echo "MONGODB_PORT: $MONGODB_PORT"
+    echo "EXPEDITION_PORT: $EXPEDITION_PORT"
+    echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
+    exit
+fi
+
+echo "Server $SERVER_NAME is not running."

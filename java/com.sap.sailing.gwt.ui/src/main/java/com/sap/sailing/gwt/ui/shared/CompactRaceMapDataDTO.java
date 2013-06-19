@@ -30,11 +30,11 @@ public class CompactRaceMapDataDTO implements IsSerializable {
             List<QuickRankDTO> quickRanks) {
         this.boatPositionsByCompetitorIdAsString = new HashMap<String, List<GPSFixDTO>>();
         for (Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : boatPositions.entrySet()) {
-            this.boatPositionsByCompetitorIdAsString.put(e.getKey().idAsString, e.getValue());
+            this.boatPositionsByCompetitorIdAsString.put(e.getKey().getIdAsString(), e.getValue());
         }
         this.quickRanks = new ArrayList<CompactQuickRankDTO>(quickRanks.size());
         for (QuickRankDTO quickRank : quickRanks) {
-            this.quickRanks.add(new CompactQuickRankDTO(quickRank.competitor.idAsString, quickRank.rank, quickRank.legNumber));
+            this.quickRanks.add(new CompactQuickRankDTO(quickRank.competitor.getIdAsString(), quickRank.rank, quickRank.legNumber));
         }
         this.coursePositions = coursePositions;
     }
@@ -42,7 +42,7 @@ public class CompactRaceMapDataDTO implements IsSerializable {
     public RaceMapDataDTO getRaceMapDataDTO(Iterable<CompetitorDTO> competitors) {
         Map<String, CompetitorDTO> competitorsByIdAsString = new HashMap<String, CompetitorDTO>();
         for (CompetitorDTO competitor : competitors) {
-            competitorsByIdAsString.put(competitor.idAsString, competitor);
+            competitorsByIdAsString.put(competitor.getIdAsString(), competitor);
         }
         RaceMapDataDTO result = new RaceMapDataDTO();
         result.quickRanks = new ArrayList<QuickRankDTO>(this.quickRanks.size());

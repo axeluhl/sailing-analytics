@@ -341,12 +341,12 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                 // in case no regatta has been selected we check if there would be a matching regatta
                 for (RegattaDTO regatta : getAvailableRegattas()) {
                     if ((boatClassName == null && regatta.boatClass == null) ||
-                            (regatta.boatClass != null && boatClassName.equalsIgnoreCase(regatta.boatClass.name))) {
+                            (regatta.boatClass != null && boatClassName.equalsIgnoreCase(regatta.boatClass.getName()))) {
                         return false;
                     }
                 }
             } else {
-                if (!boatClassName.equalsIgnoreCase(selectedRegatta.boatClass.name)) {
+                if (!boatClassName.equalsIgnoreCase(selectedRegatta.boatClass.getName())) {
                     return false;
                 }
             }
@@ -358,7 +358,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         RegattaDTO selectedRegatta = getSelectedRegatta();
         RegattaIdentifier regattaIdentifier = null;
         if (selectedRegatta != null) {
-            regattaIdentifier = new RegattaName(selectedRegatta.name);
+            regattaIdentifier = new RegattaName(selectedRegatta.getName());
         }
         
         // Check if the assigned regatta makes sense
@@ -375,7 +375,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
             String warningText = "WARNING\n";
             if (selectedRegatta != null) {
                 warningText += stringMessages.boatClassDoesNotMatchSelectedRegatta(
-                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.name, selectedRegatta.name);
+                        selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName(), selectedRegatta.getName());
             } else {
                 warningText += stringMessages.regattaExistForSelectedBoatClass();
             }

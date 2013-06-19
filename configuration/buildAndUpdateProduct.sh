@@ -346,9 +346,10 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
         cp -v $PROJECT_HOME/java/target/start $ACDIR/
         cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+        cp -v $PROJECT_HOME/java/target/status $ACDIR/
     fi
 
-    if [[ $HAS_OVERWRITTEN_TARGET -eq 0 ]] && [ ! -f $ACDIR/no-overwrite ]; then
+    if [ ! -f $ACDIR/no-overwrite ]; then
         cp -v $p2PluginRepository/configuration/config.ini configuration/
 
         mkdir -p configuration/jetty/etc
@@ -360,6 +361,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
         cp -v $PROJECT_HOME/java/target/start $ACDIR/
         cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+        cp -v $PROJECT_HOME/java/target/status $ACDIR/
         cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
 
         cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
@@ -374,15 +376,16 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     # Make sure this script is up2date at least for the next run
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
-    echo $VERSION_INFO > $ACDIR/configuration/jetty/version.txt
-
     # make sure to save the information from env.sh
     . $ACDIR/env.sh
+
+    echo "$VERSION_INFO-$MONGDB_PORT-$MEMORY-$REPLICATION_CHANNEL" > $ACDIR/configuration/jetty/version.txt
+
     sed -i "s/mongo.port=.*$/mongo.port=$MONGODB_PORT/g" $ACDIR/configuration/config.ini
     sed -i "s/expedition.udp.port=.*$/expedition.udp.port=$EXPEDITION_PORT/g" $ACDIR/configuration/config.ini
     sed -i "s/replication.exchangeName=.*$/replication.exchangeName=$REPLICATION_CHANNEL/g" $ACDIR/configuration/config.ini
 
-    echo "I have updated the configuration with the following data:"
+    echo "I have read the following configuration from $ACDIR/env.sh:"
     echo "SERVER_NAME: $SERVER_NAME"
     echo "SERVER_PORT: $SERVER_PORT"
     echo "MEMORY: $MEMORY"
@@ -392,6 +395,9 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
     echo ""
 
+    if [ -f $ACDIR/no-overwrite ]; then
+        echo "ATTENTION: I found the file $ACDIR/no-overwrite. This means that I did NOT use env.sh from this branch."
+    fi
     echo "Installation complete. You may now start the server using ./start"
 fi
 

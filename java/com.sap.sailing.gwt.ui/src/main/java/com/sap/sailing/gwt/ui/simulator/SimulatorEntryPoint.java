@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
+import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 
 public class SimulatorEntryPoint extends AbstractEntryPoint {
 
@@ -61,7 +62,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
             logger.config("Using default mode " + mode);
         } else {
             mode = modeStr.charAt(0);
-            if (mode == 'm') {
+            if (mode == SailingSimulatorUtil.measured) {
                 showArrows = true; // show the wind arrows in wind display and replay modes.    
                 showGrid = false;   // show the "heat map" in the wind display and replay modes.
                 showLines = false;  // show the wind lines in the wind display and replay modes.

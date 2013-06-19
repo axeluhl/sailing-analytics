@@ -18,6 +18,7 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
@@ -179,6 +180,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                 return dateFormatHoursMinutes.format(new Date(axisLabelsData.getValueAsLong()));
             }
         }));
+        timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1.5).setDashStyle(DashStyle.SOLID);
 
         if (compactChart) {
             chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
@@ -228,7 +230,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                         hideLoading();
 
                         if (result != null) {
-                            if (result.isEmpty()) {
+                            if (result.isEmpty() && chartContainsNoData()) {
                                 setWidget(noDataFoundLabel);
                             } else {
                                 updateChartSeries(result, append);
@@ -250,6 +252,15 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                 });
         asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
 
+    }
+    
+    private boolean chartContainsNoData() {
+        for (Series competitorSeries : dataSeriesByCompetitor.values()) {
+            if (competitorSeries.getPoints().length != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -371,7 +382,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     private Series getOrCreateCompetitorDataSeries(final CompetitorDTO competitor) {
         Series result = dataSeriesByCompetitor.get(competitor);
         if (result == null) {
-            result = chart.createSeries().setType(Series.Type.LINE).setName(competitor.name);
+            result = chart.createSeries().setType(Series.Type.LINE).setName(competitor.getName());
             result.setPlotOptions(new LinePlotOptions()
                     .setLineWidth(LINE_WIDTH)
                     .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
@@ -392,7 +403,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         Series result = markPassingSeriesByCompetitor.get(competitor);
         if (result == null) {
             result = chart.createSeries().setType(Series.Type.SCATTER)
-                    .setName(stringMessages.markPassing() + " " + competitor.name);
+                    .setName(stringMessages.markPassing() + " " + competitor.getName());
             result.setPlotOptions(new ScatterPlotOptions().setColor(competitorSelectionProvider.getColor(competitor))
                     .setSelected(true));
             markPassingSeriesByCompetitor.put(competitor, result);
@@ -596,6 +607,10 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             return;
         }
 
+        if (allowTimeAdjust) {
+            updateTimePlotLine(date);
+        }
+        
         switch (timer.getPlayMode()) {
         case Live: {
             // is date before first cache entry or is cache empty?
@@ -622,6 +637,12 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             break;
         }
         }
+    }
+
+    private void updateTimePlotLine(Date date) {
+        chart.getXAxis().removePlotLine(timePlotLine);
+        timePlotLine.setValue(date.getTime());
+        chart.getXAxis().addPlotLines(timePlotLine);
     }
 
     @Override

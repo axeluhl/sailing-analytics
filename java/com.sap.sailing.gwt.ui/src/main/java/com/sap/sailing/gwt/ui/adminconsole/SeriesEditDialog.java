@@ -30,6 +30,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     private Button addRacesBtn;
     private CheckBox isMedalCheckbox;
     private CheckBox startWithZeroScoreCheckbox;
+    private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
     private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
     private final List<TextBox> raceNameEntryFields;
     private final List<Button> raceNameDeleteButtons;
@@ -56,16 +57,16 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             List<RaceColumnDTO> raceColumnsToValidate = valueToValidate.getRaces();
             String errorMessage = null;
             for (SeriesDTO seriesDTO: regatta.series) {
-                if (!seriesDTO.name.equals(seriesToValidate.name)) {
+                if (!seriesDTO.getName().equals(seriesToValidate.getName())) {
                     for (RaceColumnDTO raceColumn : seriesDTO.getRaceColumns()) {
-                        raceColumnNamesOfOtherSeries.add(raceColumn.name);
+                        raceColumnNamesOfOtherSeries.add(raceColumn.getName());
                     }
                 }
             }
             boolean raceColumnNameNotEmpty = true;
             RaceColumnDTO wrongRaceColumn = null;
             for (RaceColumnDTO raceColumn : raceColumnsToValidate) {
-                raceColumnNameNotEmpty = raceColumn.name != null && raceColumn.name.length() > 0;
+                raceColumnNameNotEmpty = raceColumn.getName() != null && raceColumn.getName().length() > 0;
                 if (!raceColumnNameNotEmpty) {
                     wrongRaceColumn = raceColumn;
                     break;
@@ -75,24 +76,24 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             boolean raceColumnUniqueInRegatta = true;
             HashSet<String> setToFindDuplicates = new HashSet<String>();
             for (RaceColumnDTO raceColumn : raceColumnsToValidate) {
-                if (!setToFindDuplicates.add(raceColumn.name)) {
+                if (!setToFindDuplicates.add(raceColumn.getName())) {
                     raceColumnUniqueInSeries = false;
                     wrongRaceColumn = raceColumn;
                     break;
-                } else if(raceColumnNamesOfOtherSeries.contains(raceColumn.name)) {
+                } else if(raceColumnNamesOfOtherSeries.contains(raceColumn.getName())) {
                     raceColumnUniqueInRegatta = false;
                     wrongRaceColumn = raceColumn;
                     break;
                 } 
             }
             if (!raceColumnNameNotEmpty) {
-                errorMessage = stringMessages.race() + " " + wrongRaceColumn.name + ": "
+                errorMessage = stringMessages.race() + " " + wrongRaceColumn.getName() + ": "
                         + stringMessages.pleaseEnterAName();
             } else if (!raceColumnUniqueInSeries) {
-                errorMessage = stringMessages.race() + " " +  wrongRaceColumn.name + ": "
+                errorMessage = stringMessages.race() + " " +  wrongRaceColumn.getName() + ": "
                         + stringMessages.raceWithThisNameAlreadyExists();
             }  else if (!raceColumnUniqueInRegatta) {
-                errorMessage = stringMessages.race() + " " +  wrongRaceColumn.name + ": "
+                errorMessage = stringMessages.race() + " " +  wrongRaceColumn.getName() + ": "
                         + stringMessages.raceWithThisNameAlreadyExistsInRegatta();
             } else {
                 errorMessage = DiscardThresholdBoxes.getErrorMessage(valueToValidate.getResultDiscardingThresholds(), stringMessages);
@@ -102,7 +103,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     }
 
     public SeriesEditDialog(RegattaDTO regatta, SeriesDTO selectedSeries, StringMessages stringMessages,DialogCallback<SeriesDescriptor> callback) {
-        super(stringMessages.actionEditRaces(), null, stringMessages.ok(), stringMessages.cancel(),
+        super(stringMessages.actionEditSeries(), null, stringMessages.ok(), stringMessages.cancel(),
                 new RaceDialogValidator(regatta, stringMessages), callback);
         this.selectedSeries = selectedSeries;
         this.stringMessages = stringMessages;
@@ -155,20 +156,21 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             RaceColumnDTO raceColumnDTO = findRaceColumnInSeriesByName(selectedSeries, raceColumnName);
             if (raceColumnDTO == null) {
                 raceColumnDTO = new RaceColumnDTO(/* isValidInTotalScore not relevant here; not in scope of a leaderboard */ null);
-                raceColumnDTO.name = raceColumnName;
+                raceColumnDTO.setName(raceColumnName);
             }
             races.add(raceColumnDTO);
         }
         return new SeriesDescriptor(selectedSeries, races, isMedalCheckbox.getValue(),
-                useSeriesResultDiscardingThresholdsCheckbox.getValue() ?
-                        discardThresholdBoxes.getDiscardThresholds() : null, startWithZeroScoreCheckbox.getValue());
+                useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds()
+                        : null, startWithZeroScoreCheckbox.getValue(),
+                firstColumnIsNonDiscardableCarryForwardCheckbox.getValue());
     }
 
     private RaceColumnDTO findRaceColumnInSeriesByName(SeriesDTO series, String raceColumnName) {
         RaceColumnDTO result = null;
-        if(series != null) {
-            for(RaceColumnDTO raceColumn: series.getRaceColumns()) {
-                if(raceColumn.name.equals(raceColumnName)) {
+        if (series != null) {
+            for (RaceColumnDTO raceColumn : series.getRaceColumns()) {
+                if (raceColumn.getName().equals(raceColumnName)) {
                     result = raceColumn;
                     break;
                 }
@@ -186,7 +188,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         }
         HorizontalPanel seriesPanel = new HorizontalPanel();
         seriesPanel.setSpacing(3);
-        String seriesName = getSelectedSeries().name;
+        String seriesName = getSelectedSeries().getName();
         seriesPanel.add(new Label(stringMessages.series() + ": " + seriesName));
         additionalWidgetPanel.add(seriesPanel);
         isMedalCheckbox = createCheckbox(stringMessages.medalSeries());
@@ -195,6 +197,9 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         startWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());
         startWithZeroScoreCheckbox.setValue(selectedSeries.isStartsWithZeroScore());
         additionalWidgetPanel.add(startWithZeroScoreCheckbox);
+        firstColumnIsNonDiscardableCarryForwardCheckbox = createCheckbox(stringMessages.firstRaceIsNonDiscardableCarryForward());
+        firstColumnIsNonDiscardableCarryForwardCheckbox.setValue(selectedSeries.isFirstColumnIsNonDiscardableCarryForward());
+        additionalWidgetPanel.add(firstColumnIsNonDiscardableCarryForwardCheckbox);
         useSeriesResultDiscardingThresholdsCheckbox = createCheckbox(stringMessages.seriesDefinesResultDiscardingRule());
         useSeriesResultDiscardingThresholdsCheckbox.setValue(selectedSeries.getDiscardThresholds() != null);
         useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -264,7 +269,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         raceNameDeleteButtons.clear();
         if(selectedSeries != null && !selectedSeries.getRaceColumns().isEmpty()) {
             for(RaceColumnDTO raceColumn: selectedSeries.getRaceColumns()) {
-                createRaceNameWidget(raceColumn.name, false);
+                createRaceNameWidget(raceColumn.getName(), false);
                 createRaceNameDeleteButtonWidget();
             }
         }

@@ -34,6 +34,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     private TextBox nameEntryField;
     private CheckBox isMedalSeriesCheckbox;
     private CheckBox startsWithZeroScoreCheckbox;
+    private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
     private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
     private DiscardThresholdBoxes discardThresholdBoxes;
 
@@ -55,10 +56,10 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         @Override
         public String getErrorMessage(SeriesDTO seriesToValidate) {
             String errorMessage = null;
-            boolean nameNotEmpty = seriesToValidate.name != null && seriesToValidate.name.length() > 0;
+            boolean nameNotEmpty = seriesToValidate.getName() != null && seriesToValidate.getName().length() > 0;
             boolean unique = true;
             for (SeriesDTO series : existingSeries) {
-                if (series.name.equals(seriesToValidate.name)) {
+                if (series.getName().equals(seriesToValidate.getName())) {
                     unique = false;
                     break;
                 }
@@ -73,7 +74,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                 int index = 0;
                 boolean fleetNameNotEmpty = true;
                 for (FleetDTO fleet : fleetsToValidate) {
-                    fleetNameNotEmpty = fleet.name != null && fleet.name.length() > 0;
+                    fleetNameNotEmpty = fleet.getName() != null && fleet.getName().length() > 0;
                     if (!fleetNameNotEmpty) {
                         break;
                     }
@@ -83,7 +84,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                 boolean fleetUnique = true;
                 HashSet<String> setToFindDuplicates = new HashSet<String>();
                 for (FleetDTO fleet: fleetsToValidate) {
-                    if(!setToFindDuplicates.add(fleet.name)) {
+                    if(!setToFindDuplicates.add(fleet.getName())) {
                         fleetUnique = false;
                         break;
                     }
@@ -111,6 +112,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         nameEntryField.setVisibleLength(40);
         isMedalSeriesCheckbox = createCheckbox(stringMessages.medalSeries());
         startsWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());
+        firstColumnIsNonDiscardableCarryForwardCheckbox = createCheckbox(stringMessages.firstRaceIsNonDiscardableCarryForward());
         useSeriesResultDiscardingThresholdsCheckbox = createCheckbox(stringMessages.seriesDefinesResultDiscardingRule());
         useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -178,14 +180,15 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
 
     @Override
     protected SeriesDTO getResult() {
-        series.name = nameEntryField.getText();
+        series.setName(nameEntryField.getText());
         series.setMedal(isMedalSeriesCheckbox.getValue());
         series.setStartsWithZeroScore(startsWithZeroScoreCheckbox.getValue());
+        series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForwardCheckbox.getValue());
         List<FleetDTO> fleets = new ArrayList<FleetDTO>();
         int fleetsCount = fleetNameEntryFields.size();
         for(int i = 0; i < fleetsCount; i++) {
             FleetDTO fleetDTO = new FleetDTO();
-            fleetDTO.name = fleetNameEntryFields.get(i).getValue();
+            fleetDTO.setName(fleetNameEntryFields.get(i).getValue());
             fleetDTO.setColor(getSelectedColor(fleetColorEntryFields.get(i)));
             int orderNo = -1;
             if(fleetOrderNoEntryFields.get(i).getValue() != null) {
@@ -222,14 +225,15 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(5, 2);
+        Grid formGrid = new Grid(6, 2);
         panel.add(formGrid);
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 1, isMedalSeriesCheckbox);
         formGrid.setWidget(2, 1, startsWithZeroScoreCheckbox);
-        formGrid.setWidget(3, 1, useSeriesResultDiscardingThresholdsCheckbox);
-        formGrid.setWidget(4, 1, discardThresholdBoxes.getWidget());
+        formGrid.setWidget(3, 1, firstColumnIsNonDiscardableCarryForwardCheckbox);
+        formGrid.setWidget(4, 1, useSeriesResultDiscardingThresholdsCheckbox);
+        formGrid.setWidget(5, 1, discardThresholdBoxes.getWidget());
         panel.add(createHeadlineLabel(stringMessages.fleets()));
         panel.add(fleetsGrid);
         Button addFleetButton = new Button(stringMessages.addFleet());

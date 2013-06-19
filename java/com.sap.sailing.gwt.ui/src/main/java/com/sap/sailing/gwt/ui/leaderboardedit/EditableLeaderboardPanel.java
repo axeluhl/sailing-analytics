@@ -1,14 +1,9 @@
 package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
@@ -48,7 +43,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
@@ -72,7 +66,6 @@ import com.sap.sailing.gwt.ui.leaderboard.CompetitorFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
-import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 
 /**
  * An editable version of the {@link LeaderboardPanel} which allows a user to enter carried / accumulated
@@ -96,13 +89,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, String>() {
                 @Override
                 public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
-                    getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.idAsString,
+                    getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.getIdAsString(),
                             value == null || value.length() == 0 ? null : Double.valueOf(value.trim()),
                                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable t) {
                             EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update carry value for competitor "+
-                                    row.competitor.name+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
+                                    row.competitor.getName()+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
                                     "\nYou may have to refresh your view.");
                         }
 
@@ -144,7 +137,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             return new InvertibleComparatorAdapter<CompetitorDTO>() {
                 @Override
                 public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                    return Collator.getInstance().compare(o1.sailID, o2.sailID);
+                    return Collator.getInstance().compare(o1.getSailID(), o2.getSailID());
                 }
             };
         }
@@ -157,7 +150,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         @Override
         public void render(Context context, CompetitorDTO object, SafeHtmlBuilder sb) {
             ImageResourceRenderer renderer = new ImageResourceRenderer();
-            final String twoLetterIsoCountryCode = object.twoLetterIsoCountryCode;
+            final String twoLetterIsoCountryCode = object.getTwoLetterIsoCountryCode();
             final ImageResource flagImageResource;
             if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
                 flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
@@ -168,12 +161,12 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 sb.append(renderer.render(flagImageResource));
                 sb.appendHtmlConstant("&nbsp;");
             }
-            sb.appendEscaped(object.sailID);
+            sb.appendEscaped(object.getSailID());
         }
 
         @Override
         public String getValue(CompetitorDTO object) {
-            return object.sailID;
+            return object.getSailID();
         }
     }
 
@@ -211,13 +204,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         return new FieldUpdater<LeaderboardRowDTO, String>() {
             @Override
             public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
-                getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.idAsString,
+                getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.getIdAsString(),
                         value == null || value.length() == 0 ? null : value.trim(),
                                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable t) {
                         EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update display name for competitor "+
-                                row.competitor.name+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
+                                row.competitor.getName()+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
                                 "\nYou may have to refresh your view.");
                     }
 
@@ -329,7 +322,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     getBusyIndicator().setBusy(true);
-                    getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.idAsString,
+                    getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.getIdAsString(),
                             raceColumnName, value == null || value.trim().length() == 0 ? null : MaxPointsReason.valueOf(value.trim()),
                                     getLeaderboardDisplayDate(), new AsyncCallback<Triple<Double, Double, Boolean>>() {
                         @Override
@@ -337,7 +330,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                             getBusyIndicator().setBusy(false);
                             getErrorReporter().reportError(
                                     "Error trying to update max points reason for competitor "
-                                            + row.competitor.name + " in leaderboard " + getLeaderboardName()
+                                            + row.competitor.getName() + " in leaderboard " + getLeaderboardName()
                                             + ": " + t.getMessage() + "\nYou may have to refresh your view.");
                         }
 
@@ -425,14 +418,15 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     getBusyIndicator().setBusy(true);
-                    getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.idAsString, raceColumnName,
-                            value == null || value.trim().length() == 0 ? null : Double.valueOf(value.trim()), getLeaderboardDisplayDate(),
-                                    new AsyncCallback<Triple<Double, Double, Boolean>>() {
+                    getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.getIdAsString(), raceColumnName,
+                            value == null || value.trim().length() == 0 ? null : value.trim().equals("n/a") ? null
+                                    : Double.valueOf(value.trim()), getLeaderboardDisplayDate(),
+                            new AsyncCallback<Triple<Double, Double, Boolean>>() {
                         @Override
                         public void onFailure(Throwable t) {
                             getBusyIndicator().setBusy(false);
                             getErrorReporter().reportError("Error trying to update score correction for competitor "+
-                                    row.competitor.name+" in leaderboard "+getLeaderboardName()+
+                                    row.competitor.getName()+" in leaderboard "+getLeaderboardName()+
                                     " for race "+raceColumnName+": "+t.getMessage()+
                                     "\nYou may have to refresh your view.");
                         }
@@ -497,34 +491,34 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     final RowUpdateWhiteboard<LeaderboardRowDTO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDTO>(
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
-                    new EditScoreDialog(stringMessages, row.competitor.name, raceColumnName,
+                    new EditScoreDialog(stringMessages, row.competitor.getName(), raceColumnName,
                             row.fieldsByRaceColumnName.get(raceColumnName).reasonForMaxPoints,
                             row.fieldsByRaceColumnName.get(raceColumnName).netPoints, new DialogCallback<Pair<MaxPointsReason, Double>>() {
                         @Override
                         public void ok(final Pair<MaxPointsReason, Double> editedObject) {
                             getBusyIndicator().setBusy(true);
-                            getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.idAsString, raceColumnName,
+                            getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.getIdAsString(), raceColumnName,
                                     editedObject.getB(), getLeaderboardDisplayDate(),
                                             new AsyncCallback<Triple<Double, Double, Boolean>>() {
                                 @Override
                                 public void onFailure(Throwable t) {
                                     getBusyIndicator().setBusy(false);
                                     getErrorReporter().reportError("Error trying to update score correction for competitor "+
-                                            row.competitor.name+" in leaderboard "+getLeaderboardName()+
+                                            row.competitor.getName()+" in leaderboard "+getLeaderboardName()+
                                             " for race "+raceColumnName+": "+t.getMessage()+
                                             "\nYou may have to refresh your view.");
                                 }
 
                                 @Override
                                 public void onSuccess(Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
-                                    getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.idAsString, raceColumnName,
+                                    getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.getIdAsString(), raceColumnName,
                                             editedObject.getA(), getLeaderboardDisplayDate(),
                                                     new AsyncCallback<Triple<Double, Double, Boolean>>() {
                                         @Override
                                         public void onFailure(Throwable t) {
                                             getBusyIndicator().setBusy(false);
                                             getErrorReporter().reportError("Error trying to update score correction for competitor "+
-                                                    row.competitor.name+" in leaderboard "+getLeaderboardName()+
+                                                    row.competitor.getName()+" in leaderboard "+getLeaderboardName()+
                                                     " for race "+raceColumnName+": "+t.getMessage()+
                                                     "\nYou may have to refresh your view.");
                                         }
@@ -576,7 +570,19 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         importAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                performImport(stringMessages);
+                sailingService.getScoreCorrectionProviderNames(new AsyncCallback<Iterable<String>>() {
+                    @Override
+                    public void onSuccess(Iterable<String> providerNames) {
+                        ResultSelectionAndApplyDialog dialog = new ResultSelectionAndApplyDialog(EditableLeaderboardPanel.this, providerNames, getSailingService(), 
+                                getStringMessages(), getErrorReporter());
+                        dialog.show();
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error getting the score correction providers: " + caught.getMessage());
+                    }
+                });
             }
         });
 
@@ -653,15 +659,15 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         unsuppressButtonColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
             @Override
             public void update(int index, final CompetitorDTO object, String value) {
-                getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), object.idAsString,
+                getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), object.getIdAsString(),
                         /* suppressed */ false, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        getErrorReporter().reportError("Error trying to unsuppress competitor "+object.name);
+                        getErrorReporter().reportError("Error trying to unsuppress competitor "+object.getName());
                     }
                     @Override
                     public void onSuccess(Void result) {
-                        Window.setStatus("Successfully unsuppressed competitor "+object.name);
+                        Window.setStatus("Successfully unsuppressed competitor "+object.getName());
                         // force a reload of the entire editable leaderboard to hide the now suppressed competitor
                         timeChanged(getLeaderboardDisplayDate());
                     }
@@ -680,70 +686,6 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         getLeaderboard().setComment(lastScoreCorrectionComment);
         getLeaderboard().setTimePointOfLastCorrectionsValidity(lastScoreCorrectionTime);
         updateLeaderboard(getLeaderboard());
-    }
-
-    private void performImport(final StringMessages stringMessages) {
-        getBusyIndicator().setBusy(true);
-        getSailingService().getScoreCorrectionProviderDTOs(new AsyncCallback<Iterable<ScoreCorrectionProviderDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                EditableLeaderboardPanel.this.getBusyIndicator().setBusy(false);
-                getErrorReporter().reportError(stringMessages.errorLoadingScoreCorrectionProviders(caught.getMessage()));
-            }
-
-            @Override
-            public void onSuccess(Iterable<ScoreCorrectionProviderDTO> result) {
-                EditableLeaderboardPanel.this.getBusyIndicator().setBusy(false);
-                showScoreCorrectionSelectionDialog(result);
-            }
-        });
-    }
-
-    private void showScoreCorrectionSelectionDialog(Iterable<ScoreCorrectionProviderDTO> result) {
-        List<Triple<String, String, Pair<String, Date>>> providerNameAndEventNameBoatClassNameCapturedWhen =
-                new ArrayList<Triple<String,String, Pair<String,Date>>>();
-        for (ScoreCorrectionProviderDTO scp : result) {
-            for (Entry<String, Set<Pair<String, Date>>> e : scp.getHasResultsForBoatClassFromDateByEventName().entrySet()) {
-                for (Pair<String, Date> se : e.getValue()) {
-                    providerNameAndEventNameBoatClassNameCapturedWhen.add(new Triple<String, String, Pair<String, Date>>(
-                            scp.name, e.getKey(), se));
-                }
-            }
-        }
-        sortOfficialResultsByRelevance(providerNameAndEventNameBoatClassNameCapturedWhen);
-        new ResultSelectionAndApplyDialog(this, getSailingService(), getStringMessages(),
-                providerNameAndEventNameBoatClassNameCapturedWhen, getErrorReporter()).show();
-    }
-
-    private void sortOfficialResultsByRelevance(
-            List<Triple<String, String, Pair<String, Date>>> providerNameAndEventNameBoatClassNameCapturedWhen) {
-        final Set<BoatClassDTO> boatClasses = getLeaderboard().getBoatClasses();
-        final Set<String> lowercaseBoatClassNames = new HashSet<String>();
-        for (BoatClassDTO boatClass : boatClasses) {
-            lowercaseBoatClassNames.add(boatClass.name.toLowerCase());
-        }
-        Collections.sort(providerNameAndEventNameBoatClassNameCapturedWhen, new Comparator<Triple<String, String, Pair<String, Date>>>() {
-            @Override
-            public int compare(Triple<String, String, Pair<String, Date>> o1,
-                    Triple<String, String, Pair<String, Date>> o2) {
-                int result;
-                // TODO consider looking for longest common substring to handle things like "470 M" vs. "470 Men"
-                if (lowercaseBoatClassNames.contains(o1.getC().getA().toLowerCase())) {
-                    if (lowercaseBoatClassNames.contains(o2.getC().getA().toLowerCase())) {
-                        // both don't seem to have the right boat class; compare by time stamp; newest first
-                        result = o2.getC().getB().compareTo(o1.getC().getB());
-                    } else {
-                        result = -1; // o1 scores "better", comes first, because it has the right boat class name
-                    }
-                } else if (o2.getC().getA() != null && lowercaseBoatClassNames.contains(o2.getC().getA().toLowerCase())) {
-                    result = 1;
-                } else {
-                    // both don't seem to have the right boat class; compare by time stamp; newest first
-                    result = o2.getC().getB().compareTo(o1.getC().getB());
-                }
-                return result;
-            }
-        });
     }
 
     /**
@@ -787,12 +729,12 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 return new FieldUpdater<LeaderboardRowDTO, String>() {
                     @Override
                     public void update(int index, final LeaderboardRowDTO row, String value) {
-                        getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), row.competitor.idAsString,
+                        getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), row.competitor.getIdAsString(),
                                 /* suppressed */ true,
                                 new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                getErrorReporter().reportError("Error trying to suppress competitor "+row.competitor.name+
+                                getErrorReporter().reportError("Error trying to suppress competitor "+row.competitor.getName()+
                                         " in leaderboard "+getLeaderboardName());
                             }
 

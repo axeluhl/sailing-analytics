@@ -89,7 +89,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             List<RaceColumnDTO> raceList = leaderboard.getRaceList();
             List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
             for (RaceColumnDTO raceColumn : raceList) {
-                namesOfRaceColumnsToShow.add(raceColumn.name);
+                namesOfRaceColumnsToShow.add(raceColumn.getName());
             }
             LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                     namesOfRaceColumnsToShow, /* namesOfRacesToShow */null, /* nameOfRaceToSort */null, /* autoExpandPreSelectedRace */
