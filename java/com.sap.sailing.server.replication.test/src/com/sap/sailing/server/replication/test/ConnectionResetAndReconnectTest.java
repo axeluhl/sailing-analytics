@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.rabbitmq.client.AlreadyClosedException;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -41,7 +40,7 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
         @Override
         public Delivery nextDelivery() throws ShutdownSignalException, ConsumerCancelledException, InterruptedException {
             if (forceStopDelivery) {
-                throw new AlreadyClosedException("Could not connect", this);
+                throw new ShutdownSignalException(false, false, null, null);
             }
             return super.nextDelivery();
         }
@@ -105,10 +104,10 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
         stopMessagingExchange();
         replicaReplicationDescriptor.startToReplicateFrom(masterReplicationDescriptor);
         Event event = addEventOnMaster();
-        Thread.sleep(1000);
+        Thread.sleep(1000); // wait for master queue to get filled
         assertNull(replica.getEvent(event.getId()));
         startMessagingExchange();
-        Thread.sleep(2000); // wait for connection to recover
+        Thread.sleep(3000); // wait for connection to recover
         assertNotNull(replica.getEvent(event.getId()));
     }
     
