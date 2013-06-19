@@ -568,6 +568,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 for (PathCanvasOverlay r : this.replayPathCanvasOverlays) {
                     r.displayWindAlongPath = true;
                     this.timer.removeTimeListener(r);
+                    this.timeListeners.remove(r);
                     r.setTimer(null);
                     r.setVisible(true);
                     r.redraw(true);
@@ -605,6 +606,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     r.displayWindAlongPath = false;
                     r.setTimer(this.timer);
                     this.timer.addTimeListener(r);
+                    if (!this.timeListeners.contains(r)) {
+                    	this.timeListeners.add(r);
+                    }
                     r.setVisible(true);
                     r.redraw(true);
                 }
@@ -643,6 +647,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 timePanel.resetTimeSlider();
                 for (PathCanvasOverlay r : this.replayPathCanvasOverlays) {
                     r.setVisible(false);
+                    this.timer.removeTimeListener(r);
+                    this.timeListeners.remove(r);
                 }
                 this.legendCanvasOverlay.setVisible(false);
 
