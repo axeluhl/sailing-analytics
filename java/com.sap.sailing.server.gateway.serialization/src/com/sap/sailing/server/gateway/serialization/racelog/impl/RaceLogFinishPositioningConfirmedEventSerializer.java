@@ -45,13 +45,15 @@ public class RaceLogFinishPositioningConfirmedEventSerializer extends BaseRaceLo
     private JSONArray serializePositionedCompetitors(List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
         JSONArray jsonPositionedCompetitors = new JSONArray();
         
-        for (Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positionedCompetitors) {
-            JSONObject jsonPositionedCompetitor = new JSONObject();
-            
-            jsonPositionedCompetitor.put(FIELD_COMPETITOR_ID, positionedCompetitor.getA().toString());
-            jsonPositionedCompetitor.put(FIELD_COMPETITOR_NAME, positionedCompetitor.getB());
-            jsonPositionedCompetitor.put(FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON, positionedCompetitor.getC().name());
-            jsonPositionedCompetitors.add(jsonPositionedCompetitor);
+        if (positionedCompetitors != null) { // for backwards compatibility reasons
+            for (Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positionedCompetitors) {
+                JSONObject jsonPositionedCompetitor = new JSONObject();
+
+                jsonPositionedCompetitor.put(FIELD_COMPETITOR_ID, positionedCompetitor.getA().toString());
+                jsonPositionedCompetitor.put(FIELD_COMPETITOR_NAME, positionedCompetitor.getB());
+                jsonPositionedCompetitor.put(FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON, positionedCompetitor.getC().name());
+                jsonPositionedCompetitors.add(jsonPositionedCompetitor);
+            }
         }
         
         return jsonPositionedCompetitors;

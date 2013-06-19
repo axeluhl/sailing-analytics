@@ -119,8 +119,10 @@ public abstract class FullCanvasOverlay extends CanvasOverlay {
         context2d.setGlobalAlpha(1.0f);
         if (getMap().getZoomLevel() >= 11) {
         	context2d.setFillStyle(textColor);
-        	context2d.setFont("normal 12pt Calibri");
-        	context2d.fillText(text, x + 10., y + 4.);
+			double fontsize = 9.0 + (12.0-9.0)*(getMap().getZoomLevel() - 10.0)/(12.0-10.0);
+        	context2d.setFont("normal "+fontsize+"px Calibri");
+        	context2d.fillText(text, x + 0.7*fontsize, y + 0.3*fontsize);
+        	//System.out.println("ZoomLevel: "+getMap().getZoomLevel()+", Fontsize: "+fontsize);
         }
        
     }
