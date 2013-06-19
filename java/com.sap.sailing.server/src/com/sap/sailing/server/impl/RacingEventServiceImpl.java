@@ -1646,26 +1646,48 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public void serializeForInitialReplication(ObjectOutputStream oos) throws IOException {
-        logger.info("serializing eventsById");
+        StringBuffer logoutput = new StringBuffer();
+            
         oos.writeObject(eventsById);
-        logger.info("serializing regattasByName");
+        logoutput.append("\nSerialized " + eventsById.size() + " events\n");
+        for (Event event : eventsById.values()) {
+            logoutput.append(String.format("%3s\n", event.toString()));
+        }
+            
         oos.writeObject(regattasByName);
-        logger.info("serializing regattasObservedForDefaultLeaderboard");
+        logoutput.append("Serialized " + regattasByName.size() + " regattas\n");
+        for (Regatta regatta : regattasByName.values()) {
+            logoutput.append(String.format("%3s\n", regatta.toString()));
+        }
+            
         oos.writeObject(regattasObservedForDefaultLeaderboard);
-        logger.info("serializing regattaTrackingCache");
         oos.writeObject(regattaTrackingCache);
-        logger.info("serializing leaderboardGroupsByName");
         oos.writeObject(leaderboardGroupsByName);
-        logger.info("serializing leaderboardsByName");
+        logoutput.append("Serialized " + leaderboardGroupsByName.size() + " leaderboard groups\n");
+        for (LeaderboardGroup lg : leaderboardGroupsByName.values()) {
+            logoutput.append(String.format("%3s\n", lg.toString()));
+        }
+            
         oos.writeObject(leaderboardsByName);
-        logger.info("serializing mediaLibrary");
+        logoutput.append("Serialized " + leaderboardsByName.size() + " leaderboards\n");
+        for (Leaderboard lg : leaderboardsByName.values()) {
+            logoutput.append(String.format("%3s\n", lg.toString()));
+        }
+        
         mediaLibrary.serialize(oos);
+        logoutput.append("Serialized " + mediaLibrary.allTracks().size() + " media tracks\n");
+        for (MediaTrack lg : mediaLibrary.allTracks()) {
+            logoutput.append(String.format("%3s\n", lg.toString()));
+        }
+        
+        logger.info(logoutput.toString());
     }
 
     @SuppressWarnings("unchecked") // the type-parameters in the casts of the de-serialized collection objects can't be checked
     @Override
     public void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException, InterruptedException {
-        logger.info("Performing initial replication load on "+this);
+        
+        logger.info("Performing initial replication load on " + this);
         ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
         try {
             // Use this object's class's class loader as the context class loader which will then be used for
@@ -1686,40 +1708,62 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             leaderboardsByName.clear();
             eventsById.clear();
             mediaLibrary.clear();
-            logger.info("receiving eventsById");
+            
+            StringBuffer logoutput = new StringBuffer();
+            
             eventsById.putAll((Map<Serializable, Event>) ois.readObject());
-            logger.info("Recieved " + eventsById.size() + " NEW events");
-            logger.info("receiving regattasByName");
+            logoutput.append("\nReceived " + eventsById.size() + " NEW events\n");
+            for (Event event : eventsById.values()) {
+                logoutput.append(String.format("%3s\n", event.toString()));
+            }
+            
             regattasByName.putAll((Map<String, Regatta>) ois.readObject());
-            logger.info("Recieved " + regattasByName.size() + " NEW regattas");
+            logoutput.append("Received " + regattasByName.size() + " NEW regattas\n");
+            for (Regatta regatta : regattasByName.values()) {
+                logoutput.append(String.format("%3s\n", regatta.toString()));
+            }
+            
             // it is important that the leaderboards and tracked regattas are cleared before auto-linking to
             // old leaderboards takes place which then don't match the new ones
             for (DynamicTrackedRegatta trackedRegattaToObserve : (Set<DynamicTrackedRegatta>) ois.readObject()) {
                 ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedRegattaToObserve);
             }
-            logger.info("receiving regattaTrackingCache");
+            
             regattaTrackingCache.putAll((Map<Regatta, DynamicTrackedRegatta>) ois.readObject());
-            logger.info("Recieved " + regattaTrackingCache.size() + " NEW regatta tracking cache entries");
-            logger.info("receiving leaderboardGroupsByName");
+            logoutput.append("Received " + regattaTrackingCache.size() + " NEW regatta tracking cache entries\n");
+            
             leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
-            logger.info("Received " + leaderboardGroupsByName.size() + " NEW leaderboard groups");
-            logger.info("receiving leaderboardsByName");
+            logoutput.append("Received " + leaderboardGroupsByName.size() + " NEW leaderboard groups\n");
+            for (LeaderboardGroup lg : leaderboardGroupsByName.values()) {
+                logoutput.append(String.format("%3s\n", lg.toString()));
+            }
+            
             leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
-            logger.info("Recieved " + leaderboardsByName.size() + " NEW leaderboards");
+            logoutput.append("Received " + leaderboardsByName.size() + " NEW leaderboards\n");
+            for (Leaderboard leaderboard : leaderboardsByName.values()) {
+                logoutput.append(String.format("%3s\n", leaderboard.toString()));
+            }
+            
             // now fix ScoreCorrectionListener setup for LeaderboardGroupMetaLeaderboard instances:
             for (Leaderboard leaderboard : leaderboardsByName.values()) {
                 if (leaderboard instanceof LeaderboardGroupMetaLeaderboard) {
                     ((LeaderboardGroupMetaLeaderboard) leaderboard).registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards();
                 }
             }
-            logger.info("receiving mediaLibrary");
+            
             mediaLibrary.deserialize(ois);            
-            logger.info("Done with initial replication on "+this);
+            logoutput.append("Received " + mediaLibrary.allTracks().size() + " NEW media tracks\n");
+            for (MediaTrack mediatrack : mediaLibrary.allTracks()) {
+                logoutput.append(String.format("%3s\n", mediatrack.toString()));
+            }
+            
+            logger.info(logoutput.toString());
+            logger.info("Done with initial replication on " + this);
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassloader);
         }
     }
-
+    
     @Override
     public long getDelayToLiveInMillis() {
         return delayToLiveInMillis;
@@ -1886,6 +1930,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public Collection<MediaTrack> getAllMediaTracks() {
         return mediaLibrary.allTracks();
+    }
+    
+    public String toString() {
+        return "RacingEventService: " + this.hashCode() + " Build: " + Util.getBuildVersion();
     }
 
 }

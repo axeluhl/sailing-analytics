@@ -146,4 +146,8 @@ public class LeaderboardGroupImpl implements LeaderboardGroup {
     public boolean isDisplayGroupsInReverseOrder() {
         return displayGroupsInReverseOrder;
     }
+    
+    public String toString() {
+        return getName() + " " + getDescription();
+    }
 }
