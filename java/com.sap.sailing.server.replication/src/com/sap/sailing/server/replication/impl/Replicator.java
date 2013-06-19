@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.rabbitmq.client.AlreadyClosedException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
@@ -82,6 +83,13 @@ public class Replicator implements Runnable {
                         new ByteArrayInputStream(bytesFromMessage));
                 RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) ois.readObject();
                 applyOrQueue(operation);
+            } catch (AlreadyClosedException ace) {
+                // ignore this exception and try again after some time
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             } catch (ShutdownSignalException sse) {
                 logger.info("Received "+sse.getMessage()+". Terminating "+this);
                 break;

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
@@ -91,10 +92,20 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         this.exchangeName = exchangeName;
     }
     
-    private Channel createChannel(String exchangeName) throws IOException {
+    private Channel createMasterChannel(String exchangeName) throws IOException {
         final ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost("localhost"); // ...and use default port
-        Channel result = connectionFactory.newConnection().createChannel();
+        
+        Channel result = null;
+        try {
+            result = connectionFactory.newConnection().createChannel();
+        } catch (ConnectException ex) {
+            // make sure to log something meaningful
+            logger.severe("Could not connect to messaging queue on " + connectionFactory.getHost() + ":" + connectionFactory.getPort() + "/" + exchangeName);
+            throw ex;
+        }
+        
+        logger.info("Connected to " + connectionFactory.getHost() + ":" + connectionFactory.getPort() + "/" + exchangeName);
         result.exchangeDeclare(exchangeName, "fanout");
         return result;
     }
@@ -116,7 +127,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
             addAsListenerToRacingEventService();
             synchronized (this) {
                 if (masterChannel == null) {
-                    masterChannel = createChannel(exchangeName);
+                    masterChannel = createMasterChannel(exchangeName);
                 }
             }
         }

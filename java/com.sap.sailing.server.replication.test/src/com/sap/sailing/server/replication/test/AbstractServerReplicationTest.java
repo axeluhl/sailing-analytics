@@ -38,6 +38,7 @@ public abstract class AbstractServerReplicationTest {
     private DomainFactory resolveAgainst;
     protected RacingEventServiceImpl replica;
     protected RacingEventServiceImpl master;
+    protected ReplicationServiceTestImpl replicaReplicator;
     private ReplicaDescriptor replicaDescriptor;
     private ReplicationServiceImpl masterReplicator;
     
@@ -94,6 +95,7 @@ public abstract class AbstractServerReplicationTest {
                 replicaDescriptor, this.replica, this.master, masterReplicator, masterDescriptor);
         Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
         replicaReplicator.startInitialLoadTransmissionServlet();
+        this.replicaReplicator = replicaReplicator; 
         return result;
     }
     
@@ -103,7 +105,7 @@ public abstract class AbstractServerReplicationTest {
         URLConnection urlConnection = new URL("http://localhost:"+SERVLET_PORT+"/STOP").openConnection(); // stop the initial load test server thread
         urlConnection.getInputStream().close();
     }
-
+    
     static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
         private final DomainFactory resolveAgainst;
         private final RacingEventService master;
