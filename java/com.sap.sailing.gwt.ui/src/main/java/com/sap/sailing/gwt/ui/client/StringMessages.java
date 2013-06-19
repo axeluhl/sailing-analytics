@@ -655,6 +655,7 @@ public interface StringMessages extends Messages {
     String regattaDefinesResultDiscardingRules();
     String startsWithZeroScore();
     String regattaOverviewConfiguration();
+    String firstRaceIsNonDiscardableCarryForward();
     String asLink();
     String raceIsRunning();
     String raceIsRunningWithEarlyStarters();

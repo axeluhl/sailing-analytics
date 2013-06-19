@@ -7,12 +7,12 @@ public enum StartProcedureType {
     
     private String displayName;
 
-    private StartProcedureType(String displayName){
+    private StartProcedureType(String displayName) {
         this.displayName = displayName;
     }
 
     @Override 
-    public String toString(){
+    public String toString() {
         return displayName;
     }
 }

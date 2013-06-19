@@ -72,7 +72,6 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
@@ -115,6 +114,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RaceStatusDTO;
+import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -128,6 +128,7 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.utils.RaceStateOfSameDayHelper;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
@@ -181,7 +182,6 @@ import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesComparator;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
@@ -603,7 +603,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal(),
                 series.getResultDiscardingRule() == null ? null : series.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(),
-                        series.isStartsWithZeroScore());
+                        series.isStartsWithZeroScore(), series.isFirstColumnIsNonDiscardableCarryForward());
         return result;
     }
     
@@ -2588,9 +2588,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return raceGroups;
     }
 
+    /**
+     * The name of the regatta to be shown on the regatta overview webpage is retrieved from the name of the {@link Leaderboard}. Since regattas are
+     * not always represented by a {@link Regatta} object in the Sailing Suite but need to be shown on the regatta overview page, the leaderboard is
+     * used as the representative of the sailing regatta. When a display name is set for a leaderboard, this name is favored against the (mostly technical)
+     * regatta name as the display name represents the publicly visible name of the regatta. 
+     * <br>
+     * When the leaderboard is a {@link RegattaLeaderboard} the name of the {@link Regatta} is used, otherwise the leaderboard 
+     * is a {@link FlexibleLeaderboard} and it's name is used as the last option.
+     * @param leaderboard The {@link Leaderboard} from which the name is be retrieved
+     * @return the name of the regatta to be shown on the regatta overview page
+     */
     private String getRegattaNameFromLeaderboard(Leaderboard leaderboard) {
         String regattaName;
-        if (leaderboard.getDisplayName() != null) {
+        if (leaderboard.getDisplayName() != null && !leaderboard.getDisplayName().isEmpty()) {
             regattaName = leaderboard.getDisplayName();
         } else {
             if (leaderboard instanceof RegattaLeaderboard) {
@@ -2636,8 +2647,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal,
-            int[] resultDiscardingThresholds, boolean startsWithZeroScore) {
-        getService().apply(new UpdateSeries(regattaIdentifier, seriesName, isMedal, resultDiscardingThresholds, startsWithZeroScore));
+            int[] resultDiscardingThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward) {
+        getService().apply(new UpdateSeries(regattaIdentifier, seriesName, isMedal, resultDiscardingThresholds, startsWithZeroScore, firstColumnIsNonDiscardableCarryForward));
     }
 
     @Override
@@ -2674,7 +2685,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public RegattaDTO createRegatta(String regattaName, String boatClassName,
-            LinkedHashMap<String, Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
+            RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType, String defaultCourseAreaId) {
         UUID courseAreaUuid = convertIdentifierStringToUuid(defaultCourseAreaId);
         Regatta regatta = getService().apply(
@@ -3010,7 +3021,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet) {
         List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
         for (List<RegattaOverviewEntryDTO> entryList : entriesPerFleet.values()) {
-            Collections.sort(entryList, new RegattaRaceStatesComparator());
             result.addAll(entryList);
             if (showOnlyCurrentlyRunningRaces) {
                 List<RegattaOverviewEntryDTO> finishedEntries = new ArrayList<RegattaOverviewEntryDTO>();

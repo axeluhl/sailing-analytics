@@ -479,6 +479,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbSeries.put(FieldNames.SERIES_NAME.name(), s.getName());
         dbSeries.put(FieldNames.SERIES_IS_MEDAL.name(), s.isMedal());
         dbSeries.put(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name(), s.isStartsWithZeroScore());
+        dbSeries.put(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name(), s.isFirstColumnIsNonDiscardableCarryForward());
         BasicDBList dbFleets = new BasicDBList();
         for (Fleet fleet : s.getFleets()) {
             dbFleets.add(storeFleet(fleet));

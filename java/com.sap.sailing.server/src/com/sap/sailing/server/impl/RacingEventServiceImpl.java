@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +45,6 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -53,6 +53,9 @@ import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
+import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -859,21 +862,20 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
     }
 
-    private Map<String, Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>> getSeriesWithoutRaceColumnsConstructionParametersAsMap(
+    private RegattaCreationParametersDTO getSeriesWithoutRaceColumnsConstructionParametersAsMap(
             Regatta regatta) {
-        Map<String, Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>> result =
-                new HashMap<String, Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>>();
+        LinkedHashMap<String, SeriesCreationParametersDTO> result = new LinkedHashMap<String, SeriesCreationParametersDTO>();
         for (Series s : regatta.getSeries()) {
             assert Util.isEmpty(s.getRaceColumns());
-            List<Triple<String, Integer, Color>> fleetNamesAndOrdering = new ArrayList<Triple<String, Integer, Color>>();
+            List<FleetDTO> fleetNamesAndOrdering = new ArrayList<FleetDTO>();
             for (Fleet f : s.getFleets()) {
-                fleetNamesAndOrdering.add(new Triple<String, Integer, Color>(f.getName(), f.getOrdering(), f.getColor()));
+                fleetNamesAndOrdering.add(getBaseDomainFactory().convertToFleetDTO(f));
             }
-            result.put(s.getName(), new Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>(fleetNamesAndOrdering,
-                    new Pair<Boolean, Boolean>(s.isMedal(), s.isStartsWithZeroScore()),
+            result.put(s.getName(), new SeriesCreationParametersDTO(fleetNamesAndOrdering,
+                    s.isMedal(), s.isStartsWithZeroScore(), s.isFirstColumnIsNonDiscardableCarryForward(),
                     s.getResultDiscardingRule() == null ? null : s.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces()));
         }
-        return result;
+        return new RegattaCreationParametersDTO(result);
     }
 
     /**
@@ -1805,7 +1807,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public CourseArea addCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId) {
-        CourseArea courseArea = com.sap.sailing.domain.base.DomainFactory.INSTANCE.getOrCreateCourseArea(courseAreaId, courseAreaName);
+        CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaId, courseAreaName);
         synchronized (eventsById) {
             if (!eventsById.containsKey(eventId)) {
                 throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
