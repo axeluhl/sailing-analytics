@@ -8,7 +8,7 @@
         android:src="@drawable/compass_back_302dpi_new"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="Compass"
+        android:contentDescription="@string/compass_view_compass"
         android:layout_gravity="center"
         android:layout_centerInParent="true" />
     
@@ -17,7 +17,7 @@
         android:src="@drawable/compass_needle_302dpi_north_new"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="Needle"
+        android:contentDescription="@string/compass_view_needle"
         android:layout_gravity="center"
         android:layout_centerInParent="true" />
 
