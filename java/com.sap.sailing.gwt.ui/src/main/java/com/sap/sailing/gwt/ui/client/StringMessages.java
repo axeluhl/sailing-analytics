@@ -657,4 +657,8 @@ public interface StringMessages extends Messages {
     String firstRaceIsNonDiscardableCarryForward();
     String addReplicationMaster();
     String connect();
+    String explainReplicationHostname();
+    String explainReplicationExchangeName();
+    String explainReplicationExchangePort();
+    String explainReplicationServletPort();
 }

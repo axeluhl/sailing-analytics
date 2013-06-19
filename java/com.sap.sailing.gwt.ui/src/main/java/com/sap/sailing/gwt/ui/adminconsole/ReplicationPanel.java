@@ -157,15 +157,19 @@ public class ReplicationPanel extends FlowPanel {
          */
         @Override
         protected Widget getAdditionalWidget() {
-            Grid grid = new Grid(4, 2);
+            Grid grid = new Grid(8, 2);
             grid.setWidget(0, 0, new Label(stringMessages.hostname()));
             grid.setWidget(0, 1, hostnameEntryField);
-            grid.setWidget(1, 0, new Label(stringMessages.exchangeName()));
-            grid.setWidget(1, 1, exchangenameEntryField);
-            grid.setWidget(2, 0, new Label(stringMessages.messagingPortNumber()));
-            grid.setWidget(2, 1, messagingPortField);
-            grid.setWidget(3, 0, new Label(stringMessages.servletPortNumber()));
-            grid.setWidget(3, 1, servletPortField);
+            grid.setWidget(1, 0, new Label(stringMessages.explainReplicationHostname()));
+            grid.setWidget(2, 0, new Label(stringMessages.exchangeName()));
+            grid.setWidget(2, 1, exchangenameEntryField);
+            grid.setWidget(3, 0, new Label(stringMessages.explainReplicationExchangeName()));
+            grid.setWidget(4, 0, new Label(stringMessages.messagingPortNumber()));
+            grid.setWidget(4, 1, messagingPortField);
+            grid.setWidget(5, 0, new Label(stringMessages.explainReplicationExchangePort()));
+            grid.setWidget(6, 0, new Label(stringMessages.servletPortNumber()));
+            grid.setWidget(6, 1, servletPortField);
+            grid.setWidget(7, 0, new Label(stringMessages.explainReplicationServletPort()));
             return grid;
         }
         
