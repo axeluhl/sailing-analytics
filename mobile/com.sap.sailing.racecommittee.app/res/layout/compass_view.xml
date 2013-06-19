@@ -5,7 +5,7 @@
     
     <ImageView 
         android:id="@+id/compass_view_background"
-        android:src="@drawable/compass_back_200dpi"
+        android:src="@drawable/compass_back_302dpi_new"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="Compass"
@@ -14,7 +14,7 @@
     
     <ImageView 
         android:id="@+id/compass_view_needle"
-        android:src="@drawable/compass_needle_200dpi_north"
+        android:src="@drawable/compass_needle_302dpi_north_new"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="Needle"
