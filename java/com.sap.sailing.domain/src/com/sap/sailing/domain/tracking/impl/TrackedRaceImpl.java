@@ -479,7 +479,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public TimePoint getStartOfRace() {
         if (startTime == null) {
             for (RaceLog raceLog : attachedRaceLogs.values()) {
-                startTime = new StartTimeFinder(raceLog).getStartTime();
+                startTime = new StartTimeFinder(raceLog).analyze();
                 if (startTime != null) {
                     break;
                 }

@@ -22,6 +22,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Gate;
@@ -88,6 +89,8 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final Map<Serializable, Competitor> competitorCache;
     
+    private final Map<Serializable, CourseArea> courseAreaCache;
+    
     /**
      * Weakly references the waypoints. If a waypoint is no longer strongly referenced, the corresponding reference contained
      * as value will have its referred object be <code>null</code>. In this case, the methods reading from this cache will purge
@@ -134,6 +137,7 @@ public class DomainFactoryImpl implements DomainFactory {
         competitorCache = new HashMap<Serializable, Competitor>();
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
         mayStartWithNoUpwindLeg = new HashSet<String>(Arrays.asList(new String[] { "extreme40", "ess", "ess40" }));
+        courseAreaCache = new HashMap<>();
     }
     
     @Override
@@ -450,6 +454,21 @@ public class DomainFactoryImpl implements DomainFactory {
             result.add(convertToCompetitorDTO(competitor));
         }
         return result;
+    }
+
+    @Override
+    public CourseArea getOrCreateCourseArea(Serializable courseAreaId, String name) {
+        CourseArea result = getExistingCourseAreaById(courseAreaId);
+        if (result == null) {
+            result = new CourseAreaImpl(name, courseAreaId);
+            courseAreaCache.put(courseAreaId, result);
+        }
+        return result;
+    }
+
+    @Override
+    public CourseArea getExistingCourseAreaById(Serializable courseAreaId) {
+        return courseAreaCache.get(courseAreaId);
     }
 
 }

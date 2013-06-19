@@ -91,6 +91,7 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
         } catch (ParseException pe) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                     String.format("Invalid JSON in request body:\n%s", pe));
+            logger.warning(String.format("Exception while parsing post request:\n%s", pe.toString()));
             return;
         }
 
