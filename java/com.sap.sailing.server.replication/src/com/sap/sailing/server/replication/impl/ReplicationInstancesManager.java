@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.server.RacingEventServiceOperation;
-import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 
 public class ReplicationInstancesManager {

@@ -17,7 +17,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
-import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 
 /**

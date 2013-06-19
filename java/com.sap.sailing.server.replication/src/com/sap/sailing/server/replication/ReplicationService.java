@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.server.replication.impl.ReplicationServlet;
 
 public interface ReplicationService {
