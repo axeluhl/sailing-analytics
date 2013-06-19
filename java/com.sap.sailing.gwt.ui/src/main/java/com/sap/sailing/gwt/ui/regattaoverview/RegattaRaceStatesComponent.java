@@ -127,8 +127,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private void updateTable(List<RegattaOverviewEntryDTO> newEntries) {
         allEntries = newEntries;
 
-        Collections.sort(allEntries, new RegattaRaceStatesComparator()); //sort entries
-
         regattaOverviewDataProvider.getList().clear();
         regattaOverviewDataProvider.getList().addAll(allEntries);
         // now sort again according to selected criterion
@@ -217,15 +215,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
         };
         fleetNameColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        fleetNameColumn.setSortable(true);
-        regattaOverviewListHandler.setComparator(fleetNameColumn, new Comparator<RegattaOverviewEntryDTO>() {
-
-            @Override
-            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
-                return left.raceInfo.fleetName.compareTo(right.raceInfo.fleetName);
-            }
-
-        });
 
         AnchorCell raceCell = new AnchorCell();
         Column<RegattaOverviewEntryDTO, Anchor> raceNameColumn = new Column<RegattaOverviewEntryDTO, Anchor>(raceCell) {
@@ -247,15 +236,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return result;
             }
         };
-        raceNameColumn.setSortable(true);
-        regattaOverviewListHandler.setComparator(raceNameColumn, new Comparator<RegattaOverviewEntryDTO>() {
-
-            @Override
-            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
-                return right.raceInfo.raceName.compareTo(left.raceInfo.raceName);
-            }
-
-        });
 
         TextColumn<RegattaOverviewEntryDTO> raceStartTimeColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
@@ -268,27 +248,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
         };
         raceStartTimeColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        raceStartTimeColumn.setSortable(true);
-        regattaOverviewListHandler.setComparator(raceStartTimeColumn, new Comparator<RegattaOverviewEntryDTO>() {
-
-            @Override
-            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
-                int result = 0;
-                if (left.raceInfo.startTime != null && right.raceInfo.startTime != null) {
-                    result = left.raceInfo.startTime.compareTo(right.raceInfo.startTime);
-                } else if (left.raceInfo.startTime == null && right.raceInfo.startTime == null) {
-                    result = 0;
-                } else if (left.raceInfo.startTime == null) {
-                    result = 1;
-                } else if (right.raceInfo.startTime == null) {
-                    result = -1;
-                } else {
-                    result = 0;
-                }
-                return result;
-            }
-
-        });
 
         TextColumn<RegattaOverviewEntryDTO> raceStatusColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
