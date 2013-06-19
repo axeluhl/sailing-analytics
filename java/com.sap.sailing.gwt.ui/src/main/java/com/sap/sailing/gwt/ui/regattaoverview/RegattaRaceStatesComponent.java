@@ -81,10 +81,12 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private final RegattaRaceStatesSettings settings;
     private final FlagAlphabetInterpreter flagInterpreter;
+    
+    private final String localStorageRegattaOverviewEventKey;
 
     private static RegattaRaceStatesTableResources tableRes = GWT.create(RegattaRaceStatesTableResources.class);
 
-    private final static String LOCAL_STORAGE_REGATTA_OVERVIEW_KEY = "sailingAnalytics.regattaOverview.settings";
+    private final static String LOCAL_STORAGE_REGATTA_OVERVIEW_KEY = "sailingAnalytics.regattaOverview.settings.";
 
     public RegattaRaceStatesComponent(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final StringMessages stringMessages, final String eventIdAsString, RegattaRaceStatesSettings settings) {
@@ -96,6 +98,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
         this.eventDTO = null;
         this.raceGroupDTOs = null;
+        
+        this.localStorageRegattaOverviewEventKey = LOCAL_STORAGE_REGATTA_OVERVIEW_KEY + eventIdAsString;
 
         this.flagInterpreter = new FlagAlphabetInterpreter(stringMessages);
 
@@ -479,12 +483,12 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
             // delete old value
-            localStorage.removeItem(LOCAL_STORAGE_REGATTA_OVERVIEW_KEY);
+            localStorage.removeItem(localStorageRegattaOverviewEventKey);
 
             //store settings
             GwtJsonDeSerializer<RegattaRaceStatesSettings> serializer = new RegattaRaceStatesSettingsJsonDeSerializer();
             JSONObject settingsAsJson = serializer.serialize(settings);
-            localStorage.setItem(LOCAL_STORAGE_REGATTA_OVERVIEW_KEY, settingsAsJson.toString());
+            localStorage.setItem(localStorageRegattaOverviewEventKey, settingsAsJson.toString());
         }
     }
 
@@ -493,7 +497,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         Storage localStorage = Storage.getLocalStorageIfSupported();
 
         if (localStorage != null) {
-            String jsonAsLocalStore = localStorage.getItem(LOCAL_STORAGE_REGATTA_OVERVIEW_KEY);
+            String jsonAsLocalStore = localStorage.getItem(localStorageRegattaOverviewEventKey);
             if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
                 GwtJsonDeSerializer<RegattaRaceStatesSettings> deserializer = new RegattaRaceStatesSettingsJsonDeSerializer();
                 JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
