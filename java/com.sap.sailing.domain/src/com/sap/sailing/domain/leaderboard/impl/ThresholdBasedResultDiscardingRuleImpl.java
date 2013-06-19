@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -48,6 +49,29 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         ois.defaultReadObject();
     }
+    
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(discardIndexResultsStartingWithHowManyRaces);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ThresholdBasedResultDiscardingRuleImpl other = (ThresholdBasedResultDiscardingRuleImpl) obj;
+        if (!Arrays.equals(discardIndexResultsStartingWithHowManyRaces,
+                other.discardIndexResultsStartingWithHowManyRaces))
+            return false;
+        return true;
+    }
 
     @Override
     public Set<RaceColumn> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard,
@@ -74,7 +98,7 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
                 }
             };
             for (RaceColumn raceColumn : raceColumnsToConsider) {
-                if (!raceColumn.isMedalRace()) {
+                if (raceColumn.isDiscardable()) {
                     sortedRaces.add(raceColumn);
                 }
             }

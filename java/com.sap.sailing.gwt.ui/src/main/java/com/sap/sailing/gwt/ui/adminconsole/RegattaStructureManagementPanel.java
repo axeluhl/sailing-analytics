@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -15,11 +14,9 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.RegattaIdentifier;
-import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
+import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
@@ -118,20 +115,15 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     }
     
     private void createNewRegatta(final RegattaDTO newRegatta) {
-        LinkedHashMap<String, Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>> seriesStructure =
-                new LinkedHashMap<String, Triple<List<Triple<String,Integer,Color>>,Pair<Boolean, Boolean>,int[]>>();
+        LinkedHashMap<String, SeriesCreationParametersDTO> seriesStructure = new LinkedHashMap<String, SeriesCreationParametersDTO>();
         for (SeriesDTO seriesDTO : newRegatta.series) {
-            List<Triple<String, Integer, Color>> fleets = new ArrayList<Triple<String, Integer, Color>>();
-            for(FleetDTO fleetDTO : seriesDTO.getFleets()) {
-                Triple<String, Integer, Color> fleetTriple = new Triple<String, Integer, Color>(fleetDTO.getName(), fleetDTO.getOrderNo(), fleetDTO.getColor());
-                fleets.add(fleetTriple);
-            }
-            Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]> seriesPair =
-                    new Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>(
-                    fleets, new Pair<Boolean, Boolean>(seriesDTO.isMedal(), seriesDTO.isStartsWithZeroScore()), seriesDTO.getDiscardThresholds());
+            SeriesCreationParametersDTO seriesPair = new SeriesCreationParametersDTO(seriesDTO.getFleets(),
+                    seriesDTO.isMedal(), seriesDTO.isStartsWithZeroScore(),
+                    seriesDTO.isFirstColumnIsNonDiscardableCarryForward(), seriesDTO.getDiscardThresholds());
             seriesStructure.put(seriesDTO.getName(), seriesPair);
         }
-        sailingService.createRegatta(newRegatta.getName(), newRegatta.boatClass==null?null:newRegatta.boatClass.getName(), seriesStructure, true,
+        sailingService.createRegatta(newRegatta.getName(), newRegatta.boatClass==null?null:newRegatta.boatClass.getName(),
+                new RegattaCreationParametersDTO(seriesStructure), true,
                 newRegatta.scoringScheme, newRegatta.defaultCourseAreaIdAsString, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {

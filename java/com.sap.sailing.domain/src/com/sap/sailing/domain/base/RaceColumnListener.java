@@ -16,6 +16,8 @@ public interface RaceColumnListener extends Serializable {
     
     void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore);
     
+    void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward);
+
     boolean canAddRaceColumnToContainer(RaceColumn raceColumn);
     
     void raceColumnAddedToContainer(RaceColumn raceColumn);
@@ -43,4 +45,5 @@ public interface RaceColumnListener extends Serializable {
      * exclude listeners from the serialization that return <code>true</code> from this method.
      */
     boolean isTransient();
+
 }
