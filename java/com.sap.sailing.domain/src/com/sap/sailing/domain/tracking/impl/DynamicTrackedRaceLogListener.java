@@ -11,9 +11,11 @@ import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
+import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -58,13 +60,13 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     }
 
     private void analyzeStatus() {
-        /* RaceLogRaceStatus newStatus = */statusAnalyzer.getStatus();
+        /* RaceLogRaceStatus newStatus = */statusAnalyzer.analyze();
 
         // TODO: What can we do with the status? Should we use DynamicTrackedRace.setStatus?
     }
 
     private void analyzeCourseDesign() {
-        CourseBase courseDesign = courseDesignFinder.getLastCourseDesign();
+        CourseBase courseDesign = courseDesignFinder.analyze();
 
         // On the initial analyze step after attaching the RaceLog there might be no course design.
         if (courseDesign != null) {
@@ -127,6 +129,17 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     @Override
     public void visit(RaceLogStartProcedureChangedEvent event) {
 
+    }
+
+    @Override
+    public void visit(RaceLogProtestStartTimeEvent event) {
+        
+    }
+
+    @Override
+    public void visit(RaceLogWindFixEvent event) {
+        // TODO handle a new wind fix entered by the race committee
+        // add the wind fix to the race committee WindTrack
     }
 
 }

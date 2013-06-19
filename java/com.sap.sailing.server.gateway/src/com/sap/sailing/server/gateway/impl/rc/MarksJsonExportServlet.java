@@ -75,7 +75,7 @@ public class MarksJsonExportServlet extends AbstractJsonHttpServlet {
         
         if (trackedRace != null) {
             MarkJsonSerializer serializer = new MarkJsonSerializer();
-
+            
             for (Mark mark : trackedRace.getMarks()) {
                 if (toUUID(mark.getId().toString()) != null) {
                     result.add(serializer.serialize(mark));

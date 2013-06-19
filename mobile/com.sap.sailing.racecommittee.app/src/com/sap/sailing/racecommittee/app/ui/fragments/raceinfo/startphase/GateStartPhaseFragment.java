@@ -14,13 +14,11 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartPhaseEventListener;
@@ -29,7 +27,7 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.GateStartUiListener;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseLineOpeningTimeDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseGateLineOpeningTimeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChoosePathFinderDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
@@ -38,14 +36,16 @@ import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 public class GateStartPhaseFragment extends RaceFragment implements GateStartPhaseEventListener, GateStartUiListener {
 
     private RaceInfoListener infoListener;
-    
+
     TextView raceCountdown;
     TextView nextFlagCountdown;
     TextView pathfinderLabel;
     TextView lineOpeningTimeLabel;
     ImageButton abortingFlagButton;
-    ImageView displayedFlag;
-    ImageView nextToBeDisplayedFlag;
+    ImageView classFlagUp;
+    ImageView startModeFlagUp;
+    ImageView classFlagDown;
+    ImageView startModeFlagDown;
     Button resetTimeButton;
     Button pathFinderButton;
     Button lineOpeningTimeButton;
@@ -57,9 +57,7 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
         if (activity instanceof RaceInfoListener) {
             this.infoListener = (RaceInfoListener) activity;
         } else {
-            throw new UnsupportedOperationException(String.format(
-                    "%s must implement %s", 
-                    activity, 
+            throw new UnsupportedOperationException(String.format("%s must implement %s", activity,
                     RaceInfoListener.class.getName()));
         }
     }
@@ -68,15 +66,17 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.race_startphase_gate_view, container, false);
     }
-    
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
         raceCountdown = (TextView) getView().findViewById(R.id.raceCountdown);
         nextFlagCountdown = (TextView) getView().findViewById(R.id.nextFlagCountdown);
-        displayedFlag = (ImageView) getView().findViewById(R.id.currentlyDisplayedFlag);
-        nextToBeDisplayedFlag = (ImageView) getView().findViewById(R.id.nextFlagToBeDisplayed);
+        classFlagUp = (ImageView) getView().findViewById(R.id.classFlagUp);
+        startModeFlagUp = (ImageView) getView().findViewById(R.id.startModeFlagUp);
+        classFlagDown = (ImageView) getView().findViewById(R.id.classFlagDown);
+        startModeFlagDown = (ImageView) getView().findViewById(R.id.startModeFlagDown);
 
         ExLog.i("STARTPHASE", "" + getRace().getId() + " " + getRace().getStatus().toString());
 
@@ -99,18 +99,7 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
         lineOpeningTimeButton = (Button) getView().findViewById(R.id.lineOpeningTimeButton);
         pathfinderLabel = (TextView) getView().findViewById(R.id.pathfinderLabel);
         lineOpeningTimeLabel = (TextView) getView().findViewById(R.id.lineOpeningTimeLabel);
-        
-        if(getRace().getState().getStartProcedure() instanceof GateStartProcedure){
-            GateStartProcedure gateStartProcedure = ((GateStartProcedure) getRace().getState().getStartProcedure());
-            if(gateStartProcedure.getPathfinder()!=null){
-                pathfinderLabel.setText(gateStartProcedure.getPathfinder());
-            }
-            if(gateStartProcedure.getGateLineOpeningTime()!=null){
-                lineOpeningTimeLabel.setText(String.valueOf(gateStartProcedure.getGateLineOpeningTime()/(60 * 1000))+" minutes");
-            }
-        }
-        
-       
+
         pathFinderButton.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
@@ -124,7 +113,7 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
                 showLineOpeningTimeDialog();
             }
         });
-        
+
         setupUi();
     }
 
@@ -138,48 +127,55 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
 
     private void showLineOpeningTimeDialog() {
         FragmentManager fragmentManager = getFragmentManager();
-        RaceDialogFragment fragment = new RaceChooseLineOpeningTimeDialog();
+        RaceDialogFragment fragment = new RaceChooseGateLineOpeningTimeDialog();
         Bundle args = getRecentArguments();
         fragment.setArguments(args);
         fragment.show(fragmentManager, null);
     }
 
     private void setupUi() {
-        RaceLog log = getRace().getState().getRaceLog();
-        log.lockForRead();
-        try {
-            RaceLogEvent lastEvent = log.getLastFixAtOrBefore(MillisecondsTimePoint.now());
-            if (lastEvent instanceof RaceLogFlagEvent) {
-                RaceLogFlagEvent flagEvent = (RaceLogFlagEvent) lastEvent;
-                Flags flag = flagEvent.getUpperFlag();
-                
-                if (flagEvent.isDisplayed() && flag.equals(Flags.CLASS) && flagEvent.getLowerFlag().equals(Flags.GOLF)) {
-                    onClassOverGolfUp();
-                } else if (flagEvent.isDisplayed() && flag.equals(Flags.PAPA)) {
+        if (getRace().getState().getStartProcedure() instanceof GateStartProcedure) {
+            GateStartProcedure gateStartProcedure = ((GateStartProcedure) getRace().getState().getStartProcedure());
+            if (gateStartProcedure.getPathfinder() != null) {
+                pathfinderLabel.setText(gateStartProcedure.getPathfinder());
+            }
+            if (gateStartProcedure.getGateLineOpeningTime() != null) {
+                lineOpeningTimeLabel.setText(String.valueOf(gateStartProcedure.getGateLineOpeningTime() / (60 * 1000))
+                        + " minutes");
+            }
+        }
+        LastFlagsFinder lastFlagFinder = new LastFlagsFinder(this.getRace().getRaceLog());
+        RaceLogFlagEvent lastFlagEvent = LastFlagsFinder.getMostRecent(lastFlagFinder.analyze());
+        if (lastFlagEvent != null) {
+            if (lastFlagEvent.getUpperFlag().equals(Flags.CLASS) && lastFlagEvent.getLowerFlag().equals(Flags.GOLF)
+                    && lastFlagEvent.isDisplayed()) {
+                this.onClassOverGolfUp();
+            } else if (lastFlagEvent.getUpperFlag().equals(Flags.PAPA)) {
+                if (lastFlagEvent.isDisplayed()) {
                     onPapaUp();
-                } else if (!flagEvent.isDisplayed() && flag.equals(Flags.PAPA)) {
-                    onPapaDown(); 
+                } else {
+                    onPapaDown();
                 }
-            } else
-                displayedFlag.setVisibility(View.INVISIBLE);
-        } finally {
-            log.unlockAfterRead();
+            } else if (lastFlagEvent.getUpperFlag().equals(Flags.CLASS) && !lastFlagEvent.isDisplayed()) {
+                onClassOverGolfDown();
+            }
+
         }
     }
-    
+
     @Override
     public void onStart() {
         super.onStart();
-        
+
         getRace().getState().getStartProcedure().setStartPhaseEventListener(this);
-        ExLog.w(GateStartPhaseFragment.class.getName(), String.format("Fragment %s is now shown", GateStartPhaseFragment.class.getName()));
+        ExLog.w(GateStartPhaseFragment.class.getName(),
+                String.format("Fragment %s is now shown", GateStartPhaseFragment.class.getName()));
     }
-    
-    
+
     @Override
     public void onStop() {
         super.onStop();
-        
+
         getRace().getState().getStartProcedure().setStartPhaseEventListener(null);
     }
 
@@ -190,20 +186,20 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
             setCountdownLabels(TimeUtils.timeUntil(startTime));
         }
     }
-    
+
     private void setCountdownLabels(long millisecondsTillStart) {
         setStarttimeCountdownLabel(millisecondsTillStart);
         setNextFlagCountdownLabel(millisecondsTillStart);
     }
 
     private void setStarttimeCountdownLabel(long millisecondsTillStart) {
-        raceCountdown.setText(String.format(
-                getString(R.string.race_startphase_countdown_start),
+        raceCountdown.setText(String.format(getString(R.string.race_startphase_countdown_start),
                 TimeUtils.prettyString(millisecondsTillStart), getRace().getName()));
     }
 
     private void setNextFlagCountdownLabel(long millisecondsTillStart) {
-        Pair<String, List<Object>> countdownStringPackage = getRace().getState().getStartProcedure().getNextFlagCountdownUiLabel(getActivity(), millisecondsTillStart);
+        Pair<String, List<Object>> countdownStringPackage = getRace().getState().getStartProcedure()
+                .getNextFlagCountdownUiLabel(getActivity(), millisecondsTillStart);
         nextFlagCountdown.setText(String.format(countdownStringPackage.getA(),
                 TimeUtils.prettyString(((Number) countdownStringPackage.getB().get(0)).longValue())));
     }
@@ -218,26 +214,6 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
         fragment.setArguments(args);
 
         fragment.show(fragmentManager, "dialogAPMode");
-    }
-
-    @Override
-    public void onClassOverGolfUp() {
-        displayedFlag.setVisibility(View.VISIBLE);
-        
-        resetTimeButton.setEnabled(false);
-        resetTimeButton.setVisibility(View.GONE);
-        nextToBeDisplayedFlag.setImageResource(R.drawable.papa_flag);
-    }
-
-    @Override
-    public void onPapaUp() {
-        nextToBeDisplayedFlag.setVisibility(View.INVISIBLE);
-        displayedFlag.setImageResource(R.drawable.papa_flag);
-    }
-
-    @Override
-    public void onPapaDown() {
-        displayedFlag.setImageResource(R.drawable.fivehundred_five_over_golf_flag);
     }
 
     @Override
@@ -259,5 +235,58 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
                         + " minutes");
             }
         }
+    }
+
+    @Override
+    public void onPathFinderSet() {
+        if (getRace().getState().getStartProcedure() instanceof GateStartProcedure) {
+            GateStartProcedure gateStartProcedure = ((GateStartProcedure) getRace().getState().getStartProcedure());
+            if (gateStartProcedure.getPathfinder() != null) {
+                pathfinderLabel.setText(gateStartProcedure.getPathfinder());
+            }
+        }
+    }
+
+    @Override
+    public void onGateLineOpeningTimeSet() {
+        if (getRace().getState().getStartProcedure() instanceof GateStartProcedure) {
+            GateStartProcedure gateStartProcedure = ((GateStartProcedure) getRace().getState().getStartProcedure());
+            if (gateStartProcedure.getGateLineOpeningTime() != null) {
+                lineOpeningTimeLabel.setText(String.valueOf(gateStartProcedure.getGateLineOpeningTime() / (60 * 1000))
+                        + " minutes");
+            }
+        }
+    }
+
+    @Override
+    public void onClassOverGolfUp() {
+        classFlagUp.setVisibility(View.VISIBLE);
+        startModeFlagUp.setVisibility(View.GONE);
+        classFlagDown.setVisibility(View.GONE);
+        startModeFlagDown.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onPapaUp() {
+        classFlagUp.setVisibility(View.VISIBLE);
+        startModeFlagUp.setVisibility(View.VISIBLE);
+        classFlagDown.setVisibility(View.GONE);
+        startModeFlagDown.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onPapaDown() {
+        classFlagUp.setVisibility(View.VISIBLE);
+        startModeFlagUp.setVisibility(View.GONE);
+        classFlagDown.setVisibility(View.GONE);
+        startModeFlagDown.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onClassOverGolfDown() {
+        classFlagUp.setVisibility(View.GONE);
+        startModeFlagUp.setVisibility(View.GONE);
+        classFlagDown.setVisibility(View.VISIBLE);
+        startModeFlagDown.setVisibility(View.VISIBLE);
     }
 }

@@ -1,0 +1,40 @@
+package com.sap.sailing.server.gateway.deserialization.impl;
+
+import org.json.simple.JSONObject;
+
+import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
+
+public class WindJsonDeserializer implements JsonDeserializer<Wind> {
+    private JsonDeserializer<Position> positionDeserializer;
+
+    public WindJsonDeserializer(JsonDeserializer<Position> positionDeserializer) {
+        this.positionDeserializer = positionDeserializer;
+    }
+
+    public Wind deserialize(JSONObject object) throws JsonDeserializationException {
+        
+        JSONObject positionJsonObject = Helpers.getNestedObjectSafe(object, WindJsonSerializer.FIELD_POSITION);
+        Position position = positionDeserializer.deserialize(positionJsonObject);
+        
+        Number timeStamp = (Number) object.get(WindJsonSerializer.FIELD_TIMEPOINT);
+        Number bearing = (Number) object.get(WindJsonSerializer.FIELD_BEARING);
+        Number speedInKnots = (Number) object.get(WindJsonSerializer.FIELD_SPEED_IN_KNOTS);
+        
+        Bearing degreeBearing = new DegreeBearingImpl(bearing.doubleValue());
+        SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(speedInKnots.doubleValue(), degreeBearing);
+        Wind wind = new WindImpl(position, new MillisecondsTimePoint(timeStamp.longValue()), speedBearing);
+
+        return wind;
+    }
+
+}
