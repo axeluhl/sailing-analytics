@@ -269,6 +269,7 @@ import com.sap.sailing.server.replication.ReplicationFactory;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
+import com.sap.sailing.util.BuildVersion;
 
 /**
  * The server side implementation of the RPC service.
@@ -2914,6 +2915,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     public String getBuildVersion() {
-        return Util.getBuildVersion();
+        return BuildVersion.getBuildVersion();
     }
 }

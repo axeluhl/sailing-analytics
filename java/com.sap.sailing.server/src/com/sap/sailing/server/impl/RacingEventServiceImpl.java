@@ -146,6 +146,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
+import com.sap.sailing.util.BuildVersion;
 
 public class RacingEventServiceImpl implements RacingEventService, RegattaListener, LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
@@ -1933,7 +1934,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     public String toString() {
-        return "RacingEventService: " + this.hashCode() + " Build: " + Util.getBuildVersion();
+        return "RacingEventService: " + this.hashCode() + " Build: " + BuildVersion.getBuildVersion();
     }
 
 }
