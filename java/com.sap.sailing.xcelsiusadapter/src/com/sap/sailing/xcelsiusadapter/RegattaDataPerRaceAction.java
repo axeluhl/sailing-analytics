@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -31,7 +30,6 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
@@ -118,8 +116,6 @@ public class RegattaDataPerRaceAction extends HttpAction {
 
                 long minNextLegStart = raceStarted.asMillis(); // variable for keeping track of when the first competitor
                                                                // started the next leg
-                TimePoint legStarted = new MillisecondsTimePoint(minNextLegStart); // get TimePoint for when the leg started
-
                 addNamedElementWithValue(race_node, "start_time_ms", raceStarted.asMillis()); // add the starttime to the
                 if (trackedRace.getEndOfRace() != null) {
                     addNamedElementWithValue(race_node, "assumed_end_ms", trackedRace.getEndOfRace().asMillis()); // add the assumed enddtime
@@ -262,7 +258,6 @@ public class RegattaDataPerRaceAction extends HttpAction {
                             minNextLegStart = (minNextLegStart > compFinishedLeg.asMillis() ? compFinishedLeg
                                     .asMillis() : minNextLegStart);
                             
-                            legStarted = new MillisecondsTimePoint(minNextLegStart);
                             minNextLegStart = Long.MAX_VALUE;
                             previousLeg = trackedLeg;
 
@@ -337,28 +332,6 @@ public class RegattaDataPerRaceAction extends HttpAction {
     } // function end
 
     
-    private Distance getCourseLengthAtStart(TrackedRace race) {
-        return getCourseLengthAt(race, race.getStartOfRace());
-    }
-    
-    private Distance getCourseLengthAt(TrackedRace race, TimePoint timePoint) {
-        if (timePoint == null) {
-            return null;
-        }
-        List<Leg> legs = race.getRace().getCourse().getLegs();
-        Distance raceDistance = new MeterDistance(0);
-        for (Leg leg : legs) {
-            Waypoint from = leg.getFrom();
-            Waypoint to = leg.getTo();
-            Position fromPos = race.getApproximatePosition(from, timePoint);
-            Position toPos = race.getApproximatePosition(to, timePoint);
-            Distance legDistance = fromPos.getDistance(toPos);
-            Distance inMeters = new MeterDistance(legDistance.getMeters());
-            raceDistance = raceDistance.add(inMeters);
-        }
-        return raceDistance;
-    }
-    
     private Distance getCourseLength(TrackedRace race) {
         List<Leg> legs = race.getRace().getCourse().getLegs();
         Distance raceDistance = new NauticalMileDistance(0);
@@ -388,7 +361,6 @@ public class RegattaDataPerRaceAction extends HttpAction {
         for (Waypoint waypoint : waypoints) {
             if (waypoint != trackedRace.getRace().getCourse().getFirstWaypoint()) {
                 TrackedLeg trackedLeg = trackedRace.getTrackedLegFinishingAt(waypoint);
-                LinkedHashMap<Competitor, Integer> ranks = trackedLeg.getRanks(timePoint);
                 for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                     Map<Waypoint, Integer> map = result.get(competitor);
                     if (map == null) {
@@ -432,7 +404,6 @@ public class RegattaDataPerRaceAction extends HttpAction {
             windSourcesToDeliver.add(windSource);
 
             double sumWindSpeed = 0.0;
-            double sumWindSpeedConfidence = 0.0;
             double sumWindSpeedBeaufort = 0.0;
             int speedCounter = 0;
 
@@ -444,11 +415,9 @@ public class RegattaDataPerRaceAction extends HttpAction {
                         .getAveragedWindWithConfidence(null, timePoint);
                 if (averagedWindWithConfidence != null) {
                     double windSpeedinKnots = averagedWindWithConfidence.getObject().getKnots();
-                    double confidence = averagedWindWithConfidence.getConfidence();
                     double windSpeedinBeaufort = averagedWindWithConfidence.getObject().getBeaufort();
 
                     sumWindSpeed += windSpeedinKnots;
-                    sumWindSpeedConfidence += confidence;
                     sumWindSpeedBeaufort += windSpeedinBeaufort;
 
                     speedCounter++;
@@ -457,7 +426,6 @@ public class RegattaDataPerRaceAction extends HttpAction {
             }
             if (speedCounter > 0) {
                 double averageWindSpeed = sumWindSpeed / speedCounter;
-                double averageWindSpeedConfidence = sumWindSpeedConfidence / speedCounter;
                 double averageWindSpeedBeaufort = sumWindSpeedBeaufort / speedCounter;
 
                 result = new Pair<Double, Double>(averageWindSpeed, averageWindSpeedBeaufort);
