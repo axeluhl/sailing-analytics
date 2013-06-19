@@ -83,7 +83,6 @@ public class Replicator implements Runnable {
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         
         while (true) {
-            boolean noClassLoaderReset = false;
             try {
                 Delivery delivery = consumer.nextDelivery();
                 byte[] bytesFromMessage = delivery.getBody();
@@ -121,7 +120,6 @@ public class Replicator implements Runnable {
                         eir.printStackTrace();
                     }
                     checksPerformed += 1;
-                    noClassLoaderReset = true;
                     continue;
                 } else {
                     logger.severe("Grace time (" + CHECK_COUNT*(CHECK_INTERVAL/1000) + "secs) is over. Terminating replication listener " + this.toString());
@@ -132,9 +130,7 @@ public class Replicator implements Runnable {
                 logger.info("Exception while processing replica: "+e.getMessage());
                 logger.log(Level.SEVERE, "run", e);
             } finally {
-                if (noClassLoaderReset == false) {
-                    Thread.currentThread().setContextClassLoader(oldClassLoader);
-                }
+                Thread.currentThread().setContextClassLoader(oldClassLoader);
             }
         }
     }
