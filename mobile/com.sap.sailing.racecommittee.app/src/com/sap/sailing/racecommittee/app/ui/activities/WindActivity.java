@@ -2,6 +2,8 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -118,19 +120,24 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
         });
         sendButton.setEnabled(false);
 
+        windBearingEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    compassView.setDirection(Float.valueOf(windBearingEditText.getText().toString()));
+                }
+            }
+        });
         windSpeedEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
-
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     windSpeedSeekBar.setProgress(Double.valueOf(windSpeedEditText.getText().toString()).intValue() * 10);
                 }
             }
-
         });
-
-        speedFormat = new DecimalFormat("#0.0");
-        bearingFormat = new DecimalFormat("###");
+        speedFormat = new DecimalFormat("#0.0", new DecimalFormatSymbols(Locale.US));
+        bearingFormat = new DecimalFormat("###", new DecimalFormatSymbols(Locale.US));
 
         double enteredWindSpeed = AppPreferences.getWindSpeed(getBaseContext());
         windSpeedSeekBar.setProgress(Double.valueOf(enteredWindSpeed).intValue() * 10);
