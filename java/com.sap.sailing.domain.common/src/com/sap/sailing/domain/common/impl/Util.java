@@ -1,8 +1,5 @@
 package com.sap.sailing.domain.common.impl;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
@@ -249,17 +246,4 @@ public class Util {
         return result;
     }
     
-    public static String getBuildVersion() {
-        String version = "Unknown or Development (" + System.getProperty("com.sap.sailing.server.name") + ")";
-        File versionfile = new File(System.getProperty("jetty.home") + File.separator + "version.txt");
-        if (versionfile.exists()) {
-            try {
-                version = new BufferedReader(new FileReader(versionfile)).readLine();
-            } catch (Exception ex) {
-                /* ignore */
-            }
-        }
-        return version;
-    }
-
 }
