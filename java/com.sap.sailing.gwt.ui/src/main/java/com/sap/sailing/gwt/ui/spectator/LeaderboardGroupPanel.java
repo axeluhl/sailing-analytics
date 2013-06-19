@@ -343,8 +343,8 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
     private List<RaceColumnDTO> getRacesOfFleet(StrippedLeaderboardDTO leaderboard, SeriesDTO series, FleetDTO fleet) {
         List<RaceColumnDTO> racesColumnsOfFleet = new ArrayList<RaceColumnDTO>();
         
-        for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-            for (FleetDTO fleetOfRaceColumn : raceColumn.getFleets()) {
+        for (RaceColumnDTO raceColumn : series.getRaceColumns()) {
+            for (FleetDTO fleetOfRaceColumn : series.getFleets()) {
                 if(fleet.equals(fleetOfRaceColumn)) {
                     racesColumnsOfFleet.add(raceColumn);
                 }
