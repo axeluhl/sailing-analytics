@@ -607,7 +607,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
     
-    private RaceInfoDTO createRaceInfoDTO(String seriesName, RaceColumn raceColumn, Fleet fleet) {
+    private RaceInfoDTO createRaceInfoDTO(String seriesName, int seriesOrder, RaceColumn raceColumn, Fleet fleet) {
         RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
@@ -668,6 +668,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         raceInfoDTO.seriesName = seriesName;
+        raceInfoDTO.seriesOrder = seriesOrder;
         raceInfoDTO.raceName = raceColumn.getName();
         raceInfoDTO.fleetName = fleet.getName();
         raceInfoDTO.fleetOrdering = fleet.getOrdering();
@@ -2588,9 +2589,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return raceGroups;
     }
 
+    /**
+     * The name of the regatta to be shown on the regatta overview webpage is retrieved from the name of the {@link Leaderboard}. Since regattas are
+     * not always represented by a {@link Regatta} object in the Sailing Suite but need to be shown on the regatta overview page, the leaderboard is
+     * used as the representative of the sailing regatta. When a display name is set for a leaderboard, this name is favored against the (mostly technical)
+     * regatta name as the display name represents the publicly visible name of the regatta. 
+     * <br>
+     * When the leaderboard is a {@link RegattaLeaderboard} the name of the {@link Regatta} is used, otherwise the leaderboard 
+     * is a {@link FlexibleLeaderboard} and it's name is used as the last option.
+     * @param leaderboard The {@link Leaderboard} from which the name is be retrieved
+     * @return the name of the regatta to be shown on the regatta overview page
+     */
     private String getRegattaNameFromLeaderboard(Leaderboard leaderboard) {
         String regattaName;
-        if (leaderboard.getDisplayName() != null) {
+        if (leaderboard.getDisplayName() != null && !leaderboard.getDisplayName().isEmpty()) {
             regattaName = leaderboard.getDisplayName();
         } else {
             if (leaderboard instanceof RegattaLeaderboard) {
@@ -2970,9 +2982,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
                             for (Series series : regattaLeaderboard.getRegatta().getSeries()) {
                                 Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet = new HashMap<String, List<RegattaOverviewEntryDTO>>();
+                                int seriesOrder = Util.indexOf(regattaLeaderboard.getRegatta().getSeries(), series);
                                 for (RaceColumn raceColumn : series.getRaceColumns()) {
                                     getRegattaOverviewEntries(showOnlyRacesOfSameDay, dayToCheck,
-                                            courseArea, leaderboard, regattaName, series.getName(), raceColumn, entriesPerFleet);
+                                            courseArea, leaderboard, regattaName, series.getName(), seriesOrder, raceColumn, entriesPerFleet);
                                 }
                                 result.addAll(getRegattaOverviewEntriesToBeShown(showOnlyCurrentlyRunningRaces, entriesPerFleet));
                             }
@@ -2981,7 +2994,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet = new HashMap<String, List<RegattaOverviewEntryDTO>>();
                             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                                 getRegattaOverviewEntries(showOnlyRacesOfSameDay, dayToCheck, courseArea,
-                                        leaderboard, regattaName, LeaderboardNameConstants.DEFAULT_SERIES_NAME, raceColumn, entriesPerFleet);
+                                        leaderboard, regattaName, LeaderboardNameConstants.DEFAULT_SERIES_NAME, 0, raceColumn, entriesPerFleet);
                             }
                             result.addAll(getRegattaOverviewEntriesToBeShown(showOnlyCurrentlyRunningRaces, entriesPerFleet));
                         }
@@ -2993,12 +3006,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private void getRegattaOverviewEntries(boolean showOnlyRacesOfSameDay, Calendar dayToCheck,
-            CourseArea courseArea, Leaderboard leaderboard, String regattaName, String seriesName, RaceColumn raceColumn,
+            CourseArea courseArea, Leaderboard leaderboard, String regattaName, String seriesName, int seriesOrder, RaceColumn raceColumn,
             Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet) {
 
         for (Fleet fleet : raceColumn.getFleets()) {
             RegattaOverviewEntryDTO entry = createRegattaOverviewEntryDTO(courseArea,
-                    leaderboard, regattaName, seriesName, raceColumn, fleet, 
+                    leaderboard, regattaName, seriesName, seriesOrder, raceColumn, fleet, 
                     showOnlyRacesOfSameDay, dayToCheck);
             if (entry != null) {
                 addRegattaOverviewEntryToEntriesPerFleet(entriesPerFleet, fleet, entry);
@@ -3049,13 +3062,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private RegattaOverviewEntryDTO createRegattaOverviewEntryDTO(CourseArea courseArea, Leaderboard leaderboard,
-            String regattaName, String seriesName, RaceColumn raceColumn, Fleet fleet, boolean showOnlyRacesOfSameDay, Calendar dayToCheck) {
+            String regattaName, String seriesName, int seriesOrder, RaceColumn raceColumn, Fleet fleet, boolean showOnlyRacesOfSameDay, Calendar dayToCheck) {
         RegattaOverviewEntryDTO entry = new RegattaOverviewEntryDTO();
         entry.courseAreaName = courseArea.getName();
         entry.courseAreaIdAsString = courseArea.getId().toString();
         entry.regattaDisplayName = regattaName;
         entry.regattaName = leaderboard.getName();
-        entry.raceInfo = createRaceInfoDTO(seriesName, raceColumn, fleet);
+        entry.raceInfo = createRaceInfoDTO(seriesName, seriesOrder, raceColumn, fleet);
         
         if (showOnlyRacesOfSameDay) {
             if (!RaceStateOfSameDayHelper.isRaceStateOfSameDay(entry.raceInfo.startTime, entry.raceInfo.finishedTime, dayToCheck)) {
