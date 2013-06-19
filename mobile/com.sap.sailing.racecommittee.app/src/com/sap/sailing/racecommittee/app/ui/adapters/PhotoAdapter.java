@@ -62,10 +62,6 @@ public class PhotoAdapter extends ArrayAdapter<Uri> {
         return (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    public void addPhoto(Uri uri) {
-        add(uri);
-    }
-
     public List<Uri> getItems() {
         List<Uri> items = new ArrayList<Uri>();
         for (int i = 0; i < getCount(); i++) {
