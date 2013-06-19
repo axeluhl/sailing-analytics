@@ -32,6 +32,8 @@ import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
  */
 public class ReplicationPanel extends FlowPanel {
     private final Grid registeredReplicas;
+    private final Grid registeredMasters;
+    
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -40,9 +42,17 @@ public class ReplicationPanel extends FlowPanel {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
+        
+        add(new Label(stringMessages.explainReplicasRegistered()));
         registeredReplicas = new Grid();
         registeredReplicas.resizeColumns(3);
         add(registeredReplicas);
+        
+        add(new Label(stringMessages.explainConnectionsToMaster()));
+        registeredMasters = new Grid();
+        registeredMasters.resizeColumns(3);
+        add(registeredMasters);
+        
         Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(new ClickHandler() {
             @Override
@@ -51,7 +61,7 @@ public class ReplicationPanel extends FlowPanel {
             }
         });
         add(refreshButton);
-        Button addButton = new Button(stringMessages.add());
+        Button addButton = new Button(stringMessages.connectToMaster());
         addButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -59,6 +69,7 @@ public class ReplicationPanel extends FlowPanel {
             }
         });
         add(addButton);
+        updateReplicaList();
     }
     
     private void addReplication() {
@@ -96,17 +107,25 @@ public class ReplicationPanel extends FlowPanel {
         sailingService.getReplicaInfo(new AsyncCallback<ReplicationStateDTO>() {
             @Override
             public void onSuccess(ReplicationStateDTO replicas) {
-                while (registeredReplicas.getRowCount() > 0) {
-                    registeredReplicas.removeRow(0);
+                while (registeredMasters.getRowCount() > 0) {
+                    registeredMasters.removeRow(0);
                 }
                 int i=0;
                 final ReplicationMasterDTO replicatingFromMaster = replicas.getReplicatingFromMaster();
                 if (replicatingFromMaster != null) {
-                    registeredReplicas.insertRow(i);
-                    registeredReplicas.setWidget(i, 0, new Label(stringMessages.replicatingFromMaster(replicatingFromMaster.getHostname(),
+                    registeredMasters.insertRow(i);
+                    registeredMasters.setWidget(i, 0, new Label(stringMessages.replicatingFromMaster(replicatingFromMaster.getHostname(),
                             replicatingFromMaster.getMessagingPort(), replicatingFromMaster.getServletPort())));
                     i++;
+                } else {
+                    registeredMasters.insertRow(i);
+                    registeredMasters.setWidget(i, 0, new Label(stringMessages.explainNoConnectionsToMaster()));
                 }
+                
+                while (registeredReplicas.getRowCount() > 0) {
+                    registeredReplicas.removeRow(0);
+                }
+                i = 0; boolean replicaRegistered = false;
                 for (ReplicaDTO replica : replicas.getReplicas()) {
                     registeredReplicas.insertRow(i);
                     registeredReplicas.setWidget(i, 0, new Label(replica.getHostname()));
@@ -118,6 +137,12 @@ public class ReplicationPanel extends FlowPanel {
                         registeredReplicas.setWidget(i, 2, new Label(e.getValue().toString()));
                         i++;
                     }
+                    replicaRegistered = true;
+                }
+                
+                if (!replicaRegistered) {
+                    registeredReplicas.insertRow(i);
+                    registeredReplicas.setWidget(i, 0, new Label(stringMessages.explainNoConnectionsFromReplicas()));
                 }
             }
             
