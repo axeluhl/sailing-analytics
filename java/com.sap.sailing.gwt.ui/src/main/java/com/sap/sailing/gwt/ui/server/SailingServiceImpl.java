@@ -607,7 +607,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
     
-    private RaceInfoDTO createRaceInfoDTO(String seriesName, RaceColumn raceColumn, Fleet fleet) {
+    private RaceInfoDTO createRaceInfoDTO(String seriesName, int seriesOrder, RaceColumn raceColumn, Fleet fleet) {
         RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
@@ -668,6 +668,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         raceInfoDTO.seriesName = seriesName;
+        raceInfoDTO.seriesOrder = seriesOrder;
         raceInfoDTO.raceName = raceColumn.getName();
         raceInfoDTO.fleetName = fleet.getName();
         raceInfoDTO.fleetOrdering = fleet.getOrdering();
@@ -2970,9 +2971,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
                             for (Series series : regattaLeaderboard.getRegatta().getSeries()) {
                                 Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet = new HashMap<String, List<RegattaOverviewEntryDTO>>();
+                                int seriesOrder = Util.indexOf(regattaLeaderboard.getRegatta().getSeries(), series);
                                 for (RaceColumn raceColumn : series.getRaceColumns()) {
                                     getRegattaOverviewEntries(showOnlyRacesOfSameDay, dayToCheck,
-                                            courseArea, leaderboard, regattaName, series.getName(), raceColumn, entriesPerFleet);
+                                            courseArea, leaderboard, regattaName, series.getName(), seriesOrder, raceColumn, entriesPerFleet);
                                 }
                                 result.addAll(getRegattaOverviewEntriesToBeShown(showOnlyCurrentlyRunningRaces, entriesPerFleet));
                             }
@@ -2981,7 +2983,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet = new HashMap<String, List<RegattaOverviewEntryDTO>>();
                             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                                 getRegattaOverviewEntries(showOnlyRacesOfSameDay, dayToCheck, courseArea,
-                                        leaderboard, regattaName, LeaderboardNameConstants.DEFAULT_SERIES_NAME, raceColumn, entriesPerFleet);
+                                        leaderboard, regattaName, LeaderboardNameConstants.DEFAULT_SERIES_NAME, 0, raceColumn, entriesPerFleet);
                             }
                             result.addAll(getRegattaOverviewEntriesToBeShown(showOnlyCurrentlyRunningRaces, entriesPerFleet));
                         }
@@ -2993,12 +2995,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private void getRegattaOverviewEntries(boolean showOnlyRacesOfSameDay, Calendar dayToCheck,
-            CourseArea courseArea, Leaderboard leaderboard, String regattaName, String seriesName, RaceColumn raceColumn,
+            CourseArea courseArea, Leaderboard leaderboard, String regattaName, String seriesName, int seriesOrder, RaceColumn raceColumn,
             Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet) {
 
         for (Fleet fleet : raceColumn.getFleets()) {
             RegattaOverviewEntryDTO entry = createRegattaOverviewEntryDTO(courseArea,
-                    leaderboard, regattaName, seriesName, raceColumn, fleet, 
+                    leaderboard, regattaName, seriesName, seriesOrder, raceColumn, fleet, 
                     showOnlyRacesOfSameDay, dayToCheck);
             if (entry != null) {
                 addRegattaOverviewEntryToEntriesPerFleet(entriesPerFleet, fleet, entry);
@@ -3049,13 +3051,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private RegattaOverviewEntryDTO createRegattaOverviewEntryDTO(CourseArea courseArea, Leaderboard leaderboard,
-            String regattaName, String seriesName, RaceColumn raceColumn, Fleet fleet, boolean showOnlyRacesOfSameDay, Calendar dayToCheck) {
+            String regattaName, String seriesName, int seriesOrder, RaceColumn raceColumn, Fleet fleet, boolean showOnlyRacesOfSameDay, Calendar dayToCheck) {
         RegattaOverviewEntryDTO entry = new RegattaOverviewEntryDTO();
         entry.courseAreaName = courseArea.getName();
         entry.courseAreaIdAsString = courseArea.getId().toString();
         entry.regattaDisplayName = regattaName;
         entry.regattaName = leaderboard.getName();
-        entry.raceInfo = createRaceInfoDTO(seriesName, raceColumn, fleet);
+        entry.raceInfo = createRaceInfoDTO(seriesName, seriesOrder, raceColumn, fleet);
         
         if (showOnlyRacesOfSameDay) {
             if (!RaceStateOfSameDayHelper.isRaceStateOfSameDay(entry.raceInfo.startTime, entry.raceInfo.finishedTime, dayToCheck)) {
