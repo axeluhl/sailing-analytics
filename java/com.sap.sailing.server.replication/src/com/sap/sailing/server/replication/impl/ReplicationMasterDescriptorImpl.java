@@ -48,7 +48,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
             connectionFactory.setPort(port);
         }
         Connection connection = connectionFactory.newConnection();
-        Channel channel = connection.createChannel(0);
+        Channel channel = connection.createChannel();
         channel.exchangeDeclare(exchangeName, "fanout");
         QueueingConsumer consumer = new QueueingConsumer(channel);
         String queueName = channel.queueDeclare().getQueue();

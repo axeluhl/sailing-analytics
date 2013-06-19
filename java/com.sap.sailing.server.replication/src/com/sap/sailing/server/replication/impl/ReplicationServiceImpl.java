@@ -181,7 +181,15 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         logger.info("Starting to replicate from "+master);
         replicatingFromMaster = master;
         registerReplicaWithMaster(master);
-        QueueingConsumer consumer = master.getConsumer();
+        logger.info("Registered replica with master");
+        QueueingConsumer consumer = null;
+        try {
+            consumer = master.getConsumer();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw ex;
+        }
+        logger.info("Connection to exchange successful.");
         URL initialLoadURL = master.getInitialLoadURL();
         logger.info("Initial load URL is "+initialLoadURL);
         final Replicator replicator = new Replicator(master, this, /* startSuspended */ true, consumer);
