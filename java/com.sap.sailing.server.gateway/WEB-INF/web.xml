@@ -185,6 +185,15 @@
 		<servlet-name>MasterDataByLeaderboardGroupJsonGetServlet</servlet-name>
 		<url-pattern>/masterdata/leaderboardgroups</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>MasterDataByLeaderboardGroupJsonPostServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.MasterDataByLeaderboardGroupJsonPostServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>MasterDataByLeaderboardGroupJsonPostServlet</servlet-name>
+		<url-pattern>/masterdata/import/leaderboardgroups</url-pattern>
+	</servlet-mapping>
  
 	<servlet id="jsp">
      <servlet-name>jspServet</servlet-name>

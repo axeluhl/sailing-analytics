@@ -26,6 +26,7 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
     public static final String FIELD_OVERALL_LEADERBOARD = "overallLeaderboard";
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_NAME = "name";
+    public static final String FIELD_DISPLAY_GROUPS_REVERSE = "displayGroupsReverse";
     private final JsonSerializer<Leaderboard> leadboardSerializer;
 
     /**
@@ -59,7 +60,9 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
         jsonLeaderboardGroup.put(FIELD_OVERALL_LEADERBOARD,
                 leadboardSerializer.serialize(leaderboardGroup.getOverallLeaderboard()));
         jsonLeaderboardGroup.put(FIELD_LEADERBOARDS, createJsonArrayForLeaderboards(leaderboardGroup.getLeaderboards()));
+        jsonLeaderboardGroup.put(FIELD_DISPLAY_GROUPS_REVERSE, leaderboardGroup.isDisplayGroupsInReverseOrder());
 
+        
         return jsonLeaderboardGroup;
     }
 

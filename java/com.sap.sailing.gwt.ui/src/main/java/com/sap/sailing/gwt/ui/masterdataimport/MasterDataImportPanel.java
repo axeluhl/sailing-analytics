@@ -11,9 +11,11 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
@@ -24,6 +26,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.URLEncoder;
 
 public class MasterDataImportPanel extends VerticalPanel {
 
@@ -98,10 +101,11 @@ public class MasterDataImportPanel extends VerticalPanel {
             showErrorAlert("Not a valid URL for fetching leaderboardgroups masterdata: " + getMasterDataUrl);
             return;
         }
+        String[] groupNames = createLeaderBoardGroupNamesFromListBox();
+        String query = createLeaderboardQuery(groupNames);
+        RequestBuilder getLgsMasterDataRequestBuilder = new RequestBuilder(RequestBuilder.GET, getMasterDataUrl
+                + URLEncoder.encode(query));
 
-        RequestBuilder getLgsMasterDataRequestBuilder = new RequestBuilder(RequestBuilder.GET, getMasterDataUrl);
-        JSONArray groupNames = createLeaderBoardGroupNamesFromListBox();
-        getLgsMasterDataRequestBuilder.setRequestData(groupNames.toString());
         getLgsMasterDataRequestBuilder.setCallback(new RequestCallback() {
 
             @Override
@@ -111,7 +115,7 @@ public class MasterDataImportPanel extends VerticalPanel {
                             + response.getStatusCode());
                     return;
                 }
-                fireLegsImportRequest(response);
+                fireLgsImportRequest(response);
             }
 
             @Override
@@ -127,7 +131,21 @@ public class MasterDataImportPanel extends VerticalPanel {
         }
     }
 
-    protected void fireLegsImportRequest(Response response) {
+    private String createLeaderboardQuery(String[] groupNames) {
+        StringBuffer queryStringBuffer = new StringBuffer("?");
+        for (int i = 0; i < groupNames.length; i++) {
+            queryStringBuffer.append("names[]=" + groupNames[i] + "&");
+        }
+        if (queryStringBuffer.length() == 1) {
+            return "";
+        } else {
+            // Delete last "&"
+            queryStringBuffer.deleteCharAt(queryStringBuffer.length() - 1);
+        }
+        return queryStringBuffer.toString();
+    }
+
+    protected void fireLgsImportRequest(Response response) {
         RequestBuilder postLgsMasterDataRequestBuilder = new RequestBuilder(RequestBuilder.POST,
                 createPostLgsMasterDataUrl());
         postLgsMasterDataRequestBuilder.setRequestData(response.getText());
@@ -135,8 +153,12 @@ public class MasterDataImportPanel extends VerticalPanel {
 
             @Override
             public void onResponseReceived(Request request, Response response) {
-                // TODO Remove, just for initial testing
-                showErrorAlert("SUCCESS");
+                JSONValue creationCount = JSONParser.parseStrict(response.getText());
+                JSONObject creationCountObj = (JSONObject) creationCount;
+                int leaderboardsCreated = (int) ((JSONNumber) creationCountObj.get("leaderboards")).doubleValue();
+                int leaderboardGroupsCreated = (int) ((JSONNumber) creationCountObj.get("leaderboardGroups"))
+                        .doubleValue();
+                showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated);
             }
 
             @Override
@@ -153,23 +175,23 @@ public class MasterDataImportPanel extends VerticalPanel {
         }
     }
 
-    private String createPostLgsMasterDataUrl() {
-        return "http:// " + Window.Location.getHost() + "/sailingserver/masterdata/leaderboardgroups";
+    protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated) {
+        Window.alert(stringMessages.importSuccess(leaderboardGroupsCreated, leaderboardsCreated));
+
     }
 
-    private JSONArray createLeaderBoardGroupNamesFromListBox() {
+    private String createPostLgsMasterDataUrl() {
+        return "http://" + Window.Location.getHost() + "/sailingserver/masterdata/import/leaderboardgroups";
+    }
+
+    private String[] createLeaderBoardGroupNamesFromListBox() {
         List<String> names = new ArrayList<String>();
         for (int i = 0; i < leaderboardgroupListBox.getItemCount(); i++) {
             if (leaderboardgroupListBox.isItemSelected(i)) {
-                names.add(currentHost);
+                names.add(leaderboardgroupListBox.getValue(i));
             }
         }
-        JSONArray leaderBoardGroupNames = new JSONArray();
-        for (int i = 0; i < names.size(); i++) {
-            leaderBoardGroupNames.set(i, new JSONString(names.get(i)));
-        }
-
-        return leaderBoardGroupNames;
+        return names.toArray(new String[names.size()]);
     }
 
     private String createGetMasterDataForLgsUrl(String host) {
@@ -207,7 +229,12 @@ public class MasterDataImportPanel extends VerticalPanel {
                 for (int i = itemCount - 1; i >= 0; i--) {
                     leaderboardgroupListBox.removeItem(i);
                 }
-                JSONArray leaderboardGroups = JSONParser.parseStrict(response.getText()).isArray();
+                String body = response.getText();
+                if (body == null || body.isEmpty()) {
+                    showErrorAlert("No data was returned by remote server.");
+                    return;
+                }
+                JSONArray leaderboardGroups = JSONParser.parseStrict(body).isArray();
                 for (int i = 0; i < leaderboardGroups.size(); i++) {
                     JSONString leaderboardGroupName = leaderboardGroups.get(i).isString();
                     leaderboardgroupListBox.addItem(leaderboardGroupName.stringValue());
@@ -262,7 +289,12 @@ public class MasterDataImportPanel extends VerticalPanel {
                 for (int i = itemCount - 1; i >= 0; i--) {
                     eventListBox.removeItem(i);
                 }
-                JSONArray events = JSONParser.parseStrict(response.getText()).isArray();
+                String body = response.getText();
+                if (body == null || body.isEmpty()) {
+                    showErrorAlert("No data was returned by remote server.");
+                    return;
+                }
+                JSONArray events = JSONParser.parseStrict(body).isArray();
                 for (int i = 0; i < events.size(); i++) {
                     JSONObject event = events.get(i).isObject();
                     eventListBox.addItem(event.get("name").isString().stringValue(), event.get("id").isString()

@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
+package com.sap.sailing.server.gateway.deserialization.impl;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -34,6 +35,8 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
     public static final String FIELD_INDICES = "indices";
     public static final String FIELD_COURSE_AREA = "courseArea";
     public static final String FIELD_ID = "id";
+    public static final String FIELD_REGATTA_NAME = "regattaName";
+    public static final String FIELD_DISPLAY_NAME = "displayName";
     private final JsonSerializer<Competitor> competitorSerializer;
     private final JsonSerializer<RaceColumn> raceColumnSerializer;
     
@@ -56,12 +59,15 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         jsonLeaderboard.put(FIELD_COMPETITORS, createJsonArrayForCompetitors(leaderboard.getAllCompetitors()));
         jsonLeaderboard.put(FIELD_RACE_COLUMNS, createJsonArrayForRaceColumns(leaderboard.getRaceColumns()));
         jsonLeaderboard.put(FIELD_RESULT_DISCARDING_RULE, createJsonForResultDiscardingRule(leaderboard.getResultDiscardingRule()));
+        jsonLeaderboard.put(FIELD_DISPLAY_NAME, leaderboard.getDisplayName());
         boolean isRegattaLeaderboard = false;
         if (leaderboard instanceof FlexibleLeaderboard) {
             FlexibleLeaderboard flexibleLeaderboard = (FlexibleLeaderboard) leaderboard;
             jsonLeaderboard.put(FIELD_SCORING_SCHEME, createJsonForScoringScheme(leaderboard.getScoringScheme()));
             jsonLeaderboard.put(FIELD_COURSE_AREA, createJsonForCourseArea(flexibleLeaderboard.getDefaultCourseArea()));
         } else {
+            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+            jsonLeaderboard.put(FIELD_REGATTA_NAME, regattaLeaderboard.getRegatta().getName());
             isRegattaLeaderboard = true;
         }
         
@@ -88,7 +94,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
             JSONArray indices = new JSONArray();
             int[] rawValues = rule.getDiscardIndexResultsStartingWithHowManyRaces();
             for (int i = 0; i < rawValues.length; i++) {
-                indices.add(rawValues[i]);
+                indices.add(new Integer(rawValues[i]));
             }
             result.put(FIELD_INDICES, indices);
         }

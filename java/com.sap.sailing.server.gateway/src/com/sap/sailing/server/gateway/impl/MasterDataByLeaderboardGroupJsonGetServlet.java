@@ -1,7 +1,11 @@
 package com.sap.sailing.server.gateway.impl;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,8 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
@@ -24,16 +26,16 @@ public class MasterDataByLeaderboardGroupJsonGetServlet extends AbstractJsonHttp
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        JSONParser jsonParser = new JSONParser();
         Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
         Set<String> requestedLeaderboardGroupNames = new HashSet<String>();
-        try {
-            JSONArray requestedLeaderboardGroupNamesJson = (JSONArray) jsonParser.parse(req.getReader());
-            for (int i = 0; i < requestedLeaderboardGroupNamesJson.size(); i++) {
-                String name = (String) requestedLeaderboardGroupNamesJson.get(i);
-                requestedLeaderboardGroupNames.add(name);
+
+        String query = req.getQueryString();
+        if (query != null && query.length() > 0) {
+            String[] names = parseQuery(query);
+            for (int i = 0; i < names.length; i++) {
+                requestedLeaderboardGroupNames.add(names[i]);
             }
-        } catch (ParseException e) {
+        } else {
             // No range supplied. Export all for now
             requestedLeaderboardGroupNames.addAll(leaderboardGroups.keySet());
         }
@@ -48,6 +50,23 @@ public class MasterDataByLeaderboardGroupJsonGetServlet extends AbstractJsonHttp
 
         setJsonResponseHeader(resp);
         masterData.writeJSONString(resp.getWriter());
+    }
+
+    private String[] parseQuery(String query) throws UnsupportedEncodingException {
+        List<String> names = new ArrayList<String>();
+        for (String pair : query.split("&")) {
+            int eq = pair.indexOf("=");
+            if (eq >= 0) {
+                // key=value
+                String key = URLDecoder.decode(pair.substring(0, eq), "UTF-8");
+                String value = URLDecoder.decode(pair.substring(eq + 1), "UTF-8");
+                if (key.contains("names")) {
+                    names.add(value);
+                }
+            }
+        }
+        
+        return names.toArray(new String[names.size()]);
     }
 
 }

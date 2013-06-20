@@ -655,4 +655,5 @@ public interface StringMessages extends Messages {
     String regattaDefinesResultDiscardingRules();
     String startsWithZeroScore();
     String masterDataImportPanel();
+    String importSuccess(int leaderboardGroups, int leaderboards);
 }
