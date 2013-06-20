@@ -28,10 +28,6 @@ fieldset legend {
 	font-weight: bold;
 }
 
-button {
-	margin-left: 5px;
-}
-
 .chartLegend {
 	float: left;
 	margin-right: 4px;
@@ -141,6 +137,10 @@ button {
 
 .gwt-DialogBox .dialogBottomRight {
 	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-Button {
+	margin: 3px 2px 3px 5px;
 }
 
 .gwt-Button:hover {
