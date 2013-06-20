@@ -198,8 +198,13 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     @Override
     public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException, InterruptedException {
         logger.info("Starting to replicate from "+master);
+        try {
+            registerReplicaWithMaster(master);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw ex;
+        }
         replicatingFromMaster = master;
-        registerReplicaWithMaster(master);
         logger.info("Registered replica with master");
         QueueingConsumer consumer = null;
         // logging exception here because it will not propagate
@@ -208,6 +213,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
             consumer = master.getConsumer();
         } catch (Exception ex) {
             ex.printStackTrace();
+            replicatingFromMaster = null;
             throw ex;
         }
         logger.info("Connection to exchange successful.");
@@ -291,15 +297,18 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         ReplicationMasterDescriptor descriptor = isReplicatingFromMaster();
         if (descriptor != null) {
             synchronized(replicaUUIDs) {
-                replicator.stop();
-                deregisterReplicaWithMaster(descriptor);
-                descriptor.getConsumer().getChannel().close();
-                replicatingFromMaster = null;
-                replicaUUIDs.clear();
-                
-                // this is needed because QueuingConsumer.nextDelivery() wont unblock
-                // if the connection is closed by application.
-                replicatorThread.interrupt();
+                if (replicator != null) {
+                    replicator.stop();
+                    deregisterReplicaWithMaster(descriptor);
+                    descriptor.getConsumer().getChannel().close();
+                    replicatingFromMaster = null;
+                    replicaUUIDs.clear();
+                    
+                    // this is needed because QueuingConsumer.nextDelivery() wont unblock
+                    // if the connection is closed by application.
+                    replicatorThread.interrupt();
+                    replicator = null;
+                }
             }
         }
     }

@@ -164,6 +164,7 @@ public class ReplicationPanel extends FlowPanel {
                                 errorReporter.reportError(stringMessages.errorStartingReplication(
                                         masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(),
                                         masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(), e.getMessage()));
+                                updateReplicaList();
                             }
 
                             @Override

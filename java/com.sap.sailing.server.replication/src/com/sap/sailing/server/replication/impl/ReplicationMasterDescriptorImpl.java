@@ -91,4 +91,8 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         return exchangeName;
     }
     
+    public String toString() {
+        return getHostname() + ":" + getServletPort() + "/" + getMessagingPort();
+    }
+    
 }
