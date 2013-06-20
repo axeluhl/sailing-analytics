@@ -1,6 +1,7 @@
 package com.sap.sailing.server.replication.impl;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
@@ -29,13 +30,12 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         this.exchangeName = exchangeName;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public URL getReplicationRegistrationRequestURL(UUID uuid, String additional) throws MalformedURLException {
+    public URL getReplicationRegistrationRequestURL(UUID uuid, String additional) throws MalformedURLException, UnsupportedEncodingException {
         return new URL("http", hostname, servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.REGISTER.name()
                 + "&" + ReplicationServlet.SERVER_UUID + "=" + uuid.toString()
-                + "&" + ReplicationServlet.ADDITIONAL_INFORMATION + "=" + java.net.URLEncoder.encode(BuildVersion.getBuildVersion()));
+                + "&" + ReplicationServlet.ADDITIONAL_INFORMATION + "=" + java.net.URLEncoder.encode(BuildVersion.getBuildVersion(), "UTF-8"));
     }
 
     @Override
