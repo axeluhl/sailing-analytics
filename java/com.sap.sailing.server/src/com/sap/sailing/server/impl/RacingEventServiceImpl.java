@@ -1704,9 +1704,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             regattasByName.clear();
             regattasObservedForDefaultLeaderboard.clear();
             
-            for (DynamicTrackedRegatta regatta: regattaTrackingCache.values()) {
-                for (RaceTracker tracker : raceTrackersByRegatta.get(regatta)) {
-                    tracker.stop();
+            if (raceTrackersByRegatta.size() > 0) {
+                for (DynamicTrackedRegatta regatta: regattaTrackingCache.values()) {
+                    for (RaceTracker tracker : raceTrackersByRegatta.get(regatta)) {
+                            tracker.stop();
+                    }
                 }
             }
             
