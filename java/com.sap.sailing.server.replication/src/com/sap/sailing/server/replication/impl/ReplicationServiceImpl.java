@@ -89,6 +89,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         this.exchangeName = exchangeName;
         replicator = null;
         serverUUID = UUID.randomUUID();
+        logger.info("Setting " + serverUUID.toString() + " as unique replication identifier.");
     }
     
     /**
@@ -104,6 +105,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         this.exchangeName = exchangeName;
         replicator = null;
         serverUUID = UUID.randomUUID();
+        logger.info("Setting " + serverUUID.toString() + " as unique replication identifier.");
     }
     
     private Channel createMasterChannel(String exchangeName) throws IOException {
