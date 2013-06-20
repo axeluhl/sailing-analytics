@@ -38,6 +38,7 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -417,8 +418,6 @@ public interface SailingServiceAsync {
 
     void getPolarSheetData(String polarSheetId, int angle, int windSpeedLevel, AsyncCallback<PolarSheetsHistogramData> wrapperCallback);
     
-    void getRegattaOverviewEntriesForEvent(String eventIdAsString, AsyncCallback<List<RegattaOverviewEntryDTO>> asyncCallback);
-    
     void getEventByIdAsString(String eventIdAsString, AsyncCallback<EventDTO> asyncCallback);
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId, AsyncCallback<Void> callback);
@@ -426,6 +425,12 @@ public interface SailingServiceAsync {
     void getBuildVersion(AsyncCallback<String> callback);
 
     void stopReplicatingFromMaster(AsyncCallback<Void> asyncCallback);
+    
+    void getRegattaStructureForEvent(String eventIdAsString, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
+
+    void getRaceStateEntriesForRaceGroup(String eventIdAsString, List<String> visibleCourseAreas,
+            List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,
+            AsyncCallback<List<RegattaOverviewEntryDTO>> markedAsyncCallback);
     
 }
 

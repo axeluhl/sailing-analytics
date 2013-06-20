@@ -33,7 +33,7 @@ import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 public class Replicator implements Runnable {
     private final static Logger logger = Logger.getLogger(Replicator.class.getName());
     
-    private static final long CHECK_INTERVAL = 2000; // how long (milliseconds) to pause before checking connection again
+    private static final long CHECK_INTERVAL_MILLIS = 2000; // how long (milliseconds) to pause before checking connection again
     private static final int CHECK_COUNT = 150; // how long to check, value is CHECK_INTERVAL second steps
     
     private final ReplicationMasterDescriptor master;
@@ -115,7 +115,7 @@ public class Replicator implements Runnable {
                 logger.info(sse.getMessage());
                 if (checksPerformed <= CHECK_COUNT) {
                     try {
-                        Thread.sleep(CHECK_INTERVAL);
+                        Thread.sleep(CHECK_INTERVAL_MILLIS);
                         
                         /* isOpen() will return false if the channel has been closed. This
                          * does not hold when the connection is dropped.
@@ -125,7 +125,7 @@ public class Replicator implements Runnable {
                             try {
                                 logger.info("Channel seems to be closed. Trying to reconnect consumer queue...");
                                 this.consumer = master.getConsumer();
-                                Thread.sleep(CHECK_INTERVAL);
+                                Thread.sleep(CHECK_INTERVAL_MILLIS);
                                 checksPerformed += 1;
                             } catch (IOException eio) {
                                 eio.printStackTrace();
@@ -137,7 +137,7 @@ public class Replicator implements Runnable {
                     checksPerformed += 1;
                     continue;
                 } else {
-                    logger.severe("Grace time (" + CHECK_COUNT*(CHECK_INTERVAL/1000) + "secs) is over. Terminating replication listener " + this.toString());
+                    logger.severe("Grace time (" + CHECK_COUNT*(CHECK_INTERVAL_MILLIS/1000) + "secs) is over. Terminating replication listener " + this.toString());
                     // XXX: Also make sure that all handlers get notifications about this
                     break;
                 }

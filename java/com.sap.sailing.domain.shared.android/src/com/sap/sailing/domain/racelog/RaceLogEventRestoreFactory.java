@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventRestoreFactoryImpl;
+import com.sap.sailing.domain.tracking.Wind;
 
 public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
     RaceLogEventRestoreFactory INSTANCE = new RaceLogEventRestoreFactoryImpl();
@@ -39,7 +40,8 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
             List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
 
     RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint createdAt,
-            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId);
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, 
+            List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
 
     RaceLogPathfinderEvent createPathfinderEvent(TimePoint createdAt, TimePoint logicalTimePoint, Serializable id,
             List<Competitor> competitors, int passId, String pathfinderId);
@@ -49,4 +51,10 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
 
     RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint createdAt, TimePoint timePoint,
             Serializable id, List<Competitor> competitors, int passId, StartProcedureType type);
+    
+    RaceLogProtestStartTimeEvent createProtestStartTimeEvent(TimePoint createdAt, TimePoint timePoint,
+            Serializable id, List<Competitor> competitors, int passId, TimePoint protestStartTime);
+
+    RaceLogWindFixEvent createWindFixEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,
+            List<Competitor> competitors, Integer passId, Wind wind);
 }

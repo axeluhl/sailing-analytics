@@ -22,15 +22,18 @@ import com.sap.sailing.domain.racelog.analyzing.impl.FinishPositioningListFinder
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.ProtestStartTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartProcedureTypeAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.domain.racelog.RaceLogChangedListener;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.StartProcedureFactory;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
+import com.sap.sailing.racecommittee.app.domain.state.RaceStateEventListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class RaceStateImpl implements RaceState, RaceLogChangedListener {
@@ -42,6 +45,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     
     protected RaceLogRaceStatus status;
     protected Set<RaceStateChangedListener> stateChangedListeners;
+    protected Set<RaceStateEventListener> stateEventListeners;
 
     private RaceLogChangedVisitor raceLogListener;
     
@@ -52,6 +56,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private LastPublishedCourseDesignFinder lastCourseDesignFinder;
     private FinishPositioningListFinder finishPositioningListFinder;
     private StartProcedureTypeAnalyzer startProcedureTypeAnalyzer;
+    private ProtestStartTimeFinder protestStartTimeAnalyzer;
 
     public RaceStateImpl(StartProcedureType defaultStartProcedureType, RaceLog raceLog) {
         this.defaultStartProcedureType = defaultStartProcedureType;
@@ -59,6 +64,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         
         this.status = RaceLogRaceStatus.UNKNOWN;
         this.stateChangedListeners = new HashSet<RaceStateChangedListener>();
+        this.stateEventListeners = new HashSet<RaceStateEventListener>();
 
         this.raceLogListener = new RaceLogChangedVisitor(this);
         this.raceLog.addListener(raceLogListener);
@@ -70,6 +76,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.lastCourseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
         this.finishPositioningListFinder = new FinishPositioningListFinder(raceLog);
         this.startProcedureTypeAnalyzer = new StartProcedureTypeAnalyzer(raceLog);
+        this.protestStartTimeAnalyzer = new ProtestStartTimeFinder(raceLog);
         
         registerStartProcedure();
         updateStatus();
@@ -92,7 +99,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     @Override
     public StartProcedureType getStartProcedureType() {
-        StartProcedureType type = startProcedureTypeAnalyzer.getActiveStartProcedureType();
+        StartProcedureType type = startProcedureTypeAnalyzer.analyze();
         return type == null ? defaultStartProcedureType : type;
     }
 
@@ -109,59 +116,32 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         RaceLogRaceStatus oldStatus = this.status;
         this.status = newStatus;
         if (oldStatus != newStatus) {
-            notifyListenersAboutStateChange();
+            fireStatusChanged();
         }
-    }
-
-    private void notifyListenersAboutStateChange() {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
-            listener.onRaceStateChanged(this);
-        }
-    }
-    
-    private void notifyListenersAboutStartTimeChange(TimePoint newStartTime) {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
-            listener.onStartTimeChanged(newStartTime);
-        }
-    }
-    
-    private void notifyListenersAboutRaceAbortion() {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
-            listener.onRaceAborted();
-        }
-    }
-
-    public void registerListener(RaceStateChangedListener listener) {
-        stateChangedListeners.add(listener);
-    }
-
-    public void unregisterListener(RaceStateChangedListener listener) {
-        stateChangedListeners.remove(listener);
     }
 
     public TimePoint getStartTime() {
-        return startTimeFinder.getStartTime();
+        return startTimeFinder.analyze();
     }
 
-    public void setStartTime(TimePoint newStartTime, StartProcedureType type) {
+    public void setStartTime(TimePoint newStartTime) {
         
         RaceLogRaceStatus status = getStatus();
         if (status != RaceLogRaceStatus.UNSCHEDULED) {
             onRaceAborted(MillisecondsTimePoint.now());
         }
         
-        switchStartProcedure(type);
-        
         TimePoint eventTime = startProcedure.getLogicalStartTimeEventTime(newStartTime);
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(eventTime, UUID.randomUUID(), 
                 Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newStartTime);
         this.raceLog.add(event);
         
-        notifyListenersAboutStartTimeChange(newStartTime);
+        fireStartTimeChange(newStartTime);
     }
-
-    private void switchStartProcedure(StartProcedureType type) {
-        if (!type.equals(startProcedureTypeAnalyzer.getActiveStartProcedureType())) {
+    
+    @Override
+    public void createNewStartProcedure(StartProcedureType type) {
+        if (!type.equals(startProcedureTypeAnalyzer.analyze())) {
 
             RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartProcedureChangedEvent(MillisecondsTimePoint.now(), raceLog.getCurrentPassId(), type);
             this.raceLog.add(event);
@@ -173,22 +153,25 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     public TimePoint getFinishedTime() {
-        return finishedTimeFinder.getFinishedTime();
+        return finishedTimeFinder.analyze();
     }
     
     @Override
     public CourseBase getCourseDesign() {
-        return lastCourseDesignFinder.getLastCourseDesign();
+        return lastCourseDesignFinder.analyze();
     }
- 
+    
+    @Override
     public void setCourseDesign(CourseBase newCourseData) {
         TimePoint eventTime = MillisecondsTimePoint.now();
         
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(eventTime, UUID.randomUUID(),
                 Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newCourseData);
         this.raceLog.add(event);
+        
+        fireCourseDesignChanged();
     }
-
+    
     @Override
     public void onRaceAborted(TimePoint eventTime) {
         /*RaceLogEvent abortEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.UNSCHEDULED);
@@ -196,8 +179,8 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         
         RaceLogEvent passChangeEvent = RaceLogEventFactory.INSTANCE.createPassChangeEvent(eventTime, raceLog.getCurrentPassId() + 1);
         this.raceLog.add(passChangeEvent);
-        
-        notifyListenersAboutRaceAbortion();
+        registerStartProcedure();
+        fireRaceAborted();
     }
     
     @Override
@@ -231,7 +214,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     public RaceLogRaceStatus updateStatus() {
-        setStatus(statusAnalyzer.getStatus());
+        setStatus(statusAnalyzer.analyze());
         return getStatus();
     }
 
@@ -241,7 +224,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     @Override
     public TimePoint getFinishingStartTime() {
-        return finishingTimeFinder.getFinishingTime();
+        return finishingTimeFinder.analyze();
     }
 
     @Override
@@ -254,21 +237,90 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     
     @Override
     public List<Triple<Serializable, String, MaxPointsReason>> getFinishPositioningList() {
-        return finishPositioningListFinder.getFinishPositioningList();
+        return finishPositioningListFinder.analyze();
     }
     
     @Override
     public void setFinishPositioningConfirmed() {
         TimePoint eventTime = MillisecondsTimePoint.now();
         
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(eventTime, raceLog.getCurrentPassId());
-        this.raceLog.add(event);        
+        List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = getFinishPositioningList();
+        
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(eventTime, raceLog.getCurrentPassId(), positionedCompetitors);
+        this.raceLog.add(event);
+    }
+
+    @Override
+    public void setProtestStartTime(TimePoint protestStartTime) {
+        TimePoint eventTime = MillisecondsTimePoint.now();
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createProtestStartTimeEvent(eventTime, raceLog.getCurrentPassId(), protestStartTime);
+        this.raceLog.add(event);
+        fireProtestStartTimeChanged();
+    }
+
+    @Override
+    public TimePoint getProtestStartTime() {
+        return protestStartTimeAnalyzer.analyze();
+    }
+    
+    @Override
+    public void setWindFix(Wind windFix) {
+        TimePoint eventTime = MillisecondsTimePoint.now();
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createWindFixEvent(eventTime, raceLog.getCurrentPassId(), windFix);
+        this.raceLog.add(event);
     }
 
     @Override
     public void onStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
-        for (RaceStateChangedListener listener : stateChangedListeners) {
+        for (RaceStateEventListener listener : stateEventListeners) {
             listener.onStartProcedureSpecificEvent(eventTime, eventId);
         }
     }
+
+    private void fireStatusChanged() {
+        for (RaceStateChangedListener listener : stateChangedListeners) {
+            listener.onRaceStateStatusChanged(this);
+        }
+    }
+
+    private void fireCourseDesignChanged() {
+        for (RaceStateChangedListener listener : stateChangedListeners) {
+            listener.onRaceStateCourseDesignChanged(this);
+        }
+    }
+    
+    private void fireProtestStartTimeChanged() {
+        for (RaceStateChangedListener listener : stateChangedListeners) {
+            listener.onRaceStateProtestStartTimeChanged(this);
+        }
+    }
+    
+    private void fireStartTimeChange(TimePoint newStartTime) {
+        for (RaceStateEventListener listener : stateEventListeners) {
+            listener.onStartTimeChanged(newStartTime);
+        }
+    }
+    
+    private void fireRaceAborted() {
+        for (RaceStateEventListener listener : stateEventListeners) {
+            listener.onRaceAborted();
+        }
+    }
+
+    public void registerStateChangeListener(RaceStateChangedListener listener) {
+        stateChangedListeners.add(listener);
+    }
+    
+    public void registerStateEventListener(RaceStateEventListener listener) {
+        stateEventListeners.add(listener);
+    }
+
+    public void unregisterStateChangeListener(RaceStateChangedListener listener) {
+        stateChangedListeners.remove(listener);
+    }
+    
+    public void unregisterStateEventListener(RaceStateEventListener listener) {
+        stateEventListeners.remove(listener);
+    }
+
 }

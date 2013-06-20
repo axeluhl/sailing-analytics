@@ -4,24 +4,14 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 
-public class PathfinderFinder extends RaceLogAnalyzer {
+public class PathfinderFinder extends RaceLogAnalyzer<String> {
 
     public PathfinderFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
-    public String getPathfinderId() {
-        String pathfinderId;
-        this.raceLog.lockForRead();
-        try {
-            pathfinderId = searchForPathfinderId();
-        } finally {
-            this.raceLog.unlockAfterRead();
-        }
-        return pathfinderId;
-    }
-
-    private String searchForPathfinderId() {
+    @Override
+    protected String performAnalyzation() {
         String pathfinderId = null;
         for (RaceLogEvent event : getPassEvents()) {
             if (event instanceof RaceLogPathfinderEvent) {

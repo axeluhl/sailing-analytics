@@ -87,7 +87,7 @@ public class CompassView extends RelativeLayout {
 	private void notifyListener() {
 		if (changeListener != null) {
 			float degree = fromDegrees > 0 ? fromDegrees : fromDegrees + 360;
-			if (degree == 360 || degree == -360) {
+			if (Math.abs(degree) == 360) {
 				degree = 0;
 			}
 			changeListener.onDirectionChanged(degree);
@@ -110,5 +110,5 @@ public class CompassView extends RelativeLayout {
 		public void onAnimationStart(Animation animation) { }
 		
 	}
-
+	
 }

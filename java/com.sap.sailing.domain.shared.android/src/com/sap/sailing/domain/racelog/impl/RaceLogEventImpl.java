@@ -51,12 +51,4 @@ public abstract class RaceLogEventImpl implements RaceLogEvent {
         return passId;
     }
 
-    @Override
-    public boolean equals(Object object) {
-        return object instanceof RaceLogEvent && logicalTimePoint.equals(((RaceLogEvent) object).getTimePoint())
-                && id.equals(((RaceLogEvent) object).getId())
-                && involvedBoats.equals(((RaceLogEvent) object).getInvolvedBoats())
-                && passId == ((RaceLogEvent) object).getPassId();
-    }
-
 }

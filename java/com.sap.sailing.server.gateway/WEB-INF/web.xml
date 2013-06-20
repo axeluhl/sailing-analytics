@@ -42,6 +42,15 @@
 	</servlet-mapping>
 	
 	<servlet>
+		<servlet-name>RCMarkPositions</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.rc.MarkPositionsJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RCMarkPositions</servlet-name>
+		<url-pattern>/rc/markpositions</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>RCCurrentCourse</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.rc.CourseJsonExportServlet</servlet-class>
 	</servlet>

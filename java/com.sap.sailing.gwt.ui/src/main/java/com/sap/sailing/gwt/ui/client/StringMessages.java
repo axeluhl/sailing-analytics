@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.i18n.client.Messages;
-import com.google.gwt.safehtml.shared.SafeHtml;
 
 public interface StringMessages extends Messages {
     String helloWorld();
@@ -655,6 +654,7 @@ public interface StringMessages extends Messages {
     String addSeries();
     String regattaDefinesResultDiscardingRules();
     String startsWithZeroScore();
+    String regattaOverviewConfiguration();
     String firstRaceIsNonDiscardableCarryForward();
     String addReplicationMaster();
     String connect();
@@ -667,5 +667,19 @@ public interface StringMessages extends Messages {
     String explainConnectionsToMaster();
     String explainNoConnectionsToMaster();
     String explainNoConnectionsFromReplicas();
-    SafeHtml stopConnectionToMaster();
+    String stopConnectionToMaster();
+    String asLink();
+    String raceIsRunning();
+    String raceIsRunningWithEarlyStarters();
+    String raceIsFinishing();
+    String raceIsFinished();
+    String raceIsScheduled();
+    String raceIsInStartphase();
+    String generalRecall();
+    String startPostponed();
+    String startPostponedNoMoreRacingToday();
+    String startPostponedFurtherSignalsAshore();
+    String raceAbandoned();
+    String raceAbandonedNoMoreRacingToday();
+    String raceAbandonedFurtherSignalsAshore();
 }

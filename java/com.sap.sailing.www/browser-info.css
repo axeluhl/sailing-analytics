@@ -11,9 +11,11 @@
   position: fixed;
   width: 100%;
   top: 0;
-  background-image: url(images/white_gradient_header.png), url(images/header_bg_modern.png);
+    /*background-image: url(../images/white_gradient_header.png), url(../images/header_bg_modern.png);
   background-position: center top, 0 0;
   background-repeat: no-repeat, repeat-x;
+  */
+    background: url(images/header_bg_modern.png) 0 0 repeat-x;
   box-shadow: 0 0 20px #858585;
   -moz-box-shadow: 0 0 20px #858585;
   -webkit-box-shadow: 0 0 20px #858585;
