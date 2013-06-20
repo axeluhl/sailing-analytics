@@ -3073,6 +3073,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return entry;
     }
     
+    @Override
     public String getBuildVersion() {
         return BuildVersion.getBuildVersion();
     }

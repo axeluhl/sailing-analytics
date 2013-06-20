@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.i18n.client.Messages;
-import com.google.gwt.safehtml.shared.SafeHtml;
 
 public interface StringMessages extends Messages {
     String helloWorld();
@@ -668,7 +667,7 @@ public interface StringMessages extends Messages {
     String explainConnectionsToMaster();
     String explainNoConnectionsToMaster();
     String explainNoConnectionsFromReplicas();
-    SafeHtml stopConnectionToMaster();
+    String stopConnectionToMaster();
     String asLink();
     String raceIsRunning();
     String raceIsRunningWithEarlyStarters();
