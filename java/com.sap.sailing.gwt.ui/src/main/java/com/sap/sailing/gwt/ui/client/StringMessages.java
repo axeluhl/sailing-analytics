@@ -682,4 +682,5 @@ public interface StringMessages extends Messages {
     String raceAbandoned();
     String raceAbandonedNoMoreRacingToday();
     String raceAbandonedFurtherSignalsAshore();
+    String stopAllReplicas();
 }

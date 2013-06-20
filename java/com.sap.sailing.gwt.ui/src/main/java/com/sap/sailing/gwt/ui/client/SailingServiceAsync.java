@@ -431,6 +431,8 @@ public interface SailingServiceAsync {
     void getRaceStateEntriesForRaceGroup(String eventIdAsString, List<String> visibleCourseAreas,
             List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,
             AsyncCallback<List<RegattaOverviewEntryDTO>> markedAsyncCallback);
+
+    void stopAllReplicas(AsyncCallback<Void> asyncCallback);
     
 }
 

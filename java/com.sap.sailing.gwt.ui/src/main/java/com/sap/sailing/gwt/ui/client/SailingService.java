@@ -311,4 +311,6 @@ public interface SailingService extends RemoteService {
     String getBuildVersion();
 
     void stopReplicatingFromMaster();
+
+    void stopAllReplicas();
 }

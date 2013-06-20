@@ -6,10 +6,13 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -40,21 +43,40 @@ public class ReplicationPanel extends FlowPanel {
     
     private final Button addButton;
     private final Button stopReplicationButton;
+    private final Button removeAllReplicas;
     
     public ReplicationPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         
-        add(new Label(stringMessages.explainReplicasRegistered()));
+        final CaptionPanel mastergroup = new CaptionPanel(stringMessages.explainReplicasRegistered());
+        final VerticalPanel masterpanel = new VerticalPanel();
+        
         registeredReplicas = new Grid();
         registeredReplicas.resizeColumns(3);
-        add(registeredReplicas);
+        masterpanel.add(registeredReplicas);
         
-        add(new Label(stringMessages.explainConnectionsToMaster()));
+        removeAllReplicas = new Button(stringMessages.stopAllReplicas());
+        removeAllReplicas.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                stopAllReplicas();
+              };
+        });
+        removeAllReplicas.setEnabled(false);
+        masterpanel.add(removeAllReplicas);
+        
+        mastergroup.add(masterpanel);
+        add(mastergroup);
+        
+        final CaptionPanel replicagroup = new CaptionPanel(stringMessages.explainConnectionsToMaster());
+        final VerticalPanel replicapanel = new VerticalPanel();
+        final HorizontalPanel replicapanelbuttons = new HorizontalPanel();
+        
         registeredMasters = new Grid();
         registeredMasters.resizeColumns(3);
-        add(registeredMasters);
+        replicapanel.add(registeredMasters);
         
         Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(new ClickHandler() {
@@ -63,7 +85,7 @@ public class ReplicationPanel extends FlowPanel {
                 updateReplicaList();
             }
         });
-        add(refreshButton);
+        replicapanelbuttons.add(refreshButton);
         addButton = new Button(stringMessages.connectToMaster());
         addButton.addClickHandler(new ClickHandler() {
             @Override
@@ -71,7 +93,7 @@ public class ReplicationPanel extends FlowPanel {
                 addReplication();
             }
         });
-        add(addButton);
+        replicapanelbuttons.add(addButton);
         stopReplicationButton = new Button(stringMessages.stopConnectionToMaster());
         stopReplicationButton.addClickHandler(new ClickHandler() {
             @Override
@@ -80,8 +102,27 @@ public class ReplicationPanel extends FlowPanel {
               };
         });
         stopReplicationButton.setEnabled(false);
-        add(stopReplicationButton);
+        replicapanelbuttons.add(stopReplicationButton);
+        
+        replicapanel.add(replicapanelbuttons);
+        replicagroup.add(replicapanel);
+        add(replicagroup);
         updateReplicaList();
+    }
+
+    protected void stopAllReplicas() {
+        sailingService.stopAllReplicas(new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+                updateReplicaList();
+            }
+            @Override
+            public void onSuccess(Void result) {
+                removeAllReplicas.setEnabled(false);
+                updateReplicaList();
+            }
+        });
     }
 
     private void stopReplication() {
@@ -144,10 +185,41 @@ public class ReplicationPanel extends FlowPanel {
         sailingService.getReplicaInfo(new AsyncCallback<ReplicationStateDTO>() {
             @Override
             public void onSuccess(ReplicationStateDTO replicas) {
+                int i=0;
+                while (registeredReplicas.getRowCount() > 0) {
+                    registeredReplicas.removeRow(0);
+                }
+                boolean replicaRegistered = false;
+                for (ReplicaDTO replica : replicas.getReplicas()) {
+                    registeredReplicas.insertRow(i);
+                    registeredReplicas.setWidget(i, 0, new Label((i+1) + ". " + replica.getHostname() + " (" + replica.getIdentifier() + ")"));
+                    registeredReplicas.setWidget(i, 1, new Label(stringMessages.registeredAt(replica.getRegistrationTime().toString())));
+                    i++;
+                    for (Map.Entry<String, Integer> e : replica.getOperationCountByOperationClassName().entrySet()) {
+                        registeredReplicas.insertRow(i);
+                        registeredReplicas.setWidget(i, 1, new Label(e.getKey()));
+                        registeredReplicas.setWidget(i, 2, new Label(e.getValue().toString()));
+                        i++;
+                    }
+                    replicaRegistered = true;
+                }
+                
+                if (!replicaRegistered) {
+                    registeredReplicas.insertRow(i);
+                    registeredReplicas.setWidget(i, 0, new Label(stringMessages.explainNoConnectionsFromReplicas()));
+                } else {
+                    removeAllReplicas.setEnabled(true);
+                }
+                
                 while (registeredMasters.getRowCount() > 0) {
                     registeredMasters.removeRow(0);
                 }
-                int i=0;
+                i = 0;
+                
+                registeredMasters.insertRow(i);
+                registeredMasters.setWidget(i, 0, new Label("Client UUID: " + replicas.getServerIdentifier()));
+                i++;
+                
                 final ReplicationMasterDTO replicatingFromMaster = replicas.getReplicatingFromMaster();
                 if (replicatingFromMaster != null) {
                     registeredMasters.insertRow(i);
@@ -163,28 +235,6 @@ public class ReplicationPanel extends FlowPanel {
                     stopReplicationButton.setEnabled(false);
                 }
                 
-                while (registeredReplicas.getRowCount() > 0) {
-                    registeredReplicas.removeRow(0);
-                }
-                i = 0; boolean replicaRegistered = false;
-                for (ReplicaDTO replica : replicas.getReplicas()) {
-                    registeredReplicas.insertRow(i);
-                    registeredReplicas.setWidget(i, 0, new Label(replica.getHostname()));
-                    registeredReplicas.setWidget(i, 1, new Label(stringMessages.registeredAt(replica.getRegistrationTime().toString())));
-                    i++;
-                    for (Map.Entry<String, Integer> e : replica.getOperationCountByOperationClassName().entrySet()) {
-                        registeredReplicas.insertRow(i);
-                        registeredReplicas.setWidget(i, 1, new Label(e.getKey()));
-                        registeredReplicas.setWidget(i, 2, new Label(e.getValue().toString()));
-                        i++;
-                    }
-                    replicaRegistered = true;
-                }
-                
-                if (!replicaRegistered) {
-                    registeredReplicas.insertRow(i);
-                    registeredReplicas.setWidget(i, 0, new Label(stringMessages.explainNoConnectionsFromReplicas()));
-                }
             }
             
             @Override

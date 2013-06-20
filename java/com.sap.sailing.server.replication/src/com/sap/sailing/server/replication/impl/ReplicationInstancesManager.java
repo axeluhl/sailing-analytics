@@ -85,4 +85,9 @@ public class ReplicationInstancesManager {
     public Map<Class<? extends RacingEventServiceOperation<?>>, Integer> getStatistics(ReplicaDescriptor replica) {
         return replicationCounts.get(replica);
     }
+
+    public void removeAll() {
+        replicationCounts.clear();
+        replicaDescriptors.clear();
+    }
 }

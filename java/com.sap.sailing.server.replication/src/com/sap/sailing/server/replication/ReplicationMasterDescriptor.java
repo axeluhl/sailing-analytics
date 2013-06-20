@@ -3,6 +3,7 @@ package com.sap.sailing.server.replication;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.UUID;
 
 import com.rabbitmq.client.QueueingConsumer;
 
@@ -14,9 +15,9 @@ import com.rabbitmq.client.QueueingConsumer;
  */
 public interface ReplicationMasterDescriptor {
 
-    URL getReplicationRegistrationRequestURL() throws MalformedURLException;
+    URL getReplicationRegistrationRequestURL(UUID uuid, String additionalInformation) throws MalformedURLException;
     
-    URL getReplicationDeRegistrationRequestURL() throws MalformedURLException;
+    URL getReplicationDeRegistrationRequestURL(UUID uuid) throws MalformedURLException;
 
     URL getInitialLoadURL() throws MalformedURLException;
 

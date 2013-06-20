@@ -71,6 +71,7 @@ public abstract class AbstractServerReplicationTest {
     protected Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> basicSetUp(
             boolean dropDB, RacingEventServiceImpl master, RacingEventServiceImpl replica) throws IOException, InterruptedException {
         final String exchangeName = "test-sapsailinganalytics-exchange";
+        final UUID serverUuid = UUID.randomUUID();
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
         if (dropDB) {
             mongoDBService.getDB().dropDatabase();
@@ -88,7 +89,7 @@ public abstract class AbstractServerReplicationTest {
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         masterReplicator = new ReplicationServiceImpl(exchangeName, rim, this.master);
-        replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost());
+        replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost(), serverUuid, "");
         masterReplicator.registerReplica(replicaDescriptor);
         ReplicationMasterDescriptor masterDescriptor = new ReplicationMasterDescriptorImpl("localhost", exchangeName, SERVLET_PORT, 0);
         ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(exchangeName, resolveAgainst, rim,

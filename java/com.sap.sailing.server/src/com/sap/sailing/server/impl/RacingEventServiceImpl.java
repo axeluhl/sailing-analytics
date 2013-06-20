@@ -1648,32 +1648,39 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public void serializeForInitialReplication(ObjectOutputStream oos) throws IOException {
         StringBuffer logoutput = new StringBuffer();
             
+        logger.info("Serializing events...");
         oos.writeObject(eventsById);
         logoutput.append("\nSerialized " + eventsById.size() + " events\n");
         for (Event event : eventsById.values()) {
             logoutput.append(String.format("%3s\n", event.toString()));
         }
             
+        logger.info("Serializing regattas...");
         oos.writeObject(regattasByName);
         logoutput.append("Serialized " + regattasByName.size() + " regattas\n");
         for (Regatta regatta : regattasByName.values()) {
             logoutput.append(String.format("%3s\n", regatta.toString()));
         }
-            
+        
+        logger.info("Serializing regattas observed...");
         oos.writeObject(regattasObservedForDefaultLeaderboard);
+        logger.info("Serializing regatta tracking cache...");
         oos.writeObject(regattaTrackingCache);
+        logger.info("Serializing leaderboard groups...");
         oos.writeObject(leaderboardGroupsByName);
         logoutput.append("Serialized " + leaderboardGroupsByName.size() + " leaderboard groups\n");
         for (LeaderboardGroup lg : leaderboardGroupsByName.values()) {
             logoutput.append(String.format("%3s\n", lg.toString()));
         }
             
+        logger.info("Serializing leaderboards...");
         oos.writeObject(leaderboardsByName);
         logoutput.append("Serialized " + leaderboardsByName.size() + " leaderboards\n");
         for (Leaderboard lg : leaderboardsByName.values()) {
             logoutput.append(String.format("%3s\n", lg.toString()));
         }
         
+        logger.info("Serializing media library...");
         mediaLibrary.serialize(oos);
         logoutput.append("Serialized " + mediaLibrary.allTracks().size() + " media tracks\n");
         for (MediaTrack lg : mediaLibrary.allTracks()) {

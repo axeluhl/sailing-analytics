@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.osgi.util.tracker.ServiceTracker;
@@ -23,6 +24,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
+import com.sap.sailing.util.BuildVersion;
 
 /**
  * Can observe a {@link RacingEventService} for the operations it performs that require replication. Only observes as
@@ -69,6 +71,11 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      */
     private final String exchangeName;
     
+    /**
+     * UUID that identifies this server
+     */
+    private final UUID serverUUID;
+    
     private Replicator replicator;
     private Thread replicatorThread;
     
@@ -81,6 +88,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         localService = null;
         this.exchangeName = exchangeName;
         replicator = null;
+        serverUUID = UUID.randomUUID();
     }
     
     /**
@@ -95,6 +103,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         this.localService = localService;
         this.exchangeName = exchangeName;
         replicator = null;
+        serverUUID = UUID.randomUUID();
     }
     
     private Channel createMasterChannel(String exchangeName) throws IOException {
@@ -220,7 +229,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * @return the UUID that the master generated for this client which is also entered into {@link #replicaUUIDs}
      */
     private String registerReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException {
-        URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL();
+        URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL(getServerIdentifier(), BuildVersion.getBuildVersion());
         final URLConnection registrationRequestConnection = replicationRegistrationRequestURL.openConnection();
         registrationRequestConnection.connect();
         InputStream content = (InputStream) registrationRequestConnection.getContent();
@@ -238,7 +247,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     
     protected void deregisterReplicaWithMaster(ReplicationMasterDescriptor master) {
         try {
-            URL replicationDeRegistrationRequestURL = master.getReplicationDeRegistrationRequestURL();
+            URL replicationDeRegistrationRequestURL = master.getReplicationDeRegistrationRequestURL(getServerIdentifier());
             final URLConnection deregistrationRequestConnection = replicationDeRegistrationRequestURL.openConnection();
             deregistrationRequestConnection.connect();
             StringBuilder uuid = new StringBuilder();
@@ -291,6 +300,26 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
                 replicatorThread.interrupt();
             }
         }
+    }
+
+    @Override
+    public void stopAllReplica() throws IOException {
+        if (replicationInstancesManager.hasReplicas()) {
+            replicationInstancesManager.removeAll();
+            removeAsListenerFromRacingEventService();
+            synchronized (this) {
+                if (masterChannel != null) {
+                    masterChannel.close();
+                    masterChannel = null;
+                }
+            }
+            logger.info("Unregistered all replicas from this server!");
+        }
+    }
+
+    @Override
+    public UUID getServerIdentifier() {
+        return serverUUID;
     }
 
 }

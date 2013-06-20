@@ -5,6 +5,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,6 +35,8 @@ public class ReplicationServlet extends SailingServerHttpServlet {
     public enum Action { REGISTER, INITIAL_LOAD, DEREGISTER }
     
     public static final String ACTION = "action";
+    public static final String SERVER_UUID = "uuid";
+    public static final String ADDITIONAL_INFORMATION = "additional";
 
     private ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
     
@@ -98,8 +101,10 @@ public class ReplicationServlet extends SailingServerHttpServlet {
     }
 
     private ReplicaDescriptor getReplicaDescriptor(HttpServletRequest req) throws UnknownHostException {
-        // XXX: this can lead to problems if there are multiple replicas on one server
         InetAddress ipAddress = InetAddress.getByName(req.getRemoteAddr());
-        return new ReplicaDescriptor(ipAddress);
+        UUID uuid = UUID.fromString(req.getParameter(SERVER_UUID));
+        String additional = req.getParameter(ADDITIONAL_INFORMATION);
+        logger.info("Registered new replica " + ipAddress + " " + uuid.toString() + " " + additional);
+        return new ReplicaDescriptor(ipAddress, uuid, additional);
     }
 }

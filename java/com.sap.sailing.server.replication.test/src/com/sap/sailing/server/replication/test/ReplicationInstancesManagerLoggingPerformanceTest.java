@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +22,7 @@ public class ReplicationInstancesManagerLoggingPerformanceTest {
     @Before
     public void setUp() throws UnknownHostException {
         replicationInstanceManager = new ReplicationInstancesManager();
-        replica = new ReplicaDescriptor(InetAddress.getLocalHost());
+        replica = new ReplicaDescriptor(InetAddress.getLocalHost(), UUID.randomUUID(), "");
         replicationInstanceManager.registerReplica(replica);
         operation = new CreateLeaderboardGroup("Test Leaderboard Group", "Description of Test Leaderboard Group", /* displayGroupsInReverseOrder */ false, Arrays.asList(new String[] { "Default Leaderboard" }),
                 /* overallLeaderboardDiscardThresholds */ null, /* overallLeaderboardScoringSchemeType */ null);

@@ -3,12 +3,14 @@ package com.sap.sailing.server.replication.impl;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.UUID;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
+import com.sap.sailing.util.BuildVersion;
 
 public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescriptor {
     private static final String REPLICATION_SERVLET = "/replication/replication";
@@ -28,15 +30,18 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     @Override
-    public URL getReplicationRegistrationRequestURL() throws MalformedURLException {
+    public URL getReplicationRegistrationRequestURL(UUID uuid, String additional) throws MalformedURLException {
         return new URL("http", hostname, servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
-                + ReplicationServlet.Action.REGISTER.name());
+                + ReplicationServlet.Action.REGISTER.name()
+                + "&" + ReplicationServlet.SERVER_UUID + "=" + uuid.toString()
+                + "&" + ReplicationServlet.ADDITIONAL_INFORMATION + "=" + BuildVersion.getBuildVersion());
     }
 
     @Override
-    public URL getReplicationDeRegistrationRequestURL() throws MalformedURLException {
+    public URL getReplicationDeRegistrationRequestURL(UUID uuid) throws MalformedURLException {
         return new URL("http", hostname, servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
-                + ReplicationServlet.Action.DEREGISTER.name());
+                + ReplicationServlet.Action.DEREGISTER.name()
+                + "&" + ReplicationServlet.SERVER_UUID + "=" + uuid.toString());
     }
     
     @Override
@@ -85,5 +90,5 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     public String getExchangeName() {
         return exchangeName;
     }
-
+    
 }

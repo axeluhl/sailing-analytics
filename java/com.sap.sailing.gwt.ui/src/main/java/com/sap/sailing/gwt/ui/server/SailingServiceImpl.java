@@ -2429,7 +2429,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             for (Map.Entry<Class<? extends RacingEventServiceOperation<?>>, Integer> e : statistics.entrySet()) {
                 replicationCountByOperationClassName.put(e.getKey().getName(), e.getValue());
             }
-            replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostName(), replicaDescriptor.getRegistrationTime().asDate(),
+            replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostName(), replicaDescriptor.getRegistrationTime().asDate(), replicaDescriptor.getUuid().toString(),
                     replicationCountByOperationClassName));
         }
         ReplicationMasterDTO master;
@@ -2440,7 +2440,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             master = new ReplicationMasterDTO(replicatingFromMaster.getHostname(), replicatingFromMaster.getMessagingPort(),
                     replicatingFromMaster.getServletPort());
         }
-        return new ReplicationStateDTO(master, replicaDTOs);
+        return new ReplicationStateDTO(master, replicaDTOs, service.getServerIdentifier().toString());
     }
 
     @Override
@@ -3082,6 +3082,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void stopReplicatingFromMaster() {
         try {
             getReplicationService().stopToReplicateFromMaster();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void stopAllReplicas() {
+        try {
+            getReplicationService().stopAllReplica();
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);

@@ -2,6 +2,7 @@ package com.sap.sailing.server.replication;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
@@ -49,4 +50,16 @@ public interface ReplicationService {
      * @throws IOException 
      */
     void stopToReplicateFromMaster() throws IOException;
+
+    /**
+     * Stops all replica currently registered with this server.
+     * @throws IOException 
+     */
+    void stopAllReplica() throws IOException;
+    
+    /**
+     * Returns an unique server identifier
+     * @return
+     */
+    UUID getServerIdentifier();
 }
