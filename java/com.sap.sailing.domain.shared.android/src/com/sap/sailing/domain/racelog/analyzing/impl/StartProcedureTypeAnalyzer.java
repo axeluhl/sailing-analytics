@@ -5,24 +5,14 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 
-public class StartProcedureTypeAnalyzer extends RaceLogAnalyzer {
+public class StartProcedureTypeAnalyzer extends RaceLogAnalyzer<StartProcedureType> {
 
     public StartProcedureTypeAnalyzer(RaceLog raceLog) {
         super(raceLog);
     }
-    
-    public StartProcedureType getActiveStartProcedureType() {
-        StartProcedureType result = null;
-        raceLog.lockForRead();
-        try {
-            result = searchLog();
-        } finally {
-            raceLog.unlockAfterRead();
-        }
-        return result;
-    }
 
-    private StartProcedureType searchLog() {
+    @Override
+    protected StartProcedureType performAnalyzation() {
         StartProcedureType result = null;
         for (RaceLogEvent event : getAllEvents()) {
             if (event instanceof RaceLogStartProcedureChangedEvent) {

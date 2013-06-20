@@ -9,4 +9,10 @@ public interface GateStartPhaseEventListener extends StartPhaseEventListener {
     void onPapaUp();
 
     void onPapaDown();
+    
+    void onClassOverGolfDown();
+    
+    void onPathFinderSet();
+    
+    void onGateLineOpeningTimeSet();
 }

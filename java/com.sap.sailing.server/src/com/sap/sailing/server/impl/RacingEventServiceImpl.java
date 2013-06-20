@@ -43,7 +43,6 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
@@ -269,10 +268,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
                 tractracDomainFactory.getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+        loadStoredEvents();
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
-        loadStoredEvents();
         loadMediaLibary();
     }
 
@@ -1853,7 +1852,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public CourseArea addCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId) {
-        CourseArea courseArea = new CourseAreaImpl(courseAreaName, courseAreaId);
+        CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaId, courseAreaName);
         synchronized (eventsById) {
             if (!eventsById.containsKey(eventId)) {
                 throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");

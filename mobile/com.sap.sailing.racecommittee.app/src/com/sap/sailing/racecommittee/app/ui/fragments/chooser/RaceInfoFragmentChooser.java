@@ -4,8 +4,6 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.ErrorRaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishedRaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishingRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 
 public class RaceInfoFragmentChooser {
@@ -21,9 +19,9 @@ public class RaceInfoFragmentChooser {
         case RUNNING:
             return createInfoFragment(managedRace.getState().getStartProcedure().getRunningRaceFragment(), managedRace);
         case FINISHING:
-            return createInfoFragment(FinishingRaceFragment.class, managedRace);
+            return createInfoFragment(managedRace.getState().getStartProcedure().getFinishingRaceFragment(), managedRace);
         case FINISHED:
-            return createInfoFragment(FinishedRaceFragment.class, managedRace);
+            return createInfoFragment(managedRace.getState().getStartProcedure().getFinishedRaceFragment(), managedRace);
         default:
             return createInfoFragment(ErrorRaceFragment.class, managedRace);
         }

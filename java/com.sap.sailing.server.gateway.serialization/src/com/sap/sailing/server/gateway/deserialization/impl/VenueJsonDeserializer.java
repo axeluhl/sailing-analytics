@@ -11,27 +11,27 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 
 public class VenueJsonDeserializer implements JsonDeserializer<Venue> {
-	private JsonDeserializer<CourseArea> courseAreaDeserializer;
-	
-	public VenueJsonDeserializer(JsonDeserializer<CourseArea> courseAreaDeserializer) {
-		this.courseAreaDeserializer = courseAreaDeserializer;
-	}
-	
-	public Venue deserialize(JSONObject object)
-			throws JsonDeserializationException {
-		
-		String name = object.get(VenueJsonSerializer.FIELD_NAME).toString();
-		Venue venue = new VenueImpl(name);
-		
-		JSONArray courseAreaArray = Helpers.getNestedArraySafe(
-				object, 
-				VenueJsonSerializer.FIELD_COURSE_AREAS);
-		for (Object element : courseAreaArray) {
-			JSONObject courseAreaObject = Helpers.toJSONObjectSafe(element);
-			venue.addCourseArea(courseAreaDeserializer.deserialize(courseAreaObject));
-		}
-		
-		return venue;
-	}
+    private JsonDeserializer<CourseArea> courseAreaDeserializer;
+
+    public VenueJsonDeserializer(JsonDeserializer<CourseArea> courseAreaDeserializer) {
+        this.courseAreaDeserializer = courseAreaDeserializer;
+    }
+
+    public Venue deserialize(JSONObject object)
+            throws JsonDeserializationException {
+
+        String name = object.get(VenueJsonSerializer.FIELD_NAME).toString();
+        Venue venue = new VenueImpl(name);
+
+        JSONArray courseAreaArray = Helpers.getNestedArraySafe(
+                object, 
+                VenueJsonSerializer.FIELD_COURSE_AREAS);
+        for (Object element : courseAreaArray) {
+            JSONObject courseAreaObject = Helpers.toJSONObjectSafe(element);
+            venue.addCourseArea(courseAreaDeserializer.deserialize(courseAreaObject));
+        }
+
+        return venue;
+    }
 
 }

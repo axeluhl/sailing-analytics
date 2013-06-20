@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureListener;
 
@@ -21,7 +22,7 @@ public interface RaceState extends StartProcedureListener {
      * @param listener
      *            to be registered.
      */
-    void registerListener(RaceStateChangedListener listener);
+    void registerStateChangeListener(RaceStateChangedListener listener);
 
     /**
      * Unregister a previously registered state change listener.
@@ -29,8 +30,24 @@ public interface RaceState extends StartProcedureListener {
      * @param listener
      *            to be unregistered.
      */
-    void unregisterListener(RaceStateChangedListener listener);
+    void unregisterStateChangeListener(RaceStateChangedListener listener);
+    
+    /**
+     * Register a new listener on state events.
+     * 
+     * @param listener
+     *            to be registered.
+     */
+    void registerStateEventListener(RaceStateEventListener eventListener);
 
+    /**
+     * Unregister a previously registered state event listener.
+     * 
+     * @param listener
+     *            to be unregistered.
+     */
+    void unregisterStateEventListener(RaceStateEventListener value);
+    
     /**
      * @return the log of the race.
      */
@@ -87,7 +104,7 @@ public interface RaceState extends StartProcedureListener {
      * @param newStartTime
      *            to be set.
      */
-    void setStartTime(TimePoint newStartTime, StartProcedureType startProcedureType);
+    void setStartTime(TimePoint newStartTime);
     
     /**
      * Sets the current race's course design
@@ -110,6 +127,16 @@ public interface RaceState extends StartProcedureListener {
     void setFinishPositioningConfirmed();
 
     /**
+     * Sets a new protest start time.
+     */
+    void setProtestStartTime(TimePoint protestStartTime);
+
+    /**
+     * Gets the current protest start time.
+     */
+    TimePoint getProtestStartTime();
+
+    /**
      * Updates the race's status.
      * 
      * @return the new status, as returned by {@link RaceState#getStatus()}.
@@ -120,5 +147,12 @@ public interface RaceState extends StartProcedureListener {
      * @return the status of the race.
      */
     RaceLogRaceStatus getStatus();
+
+    void createNewStartProcedure(StartProcedureType selectedStartProcedureType);
+
+    /**
+     * Sets a new wind fix.
+     */
+    void setWindFix(Wind windFix);
 
 }
