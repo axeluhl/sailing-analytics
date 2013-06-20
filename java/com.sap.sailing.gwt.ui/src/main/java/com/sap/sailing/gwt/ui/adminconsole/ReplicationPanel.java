@@ -85,13 +85,17 @@ public class ReplicationPanel extends FlowPanel {
     }
 
     private void stopReplication() {
+        stopReplicationButton.setEnabled(false);
         sailingService.stopReplicatingFromMaster(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
+                stopReplicationButton.setEnabled(true);
             }
             @Override
             public void onSuccess(Void result) {
+                addButton.setEnabled(true);
+                stopReplicationButton.setEnabled(false);
                 updateReplicaList();
             }
         });
@@ -105,12 +109,15 @@ public class ReplicationPanel extends FlowPanel {
                         registeredMasters.removeRow(0);
                         registeredMasters.insertRow(0);
                         registeredMasters.setWidget(0, 0, new Label(stringMessages.loading()));
+                        addButton.setEnabled(false);
+                        stopReplicationButton.setEnabled(false);
                         sailingService.startReplicatingFromMaster(masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getC(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getB(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable e) {
+                                addButton.setEnabled(true);
                                 errorReporter.reportError(stringMessages.errorStartingReplication(
                                         masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(),
                                         masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(), e.getMessage()));
@@ -118,8 +125,9 @@ public class ReplicationPanel extends FlowPanel {
 
                             @Override
                             public void onSuccess(Void arg0) {
-                                updateReplicaList();
                                 addButton.setEnabled(false);
+                                stopReplicationButton.setEnabled(true);
+                                updateReplicaList();
                             }
                         });
                     }

@@ -90,10 +90,6 @@ public class Replicator implements Runnable {
             }
             try {
                 Delivery delivery = consumer.nextDelivery();
-                
-                /* Delivery is blocking, upon unblock we will not check for
-                 * stopping because we want to receive at least the last event.
-                 */
                 byte[] bytesFromMessage = delivery.getBody();
                 checksPerformed = 0;
                 // Set this object's class's class loader as context for de-serialization so that all exported classes
@@ -103,6 +99,8 @@ public class Replicator implements Runnable {
                         new ByteArrayInputStream(bytesFromMessage));
                 RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) ois.readObject();
                 applyOrQueue(operation);
+            } catch (InterruptedException irr) {
+                logger.info("Application requested shutdown.");
             } catch (ShutdownSignalException sse) {
                 /* make sure to respond to a stop event without waiting */
                 if (isBeingStopped()) {
@@ -209,8 +207,13 @@ public class Replicator implements Runnable {
             /* make sure to apply everything in queue before stopping this thread */
             applyQueue();
         }
-        stopped = true;
         logger.info("Signaled Replicator thread to stop asap.");
+        stopped = true;
+        try {
+            master.getConsumer().getChannel().getConnection().close(1);
+        } catch (Exception ex) {
+            // ignore any exception during abort.
+        }
     }
     
     public synchronized boolean isBeingStopped() {

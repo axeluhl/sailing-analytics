@@ -70,6 +70,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     private final String exchangeName;
     
     private Replicator replicator;
+    private Thread replicatorThread;
     
     public ReplicationServiceImpl(String exchangeName, final ReplicationInstancesManager replicationInstancesManager) throws IOException {
         this.replicationInstancesManager = replicationInstancesManager;
@@ -203,7 +204,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         logger.info("Initial load URL is "+initialLoadURL);
         replicator = new Replicator(master, this, /* startSuspended */ true, consumer);
         // start receiving messages already now, but start in suspended mode
-        new Thread(replicator, "Replicator receiving from "+master.getHostname()+"/"+master.getExchangeName()).start();
+        replicatorThread = new Thread(replicator, "Replicator receiving from "+master.getHostname()+"/"+master.getExchangeName());
+        replicatorThread.start();
         logger.info("Started replicator thread");
         InputStream is = initialLoadURL.openStream();
         final RacingEventService racingEventService = getRacingEventService();
@@ -234,19 +236,25 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         return replicaUUID;
     }
     
-    protected void deregisterReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException {
-        URL replicationDeRegistrationRequestURL = master.getReplicationDeRegistrationRequestURL();
-        final URLConnection deregistrationRequestConnection = replicationDeRegistrationRequestURL.openConnection();
-        deregistrationRequestConnection.connect();
-        StringBuilder uuid = new StringBuilder();
-        InputStream content = (InputStream) deregistrationRequestConnection.getContent();
-        byte[] buf = new byte[256];
-        int read = content.read(buf);
-        while (read != -1) {
-            uuid.append(new String(buf, 0, read));
-            read = content.read(buf);
+    protected void deregisterReplicaWithMaster(ReplicationMasterDescriptor master) {
+        try {
+            URL replicationDeRegistrationRequestURL = master.getReplicationDeRegistrationRequestURL();
+            final URLConnection deregistrationRequestConnection = replicationDeRegistrationRequestURL.openConnection();
+            deregistrationRequestConnection.connect();
+            StringBuilder uuid = new StringBuilder();
+            InputStream content = (InputStream) deregistrationRequestConnection.getContent();
+            byte[] buf = new byte[256];
+            int read = content.read(buf);
+            while (read != -1) {
+                uuid.append(new String(buf, 0, read));
+                read = content.read(buf);
+            }
+            content.close();
+        } catch (Exception ex) {
+            // ignore exceptions here - they will mostly be caused by an incompatible server
+            // it is also not problematic if the server does not get this deregistration
+            // a new registration will overwrite the current one
         }
-        content.close();
     }
 
     @Override
@@ -275,7 +283,12 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
                 replicator.stop();
                 deregisterReplicaWithMaster(descriptor);
                 descriptor.getConsumer().getChannel().close();
+                replicatingFromMaster = null;
                 replicaUUIDs.clear();
+                
+                // this is needed because QueuingConsumer.nextDelivery() wont unblock
+                // if the connection is closed by application.
+                replicatorThread.interrupt();
             }
         }
     }
