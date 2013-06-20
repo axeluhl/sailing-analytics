@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.IntegerBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.panels.UserStatusPanel;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
@@ -193,10 +194,28 @@ public class ReplicationPanel extends FlowPanel {
                     registeredReplicas.removeRow(0);
                 }
                 boolean replicaRegistered = false;
-                for (ReplicaDTO replica : replicas.getReplicas()) {
+                for (final ReplicaDTO replica : replicas.getReplicas()) {
                     registeredReplicas.insertRow(i);
                     registeredReplicas.setWidget(i, 0, new Label((i+1) + ". " + replica.getHostname() + " (" + replica.getIdentifier() + ")"));
                     registeredReplicas.setWidget(i, 1, new Label(stringMessages.registeredAt(replica.getRegistrationTime().toString())));
+                    final Button removeReplicaButton = new Button(stringMessages.dropReplicaConnection());
+                    removeReplicaButton.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            sailingService.stopSingleReplicaInstance(replica.getIdentifier(), new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError(caught.getMessage());
+                                    updateReplicaList();
+                                }
+                                @Override
+                                public void onSuccess(Void result) {
+                                    updateReplicaList();
+                                }
+                            });
+                        }
+                    });
+                    registeredReplicas.setWidget(i, 2, removeReplicaButton);
                     i++;
                     for (Map.Entry<String, Integer> e : replica.getOperationCountByOperationClassName().entrySet()) {
                         registeredReplicas.insertRow(i);
@@ -225,6 +244,7 @@ public class ReplicationPanel extends FlowPanel {
                 
                 final ReplicationMasterDTO replicatingFromMaster = replicas.getReplicatingFromMaster();
                 if (replicatingFromMaster != null) {
+                    UserStatusPanel.setGlobalAlert(stringMessages.warningServerIsReplica());
                     registeredMasters.insertRow(i);
                     registeredMasters.setWidget(i, 0, new Label(stringMessages.replicatingFromMaster(replicatingFromMaster.getHostname(),
                             replicatingFromMaster.getMessagingPort(), replicatingFromMaster.getServletPort())));
@@ -232,6 +252,7 @@ public class ReplicationPanel extends FlowPanel {
                     addButton.setEnabled(false);
                     stopReplicationButton.setEnabled(true);
                 } else {
+                    UserStatusPanel.setGlobalAlert("");
                     registeredMasters.insertRow(i);
                     registeredMasters.setWidget(i, 0, new Label(stringMessages.explainNoConnectionsToMaster()));
                     addButton.setEnabled(true);
