@@ -204,9 +204,15 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             drawMap(courseDesignComputer.compute());
         } catch (IllegalStateException ise) {
             Toast.makeText(getActivity(), ise.getMessage(), Toast.LENGTH_LONG).show();
+            clearMap();
         } catch (IllegalArgumentException iae) {
             Toast.makeText(getActivity(), iae.getMessage(), Toast.LENGTH_LONG).show();
+            clearMap();
         }
+    }
+
+    private void clearMap() {
+        courseAreaMap.clear();        
     }
 
     private void setupBoatClassSpinner() {
