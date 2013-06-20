@@ -49,6 +49,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         // TODO:
         // ??? trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0));
         if (raceLog != null) {
+            trackedRace.invalidateStartTime();
             raceLog.removeListener(this);
         }
     }
@@ -77,12 +78,12 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogPassChangeEvent event) {
-        analyzeStatus();
+        trackedRace.invalidateStartTime();
     }
 
     @Override
     public void visit(RaceLogStartTimeEvent event) {
-        analyzeStatus();
+        trackedRace.invalidateStartTime();
     }
 
     @Override
