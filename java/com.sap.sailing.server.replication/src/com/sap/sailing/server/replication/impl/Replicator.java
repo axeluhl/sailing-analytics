@@ -91,16 +91,9 @@ public class Replicator implements Runnable {
             try {
                 Delivery delivery = consumer.nextDelivery();
                 
-                /* Delivery is blocking, upon unblock we need to check if there
-                 * we has been stopped. If this is the case we assume that
-                 * we do not handle any new deliveries. It's a bit odd to have so
-                 * many checks for stopped event but we need to make sure that
-                 * we check this at every stage.
+                /* Delivery is blocking, upon unblock we will not check for
+                 * stopping because we want to receive at least the last event.
                  */
-                if (isBeingStopped()) {
-                    break;
-                }
-                
                 byte[] bytesFromMessage = delivery.getBody();
                 checksPerformed = 0;
                 // Set this object's class's class loader as context for de-serialization so that all exported classes
