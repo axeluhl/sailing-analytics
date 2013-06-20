@@ -101,4 +101,9 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     public boolean isStartsWithZeroScore() {
         return getSeries().isStartsWithZeroScore() && isFirstColumnInSeries();
     }
+
+    @Override
+    public boolean isDiscardable() {
+        return !isMedalRace() && (!isFirstColumnInSeries() || !getSeries().isFirstColumnIsNonDiscardableCarryForward());
+    }
 }

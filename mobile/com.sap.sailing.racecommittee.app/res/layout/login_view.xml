@@ -7,46 +7,26 @@
     android:baselineAligned="false"
     android:background="@drawable/background" >
 	
-	<LinearLayout
-	    android:layout_width="match_parent"
-	    android:layout_height="match_parent"
-	    android:orientation="vertical"
-	    android:layout_weight="0.5"
-	    android:background="@color/welter_extralight_gray_transparent"
-	    >
-	    
-	    <FrameLayout
-	        android:id="@+id/leftContainer"
-	        android:layout_width="fill_parent"
-	        android:layout_height="fill_parent">
-	    </FrameLayout>
-	    
-	</LinearLayout>
+    <FrameLayout
+        android:id="@+id/login_view_left_container"
+        android:layout_width="match_parent"
+    	android:layout_height="match_parent"
+    	android:layout_weight="0.5">
+    </FrameLayout>
 
 	<LinearLayout
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
-	    android:orientation="vertical"
 	    android:layout_weight="0.99"
+	    android:orientation="vertical"
 	    android:background="@color/welter_deep_gray">
 	</LinearLayout>
 	
-	<LinearLayout
-	    android:id="@+id/rightLayout"
-	    android:visibility="invisible"
+    <FrameLayout
+        android:id="@+id/login_view_right_container"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
-	    android:orientation="vertical"
-	    android:layout_weight="0.5"
-	    android:background="@color/welter_extralight_gray_transparent"
-	    >
-	    	        
-	    <FrameLayout
-	        android:id="@+id/rightContainer"
-	        android:layout_width="fill_parent"
-	        android:layout_height="fill_parent">
-	    </FrameLayout>
-	    
-	</LinearLayout>
+	    android:layout_weight="0.5">
+    </FrameLayout>
 
 </LinearLayout>

@@ -127,6 +127,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
+        getRaceColumnListeners().notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(raceColumn, firstColumnIsNonDiscardableCarryForward);
+    }
+
+    @Override
     public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
         return getRaceColumnListeners().canAddRaceColumnToContainer(raceColumn);
     }

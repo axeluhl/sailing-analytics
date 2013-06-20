@@ -20,6 +20,11 @@ public enum InMemoryDataStore implements DataStore {
     private CourseBase courseData;
 
     private InMemoryDataStore() {
+        reset();
+    }
+
+    @Override
+    public void reset() {
         this.eventsById = new HashMap<Serializable, EventBase>();
         this.managedRaceById = new HashMap<Serializable, ManagedRace>();
         this.marksById = new HashMap<Serializable, Mark>();

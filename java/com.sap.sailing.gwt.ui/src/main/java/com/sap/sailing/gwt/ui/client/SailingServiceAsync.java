@@ -3,13 +3,11 @@ package com.sap.sailing.gwt.ui.client;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -26,6 +24,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
@@ -39,6 +38,7 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -346,14 +346,14 @@ public interface SailingServiceAsync {
             AsyncCallback<Void> callback);
 
     void createRegatta(String regattaName, String boatClassName,
-            LinkedHashMap<String, Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType, String defaultCourseAreaId, AsyncCallback<RegattaDTO> callback);
+            RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
+            ScoringSchemeType scoringSchemeType, String defaultCourseAreaId, AsyncCallback<RegattaDTO> callback);
 
     void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<List<RaceColumnInSeriesDTO>> callback);
     
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal, int[] resultDiscardingThresholds,
-            boolean startsWithZeroScore, AsyncCallback<Void> callback);
+            boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward, AsyncCallback<Void> callback);
 
     void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);
@@ -418,13 +418,17 @@ public interface SailingServiceAsync {
 
     void getPolarSheetData(String polarSheetId, int angle, int windSpeedLevel, AsyncCallback<PolarSheetsHistogramData> wrapperCallback);
     
-    void getRegattaOverviewEntriesForEvent(String eventIdAsString, AsyncCallback<List<RegattaOverviewEntryDTO>> asyncCallback);
-    
     void getEventByIdAsString(String eventIdAsString, AsyncCallback<EventDTO> asyncCallback);
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId, AsyncCallback<Void> callback);
 
     void getBuildVersion(AsyncCallback<String> callback);
+    
+    void getRegattaStructureForEvent(String eventIdAsString, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
+
+    void getRaceStateEntriesForRaceGroup(String eventIdAsString, List<String> visibleCourseAreas,
+            List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,
+            AsyncCallback<List<RegattaOverviewEntryDTO>> markedAsyncCallback);
     
 }
 

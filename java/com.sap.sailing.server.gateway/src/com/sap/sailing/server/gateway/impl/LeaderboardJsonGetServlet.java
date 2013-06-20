@@ -28,7 +28,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardCacheManager;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -36,6 +36,8 @@ import com.sap.sailing.domain.leaderboard.caching.LeaderboardCache;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
+import com.sap.sailing.server.gateway.HttpRequestUtils;
+import com.sap.sailing.server.gateway.ParseHttpParameterException;
 import com.sap.sailing.util.SmartFutureCache;
 import com.sap.sailing.util.SmartFutureCache.CacheUpdater;
 import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
@@ -51,6 +53,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     private static final String PARAM_NAME_LEADERBOARDNAME = "leaderboardName";
     private static final String PARAM_NAME_RESULTSTATE = "resultState";
     private static final String PARAM_NAME_USE_CACHE = "useCache";
+    private static final String PARAM_NAME_MAX_COMPETITORS_COUNT = "maxCompetitorsCount";
     
     public static enum ResultStates { Live, Preliminary, Final };
     
@@ -71,7 +74,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
      * computing cache updates, new values are appended "at the end" and therefore tend to survive longer than any value appended
      * earlier.
      */
-    private final SmartFutureCache<Leaderboard, LinkedHashMap<Pair<TimePoint, ResultStates>, StringBuffer>, LeaderboardJsonCacheUpdateInterval> cache;
+    private final SmartFutureCache<Leaderboard, LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer>, LeaderboardJsonCacheUpdateInterval> cache;
     
     /**
      * Used to observe the leaderboards cached so far and triggering {@link #cache} updates.
@@ -79,15 +82,15 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     private final LeaderboardCacheManager cacheManager;
     
     private static class LeaderboardJsonCacheUpdateInterval implements UpdateInterval<LeaderboardJsonCacheUpdateInterval> {
-        private final LinkedHashSet<Pair<TimePoint, ResultStates>> timePointsAndResultStates;
+        private final LinkedHashSet<Triple<TimePoint, ResultStates, Integer>> timePointsAndResultStates;
         
-        public LeaderboardJsonCacheUpdateInterval(Iterable<Pair<TimePoint, ResultStates>> timePointsAndResultStates) {
+        public LeaderboardJsonCacheUpdateInterval(Iterable<Triple<TimePoint, ResultStates, Integer>> timePointsAndResultStates) {
             assert timePointsAndResultStates != null;
             this.timePointsAndResultStates = new LinkedHashSet<>();
             Util.addAll(timePointsAndResultStates, this.timePointsAndResultStates);
         }
 
-        public LinkedHashSet<Pair<TimePoint, ResultStates>> getTimePointsAndResultStates() {
+        public LinkedHashSet<Triple<TimePoint, ResultStates, Integer>> getTimePointsAndResultStates() {
             return timePointsAndResultStates;
         }
 
@@ -99,7 +102,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
          */
         @Override
         public LeaderboardJsonCacheUpdateInterval join(LeaderboardJsonCacheUpdateInterval otherUpdateInterval) {
-            LinkedHashSet<Pair<TimePoint, ResultStates>> newTimePointsAndResultStates = new LinkedHashSet<>();
+            LinkedHashSet<Triple<TimePoint, ResultStates, Integer>> newTimePointsAndResultStates = new LinkedHashSet<>();
             newTimePointsAndResultStates.addAll(getTimePointsAndResultStates());
             newTimePointsAndResultStates.addAll(otherUpdateInterval.getTimePointsAndResultStates());
             return new LeaderboardJsonCacheUpdateInterval(newTimePointsAndResultStates);
@@ -109,17 +112,17 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     
     private class LeaderboardJsonCacheUpdater
             implements
-            CacheUpdater<Leaderboard, LinkedHashMap<Pair<TimePoint, ResultStates>, StringBuffer>, LeaderboardJsonCacheUpdateInterval> {
+            CacheUpdater<Leaderboard, LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer>, LeaderboardJsonCacheUpdateInterval> {
         @Override
-        public LinkedHashMap<Pair<TimePoint, ResultStates>, StringBuffer> computeCacheUpdate(Leaderboard key,
+        public LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer> computeCacheUpdate(Leaderboard key,
                 LeaderboardJsonCacheUpdateInterval updateInterval) throws Exception {
-            final LinkedHashMap<Pair<TimePoint, ResultStates>, StringBuffer> result;
+            final LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer> result;
             if (updateInterval == null) {
                 result = null;
             } else {
                 // no removeEldestEntry override required here; map is merged into another LinkedHashMap created in provideNewCacheValue
                 result = new LinkedHashMap<>();
-                for (Pair<TimePoint, ResultStates> timePointAndResultState : updateInterval.getTimePointsAndResultStates()) {
+                for (Triple<TimePoint, ResultStates, Integer> timePointAndResultState : updateInterval.getTimePointsAndResultStates()) {
                     StringWriter sw = new StringWriter();
                     computeLeaderboardJson(key, timePointAndResultState).writeJSONString(sw);
                     result.put(timePointAndResultState, sw.getBuffer());
@@ -129,21 +132,21 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
         }
 
         @Override
-        public LinkedHashMap<Pair<TimePoint, ResultStates>, StringBuffer> provideNewCacheValue(Leaderboard leaderboard,
-                LinkedHashMap<Pair<TimePoint, ResultStates>, StringBuffer> oldCacheValue,
-                LinkedHashMap<Pair<TimePoint, ResultStates>, StringBuffer> computedCacheUpdate,
+        public LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer> provideNewCacheValue(Leaderboard leaderboard,
+                LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer> oldCacheValue,
+                LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer> computedCacheUpdate,
                 LeaderboardJsonCacheUpdateInterval updateInterval) {
-            final LinkedHashMap<Pair<TimePoint, ResultStates>, StringBuffer> result;
+            final LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer> result;
             if (computedCacheUpdate == null) {
                 result = null;
                 if (oldCacheValue != null) {
                     totalNumberOfCacheEntries -= oldCacheValue.size();
                 }
             } else {
-                result = new LinkedHashMap<Pair<TimePoint, ResultStates>, StringBuffer>(16, 0.75f, /* access-based eviction */ true) {
+                result = new LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer>(16, 0.75f, /* access-based eviction */ true) {
                     private static final long serialVersionUID = -6197983565575024084L;
                     @Override
-                    protected boolean removeEldestEntry(Entry<Pair<TimePoint, ResultStates>, StringBuffer> eldest) {
+                    protected boolean removeEldestEntry(Entry<Triple<TimePoint, ResultStates, Integer>, StringBuffer> eldest) {
                         final boolean result;
                         if (totalNumberOfCacheEntries > MAX_TOTAL_NUMBER_OF_CACHE_ENTRIES) {
                             totalNumberOfCacheEntries--;
@@ -178,6 +181,11 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
         TimePoint requestTimePoint = MillisecondsTimePoint.now();
         String leaderboardName = req.getParameter(PARAM_NAME_LEADERBOARDNAME);
         String useCacheParam = req.getParameter(PARAM_NAME_USE_CACHE);
+        Integer maxCompetitorsCount = null;
+        try {
+            maxCompetitorsCount = HttpRequestUtils.getIntParameter(req, PARAM_NAME_MAX_COMPETITORS_COUNT);
+        } catch (ParseHttpParameterException e1) {
+        }
         boolean useCache = true; // default
         if(useCacheParam != null && "false".equalsIgnoreCase(useCacheParam)) {
             useCache = false;
@@ -195,7 +203,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                     TimePoint resultTimePoint = calculateTimePointForResultState(leaderboard, resultState);
                     StringBuffer jsonLeaderboardAsString;
                     if (resultTimePoint != null) {
-                        Pair<TimePoint, ResultStates> resultStateAndTimePoint = new Pair<>(resultTimePoint, resultState);
+                        Triple<TimePoint, ResultStates, Integer> resultStateAndTimePoint = new Triple<>(resultTimePoint, resultState, maxCompetitorsCount);
                         if (useCache) {
                             jsonLeaderboardAsString = getLeaderboardJsonFromCacheOrCompute(leaderboard, resultStateAndTimePoint, requestTimePoint);
                         } else {
@@ -205,7 +213,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                         }
                     } else {
                         StringWriter sw = new StringWriter();
-                        createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint).writeJSONString(sw);
+                        createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint, maxCompetitorsCount).writeJSONString(sw);
                         jsonLeaderboardAsString = sw.getBuffer();
                     }
                     setJsonResponseHeader(resp);
@@ -228,37 +236,42 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     }
 
     private StringBuffer getLeaderboardJsonFromCacheOrCompute(Leaderboard leaderboard,
-            Pair<TimePoint, ResultStates> timePointAndResultState, final TimePoint requestTimePoint) throws NoWindException {
-        Map<Pair<TimePoint, ResultStates>, StringBuffer> cacheEntry = cache.get(leaderboard, /* waitForLatest */ false);
-        if (cacheEntry == null || !cacheEntry.containsKey(timePointAndResultState)) {
+            Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount, final TimePoint requestTimePoint) throws NoWindException {
+        Map<Triple<TimePoint, ResultStates, Integer>, StringBuffer> cacheEntry = cache.get(leaderboard, /* waitForLatest */ false);
+        if (cacheEntry == null || !cacheEntry.containsKey(timePointAndResultStateAndMaxCompetitorsCount)) {
             cacheMisses++;
-            LinkedHashSet<Pair<TimePoint, ResultStates>> timePointsAndResultStates = new LinkedHashSet<>();
-            timePointsAndResultStates.add(timePointAndResultState);
+            LinkedHashSet<Triple<TimePoint, ResultStates, Integer>> timePointsAndResultStates = new LinkedHashSet<>();
+            timePointsAndResultStates.add(timePointAndResultStateAndMaxCompetitorsCount);
             cache.triggerUpdate(leaderboard, new LeaderboardJsonCacheUpdateInterval(timePointsAndResultStates));
             // now wait for this entry to be computed
             cacheEntry = cache.get(leaderboard, /* waitForLatest */ true);
-            StringBuffer jsonObjectAsString = cacheEntry.get(timePointAndResultState);
+            StringBuffer jsonObjectAsString = cacheEntry.get(timePointAndResultStateAndMaxCompetitorsCount);
             return jsonObjectAsString;
         } else {
             cacheHits++;
         }
         logger.finest(this+" cache hits/misses: "+cacheHits+"/"+cacheMisses);
-        return cacheEntry.get(timePointAndResultState);
+        return cacheEntry.get(timePointAndResultStateAndMaxCompetitorsCount);
     }
 
     private JSONObject computeLeaderboardJson(Leaderboard leaderboard,
-            Pair<TimePoint, ResultStates> resultStateAndTimePoint) throws NoWindException {
-        TimePoint resultTimePoint = resultStateAndTimePoint.getA();
-        ResultStates resultState = resultStateAndTimePoint.getB();
-        List<Competitor> competitorsFromBestToWorstAccordingToTotalRank = leaderboard.getCompetitorsFromBestToWorst(resultTimePoint);
+            Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount) throws NoWindException {
+        TimePoint resultTimePoint = timePointAndResultStateAndMaxCompetitorsCount.getA();
+        ResultStates resultState = timePointAndResultStateAndMaxCompetitorsCount.getB();
+        Integer maxCompetitorsCount = timePointAndResultStateAndMaxCompetitorsCount.getC();
+        List<Competitor> competitorsOrderedByTotalRank = leaderboard.getCompetitorsFromBestToWorst(resultTimePoint);
         Map<RaceColumn, List<Competitor>> rankedCompetitorsPerColumn = new HashMap<RaceColumn, List<Competitor>>();
         JSONObject jsonLeaderboard = new JSONObject();
         
-        writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, resultTimePoint);
+        writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, resultTimePoint, maxCompetitorsCount);
 
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
-        for (Competitor competitor : competitorsFromBestToWorstAccordingToTotalRank) {
+        int counter = 1;
+        for (Competitor competitor : competitorsOrderedByTotalRank) {
+            if(maxCompetitorsCount != null && counter > maxCompetitorsCount) {
+                break;
+            }
             JSONObject jsonCompetitor = new JSONObject();
             jsonCompetitor.put("name", competitor.getName());
             final String displayName = leaderboard.getDisplayName(competitor);
@@ -269,7 +282,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
             jsonCompetitor.put("nationality", nationality != null ? nationality.getThreeLetterIOCAcronym(): null);
             jsonCompetitor.put("countryCode", nationality != null ? (nationality.getCountryCode() != null ? nationality.getCountryCode().getTwoLetterISOCode(): null) : null);
             
-            jsonCompetitor.put("rank", competitorsFromBestToWorstAccordingToTotalRank.indexOf(competitor) + 1);
+            jsonCompetitor.put("rank", competitorsOrderedByTotalRank.indexOf(competitor) + 1);
             jsonCompetitor.put("carriedPoints", leaderboard.getCarriedPoints(competitor));
             jsonCompetitor.put("totalPoints", leaderboard.getTotalPoints(competitor, resultTimePoint));
             jsonCompetitorEntries.add(jsonCompetitor);
@@ -298,15 +311,16 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                 jsonEntry.put("isDiscarded", leaderboard.isDiscarded(competitor, raceColumn, resultTimePoint));
                 jsonEntry.put("isCorrected", leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn));
             }
+            counter++;
         }
         return jsonLeaderboard;
     }
 
     private JSONObject createEmptyLeaderboardJson(Leaderboard leaderboard,
-            ResultStates resultState, TimePoint requestTimePoint) throws NoWindException {
+            ResultStates resultState, TimePoint requestTimePoint, Integer maxCompetitorsCount) throws NoWindException {
         JSONObject jsonLeaderboard = new JSONObject();
         
-        writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, null);
+        writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, null, maxCompetitorsCount);
 
         JSONArray jsonCompetitorEntries = new JSONArray();
         jsonLeaderboard.put("competitors", jsonCompetitorEntries);
@@ -344,7 +358,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     }
 
     private void writeCommonLeaderboardData(JSONObject jsonLeaderboard, Leaderboard leaderboard, ResultStates resultState, 
-            TimePoint resultTimePoint) {
+            TimePoint resultTimePoint, Integer maxCompetitorsCount) {
         jsonLeaderboard.put("name", leaderboard.getName());
         
         // for backward compatibility 
@@ -352,6 +366,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
 
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.toString() : null);
         jsonLeaderboard.put("resultState", resultState.name());
+        jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
         
         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
         if (scoreCorrection != null) {
@@ -451,7 +466,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
      */
     @Override
     public void invalidate(Leaderboard leaderboard) {
-        final LinkedHashMap<Pair<TimePoint, ResultStates>, StringBuffer> currentCachedValueForLeaderboard =
+        final LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer> currentCachedValueForLeaderboard =
                 cache.get(leaderboard, /* waitForLatest */ false);
         cache.triggerUpdate(leaderboard, new LeaderboardJsonCacheUpdateInterval(currentCachedValueForLeaderboard.keySet()));
     }
