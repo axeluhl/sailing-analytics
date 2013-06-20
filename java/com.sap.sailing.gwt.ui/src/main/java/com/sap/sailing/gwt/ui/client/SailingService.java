@@ -305,4 +305,6 @@ public interface SailingService extends RemoteService {
     EventDTO getEventByIdAsString(String eventIdAsString);
     
     String getBuildVersion();
+
+    void stopReplicatingFromMaster();
 }

@@ -34,6 +34,12 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     @Override
+    public URL getReplicationDeRegistrationRequestURL() throws MalformedURLException {
+        return new URL("http", hostname, servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
+                + ReplicationServlet.Action.DEREGISTER.name());
+    }
+    
+    @Override
     public URL getInitialLoadURL() throws MalformedURLException {
         return new URL("http", hostname, servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.INITIAL_LOAD.name());
@@ -79,4 +85,5 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     public String getExchangeName() {
         return exchangeName;
     }
+
 }

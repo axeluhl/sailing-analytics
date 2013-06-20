@@ -15,6 +15,8 @@ import com.rabbitmq.client.QueueingConsumer;
 public interface ReplicationMasterDescriptor {
 
     URL getReplicationRegistrationRequestURL() throws MalformedURLException;
+    
+    URL getReplicationDeRegistrationRequestURL() throws MalformedURLException;
 
     URL getInitialLoadURL() throws MalformedURLException;
 

@@ -106,6 +106,10 @@ public abstract class AbstractServerReplicationTest {
         urlConnection.getInputStream().close();
     }
     
+    public void stopReplicatingToMaster() throws IOException {
+        replicaReplicator.stopToReplicateFromMaster();
+    }
+    
     static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
         private final DomainFactory resolveAgainst;
         private final RacingEventService master;
@@ -146,7 +150,12 @@ public abstract class AbstractServerReplicationTest {
                             pw.println("Content-Type: text/plain");
                             pw.println();
                             pw.flush();
-                            if (request.contains("REGISTER")) {
+                            if (request.contains("DEREGISTER")) {
+                                // assuming that it is safe to unregister all replicas for tests
+                                for (ReplicaDescriptor descriptor : getReplicaInfo()) {
+                                    unregisterReplica(descriptor);
+                                }
+                            } else if (request.contains("REGISTER")) {
                                 final String uuid = UUID.randomUUID().toString();
                                 registerReplicaUuidForMaster(uuid, masterDescriptor);
                                 pw.print(uuid.getBytes());

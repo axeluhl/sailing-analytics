@@ -52,6 +52,8 @@ public class Replicator implements Runnable {
      */
     private boolean suspended;
     
+    private boolean stopped = false;
+    
     /**
      * Starts the replicator immediately, not holding back messages received but forwarding them directly.
      * 
@@ -83,8 +85,22 @@ public class Replicator implements Runnable {
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         
         while (true) {
+            if (isBeingStopped()) {
+                break;
+            }
             try {
                 Delivery delivery = consumer.nextDelivery();
+                
+                /* Delivery is blocking, upon unblock we need to check if there
+                 * we has been stopped. If this is the case we assume that
+                 * we do not handle any new deliveries. It's a bit odd to have so
+                 * many checks for stopped event but we need to make sure that
+                 * we check this at every stage.
+                 */
+                if (isBeingStopped()) {
+                    break;
+                }
+                
                 byte[] bytesFromMessage = delivery.getBody();
                 checksPerformed = 0;
                 // Set this object's class's class loader as context for de-serialization so that all exported classes
@@ -95,6 +111,11 @@ public class Replicator implements Runnable {
                 RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) ois.readObject();
                 applyOrQueue(operation);
             } catch (ShutdownSignalException sse) {
+                /* make sure to respond to a stop event without waiting */
+                if (isBeingStopped()) {
+                    break;
+                }
+                
                 if (sse.isInitiatedByApplication()) {
                     logger.severe("Application shut down messaging queue for " + this.toString());
                     break;
@@ -103,12 +124,15 @@ public class Replicator implements Runnable {
                 logger.info(sse.getMessage());
                 if (checksPerformed <= CHECK_COUNT) {
                     try {
-                        logger.info("Replication reciever is sleeping because of " + sse.getLocalizedMessage());
                         Thread.sleep(CHECK_INTERVAL);
                         
+                        /* isOpen() will return false if the channel has been closed. This
+                         * does not hold when the connection is dropped.
+                         */
                         if (!this.consumer.getChannel().isOpen()) {
                             /* for a reconnection we need to instantiate a new consumer */
                             try {
+                                logger.info("Channel seems to be closed. Trying to reconnect consumer queue...");
                                 this.consumer = master.getConsumer();
                                 Thread.sleep(CHECK_INTERVAL);
                                 checksPerformed += 1;
@@ -133,6 +157,7 @@ public class Replicator implements Runnable {
                 Thread.currentThread().setContextClassLoader(oldClassLoader);
             }
         }
+        logger.info("Stopped replicator thread. This server will no longer receive events from a master.");
     }
     
     public synchronized boolean isQueueEmpty() {
@@ -184,6 +209,19 @@ public class Replicator implements Runnable {
 
     public synchronized boolean isSuspended() {
         return suspended;
+    }
+    
+    public synchronized void stop() {
+        if (isSuspended()) {
+            /* make sure to apply everything in queue before stopping this thread */
+            applyQueue();
+        }
+        stopped = true;
+        logger.info("Signaled Replicator thread to stop asap.");
+    }
+    
+    public synchronized boolean isBeingStopped() {
+        return stopped;
     }
 
     @Override

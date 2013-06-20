@@ -424,6 +424,8 @@ public interface SailingServiceAsync {
     void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId, AsyncCallback<Void> callback);
 
     void getBuildVersion(AsyncCallback<String> callback);
+
+    void stopReplicatingFromMaster(AsyncCallback<Void> asyncCallback);
     
 }
 

@@ -38,6 +38,9 @@ public class ReplicationPanel extends FlowPanel {
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     
+    private final Button addButton;
+    private final Button stopReplicationButton;
+    
     public ReplicationPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -61,7 +64,7 @@ public class ReplicationPanel extends FlowPanel {
             }
         });
         add(refreshButton);
-        Button addButton = new Button(stringMessages.connectToMaster());
+        addButton = new Button(stringMessages.connectToMaster());
         addButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -69,7 +72,29 @@ public class ReplicationPanel extends FlowPanel {
             }
         });
         add(addButton);
+        stopReplicationButton = new Button(stringMessages.stopConnectionToMaster());
+        stopReplicationButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                stopReplication();
+              };
+        });
+        stopReplicationButton.setEnabled(false);
+        add(stopReplicationButton);
         updateReplicaList();
+    }
+
+    private void stopReplication() {
+        sailingService.stopReplicatingFromMaster(new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+            }
+            @Override
+            public void onSuccess(Void result) {
+                updateReplicaList();
+            }
+        });
     }
     
     private void addReplication() {
@@ -77,6 +102,9 @@ public class ReplicationPanel extends FlowPanel {
                 new DialogCallback<Triple<Pair<String, String>, Integer, Integer>>() {
                     @Override
                     public void ok(final Triple<Pair<String, String>, Integer, Integer> masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber) {
+                        registeredMasters.removeRow(0);
+                        registeredMasters.insertRow(0);
+                        registeredMasters.setWidget(0, 0, new Label(stringMessages.loading()));
                         sailingService.startReplicatingFromMaster(masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getC(),
@@ -91,6 +119,7 @@ public class ReplicationPanel extends FlowPanel {
                             @Override
                             public void onSuccess(Void arg0) {
                                 updateReplicaList();
+                                addButton.setEnabled(false);
                             }
                         });
                     }
@@ -117,9 +146,13 @@ public class ReplicationPanel extends FlowPanel {
                     registeredMasters.setWidget(i, 0, new Label(stringMessages.replicatingFromMaster(replicatingFromMaster.getHostname(),
                             replicatingFromMaster.getMessagingPort(), replicatingFromMaster.getServletPort())));
                     i++;
+                    addButton.setEnabled(false);
+                    stopReplicationButton.setEnabled(true);
                 } else {
                     registeredMasters.insertRow(i);
                     registeredMasters.setWidget(i, 0, new Label(stringMessages.explainNoConnectionsToMaster()));
+                    addButton.setEnabled(true);
+                    stopReplicationButton.setEnabled(false);
                 }
                 
                 while (registeredReplicas.getRowCount() > 0) {

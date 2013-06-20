@@ -2917,4 +2917,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public String getBuildVersion() {
         return BuildVersion.getBuildVersion();
     }
+
+    @Override
+    public void stopReplicatingFromMaster() {
+        try {
+            getReplicationService().stopToReplicateFromMaster();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
 }

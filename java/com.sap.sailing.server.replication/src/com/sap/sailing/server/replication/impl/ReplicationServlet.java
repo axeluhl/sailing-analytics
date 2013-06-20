@@ -31,7 +31,7 @@ public class ReplicationServlet extends SailingServerHttpServlet {
     
     private static final long serialVersionUID = 4835516998934433846L;
     
-    public enum Action { REGISTER, INITIAL_LOAD }
+    public enum Action { REGISTER, INITIAL_LOAD, DEREGISTER }
     
     public static final String ACTION = "action";
 
@@ -61,6 +61,9 @@ public class ReplicationServlet extends SailingServerHttpServlet {
         case REGISTER:
             registerClientWithReplicationService(req, resp);
             break;
+        case DEREGISTER:
+            deregisterClientWithReplicationService(req, resp);
+            break;
         case INITIAL_LOAD:
             ObjectOutputStream oos = new ObjectOutputStream(resp.getOutputStream());
             try {
@@ -78,6 +81,14 @@ public class ReplicationServlet extends SailingServerHttpServlet {
         }
     }
 
+    private void deregisterClientWithReplicationService(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        ReplicaDescriptor replica = getReplicaDescriptor(req);
+        getReplicationService().unregisterReplica(replica);
+        logger.info("Deregistered replication client with this server " + replica.getIpAddress());
+        resp.setContentType("text/plain");
+        resp.getWriter().print(replica.getUuid());
+    }
+
     private void registerClientWithReplicationService(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         ReplicaDescriptor replica = getReplicaDescriptor(req);
@@ -87,6 +98,7 @@ public class ReplicationServlet extends SailingServerHttpServlet {
     }
 
     private ReplicaDescriptor getReplicaDescriptor(HttpServletRequest req) throws UnknownHostException {
+        // XXX: this can lead to problems if there are multiple replicas on one server
         InetAddress ipAddress = InetAddress.getByName(req.getRemoteAddr());
         return new ReplicaDescriptor(ipAddress);
     }

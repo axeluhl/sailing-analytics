@@ -69,6 +69,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      */
     private final String exchangeName;
     
+    private Replicator replicator;
+    
     public ReplicationServiceImpl(String exchangeName, final ReplicationInstancesManager replicationInstancesManager) throws IOException {
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
@@ -77,6 +79,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         racingEventServiceTracker.open();
         localService = null;
         this.exchangeName = exchangeName;
+        replicator = null;
     }
     
     /**
@@ -87,9 +90,10 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     public ReplicationServiceImpl(String exchangeName,
             final ReplicationInstancesManager replicationInstancesManager, RacingEventService localService) throws IOException {
         this.replicationInstancesManager = replicationInstancesManager;
-        replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
+        replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>(); // XXX why is this a map? there should be only one connection to a master
         this.localService = localService;
         this.exchangeName = exchangeName;
+        replicator = null;
     }
     
     private Channel createMasterChannel(String exchangeName) throws IOException {
@@ -144,9 +148,12 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         if (!replicationInstancesManager.hasReplicas()) {
             removeAsListenerFromRacingEventService();
             synchronized (this) {
-                masterChannel.close();
-                masterChannel = null;
+                if (masterChannel != null) {
+                    masterChannel.close();
+                    masterChannel = null;
+                }
             }
+            logger.info("Unregistered replica " + replica.getIpAddress().toString());
         }
     }
 
@@ -183,6 +190,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         registerReplicaWithMaster(master);
         logger.info("Registered replica with master");
         QueueingConsumer consumer = null;
+        // logging exception here because it will not propagate
+        // thru the client with all details
         try {
             consumer = master.getConsumer();
         } catch (Exception ex) {
@@ -192,7 +201,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         logger.info("Connection to exchange successful.");
         URL initialLoadURL = master.getInitialLoadURL();
         logger.info("Initial load URL is "+initialLoadURL);
-        final Replicator replicator = new Replicator(master, this, /* startSuspended */ true, consumer);
+        replicator = new Replicator(master, this, /* startSuspended */ true, consumer);
         // start receiving messages already now, but start in suspended mode
         new Thread(replicator, "Replicator receiving from "+master.getHostname()+"/"+master.getExchangeName()).start();
         logger.info("Started replicator thread");
@@ -224,6 +233,21 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         registerReplicaUuidForMaster(replicaUUID, master);
         return replicaUUID;
     }
+    
+    protected void deregisterReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException {
+        URL replicationDeRegistrationRequestURL = master.getReplicationDeRegistrationRequestURL();
+        final URLConnection deregistrationRequestConnection = replicationDeRegistrationRequestURL.openConnection();
+        deregistrationRequestConnection.connect();
+        StringBuilder uuid = new StringBuilder();
+        InputStream content = (InputStream) deregistrationRequestConnection.getContent();
+        byte[] buf = new byte[256];
+        int read = content.read(buf);
+        while (read != -1) {
+            uuid.append(new String(buf, 0, read));
+            read = content.read(buf);
+        }
+        content.close();
+    }
 
     @Override
     public <T> void executed(RacingEventServiceOperation<T> operation) {
@@ -241,6 +265,19 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     @Override
     public Map<Class<? extends RacingEventServiceOperation<?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor) {
         return replicationInstancesManager.getStatistics(replicaDescriptor);
+    }
+
+    @Override
+    public void stopToReplicateFromMaster() throws IOException {
+        ReplicationMasterDescriptor descriptor = isReplicatingFromMaster();
+        if (descriptor != null) {
+            synchronized(replicaUUIDs) {
+                replicator.stop();
+                deregisterReplicaWithMaster(descriptor);
+                descriptor.getConsumer().getChannel().close();
+                replicaUUIDs.clear();
+            }
+        }
     }
 
 }

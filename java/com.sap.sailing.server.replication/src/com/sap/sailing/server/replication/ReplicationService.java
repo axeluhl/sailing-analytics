@@ -42,4 +42,11 @@ public interface ReplicationService {
      * replica by type, where the operation type is the key, represented as the operation's class name
      */
     Map<Class<? extends RacingEventServiceOperation<?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor);
+
+    /**
+     * Stops the currently running replication. As there can be only one replication running
+     * this method needs no parameters.
+     * @throws IOException 
+     */
+    void stopToReplicateFromMaster() throws IOException;
 }
