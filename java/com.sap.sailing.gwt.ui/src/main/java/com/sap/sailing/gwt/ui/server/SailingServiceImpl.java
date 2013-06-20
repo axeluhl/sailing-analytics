@@ -3097,4 +3097,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void stopSingleReplicaInstance(String identifier) {
+        UUID uuid = UUID.fromString(identifier);
+        ReplicaDescriptor replicaDescriptor = new ReplicaDescriptor(null, uuid, "");
+        try {
+            getReplicationService().unregisterReplica(replicaDescriptor);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
 }

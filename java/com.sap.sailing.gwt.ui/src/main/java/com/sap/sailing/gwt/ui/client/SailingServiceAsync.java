@@ -433,6 +433,8 @@ public interface SailingServiceAsync {
             AsyncCallback<List<RegattaOverviewEntryDTO>> markedAsyncCallback);
 
     void stopAllReplicas(AsyncCallback<Void> asyncCallback);
+
+    void stopSingleReplicaInstance(String identifier, AsyncCallback<Void> asyncCallback);
     
 }
 

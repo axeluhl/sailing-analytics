@@ -165,7 +165,6 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
                     masterChannel = null;
                 }
             }
-            logger.info("Unregistered replica " + replica.getIpAddress().toString());
         }
     }
 

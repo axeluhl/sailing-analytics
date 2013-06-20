@@ -125,10 +125,11 @@ public class Replicator implements Runnable {
                             try {
                                 logger.info("Channel seems to be closed. Trying to reconnect consumer queue...");
                                 this.consumer = master.getConsumer();
+                                logger.info("OK - channel reconnected!");
                                 Thread.sleep(CHECK_INTERVAL_MILLIS);
                                 checksPerformed += 1;
                             } catch (IOException eio) {
-                                eio.printStackTrace();
+                                // do not print exceptions known to occur
                             }
                         }
                     } catch (InterruptedException eir) {

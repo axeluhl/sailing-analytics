@@ -313,4 +313,6 @@ public interface SailingService extends RemoteService {
     void stopReplicatingFromMaster();
 
     void stopAllReplicas();
+
+    void stopSingleReplicaInstance(String identifier);
 }
