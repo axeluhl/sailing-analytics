@@ -149,6 +149,7 @@ public class Replicator implements Runnable {
                 Thread.currentThread().setContextClassLoader(oldClassLoader);
             }
         }
+        
         logger.info("Stopped replicator thread. This server will no longer receive events from a master.");
     }
     
@@ -210,11 +211,7 @@ public class Replicator implements Runnable {
         }
         logger.info("Signaled Replicator thread to stop asap.");
         stopped = true;
-        try {
-            master.getConsumer().getChannel().getConnection().close(1);
-        } catch (Exception ex) {
-            // ignore any exception during abort.
-        }
+        master.stopConnection();
     }
     
     public synchronized boolean isBeingStopped() {

@@ -300,7 +300,6 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
                 if (replicator != null) {
                     replicator.stop();
                     deregisterReplicaWithMaster(descriptor);
-                    descriptor.getConsumer().getChannel().close();
                     replicatingFromMaster = null;
                     replicaUUIDs.clear();
                     

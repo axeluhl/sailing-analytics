@@ -23,6 +23,8 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     private final int messagingPort;
     private final String queueName;
     
+    private QueueingConsumer consumer;
+    
     /**
      * @param messagingPort 0 means use default port
      */
@@ -32,6 +34,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         this.messagingPort = messagingPort;
         this.exchangeName = exchangeName;
         this.queueName = queueName;
+        this.consumer = null;
     }
 
     @Override
@@ -56,7 +59,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     @Override
-    public QueueingConsumer getConsumer() throws IOException {
+    public synchronized QueueingConsumer getConsumer() throws IOException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost(getHostname());
         int port = getMessagingPort();
@@ -108,7 +111,23 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         // from now on we get all new messages that the exchange is getting from producer
         channel.queueBind(queueName, exchangeName, "");
         channel.basicConsume(queueName, /* auto-ack */ true, consumer);
+        this.consumer = consumer;
         return consumer;
+    }
+    
+    @Override
+    public synchronized void stopConnection() {
+        try {
+            if (consumer != null) {
+                // make sure to remove queue in order to avoid any exchanges filling it with messages
+                consumer.getChannel().queueUnbind(queueName, exchangeName, "");
+                consumer.getChannel().queueDelete(queueName);
+                consumer.getChannel().getConnection().close(1);
+            }
+        } catch (Exception ex) {
+            // ignore any exception during abort. close can yield a broad
+            // number of exceptions that we don't want to know or to log.
+        }
     }
 
     /**

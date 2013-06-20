@@ -36,4 +36,6 @@ public interface ReplicationMasterDescriptor {
     QueueingConsumer getConsumer() throws IOException;
 
     String getExchangeName();
+
+    void stopConnection();
 }
