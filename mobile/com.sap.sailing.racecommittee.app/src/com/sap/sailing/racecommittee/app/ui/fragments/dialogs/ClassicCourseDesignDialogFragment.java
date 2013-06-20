@@ -301,7 +301,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             }
         });
 
-        spinnerNumberOfRounds.setSelection(targetTimeAdapter.getPosition(selectedTargetTime));
+        spinnerTargetTime.setSelection(targetTimeAdapter.getPosition(selectedTargetTime));
     }
 
     @Override
