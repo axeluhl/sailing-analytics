@@ -3,7 +3,8 @@ package com.sap.sailing.racecommittee.app.domain.coursedesign;
 public enum NumberOfRounds {
     TWO(2),
     THREE(3),
-    FOUR(4);
+    FOUR(4),
+    FIVE(5);
     
     private final Integer numberOfRounds;
     

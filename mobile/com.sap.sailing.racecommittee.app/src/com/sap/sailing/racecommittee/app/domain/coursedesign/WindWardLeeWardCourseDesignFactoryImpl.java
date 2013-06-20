@@ -59,8 +59,15 @@ public class WindWardLeeWardCourseDesignFactoryImpl extends AbstractCourseDesign
             throw new IllegalArgumentException(
                     "There was no speed diagram for the given boat class and the given wind.");
         }
-        double roundLength = targetTime.getTimeInMinutes() / numberOfRounds.getNumberOfRounds();
-        double legLength = roundLength / (speedTable.get(PointOfSail.Upwind) + speedTable.get(PointOfSail.Downwind));
+        double legLength;
+        if (((WindWardLeeWardCourseLayouts) courseLayout).isUpWindFinish()) {
+            legLength = (targetTime.getTimeInMinutes() / (speedTable.get(PointOfSail.Downwind)
+                    * (numberOfRounds.getNumberOfRounds() - 1) + (speedTable.get(PointOfSail.Upwind)
+                    * numberOfRounds.getNumberOfRounds())));
+        } else {
+            double roundLength = targetTime.getTimeInMinutes() / numberOfRounds.getNumberOfRounds();
+            legLength = roundLength / (speedTable.get(PointOfSail.Upwind) + speedTable.get(PointOfSail.Downwind));
+        }
         legDistance = new NauticalMileDistance(legLength);
         Position luvBuoyPosition = getPositionForGivenPointDistanceAndBearing(this.product.getReferencePoint(),
                 legDistance, windDirection.add(new DegreeBearingImpl(LUV_BUOY1_ANGLE_TO_WIND)));
