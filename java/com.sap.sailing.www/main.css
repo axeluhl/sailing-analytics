@@ -88,6 +88,13 @@ a {
   width: 950px;
   margin: 0 auto;
   min-height: 100%; }
+  #yield_content .headNavigation {
+    float: right;
+    margin: 20px 0 0 0;
+    padding: 0; }
+    #yield_content .headNavigation a {
+      font-family: 'OpenSans-Bold';
+      color: #fff; }
   /* line 47, site.css.sass */
   #yield_content #pageHeadline {
     color: white;
