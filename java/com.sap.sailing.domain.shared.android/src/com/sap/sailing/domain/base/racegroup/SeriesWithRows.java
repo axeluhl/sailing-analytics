@@ -7,5 +7,9 @@ import com.sap.sailing.domain.base.SeriesBase;
  * between Leaderboards and Regattas for any app since Leaderboards do not have any series, but Regattas.
  */
 public interface SeriesWithRows extends SeriesBase {
+    
+    /**
+     * All {@link RaceRow}s of this series.
+     */
     public Iterable<RaceRow> getRaceRows();
 }

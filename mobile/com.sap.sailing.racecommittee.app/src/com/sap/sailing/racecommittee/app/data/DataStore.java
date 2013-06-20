@@ -10,6 +10,8 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public interface DataStore {
+    
+    public void reset();
 
     public Collection<EventBase> getEvents();
     public EventBase getEvent(Serializable id);

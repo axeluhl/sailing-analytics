@@ -3,14 +3,12 @@ package com.sap.sailing.gwt.ui.client;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -26,6 +24,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
@@ -39,6 +38,7 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -142,9 +142,9 @@ public interface SailingService extends RemoteService {
     
     void moveLeaderboardColumnDown(String leaderboardName, String columnName);
     
-    RegattaDTO createRegatta(String regattaName, String boatClassName, 
-            LinkedHashMap<String, Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType, String defaultCourseAreaId);
+    RegattaDTO createRegatta(String regattaName, String boatClassName,
+            RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
+            ScoringSchemeType scoringSchemeType, String defaultCourseAreaId);
     
     void removeRegatta(RegattaIdentifier regattaIdentifier);
     
@@ -152,7 +152,8 @@ public interface SailingService extends RemoteService {
     
     List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
 
-    void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal, int[] resultDiscardingThresholds, boolean startsWithZeroScore);
+    void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal,
+            int[] resultDiscardingThresholds, boolean startsWithZeroScore, boolean firstRaceIsNonDiscardableCarryForward);
 
     RaceColumnInSeriesDTO addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
@@ -300,9 +301,12 @@ public interface SailingService extends RemoteService {
     
     CourseAreaDTO createCourseArea(String eventIdAsString, String courseAreaName);
     
-    List<RegattaOverviewEntryDTO> getRegattaOverviewEntriesForEvent(String eventIdAsString);
-    
     EventDTO getEventByIdAsString(String eventIdAsString);
+    
+    List<RaceGroupDTO> getRegattaStructureForEvent(String eventIdAsString);
+    
+    List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(String eventIdAsString, List<String> visibleCourseAreas,
+            List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay);
     
     String getBuildVersion();
 }

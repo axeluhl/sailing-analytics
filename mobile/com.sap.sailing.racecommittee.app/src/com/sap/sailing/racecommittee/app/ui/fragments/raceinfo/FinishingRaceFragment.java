@@ -21,6 +21,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PositioningFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
 public class FinishingRaceFragment extends RaceFragment {
@@ -29,6 +30,8 @@ public class FinishingRaceFragment extends RaceFragment {
     protected TextView nextFlagCountdown;
     private ImageButton abortingFlagButton;
     private ImageButton blueFlagButton;
+    
+    PositioningFragment positioningFragment;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -46,7 +49,7 @@ public class FinishingRaceFragment extends RaceFragment {
         blueFlagButton = (ImageButton) getView().findViewById(R.id.blueFlagButton);
         abortingFlagButton = (ImageButton) getView().findViewById(R.id.abortingFlagButton);
         
-        PositioningFragment positioningFragment = new PositioningFragment();
+        positioningFragment = new PositioningFragment();
         positioningFragment.setArguments(PositioningFragment.createArguments(getRace()));
         getFragmentManager().beginTransaction().add(R.id.innerFragmentHolder, positioningFragment, null).commit();
         
@@ -150,7 +153,7 @@ public class FinishingRaceFragment extends RaceFragment {
     @Override
     public void onStart() {
         super.onStart();
-        ExLog.w(FinishingRaceFragment.class.getName(), String.format("Fragment %s is now shown", FinishingRaceFragment.class.getName()));
+        ExLog.i(FinishingRaceFragment.class.getName(), String.format("Fragment %s is now shown", FinishingRaceFragment.class.getName()));
     }
 
     public void notifyTick() {
