@@ -223,7 +223,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 selectedBoatClass = (BoatClassType) adapterView.getItemAtPosition(position);
-
+                courseDesignComputer.setBoatClass(selectedBoatClass);
                 // update possible course layouts
                 courseLayoutAdapter.clear();
                 courseLayoutAdapter.addAll(selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet());
@@ -231,9 +231,11 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
                 selectedCourseLayout = (CourseLayouts) selectedBoatClass.getPossibleCourseLayoutsWithTargetTime()
                         .keySet().toArray().clone()[0];
                 spinnerCourseLayout.setSelection(courseLayoutAdapter.getPosition(selectedCourseLayout));
-
-                courseDesignComputer.setBoatClass(selectedBoatClass);
                 courseDesignComputer.setCourseLayout(selectedCourseLayout);
+                //update target time
+                selectedTargetTime = (TargetTime) selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().get(selectedCourseLayout);
+                spinnerTargetTime.setSelection(targetTimeAdapter.getPosition(selectedTargetTime));
+                courseDesignComputer.setTargetTime(selectedTargetTime);
                 if (selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet().contains(selectedCourseLayout)) {
                     recomputeCourseDesign();
                 }
@@ -257,8 +259,11 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 selectedCourseLayout = (CourseLayouts) adapterView.getItemAtPosition(position);
                 courseDesignComputer.setCourseLayout(selectedCourseLayout);
-                spinnerTargetTime.setSelection(targetTimeAdapter.getPosition(selectedBoatClass
-                        .getPossibleCourseLayoutsWithTargetTime().get(selectedCourseLayout)));
+                //update target time
+                selectedTargetTime = (TargetTime) selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().get(selectedCourseLayout);
+                spinnerTargetTime.setSelection(targetTimeAdapter.getPosition(selectedTargetTime));
+                courseDesignComputer.setTargetTime(selectedTargetTime);
+
                 recomputeCourseDesign();
             }
 
