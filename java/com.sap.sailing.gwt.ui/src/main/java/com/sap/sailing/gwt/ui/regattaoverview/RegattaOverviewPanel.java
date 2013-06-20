@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.regattaoverview;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -25,9 +26,9 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 
-public class RegattaOverviewPanel extends SimplePanel implements RegattaOverviewRaceSelectionChangeListener, EventProvider {
+public class RegattaOverviewPanel extends SimplePanel {
     
     private final long serverUpdateRateInMs = 10000;
     private final long uiUpdateRateInMs = 1000;
@@ -37,14 +38,14 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
     
     private final SailingServiceAsync sailingService;
     protected final StringMessages stringMessages;
+    protected final ErrorReporter errorReporter;
     
     private final String eventIdAsString;
     private EventDTO eventDTO;
-    
-    private RegattaOverviewRaceSelectionModel raceSelectionProvider;
+    private List<RaceGroupDTO> raceGroupDTOs;
+    private List<EventAndRaceGroupAvailabilityListener> eventRaceGroupListeners;
     
     private RegattaRaceStatesComponent regattaRaceStatesComponent;
-    private RaceCourseComposite raceCourseComposite;
     
     private final Label eventNameLabel;
     private final Label venueNameLabel;
@@ -64,47 +65,27 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
     private static final String STYLE_VENUE_LABEL = STYLE_NAME_PREFIX + "VenueLabel";
     private static final String STYLE_CLOCK_LABEL = STYLE_NAME_PREFIX + "ClockLabel";
     
-    public RegattaOverviewPanel(SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages, String eventIdAsString) {
+    public RegattaOverviewPanel(SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages, 
+            String eventIdAsString, RegattaRaceStatesSettings settings) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
+        this.errorReporter = errorReporter;
         this.eventIdAsString = eventIdAsString;
         
         this.eventDTO = null;
+        this.raceGroupDTOs = new ArrayList<RaceGroupDTO>();
+        this.eventRaceGroupListeners = new ArrayList<EventAndRaceGroupAvailabilityListener>();
         retrieveEvent();
+        retrieveRegattaStructure();
         
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
         mainPanel.addStyleName(STYLE_CONTENT_WRAPPER);
         
-        Grid grid = new Grid(2, 2);
-        grid.setWidth("100%");
-        
-        Label raceOverviewLabel = new Label(stringMessages.courseAreaOverview());
-        raceOverviewLabel.addStyleName(STYLE_TITLE_LABEL);
-        
-        Label courseDesignOverviewLabel = new Label(stringMessages.courseDesignOverview());
-        courseDesignOverviewLabel.addStyleName(STYLE_TITLE_LABEL);
-        
-        grid.setWidget(0, 0, raceOverviewLabel);
-        grid.setWidget(0, 1, courseDesignOverviewLabel);
-        
-        raceSelectionProvider = new RegattaOverviewRaceSelectionModel(false);
-        raceSelectionProvider.addRegattaOverviewRaceSelectionChangeListener(this);
-        
-        regattaRaceStatesComponent = new RegattaRaceStatesComponent(sailingService, errorReporter, stringMessages, eventIdAsString, 
-                raceSelectionProvider, this);
-        grid.setWidget(1, 0, regattaRaceStatesComponent);
-        
-        raceCourseComposite = new RaceCourseComposite(sailingService, errorReporter, stringMessages);
-        grid.setWidget(1, 1, raceCourseComposite);
-        
-        grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
-        grid.getRowFormatter().setVerticalAlign(1, HasVerticalAlignment.ALIGN_TOP);
-        grid.getColumnFormatter().setWidth(0, "80%");
-        grid.getColumnFormatter().setWidth(1, "20%");
-        grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
-        grid.getColumnFormatter().getElement(1).getStyle().setPaddingLeft(20.0, Unit.PX);
+        regattaRaceStatesComponent = new RegattaRaceStatesComponent(sailingService, errorReporter, stringMessages, eventIdAsString, settings);
+        this.eventRaceGroupListeners.add(regattaRaceStatesComponent);
+        regattaRaceStatesComponent.setWidth("100%");
         
         refreshNowButton = new Button(stringMessages.refreshNow());
         refreshNowButton.addClickHandler(new ClickHandler() {
@@ -194,7 +175,7 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         flexTable.setWidget(0, 1, refreshStartStopClockPanel);
         
         mainPanel.add(flexTable);
-        mainPanel.add(grid);
+        mainPanel.add(regattaRaceStatesComponent);
         
         // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
         onUpdateUI(new Date());
@@ -216,32 +197,15 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
     public void onUpdateUI(Date time) {
         timeLabel.setText(timeFormatter.format(time));
     }
-
-    @Override
-    public void onRegattaOverviewEntrySelectionChange(List<RegattaOverviewEntryDTO> selectedRegattaOverviewEntries) {
-        final RegattaOverviewEntryDTO selectedRegattaOverviewEntry;
-        if (selectedRegattaOverviewEntries.iterator().hasNext()) {
-            selectedRegattaOverviewEntry = selectedRegattaOverviewEntries.iterator().next();
-        if (selectedRegattaOverviewEntry != null && regattaRaceStatesComponent.getAllRaces() != null) {
-            for(RegattaOverviewEntryDTO regattaOverviewEntryDTO: regattaRaceStatesComponent.getAllRaces()) {
-                if(regattaOverviewEntryDTO.equals(selectedRegattaOverviewEntry)) {
-                    raceCourseComposite.setRace(regattaOverviewEntryDTO);
-                    break;
-                }
-            }
-        }
-        } else {
-            raceCourseComposite.setRace(null);
-        }
-    }
     
     private void retrieveEvent() {
         sailingService.getEventByIdAsString(eventIdAsString, new MarkedAsyncCallback<EventDTO>() {
 
             @Override
             protected void handleFailure(Throwable cause) {
-                //Show a (friendly) error message
                 settingsButton.setEnabled(false);
+                errorReporter.reportError("Error trying to load event with id " + eventIdAsString + " : "
+                        + cause.getMessage());
             }
 
             @Override
@@ -258,11 +222,6 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         venueNameLabel.setText(eventDTO.venue.getName());
     }
 
-    @Override
-    public EventDTO getEvent() {
-        return eventDTO;
-    }
-
     protected void setEvent(EventDTO event) {
         eventDTO = event;
         onEventUpdated();
@@ -270,9 +229,50 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
 
     private void onEventUpdated() {
         fillEventAndVenueName();
-        settingsButton.setEnabled(true);
+        
+        for (EventAndRaceGroupAvailabilityListener listener : this.eventRaceGroupListeners) {
+            listener.onEventUpdated(eventDTO);
+        }
+        
+        checkToEnableSettingsButton();
     }
     
-    
+    private void retrieveRegattaStructure() {
+        sailingService.getRegattaStructureForEvent(eventIdAsString, new MarkedAsyncCallback<List<RaceGroupDTO>>() {
+
+            @Override
+            protected void handleFailure(Throwable cause) {
+                errorReporter.reportError("Error trying to load regattas for event with id " + eventIdAsString + " : "
+                        + cause.getMessage());
+            }
+
+            @Override
+            protected void handleSuccess(List<RaceGroupDTO> result) {
+                if (result != null) {
+                    setRaceGroups(result);
+                }
+            }
+            
+        });
+    }
+
+    protected void setRaceGroups(List<RaceGroupDTO> result) {
+        raceGroupDTOs.clear();
+        raceGroupDTOs.addAll(result);
+        onRaceGroupsUpdated();
+    }
+
+    private void onRaceGroupsUpdated() {
+        for (EventAndRaceGroupAvailabilityListener listener : this.eventRaceGroupListeners) {
+            listener.onRaceGroupsUpdated(raceGroupDTOs);
+        }
+        checkToEnableSettingsButton();
+    }
+
+    private void checkToEnableSettingsButton() {
+        if (eventDTO != null && raceGroupDTOs.size() > 0) {
+            settingsButton.setEnabled(true);
+        }
+    }
     
 }

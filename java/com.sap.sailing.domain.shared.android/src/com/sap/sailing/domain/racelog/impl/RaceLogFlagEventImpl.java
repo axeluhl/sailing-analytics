@@ -43,13 +43,4 @@ public class RaceLogFlagEventImpl extends RaceLogEventImpl implements RaceLogFla
         visitor.visit(this);
     }
 
-    @Override
-    public boolean equals(Object object) {
-        return super.equals(object) 
-                && object instanceof RaceLogFlagEvent 
-                && upperFlag.equals(((RaceLogFlagEvent) object).getUpperFlag())
-                && lowerFlag.equals(((RaceLogFlagEvent) object).getLowerFlag())
-                && isDisplayed == ((RaceLogFlagEvent) object).isDisplayed();
-    }
-
 }

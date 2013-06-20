@@ -30,11 +30,4 @@ public class RaceLogStartTimeEventImpl extends RaceLogRaceStatusEventImpl implem
         visitor.visit(this);
     }
 
-    @Override
-    public boolean equals(Object object) {
-        // / TODO: please check the implementation of this method... why is this needed?
-        return super.equals(object) && object instanceof RaceLogStartTimeEvent
-                && startTime.equals(((RaceLogStartTimeEvent) object).getStartTime());
-    }
-
 }

@@ -9,6 +9,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
 public interface StartProcedure {
     
@@ -46,10 +47,18 @@ public interface StartProcedure {
     
     Class<? extends RaceFragment> getRunningRaceFragment();
     
+    Class<? extends RaceFragment> getFinishingRaceFragment();
+    
+    Class<? extends RaceFragment> getFinishedRaceFragment();
+    
     void setStartPhaseEventListener(StartPhaseEventListener listener);
     
     Pair<String, List<Object>> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart);
 
     void handleStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId);
+
+    Class<? extends RaceDialogFragment> checkForUserActionRequiredActions(MillisecondsTimePoint newStartTime, UserRequiredActionPerformedListener listener);
+
+    Class<? extends RaceDialogFragment> getCourseDesignDialog();
 
 }

@@ -56,11 +56,19 @@ public class RaceGroupFactory {
         Map<Series, List<RaceColumn>> seriesToRaceColumns = getSeriesToRaceColumns(leaderboard);
 
         Collection<SeriesWithRows> seriesWithRows = new ArrayList<>();
-        for (Series series : seriesToRaceColumns.keySet()) {
+        for (Series series : getSeriesIterable(leaderboard, seriesToRaceColumns)) {
             seriesWithRows.add(new SeriesWithRowsImpl(series.getName(), series.isMedal(), getRows(series,
                     seriesToRaceColumns.get(series))));
         }
         return seriesWithRows;
+    }
+
+    private Iterable<? extends Series> getSeriesIterable(Leaderboard leaderboard, Map<Series, List<RaceColumn>> seriesToRaceColumns) {
+        // for RegattaLeaderboards we want to preserve the order of series
+        if (leaderboard instanceof RegattaLeaderboard) {
+            return ((RegattaLeaderboard) leaderboard).getRegatta().getSeries();
+        }
+        return seriesToRaceColumns.keySet();
     }
 
     private Collection<RaceRow> getRows(Series series, List<RaceColumn> raceColumns) {

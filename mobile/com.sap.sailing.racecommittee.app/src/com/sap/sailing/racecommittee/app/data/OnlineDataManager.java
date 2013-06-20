@@ -16,7 +16,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.CourseDataHandler;
@@ -86,12 +86,13 @@ public class OnlineDataManager extends DataManager {
     }
 
     protected void reloadEvents(LoadClient<Collection<EventBase>> client) {
+        SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
         DataParser<Collection<EventBase>> parser = new EventsDataParser(new EventBaseJsonDeserializer(
-                new VenueJsonDeserializer(new CourseAreaJsonDeserializer())));
+                new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory))));
         DataHandler<Collection<EventBase>> handler = new EventsDataHandler(this, client);
 
         try {
-            new DataLoader<Collection<EventBase>>(context, URI.create(AppConstants.getServerBaseURL(context)
+            new DataLoader<Collection<EventBase>>(context, URI.create(AppPreferences.getServerBaseURL(context)
                     + "/sailingserver/events"), parser, handler).forceLoad();
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -146,7 +147,7 @@ public class OnlineDataManager extends DataManager {
                                 new RaceLogDeserializer(RaceLogEventDeserializer.create(domainFactory)))))));
         DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(this, client);
         try {
-            new DataLoader<Collection<ManagedRace>>(context, URI.create(AppConstants.getServerBaseURL(context)
+            new DataLoader<Collection<ManagedRace>>(context, URI.create(AppPreferences.getServerBaseURL(context)
                     + "/sailingserver/rc/racegroups?courseArea=" + courseAreaId.toString()), parser, handler)
                     .forceLoad();
         } catch (MalformedURLException e) {
@@ -175,7 +176,7 @@ public class OnlineDataManager extends DataManager {
         String fleetName = URLEncoder.encode(identifier.getFleet().getName());
         
         try {
-            new DataLoader<Collection<Mark>>(context, URI.create(AppConstants.getServerBaseURL(context)
+            new DataLoader<Collection<Mark>>(context, URI.create(AppPreferences.getServerBaseURL(context)
                     + "/sailingserver/rc/marks?leaderboard=" + raceGroupName + "&raceColumn=" + raceColumnName 
                     + "&fleet=" + fleetName), parser, handler)
                     .forceLoad();
@@ -205,7 +206,7 @@ public class OnlineDataManager extends DataManager {
         String fleetName = URLEncoder.encode(identifier.getFleet().getName());
         
         try {
-            new DataLoader<CourseBase>(context, URI.create(AppConstants.getServerBaseURL(context)
+            new DataLoader<CourseBase>(context, URI.create(AppPreferences.getServerBaseURL(context)
                     + "/sailingserver/rc/currentcourse?leaderboard=" + raceGroupName + "&raceColumn=" + raceColumnName 
                     + "&fleet=" + fleetName), parser, handler)
                     .forceLoad();
@@ -230,7 +231,7 @@ public class OnlineDataManager extends DataManager {
         String fleetName = URLEncoder.encode(identifier.getFleet().getName());
         
         try {
-            new DataLoader<Collection<Competitor>>(context, URI.create(AppConstants.getServerBaseURL(context)
+            new DataLoader<Collection<Competitor>>(context, URI.create(AppPreferences.getServerBaseURL(context)
                     + "/sailingserver/rc/competitors?leaderboard=" + raceGroupName + "&raceColumn=" + raceColumnName 
                     + "&fleet=" + fleetName), parser, handler)
                     .forceLoad();

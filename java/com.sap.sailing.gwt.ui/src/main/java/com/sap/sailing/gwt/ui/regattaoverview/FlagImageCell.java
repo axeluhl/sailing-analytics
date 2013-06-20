@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
 public class FlagImageCell extends ImagesBarCell {
     static final String ACTION_EDIT = "ACTION_EDIT";
     private final StringMessages stringMessages;
-    private static RegattaOverviewResources resources = GWT.create(RegattaOverviewResources.class);
+    private static RegattaRaceStatesFlagsResources resources = GWT.create(RegattaRaceStatesFlagsResources.class);
 
     public FlagImageCell(StringMessages stringConstants) {
         super();
