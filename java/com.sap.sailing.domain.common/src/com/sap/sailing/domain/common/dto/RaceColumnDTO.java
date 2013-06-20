@@ -33,7 +33,10 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
      * <p>
      * 
      * If no tracked race is attached to this column or none of the tracked races attached has started at the query time
-     * point, this field is <code>null</code>.
+     * point, this field is <code>null</code>.<p>
+     * 
+     * Note that the {@link Date} objects in here are in "server time" and must never be directly compared to an
+     * uncorrected client time because the client's clock may have a significant offset to the server time.
      */
     private Map<FleetDTO, Date> whenLastTrackedRaceWasLiveByFleet;
 
