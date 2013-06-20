@@ -191,5 +191,9 @@
     
     <string name="compass_view_compass">Compass</string>
     <string name="compass_view_needle">Needle</string>
+    
+    <string name="racing_course_area_missing">Course area could not be loaded. Please go back to the login page.</string>
+    <string name="racing_load_success">Successfully loaded %d races.</string>
+    <string name="generic_load_failure">There was an error loading the requested data: %s\nDo you want to retry?</string>
 
 </resources>
