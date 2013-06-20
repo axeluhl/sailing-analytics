@@ -131,7 +131,7 @@ public class RegattaOverviewPanel extends SimplePanel {
 
             @Override
             public void timeChanged(Date date) {
-                regattaRaceStatesComponent.onUpdateServer(date);
+                regattaRaceStatesComponent.onUpdateServer();
             }
         });
         this.serverUpdateTimer.play();

@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.regattaoverview;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,7 +123,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         updateSettings(settings);
     }
 
-    public void onUpdateServer(Date time) {
+    public void onUpdateServer() {
         loadAndUpdateEventLog();
     }
 

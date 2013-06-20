@@ -3067,6 +3067,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         entry.regattaDisplayName = regattaName;
         entry.regattaName = leaderboard.getName();
         entry.raceInfo = createRaceInfoDTO(seriesName, raceColumn, fleet);
+        entry.currentServerTime = new Date();
         
         if (showOnlyRacesOfSameDay) {
             if (!RaceStateOfSameDayHelper.isRaceStateOfSameDay(entry.raceInfo.startTime, entry.raceInfo.finishedTime, dayToCheck)) {

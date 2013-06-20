@@ -153,9 +153,28 @@ public class Timer {
         playStateListeners.remove(listener);
     }
     
-    public void setMillisecondsClientIsCurrentlyBehindServer(long milliseconds) {
-        final double exponentialMovingAverageFactor = 0.5;
-        millisecondsClientIsBehindServer = (long) (millisecondsClientIsBehindServer * exponentialMovingAverageFactor + (1.-exponentialMovingAverageFactor) * milliseconds);
+    /**
+     * Assumes that a service request was sent to the server at <code>timePointWhenRequestWasSent</code> for which the
+     * response was received at <code>timePointWhenResponseWasReceived</code> and where the response tells
+     * <code>currentServerTime</code> as the server time during processing the request. Based on this, calculates the
+     * difference between the client's <code>System.currentTimeMillis()</code> and the current server time and, removing
+     * half the time between send and receive time point to approximate the network latency. This gives a good
+     * indication for how far client and server clock differ.
+     * 
+     * @param serverTimeDuringRequest may be <code>null</code> in which case no adjustment is performed
+     */
+    public void adjustClientServerOffset(long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
+        if (serverTimeDuringRequest != null) {
+            // Let's assume the calculation of the RaceTimesInfoDTO objects during the request takes almost no time compared
+            // to network latency. Then the difference between the client's current time and the time when the request was sent
+            // can be considered network latency. If we furthermore assume that the network latency is roughly symmetrical for
+            // request and response, dividing the total latency by two will approximately tell us the time that passed between
+            // when the server set the RaceTimesInfoDTO.currentServerTime field and the current time.
+            long responseNetworkLatencyInMillis = (clientTimeWhenResponseWasReceived-clientTimeWhenRequestWasSent)/2l;
+            long offset = serverTimeDuringRequest.getTime() + responseNetworkLatencyInMillis - clientTimeWhenResponseWasReceived;
+            final double exponentialMovingAverageFactor = 0.5;
+            millisecondsClientIsBehindServer = (long) (millisecondsClientIsBehindServer * exponentialMovingAverageFactor + (1.-exponentialMovingAverageFactor) * offset);
+        }
     }
     
     public void setTime(long timePointAsMillis) {

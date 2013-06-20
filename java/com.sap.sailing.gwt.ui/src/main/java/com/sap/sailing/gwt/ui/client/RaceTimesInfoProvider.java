@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -63,7 +64,7 @@ public class RaceTimesInfoProvider {
     /**
      * Adds the given {@link RaceIdentifier} and if <code>forceTimesInfoRequest</code> is <code>true</code>, an independent
      * request to fetch the time infos for the given race is forced. All listeners will receive a
-     * {@link RaceTimesInfoProviderListener#raceTimesInfosReceived(Map, long)}.
+     * {@link RaceTimesInfoProviderListener#raceTimesInfosReceived(Map, long, Date, long)}.
      * 
      * @param raceIdentifier
      *            The {@link RaceIdentifier} to be added
@@ -73,7 +74,7 @@ public class RaceTimesInfoProvider {
     public void addRaceIdentifier(final RegattaAndRaceIdentifier raceIdentifier, boolean forceTimesInfoRequest) {
         raceIdentifiers.add(raceIdentifier);
         if (forceTimesInfoRequest) {
-            final long timePointWhenRequestWasSent = System.currentTimeMillis();
+            final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
             sailingService.getRaceTimesInfo(raceIdentifier, new AsyncCallback<RaceTimesInfoDTO>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -83,10 +84,10 @@ public class RaceTimesInfoProvider {
 
                 @Override
                 public void onSuccess(RaceTimesInfoDTO raceTimesInfo) {
+                    final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
                     if (raceTimesInfo != null) {
                         RaceTimesInfoProvider.this.raceTimesInfos.put(raceTimesInfo.getRaceIdentifier(), raceTimesInfo);
-                        long millisecondsClientIsBehindServer = determineMillisecondsClientIsBehindServer(raceTimesInfo, timePointWhenRequestWasSent);
-                        notifyListeners(millisecondsClientIsBehindServer);
+                        notifyListeners(clientTimeWhenRequestWasSent, raceTimesInfo.currentServerTime, clientTimeWhenResponseWasReceived);
                     }
                 }
             });
@@ -95,7 +96,7 @@ public class RaceTimesInfoProvider {
     
     private void readTimesInfos() {
         if (!raceIdentifiers.isEmpty()) {
-            final long timePointWhenRequestWasSent = System.currentTimeMillis();
+            final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
             sailingService.getRaceTimesInfos(raceIdentifiers, new AsyncCallback<List<RaceTimesInfoDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -105,33 +106,18 @@ public class RaceTimesInfoProvider {
 
                 @Override
                 public void onSuccess(List<RaceTimesInfoDTO> raceTimesInfos) {
+                    final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
                     if (!raceTimesInfos.isEmpty()) {
-                        long millisecondsClientIsBehindServer = 0;
+                        Date currentServerTime = null;
                         for (RaceTimesInfoDTO raceTimesInfo : raceTimesInfos) {
                             RaceTimesInfoProvider.this.raceTimesInfos.put(raceTimesInfo.getRaceIdentifier(), raceTimesInfo);
-                            millisecondsClientIsBehindServer = determineMillisecondsClientIsBehindServer(raceTimesInfo, timePointWhenRequestWasSent);
+                            currentServerTime = raceTimesInfo.currentServerTime;
                         }
-                        notifyListeners(millisecondsClientIsBehindServer);
+                        notifyListeners(clientTimeWhenRequestWasSent, currentServerTime, clientTimeWhenResponseWasReceived);
                     }
                 }
             });
         }
-    }
-
-    /**
-     * Each {@link RaceTimesInfoDTO} has the current server time when the object was filled in its
-     * {@link RaceTimesInfoDTO#currentServerTime} field. Calculating the difference gives a good indication about
-     * how far the client clock is off, compared to the server clock.
-     */
-    private long determineMillisecondsClientIsBehindServer(RaceTimesInfoDTO raceTimesInfo, long timePointWhenRequestWasSent) {
-        // Let's assume the calculation of the RaceTimesInfoDTO objects during the request takes almost no time compared
-        // to network latency. Then the difference between the client's current time and the time when the request was sent
-        // can be considered network latency. If we furthermore assume that the network latency is roughly symmetrical for
-        // request and response, dividing the total latency by two will approximately tell us the time that passed between
-        // when the server set the RaceTimesInfoDTO.currentServerTime field and the current time.
-        long now = System.currentTimeMillis();
-        long responseNetworkLatencyInMillis = (now-timePointWhenRequestWasSent)/2l;
-        return raceTimesInfo.currentServerTime.getTime() + responseNetworkLatencyInMillis - now;
     }
 
     /**
@@ -189,7 +175,7 @@ public class RaceTimesInfoProvider {
     
     /**
      * Forces an independent request to fetch the time infos for all races. All listeners will receive a
-     * {@link RaceTimesInfoProviderListener#raceTimesInfosReceived(Map, long)}.
+     * {@link RaceTimesInfoProviderListener#raceTimesInfosReceived(Map, long, Date, long)}.
      */
     public void forceTimesInfosUpdate() {
         readTimesInfos();
@@ -213,9 +199,9 @@ public class RaceTimesInfoProvider {
         return firstStartedAndUnfinishedRace;
     }
 
-    private void notifyListeners(long millisecondsClientIsBehindServer) {
+    private void notifyListeners(long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
         for (RaceTimesInfoProviderListener listener : listeners) {
-            listener.raceTimesInfosReceived(getRaceTimesInfos(), millisecondsClientIsBehindServer);
+            listener.raceTimesInfosReceived(getRaceTimesInfos(), clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         }
     }
     
