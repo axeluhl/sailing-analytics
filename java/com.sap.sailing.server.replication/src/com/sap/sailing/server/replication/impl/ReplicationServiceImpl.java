@@ -11,6 +11,7 @@ import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.util.tracker.ServiceTracker;
@@ -200,7 +201,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         try {
             registerReplicaWithMaster(master);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.log(Level.SEVERE, "ERROR", ex);
             throw ex;
         }
         replicatingFromMaster = master;
@@ -211,7 +212,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         try {
             consumer = master.getConsumer();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.log(Level.SEVERE, "ERROR", ex);
             replicatingFromMaster = null;
             throw ex;
         }
