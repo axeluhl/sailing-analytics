@@ -165,9 +165,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         
         mainPanel.add(flexTable);
         mainPanel.add(regattaRaceStatesComponent);
-        
-        // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
-        onUpdateUI(new Date());
+        onUpdateUI(uiUpdateTimer.getLiveTimePointAsDate());
     }
 
     private HorizontalPanel getRefreshStartStopClockPanel() {

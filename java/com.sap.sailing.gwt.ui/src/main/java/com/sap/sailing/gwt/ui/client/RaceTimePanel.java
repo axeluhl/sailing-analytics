@@ -36,7 +36,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     @Override
     public RaceTimePanelSettings getSettings() {
         RaceTimePanelSettings result = new RaceTimePanelSettings();
-        result.setDelayToLivePlayInSeconds(timer.getLivePlayDelayInMillis()/1000);
         result.setRefreshInterval(timer.getRefreshInterval());
         result.setRaceTimesInfo(raceTimesInfoProvider.getRaceTimesInfo(selectedRace));
         return result;

@@ -463,7 +463,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     @SuppressWarnings("unchecked")
     public T getSettings() {
         TimePanelSettings result = new TimePanelSettings();
-        result.setDelayToLivePlayInSeconds(timer.getLivePlayDelayInMillis()/1000);
         result.setRefreshInterval(timer.getRefreshInterval());
         return (T) result;
     }
@@ -485,14 +484,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     @Override
     public void updateSettings(T newSettings) {
-        boolean delayChanged = newSettings.getDelayToLivePlayInSeconds() != getSettings().getDelayToLivePlayInSeconds();
-        if (delayChanged) {
-            // explicit change always goes through and disables further automatic delay updates in timer
-            timer.setLivePlayDelayInMillisExplicitly(1000l * newSettings.getDelayToLivePlayInSeconds());
-            if (timer.getPlayMode() == PlayModes.Live) {
-                timeDelayLabel.setText(String.valueOf(newSettings.getDelayToLivePlayInSeconds()) + " s");
-            }
-        }
         timer.setRefreshInterval(newSettings.getRefreshInterval());
     }
 

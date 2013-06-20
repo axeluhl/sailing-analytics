@@ -434,9 +434,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         if (newSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
             timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
         }
-        if (newSettings.getDelayInMilliseconds() != null) {
-            timer.setLivePlayDelayInMillisExplicitly(newSettings.getDelayInMilliseconds());
-        }
         for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
             expandableSortableColumn.toggleExpansion();
         }
@@ -2497,7 +2494,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails),
                 Collections.unmodifiableList(selectedOverallDetailColumns), /* All races to select */ leaderboard.getRaceList(),
                 raceColumnSelection.getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard), raceColumnSelection, autoExpandPreSelectedRace,
-                showOverallLeaderboardsOnSamePage, timer.getRefreshInterval(), timer.getLivePlayDelayInMillis(), stringMessages);
+                showOverallLeaderboardsOnSamePage, timer.getRefreshInterval(), stringMessages);
     }
 
     @Override

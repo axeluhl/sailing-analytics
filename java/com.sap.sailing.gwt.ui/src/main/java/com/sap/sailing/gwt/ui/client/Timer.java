@@ -30,8 +30,9 @@ public class Timer {
     private Date time;
 
     /**
-     * The time delay to the current point in time in milliseconds which
-     * will only be used in {@link PlayModes#Live} play mode.  
+     * The time delay to the current point in time in milliseconds which will only be used in {@link PlayModes#Live}
+     * play mode in order to infer an approximate, server-based time point to display on the client that is independent
+     * of the client clock. Not set explicitly by the user but controlled by responses coming from the server.
      */
     private long livePlayDelayInMillis;
     
@@ -80,13 +81,6 @@ public class Timer {
     private boolean autoAdvance;
 
     /**
-     * If {@link #setLivePlayDelayInMillisExplicitly(long)} was called, this flag is set to <code>true</code> which will
-     * cause calls to {@link #setLivePlayDelayInMillis(long)} to be ignored. Then, the only way to update the live delay is
-     * to call {@link #setLivePlayDelayInMillisExplicitly(long)}.
-     */
-    private boolean delaySetExplicity;
-    
-    /**
      * The clocks of a client cannot be expected to be synchronized to the same time source as the server clock.
      * Therefore, there is a good chance for a significant time difference between client and server. While this does
      * not matter in replay mode where the client requests data for some arbitrary point in time, in live mode the
@@ -126,7 +120,8 @@ public class Timer {
      */
     public Timer(PlayModes playMode, long refreshInterval) {
         this.refreshInterval = refreshInterval;
-        // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
+        // Using the client's clock is only a default; the time offset between client and server is adjusted when
+        // information about the server time is present; see adjustClientServerOffset(...)
         time = new Date();
         timeListeners = new HashSet<TimeListener>();
         playStateListeners = new HashSet<PlayStateListener>();
@@ -260,7 +255,6 @@ public class Timer {
         if (playState != PlayStates.Playing) {
             playState = PlayStates.Playing;
             if (playMode == PlayModes.Live) {
-                // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"; the server needs to tell the client its time
                 setTime(getLiveTimePointInMillis());
             }
             if (autoAdvance) {
@@ -282,7 +276,6 @@ public class Timer {
                         newTime += (long) playSpeedFactor * refreshInterval;
                     } else {
                         // play mode is Live; quantize to make cache hits more likely
-                        // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
                         newTime = quantizeTimeStamp(getLiveTimePointInMillis()); 
                     }
                     setTime(newTime);
@@ -313,26 +306,10 @@ public class Timer {
     }
     
     public void setLivePlayDelayInMillis(long delayInMilliseconds) {
-        if (!delaySetExplicity) {
-            basicSetLivePlayDelayInMillis(delayInMilliseconds);
-        }
-    }
-    
-    /**
-     * Always updates the delay if it is different from the current delay setting. The fact that an explicit delay update was
-     * performed is recorded which will block further automatic delay updates from this point onwards.
-     */
-    public void setLivePlayDelayInMillisExplicitly(long delayInMilliseconds) {
-        basicSetLivePlayDelayInMillis(delayInMilliseconds);
-        delaySetExplicity = true;
-    }
-
-    private void basicSetLivePlayDelayInMillis(long delayInMilliseconds) {
         if (this.livePlayDelayInMillis != delayInMilliseconds) {
             this.livePlayDelayInMillis = delayInMilliseconds;
             if (getPlayMode() == PlayModes.Live) {
-                // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"
-                setTime(new Date().getTime() - delayInMilliseconds);
+                setTime(getLiveTimePointInMillis());
             }
         }
     }
