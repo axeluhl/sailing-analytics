@@ -379,7 +379,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     # make sure to save the information from env.sh
     . $ACDIR/env.sh
 
-    echo "$VERSION_INFO-$MONGDB_PORT-$MEMORY-$REPLICATION_CHANNEL" > $ACDIR/configuration/jetty/version.txt
+    echo "$VERSION_INFO-$MONGODB_PORT-$MEMORY-$REPLICATION_CHANNEL" > $ACDIR/configuration/jetty/version.txt
 
     sed -i "s/mongo.port=.*$/mongo.port=$MONGODB_PORT/g" $ACDIR/configuration/config.ini
     sed -i "s/expedition.udp.port=.*$/expedition.udp.port=$EXPEDITION_PORT/g" $ACDIR/configuration/config.ini
