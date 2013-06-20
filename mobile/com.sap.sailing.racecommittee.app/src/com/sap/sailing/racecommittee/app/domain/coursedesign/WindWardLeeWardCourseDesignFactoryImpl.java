@@ -65,8 +65,9 @@ public class WindWardLeeWardCourseDesignFactoryImpl extends AbstractCourseDesign
                     * (numberOfRounds.getNumberOfRounds() - 1) + (speedTable.get(PointOfSail.Upwind)
                     * numberOfRounds.getNumberOfRounds())));
         } else {
-            double roundLength = targetTime.getTimeInMinutes() / numberOfRounds.getNumberOfRounds();
-            legLength = roundLength / (speedTable.get(PointOfSail.Upwind) + speedTable.get(PointOfSail.Downwind));
+            legLength = (targetTime.getTimeInMinutes() / (speedTable.get(PointOfSail.Downwind)
+                    * (numberOfRounds.getNumberOfRounds()) + (speedTable.get(PointOfSail.Upwind)
+                    * numberOfRounds.getNumberOfRounds())));
         }
         legDistance = new NauticalMileDistance(legLength);
         Position luvBuoyPosition = getPositionForGivenPointDistanceAndBearing(this.product.getReferencePoint(),

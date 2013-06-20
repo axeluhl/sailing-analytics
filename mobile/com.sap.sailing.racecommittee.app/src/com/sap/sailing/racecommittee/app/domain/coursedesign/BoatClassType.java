@@ -236,26 +236,26 @@ public enum BoatClassType {
         {
             put(new WindRange(5, 8), new EnumMap<PointOfSail, Float>(PointOfSail.class) {
                 {
-                    put(PointOfSail.Upwind, 13f);
-                    put(PointOfSail.Downwind, 9.5f);
+                    put(PointOfSail.Upwind, 17f);
+                    put(PointOfSail.Downwind, 12.5f);
                 }
             });
             put(new WindRange(8, 12), new EnumMap<PointOfSail, Float>(PointOfSail.class) {
                 {
-                    put(PointOfSail.Upwind, 9.5f);
-                    put(PointOfSail.Downwind, 5f);
+                    put(PointOfSail.Upwind, 12.5f);
+                    put(PointOfSail.Downwind, 6.5f);
                 }
             });
             put(new WindRange(12, 15), new EnumMap<PointOfSail, Float>(PointOfSail.class) {
                 {
-                    put(PointOfSail.Upwind, 8f);
-                    put(PointOfSail.Downwind, 4f);
+                    put(PointOfSail.Upwind, 10.5f);
+                    put(PointOfSail.Downwind, 5f);
                 }
             });
             put(new WindRange(15, 99), new EnumMap<PointOfSail, Float>(PointOfSail.class) {
                 {
-                    put(PointOfSail.Upwind, 6.5f);
-                    put(PointOfSail.Downwind, 3.5f);
+                    put(PointOfSail.Upwind, 8.5f);
+                    put(PointOfSail.Downwind, 4.5f);
                 }
             });
         }
