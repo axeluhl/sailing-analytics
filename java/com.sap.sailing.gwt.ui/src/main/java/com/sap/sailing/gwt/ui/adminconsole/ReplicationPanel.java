@@ -50,6 +50,15 @@ public class ReplicationPanel extends FlowPanel {
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         
+        Button refreshButton = new Button(stringMessages.refresh());
+        refreshButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                updateReplicaList();
+            }
+        });
+        add(refreshButton);
+        
         final CaptionPanel mastergroup = new CaptionPanel(stringMessages.explainReplicasRegistered());
         final VerticalPanel masterpanel = new VerticalPanel();
         
@@ -78,14 +87,6 @@ public class ReplicationPanel extends FlowPanel {
         registeredMasters.resizeColumns(3);
         replicapanel.add(registeredMasters);
         
-        Button refreshButton = new Button(stringMessages.refresh());
-        refreshButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateReplicaList();
-            }
-        });
-        replicapanelbuttons.add(refreshButton);
         addButton = new Button(stringMessages.connectToMaster());
         addButton.addClickHandler(new ClickHandler() {
             @Override
@@ -107,6 +108,7 @@ public class ReplicationPanel extends FlowPanel {
         replicapanel.add(replicapanelbuttons);
         replicagroup.add(replicapanel);
         add(replicagroup);
+        
         updateReplicaList();
     }
 

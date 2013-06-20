@@ -17,6 +17,21 @@ h1 {
   text-align: center;
 }
 
+fieldset {
+	padding: 6px 6px;
+	margin: 8px 3px 10px 2px;
+	border: 1px solid black;
+}
+
+fieldset legend {
+	padding: 0px 4px;
+	font-weight: bold;
+}
+
+button {
+	margin-left: 5px;
+}
+
 .chartLegend {
 	float: left;
 	margin-right: 4px;
