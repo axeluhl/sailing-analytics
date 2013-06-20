@@ -29,12 +29,13 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         this.exchangeName = exchangeName;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public URL getReplicationRegistrationRequestURL(UUID uuid, String additional) throws MalformedURLException {
         return new URL("http", hostname, servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.REGISTER.name()
                 + "&" + ReplicationServlet.SERVER_UUID + "=" + uuid.toString()
-                + "&" + ReplicationServlet.ADDITIONAL_INFORMATION + "=" + BuildVersion.getBuildVersion());
+                + "&" + ReplicationServlet.ADDITIONAL_INFORMATION + "=" + java.net.URLEncoder.encode(BuildVersion.getBuildVersion()));
     }
 
     @Override

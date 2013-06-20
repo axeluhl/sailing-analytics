@@ -23,7 +23,7 @@ public class ReplicationStateDTO implements IsSerializable {
         this.serverIdentifier = serverIdentifier;
         this.replicaInfoByHostname = new HashMap<String, ReplicaDTO>();
         for (ReplicaDTO replica : replicas) {
-            replicaInfoByHostname.put(replica.getHostname(), replica);
+            replicaInfoByHostname.put(replica.getIdentifier(), replica);
         }
     }
 
@@ -33,10 +33,6 @@ public class ReplicationStateDTO implements IsSerializable {
 
     public Iterable<ReplicaDTO> getReplicas() {
         return replicaInfoByHostname.values();
-    }
-    
-    public ReplicaDTO getReplicaByHostname(String hostname) {
-        return replicaInfoByHostname.get(hostname);
     }
     
     public String getServerIdentifier() {
