@@ -1,6 +1,7 @@
 package com.sap.sailing.mongodb.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.net.UnknownHostException;
 import java.util.UUID;
@@ -11,15 +12,23 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.GateImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
 
 public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
 
@@ -77,6 +86,25 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
         course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, "white", "conical", "bold"), NauticalSide.PORT));
         
         return course;
+    }
+    
+    protected void compareWind(Wind storedWindFix, Wind loadedWindFix) {
+        assertEquals(storedWindFix.getTimePoint(), loadedWindFix.getTimePoint());
+        assertNotNull(storedWindFix.getPosition());
+        assertNotNull(loadedWindFix.getPosition());
+        assertEquals(storedWindFix.getPosition().getLatDeg(), loadedWindFix.getPosition().getLatDeg(), 0);
+        assertEquals(storedWindFix.getPosition().getLngDeg(), loadedWindFix.getPosition().getLngDeg(), 0);
+        assertEquals(storedWindFix.getKnots(), loadedWindFix.getKnots(), 0);
+        assertNotNull(storedWindFix.getBearing());
+        assertNotNull(loadedWindFix.getBearing());
+        assertEquals(storedWindFix.getBearing().getDegrees(), loadedWindFix.getBearing().getDegrees(), 0);
+    }
+
+    protected Wind createWindFix() {
+        Position position = new DegreePosition(23.0313, 2.2344);
+        Bearing bearing = new DegreeBearingImpl(25.5);
+        SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(10.4, bearing);
+        return new WindImpl(position, now, speedBearing);
     }
 
 }

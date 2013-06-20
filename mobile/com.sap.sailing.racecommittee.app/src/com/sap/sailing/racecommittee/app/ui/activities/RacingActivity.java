@@ -1,8 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
+import android.app.ActionBar;
+import android.app.ActionBar.OnNavigationListener;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -10,9 +14,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.view.Window;
-import android.widget.TextView;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.sap.sailing.domain.base.CourseArea;
@@ -24,25 +27,48 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.CourseDesignListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment.FilterMode;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 
-public class RacingActivity extends TwoPaneActivity implements RaceInfoListener, CourseDesignListener /*
-                                                                                 * implements ResetTimeListener,
-                                                                                 * StartModeSelectionListener,
-                                                                                 * PathfinderSelectionListener,
-                                                                                 * GateLineOpeningTimeSelectionListener,
-                                                                                 * CourseDesignSelectionListener
-                                                                                 */{
-    // private final static String TAG = RacingActivity.class.getName();
-
+public class RacingActivity extends BaseActivity implements RaceInfoListener {
+    //private final static String TAG = RacingActivity.class.getName();
     private final static String ListFragmentTag = RacingActivity.class.getName() + ".ManagedRaceListFragment";
+
+    private class FilterModeSelectionBinder implements OnNavigationListener {
+
+        private ManagedRaceListFragment targetList;
+        private ActionBar actionBar;
+        private List<FilterMode> items;
+
+        public FilterModeSelectionBinder(ManagedRaceListFragment list, ActionBar actionBar,
+                ArrayAdapter<FilterMode> adapter, FilterMode... rawItems) {
+            this.targetList = list;
+            this.actionBar = actionBar;
+            this.items = Arrays.asList(rawItems);
+            adapter.addAll(this.items);
+            this.actionBar.setListNavigationCallbacks(adapter, this);
+            trackSelection(list);
+        }
+
+        private void trackSelection(ManagedRaceListFragment list) {
+            int selectedIndex = this.items.indexOf(list.getFilterMode());
+            if (selectedIndex >= 0) {
+                this.actionBar.setSelectedNavigationItem(selectedIndex);
+            }
+        }
+
+        @Override
+        public boolean onNavigationItemSelected(int position, long id) {
+            targetList.setFilterMode(items.get(position));
+            return true;
+        }
+    }
 
     /**
      * Selection list of all races
      */
-    private ManagedRaceListFragment listFragment;
+    private ManagedRaceListFragment raceListFragment;
 
     /**
      * Container fragment for currently selected race
@@ -59,14 +85,17 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // features must be requested before anything else
+        getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
         super.onCreate(savedInstanceState);
+
         dataManager = DataManager.create(this);
 
-        getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.racing_view);
         setProgressBarIndeterminateVisibility(false);
 
-        listFragment = getListFragment();
+        raceListFragment = getOrCreateRaceListFragment();
 
         Serializable courseAreaId = getCourseAreaIdFromIntent();
         if (courseAreaId == null) {
@@ -77,26 +106,26 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
             throw new IllegalStateException("Course Area was not found.");
         }
 
-        setupTitle(courseArea);
-        // unload and unregister from aaaaaaall races here!
+        setupActionBar(courseArea);
+        // unload and unregister from all races here!
         unloadAllRaces();
         loadRaces(courseArea);
         // StaticVibrator.prepareVibrator(this);
     }
 
-    private ManagedRaceListFragment getListFragment() {
+    private ManagedRaceListFragment getOrCreateRaceListFragment() {
         Fragment fragment = getFragmentManager().findFragmentByTag(ListFragmentTag);
         // on first create add race list fragment
         if (fragment == null) {
-            fragment = createListFragment();
+            fragment = createRaceListFragment();
         }
         return (ManagedRaceListFragment) fragment;
     }
 
-    private Fragment createListFragment() {
+    private Fragment createRaceListFragment() {
         Fragment fragment = new ManagedRaceListFragment();
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.add(R.id.races_and_details_left, fragment, ListFragmentTag);
+        transaction.add(R.id.racing_view_left_container, fragment, ListFragmentTag);
         transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
         transaction.commit();
         return fragment;
@@ -120,13 +149,21 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
         return courseId;
     }
 
-    private void setupTitle(CourseArea courseArea) {
-        TextView label = (TextView) findViewById(R.id.textListHeader);
-        label.setText(String.format(getString(R.string.racingview_header), courseArea.getName()));
+    private void setupActionBar(CourseArea courseArea) {
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
+        actionBar.setTitle(String.format(getString(R.string.racingview_header), courseArea.getName()));
+
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        ArrayAdapter<ManagedRaceListFragment.FilterMode> adapter = new ArrayAdapter<ManagedRaceListFragment.FilterMode>(
+                this, R.layout.action_bar_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        new FilterModeSelectionBinder(raceListFragment, actionBar, adapter, ManagedRaceListFragment.FilterMode.values());
     }
 
     private void unloadAllRaces() {
-        Intent intent = new Intent(getString(R.string.intentActionClearRaces));
+        Intent intent = new Intent(AppConstants.INTENT_ACTION_CLEAR_RACES);
         this.startService(intent);
     }
 
@@ -148,7 +185,7 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
         setProgressBarIndeterminateVisibility(false);
 
         registerOnService(data);
-        listFragment.setupOn(data);
+        raceListFragment.setupOn(data);
 
         Toast.makeText(RacingActivity.this, "Loaded " + data.size() + " races for course " + courseArea.getId(),
                 Toast.LENGTH_LONG).show();
@@ -164,7 +201,7 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
         // he should decide whether these races are already
         // registered or not.
         for (ManagedRace race : races) {
-            Intent registerIntent = new Intent(getString(R.string.intentActionRegisterRace));
+            Intent registerIntent = new Intent(AppConstants.INTENT_ACTION_REGISTER_RACE);
             registerIntent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
             this.startService(registerIntent);
         }
@@ -191,49 +228,19 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener,
     }
 
     public void onRaceItemClicked(ManagedRace managedRace) {
-        this.infoFragment = new RaceInfoFragment();
+        infoFragment = new RaceInfoFragment();
         infoFragment.setArguments(RaceFragment.createArguments(managedRace));
 
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
-        transaction.replace(R.id.races_and_details_right, infoFragment);
+        transaction.replace(R.id.racing_view_right_container, infoFragment);
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         transaction.commit();
-        getRightLayout().setVisibility(View.VISIBLE);
     }
 
+    @Override
     public void onResetTime() {
         infoFragment.onResetTime();
     }
-
-    @Override
-    public ReadonlyDataManager getDataManager() {
-        return dataManager;
-    }
-
-    @Override
-    public void onCourseDesignPublish() {
-        onChangeCourseDesign();
-    }
-
-    @Override
-    public void onChangeCourseDesign() {
-        infoFragment.onChangeCourseDesign();
-    }
-
-    /*
-     * public void onResetTimeClick() { infoFragment.displayResetTimeFragment(); }
-     * 
-     * public void onStartModeSelected() { infoFragment.startModeSelected(); }
-     * 
-     * 
-     * public void onPathfinderSelected() { infoFragment.pathfinderSelected(); }
-     * 
-     * 
-     * public void onLineOpeningTimeSelected() { infoFragment.gateLineOpeningTimeSelected(); }
-     * 
-     * 
-     * @Override public void onCourseDesignSelected() { infoFragment.courseDesignSelected(); }
-     */
 
 }

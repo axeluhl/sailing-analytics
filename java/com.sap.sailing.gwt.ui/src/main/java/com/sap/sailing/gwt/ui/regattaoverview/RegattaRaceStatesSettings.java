@@ -14,7 +14,7 @@ public class RegattaRaceStatesSettings {
         this.visibleCourseAreas = new ArrayList<String>();
         this.visibleRegattas = new ArrayList<String>();
         this.showOnlyRacesOfSameDay = false;
-        this.showOnlyCurrentlyRunningRaces = false;
+        this.showOnlyCurrentlyRunningRaces = true;
     }
 
     public RegattaRaceStatesSettings(List<String> visibleCourseAreas, List<String> visibleRegattas, 

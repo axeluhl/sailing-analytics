@@ -14,25 +14,25 @@ public abstract class BaseDialogFragment extends DialogFragment {
     private final static String TAG = BaseDialogFragment.class.getName();
 
     protected abstract CharSequence getNegativeButtonLabel();
+
     protected abstract CharSequence getPositiveButtonLabel();
+
     protected abstract Builder createDialog(AlertDialog.Builder builder);
 
     protected abstract DialogFragmentButtonListener getHost();
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return createDialog(new Builder(getActivity())
-        .setNegativeButton(getNegativeButtonLabel(), new OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                onNegativeButton();
-            }
-        })
-        .setPositiveButton(getPositiveButtonLabel(), new OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                onPositiveButton();
-            }
-        })
-                ).create();
+        return createDialog(
+                new Builder(getActivity()).setNegativeButton(getNegativeButtonLabel(), new OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        onNegativeButton();
+                    }
+                }).setPositiveButton(getPositiveButtonLabel(), new OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        onPositiveButton();
+                    }
+                })).create();
     }
 
     protected void onNegativeButton() {

@@ -99,8 +99,7 @@
             android:text="@string/empty"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
-            android:ems="10"
-            android:visibility="invisible" />
+            android:ems="10" />
     </LinearLayout>
     
     <LinearLayout
