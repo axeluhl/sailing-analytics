@@ -229,6 +229,7 @@ public class ReplicationPanel extends FlowPanel {
                 if (!replicaRegistered) {
                     registeredReplicas.insertRow(i);
                     registeredReplicas.setWidget(i, 0, new Label(stringMessages.explainNoConnectionsFromReplicas()));
+                    removeAllReplicas.setEnabled(false);
                 } else {
                     removeAllReplicas.setEnabled(true);
                 }
