@@ -35,17 +35,13 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
         camera.autoFocus(new AutoFocusCallback() {
             @Override
             public void onAutoFocus(boolean success, Camera camera) {
-                if (success) {
-                    camera.takePicture(shutterSoundCallback, null, new PictureCallback() {
-                        @Override
-                        public void onPictureTaken(byte[] data, Camera camera) {
-                            pictureHandler.onPictureTaken(data, camera);
-                            camera.startPreview();
-                        }
-                    });
-                } else {
-                    audioManager.playSoundEffect(AudioManager.FX_KEYPRESS_DELETE);
-                }
+                camera.takePicture(shutterSoundCallback, null, new PictureCallback() {
+                    @Override
+                    public void onPictureTaken(byte[] data, Camera camera) {
+                        pictureHandler.onPictureTaken(data, camera);
+                        camera.startPreview();
+                    }
+                });
             }
         });
     }
