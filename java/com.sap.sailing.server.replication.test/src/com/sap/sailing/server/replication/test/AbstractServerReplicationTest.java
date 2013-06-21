@@ -41,6 +41,7 @@ public abstract class AbstractServerReplicationTest {
     protected ReplicationServiceTestImpl replicaReplicator;
     private ReplicaDescriptor replicaDescriptor;
     private ReplicationServiceImpl masterReplicator;
+    private ReplicationMasterDescriptor  masterDescriptor;
     
     /**
      * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.
@@ -91,7 +92,7 @@ public abstract class AbstractServerReplicationTest {
         masterReplicator = new ReplicationServiceImpl(exchangeName, rim, this.master);
         replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost(), serverUuid, "");
         masterReplicator.registerReplica(replicaDescriptor);
-        ReplicationMasterDescriptor masterDescriptor = new ReplicationMasterDescriptorImpl("localhost", exchangeName, SERVLET_PORT, 0, "test-queue");
+        masterDescriptor = new ReplicationMasterDescriptorImpl("localhost", exchangeName, SERVLET_PORT, 0, UUID.randomUUID().toString());
         ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(exchangeName, resolveAgainst, rim,
                 replicaDescriptor, this.replica, this.master, masterReplicator, masterDescriptor);
         Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
@@ -105,6 +106,7 @@ public abstract class AbstractServerReplicationTest {
         masterReplicator.unregisterReplica(replicaDescriptor);
         URLConnection urlConnection = new URL("http://localhost:"+SERVLET_PORT+"/STOP").openConnection(); // stop the initial load test server thread
         urlConnection.getInputStream().close();
+        masterDescriptor.stopConnection();
     }
     
     public void stopReplicatingToMaster() throws IOException {
