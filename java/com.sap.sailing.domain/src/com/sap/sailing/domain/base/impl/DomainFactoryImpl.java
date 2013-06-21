@@ -49,6 +49,7 @@ import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.RaceStatusDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -337,7 +338,8 @@ public class DomainFactoryImpl implements DomainFactory {
     public CompetitorDTO convertToCompetitorDTO(Competitor c) {
         CompetitorDTO competitorDTO = weakCompetitorDTOCache.get(c);
         if (competitorDTO == null) {
-            CountryCode countryCode = c.getTeam().getNationality().getCountryCode();
+            final Nationality nationality = c.getTeam().getNationality();
+            CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
             competitorDTO = new CompetitorDTOImpl(c.getName(), countryCode == null ? ""
                     : countryCode.getTwoLetterISOCode(),
                     countryCode == null ? "" : countryCode.getThreeLetterIOCCode(), countryCode == null ? ""
@@ -358,15 +360,32 @@ public class DomainFactoryImpl implements DomainFactory {
     public RaceDTO createRaceDTO(TrackedRegattaRegistry trackedRegattaRegistry, boolean withGeoLocationData, RegattaAndRaceIdentifier raceIdentifier, TrackedRace trackedRace) {
         // Optional: Getting the places of the race
         PlacemarkOrderDTO racePlaces = withGeoLocationData ? getRacePlaces(trackedRace) : null;
-        TrackedRaceDTO trackedRaceDTO = new TrackedRaceDTO();
-        trackedRaceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
-        trackedRaceDTO.hasWindData = trackedRace.hasWindData();
-        trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
+        TrackedRaceDTO trackedRaceDTO = createTrackedRaceDTO(trackedRace); 
         RaceDTO raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO, trackedRegattaRegistry.isRaceBeingTracked(trackedRace.getRace()));
         raceDTO.places = racePlaces;
+        updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
+        return raceDTO;
+    }
+
+    @Override
+    public void updateRaceDTOWithTrackedRaceData(TrackedRace trackedRace, RaceDTO raceDTO) {
         raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
         raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
-        return raceDTO;
+        raceDTO.status = new RaceStatusDTO();
+        raceDTO.status.status = trackedRace.getStatus().getStatus();
+        raceDTO.status.loadingProgress = trackedRace.getStatus().getLoadingProgress();
+    }
+
+    @Override
+    public TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace) {
+        TrackedRaceDTO trackedRaceDTO = new TrackedRaceDTO();
+        trackedRaceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
+        trackedRaceDTO.endOfTracking = trackedRace.getEndOfTracking() == null ? null : trackedRace.getEndOfTracking().asDate();
+        trackedRaceDTO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent().asDate();
+        trackedRaceDTO.hasWindData = trackedRace.hasWindData();
+        trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
+        trackedRaceDTO.delayToLiveInMs = trackedRace.getDelayToLiveInMillis();
+        return trackedRaceDTO;
     }
 
     private PlacemarkOrderDTO getRacePlaces(TrackedRace trackedRace) {
