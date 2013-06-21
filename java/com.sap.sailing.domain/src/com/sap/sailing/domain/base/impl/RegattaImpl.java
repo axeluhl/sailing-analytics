@@ -364,5 +364,9 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         }
         return false;
     }
+    
+    public String toString() {
+        return getId() + " " + getName() + " " + getScoringScheme().getType().name();
+    }
 
 }

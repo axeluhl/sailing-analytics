@@ -19,4 +19,8 @@ public class EventLeaderboardImpl extends LeaderboardGroupImpl implements EventL
     public Event getEvent() {
        return event;
     }
+    
+    public String toString() {
+        return super.toString() + " || " + getEvent().toString();
+    }
 }
