@@ -6,16 +6,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import android.app.DialogFragment;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TimePicker;
 
@@ -29,7 +26,7 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 
-public class ProtestTimeDialogFragment extends DialogFragment {
+public class ProtestTimeDialogFragment extends BaseDialogFragment {
 
     private static String ARGS_RACE_IDS = ProtestTimeDialogFragment.class.getSimpleName() + ".raceids";
 
@@ -55,42 +52,46 @@ public class ProtestTimeDialogFragment extends DialogFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.protest_time_view, container, false);
+    protected Builder createDialog(Builder builder) {
+        getRacesFromArguments();
+        View view = setupView();
+        return builder.setTitle(getString(R.string.protest_dialog_title)).setView(view);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    protected CharSequence getNegativeButtonLabel() {
+        return "Cancel";
+    }
 
-        if (getDialog() != null) {
-            getDialog().setTitle(getString(R.string.protest_dialog_title));
-        }
+    @Override
+    protected CharSequence getPositiveButtonLabel() {
+        return "Set";
+    }
 
-        getRacesFromArguments();
+    @Override
+    protected DialogFragmentButtonListener getHost() {
+        return new DialogFragmentButtonListener() {
 
-        Button okButton = (Button) getView().findViewById(R.id.protest_time_ok_button);
-        okButton.setOnClickListener(new OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onDialogPositiveButton() {
                 setAndAnnounceProtestTime();
-                dismiss();
             }
-        });
 
-        Button cancelButton = (Button) getView().findViewById(R.id.protest_time_cancel_button);
-        cancelButton.setOnClickListener(new OnClickListener() {
             @Override
-            public void onClick(View view) {
-                dismiss();
+            public void onDialogNegativeButton() {
+
             }
-        });
+        };
+    }
 
-        racesList = (ListView) getView().findViewById(R.id.protest_time_races_list);
+    private View setupView() {
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        View view = inflater.inflate(R.layout.protest_time_view, null);
+        racesList = (ListView) view.findViewById(R.id.protest_time_races_list);
         setupRacesList(racesList);
-
-        timePicker = (TimePicker) getView().findViewById(R.id.protest_time_time_time_picker);
+        timePicker = (TimePicker) view.findViewById(R.id.protest_time_time_time_picker);
         setupTimePicker(timePicker);
+        return view;
     }
 
     private void setupRacesList(ListView racesList) {

@@ -32,7 +32,7 @@ public class LoadFailedDialog extends FragmentAttachedDialogFragment {
     protected Builder createDialog(Builder builder) {
         return builder
                 .setMessage(String.format(
-                        "There was an error loading the requested data:\n%s\nDo you want to retry?", 
+                        "There was an error loading the requested data:\n\"%s\"\nDo you want to retry?", 
                         getArguments().getString(ARGS_ERROR_MSG)))
                         .setTitle("Load failure")
                         .setIcon(R.drawable.ic_dialog_alert_holo_light);
