@@ -24,16 +24,17 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     private double effectiveFactor;
     
     /**
-     * If the column has tracked races attached, this field tells the latest time point when one of those races was
-     * still running. It is necessary for the race to have GPS and wind data for the time point to be recorded here. If
-     * a tracked race has started but hasn't ended yet, the query time point is used for this field if it is after the
-     * time point when that race started, assuming that at the query time the race was still running. If the race hasn't
-     * started at the query time, the race isn't considered for setting this field. If the end of the race is known, it
-     * is used for this field if later than any other value set for this field.
+     * For each fleet, if the column has a tracked races attached for that fleet, this field tells the latest time point
+     * when that race was still running. It is necessary for the race to have GPS and wind data for the time point to be
+     * recorded here. If a tracked race has started but hasn't ended yet, the query time point is used for this field if
+     * it is after the time point when that race started, assuming that at the query time the race was still running. If
+     * the race hasn't started at the query time, the race isn't considered for setting this field. If the end of the
+     * race is known, it is used for this field if later than any other value set for this field.
      * <p>
      * 
      * If no tracked race is attached to this column or none of the tracked races attached has started at the query time
-     * point, this field is <code>null</code>.<p>
+     * point, this field is <code>null</code>.
+     * <p>
      * 
      * Note that the {@link Date} objects in here are in "server time" and must never be directly compared to an
      * uncorrected client time because the client's clock may have a significant offset to the server time.

@@ -1040,6 +1040,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(), fleetDTO,
                         raceColumn.isMedalRace(), raceIdentifier, race);
                 if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive != null) {
+                    // TODO Bug 1351: unify this with the similar calculation performed in StrippedLeaderboardDTO.createStrippedLeaderboardDTO
                     raceColumnDTO.setWhenLastTrackedRaceWasLive(fleetDTO,
                             latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive.asDate());
                 }

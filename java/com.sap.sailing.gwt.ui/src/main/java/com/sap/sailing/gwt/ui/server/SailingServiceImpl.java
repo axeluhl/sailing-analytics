@@ -1762,6 +1762,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(fleet);
                 RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
+                // TODO Bug 1351: unify this with the similar calculation performed in AbstractSimpleLeaderboardImpl.computeDTO
                 if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive != null) {
                     raceColumnDTO.setWhenLastTrackedRaceWasLive(fleetDTO, latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive.asDate());
                 }

@@ -182,6 +182,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getOrCreateTrack(mark);
     }
 
+    /**
+     * In addition to creating the track which is performed by the superclass implementation, this implementation registers
+     * a {@link GPSTrackListener} with the mark's track and {@link #notifyListeners(GPSFix, Mark) notifies the listeners}
+     * about updates. The {@link #updated(TimePoint)} method is <em>not</em> called with the mark fix's time point because
+     * mark fixes may be received also from marks that don't belong to this race.
+     */
     @Override
     protected DynamicGPSFixTrackImpl<Mark> createMarkTrack(Mark mark) {
         DynamicGPSFixTrackImpl<Mark> result = super.createMarkTrack(mark);

@@ -130,7 +130,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                     LeaderboardGroupPanel.this.leaderboardGroup = leaderboardGroupDTO;
                     // in case there is a regatta leaderboard in the leaderboard group 
                     // we need to know the corresponding regatta structure
-                    if(leaderboardGroup.containsRegattaLeaderboard()) {
+                    if (leaderboardGroup.containsRegattaLeaderboard()) {
                         sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
                             @Override
                             public void onSuccess(List<RegattaDTO> regattaDTOs) {
