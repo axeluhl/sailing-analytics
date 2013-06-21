@@ -67,6 +67,7 @@ fieldset legend {
 	font-size: 120%;
 	text-align: right;
 	padding: 0px 50px 0px 0px;
+	clear: both;
 }
 
 .errorLabel {
