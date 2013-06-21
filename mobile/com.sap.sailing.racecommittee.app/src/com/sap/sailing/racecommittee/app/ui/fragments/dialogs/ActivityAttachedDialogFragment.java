@@ -21,7 +21,7 @@ public abstract class ActivityAttachedDialogFragment extends BaseDialogFragment 
     };
 
     @Override
-    protected DialogFragmentButtonListener getHost() {
+    protected DialogFragmentButtonListener getListener() {
         return this.hostActivity;
     }
 

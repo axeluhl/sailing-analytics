@@ -206,12 +206,12 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(
                 String.format(getString(R.string.generic_load_failure), message))
-                .setTitle("Connection failure").setIcon(R.drawable.ic_dialog_alert_holo_light).setCancelable(true)
-                .setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                .setTitle(getString(R.string.loading_failure)).setIcon(R.drawable.ic_dialog_alert_holo_light).setCancelable(true)
+                .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         loadRaces(courseArea);
                     }
-                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
                     }

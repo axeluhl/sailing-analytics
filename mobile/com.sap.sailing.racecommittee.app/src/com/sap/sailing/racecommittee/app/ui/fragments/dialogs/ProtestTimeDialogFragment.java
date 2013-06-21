@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.view.ViewParent;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TimePicker;
@@ -46,16 +48,23 @@ public class ProtestTimeDialogFragment extends BaseDialogFragment {
     private List<ManagedRace> races;
     private ListView racesList;
     private TimePicker timePicker;
+    private View customView;
 
     public ProtestTimeDialogFragment() {
         races = new ArrayList<ManagedRace>();
+    }
+    
+    @Override
+    public void onStart() {
+        super.onStart();
+        forceWrapContent(customView);
     }
 
     @Override
     protected Builder createDialog(Builder builder) {
         getRacesFromArguments();
-        View view = setupView();
-        return builder.setTitle(getString(R.string.protest_dialog_title)).setView(view);
+        customView = setupView();
+        return builder.setTitle(getString(R.string.protest_dialog_title)).setView(customView);
     }
 
     @Override
@@ -69,7 +78,7 @@ public class ProtestTimeDialogFragment extends BaseDialogFragment {
     }
 
     @Override
-    protected DialogFragmentButtonListener getHost() {
+    protected DialogFragmentButtonListener getListener() {
         return new DialogFragmentButtonListener() {
 
             @Override
@@ -92,6 +101,34 @@ public class ProtestTimeDialogFragment extends BaseDialogFragment {
         timePicker = (TimePicker) view.findViewById(R.id.protest_time_time_time_picker);
         setupTimePicker(timePicker);
         return view;
+    }
+    
+    protected void forceWrapContent(View v) {
+        // Start with the provided view
+        View current = v;
+
+        // Travel up the tree until fail, modifying the LayoutParams
+        do {
+            // Get the parent
+            ViewParent parent = current.getParent();    
+
+            // Check if the parent exists
+            if (parent != null) {
+                // Get the view
+                try {
+                    current = (View) parent;
+                } catch (ClassCastException e) {
+                    // This will happen when at the top view, it cannot be cast to a View
+                    break;
+                }
+
+                // Modify the layout
+                current.getLayoutParams().width = LayoutParams.WRAP_CONTENT;
+            }
+        } while (current.getParent() != null);
+
+        // Request a layout to be re-done
+        current.requestLayout();
     }
 
     private void setupRacesList(ListView racesList) {

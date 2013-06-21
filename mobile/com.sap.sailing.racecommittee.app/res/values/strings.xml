@@ -150,6 +150,8 @@
     <string name="unpublish">Unpublish</string>
     <string name="take_previous">Use previous course</string>
     <string name="markImage">Mark image</string>
+    <string name="cancel">Cancel</string>
+    <string name="retry">Retry</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="positionings">Positioning</string>
@@ -197,5 +199,7 @@
     <string name="racing_course_area_missing">Course area could not be loaded. Please go back to the login page.</string>
     <string name="racing_load_success">Successfully loaded %d races.</string>
     <string name="generic_load_failure">There was an error loading the requested data: %s\nDo you want to retry?</string>
+    
+    <string name="loading_failure">Load failure</string>
 
 </resources>

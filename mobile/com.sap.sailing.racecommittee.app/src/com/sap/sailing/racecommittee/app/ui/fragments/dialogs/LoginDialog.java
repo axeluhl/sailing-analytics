@@ -33,7 +33,7 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
 
     @Override
     protected CharSequence getNegativeButtonLabel() {
-        return "Cancel";
+        return getString(R.string.cancel);
     }
 
     @Override

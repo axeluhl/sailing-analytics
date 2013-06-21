@@ -19,7 +19,7 @@ public abstract class BaseDialogFragment extends DialogFragment {
 
     protected abstract Builder createDialog(AlertDialog.Builder builder);
 
-    protected abstract DialogFragmentButtonListener getHost();
+    protected abstract DialogFragmentButtonListener getListener();
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -36,16 +36,16 @@ public abstract class BaseDialogFragment extends DialogFragment {
     }
 
     protected void onNegativeButton() {
-        if (getHost() != null) {
-            getHost().onDialogNegativeButton();
+        if (getListener() != null) {
+            getListener().onDialogNegativeButton();
         } else {
             ExLog.w(TAG, "Dialog host was null.");
         }
     }
 
     protected void onPositiveButton() {
-        if (getHost() != null) {
-            getHost().onDialogPositiveButton();
+        if (getListener() != null) {
+            getListener().onDialogPositiveButton();
         } else {
             ExLog.w(TAG, "Dialog host was null.");
         }
