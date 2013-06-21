@@ -508,15 +508,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (previousLeaderboardDTO == null) {
                     result = new FullLeaderboardDTO(leaderboardDTO);
                 } else {
+                    final IncrementalLeaderboardDTO incrementalResult;
                     if (cachedDiff == null) {
                         IncrementalLeaderboardDTO preResult = new IncrementalLeaderboardDTOCloner().clone(leaderboardDTO).strip(previousLeaderboardDTO);
                         synchronized (leaderboardDifferenceCacheByIdPair) {
                             leaderboardDifferenceCacheByIdPair.put(new Pair<String, String>(previousLeaderboardId, leaderboardDTO.getId()), preResult);
                         }
-                        result = preResult;
+                        incrementalResult = preResult;
                     } else {
-                        result = cachedDiff;
+                        incrementalResult = cachedDiff;
                     }
+                    incrementalResult.setCurrentServerTime(new Date()); // may update a cached object, but we consider a reference update atomic
+                    result = incrementalResult;
                 }
                 logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
                         + namesOfRaceColumnsForWhichToLoadLegDetails + ") took "
