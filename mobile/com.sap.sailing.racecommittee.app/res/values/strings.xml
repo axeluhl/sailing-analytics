@@ -208,15 +208,11 @@
         <item>OS</item>
         <item>L</item>
         <item>LS</item>
-        <item>AS</item>
+        <item>LR</item>
+        <item>LG</item>
+        <item>IA</item>
         <item>LA</item>
-        <item>M</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
+        <item>W</item>
     </string-array>
     
     <string name="loading_failure">Load failure</string>
