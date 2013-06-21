@@ -81,6 +81,8 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
         stringMessages = GWT.create(StringMessages.class);
         errorDialogBox = createErrorDialog(); /* TODO: Make this more generic (e.g. make it support all kinds of messages) */
         userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
+        persistentAlertLabel = new Label("");
+        persistentAlertLabel.setStyleName("global-alert-message");
         
         ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
         ServiceDefTarget mediaServiceDef = (ServiceDefTarget) mediaService;
