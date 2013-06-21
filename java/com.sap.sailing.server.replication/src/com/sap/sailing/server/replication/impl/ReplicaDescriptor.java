@@ -1,4 +1,4 @@
-package com.sap.sailing.server.replication;
+package com.sap.sailing.server.replication.impl;
 
 import java.io.Serializable;
 import java.net.InetAddress;
@@ -18,18 +18,18 @@ public class ReplicaDescriptor implements Serializable {
     private static final long serialVersionUID = -5451556877949921454L;
 
     private final UUID uuid;
-    
     private final InetAddress ipAddress;
-    
     private final TimePoint registrationTime;
+    private final String additionalInformation;
 
     /**
      * Sets the registration time to now.
      */
-    public ReplicaDescriptor(InetAddress ipAddress) {
-        this.uuid = UUID.randomUUID();
+    public ReplicaDescriptor(InetAddress ipAddress, UUID serverUuid, String additionalInformation) {
+        this.uuid = serverUuid;
         this.registrationTime = MillisecondsTimePoint.now();
         this.ipAddress = ipAddress;
+        this.additionalInformation = additionalInformation;
     }
 
     public UUID getUuid() {
@@ -42,6 +42,10 @@ public class ReplicaDescriptor implements Serializable {
 
     public TimePoint getRegistrationTime() {
         return registrationTime;
+    }
+    
+    public String getAdditionalInformation() {
+        return additionalInformation;
     }
 
     @Override

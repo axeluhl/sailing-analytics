@@ -25,9 +25,11 @@ public abstract class AbstractRecordRaceLogEvent extends AbstractRacingEventServ
      * @return <code>true</code> if add was successful.
      */
     protected RaceLogEvent addEventTo(RaceColumn raceColumn) {
-        Fleet fleet = raceColumn.getFleetByName(fleetName);
-        RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        raceLog.add(event);
+        if (raceColumn != null) {
+            Fleet fleet = raceColumn.getFleetByName(fleetName);
+            RaceLog raceLog = raceColumn.getRaceLog(fleet);
+            raceLog.add(event);
+        }
         return event;
     }
 

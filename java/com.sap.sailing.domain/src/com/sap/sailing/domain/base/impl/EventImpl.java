@@ -40,4 +40,8 @@ public class EventImpl extends EventBaseImpl implements Event {
     public void removeRegatta(Regatta regatta) {
         regattas.remove(regatta);
     }
+    
+    public String toString() {
+        return getId() + " " + getName() + " " + getVenue().getName() + " " + isPublic();
+    }
 }

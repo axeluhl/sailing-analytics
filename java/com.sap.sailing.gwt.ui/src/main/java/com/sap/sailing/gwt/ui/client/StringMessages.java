@@ -656,6 +656,18 @@ public interface StringMessages extends Messages {
     String startsWithZeroScore();
     String regattaOverviewConfiguration();
     String firstRaceIsNonDiscardableCarryForward();
+    String addReplicationMaster();
+    String connect();
+    String connectToMaster();
+    String explainReplicationHostname();
+    String explainReplicationExchangeName();
+    String explainReplicationExchangePort();
+    String explainReplicationServletPort();
+    String explainReplicasRegistered();
+    String explainConnectionsToMaster();
+    String explainNoConnectionsToMaster();
+    String explainNoConnectionsFromReplicas();
+    String stopConnectionToMaster();
     String asLink();
     String raceIsRunning();
     String raceIsRunningWithEarlyStarters();
@@ -670,4 +682,7 @@ public interface StringMessages extends Messages {
     String raceAbandoned();
     String raceAbandonedNoMoreRacingToday();
     String raceAbandonedFurtherSignalsAshore();
+    String stopAllReplicas();
+    String warningServerIsReplica();
+    String dropReplicaConnection();
 }
