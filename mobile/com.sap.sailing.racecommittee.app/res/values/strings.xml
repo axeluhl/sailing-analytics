@@ -188,6 +188,7 @@
     <string name="store_wind_entry">4. Store wind entry</string>
     <string name="store_wind">Store wind</string>
     <string name="override_default_start_procedure_type">Override default start procedure type</string>
+    <string name="override_default_start_procedure_type_select">Default start procedure type when overriden</string>
     
     <string name="compass_view_compass">Compass</string>
     <string name="compass_view_needle">Needle</string>

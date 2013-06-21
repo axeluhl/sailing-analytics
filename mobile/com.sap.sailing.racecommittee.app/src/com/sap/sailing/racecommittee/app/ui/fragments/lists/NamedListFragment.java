@@ -45,8 +45,8 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
 
     protected abstract void loadItems(ReadonlyDataManager manager);
 
-    protected NamedArrayAdapter<T> createAdapter(Context context, int layoutId, ArrayList<T> items) {
-        return new NamedArrayAdapter<T>(context, layoutId, items);
+    protected NamedArrayAdapter<T> createAdapter(Context context, ArrayList<T> items) {
+        return new NamedArrayAdapter<T>(context, items);
     }
 
     protected void loadItems() {
@@ -71,7 +71,7 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
         addHeader();
 
         namedList = new ArrayList<T>();
-        listAdapter = createAdapter(getActivity(), android.R.layout.simple_list_item_single_choice, namedList);
+        listAdapter = createAdapter(getActivity(), /*android.R.layout.simple_list_item_single_choice, */namedList);
 
         this.getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         this.setListAdapter(listAdapter);

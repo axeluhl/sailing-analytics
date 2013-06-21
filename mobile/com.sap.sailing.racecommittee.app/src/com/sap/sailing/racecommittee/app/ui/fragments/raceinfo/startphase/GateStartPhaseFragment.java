@@ -113,8 +113,31 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
                 showLineOpeningTimeDialog();
             }
         });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
 
         setupUi();
+        getRace().getState().getStartProcedure().setStartPhaseEventListener(this);
+        ExLog.w(GateStartPhaseFragment.class.getName(),
+                String.format("Fragment %s is now shown", GateStartPhaseFragment.class.getName()));
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        getRace().getState().getStartProcedure().setStartPhaseEventListener(null);
+    }
+
+    @Override
+    public void notifyTick() {
+        TimePoint startTime = getRace().getState().getStartTime();
+        if (startTime != null) {
+            setCountdownLabels(TimeUtils.timeUntil(startTime));
+        }
     }
 
     private void showPathFinderDialog() {
@@ -160,30 +183,6 @@ public class GateStartPhaseFragment extends RaceFragment implements GateStartPha
                 onClassOverGolfDown();
             }
 
-        }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        getRace().getState().getStartProcedure().setStartPhaseEventListener(this);
-        ExLog.w(GateStartPhaseFragment.class.getName(),
-                String.format("Fragment %s is now shown", GateStartPhaseFragment.class.getName()));
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        getRace().getState().getStartProcedure().setStartPhaseEventListener(null);
-    }
-
-    @Override
-    public void notifyTick() {
-        TimePoint startTime = getRace().getState().getStartTime();
-        if (startTime != null) {
-            setCountdownLabels(TimeUtils.timeUntil(startTime));
         }
     }
 
