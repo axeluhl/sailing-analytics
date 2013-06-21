@@ -505,9 +505,9 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             public void onSuccess(List<LeaderboardGroupDTO> result) {
                 final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
                 if (result != null && !result.isEmpty()) {
-                            timerForClientServerOffset.adjustClientServerOffset(clientTimeWhenRequestWasSent, result
-                                    .get(result.size() - 1).getCurrentServerTime(), clientTimeWhenResponseWasReceived);
-                        }
+                    timerForClientServerOffset.adjustClientServerOffset(clientTimeWhenRequestWasSent, result
+                            .get(result.size() - 1).getCurrentServerTime(), clientTimeWhenResponseWasReceived);
+                }
                 availableGroups = result == null ? new ArrayList<LeaderboardGroupDTO>() : result;
                 groupsDataProvider.getList().clear();
                 groupsDataProvider.getList().addAll(availableGroups);
