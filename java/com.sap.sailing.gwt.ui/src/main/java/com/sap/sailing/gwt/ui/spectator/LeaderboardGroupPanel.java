@@ -134,7 +134,9 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                 final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
                 if (leaderboardGroupDTO != null) {
                     LeaderboardGroupPanel.this.leaderboardGroup = leaderboardGroupDTO;
-                    timerForClientServerOffset.setLivePlayDelayInMillis(leaderboardGroupDTO.getAverageDelayToLiveInMillis());
+                    if (leaderboardGroupDTO.getAverageDelayToLiveInMillis() != null) {
+                        timerForClientServerOffset.setLivePlayDelayInMillis(leaderboardGroupDTO.getAverageDelayToLiveInMillis());
+                    }
                     timerForClientServerOffset.adjustClientServerOffset(clientTimeWhenRequestWasSent, leaderboardGroupDTO.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
                     // in case there is a regatta leaderboard in the leaderboard group 
                     // we need to know the corresponding regatta structure

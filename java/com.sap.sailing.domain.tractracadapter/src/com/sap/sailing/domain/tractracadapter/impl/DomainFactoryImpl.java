@@ -229,7 +229,13 @@ public class DomainFactoryImpl implements DomainFactory {
         Competitor result = baseDomainFactory.getExistingCompetitorById(competitor.getId());
         if (result == null) {
             BoatClass boatClass = getOrCreateBoatClass(competitor.getCompetitorClass());
-            Nationality nationality = getOrCreateNationality(competitor.getNationality());
+            Nationality nationality;
+            try {
+                nationality = getOrCreateNationality(competitor.getNationality());
+            } catch (IllegalArgumentException iae) {
+                // the country code was probably not a legal IOC country code
+                nationality = null;
+            }
             Team team = getOrCreateTeam(competitor.getName(), nationality, competitor.getId());
             Boat boat = new BoatImpl(competitor.getShortName(), boatClass, competitor.getShortName());
             result = baseDomainFactory.createCompetitor(competitor.getId(), competitor.getName(), team, boat);

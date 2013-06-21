@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -33,8 +34,9 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         result.put(FIELD_ID, competitor.getId().toString());
         result.put(FIELD_NAME, competitor.getName());
         result.put(FIELD_SAILID, competitor.getBoat()==null?"":competitor.getBoat().getSailID());
-        result.put(FIELD_NATIONALITY, competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
-        CountryCode countryCode = competitor.getTeam().getNationality().getCountryCode();
+        final Nationality nationality = competitor.getTeam().getNationality();
+        result.put(FIELD_NATIONALITY, nationality == null ? "" : nationality.getThreeLetterIOCAcronym());
+        CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
         result.put(FIELD_NATIONALITY_ISO2, countryCode == null ? "" : countryCode.getTwoLetterISOCode());
         result.put(FIELD_NATIONALITY_ISO3, countryCode == null ? "" : countryCode.getThreeLetterISOCode());
         if(teamJsonSerializer != null) {
