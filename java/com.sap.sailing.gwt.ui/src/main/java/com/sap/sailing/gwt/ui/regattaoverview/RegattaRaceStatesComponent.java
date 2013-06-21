@@ -328,6 +328,19 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                     additionalInformation.append("GateLineOpeningTime: "
                             + (entryDTO.raceInfo.gateLineOpeningTime / (60 * 1000)) + " minutes");
                 }
+                if (entryDTO.raceInfo.protestFinishTime != null) {
+                    if (entryDTO.raceInfo.pathfinderId != null || entryDTO.raceInfo.gateLineOpeningTime != null) {
+                        additionalInformation.append("  /  ");
+                    }
+                    Date now = new Date();
+                    String text = "";
+                    if (entryDTO.raceInfo.protestFinishTime.after(now)) {
+                        text = stringMessages.protestTimeFinishesAt();
+                    } else {
+                        text = stringMessages.protestTimeFinishedAt();
+                    }
+                    additionalInformation.append(text + timeFormatter.format(entryDTO.raceInfo.protestFinishTime));
+                }
 
                 return additionalInformation.toString();
             }
