@@ -7,6 +7,7 @@ import java.util.Set;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -30,9 +31,14 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         rootPanel.setSize("100%", "100%");
         verticalPanel.setSize("100%", "100%");
         
+        HorizontalPanel topInformationPanel = new HorizontalPanel();
+        topInformationPanel.setSize("100%", "95%");
         UserStatusPanel userStatusPanel = new UserStatusPanel(userManagementService, this);
         userStatusPanel.ensureDebugId("UserStatus");
-        verticalPanel.add(userStatusPanel);
+        topInformationPanel.add(userStatusPanel);
+        topInformationPanel.add(persistentAlertLabel);
+        
+        verticalPanel.add(topInformationPanel);
         
         TabPanel tabPanel = new TabPanel();
         tabPanel.ensureDebugId("AdministrationTabs");

@@ -22,7 +22,6 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.IntegerBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.panels.UserStatusPanel;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
@@ -245,7 +244,7 @@ public class ReplicationPanel extends FlowPanel {
                 
                 final ReplicationMasterDTO replicatingFromMaster = replicas.getReplicatingFromMaster();
                 if (replicatingFromMaster != null) {
-                    UserStatusPanel.setGlobalAlert(stringMessages.warningServerIsReplica());
+                    errorReporter.reportPersistentInformation(stringMessages.warningServerIsReplica());
                     registeredMasters.insertRow(i);
                     registeredMasters.setWidget(i, 0, new Label(stringMessages.replicatingFromMaster(replicatingFromMaster.getHostname(),
                             replicatingFromMaster.getMessagingPort(), replicatingFromMaster.getServletPort())));
@@ -253,7 +252,7 @@ public class ReplicationPanel extends FlowPanel {
                     addButton.setEnabled(false);
                     stopReplicationButton.setEnabled(true);
                 } else {
-                    UserStatusPanel.setGlobalAlert("");
+                    errorReporter.reportPersistentInformation("");
                     registeredMasters.insertRow(i);
                     registeredMasters.setWidget(i, 0, new Label(stringMessages.explainNoConnectionsToMaster()));
                     addButton.setEnabled(true);
