@@ -498,7 +498,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     @Override
     public String getLocalizedShortName() {
-        return "Time control";
+        return stringMessages.timePanelName();
     }
     
     @Override
