@@ -358,6 +358,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public RaceDTO createRaceDTO(TrackedRegattaRegistry trackedRegattaRegistry, boolean withGeoLocationData, RegattaAndRaceIdentifier raceIdentifier, TrackedRace trackedRace) {
+        assert trackedRace != null;
         // Optional: Getting the places of the race
         PlacemarkOrderDTO racePlaces = withGeoLocationData ? getRacePlaces(trackedRace) : null;
         TrackedRaceDTO trackedRaceDTO = createTrackedRaceDTO(trackedRace); 
@@ -369,11 +370,12 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public void updateRaceDTOWithTrackedRaceData(TrackedRace trackedRace, RaceDTO raceDTO) {
+        assert trackedRace != null;
         raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
         raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
         raceDTO.status = new RaceStatusDTO();
-        raceDTO.status.status = trackedRace.getStatus().getStatus();
-        raceDTO.status.loadingProgress = trackedRace.getStatus().getLoadingProgress();
+        raceDTO.status.status = trackedRace.getStatus() == null ? null : trackedRace.getStatus().getStatus();
+        raceDTO.status.loadingProgress = trackedRace.getStatus() == null ? 0.0 : trackedRace.getStatus().getLoadingProgress();
     }
 
     @Override

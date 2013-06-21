@@ -96,6 +96,9 @@ public interface DomainFactory extends SharedDomainFactory {
 
     FleetDTO convertToFleetDTO(Fleet fleet);
 
+    /**
+     * @param trackedRace must not be <code>null</code>
+     */
     RaceDTO createRaceDTO(TrackedRegattaRegistry trackedRegattaRegistry, boolean withGeoLocationData, RegattaAndRaceIdentifier raceIdentifier, TrackedRace trackedRace);
 
     PlacemarkDTO convertToPlacemarkDTO(Placemark placemark);
@@ -104,6 +107,9 @@ public interface DomainFactory extends SharedDomainFactory {
 
     TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace);
 
+    /**
+     * @param trackedRace must not be <code>null</code>
+     */
     void updateRaceDTOWithTrackedRaceData(TrackedRace trackedRace, RaceDTO raceDTO);
 
 }
