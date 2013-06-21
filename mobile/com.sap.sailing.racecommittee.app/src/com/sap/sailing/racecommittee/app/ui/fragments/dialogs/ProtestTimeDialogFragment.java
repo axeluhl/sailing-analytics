@@ -78,17 +78,21 @@ public class ProtestTimeDialogFragment extends BaseDialogFragment {
     }
 
     @Override
-    protected DialogFragmentButtonListener getListener() {
-        return new DialogFragmentButtonListener() {
-
+    protected DialogListenerHost getHost() {
+        return new DialogListenerHost() {
             @Override
-            public void onDialogPositiveButton() {
-                setAndAnnounceProtestTime();
-            }
+            public DialogResultListener getListener() {
+                return new DialogResultListener() {
+                    @Override
+                    public void onDialogNegativeButton(BaseDialogFragment dialog) {
+                        // no operation
+                    }
 
-            @Override
-            public void onDialogNegativeButton() {
-
+                    @Override
+                    public void onDialogPositiveButton(BaseDialogFragment dialog) {
+                        setAndAnnounceProtestTime();
+                    }
+                };
             }
         };
     }
