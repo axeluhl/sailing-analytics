@@ -19,15 +19,6 @@ public class TrackedRaceDTO implements Serializable {
     public Date timePointOfNewestEvent;
     public long delayToLiveInMs;
     
-    public boolean isLive() {
-        long eventTimeoutTolerance = 60 * 1000; // 60s
-        long liveTimePointInMillis = System.currentTimeMillis() - delayToLiveInMs;
-        boolean live = timePointOfNewestEvent != null
-                && liveTimePointInMillis < timePointOfNewestEvent.getTime() + eventTimeoutTolerance
-                && startOfTracking != null && liveTimePointInMillis > startOfTracking.getTime();
-        return live;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;

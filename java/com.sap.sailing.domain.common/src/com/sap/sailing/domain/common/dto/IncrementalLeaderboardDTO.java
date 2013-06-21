@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.dto;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -93,6 +94,11 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
      * for which the entire row is unchanged in {@link #rows}.
      */
     private UnchangedWithCompetitorsInBitSet<Void> rowsUnchanged;
+    
+    /**
+     * Time stamp in "server time," updated to when this object was sent out, just before serialization
+     */
+    private Date currentServerTime;
     
     static class UnchangedWithCompetitorsInBitSet<K> implements Serializable {
         private static final long serialVersionUID = 504599408604780499L;
@@ -672,6 +678,14 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             legDetailsUnchanged = new UnchangedLegDetails(previousVersion, rows.size());
         }
         return legDetailsUnchanged;
+    }
+
+    public void setCurrentServerTime(Date currentServerTime) {
+        this.currentServerTime = currentServerTime;
+    }
+
+    public Date getCurrentServerTime() {
+        return currentServerTime;
     }
 
 }

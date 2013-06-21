@@ -434,9 +434,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         if (newSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
             timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
         }
-        if (newSettings.getDelayInMilliseconds() != null) {
-            timer.setLivePlayDelayInMillisExplicitly(newSettings.getDelayInMilliseconds());
-        }
         for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
             expandableSortableColumn.toggleExpansion();
         }
@@ -515,7 +512,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             // wait for the first update and adjust leaderboard once the race times have been received
             final RaceTimesInfoProviderListener raceTimesInfoProviderListener = new RaceTimesInfoProviderListener() {
                 @Override
-                public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
+                public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo, long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
+                    timer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
                     updateLeaderboard(getLeaderboard());
                     getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener(this);
                 }
@@ -690,7 +688,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         public boolean isLive(FleetDTO fleetDTO) {
-            return race.isLive(fleetDTO);
+            return race.isLive(fleetDTO, timer.getLiveTimePointInMillis());
         }
 
         @Override
@@ -1217,7 +1215,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
-            String textColor = getLeaderboard().hasLiveRace() ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
+            String textColor = getLeaderboard().hasLiveRace(timer.getLiveTimePointInMillis()) ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
         	
             sb.appendHtmlConstant("<span style=\"font-weight: bold; color:" + textColor + "\">");
             sb.appendEscaped(getValue(object));
@@ -1780,7 +1778,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
                     getLeaderboardName(), timer.getPlayMode() == PlayModes.Live ? null : date,
                     /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                    /* previousLeaderboard */ getLeaderboard(), new AsyncCallback<LeaderboardDTO>() {
+                    /* previousLeaderboard */ getLeaderboard(), timer, errorReporter, stringMessages, new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
                             updateLeaderboard(result);
@@ -1888,7 +1886,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 scoreCorrectionLastUpdateTimeLabel.setText("");
             }
             
-            List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces();
+            List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
             boolean hasLiveRace = !liveRaces.isEmpty();
             if (hasLiveRace) {
             	String liveRaceText = "";
@@ -2413,6 +2411,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         return getLeaderboardTable().getDataProvider();
     }
 
+    /**
+     * @param date
+     *            ignored; may be <code>null</code>. The time for loading the leaderboard is determined using
+     *            {@link #getLeaderboardDisplayDate()}.
+     */
     @Override
     public void timeChanged(Date date) {
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
@@ -2491,7 +2494,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails),
                 Collections.unmodifiableList(selectedOverallDetailColumns), /* All races to select */ leaderboard.getRaceList(),
                 raceColumnSelection.getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard), raceColumnSelection, autoExpandPreSelectedRace,
-                showOverallLeaderboardsOnSamePage, timer.getRefreshInterval(), timer.getLivePlayDelayInMillis(), stringMessages);
+                showOverallLeaderboardsOnSamePage, timer.getRefreshInterval(), stringMessages);
     }
 
     @Override

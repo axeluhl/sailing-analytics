@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.Date;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class RegattaOverviewEntryDTO implements IsSerializable {
@@ -8,6 +10,7 @@ public class RegattaOverviewEntryDTO implements IsSerializable {
     public String regattaDisplayName;
     public RaceInfoDTO raceInfo;
     public String regattaName;
+    public Date currentServerTime;
     
     // for GWT serialization
     public RegattaOverviewEntryDTO() { }

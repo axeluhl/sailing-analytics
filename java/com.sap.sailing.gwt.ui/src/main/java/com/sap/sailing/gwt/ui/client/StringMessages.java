@@ -685,4 +685,6 @@ public interface StringMessages extends Messages {
     String stopAllReplicas();
     String warningServerIsReplica();
     String dropReplicaConnection();
+    String timePanelName();
+    String competitorFilterExplanation();
 }

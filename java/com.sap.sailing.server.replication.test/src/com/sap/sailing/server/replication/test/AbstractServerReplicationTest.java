@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintWriter;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -54,8 +55,8 @@ public abstract class AbstractServerReplicationTest {
             /* replica=null means create a new one */null);
             result.getA().startToReplicateFrom(result.getB());
         } catch (Exception e) {
-            e.printStackTrace();
             tearDown();
+            throw e;
         }
     }
 
@@ -104,9 +105,16 @@ public abstract class AbstractServerReplicationTest {
     @After
     public void tearDown() throws Exception {
         masterReplicator.unregisterReplica(replicaDescriptor);
-        URLConnection urlConnection = new URL("http://localhost:"+SERVLET_PORT+"/STOP").openConnection(); // stop the initial load test server thread
-        urlConnection.getInputStream().close();
         masterDescriptor.stopConnection();
+        try {
+            URLConnection urlConnection = new URL("http://localhost:"+SERVLET_PORT+"/STOP").openConnection(); // stop the initial load test server thread
+            urlConnection.getInputStream().close();
+        } catch (ConnectException ex) {
+            /* do not make tests fail because of a server that has been shut down
+             * or when an exception occured (see setUp()) - let the
+             * original exception propagate */
+            ex.printStackTrace();
+        }
     }
     
     public void stopReplicatingToMaster() throws IOException {
