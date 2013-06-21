@@ -29,7 +29,7 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
 public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
 
-    private Logger logger = Logger.getLogger(LeaderboardForKielWeekTest.class.getName());
+    private final Logger logger = Logger.getLogger(LeaderboardForKielWeekTest.class.getName());
     private FlexibleLeaderboardImpl leaderboard;
 
     public LeaderboardForKielWeekTest() throws MalformedURLException, URISyntaxException {
