@@ -346,7 +346,9 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         for (RaceColumnDTO raceColumn : series.getRaceColumns()) {
             for (FleetDTO fleetOfRaceColumn : series.getFleets()) {
                 if(fleet.equals(fleetOfRaceColumn)) {
-                    racesColumnsOfFleet.add(raceColumn);
+                    //We have to get the race column from the leaderboard, because the race column of the series
+                    //have no tracked race and would be displayed as inactive race.
+                    racesColumnsOfFleet.add(leaderboard.getRaceColumnByName(raceColumn.getName()));
                 }
             }
         }
