@@ -6,7 +6,9 @@ import java.util.Date;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * Performs a result adaptation from {@link IncrementalOrFullLeaderboardDTO} and {@link LeaderboardDTO}, encapsulating
@@ -24,11 +26,16 @@ public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDT
     private final Date date;
     private final Collection<String> namesOfRacesForWhichToLoadLegDetails;
     private final LeaderboardDTO previousLeaderboard;
+    private final StringMessages stringMessages;
+    private final ErrorReporter errorReporter;
     
     public GetLeaderboardByNameAction(SailingServiceAsync sailingService, String leaderboardName, Date date,
-            final Collection<String> namesOfRacesForWhichToLoadLegDetails, LeaderboardDTO previousLeaderboard, AsyncCallback<LeaderboardDTO> callback) {
+            final Collection<String> namesOfRacesForWhichToLoadLegDetails, LeaderboardDTO previousLeaderboard,
+            ErrorReporter errorReporter, StringMessages stringMessages, AsyncCallback<LeaderboardDTO> callback) {
         super(callback);
         this.sailingService = sailingService;
+        this.errorReporter = errorReporter;
+        this.stringMessages = stringMessages;
         this.leaderboardName = leaderboardName;
         this.date = date;
         this.namesOfRacesForWhichToLoadLegDetails = namesOfRacesForWhichToLoadLegDetails;
@@ -49,8 +56,12 @@ public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDT
 
                             @Override
                             public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
-                                LeaderboardDTO leaderboardDTOResult = result.getLeaderboardDTO(previousLeaderboard);
-                                wrapperCallback.onSuccess(leaderboardDTOResult);
+                                if (result == null) {
+                                    errorReporter.reportError(stringMessages.errorTryingToObtainLeaderboardContents(leaderboardName), /* silent */ true);
+                                } else {
+                                    LeaderboardDTO leaderboardDTOResult = result.getLeaderboardDTO(previousLeaderboard);
+                                    wrapperCallback.onSuccess(leaderboardDTOResult);
+                                }
                             }
                 });
     }
