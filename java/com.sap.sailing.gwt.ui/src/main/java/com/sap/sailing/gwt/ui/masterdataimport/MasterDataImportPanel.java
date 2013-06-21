@@ -158,7 +158,9 @@ public class MasterDataImportPanel extends VerticalPanel {
                 int leaderboardsCreated = (int) ((JSONNumber) creationCountObj.get("leaderboards")).doubleValue();
                 int leaderboardGroupsCreated = (int) ((JSONNumber) creationCountObj.get("leaderboardGroups"))
                         .doubleValue();
-                showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated);
+                int eventsCreated = (int) ((JSONNumber) creationCountObj.get("events"))
+                        .doubleValue();
+                showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated);
             }
 
             @Override
@@ -175,8 +177,8 @@ public class MasterDataImportPanel extends VerticalPanel {
         }
     }
 
-    protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated) {
-        Window.alert(stringMessages.importSuccess(leaderboardGroupsCreated, leaderboardsCreated));
+    protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated, int eventsCreated) {
+        Window.alert(stringMessages.importSuccess(leaderboardGroupsCreated, leaderboardsCreated, eventsCreated));
 
     }
 

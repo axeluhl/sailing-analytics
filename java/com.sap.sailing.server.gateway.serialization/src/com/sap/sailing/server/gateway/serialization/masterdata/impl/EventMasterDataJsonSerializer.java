@@ -11,18 +11,10 @@ public class EventMasterDataJsonSerializer implements JsonSerializer<Event> {
 
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
-    public static final String FIELD_BASE_NAME = "baseName";
     public static final String FIELD_VENUE_NAME = "venueName";
     public static final String FIELD_PUB_URL = "publicationUrl";
     public static final String FIELD_COURSE_AREAS = "courseAreas";
-    public static final String FIELD_REGATTAS = "regattas";
-    public static final String FIELD_BOAT_CLASS_NAME = "boatClass";
-    public static final String FIELD_DEFAULT_COURSE_AREA_ID = "defaultCourseAreaId";
-    public static final String FIELD_SCORING_SCHEME_TYPE = "scoringSchemeType";
-    public static final String FIELD_SERIES = "series";
-    public static final String FIELD_RACE_COLUMNS = "raceColumns";
-    public static final String FIELD_IS_MEDAL = "isMedal";
-    public static final String FIELD_FLEETS = "fleets";
+    public static final String FIELD_IS_PUBLIC = "isPublic";
     
 
     @Override
@@ -32,6 +24,7 @@ public class EventMasterDataJsonSerializer implements JsonSerializer<Event> {
         result.put(FIELD_NAME, event.getName());
         result.put(FIELD_VENUE_NAME, event.getVenue().getName());
         result.put(FIELD_PUB_URL, event.getPublicationUrl());
+        result.put(FIELD_IS_PUBLIC, event.isPublic());
         result.put(FIELD_COURSE_AREAS, createJsonArrayForCourseAreas(event.getVenue().getCourseAreas()));
         //TODO Sadly event.getRegattas() returns an empty collection
         //result.put(FIELD_REGATTAS, createJsonArrayForRegattas(event.getRegattas()));
