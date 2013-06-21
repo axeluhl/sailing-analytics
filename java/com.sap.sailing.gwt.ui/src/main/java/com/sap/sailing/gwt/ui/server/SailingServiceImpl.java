@@ -123,6 +123,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.utils.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -148,6 +149,7 @@ import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.ProtestStartTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
@@ -644,7 +646,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceInfoDTO.isLastFlagDisplayed = lastFlagEvent.isDisplayed();
             }
             
-            
             AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
             
             RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
@@ -663,6 +664,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(lastCourse);
             if (lastCourse != null) {
                 raceInfoDTO.lastCourseName = lastCourse.getName();
+            }
+            
+            if (raceInfoDTO.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
+                ProtestStartTimeFinder protestStartTimeFinder = new ProtestStartTimeFinder(raceLog);
+                
+                TimePoint protestStartTime = protestStartTimeFinder.analyze();
+                if (protestStartTime != null) {
+                    long protestDuration = 90 * 60 * 1000; // 90 min protest duration
+                    raceInfoDTO.protestFinishTime = protestStartTime.plus(protestDuration).asDate();
+                    raceInfoDTO.lastUpperFlag = Flags.BRAVO;
+                    raceInfoDTO.lastLowerFlag = Flags.NONE;
+                    raceInfoDTO.isLastFlagDisplayed = true;
+                }
             }
         }
         raceInfoDTO.seriesName = seriesName;
