@@ -125,14 +125,10 @@ public class WindJsonGetServlet extends AbstractJsonHttpServlet {
                 jsonWind.put("meterspersecondspeed", wind.getMetersPerSecond());
                 if (wind.getTimePoint() != null) {
                     jsonWind.put("timepoint", wind.getTimePoint().asMillis());
-                    jsonWind.put("dampenedtruebearingdeg",
-                            windTrack.getAveragedWind(wind.getPosition(), wind.getTimePoint()).getBearing()
-                                    .getDegrees());
-                    jsonWind.put("dampenedknotspeed",
-                            windTrack.getAveragedWind(wind.getPosition(), wind.getTimePoint()).getKnots());
-                    jsonWind.put("dampenedmeterspersecondspeed",
-                            windTrack.getAveragedWind(wind.getPosition(), wind.getTimePoint())
-                                    .getMetersPerSecond());
+                    final Wind averagedWind = windTrack.getAveragedWind(wind.getPosition(), wind.getTimePoint());
+                    jsonWind.put("dampenedtruebearingdeg", averagedWind.getBearing().getDegrees());
+                    jsonWind.put("dampenedknotspeed", averagedWind.getKnots());
+                    jsonWind.put("dampenedmeterspersecondspeed", averagedWind.getMetersPerSecond());
                 }
                 if (wind.getPosition() != null) {
                     jsonWind.put("latdeg", wind.getPosition().getLatDeg());
