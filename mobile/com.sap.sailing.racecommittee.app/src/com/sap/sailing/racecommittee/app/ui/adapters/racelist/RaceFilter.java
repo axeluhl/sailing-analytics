@@ -43,21 +43,20 @@ public class RaceFilter extends Filter {
         }
 
         List<RaceListDataType> filteredItems = new ArrayList<RaceListDataType>();
-        boolean changedGroup = true;
+        // boolean changedGroup = true;
         RaceListDataTypeRace newestFinishedItem = null;
         RaceListDataTypeRace nextUnscheduldedItem = null;
 
         // To filter the races...
         List<RaceListDataType> array = new ArrayList<RaceListDataType>(items);
         for (RaceListDataType item : array) {
+            int itemIndex = array.indexOf(item);
             // ... we always take the headers...
             if (item instanceof RaceListDataTypeHeader) {
-                changedGroup = true;
                 RaceListDataTypeHeader headerItem = (RaceListDataTypeHeader) item;
                 filteredItems.add(headerItem);
 
-            } else {
-                changedGroup = false;
+            } else if (item instanceof RaceListDataTypeRace) {
                 // ... but...
                 RaceListDataTypeRace raceItem = (RaceListDataTypeRace) item;
                 RaceLogRaceStatus status = raceItem.getCurrentStatus();
@@ -70,21 +69,44 @@ public class RaceFilter extends Filter {
                     newestFinishedItem = raceItem;
                 } else if (status.equals(RaceLogRaceStatus.UNSCHEDULED)) {
                     // ... the first (by sort order) unscheduled race and the next after the (current) newest
-                    // finished...
+                    // finished or scheduled...
                     if (nextUnscheduldedItem == null) {
                         filteredItems.add(raceItem);
                         nextUnscheduldedItem = raceItem;
-                    } else if (array.indexOf(newestFinishedItem) == array.indexOf(item) - 1) {
+                    } else if (array.indexOf(newestFinishedItem) == itemIndex - 1) {
                         filteredItems.add(raceItem);
                     }
                 } else if (RaceLogRaceStatus.isActive(status)) {
                     // ... and all active races...
                     filteredItems.add(raceItem);
                 }
+            } else {
+                throw new IllegalStateException("Unknown race list item type.");
             }
 
             // ... and every time we are starting with a new header reset the state!
-            if (changedGroup) {
+            boolean isGroupEnd = itemIndex == array.size() - 1
+                    || array.get(itemIndex + 1) instanceof RaceListDataTypeHeader;
+            if (isGroupEnd) {
+                if (filteredItems.size() > 0) {
+                    RaceListDataType lastItemOfPreviousGroup = filteredItems.get(filteredItems.size() - 1);
+                    if (lastItemOfPreviousGroup != nextUnscheduldedItem) {
+                        int indexOfLastItemOfPreviousGroup = array.indexOf(lastItemOfPreviousGroup);
+                        // ... if there are some items filtered between this header and the last item
+                        // of the previous group ...
+                        if (indexOfLastItemOfPreviousGroup != (array.indexOf(item) - 1)
+                                && indexOfLastItemOfPreviousGroup != array.size() - 1) {
+                            RaceListDataType followingItem = array.get(indexOfLastItemOfPreviousGroup + 1);
+                            if (followingItem instanceof RaceListDataTypeRace) {
+                                RaceListDataTypeRace raceItem = (RaceListDataTypeRace) followingItem;
+                                // ... take it if it's unscheduled!
+                                if (raceItem.getCurrentStatus().equals(RaceLogRaceStatus.UNSCHEDULED)) {
+                                    filteredItems.add(followingItem);
+                                }
+                            }
+                        }
+                    }
+                }
                 newestFinishedItem = null;
                 nextUnscheduldedItem = null;
             }
