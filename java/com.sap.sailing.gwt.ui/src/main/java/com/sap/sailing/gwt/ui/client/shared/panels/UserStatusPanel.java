@@ -33,8 +33,6 @@ public class UserStatusPanel extends FlowPanel {
         userNameText = new Label("");
         userRolesText = new Label("");
         user = null;
-
-        logoutButton = new Button("Logout");
         
         userManagementService.getUser(new AsyncCallback<UserDTO>() {
             @Override
@@ -48,29 +46,9 @@ public class UserStatusPanel extends FlowPanel {
             }
         });
         
-        logoutButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent click) {
-                userManagementService.logoutUser(
-                        new AsyncCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error during logout of the user: " + caught.getMessage());
-                    }
-
-                    @Override
-                    public void onSuccess(Void result) {
-                        errorReporter.reportError("Basic authentication does not support a server side 'Logout'. Please close the browser to logout.");
-//                        Window.Location.reload();
-                    }
-                });
-            }
-        });
-        
         addFloatingWidget(userNameLabel);
         addFloatingWidget(userNameText);
         addFloatingWidget(userRolesText);
-        //add(logoutButton);
         
         alert.setStyleName("global-alert-message");
         add(alert);
