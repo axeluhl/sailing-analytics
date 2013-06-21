@@ -30,8 +30,8 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ClassicCourseDesignDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseStartModeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RRS26FinishedRaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RRS26FinishingRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishedRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishingRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RRS26RunningRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.RRS26StartPhaseFragment;
 
@@ -394,12 +394,12 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
 
     @Override
     public Class<? extends RaceFragment> getFinishingRaceFragment() {
-        return RRS26FinishingRaceFragment.class;
+        return FinishingRaceFragment.class;
     }
 
     @Override
     public Class<? extends RaceFragment> getFinishedRaceFragment() {
-        return RRS26FinishedRaceFragment.class;
+        return FinishedRaceFragment.class;
     }
 
     @Override
