@@ -9,6 +9,7 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
@@ -23,19 +24,21 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        
         RootPanel rootPanel = RootPanel.get();
+        VerticalPanel verticalPanel = new VerticalPanel();
+        rootPanel.add(verticalPanel);
         rootPanel.setSize("100%", "100%");
+        verticalPanel.setSize("100%", "100%");
         
         UserStatusPanel userStatusPanel = new UserStatusPanel(userManagementService, this);
         userStatusPanel.ensureDebugId("UserStatus");
-        rootPanel.add(userStatusPanel);
+        verticalPanel.add(userStatusPanel);
         
         TabPanel tabPanel = new TabPanel();
         tabPanel.ensureDebugId("AdministrationTabs");
         tabPanel.setAnimationEnabled(true);
         tabPanel.setSize("99%", "95%");
-        rootPanel.add(tabPanel); //, 10, 10);
+        verticalPanel.add(tabPanel); //, 10, 10);
         
         regattaDisplayers = new HashSet<RegattaDisplayer>();
 
@@ -126,7 +129,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(sailingService, this);
         sysinfoPanel.ensureDebugId("SystemInformation");
-        rootPanel.add(sysinfoPanel);
+        verticalPanel.add(sysinfoPanel);
     }
 
     @Override
