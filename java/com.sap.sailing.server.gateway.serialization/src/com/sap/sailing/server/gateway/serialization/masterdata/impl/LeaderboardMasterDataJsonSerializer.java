@@ -1,11 +1,15 @@
 package com.sap.sailing.server.gateway.serialization.masterdata.impl;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -40,6 +44,16 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
     private final JsonSerializer<Competitor> competitorSerializer;
     private final JsonSerializer<RaceColumn> raceColumnSerializer;
     
+    /*
+     * TODO This is a hack to "remember" the course areas to allow finding the events which
+     * own the course areas. This way regatta leaderboard can be completely exported, because all events, their regattas, etc 
+     * can be exported too.
+     * Their should be a proper connection between regatta and event soon. 
+     */
+    private final Set<String> courseAreaIds = new HashSet<String>();
+    
+    private final Set<Regatta> regattas = new HashSet<Regatta>();
+    
     
 
     public LeaderboardMasterDataJsonSerializer(JsonSerializer<Competitor> competitorSerializer,
@@ -68,6 +82,9 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         } else {
             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
             jsonLeaderboard.put(FIELD_REGATTA_NAME, regattaLeaderboard.getRegatta().getName());
+            CourseArea courseArea = regattaLeaderboard.getRegatta().getDefaultCourseArea();
+            courseAreaIds.add(courseArea.getId().toString());
+            regattas.add(regattaLeaderboard.getRegatta());
             isRegattaLeaderboard = true;
         }
         
@@ -167,5 +184,15 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
 
         return scoreCorrectionsForCompetitors;
     }
+
+    public Set<String> getCourseAreaIds() {
+        return courseAreaIds;
+    }
+
+    public Iterable<Regatta> getRegattas() {
+        return regattas;
+    }
+    
+    
 
 }

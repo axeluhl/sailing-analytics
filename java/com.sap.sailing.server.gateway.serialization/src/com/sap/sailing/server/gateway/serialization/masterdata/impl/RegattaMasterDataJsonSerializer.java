@@ -1,0 +1,91 @@
+package com.sap.sailing.server.gateway.serialization.masterdata.impl;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+
+public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> {
+
+    public static final String FIELD_ID = "id";
+    public static final String FIELD_NAME = "name";
+    public static final String FIELD_BASE_NAME = "baseName";
+    public static final String FIELD_REGATTAS = "regattas";
+    public static final String FIELD_BOAT_CLASS_NAME = "boatClass";
+    public static final String FIELD_DEFAULT_COURSE_AREA_ID = "defaultCourseAreaId";
+    public static final String FIELD_SCORING_SCHEME_TYPE = "scoringSchemeType";
+    public static final String FIELD_SERIES = "series";
+    public static final String FIELD_RACE_COLUMNS = "raceColumns";
+    public static final String FIELD_IS_MEDAL = "isMedal";
+    public static final String FIELD_FLEETS = "fleets";
+    
+    private final JsonSerializer<Fleet> fleetSerializer;
+    
+    
+    
+    public RegattaMasterDataJsonSerializer(JsonSerializer<Fleet> fleetSerializer) {
+        this.fleetSerializer = fleetSerializer;
+    }
+
+
+    @Override
+    public JSONObject serialize(Regatta regatta) {
+        return createJsonForRegatta(regatta);
+    }
+
+
+    private JSONObject createJsonForRegatta(Regatta regatta) {
+        JSONObject result = new JSONObject();
+        result.put(FIELD_ID, regatta.getId().toString());
+        result.put(FIELD_BASE_NAME, regatta.getBaseName());
+        result.put(FIELD_BOAT_CLASS_NAME, regatta.getBoatClass().getName());
+        result.put(FIELD_DEFAULT_COURSE_AREA_ID, regatta.getDefaultCourseArea().getId().toString());
+        result.put(FIELD_SCORING_SCHEME_TYPE, regatta.getScoringScheme().getType().toString());
+        result.put(FIELD_SERIES, createJsonArrayForSeries(regatta.getSeries()));
+        return result;
+    }
+
+    private JSONArray createJsonArrayForSeries(Iterable<? extends Series> series) {
+        JSONArray array = new JSONArray();
+        for (Series oneSeries : series) {
+            array.add(createJsonForSeries(oneSeries));
+        }
+        return array;
+    }
+
+    private JSONObject createJsonForSeries(Series series) {
+        JSONObject result = new JSONObject();
+        result.put(FIELD_NAME, series.getName());
+        result.put(FIELD_IS_MEDAL, series.isMedal());
+        result.put(FIELD_FLEETS, createJsonArrayForFleets(series.getFleets()));
+        result.put(FIELD_RACE_COLUMNS, createJsonArrayForRaceColumns(series.getRaceColumns()));
+        return result;
+    }
+
+    private JSONArray createJsonArrayForFleets(Iterable<? extends Fleet> fleets) {
+        JSONArray array = new JSONArray();
+        for (Fleet fleet : fleets) {
+            array.add(fleetSerializer.serialize(fleet));
+        }
+        return array;
+    }
+
+    private JSONArray createJsonArrayForRaceColumns(Iterable<? extends RaceColumnInSeries> raceColumns) {
+        JSONArray array = new JSONArray();
+        for (RaceColumnInSeries raceColumn: raceColumns) {
+            array.add(createJsonForRaceColumn(raceColumn));
+        }
+        return array;
+    }
+
+    private JSONObject createJsonForRaceColumn(RaceColumnInSeries raceColumn) {
+        JSONObject result = new JSONObject();
+        result.put(FIELD_NAME, raceColumn.getName());
+        return result;
+    }
+
+}
