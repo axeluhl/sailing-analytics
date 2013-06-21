@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app;
 
+import java.util.Arrays;
+import java.util.List;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -11,6 +14,13 @@ public class AppPreferences {
     private final static String PREFERENCE_WIND_BEARING = "windBearingPref";
     private final static String PREFERENCE_WIND_SPEED = "windSpeedPref";
     private final static String PREFERENCE_MAIL_RECIPIENT = "mailRecipientPreference";
+    private final static String PREFERENCE_MANAGED_COURSE_AREAS = "courseAreasPref";
+    
+    public static List<String> getManagedCourseAreaNames(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        String value = sp.getString(PREFERENCE_MANAGED_COURSE_AREAS, "");
+        return Arrays.asList(value.split(","));
+    }
     
     public static double getWindBearing(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
