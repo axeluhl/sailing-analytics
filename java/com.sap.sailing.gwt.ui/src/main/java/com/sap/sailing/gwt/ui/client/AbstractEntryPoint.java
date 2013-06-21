@@ -37,6 +37,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
     private Button dialogCloseButton;
     protected StringMessages stringMessages;
     protected UserAgentDetails userAgent;
+    protected Label persistentAlertLabel;
     
     /**
      * Create a remote service proxy to talk to the server-side sailing service.
@@ -107,6 +108,11 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
         } else {
             reportError(message);
         }
+    }
+    
+    @Override
+    public void reportPersistentInformation(String message) {
+        persistentAlertLabel.setText(message);
     }
     
     @Override

@@ -19,7 +19,7 @@ public class UserStatusPanel extends FlowPanel {
 
     private final Label userRolesText;
     
-    public static final Label alert = new Label("");
+    public final Label persistentAlert = new Label("");
 
     public UserStatusPanel(final UserManagementServiceAsync userManagementService, final ErrorReporter errorReporter) {
         super();
@@ -45,8 +45,8 @@ public class UserStatusPanel extends FlowPanel {
         addFloatingWidget(userNameText);
         addFloatingWidget(userRolesText);
         
-        alert.setStyleName("global-alert-message");
-        add(alert);
+        persistentAlert.setStyleName("global-alert-message");
+        add(persistentAlert);
         
         updateUser(user);
     }
@@ -69,7 +69,7 @@ public class UserStatusPanel extends FlowPanel {
         }
     }
     
-    public static void setGlobalAlert(String message) {
-        alert.setText(message);
+    public void setGlobalAlert(String message) {
+        persistentAlert.setText(message);
     }
 }
