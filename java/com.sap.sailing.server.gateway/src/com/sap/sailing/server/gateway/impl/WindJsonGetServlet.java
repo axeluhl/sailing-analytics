@@ -139,8 +139,8 @@ public class WindJsonGetServlet extends AbstractJsonHttpServlet {
                     jsonWind.put("lngdeg", wind.getPosition().getLngDeg());
                 }
                 jsonWindArray.add(jsonWind);
-                jsonWindTracks.put(windSource.toString(), jsonWindArray);
             }
+            jsonWindTracks.put(windSource.toString(), jsonWindArray);
         }
         return jsonWindTracks;
     }
