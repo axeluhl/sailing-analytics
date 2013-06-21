@@ -69,8 +69,6 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
         displayedFlag = (ImageView) getView().findViewById(R.id.currentlyDisplayedFlag);
         flagToBeDisplayed = (ImageView) getView().findViewById(R.id.flagToBeDisplayed);
 
-        setupUi();
-
         getRace().getState().getStartProcedure().setRunningRaceEventListener(this);
 
         PathfinderFinder pathFinderFinder = new PathfinderFinder(this.getRace().getRaceLog());
@@ -82,6 +80,25 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
             showGateLineOpeningTimeDialog();
         }
 
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        setupUi();
+        
+        ExLog.i(GateStartRunningRaceFragment.class.getName(),
+                String.format("Fragment %s is now shown", GateStartRunningRaceFragment.class.getName()));
+    }
+
+    @Override
+    public void notifyTick() {
+        if (getRace().getState().getStartTime() == null)
+            return;
+
+        long millisSinceStart = System.currentTimeMillis() - getRace().getState().getStartTime().asMillis();
+        setStarttimeCountupLabel(millisSinceStart);
     }
 
     private void setupUi() {
@@ -149,22 +166,6 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
                         });
         AlertDialog alert = builder.create();
         alert.show();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        ExLog.i(GateStartRunningRaceFragment.class.getName(),
-                String.format("Fragment %s is now shown", GateStartRunningRaceFragment.class.getName()));
-    }
-
-    public void notifyTick() {
-        if (getRace().getState().getStartTime() == null)
-            return;
-
-        long millisSinceStart = System.currentTimeMillis() - getRace().getState().getStartTime().asMillis();
-        setStarttimeCountupLabel(millisSinceStart);
-        // TODO: implement count down label text when individual recall is displayed
     }
 
     private void setStarttimeCountupLabel(long millisecondsSinceStart) {

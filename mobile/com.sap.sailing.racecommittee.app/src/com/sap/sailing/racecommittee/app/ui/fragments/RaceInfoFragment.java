@@ -89,6 +89,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     public void onStart() {
         super.onStart();
         getRace().getState().registerStateChangeListener(this);
+        switchToInfoFragment();
     }
 
     @Override

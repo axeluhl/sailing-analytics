@@ -86,7 +86,24 @@ public class RRS26RunningRaceFragment extends RaceFragment implements RRS26Runni
                 }
             }
         });
+    }
+    
+    @Override
+    public void onStart() {
+        super.onStart();
         setupUi();
+        getRace().getState().getStartProcedure().setRunningRaceEventListener(this);
+        ExLog.i(RRS26RunningRaceFragment.class.getName(), String.format("Fragment %s is now shown", RRS26RunningRaceFragment.class.getName()));
+    }
+    
+    @Override
+    public void notifyTick() {
+        if (getRace().getState().getStartTime() == null)
+            return;
+
+        long millisSinceStart = System.currentTimeMillis() - getRace().getState().getStartTime().asMillis();
+        setStarttimeCountupLabel(millisSinceStart);
+        //TODO: implement count down label text when individual recall is displayed
     }
 
     private void setupUi() {
@@ -145,22 +162,6 @@ public class RRS26RunningRaceFragment extends RaceFragment implements RRS26Runni
         });
         AlertDialog alert = builder.create();
         alert.show();
-    }
-    
-    @Override
-    public void onStart() {
-        super.onStart();
-        getRace().getState().getStartProcedure().setRunningRaceEventListener(this);
-        ExLog.i(RRS26RunningRaceFragment.class.getName(), String.format("Fragment %s is now shown", RRS26RunningRaceFragment.class.getName()));
-    }
-    
-    public void notifyTick() {
-        if (getRace().getState().getStartTime() == null)
-            return;
-
-        long millisSinceStart = System.currentTimeMillis() - getRace().getState().getStartTime().asMillis();
-        setStarttimeCountupLabel(millisSinceStart);
-        //TODO: implement count down label text when individual recall is displayed
     }
 
 
