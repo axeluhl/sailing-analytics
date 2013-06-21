@@ -381,7 +381,7 @@ public class DomainFactoryImpl implements DomainFactory {
         TrackedRaceDTO trackedRaceDTO = new TrackedRaceDTO();
         trackedRaceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
         trackedRaceDTO.endOfTracking = trackedRace.getEndOfTracking() == null ? null : trackedRace.getEndOfTracking().asDate();
-        trackedRaceDTO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent().asDate();
+        trackedRaceDTO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
         trackedRaceDTO.hasWindData = trackedRace.hasWindData();
         trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
         trackedRaceDTO.delayToLiveInMs = trackedRace.getDelayToLiveInMillis();
