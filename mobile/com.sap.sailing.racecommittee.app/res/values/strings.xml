@@ -195,5 +195,24 @@
     <string name="racing_course_area_missing">Course area could not be loaded. Please go back to the login page.</string>
     <string name="racing_load_success">Successfully loaded %d races.</string>
     <string name="generic_load_failure">There was an error loading the requested data: %s\nDo you want to retry?</string>
+    <string name="set_course_layout">Set the course layout</string>
+    
+    <string-array name="course_routes">
+        <item>I</item>
+        <item>O</item>
+        <item>IS</item>
+        <item>OS</item>
+        <item>L</item>
+        <item>LS</item>
+        <item>AS</item>
+        <item>LA</item>
+        <item>M</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+    </string-array>
 
 </resources>
