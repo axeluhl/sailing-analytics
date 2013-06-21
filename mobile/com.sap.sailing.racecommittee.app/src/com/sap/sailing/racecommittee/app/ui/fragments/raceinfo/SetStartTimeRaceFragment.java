@@ -254,10 +254,8 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
 
                 fragment.show(fragmentManager, "userActionRequiredDialog");
             } catch (java.lang.InstantiationException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             } catch (IllegalAccessException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
 

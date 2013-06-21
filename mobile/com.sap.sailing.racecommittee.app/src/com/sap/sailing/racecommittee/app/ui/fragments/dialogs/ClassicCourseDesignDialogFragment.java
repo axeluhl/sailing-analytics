@@ -124,7 +124,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         publishButton.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                CourseBase courseBase = new CourseDataImpl(selectedCourseLayout.getShortName()+selectedNumberOfRounds.getNumberOfRounds());
+                CourseBase courseBase = new CourseDataImpl(selectedCourseLayout.getShortName() + " " + selectedNumberOfRounds.getNumberOfRounds());
                 sendCourseDataAndDismiss(courseBase);
             }
 
