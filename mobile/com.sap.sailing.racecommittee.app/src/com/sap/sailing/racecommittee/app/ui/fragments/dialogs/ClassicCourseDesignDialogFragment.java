@@ -102,7 +102,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         return view;
 
     }
-    
+
     protected void sendCourseDataAndDismiss(CourseBase courseDesign) {
         getRace().getState().setCourseDesign(courseDesign);
         saveChangedCourseDesignInCache(courseDesign);
@@ -124,12 +124,13 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         publishButton.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                CourseBase courseBase = new CourseDataImpl(selectedCourseLayout.getShortName() + " " + selectedNumberOfRounds.getNumberOfRounds());
+                CourseBase courseBase = new CourseDataImpl(selectedCourseLayout.getShortName() + " "
+                        + selectedNumberOfRounds.getNumberOfRounds());
                 sendCourseDataAndDismiss(courseBase);
             }
 
         });
-        
+
         unpublishButton = (Button) getView().findViewById(R.id.unpublishCourseDesignButton);
         unpublishButton.setOnClickListener(new OnClickListener() {
 
@@ -212,7 +213,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     private void clearMap() {
-        courseAreaMap.clear();        
+        courseAreaMap.clear();
     }
 
     private void setupBoatClassSpinner() {
@@ -232,8 +233,9 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
                         .keySet().toArray().clone()[0];
                 spinnerCourseLayout.setSelection(courseLayoutAdapter.getPosition(selectedCourseLayout));
                 courseDesignComputer.setCourseLayout(selectedCourseLayout);
-                //update target time
-                selectedTargetTime = (TargetTime) selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().get(selectedCourseLayout);
+                // update target time
+                selectedTargetTime = (TargetTime) selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().get(
+                        selectedCourseLayout);
                 spinnerTargetTime.setSelection(targetTimeAdapter.getPosition(selectedTargetTime));
                 courseDesignComputer.setTargetTime(selectedTargetTime);
                 if (selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet().contains(selectedCourseLayout)) {
@@ -259,8 +261,9 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 selectedCourseLayout = (CourseLayouts) adapterView.getItemAtPosition(position);
                 courseDesignComputer.setCourseLayout(selectedCourseLayout);
-                //update target time
-                selectedTargetTime = (TargetTime) selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().get(selectedCourseLayout);
+                // update target time
+                selectedTargetTime = (TargetTime) selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().get(
+                        selectedCourseLayout);
                 spinnerTargetTime.setSelection(targetTimeAdapter.getPosition(selectedTargetTime));
                 courseDesignComputer.setTargetTime(selectedTargetTime);
 
@@ -335,7 +338,13 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private void setUpMapIfNeeded(View inflatedView) {
         if (courseAreaMap == null) {
             courseAreaMap = ((MapView) inflatedView.findViewById(R.id.mapView)).getMap();
-            courseAreaMap.getUiSettings().setRotateGesturesEnabled(false);
+            // something really bad happened
+            if (courseAreaMap == null) {
+                CourseBase emptyCourse = new CourseDataImpl("Unknown");
+                sendCourseDataAndDismiss(emptyCourse);
+            } else {
+                courseAreaMap.getUiSettings().setRotateGesturesEnabled(false);
+            }
         }
     }
 
@@ -352,11 +361,10 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
                 bmpOriginal.getHeight() / 2);
         tempCanvas.drawBitmap(bmpOriginal, 0, 0, null);
 
-        courseAreaMap.addMarker(new MarkerOptions()
-                .position(position2LatLng(courseDesign.getStartBoatPosition()))
-                .icon(BitmapDescriptorFactory.fromBitmap(bmResult))
-                .draggable(false)
-                .title(courseDesign.getCourseDesignDescription())).showInfoWindow();
+        courseAreaMap.addMarker(
+                new MarkerOptions().position(position2LatLng(courseDesign.getStartBoatPosition()))
+                        .icon(BitmapDescriptorFactory.fromBitmap(bmResult)).draggable(false)
+                        .title(courseDesign.getCourseDesignDescription())).showInfoWindow();
         LatLng pinEndPosition = new LatLng(courseDesign.getPinEnd().getPosition().getLatDeg(), courseDesign.getPinEnd()
                 .getPosition().getLngDeg());
         courseAreaMap.addMarker(new MarkerOptions().position(pinEndPosition)
@@ -365,11 +373,8 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
 
         for (PositionedMark mark : courseDesign.getCourseDesignSpecificMarks()) {
             LatLng markPosition = new LatLng(mark.getPosition().getLatDeg(), mark.getPosition().getLngDeg());
-            courseAreaMap.addMarker(new MarkerOptions()
-                    .position(markPosition)
-                    .icon(getImageForMark(mark))
-                    .draggable(false)
-                    .title(makeMarkDescription(mark, courseDesign.getReferencePoint())));
+            courseAreaMap.addMarker(new MarkerOptions().position(markPosition).icon(getImageForMark(mark))
+                    .draggable(false).title(makeMarkDescription(mark, courseDesign.getReferencePoint())));
         }
 
     }
