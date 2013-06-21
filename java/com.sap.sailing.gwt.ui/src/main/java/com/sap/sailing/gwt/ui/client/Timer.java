@@ -94,6 +94,8 @@ public class Timer {
      */
     private long millisecondsClientIsBehindServer;
     
+    private boolean clientServerOffsetHasAtLeastBeenSetOnce;
+    
     /**
      * The timer can run in two different modes: Live and Replay
      * 'Live' means the timer is used for a real time event
@@ -169,9 +171,14 @@ public class Timer {
             // when the server set the RaceTimesInfoDTO.currentServerTime field and the current time.
             long responseNetworkLatencyInMillis = (clientTimeWhenResponseWasReceived-clientTimeWhenRequestWasSent)/2l;
             long offset = serverTimeDuringRequest.getTime() + responseNetworkLatencyInMillis - clientTimeWhenResponseWasReceived;
-            final double exponentialMovingAverageFactor = 0.5;
-            // TODO bug 1351 the first call shall fix millisecondsClientIsBehindServer to the single measured value
-            millisecondsClientIsBehindServer = (long) (millisecondsClientIsBehindServer * exponentialMovingAverageFactor + (1.-exponentialMovingAverageFactor) * offset);
+            if (clientServerOffsetHasAtLeastBeenSetOnce) {
+                final double exponentialMovingAverageFactor = 0.5;
+                millisecondsClientIsBehindServer = (long) (millisecondsClientIsBehindServer
+                        * exponentialMovingAverageFactor + (1. - exponentialMovingAverageFactor) * offset);
+            } else {
+                millisecondsClientIsBehindServer = offset;
+                clientServerOffsetHasAtLeastBeenSetOnce = true;
+            }
         }
     }
     
