@@ -259,7 +259,17 @@ public enum BoatClassType {
                 }
             });
         }
-    }, new MeterDistance(4.9), new MeterDistance(140));
+    }, new MeterDistance(4.9), new MeterDistance(140)),
+    boatClassOther("Other", new HashMap<CourseLayouts, TargetTime>() {
+        {
+            put(WindWardLeeWardCourseLayouts.windWardLeewardLeeward, TargetTime.thirty);
+            put(WindWardLeeWardCourseLayouts.windWardLeewardWindward, TargetTime.thirty);
+            put(TrapezoidCourseLayouts.innerLoopTrapezoid70, TargetTime.sixty);
+            put(TrapezoidCourseLayouts.outerLoopTrapezoid70, TargetTime.sixty);
+            put(TrapezoidCourseLayouts.innerLoopTrapezoid60, TargetTime.sixty);
+            put(TrapezoidCourseLayouts.outerLoopTrapezoid60, TargetTime.sixty);
+        }
+    }, new TreeMap<WindRange, Map<PointOfSail, Float>>(), new MeterDistance(0.0), new MeterDistance(0));
 
     private String displayName;
     private Map<CourseLayouts, TargetTime> possipleCourseLayoutsWithStandardTargetTime;
