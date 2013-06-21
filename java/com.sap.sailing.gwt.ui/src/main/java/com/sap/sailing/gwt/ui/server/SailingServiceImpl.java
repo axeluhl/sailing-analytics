@@ -1,8 +1,5 @@
 package com.sap.sailing.gwt.ui.server;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -274,10 +271,11 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCo
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
-import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationFactory;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
+import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
+import com.sap.sailing.util.BuildVersion;
 
 /**
  * The server side implementation of the RPC service.
@@ -2431,7 +2429,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             for (Map.Entry<Class<? extends RacingEventServiceOperation<?>>, Integer> e : statistics.entrySet()) {
                 replicationCountByOperationClassName.put(e.getKey().getName(), e.getValue());
             }
-            replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostName(), replicaDescriptor.getRegistrationTime().asDate(),
+            replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostName(), replicaDescriptor.getRegistrationTime().asDate(), replicaDescriptor.getUuid().toString(),
                     replicationCountByOperationClassName));
         }
         ReplicationMasterDTO master;
@@ -2442,13 +2440,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             master = new ReplicationMasterDTO(replicatingFromMaster.getHostname(), replicatingFromMaster.getMessagingPort(),
                     replicatingFromMaster.getServletPort());
         }
-        return new ReplicationStateDTO(master, replicaDTOs);
+        return new ReplicationStateDTO(master, replicaDTOs, service.getServerIdentifier().toString());
     }
 
     @Override
     public void startReplicatingFromMaster(String masterName, String exchangeName, int servletPort, int messagingPort) throws IOException, ClassNotFoundException, InterruptedException {
+        // the queue name must be always the same for this server. in order to achieve
+        // this we're using the unique server identifier
         getReplicationService().startToReplicateFrom(
-                ReplicationFactory.INSTANCE.createReplicationMasterDescriptor(masterName, exchangeName, servletPort, messagingPort));
+                ReplicationFactory.INSTANCE.createReplicationMasterDescriptor(masterName, exchangeName, servletPort, messagingPort, 
+                        getReplicationService().getServerIdentifier().toString()));
     }
 
     @Override
@@ -3075,16 +3076,40 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return entry;
     }
     
+    @Override
     public String getBuildVersion() {
-        String version = "Unknown or Development";
-        File versionfile = new File(System.getProperty("jetty.home") + File.separator + "version.txt");
-        if (versionfile.exists()) {
-            try {
-                version = new BufferedReader(new FileReader(versionfile)).readLine();
-            } catch (Exception ex) {
-                logger.severe("Could not load file " + versionfile.getAbsolutePath());
-            }
+        return BuildVersion.getBuildVersion();
+    }
+
+    @Override
+    public void stopReplicatingFromMaster() {
+        try {
+            getReplicationService().stopToReplicateFromMaster();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return version;
+    }
+
+    @Override
+    public void stopAllReplicas() {
+        try {
+            getReplicationService().stopAllReplica();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void stopSingleReplicaInstance(String identifier) {
+        UUID uuid = UUID.fromString(identifier);
+        ReplicaDescriptor replicaDescriptor = new ReplicaDescriptor(null, uuid, "");
+        try {
+            getReplicationService().unregisterReplica(replicaDescriptor);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 }

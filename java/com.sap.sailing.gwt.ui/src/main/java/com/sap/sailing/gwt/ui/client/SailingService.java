@@ -309,4 +309,10 @@ public interface SailingService extends RemoteService {
             List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay);
     
     String getBuildVersion();
+
+    void stopReplicatingFromMaster();
+
+    void stopAllReplicas();
+
+    void stopSingleReplicaInstance(String identifier);
 }

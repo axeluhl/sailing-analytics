@@ -293,7 +293,7 @@
 
 		<repository>
 			<id>sailing-server-maven</id>
-			<url>http://sapcoe-app01.pironet-ndh.com/maven</url>
+			<url>http://maven.sapsailing.com/maven</url>
 		</repository>
 	</repositories>
 </project>

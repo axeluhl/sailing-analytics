@@ -17,6 +17,17 @@ h1 {
   text-align: center;
 }
 
+fieldset {
+	padding: 6px 6px;
+	margin: 8px 3px 10px 2px;
+	border: 1px solid black;
+}
+
+fieldset legend {
+	padding: 0px 4px;
+	font-weight: bold;
+}
+
 .chartLegend {
 	float: left;
 	margin-right: 4px;
@@ -48,6 +59,14 @@ h1 {
 
 .gwt-TabPanelBottom {
 	height: 100%;
+}
+
+.global-alert-message {
+	font-weight: bold;
+	color: red;
+	font-size: 120%;
+	text-align: right;
+	padding: 0px 50px 0px 0px;
 }
 
 .errorLabel {
@@ -126,6 +145,10 @@ h1 {
 
 .gwt-DialogBox .dialogBottomRight {
 	background: none repeat scroll 0 0 #e5e5e5;
+}
+
+.gwt-Button {
+	margin: 3px 2px 3px 5px;
 }
 
 .gwt-Button:hover {
