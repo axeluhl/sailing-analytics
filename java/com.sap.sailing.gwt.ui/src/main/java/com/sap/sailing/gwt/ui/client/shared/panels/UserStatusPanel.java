@@ -19,16 +19,12 @@ public class UserStatusPanel extends FlowPanel {
 
     private final Label userRolesText;
     
-    public final Label persistentAlert = new Label("");
-
     public UserStatusPanel(final UserManagementServiceAsync userManagementService, final ErrorReporter errorReporter) {
         super();
-        
         userNameLabel = new Label("User:");
         userNameText = new Label("");
         userRolesText = new Label("");
         user = null;
-        
         userManagementService.getUser(new AsyncCallback<UserDTO>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -40,14 +36,9 @@ public class UserStatusPanel extends FlowPanel {
                 updateUser(result);
             }
         });
-        
         addFloatingWidget(userNameLabel);
         addFloatingWidget(userNameText);
         addFloatingWidget(userRolesText);
-        
-        persistentAlert.setStyleName("global-alert-message");
-        add(persistentAlert);
-        
         updateUser(user);
     }
 
@@ -67,9 +58,5 @@ public class UserStatusPanel extends FlowPanel {
             userNameText.setText("Unknown");
             userRolesText.setText("Unknown");
         }
-    }
-    
-    public void setGlobalAlert(String message) {
-        persistentAlert.setText(message);
     }
 }
