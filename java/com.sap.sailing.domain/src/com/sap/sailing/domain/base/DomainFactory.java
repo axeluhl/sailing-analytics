@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -100,5 +101,9 @@ public interface DomainFactory extends SharedDomainFactory {
     PlacemarkDTO convertToPlacemarkDTO(Placemark placemark);
 
     List<CompetitorDTO> getCompetitorDTOList(List<Competitor> competitors);
+
+    TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace);
+
+    void updateRaceDTOWithTrackedRaceData(TrackedRace trackedRace, RaceDTO raceDTO);
 
 }
