@@ -1,10 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.panels;
 
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -21,8 +18,6 @@ public class UserStatusPanel extends FlowPanel {
     private final Label userNameText;
 
     private final Label userRolesText;
-
-    private final Button logoutButton;
     
     public static final Label alert = new Label("");
 
@@ -68,11 +63,9 @@ public class UserStatusPanel extends FlowPanel {
         if(user != null) {
             userNameText.setText(user.principalName);
             userRolesText.setText(user.roles.toString());
-            logoutButton.setEnabled(false);
         } else {
             userNameText.setText("Unknown");
             userRolesText.setText("Unknown");
-            logoutButton.setEnabled(false);
         }
     }
     
