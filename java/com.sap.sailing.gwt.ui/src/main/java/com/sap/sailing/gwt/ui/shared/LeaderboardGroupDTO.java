@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.client.Timer;
 
 public class LeaderboardGroupDTO extends NamedDTO {
     private static final long serialVersionUID = -2923229069598593687L;
@@ -22,9 +23,18 @@ public class LeaderboardGroupDTO extends NamedDTO {
     
     private int[] overallLeaderboardDiscardThresholds;
     private ScoringSchemeType overallLeaderboardScoringSchemeType;
+
+    /**
+     * The current time on the server when this object was created. Clients can use this to synchronize a clock
+     * difference, e.g., in the {@link Timer} class.
+     */
+    private Date currentServerTime;
     
     /**
-     * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for the leaderboards.<br />
+     * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for
+     * the leaderboards. The {@link #currentServerTime} will be set to the creation time on the system that creates this
+     * object.
+     * <p>
      * The additional data (start dates and places for the races) will be initialized but empty.
      */
     public LeaderboardGroupDTO() {
@@ -36,8 +46,9 @@ public class LeaderboardGroupDTO extends NamedDTO {
      * All parameters can be <code>null</code> but then the attributes will also be <code>null</code>.<br />
      * The additional data (start dates and places for the races) will be initialized but empty.
      */
-    public LeaderboardGroupDTO(String name, String description, List<StrippedLeaderboardDTO> leaderboards) {
+    private LeaderboardGroupDTO(String name, String description, List<StrippedLeaderboardDTO> leaderboards) {
         super(name);
+        currentServerTime = new Date();
         this.description = description;
         this.leaderboards = leaderboards;
     }
@@ -134,9 +145,9 @@ public class LeaderboardGroupDTO extends NamedDTO {
     /**
      * @return <code>true</code> if the group contains a race which is live.
      */
-    public boolean hasLiveRace() {
+    public boolean hasLiveRace(long serverTimePointAsMillis) {
         for (StrippedLeaderboardDTO leaderboard : leaderboards) {
-            if (leaderboard.hasLiveRace()) {
+            if (leaderboard.hasLiveRace(serverTimePointAsMillis)) {
                 return true;
             }
         }
@@ -176,6 +187,26 @@ public class LeaderboardGroupDTO extends NamedDTO {
 
     public List<StrippedLeaderboardDTO> getLeaderboards() {
         return leaderboards;
+    }
+
+    public Long getAverageDelayToLiveInMillis() {
+        Long result = null;
+        long delaySum = 0;
+        long count = 0;
+        for (StrippedLeaderboardDTO leaderboard : leaderboards) {
+            if (leaderboard.getDelayToLiveInMillisForLatestRace() != null) {
+                delaySum += leaderboard.getDelayToLiveInMillisForLatestRace();
+                count++;
+            }
+        }
+        if (count > 0) {
+            result = delaySum / count;
+        }
+        return result;
+    }
+
+    public Date getCurrentServerTime() {
+        return currentServerTime;
     }
     
 }

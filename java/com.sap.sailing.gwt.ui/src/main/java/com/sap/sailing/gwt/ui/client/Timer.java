@@ -104,9 +104,11 @@ public class Timer {
     public enum PlayStates { Stopped, Playing, Paused }; 
 
     /**
-     * The timer is created in stopped state, using "now" as its current time, 1.0 as its {@link #playSpeedFactor play speed factor} and
-     * 1 second (1000ms) as the {@link #refreshInterval delay between automatic updates} should the timer be
-     * {@link #resume() started}.
+     * The timer is created in stopped state unless created with <code>playMode==PlayModes.Live</code>, using the
+     * client's "now" as its current time, 1.0 as its {@link #playSpeedFactor play speed factor} and 1 second (1000ms)
+     * as the {@link #refreshInterval delay between automatic updates} should the timer be {@link #resume() started}.
+     * The {@link #millisecondsClientIsBehindServer offset} to the server time is initially left at 0ms until
+     * updated by a call to {@link #adjustClientServerOffset(long, Date, long)}. 
      */
     public Timer(PlayModes playMode) {
         this(playMode, 1000);

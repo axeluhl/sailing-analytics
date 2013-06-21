@@ -1015,7 +1015,6 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
                     this.getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint));
             for (Fleet fleet : raceColumn.getFleets()) {
-                TimePoint latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = null;
                 RegattaAndRaceIdentifier raceIdentifier = null;
                 RaceDTO race = null;
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
@@ -1025,25 +1024,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(),
                             trackedRace.getRace().getName());
                     race = baseDomainFactory.createRaceDTO(trackedRegattaRegistry, /* withGeoLocationData */ false, raceIdentifier, trackedRace);
-                    if (trackedRace.hasStarted(timePoint) && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
-                        TimePoint liveTimePointForTrackedRace = timePoint;
-                        final TimePoint endOfRace = trackedRace.getEndOfRace();
-                        if (endOfRace != null) {
-                            liveTimePointForTrackedRace = endOfRace;
-                        }
-                        latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = liveTimePointForTrackedRace;
-                    }
                 }
 
                 // Note: the RaceColumnDTO won't be created by the following addRace call because it has been created
                 // above by the result.createEmptyRaceColumn call
                 result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(), fleetDTO,
                         raceColumn.isMedalRace(), raceIdentifier, race);
-                if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive != null) {
-                    // TODO Bug 1351: unify this with the similar calculation performed in StrippedLeaderboardDTO.createStrippedLeaderboardDTO
-                    raceColumnDTO.setWhenLastTrackedRaceWasLive(fleetDTO,
-                            latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive.asDate());
-                }
             }
             result.setCompetitorsFromBestToWorst(raceColumnDTO,
                     baseDomainFactory.getCompetitorDTOList(this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
