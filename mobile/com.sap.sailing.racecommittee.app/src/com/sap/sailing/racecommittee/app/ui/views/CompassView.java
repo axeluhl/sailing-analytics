@@ -20,8 +20,9 @@ public class CompassView extends RelativeLayout {
 
     private CompassDirectionListener changeListener = null;
     private RotateAnimation rotation = null;
-    private ImageView needleView;
+    private ImageView needleView = null;
     private float currentDegrees = 0.0f;
+    private Float deferredToDegress = null;
 
     private float getNeedlePivotX() { return needleView.getWidth() / 2; }
     private float getNeedlePivotY() { return needleView.getHeight() / 2; }
@@ -63,9 +64,19 @@ public class CompassView extends RelativeLayout {
         
         return true;
     }
+    
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        doDeferredRotation();
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
 
     public void setDirection(float toDegrees) {
-        cancelAndStartAnimation(toDegrees, 500);
+        if (isNeedleReady()) {
+            deferredToDegress = toDegrees;
+        } else {
+            cancelAndStartAnimation(toDegrees, 500);
+        }
     }
 
     private void cancelAndStartAnimation(float toDegrees, long duration) {
@@ -93,6 +104,18 @@ public class CompassView extends RelativeLayout {
             }
             changeListener.onDirectionChanged(degree);
         }
+    }
+    
+    private void doDeferredRotation() {
+        if (deferredToDegress != null) {
+            float toDegrees = deferredToDegress;
+            deferredToDegress = null;
+            setDirection(toDegrees);
+        }
+    }
+    
+    private boolean isNeedleReady() {
+        return getNeedlePivotX() == 0.0;
     }
 
     private class NeedleRotationListener implements AnimationListener {

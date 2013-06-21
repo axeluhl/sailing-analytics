@@ -13,16 +13,14 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
 
     @Override
     protected RaceLogRaceStatus performAnalyzation() {
-        RaceLogRaceStatus newStatus = RaceLogRaceStatus.UNSCHEDULED;
-        
-        for (RaceLogEvent event : getPassEvents()) {
+        for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogRaceStatusEvent) {
                 RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
-                newStatus = statusEvent.getNextStatus();
+                return statusEvent.getNextStatus();
             }
         }
         
-        return newStatus;
+        return RaceLogRaceStatus.UNSCHEDULED;
     }
 
 }

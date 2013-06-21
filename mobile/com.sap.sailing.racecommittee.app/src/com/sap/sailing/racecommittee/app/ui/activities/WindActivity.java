@@ -50,6 +50,7 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
     EditText longitudeEditText;
     SeekBar windSpeedSeekBar;
     Button sendButton;
+    
     LocationManager locationManager;
     Location currentLocation;
     DecimalFormat speedFormat;
@@ -139,10 +140,12 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
         speedFormat = new DecimalFormat("#0.0", new DecimalFormatSymbols(Locale.US));
         bearingFormat = new DecimalFormat("###", new DecimalFormatSymbols(Locale.US));
 
-        double enteredWindSpeed = AppPreferences.getWindSpeed(getBaseContext());
+        double enteredWindSpeed = AppPreferences.getWindSpeed(this);
         windSpeedSeekBar.setProgress(Double.valueOf(enteredWindSpeed).intValue() * 10);
         windSpeedEditText.setText(speedFormat.format(enteredWindSpeed));
-        windBearingEditText.setText(bearingFormat.format(AppPreferences.getWindBearing(getBaseContext())));
+        double enteredWindBearing = AppPreferences.getWindBearing(this);
+        compassView.setDirection((float)enteredWindBearing);
+        windBearingEditText.setText(bearingFormat.format(enteredWindBearing));
     }
 
     private void buildAlertMessageNoGps() {

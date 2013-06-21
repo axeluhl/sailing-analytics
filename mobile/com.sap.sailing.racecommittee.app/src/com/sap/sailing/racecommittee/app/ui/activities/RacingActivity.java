@@ -32,7 +32,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragm
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 
 public class RacingActivity extends BaseActivity implements RaceInfoListener {
-    //private final static String TAG = RacingActivity.class.getName();
+    // private final static String TAG = RacingActivity.class.getName();
     private final static String ListFragmentTag = RacingActivity.class.getName() + ".ManagedRaceListFragment";
 
     private class FilterModeSelectionBinder implements OnNavigationListener {
@@ -103,14 +103,13 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
         }
         CourseArea courseArea = dataManager.getDataStore().getCourseArea(courseAreaId);
         if (courseArea == null) {
-            throw new IllegalStateException("Course Area was not found.");
+            Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
+        } else {
+            setupActionBar(courseArea);
+            // unload and unregister from all races here!
+            unloadAllRaces();
+            loadRaces(courseArea);
         }
-
-        setupActionBar(courseArea);
-        // unload and unregister from all races here!
-        unloadAllRaces();
-        loadRaces(courseArea);
-        // StaticVibrator.prepareVibrator(this);
     }
 
     private ManagedRaceListFragment getOrCreateRaceListFragment() {
@@ -133,17 +132,13 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
 
     private Serializable getCourseAreaIdFromIntent() {
         if (getIntent() == null || getIntent().getExtras() == null) {
-            String msg = "Expected an intent carrying event extras.";
-            Log.e(getClass().getName(), msg);
-            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+            Log.e(getClass().getName(), "Expected an intent carrying event extras.");
             return null;
         }
 
         final Serializable courseId = getIntent().getExtras().getSerializable(AppConstants.COURSE_AREA_UUID_KEY);
         if (courseId == null) {
-            String msg = "Expected an intent carrying the course area id.";
-            Log.e(getClass().getName(), msg);
-            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+            Log.e(getClass().getName(), "Expected an intent carrying the course area id.");
             return null;
         }
         return courseId;
@@ -187,8 +182,8 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
         registerOnService(data);
         raceListFragment.setupOn(data);
 
-        Toast.makeText(RacingActivity.this, "Loaded " + data.size() + " races for course " + courseArea.getId(),
-                Toast.LENGTH_LONG).show();
+        Toast.makeText(RacingActivity.this, String.format(getString(R.string.racing_load_success), data.size()),
+                Toast.LENGTH_SHORT).show();
     }
 
     private void onLoadRacesFailed(final CourseArea courseArea, Exception reason) {
@@ -210,8 +205,8 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
     private void showLoadFailedDialog(final CourseArea courseArea, String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(
-                String.format("There was an error loading the requested data: %s\nDo you want to retry?", message))
-                .setTitle("Load failure").setIcon(R.drawable.ic_dialog_alert_holo_light).setCancelable(true)
+                String.format(getString(R.string.generic_load_failure), message))
+                .setTitle("Connection failure").setIcon(R.drawable.ic_dialog_alert_holo_light).setCancelable(true)
                 .setPositiveButton("Retry", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         loadRaces(courseArea);
