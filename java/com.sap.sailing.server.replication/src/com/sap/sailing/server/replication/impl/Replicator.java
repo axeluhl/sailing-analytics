@@ -1,6 +1,7 @@
 package com.sap.sailing.server.replication.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,15 +33,26 @@ import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 public class Replicator implements Runnable {
     private final static Logger logger = Logger.getLogger(Replicator.class.getName());
     
+    private static final long CHECK_INTERVAL_MILLIS = 2000; // how long (milliseconds) to pause before checking connection again
+    private static final int CHECK_COUNT = 150; // how long to check, value is CHECK_INTERVAL second steps
+    
     private final ReplicationMasterDescriptor master;
     private final HasRacingEventService racingEventServiceTracker;
     private final List<RacingEventServiceOperation<?>> queue;
-    private final QueueingConsumer consumer;
+    
+    private QueueingConsumer consumer;
+    
+    /**
+     * How many checks have been performed due to a failing connection?
+     */
+    private int checksPerformed = 0;
     
     /**
      * If the replicator is suspended, messages received are queued.
      */
     private boolean suspended;
+    
+    private boolean stopped = false;
     
     /**
      * Starts the replicator immediately, not holding back messages received but forwarding them directly.
@@ -71,10 +83,15 @@ public class Replicator implements Runnable {
     @Override
     public void run() {
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+        
         while (true) {
+            if (isBeingStopped()) {
+                break;
+            }
             try {
                 Delivery delivery = consumer.nextDelivery();
                 byte[] bytesFromMessage = delivery.getBody();
+                checksPerformed = 0;
                 // Set this object's class's class loader as context for de-serialization so that all exported classes
                 // of all required bundles/packages can be deserialized at least
                 Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
@@ -82,9 +99,49 @@ public class Replicator implements Runnable {
                         new ByteArrayInputStream(bytesFromMessage));
                 RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) ois.readObject();
                 applyOrQueue(operation);
+            } catch (InterruptedException irr) {
+                logger.info("Application requested shutdown.");
             } catch (ShutdownSignalException sse) {
-                logger.info("Received "+sse.getMessage()+". Terminating "+this);
-                break;
+                /* make sure to respond to a stop event without waiting */
+                if (isBeingStopped()) {
+                    break;
+                }
+                
+                if (sse.isInitiatedByApplication()) {
+                    logger.severe("Application shut down messaging queue for " + this.toString());
+                    break;
+                }
+                
+                logger.info(sse.getMessage());
+                if (checksPerformed <= CHECK_COUNT) {
+                    try {
+                        Thread.sleep(CHECK_INTERVAL_MILLIS);
+                        
+                        /* isOpen() will return false if the channel has been closed. This
+                         * does not hold when the connection is dropped.
+                         */
+                        if (!this.consumer.getChannel().isOpen()) {
+                            /* for a reconnection we need to instantiate a new consumer */
+                            try {
+                                logger.info("Channel seems to be closed. Trying to reconnect consumer queue...");
+                                this.consumer = master.getConsumer();
+                                logger.info("OK - channel reconnected!");
+                                Thread.sleep(CHECK_INTERVAL_MILLIS);
+                                checksPerformed += 1;
+                            } catch (IOException eio) {
+                                // do not print exceptions known to occur
+                            }
+                        }
+                    } catch (InterruptedException eir) {
+                        eir.printStackTrace();
+                    }
+                    checksPerformed += 1;
+                    continue;
+                } else {
+                    logger.severe("Grace time (" + CHECK_COUNT*(CHECK_INTERVAL_MILLIS/1000) + "secs) is over. Terminating replication listener " + this.toString());
+                    // XXX: Also make sure that all handlers get notifications about this
+                    break;
+                }
             } catch (Exception e) {
                 logger.info("Exception while processing replica: "+e.getMessage());
                 logger.log(Level.SEVERE, "run", e);
@@ -92,6 +149,8 @@ public class Replicator implements Runnable {
                 Thread.currentThread().setContextClassLoader(oldClassLoader);
             }
         }
+        
+        logger.info("Stopped replicator thread. This server will no longer receive events from a master.");
     }
     
     public synchronized boolean isQueueEmpty() {
@@ -143,6 +202,20 @@ public class Replicator implements Runnable {
 
     public synchronized boolean isSuspended() {
         return suspended;
+    }
+    
+    public synchronized void stop() {
+        if (isSuspended()) {
+            /* make sure to apply everything in queue before stopping this thread */
+            applyQueue();
+        }
+        logger.info("Signaled Replicator thread to stop asap.");
+        stopped = true;
+        master.stopConnection();
+    }
+    
+    public synchronized boolean isBeingStopped() {
+        return stopped;
     }
 
     @Override

@@ -109,7 +109,7 @@ public class Util {
             return !ts.iterator().hasNext();
         }
     }
-
+    
     public static class Pair<A, B> implements Serializable {
         private static final long serialVersionUID = -7631774746419135931L;
 
@@ -245,5 +245,5 @@ public class Util {
         }
         return result;
     }
-
+    
 }

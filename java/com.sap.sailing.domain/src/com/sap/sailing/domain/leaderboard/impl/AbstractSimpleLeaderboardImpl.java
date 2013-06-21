@@ -1563,5 +1563,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
         return result;
     }
+    
+    public String toString() {
+        return getName() + " " + (getDefaultCourseArea() != null ? getDefaultCourseArea().getName() : "<No course area defined>") + " " + (getScoringScheme() != null ? getScoringScheme().getType().name() : "<No scoring scheme set>");
+    }
 
 }

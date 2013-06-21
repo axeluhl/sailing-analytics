@@ -23,6 +23,8 @@ public class UserStatusPanel extends FlowPanel {
     private final Label userRolesText;
 
     private final Button logoutButton;
+    
+    public static final Label alert = new Label("");
 
     public UserStatusPanel(final UserManagementServiceAsync userManagementService, final ErrorReporter errorReporter) {
         super();
@@ -68,7 +70,10 @@ public class UserStatusPanel extends FlowPanel {
         addFloatingWidget(userNameLabel);
         addFloatingWidget(userNameText);
         addFloatingWidget(userRolesText);
-        add(logoutButton);
+        //add(logoutButton);
+        
+        alert.setStyleName("global-alert-message");
+        add(alert);
         
         updateUser(user);
     }
@@ -91,5 +96,9 @@ public class UserStatusPanel extends FlowPanel {
             userRolesText.setText("Unknown");
             logoutButton.setEnabled(false);
         }
+    }
+    
+    public static void setGlobalAlert(String message) {
+        alert.setText(message);
     }
 }
