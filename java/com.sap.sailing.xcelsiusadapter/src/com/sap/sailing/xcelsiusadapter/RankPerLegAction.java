@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jdom.Document;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -64,7 +65,8 @@ public class RankPerLegAction extends HttpAction {
                     if (competitorNameSet == null || competitorNameSet.contains(competitor.getName())) {
                         // Get data
                         final String competitorName = competitor.getName();
-                        final String nationality = competitor.getTeam().getNationality().getThreeLetterIOCAcronym();
+                        final Nationality nationality = competitor.getTeam().getNationality();
+                        final String threeLetterIocCode = nationality == null ? "" : nationality.getThreeLetterIOCAcronym();
                         final String sailID = competitor.getBoat().getSailID();
                         final int overallRank = trackedRace.getRank(competitor);
                         TrackedLegOfCompetitor trackedLegOfCompetitor = trackedLeg.getTrackedLeg(competitor);
@@ -87,7 +89,7 @@ public class RankPerLegAction extends HttpAction {
                         addColumn(upOrDownwindLeg);
                         addColumn(competitorName);
                         addColumn(sailID == null ? "null" : sailID);
-                        addColumn(nationality);
+                        addColumn(threeLetterIocCode);
                         addColumn("" + overallRank);
                         addColumn("" + legRank);
                         addColumn("" + posGL);

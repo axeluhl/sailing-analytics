@@ -423,12 +423,18 @@ public interface SailingServiceAsync {
     void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId, AsyncCallback<Void> callback);
 
     void getBuildVersion(AsyncCallback<String> callback);
+
+    void stopReplicatingFromMaster(AsyncCallback<Void> asyncCallback);
     
     void getRegattaStructureForEvent(String eventIdAsString, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
 
     void getRaceStateEntriesForRaceGroup(String eventIdAsString, List<String> visibleCourseAreas,
             List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,
             AsyncCallback<List<RegattaOverviewEntryDTO>> markedAsyncCallback);
+
+    void stopAllReplicas(AsyncCallback<Void> asyncCallback);
+
+    void stopSingleReplicaInstance(String identifier, AsyncCallback<Void> asyncCallback);
     
 }
 

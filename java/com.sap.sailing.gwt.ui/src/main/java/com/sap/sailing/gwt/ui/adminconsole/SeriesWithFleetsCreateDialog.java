@@ -14,7 +14,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -23,6 +22,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.IntegerBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 

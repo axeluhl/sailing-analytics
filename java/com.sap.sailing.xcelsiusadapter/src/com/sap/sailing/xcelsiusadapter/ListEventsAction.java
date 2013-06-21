@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jdom.Document;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -63,16 +64,17 @@ public class ListEventsAction extends HttpAction {
                             .getTimePointOfNewestEvent());
                     Iterator<Map.Entry<Competitor, Integer>> entryIter = finalRanks.entrySet().iterator();
                     for (int i = 0; i < 3; i++) {
-                        String nationality = "";
+                        String threeLetterIocCode = "";
                         String sailID = "";
                         String competitorName = "";
                         if (entryIter.hasNext()) {
                             Map.Entry<Competitor, Integer> next = entryIter.next();
-                            nationality = next.getKey().getTeam().getNationality().getThreeLetterIOCAcronym();
+                            final Nationality nationality = next.getKey().getTeam().getNationality();
+                            threeLetterIocCode = nationality == null ? "" : nationality.getThreeLetterIOCAcronym();
                             sailID = next.getKey().getBoat().getSailID();
                             competitorName = next.getKey().getName();
                         }
-                        addColumn(nationality);
+                        addColumn(threeLetterIocCode);
                         addColumn(sailID);
                         addColumn(competitorName);
                     }
