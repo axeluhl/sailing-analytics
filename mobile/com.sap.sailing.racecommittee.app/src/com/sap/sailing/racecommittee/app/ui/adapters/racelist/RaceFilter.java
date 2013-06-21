@@ -60,7 +60,7 @@ public class RaceFilter extends Filter {
                 changedGroup = false;
                 // ... but...
                 RaceListDataTypeRace raceItem = (RaceListDataTypeRace) item;
-                RaceLogRaceStatus status = raceItem.getRace().getStatus();
+                RaceLogRaceStatus status = raceItem.getCurrentStatus();
                 if (status.equals(RaceLogRaceStatus.FINISHED)) {
                     // ... only the newest (by sort order) finished race...
                     if (newestFinishedItem != null) {
