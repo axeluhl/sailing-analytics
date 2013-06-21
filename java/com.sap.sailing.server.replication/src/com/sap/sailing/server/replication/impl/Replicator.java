@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
@@ -99,8 +100,12 @@ public class Replicator implements Runnable {
                         new ByteArrayInputStream(bytesFromMessage));
                 RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) ois.readObject();
                 applyOrQueue(operation);
+            } catch (ConsumerCancelledException cce) {
+                logger.info("Consumer has been shut down properly.");
+                break;
             } catch (InterruptedException irr) {
                 logger.info("Application requested shutdown.");
+                break;
             } catch (ShutdownSignalException sse) {
                 /* make sure to respond to a stop event without waiting */
                 if (isBeingStopped()) {
