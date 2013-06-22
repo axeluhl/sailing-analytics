@@ -4,11 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
+import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesComponent.EntryClickedHandler;
+import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
 public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
 
@@ -17,18 +26,25 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
     private final static String PARAM_ONLY_RACES_OF_SAME_DAY = "onlyracesofsameday";
     private final static String PARAM_REGATTA = "regatta";
     private final static String PARAM_COURSE_AREA = "coursearea";
+    
+    private DockLayoutPanel containerPanel;
+    private RaceDetailPanel detailPanel;
+    private RegattaOverviewPanel regattaPanel;
 
     @Override
     public void doOnModuleLoad() {
         super.doOnModuleLoad();
 
-        RootPanel rootPanel = RootPanel.get();
+        RootLayoutPanel rootPanel = RootLayoutPanel.get();
+        containerPanel = new DockLayoutPanel(Unit.PX);
+        rootPanel.add(containerPanel);
+        
         boolean embedded = Window.Location.getParameter("embedded") != null
                 && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
         if (!embedded) {
             LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.regattaOverview(), stringMessages, this);
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-            rootPanel.add(logoAndTitlePanel);
+            containerPanel.addNorth(logoAndTitlePanel, 68);
         } else {
             RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
             RootPanel.getBodyElement().getStyle().setPaddingTop(20, Unit.PX);
@@ -36,10 +52,41 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
 
         String eventIdAsString = Window.Location.getParameter(PARAM_EVENT);
 
-        RegattaRaceStatesSettings settings = createRegattaRaceStatesSettingsFromURL();
+        createAndAddDetailPanel();
+        createAndAddRegattaPanel(eventIdAsString);
+        toggleDetailPanel(false);
+        
+        regattaPanel.setEntryClickedHandler(new EntryClickedHandler() { 
+            @Override
+            public void onEntryClicked(RegattaOverviewEntryDTO entry) {
+                detailPanel.show(entry);
+                toggleDetailPanel(true);
+            }
+        });
+    }
+    
+    private void toggleDetailPanel(boolean visibile) {
+        containerPanel.setWidgetHidden(detailPanel, !visibile);
+    }
 
-        RegattaOverviewPanel regattaOverviewPanel = new RegattaOverviewPanel(sailingService, this, stringMessages, eventIdAsString, settings);
-        rootPanel.add(regattaOverviewPanel);
+    private void createAndAddRegattaPanel(String eventIdAsString) {
+        RegattaRaceStatesSettings settings = createRegattaRaceStatesSettingsFromURL();
+        regattaPanel = new RegattaOverviewPanel(sailingService, this, stringMessages, eventIdAsString, settings);
+        Panel centerPanel = new FlowPanel();
+        centerPanel.add(regattaPanel);
+        ScrollPanel scrollPanel = new ScrollPanel(centerPanel);
+        containerPanel.add(scrollPanel);
+    }
+
+    private void createAndAddDetailPanel() {
+        detailPanel = new RaceDetailPanel(stringMessages, new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                toggleDetailPanel(false);
+            }
+        });
+        detailPanel.addStyleName("RaceDetailPanel");
+        containerPanel.addSouth(detailPanel, 96);
     }
 
     public static RegattaRaceStatesSettings createRegattaRaceStatesSettingsFromURL() {

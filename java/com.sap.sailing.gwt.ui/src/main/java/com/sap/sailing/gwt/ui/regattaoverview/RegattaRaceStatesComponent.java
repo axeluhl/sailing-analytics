@@ -12,6 +12,7 @@ import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -36,6 +37,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.CellPreviewEvent;
+import com.google.gwt.view.client.CellPreviewEvent.Handler;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -67,6 +70,10 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
  */
 public class RegattaRaceStatesComponent extends SimplePanel implements Component<RegattaRaceStatesSettings>, EventAndRaceGroupAvailabilityListener {
 
+    public interface EntryClickedHandler {
+        void onEntryClicked(RegattaOverviewEntryDTO entry);
+    }
+    
     private List<RegattaOverviewEntryDTO> allEntries;
 
     private final CellTable<RegattaOverviewEntryDTO> regattaOverviewTable;
@@ -100,6 +107,12 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private static final String STYLE_CIRCLE_YELLOW = "circleYellow";
     private static final String STYLE_CIRCLE_GREEN = "circleGreen";
     private static final String STYLE_CIRCLE_GREY = "circleGrey";
+    
+    private EntryClickedHandler entryClickedHandler;
+    
+    public void setEntryClickedHandler(EntryClickedHandler handler) {
+        this.entryClickedHandler = handler;
+    }
 
     /**
      * @param timerToSynchronize
@@ -129,6 +142,14 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
         regattaOverviewDataProvider = new ListDataProvider<RegattaOverviewEntryDTO>();
         regattaOverviewTable = createRegattaTable();
+        regattaOverviewTable.addCellPreviewHandler(new Handler<RegattaOverviewEntryDTO>() {
+            @Override
+            public void onCellPreview(CellPreviewEvent<RegattaOverviewEntryDTO> event) {
+                if (BrowserEvents.CLICK.equals(event.getNativeEvent().getType()) && entryClickedHandler != null){
+                    entryClickedHandler.onEntryClicked(event.getValue());
+                }
+            }
+        });
 
         mainPanel.add(regattaOverviewTable);
         setWidget(mainPanel);
