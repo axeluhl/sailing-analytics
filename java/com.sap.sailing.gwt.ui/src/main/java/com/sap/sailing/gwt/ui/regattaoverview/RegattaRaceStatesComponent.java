@@ -203,6 +203,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 builder.append(SafeHtmlUtils.fromTrustedString("<div class=\"" + STYLE_CIRCLE + " "));
                 switch (entryDTO.raceInfo.lastStatus) {
                 case RUNNING:
+                case FINISHING:
                     builder.append(SafeHtmlUtils.fromTrustedString(STYLE_CIRCLE_GREEN));
                     break;
                 case FINISHED:
