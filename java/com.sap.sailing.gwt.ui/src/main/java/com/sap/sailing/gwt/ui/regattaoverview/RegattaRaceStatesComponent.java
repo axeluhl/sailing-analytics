@@ -32,7 +32,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -396,21 +395,25 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             
         };
         flagColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        flagColumn.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        
+        TextColumn<RegattaOverviewEntryDTO> lastUpdateColumn = new TextColumn<RegattaOverviewEntryDTO>() {
+            @Override
+            public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                String lastUpdateTime = "-";
+                if (entryDTO.raceInfo.lastUpdateTime != null) {
+                    lastUpdateTime = timeFormatter.format(entryDTO.raceInfo.lastUpdateTime);
+                }
+                return lastUpdateTime;
+            }
+        };
+        lastUpdateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         TextColumn<RegattaOverviewEntryDTO> raceAdditionalInformationColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
                 StringBuffer additionalInformation = new StringBuffer();
                 boolean isInfoBefore = false;
-                if (entryDTO.raceInfo.lastUpdateTime != null) {
-                    additionalInformation.append("Last update at " + timeFormatter.format(entryDTO.raceInfo.lastUpdateTime));
-                    isInfoBefore = true;
-                }
                 if (entryDTO.raceInfo.pathfinderId != null) {
-                    if (isInfoBefore) {
-                        additionalInformation.append("  /  ");
-                    }
                     additionalInformation.append("Pathfinder: " + entryDTO.raceInfo.pathfinderId);
                     isInfoBefore = true;
                 }
@@ -450,6 +453,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         table.addColumn(raceStatusColumn, stringMessages.status());
         table.addColumn(raceCourseColumn, stringMessages.course());
         table.addColumn(flagColumn, stringMessages.flags());
+        table.addColumn(lastUpdateColumn, stringMessages.lastUpdate());
         table.addColumn(raceAdditionalInformationColumn, stringMessages.additionalInformation());
         
         table.addColumnSortHandler(regattaOverviewListHandler);
