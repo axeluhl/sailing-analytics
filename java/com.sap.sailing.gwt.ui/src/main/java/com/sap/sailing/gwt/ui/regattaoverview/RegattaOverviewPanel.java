@@ -32,7 +32,7 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 public class RegattaOverviewPanel extends SimplePanel {
     
     private final long serverUpdateRateInMs = 10000;
-    private final long uiUpdateRateInMs = 1000;
+    private final long uiUpdateRateInMs = 450;
     
     private final Timer serverUpdateTimer;
     private final Timer uiUpdateTimer;
