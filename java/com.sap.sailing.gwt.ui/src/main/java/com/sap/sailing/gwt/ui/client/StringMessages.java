@@ -690,4 +690,5 @@ public interface StringMessages extends Messages {
     String protestTimeFinishesAt();
     String protestTimeFinishedAt();
     String flags();
+    String lastUpdate();
 }
