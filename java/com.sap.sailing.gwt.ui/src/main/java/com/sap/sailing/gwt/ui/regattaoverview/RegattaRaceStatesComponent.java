@@ -11,6 +11,7 @@ import java.util.Map;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.ImageResourceCell;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -19,6 +20,9 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -90,6 +94,13 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private static RegattaRaceStatesTableResources tableRes = GWT.create(RegattaRaceStatesTableResources.class);
 
     private final static String LOCAL_STORAGE_REGATTA_OVERVIEW_KEY = "sailingAnalytics.regattaOverview.settings.";
+    
+    private static final String STYLE_NAME_PREFIX = "RegattaOverview-";
+    private static final String STYLE_CIRCLE = STYLE_NAME_PREFIX + "circle";
+    private static final String STYLE_CIRCLE_BLUE = "circleBlue";
+    private static final String STYLE_CIRCLE_YELLOW = "circleYellow";
+    private static final String STYLE_CIRCLE_GREEN = "circleGreen";
+    private static final String STYLE_CIRCLE_GREY = "circleGrey";
 
     /**
      * @param timerToSynchronize
@@ -184,6 +195,35 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
         ListHandler<RegattaOverviewEntryDTO> regattaOverviewListHandler = new ListHandler<RegattaOverviewEntryDTO>(
                 regattaOverviewDataProvider.getList());
+        
+        SafeHtmlCell circleCell = new SafeHtmlCell();
+        Column<RegattaOverviewEntryDTO, SafeHtml> circleColumn = new Column<RegattaOverviewEntryDTO, SafeHtml>(circleCell) {
+
+            @Override
+            public SafeHtml getValue(RegattaOverviewEntryDTO entryDTO) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                builder.append(SafeHtmlUtils.fromTrustedString("<div class=\"" + STYLE_CIRCLE + " "));
+                switch (entryDTO.raceInfo.lastStatus) {
+                case RUNNING:
+                    builder.append(SafeHtmlUtils.fromTrustedString(STYLE_CIRCLE_GREEN));
+                    break;
+                case FINISHED:
+                    builder.append(SafeHtmlUtils.fromTrustedString(STYLE_CIRCLE_BLUE));
+                    break;
+                case SCHEDULED:
+                case STARTPHASE:
+                    builder.append(SafeHtmlUtils.fromTrustedString(STYLE_CIRCLE_YELLOW));
+                    break;
+                default:
+                    builder.append(SafeHtmlUtils.fromTrustedString(STYLE_CIRCLE_GREY));
+                    break;
+                }
+                
+                builder.append(SafeHtmlUtils.fromTrustedString("\"></div>"));
+                return builder.toSafeHtml();
+            }
+            
+        };
 
         TextColumn<RegattaOverviewEntryDTO> courseAreaColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
@@ -366,6 +406,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
         };
 
+        table.addColumn(circleColumn, "");
         table.addColumn(courseAreaColumn, stringMessages.courseArea());
         table.addColumn(regattaNameColumn, stringMessages.regatta());
         table.addColumn(seriesNameColumn, stringMessages.series());
@@ -379,7 +420,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         table.addColumn(lastFlagDirectionColumn, stringMessages.flagStatus());
         table.addColumn(raceAdditionalInformationColumn, stringMessages.additionalInformation());
         table.addColumnSortHandler(regattaOverviewListHandler);
-
+        
         return table;
     }
 
