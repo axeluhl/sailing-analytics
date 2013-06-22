@@ -42,6 +42,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.AnchorCell;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -176,9 +177,9 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             protected void handleSuccess(List<RegattaOverviewEntryDTO> result) {
                 final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
                 Date serverTimeDuringRequest = null;
-                for (RegattaOverviewEntryDTO roeDto : result) {
-                    if (roeDto.currentServerTime != null) {
-                        serverTimeDuringRequest = roeDto.currentServerTime;
+                for (RegattaOverviewEntryDTO entryDTO : result) {
+                    if (entryDTO.currentServerTime != null) {
+                        serverTimeDuringRequest = entryDTO.currentServerTime;
                     }
                 }
                 updateTable(result);
@@ -236,7 +237,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
             @Override
             public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
-                return left.courseAreaName.compareTo(right.courseAreaName);
+                return new NaturalComparator().compare(left.courseAreaName, right.courseAreaName);
             }
 
         });
@@ -259,7 +260,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
             @Override
             public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
-                return left.regattaDisplayName.compareTo(right.regattaDisplayName);
+                return new NaturalComparator().compare(left.regattaDisplayName, right.regattaDisplayName);
             }
 
         });
@@ -419,7 +420,9 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         table.addColumn(lastLowerFlagColumn, stringMessages.lastLowerFlag());
         table.addColumn(lastFlagDirectionColumn, stringMessages.flagStatus());
         table.addColumn(raceAdditionalInformationColumn, stringMessages.additionalInformation());
+        
         table.addColumnSortHandler(regattaOverviewListHandler);
+        table.getColumnSortList().push(courseAreaColumn);
         
         return table;
     }
