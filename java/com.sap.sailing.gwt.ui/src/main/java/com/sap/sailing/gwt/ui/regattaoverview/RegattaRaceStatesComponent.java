@@ -45,6 +45,7 @@ import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -84,17 +85,25 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     
     private final String localStorageRegattaOverviewEventKey;
 
+    private final Timer timerToSynchronize;
+
     private static RegattaRaceStatesTableResources tableRes = GWT.create(RegattaRaceStatesTableResources.class);
 
     private final static String LOCAL_STORAGE_REGATTA_OVERVIEW_KEY = "sailingAnalytics.regattaOverview.settings.";
 
+    /**
+     * @param timerToSynchronize
+     *            Whenever this component makes a service call and receives an update on the current server time, the
+     *            timer passed for this argument will be synchronized.
+     */
     public RegattaRaceStatesComponent(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            final StringMessages stringMessages, final String eventIdAsString, RegattaRaceStatesSettings settings) {
+            final StringMessages stringMessages, final String eventIdAsString, RegattaRaceStatesSettings settings, Timer timerToSynchronize) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.eventIdAsString = eventIdAsString;
         this.flagImageResolver = new FlagImageResolver();
         this.allEntries = new ArrayList<RegattaOverviewEntryDTO>();
+        this.timerToSynchronize = timerToSynchronize;
 
         this.eventDTO = null;
         this.raceGroupDTOs = null;
@@ -124,7 +133,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         updateSettings(settings);
     }
 
-    public void onUpdateServer(Date time) {
+    public void onUpdateServer() {
         loadAndUpdateEventLog();
     }
 
@@ -137,10 +146,13 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         ColumnSortEvent.fire(regattaOverviewTable, regattaOverviewTable.getColumnSortList());
     }
 
+    /**
+     */
     protected void loadAndUpdateEventLog() {
         if (eventIdAsString == null || eventDTO == null || raceGroupDTOs == null) {
             return;
         }
+        final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
         sailingService.getRaceStateEntriesForRaceGroup(eventIdAsString, settings.getVisibleCourseAreas(), settings.getVisibleRegattas(), 
                 settings.isShowOnlyCurrentlyRunningRaces(), settings.isShowOnlyRacesOfSameDay(), new MarkedAsyncCallback<List<RegattaOverviewEntryDTO>>() {
 
@@ -151,7 +163,15 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
             @Override
             protected void handleSuccess(List<RegattaOverviewEntryDTO> result) {
+                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
+                Date serverTimeDuringRequest = null;
+                for (RegattaOverviewEntryDTO roeDto : result) {
+                    if (roeDto.currentServerTime != null) {
+                        serverTimeDuringRequest = roeDto.currentServerTime;
+                    }
+                }
                 updateTable(result);
+                timerToSynchronize.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
             }
 
         });
