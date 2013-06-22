@@ -689,4 +689,5 @@ public interface StringMessages extends Messages {
     String competitorFilterExplanation();
     String protestTimeFinishesAt();
     String protestTimeFinishedAt();
+    String flags();
 }
