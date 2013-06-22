@@ -379,18 +379,28 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
                 StringBuffer additionalInformation = new StringBuffer();
-                if (entryDTO.raceInfo.pathfinderId != null) {
-                    additionalInformation.append("Pathfinder: " + entryDTO.raceInfo.pathfinderId);
+                boolean isInfoBefore = false;
+                if (entryDTO.raceInfo.lastUpdateTime != null) {
+                    additionalInformation.append("Last update at " + timeFormatter.format(entryDTO.raceInfo.lastUpdateTime));
+                    isInfoBefore = true;
                 }
-                if (entryDTO.raceInfo.pathfinderId != null && entryDTO.raceInfo.gateLineOpeningTime != null) {
-                    additionalInformation.append("  /  ");
+                if (entryDTO.raceInfo.pathfinderId != null) {
+                    if (isInfoBefore) {
+                        additionalInformation.append("  /  ");
+                    }
+                    additionalInformation.append("Pathfinder: " + entryDTO.raceInfo.pathfinderId);
+                    isInfoBefore = true;
                 }
                 if (entryDTO.raceInfo.gateLineOpeningTime != null) {
+                    if (isInfoBefore) {
+                        additionalInformation.append("  /  ");
+                    }
                     additionalInformation.append("GateLineOpeningTime: "
                             + (entryDTO.raceInfo.gateLineOpeningTime / (60 * 1000)) + " minutes");
+                    isInfoBefore = true;
                 }
                 if (entryDTO.raceInfo.protestFinishTime != null) {
-                    if (entryDTO.raceInfo.pathfinderId != null || entryDTO.raceInfo.gateLineOpeningTime != null) {
+                    if (isInfoBefore) {
                         additionalInformation.append("  /  ");
                     }
                     Date now = new Date();
