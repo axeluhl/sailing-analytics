@@ -16,6 +16,7 @@ public class EntryPointLinkFactory {
 
     private static String createEntryPointLink(String baseLink, Map<String, String> parameters) {
         String debugParam = Window.Location.getParameter("gwt.codesvr");
+        String localeParam = Window.Location.getParameter("locale");
         String link = baseLink;
         int i = 1;
         for(Entry<String, String> entry: parameters.entrySet()) {
@@ -26,6 +27,10 @@ public class EntryPointLinkFactory {
         if (debugParam != null && !debugParam.isEmpty()) {
             link += i == 1 ? "?" : "&";
             link += "gwt.codesvr=" + debugParam;
+        }
+        if (localeParam != null && !localeParam.isEmpty()) {
+            link += i == 1 ? "?" : "&";
+            link += "locale=" + localeParam;
         }
         return URLEncoder.encode(link);
     }
