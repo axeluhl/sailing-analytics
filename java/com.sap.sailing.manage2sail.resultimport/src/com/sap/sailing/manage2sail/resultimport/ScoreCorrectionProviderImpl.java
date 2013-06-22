@@ -23,7 +23,6 @@ import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
-import com.sap.sailing.xrr.resultimport.impl.XRRParserUtil;
 import com.sap.sailing.xrr.resultimport.impl.XRRRegattaResultsAsScoreCorrections;
 import com.sap.sailing.xrr.resultimport.schema.Division;
 import com.sap.sailing.xrr.resultimport.schema.Event;
@@ -84,8 +83,8 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
         Parser parser = resolveParser(eventName, boatClassName);
         try {
             RegattaResults regattaResults = parser.parse();
-            TimePoint timePoint = XRRParserUtil.calculateTimePointForRegattaResults(regattaResults);
-            if ((timePoint == null && timePointPublished == null) || (timePoint != null && timePoint.equals(timePointPublished))) {
+//            TimePoint timePoint = XRRParserUtil.calculateTimePointForRegattaResults(regattaResults);
+//            if ((timePoint == null && timePointPublished == null) || (timePoint != null && timePoint.equals(timePointPublished))) {
                 for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
                     if (o instanceof Event) {
                         Event event = (Event) o;
@@ -101,7 +100,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
                             }
                         }
                     }
-                }
+//                }
             }
         } catch (JAXBException e) {
             logger.info("Parse error during XRR import. Ignoring document " + parser.toString());
