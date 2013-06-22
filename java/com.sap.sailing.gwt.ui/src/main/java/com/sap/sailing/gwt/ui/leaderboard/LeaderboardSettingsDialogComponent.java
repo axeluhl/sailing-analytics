@@ -120,13 +120,9 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         timingPanel.add(timingContent);
         
         timingContent.addStyleName("dialogInnerContent");
-        Label delayLabel = new Label(stringMessages.delayInSeconds() + ":");
-        delayLabel.getElement().getStyle().setPaddingRight(5, Unit.PX);
-        delayLabel.getElement().getStyle().setFloat(Float.LEFT);
-        timingContent.add(delayLabel);
         Label refreshIntervalLabel = new Label(stringMessages.refreshInterval() + ":");
         refreshIntervalLabel.getElement().getStyle().setPaddingRight(5, Unit.PX);
-        refreshIntervalLabel.getElement().getStyle().setPaddingLeft(25, Unit.PX);
+        refreshIntervalLabel.getElement().getStyle().setPaddingLeft(5, Unit.PX);
         refreshIntervalLabel.getElement().getStyle().setFloat(Float.LEFT);
         timingContent.add(refreshIntervalLabel);
         timingContent.add(refreshIntervalInSecondsBox);

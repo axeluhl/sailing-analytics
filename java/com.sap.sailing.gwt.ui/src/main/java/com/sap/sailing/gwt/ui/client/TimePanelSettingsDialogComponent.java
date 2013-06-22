@@ -32,28 +32,17 @@ public class TimePanelSettingsDialogComponent<T extends TimePanelSettings>
 	@Override
 	public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
 		mainContentPanel = new FlowPanel();
-
 		FlowPanel labelAndRefreshIntervalBoxPanel = new FlowPanel();
 		Label labelIntervalBox = new Label(stringMessages.refreshInterval()
 				+ ":");
 		labelIntervalBox.setStyleName(STYLE_LABEL);
 		labelAndRefreshIntervalBoxPanel.add(labelIntervalBox);
-
 		refreshIntervalBox = dialog.createDoubleBox(
 				((double) initialSettings.getRefreshInterval()) / 1000, 4);
 		refreshIntervalBox.setStyleName(STYLE_INPUT);
-
 		labelAndRefreshIntervalBoxPanel.setStyleName(STYLE_BOXPANEL);
 		labelAndRefreshIntervalBoxPanel.add(refreshIntervalBox);
-
-		FlowPanel labelAndTimeDelayBoxPanel = new FlowPanel();
-		Label labelTimeDelayBox = new Label(stringMessages.timeDelay() + ":");
-		labelTimeDelayBox.setStyleName(STYLE_LABEL);
-		labelAndTimeDelayBoxPanel.add(labelTimeDelayBox);
-		labelAndTimeDelayBoxPanel.setStyleName(STYLE_BOXPANEL);
 		mainContentPanel.add(labelAndRefreshIntervalBoxPanel);
-		mainContentPanel.add(labelAndTimeDelayBoxPanel);
-
 		return mainContentPanel;
 	}
 
