@@ -28,7 +28,6 @@ public class LeaderboardSettings {
     private final List<DetailType> overallDetailsToShow;
     private final boolean autoExpandPreSelectedRace;
     private final Long delayBetweenAutoAdvancesInMilliseconds;
-    private final Long delayInMilliseconds;
     private final boolean updateUponPlayStateChange;
     private final boolean showOverallLeaderboardsOnSamePage;
     
@@ -52,9 +51,9 @@ public class LeaderboardSettings {
     public LeaderboardSettings(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
             List<DetailType> raceDetailsToShow, List<DetailType> overallDetailsToShow,
             List<String> namesOfRaceColumnsToShow, List<String> namesOfRacesToShow, Integer numberOfLastRacesToShow,
-            boolean autoExpandPreSelectedRace, Long delayBetweenAutoAdvancesInMilliseconds, Long delayInMilliseconds,
-            String nameOfRaceToSort, boolean sortAscending, boolean updateUponPlayStateChange,
-            RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy, boolean showOverallLeaderboardsOnSamePage) {
+            boolean autoExpandPreSelectedRace, Long delayBetweenAutoAdvancesInMilliseconds, String nameOfRaceToSort,
+            boolean sortAscending, boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
+            boolean showOverallLeaderboardsOnSamePage) {
         if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
             throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
         }
@@ -67,7 +66,6 @@ public class LeaderboardSettings {
         this.activeRaceColumnSelectionStrategy = activeRaceColumnSelectionStrategy;
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
-        this.delayInMilliseconds = delayInMilliseconds;
         this.maneuverDetailsToShow = meneuverDetailsToShow;
         this.nameOfRaceToSort = nameOfRaceToSort;
         this.sortAscending = sortAscending;
@@ -125,13 +123,6 @@ public class LeaderboardSettings {
      */
     public Long getDelayBetweenAutoAdvancesInMilliseconds() {
         return delayBetweenAutoAdvancesInMilliseconds;
-    }
-
-    /**
-     * @return if <code>null</code>, leave delay alone (don't change in {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}
-     */
-    public Long getDelayInMilliseconds() {
-        return delayInMilliseconds;
     }
 
     public String getNameOfRaceToSort() {

@@ -37,6 +37,8 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.HasWelcomeWidget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.client.shared.panels.WelcomeWidget;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
@@ -100,6 +102,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
     private final boolean isEmbedded;
     private final boolean showRaceDetails;
     private final boolean canReplayDuringLiveRaces;
+    private final Timer timerForClientServerOffset;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
             ErrorReporter errorReporter, final String groupName, String root, String viewMode, boolean embedded,
@@ -119,18 +122,25 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         mainPanel.setWidth("100%");
         mainPanel.addStyleName("mainPanel");
         add(mainPanel);
+        timerForClientServerOffset = new Timer(PlayModes.Replay);
         loadLeaderboardGroup(groupName);
     }
 
     private void loadLeaderboardGroup(final String leaderboardGroupName) {
+        final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
         sailingService.getLeaderboardGroupByName(leaderboardGroupName, false /*withGeoLocationData*/, new AsyncCallback<LeaderboardGroupDTO>() {
             @Override
             public void onSuccess(final LeaderboardGroupDTO leaderboardGroupDTO) {
+                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
                 if (leaderboardGroupDTO != null) {
                     LeaderboardGroupPanel.this.leaderboardGroup = leaderboardGroupDTO;
+                    if (leaderboardGroupDTO.getAverageDelayToLiveInMillis() != null) {
+                        timerForClientServerOffset.setLivePlayDelayInMillis(leaderboardGroupDTO.getAverageDelayToLiveInMillis());
+                    }
+                    timerForClientServerOffset.adjustClientServerOffset(clientTimeWhenRequestWasSent, leaderboardGroupDTO.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
                     // in case there is a regatta leaderboard in the leaderboard group 
                     // we need to know the corresponding regatta structure
-                    if(leaderboardGroup.containsRegattaLeaderboard()) {
+                    if (leaderboardGroup.containsRegattaLeaderboard()) {
                         sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
                             @Override
                             public void onSuccess(List<RegattaDTO> regattaDTOs) {
@@ -336,7 +346,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         for (RaceColumnDTO raceColumn : raceColumns) {
             String raceColumnName = raceColumn.getRaceColumnName();
             RaceDTO race = raceColumn.getRace(fleet);
-            renderRaceLink(leaderboardName, race, raceColumn.isLive(fleet), raceColumnName, b);
+            renderRaceLink(leaderboardName, race, raceColumn.isLive(fleet, timerForClientServerOffset.getLiveTimePointInMillis()), raceColumnName, b);
         }
     }
 
@@ -346,7 +356,9 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         for (RaceColumnDTO raceColumn : series.getRaceColumns()) {
             for (FleetDTO fleetOfRaceColumn : series.getFleets()) {
                 if(fleet.equals(fleetOfRaceColumn)) {
-                    racesColumnsOfFleet.add(raceColumn);
+                    //We have to get the race column from the leaderboard, because the race column of the series
+                    //have no tracked race and would be displayed as inactive race.
+                    racesColumnsOfFleet.add(leaderboard.getRaceColumnByName(raceColumn.getName()));
                 }
             }
         }

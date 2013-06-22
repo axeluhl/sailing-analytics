@@ -71,7 +71,8 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.eventIdAsString = eventIdAsString;
-        
+        this.serverUpdateTimer = new Timer(PlayModes.Live, serverUpdateRateInMs);
+        this.uiUpdateTimer = new Timer(PlayModes.Live, uiUpdateRateInMs);
         this.eventDTO = null;
         this.raceGroupDTOs = new ArrayList<RaceGroupDTO>();
         this.eventRaceGroupListeners = new ArrayList<EventAndRaceGroupAvailabilityListener>();
@@ -83,24 +84,20 @@ public class RegattaOverviewPanel extends SimplePanel {
         mainPanel.setWidth("100%");
         mainPanel.addStyleName(STYLE_CONTENT_WRAPPER);
         
-        regattaRaceStatesComponent = new RegattaRaceStatesComponent(sailingService, errorReporter, stringMessages, eventIdAsString, settings);
+        regattaRaceStatesComponent = new RegattaRaceStatesComponent(sailingService, errorReporter, stringMessages, eventIdAsString, settings, uiUpdateTimer);
         this.eventRaceGroupListeners.add(regattaRaceStatesComponent);
         regattaRaceStatesComponent.setWidth("100%");
         
         refreshNowButton = new Button(stringMessages.refreshNow());
         refreshNowButton.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 regattaRaceStatesComponent.loadAndUpdateEventLog();
             }
             
         });
-        
-        
         settingsButton = new Button(stringMessages.settings());
         settingsButton.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 new SettingsDialog<RegattaRaceStatesSettings>(regattaRaceStatesComponent, stringMessages).show();
@@ -109,7 +106,6 @@ public class RegattaOverviewPanel extends SimplePanel {
         
         startStopUpdatingButton = new Button(stringMessages.stopUpdating());
         startStopUpdatingButton.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 if (serverUpdateTimer.getPlayState().equals(PlayStates.Playing)) {
@@ -122,23 +118,16 @@ public class RegattaOverviewPanel extends SimplePanel {
             }
             
         });
-        
         this.refreshNowButton.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
         this.startStopUpdatingButton.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
-        
-        this.serverUpdateTimer = new Timer(PlayModes.Live, serverUpdateRateInMs);
         this.serverUpdateTimer.addTimeListener(new TimeListener() {
-
             @Override
             public void timeChanged(Date date) {
-                regattaRaceStatesComponent.onUpdateServer(date);
+                regattaRaceStatesComponent.onUpdateServer();
             }
         });
         this.serverUpdateTimer.play();
-
-        this.uiUpdateTimer = new Timer(PlayModes.Live, uiUpdateRateInMs);
         this.uiUpdateTimer.addTimeListener(new TimeListener() {
-
             @Override
             public void timeChanged(Date date) {
                 onUpdateUI(date);
@@ -176,8 +165,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         
         mainPanel.add(flexTable);
         mainPanel.add(regattaRaceStatesComponent);
-        
-        onUpdateUI(new Date());
+        onUpdateUI(uiUpdateTimer.getLiveTimePointAsDate());
     }
 
     private HorizontalPanel getRefreshStartStopClockPanel() {
@@ -228,11 +216,9 @@ public class RegattaOverviewPanel extends SimplePanel {
 
     private void onEventUpdated() {
         fillEventAndVenueName();
-        
         for (EventAndRaceGroupAvailabilityListener listener : this.eventRaceGroupListeners) {
             listener.onEventUpdated(eventDTO);
         }
-        
         checkToEnableSettingsButton();
     }
     

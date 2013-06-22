@@ -100,7 +100,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
                 /* select all races by default */ raceList, new ExplicitRaceColumnSelection(),
                 /* autoExpandPreSelectedRace */ false,
                 /* showOverallLeaderboardOnSamePage */ false,
-                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, /* delayInMilliseconds */ 3000l, stringMessages);
+                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, stringMessages);
         }
 
         private void updateURL(LeaderboardUrlSettings settings, String leaderboardName, String leaderboardDisplayName) {
