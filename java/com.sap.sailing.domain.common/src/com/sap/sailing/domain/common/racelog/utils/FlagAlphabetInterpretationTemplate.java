@@ -7,11 +7,8 @@ public abstract class FlagAlphabetInterpretationTemplate {
 
     public String getMeaningOfRaceStateAndFlags(RaceLogRaceStatus status, Flags upperFlag, Flags lowerFlag, boolean isDisplayed) {
         String statusText = "";
-        if (status.equals(RaceLogRaceStatus.RUNNING) && upperFlag.equals(Flags.XRAY) && isDisplayed) {
-            statusText = getTextForRunningRaceWithEarlyStarter();
-        } else if (status.equals(RaceLogRaceStatus.RUNNING) && upperFlag.equals(Flags.XRAY) && !isDisplayed) {
-            statusText = getTextForRunningRace();
-        } else if (status.equals(RaceLogRaceStatus.RUNNING)) {
+        
+        if (status.equals(RaceLogRaceStatus.RUNNING)) {
             statusText = getTextForRunningRace();
         } else if (status.equals(RaceLogRaceStatus.FINISHING)) {
             statusText = getTextForFinishingRace();
@@ -45,8 +42,6 @@ public abstract class FlagAlphabetInterpretationTemplate {
     }
     
     protected abstract String getTextForRunningRace();
-    
-    protected abstract String getTextForRunningRaceWithEarlyStarter();
     
     protected abstract String getTextForFinishingRace();
     
