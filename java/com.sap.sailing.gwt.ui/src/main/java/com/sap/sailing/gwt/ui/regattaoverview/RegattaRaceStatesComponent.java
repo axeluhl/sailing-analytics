@@ -334,6 +334,27 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
         };
         raceStartTimeColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        raceStartTimeColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(raceStartTimeColumn, new Comparator<RegattaOverviewEntryDTO>() {
+
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                int result = 0;
+                if (left.raceInfo.startTime != null && right.raceInfo.startTime != null) {
+                    result = left.raceInfo.startTime.compareTo(right.raceInfo.startTime);
+                } else if (left.raceInfo.startTime == null && right.raceInfo.startTime == null) {
+                    result = 0;
+                } else if (left.raceInfo.startTime == null) {
+                    result = 1;
+                } else if (right.raceInfo.startTime == null) {
+                    result = -1;
+                } else {
+                    result = 0;
+                }
+                return result;
+            }
+
+        });
 
         TextColumn<RegattaOverviewEntryDTO> raceStatusColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
@@ -342,6 +363,15 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         entryDTO.raceInfo.lastLowerFlag, entryDTO.raceInfo.isLastFlagDisplayed);
             }
         };
+        raceStatusColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(raceStatusColumn, new Comparator<RegattaOverviewEntryDTO>() {
+
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                return left.raceInfo.lastStatus.compareTo(right.raceInfo.lastStatus);
+            }
+
+        });
 
         Column<RegattaOverviewEntryDTO, String> raceCourseColumn = new Column<RegattaOverviewEntryDTO, String>(new ClickableTextCell()) {
             @Override
