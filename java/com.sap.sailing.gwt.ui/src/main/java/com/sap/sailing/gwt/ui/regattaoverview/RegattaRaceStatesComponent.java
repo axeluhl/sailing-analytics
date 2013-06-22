@@ -385,7 +385,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 String tooltip = "";
                 if (entryDTO.raceInfo.lastUpperFlag != null) {
                     tooltip = entryDTO.raceInfo.lastUpperFlag.name();
-                    if (entryDTO.raceInfo.lastLowerFlag != null) {
+                    if (entryDTO.raceInfo.lastLowerFlag != null && !entryDTO.raceInfo.lastLowerFlag.equals(Flags.NONE)) {
                         tooltip += " over " + entryDTO.raceInfo.lastLowerFlag.name();
                     }
                 }
