@@ -13,6 +13,10 @@ public class EntryPointLinkFactory {
     public static String createLeaderboardLink(Map<String, String> parameters) {
         return createEntryPointLink("/gwt/Leaderboard.html", parameters);
     }
+    
+    public static String createLeaderboardGroupLink(Map<String, String> parameters) {
+        return createEntryPointLink("/gwt/Spectator.html", parameters);
+    }
 
     private static String createEntryPointLink(String baseLink, Map<String, String> parameters) {
         String debugParam = Window.Location.getParameter("gwt.codesvr");
