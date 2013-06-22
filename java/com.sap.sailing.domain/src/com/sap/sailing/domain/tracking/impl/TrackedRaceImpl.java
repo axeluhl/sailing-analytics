@@ -2377,18 +2377,26 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 Iterable<Mark> marks = startWaypoint.getControlPoint().getMarks();
                 Iterator<Mark> marksIterator = marks.iterator();
                 Mark first = marksIterator.next();
-                Position firstPosition = getOrCreateTrack(first)
-                        .getEstimatedPosition(timePoint, /* extrapolate */false);
-                if (marksIterator.hasNext()) {
-                    // it's a line / gate
-                    Mark second = marksIterator.next();
-                    Position secondPosition = getOrCreateTrack(second).getEstimatedPosition(timePoint, /* extrapolate */
-                            false);
-                    Position competitorProjectedOntoStartLine = competitorPosition.projectToLineThrough(firstPosition,
-                            firstPosition.getBearingGreatCircle(secondPosition));
-                    result = competitorPosition.getDistance(competitorProjectedOntoStartLine);
+                Position firstPosition = getOrCreateTrack(first).getEstimatedPosition(timePoint, /* extrapolate */false);
+                if (firstPosition == null) {
+                    result = null;
                 } else {
-                    result = competitorPosition.getDistance(firstPosition);
+                    if (marksIterator.hasNext()) {
+                        // it's a line / gate
+                        Mark second = marksIterator.next();
+                        Position secondPosition = getOrCreateTrack(second).getEstimatedPosition(timePoint, /* extrapolate */
+                                false);
+                        final Bearing bearingGreatCircle = firstPosition.getBearingGreatCircle(secondPosition);
+                        if (bearingGreatCircle == null) {
+                            result = null;
+                        } else {
+                            Position competitorProjectedOntoStartLine = competitorPosition.projectToLineThrough(
+                                    firstPosition, bearingGreatCircle);
+                            result = competitorPosition.getDistance(competitorProjectedOntoStartLine);
+                        }
+                    } else {
+                        result = competitorPosition.getDistance(firstPosition);
+                    }
                 }
             }
         }
