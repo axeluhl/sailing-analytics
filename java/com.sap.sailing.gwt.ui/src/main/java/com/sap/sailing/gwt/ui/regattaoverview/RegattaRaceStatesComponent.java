@@ -321,6 +321,15 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         entryDTO.raceInfo.lastLowerFlag, entryDTO.raceInfo.isLastFlagDisplayed);
             }
         };
+        raceStatusColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(raceStatusColumn, new Comparator<RegattaOverviewEntryDTO>() {
+
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                return left.raceInfo.lastStatus.compareTo(right.raceInfo.lastStatus);
+            }
+
+        });
 
         Column<RegattaOverviewEntryDTO, String> raceCourseColumn = new Column<RegattaOverviewEntryDTO, String>(new ClickableTextCell()) {
             @Override
