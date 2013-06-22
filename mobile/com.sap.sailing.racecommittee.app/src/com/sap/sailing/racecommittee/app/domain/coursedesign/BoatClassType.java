@@ -11,8 +11,8 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 public enum BoatClassType {
     boatClass470erMen("470er Men", new HashMap<CourseLayouts, TargetTime>() {
         {
-            put(TrapezoidCourseLayouts.innerLoopTrapezoid60, TargetTime.sixty);
-            put(TrapezoidCourseLayouts.outerLoopTrapezoid60, TargetTime.sixty);
+            put(TrapezoidCourseLayouts.innerLoopTrapezoid60, TargetTime.fourty);
+            put(TrapezoidCourseLayouts.outerLoopTrapezoid60, TargetTime.fourty);
         }
     }, new TreeMap<WindRange, Map<PointOfSail, Float>>() {
         {
@@ -48,8 +48,8 @@ public enum BoatClassType {
     }, new MeterDistance(4.7), new MeterDistance(290)),
     boatClass470eromen("470er Women", new HashMap<CourseLayouts, TargetTime>() {
         {
-            put(TrapezoidCourseLayouts.innerLoopTrapezoid60, TargetTime.sixty);
-            put(TrapezoidCourseLayouts.outerLoopTrapezoid60, TargetTime.sixty);
+            put(TrapezoidCourseLayouts.innerLoopTrapezoid60, TargetTime.fourty);
+            put(TrapezoidCourseLayouts.outerLoopTrapezoid60, TargetTime.fourty);
         }
     }, new TreeMap<WindRange, Map<PointOfSail, Float>>() {
         {
@@ -85,8 +85,8 @@ public enum BoatClassType {
     }, new MeterDistance(4.7), new MeterDistance(110)),
     boatClassLaserMen("Laser Men", new HashMap<CourseLayouts, TargetTime>() {
         {
-            put(TrapezoidCourseLayouts.innerLoopTrapezoid70, TargetTime.sixty);
-            put(TrapezoidCourseLayouts.outerLoopTrapezoid70, TargetTime.sixty);
+            put(TrapezoidCourseLayouts.innerLoopTrapezoid70, TargetTime.fourty);
+            put(TrapezoidCourseLayouts.outerLoopTrapezoid70, TargetTime.fourty);
         }
     }, new TreeMap<WindRange, Map<PointOfSail, Float>>() {
         {
@@ -122,8 +122,8 @@ public enum BoatClassType {
     }, new MeterDistance(4.24), new MeterDistance(280)),
     boatClassLaserRadial("Laser Radial", new HashMap<CourseLayouts, TargetTime>() {
         {
-            put(TrapezoidCourseLayouts.innerLoopTrapezoid70, TargetTime.sixty);
-            put(TrapezoidCourseLayouts.outerLoopTrapezoid70, TargetTime.sixty);
+            put(TrapezoidCourseLayouts.innerLoopTrapezoid70, TargetTime.fourty);
+            put(TrapezoidCourseLayouts.outerLoopTrapezoid70, TargetTime.fourty);
         }
     }, new TreeMap<WindRange, Map<PointOfSail, Float>>() {
         {
@@ -159,8 +159,8 @@ public enum BoatClassType {
     }, new MeterDistance(4.24), new MeterDistance(260)),
     boatClassFinn("Finn", new HashMap<CourseLayouts, TargetTime>() {
         {
-            put(TrapezoidCourseLayouts.innerLoopTrapezoid70, TargetTime.sixty);
-            put(TrapezoidCourseLayouts.outerLoopTrapezoid70, TargetTime.sixty);
+            put(TrapezoidCourseLayouts.innerLoopTrapezoid70, TargetTime.fourty);
+            put(TrapezoidCourseLayouts.outerLoopTrapezoid70, TargetTime.fourty);
         }
     }, new TreeMap<WindRange, Map<PointOfSail, Float>>() {
         {

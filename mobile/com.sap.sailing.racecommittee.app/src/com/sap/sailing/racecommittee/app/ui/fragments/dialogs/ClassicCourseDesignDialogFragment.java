@@ -38,6 +38,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
@@ -68,17 +69,10 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private Spinner spinnerTargetTime;
 
     private CourseDesignComputer courseDesignComputer;
+    private TargetTime selectedTargetTime;
 
     private ArrayAdapter<CourseLayouts> courseLayoutAdapter;
     private ArrayAdapter<TargetTime> targetTimeAdapter;
-
-    // TODO determine this by given race
-    private BoatClassType selectedBoatClass = BoatClassType.boatClass470erMen;
-    private CourseLayouts selectedCourseLayout = (CourseLayouts) selectedBoatClass
-            .getPossibleCourseLayoutsWithTargetTime().keySet().toArray().clone()[0];
-    private NumberOfRounds selectedNumberOfRounds = NumberOfRounds.TWO;
-    private TargetTime selectedTargetTime = selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().get(
-            selectedCourseLayout);
 
     public ClassicCourseDesignDialogFragment() {
         super();
@@ -124,8 +118,8 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         publishButton.setOnClickListener(new OnClickListener() {
 
             public void onClick(View arg0) {
-                CourseBase courseBase = new CourseDataImpl(selectedCourseLayout.getShortName() + " "
-                        + selectedNumberOfRounds.getNumberOfRounds());
+                CourseBase courseBase = new CourseDataImpl(getSelectedCourseLayout().getShortName() + " "
+                        + getSelectedNumberOfRounds().getNumberOfRounds());
                 sendCourseDataAndDismiss(courseBase);
             }
 
@@ -154,9 +148,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
 
         });
 
-        courseDesignComputer = new CourseDesignComputer().setBoatClass(selectedBoatClass)
-                .setCourseLayout(selectedCourseLayout).setNumberOfRounds(selectedNumberOfRounds)
-                .setTargetTime(selectedTargetTime);
+        courseDesignComputer = new CourseDesignComputer();
 
         spinnerBoatClass = (Spinner) getView().findViewById(R.id.classic_course_designer_boat_class);
         setupBoatClassSpinner();
@@ -223,49 +215,18 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         spinnerBoatClass.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-                selectedBoatClass = (BoatClassType) adapterView.getItemAtPosition(position);
-                courseDesignComputer.setBoatClass(selectedBoatClass);
+                setSelectedBoatClass((BoatClassType) adapterView.getItemAtPosition(position));
+
                 // update possible course layouts
                 courseLayoutAdapter.clear();
-                courseLayoutAdapter.addAll(selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet());
+                courseLayoutAdapter.addAll(getSelectedBoatClass().getPossibleCourseLayoutsWithTargetTime().keySet());
                 courseLayoutAdapter.notifyDataSetChanged();
-                selectedCourseLayout = (CourseLayouts) selectedBoatClass.getPossibleCourseLayoutsWithTargetTime()
-                        .keySet().toArray().clone()[0];
-                spinnerCourseLayout.setSelection(courseLayoutAdapter.getPosition(selectedCourseLayout));
-                courseDesignComputer.setCourseLayout(selectedCourseLayout);
-                // update target time
-                selectedTargetTime = (TargetTime) selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().get(
-                        selectedCourseLayout);
-                spinnerTargetTime.setSelection(targetTimeAdapter.getPosition(selectedTargetTime));
-                courseDesignComputer.setTargetTime(selectedTargetTime);
-                if (selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet().contains(selectedCourseLayout)) {
-                    recomputeCourseDesign();
+                if (!getSelectedBoatClass().getPossibleCourseLayoutsWithTargetTime().keySet()
+                        .contains(getSelectedCourseLayout())) {
+                    setSelectedCourseLayout((CourseLayouts) getSelectedBoatClass()
+                            .getPossibleCourseLayoutsWithTargetTime().keySet().toArray().clone()[0]);
+                    spinnerCourseLayout.setSelection(courseLayoutAdapter.getPosition(getSelectedCourseLayout()));
                 }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-            }
-        });
-
-        spinnerBoatClass.setSelection(adapter.getPosition(selectedBoatClass));
-    }
-
-    private void setupCourseLayoutSpinner() {
-        courseLayoutAdapter = new ArrayAdapter<CourseLayouts>(getActivity(),
-                android.R.layout.simple_spinner_dropdown_item);
-        courseLayoutAdapter.addAll(selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().keySet());
-        spinnerCourseLayout.setAdapter(courseLayoutAdapter);
-        spinnerCourseLayout.setOnItemSelectedListener(new OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-                selectedCourseLayout = (CourseLayouts) adapterView.getItemAtPosition(position);
-                courseDesignComputer.setCourseLayout(selectedCourseLayout);
-                // update target time
-                selectedTargetTime = (TargetTime) selectedBoatClass.getPossibleCourseLayoutsWithTargetTime().get(
-                        selectedCourseLayout);
-                spinnerTargetTime.setSelection(targetTimeAdapter.getPosition(selectedTargetTime));
-                courseDesignComputer.setTargetTime(selectedTargetTime);
 
                 recomputeCourseDesign();
             }
@@ -275,7 +236,34 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             }
         });
 
-        spinnerCourseLayout.setSelection(courseLayoutAdapter.getPosition(selectedCourseLayout));
+        spinnerBoatClass.setSelection(adapter.getPosition(getSelectedBoatClass()));
+    }
+
+    private void setupCourseLayoutSpinner() {
+        courseLayoutAdapter = new ArrayAdapter<CourseLayouts>(getActivity(),
+                android.R.layout.simple_spinner_dropdown_item);
+        courseLayoutAdapter.addAll(getSelectedBoatClass().getPossibleCourseLayoutsWithTargetTime().keySet());
+        spinnerCourseLayout.setAdapter(courseLayoutAdapter);
+        spinnerCourseLayout.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                setSelectedCourseLayout((CourseLayouts) adapterView.getItemAtPosition(position));
+                // update target time
+                if (getSelectedBoatClass().getPossibleCourseLayoutsWithTargetTime().keySet()
+                        .contains(getSelectedCourseLayout())) {
+                setSelectedTargetTime((TargetTime) getSelectedBoatClass().getPossibleCourseLayoutsWithTargetTime().get(
+                        getSelectedCourseLayout()));
+                }
+                spinnerTargetTime.setSelection(targetTimeAdapter.getPosition(getSelectedTargetTime()));
+                recomputeCourseDesign();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
+        spinnerCourseLayout.setSelection(courseLayoutAdapter.getPosition(getSelectedCourseLayout()));
     }
 
     private void setupNumberOfRoundsSpinner() {
@@ -285,8 +273,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         spinnerNumberOfRounds.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-                selectedNumberOfRounds = (NumberOfRounds) adapterView.getItemAtPosition(position);
-                courseDesignComputer.setNumberOfRounds(selectedNumberOfRounds);
+                setSelectedNumberOfRounds((NumberOfRounds) adapterView.getItemAtPosition(position));
                 recomputeCourseDesign();
             }
 
@@ -295,7 +282,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             }
         });
 
-        spinnerNumberOfRounds.setSelection(adapter.getPosition(selectedNumberOfRounds));
+        spinnerNumberOfRounds.setSelection(adapter.getPosition(getSelectedNumberOfRounds()));
     }
 
     private void setupTargetTimeSpinner() {
@@ -305,8 +292,8 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
         spinnerTargetTime.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-                selectedTargetTime = (TargetTime) adapterView.getItemAtPosition(position);
-                courseDesignComputer.setTargetTime(selectedTargetTime);
+                setSelectedTargetTime((TargetTime) adapterView.getItemAtPosition(position));
+                courseDesignComputer.setTargetTime(getSelectedTargetTime());
                 recomputeCourseDesign();
             }
 
@@ -315,7 +302,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
             }
         });
 
-        spinnerTargetTime.setSelection(targetTimeAdapter.getPosition(selectedTargetTime));
+        spinnerTargetTime.setSelection(targetTimeAdapter.getPosition(getSelectedTargetTime()));
     }
 
     @Override
@@ -416,6 +403,66 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     public void onDestroy() {
         mMapView.onDestroy();
         super.onDestroy();
+    }
+
+    public BoatClassType getSelectedBoatClass() {
+        if (AppPreferences.getBoatClass(getActivity()) != null) {
+            return AppPreferences.getBoatClass(getActivity());
+        } else {
+            setSelectedBoatClass(BoatClassType.boatClass470erMen);
+            return AppPreferences.getBoatClass(getActivity());
+        }
+    }
+
+    public CourseLayouts getSelectedCourseLayout() {
+        if (AppPreferences.getCourseLayout(getActivity()) != null) {
+            return AppPreferences.getCourseLayout(getActivity());
+        } else {
+            setSelectedCourseLayout((CourseLayouts) getSelectedBoatClass().getPossibleCourseLayoutsWithTargetTime()
+                    .keySet().toArray().clone()[0]);
+            return AppPreferences.getCourseLayout(getActivity());
+        }
+    }
+
+    public NumberOfRounds getSelectedNumberOfRounds() {
+        if (AppPreferences.getNumberOfRounds(getActivity()) != null) {
+            return AppPreferences.getNumberOfRounds(getActivity());
+        } else {
+            setSelectedNumberOfRounds(NumberOfRounds.TWO);
+            return AppPreferences.getNumberOfRounds(getActivity());
+        }
+    }
+
+    public TargetTime getSelectedTargetTime() {
+        return selectedTargetTime;
+        /*if (AppPreferences.getTargetTime(getActivity()) != null) {
+            return AppPreferences.getTargetTime(getActivity());
+        } else {
+            setSelectedTargetTime(getSelectedBoatClass().getPossibleCourseLayoutsWithTargetTime().get(
+                    getSelectedCourseLayout()));
+            return AppPreferences.getTargetTime(getActivity());
+        }*/
+    }
+
+    public void setSelectedBoatClass(BoatClassType selectedBoatClass) {
+        AppPreferences.setBoatClass(getActivity(), selectedBoatClass);
+        courseDesignComputer.setBoatClass(getSelectedBoatClass());
+    }
+
+    public void setSelectedCourseLayout(CourseLayouts selectedCourseLayout) {
+        AppPreferences.setCourseLayout(getActivity(), selectedCourseLayout);
+        courseDesignComputer.setCourseLayout(getSelectedCourseLayout());
+    }
+
+    public void setSelectedNumberOfRounds(NumberOfRounds selectedNumberOfRounds) {
+        AppPreferences.setNumberOfRounds(getActivity(), selectedNumberOfRounds);
+        courseDesignComputer.setNumberOfRounds(getSelectedNumberOfRounds());
+    }
+
+    public void setSelectedTargetTime(TargetTime selectedTargetTime) {
+        this.selectedTargetTime  = selectedTargetTime;
+        /*AppPreferences.setTargetTime(getActivity(), selectedTargetTime);
+        courseDesignComputer.setTargetTime(getSelectedTargetTime());*/
     }
 
 }
