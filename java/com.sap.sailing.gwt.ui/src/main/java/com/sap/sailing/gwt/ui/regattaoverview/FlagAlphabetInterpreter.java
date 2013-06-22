@@ -17,11 +17,6 @@ public class FlagAlphabetInterpreter extends FlagAlphabetInterpretationTemplate 
     }
 
     @Override
-    protected String getTextForRunningRaceWithEarlyStarter() {
-        return stringMessages.raceIsRunningWithEarlyStarters();
-    }
-
-    @Override
     protected String getTextForFinishingRace() {
         return stringMessages.raceIsFinishing();
     }
@@ -58,12 +53,12 @@ public class FlagAlphabetInterpreter extends FlagAlphabetInterpretationTemplate 
 
     @Override
     protected String getTextForAnsweringPennantWithAlphaFlags() {
-        return stringMessages.startPostponedNoMoreRacingToday();
+        return stringMessages.startPostponed();
     }
 
     @Override
     protected String getTextForAnsweringPennantWithHotelFlags() {
-        return stringMessages.startPostponedFurtherSignalsAshore();
+        return stringMessages.startPostponed();
     }
 
     @Override
@@ -73,12 +68,12 @@ public class FlagAlphabetInterpreter extends FlagAlphabetInterpretationTemplate 
 
     @Override
     protected String getTextForNovemberWithAlphaFlags() {
-        return stringMessages.raceAbandonedNoMoreRacingToday();
+        return stringMessages.raceAbandoned();
     }
 
     @Override
     protected String getTextForNovemberWithHotelFlags() {
-        return stringMessages.raceAbandonedFurtherSignalsAshore();
+        return stringMessages.raceAbandoned();
     }
 
 }

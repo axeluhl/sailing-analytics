@@ -41,6 +41,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.gwt.ui.client.AnchorCell;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -347,6 +348,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
 
         });
+        raceStatusColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         Column<RegattaOverviewEntryDTO, String> raceCourseColumn = new Column<RegattaOverviewEntryDTO, String>(new ClickableTextCell()) {
             @Override
@@ -413,7 +415,20 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
                 StringBuffer additionalInformation = new StringBuffer();
                 boolean isInfoBefore = false;
+                if (entryDTO.raceInfo.lastLowerFlag != null && entryDTO.raceInfo.lastLowerFlag.equals(Flags.ALPHA)) {
+                    additionalInformation.append(stringMessages.noMoreRacingToday());
+                    isInfoBefore = true;
+                } else if (entryDTO.raceInfo.lastLowerFlag != null && entryDTO.raceInfo.lastLowerFlag.equals(Flags.HOTEL)) {
+                    additionalInformation.append(stringMessages.furtherSignalsAshore());
+                    isInfoBefore = true;
+                } else if (entryDTO.raceInfo.lastUpperFlag != null && entryDTO.raceInfo.lastUpperFlag.equals(Flags.XRAY) && entryDTO.raceInfo.isLastFlagDisplayed) {
+                    additionalInformation.append(stringMessages.earlyStarters());
+                    isInfoBefore = true;
+                }
                 if (entryDTO.raceInfo.pathfinderId != null) {
+                    if (isInfoBefore) {
+                        additionalInformation.append("  /  ");
+                    }
                     additionalInformation.append("Pathfinder: " + entryDTO.raceInfo.pathfinderId);
                     isInfoBefore = true;
                 }
