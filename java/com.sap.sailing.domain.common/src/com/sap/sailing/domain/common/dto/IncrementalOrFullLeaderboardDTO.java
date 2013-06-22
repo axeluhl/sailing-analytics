@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Allows for incremental serialization of a {@link LeaderboardDTO} by providing an implementation that refers to a previous
@@ -18,4 +19,9 @@ public interface IncrementalOrFullLeaderboardDTO extends Serializable {
      * to request this object will result in an {@link IllegalArgumentException}.
      */
     LeaderboardDTO getLeaderboardDTO(LeaderboardDTO previousVersion);
+
+    /**
+     * Time when the server sent out this object, in the server clock's time. 
+     */
+    Date getCurrentServerTime();
 }

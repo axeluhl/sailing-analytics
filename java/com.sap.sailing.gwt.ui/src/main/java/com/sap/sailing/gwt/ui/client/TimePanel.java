@@ -124,8 +124,8 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
             public void onValueChange(ValueChangeEvent<Double> newValue) {
                 if (timeSlider.getCurrentValue() != null) {
                     if (TimePanel.this.timer.getPlayMode() == PlayModes.Live) {
-                        // TODO bug 1372 only do this if canReplayWhileLive==true; otherwise pause and only allow going back to live
-                        // put timer into replay mode when user explicitly adjusts time; avoids having to press pause first
+                        // if canReplayWhileLive==false, playStateChanged(...) will ensure that the timer is paused when
+                        // reaching Replay mode
                         TimePanel.this.timer.setPlayMode(PlayModes.Replay);
                     }
                     TimePanel.this.timer.setTime(timeSlider.getCurrentValue().longValue());
@@ -395,7 +395,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         switch (playMode) {
         case Live:
             playModeLabel.setText(stringMessages.playModeLive());
-            timeDelayLabel.setText(stringMessages.timeDelay() + ": " + timer.getCurrentDelayInMillis() / 1000 + " s");
+            timeDelayLabel.setText(stringMessages.timeDelay() + ": " + timer.getLivePlayDelayInMillis() / 1000 + " s");
             timeDelayLabel.setVisible(true);
             timeSlider.setEnabled(true);
             playSpeedBox.setEnabled(false);
@@ -463,7 +463,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     @SuppressWarnings("unchecked")
     public T getSettings() {
         TimePanelSettings result = new TimePanelSettings();
-        result.setDelayToLivePlayInSeconds(timer.getLivePlayDelayInMillis()/1000);
         result.setRefreshInterval(timer.getRefreshInterval());
         return (T) result;
     }
@@ -485,14 +484,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     @Override
     public void updateSettings(T newSettings) {
-        boolean delayChanged = newSettings.getDelayToLivePlayInSeconds() != getSettings().getDelayToLivePlayInSeconds();
-        if (delayChanged) {
-            // explicit change always goes through and disables further automatic delay updates in timer
-            timer.setLivePlayDelayInMillisExplicitly(1000l * newSettings.getDelayToLivePlayInSeconds());
-            if (timer.getPlayMode() == PlayModes.Live) {
-                timeDelayLabel.setText(String.valueOf(newSettings.getDelayToLivePlayInSeconds()) + " s");
-            }
-        }
         timer.setRefreshInterval(newSettings.getRefreshInterval());
     }
 

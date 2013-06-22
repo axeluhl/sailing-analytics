@@ -338,7 +338,8 @@ public class DomainFactoryImpl implements DomainFactory {
     public CompetitorDTO convertToCompetitorDTO(Competitor c) {
         CompetitorDTO competitorDTO = weakCompetitorDTOCache.get(c);
         if (competitorDTO == null) {
-            CountryCode countryCode = c.getTeam().getNationality().getCountryCode();
+            final Nationality nationality = c.getTeam().getNationality();
+            CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
             competitorDTO = new CompetitorDTOImpl(c.getName(), countryCode == null ? ""
                     : countryCode.getTwoLetterISOCode(),
                     countryCode == null ? "" : countryCode.getThreeLetterIOCCode(), countryCode == null ? ""
