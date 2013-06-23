@@ -34,6 +34,13 @@ public class CreationCount {
         return countJson;
     }
 
+    public void add(CreationCount toAdd) {
+        leaderboardCount = leaderboardCount + toAdd.leaderboardCount;
+        leaderboardGroupCount = leaderboardGroupCount + toAdd.leaderboardGroupCount;
+        eventCount = eventCount + toAdd.eventCount;
+        regattaCount = regattaCount + toAdd.regattaCount;
+    }
+
 
    
 }

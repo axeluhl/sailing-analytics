@@ -50,7 +50,6 @@ public class MasterDataByLeaderboardGroupJsonPostServlet extends AbstractJsonHtt
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         domainFactory = DomainFactory.INSTANCE;
-        //Initialize just in case the servlet does not even run any import operations
         creationCount = new CreationCount();
         JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
 
@@ -77,7 +76,7 @@ public class MasterDataByLeaderboardGroupJsonPostServlet extends AbstractJsonHtt
                 LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
                         .deserialize(leaderBoardGroupMasterDataJson);
                 ImportMasterDataOperation op = new ImportMasterDataOperation(masterData);
-                creationCount = getService().apply(op);
+                creationCount.add(getService().apply(op));
             }
         } catch (ParseException e) {
             resp.sendError(400);

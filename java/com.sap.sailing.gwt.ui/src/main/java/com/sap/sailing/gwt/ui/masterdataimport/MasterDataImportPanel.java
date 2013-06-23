@@ -242,6 +242,7 @@ public class MasterDataImportPanel extends VerticalPanel {
                     return;
                 }
                 JSONArray leaderboardGroups = JSONParser.parseStrict(body).isArray();
+                leaderboardgroupListBox.setVisibleItemCount(leaderboardGroups.size());
                 for (int i = 0; i < leaderboardGroups.size(); i++) {
                     JSONString leaderboardGroupName = leaderboardGroups.get(i).isString();
                     leaderboardgroupListBox.addItem(leaderboardGroupName.stringValue());
@@ -294,7 +295,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     private void addContentToLeftPanel(VerticalPanel contentPanel) {
         contentPanel.add(new Label("Leaderboard Groups:"));
 
-        leaderboardgroupListBox = new ListBox();
+        leaderboardgroupListBox = new ListBox(true);
         contentPanel.add(leaderboardgroupListBox);
 
         importLeaderboardGroupsButton = new Button("Import selected LGs");
