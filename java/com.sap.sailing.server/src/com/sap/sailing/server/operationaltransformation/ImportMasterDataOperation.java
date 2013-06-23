@@ -1,7 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -116,7 +115,7 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
     }
 
     private Iterable<Series> createSeries(Iterable<SeriesMasterData> series, RacingEventService toState) {
-        Set<Series> result = new HashSet<Series>();
+        List<Series> result = new ArrayList<Series>();
         for (SeriesMasterData singleSeriesData : series) {
             String name = singleSeriesData.getName();
             boolean isMedal = singleSeriesData.isMedal();
