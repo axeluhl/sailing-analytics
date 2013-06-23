@@ -88,6 +88,9 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         super.onStart();
         unregisterOnAllRaces();
         registerOnAllRaces();
+        for (ManagedRace race : managedRacesById.values()) {
+            onRaceStateStatusChanged(race.getState());
+        }
     }
 
     @Override
@@ -173,9 +176,9 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
             if (adapterItems.get(i) instanceof RaceListDataTypeRace) {
                 RaceListDataTypeRace raceView = (RaceListDataTypeRace) adapterItems.get(i);
                 ManagedRace race = raceView.getRace();
-                if (changedState == null
-                        || (race.getState().equals(changedState) && !raceView.getRace().equals(this.selectedRace))) {
-                    raceView.setUpdateIndicator(true);
+                if (changedState != null && race.getState().equals(changedState)) {
+                    boolean allowUpdateIndicator = !raceView.getRace().equals(this.selectedRace);
+                    raceView.onStatusChanged(changedState.getStatus(), allowUpdateIndicator);
                 }
             }
         }
@@ -189,7 +192,7 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         RaceListDataType selectedItem = adapter.getItem(position);
         if (selectedItem instanceof RaceListDataTypeRace) {
             RaceListDataTypeRace selectedElement = (RaceListDataTypeRace) selectedItem;
-            selectedElement.setUpdateIndicator(false);
+            selectedElement.setUpdateIndicatorVisible(false);
             ((ImageView) view.findViewById(R.id.Welter_Cell_UpdateLabel)).setVisibility(View.GONE);
 
             selectedRace = selectedElement.getRace();

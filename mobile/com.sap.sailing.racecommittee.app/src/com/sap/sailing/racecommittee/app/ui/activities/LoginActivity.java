@@ -15,7 +15,8 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogFragmentButtonListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.BaseDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.CourseAreaListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
@@ -24,7 +25,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelec
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
 public class LoginActivity extends BaseActivity implements EventSelectedListenerHost,
-        CourseAreaSelectedListenerHost, DialogFragmentButtonListener {
+        CourseAreaSelectedListenerHost, DialogListenerHost {
     private final static String TAG = LoginActivity.class.getName();
 
     private LoginDialog loginDialog;
@@ -108,34 +109,43 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         loginDialog.show(getFragmentManager(), "LoginDialog");
     }
 
-    public void onDialogNegativeButton() { /* nothing here... */
-    }
+    @Override
+    public DialogResultListener getListener() {
+        return new DialogResultListener() {
+            
+            @Override
+            public void onDialogPositiveButton(BaseDialogFragment dialog) {
+                switch (loginDialog.getSelectedLoginType()) {
+                case OFFICER:
+                    ExLog.i(TAG, "Communication with backend is active.");
+                    AppPreferences.setSendingActive(LoginActivity.this, true);
+                    break;
+                case VIEWER:
+                    ExLog.i(TAG, "Communication with backend is inactive.");
+                    AppPreferences.setSendingActive(LoginActivity.this, false);
+                    break;
+                default:
+                    Toast.makeText(LoginActivity.this, "Invalid login type. Ignoring.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-    public void onDialogPositiveButton() {
-        switch (loginDialog.getSelectedLoginType()) {
-        case OFFICER:
-            ExLog.i(TAG, "Communication with backend is active.");
-            AppPreferences.setSendingActive(this, true);
-            break;
-        case VIEWER:
-            ExLog.i(TAG, "Communication with backend is inactive.");
-            AppPreferences.setSendingActive(this, false);
-            break;
-        default:
-            Toast.makeText(this, "Invalid login type. Ignoring.", Toast.LENGTH_SHORT).show();
-            return;
-        }
+                if (selectedCourse == null) {
+                    Toast.makeText(LoginActivity.this, "The selected course was lost.", Toast.LENGTH_LONG).show();
+                    ExLog.e(TAG, "Course reference was not set - cannot start racing activity.");
+                    return;
+                }
 
-        if (selectedCourse == null) {
-            Toast.makeText(this, "The selected course was lost.", Toast.LENGTH_LONG).show();
-            ExLog.e(TAG, "Course reference was not set - cannot start racing activity.");
-            return;
-        }
-
-        Toast.makeText(this, selectedCourse.getId().toString(), Toast.LENGTH_LONG).show();
-        Intent message = new Intent(this, RacingActivity.class);
-        message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, selectedCourse.getId());
-        fadeActivity(message);
+                Toast.makeText(LoginActivity.this, selectedCourse.getId().toString(), Toast.LENGTH_LONG).show();
+                Intent message = new Intent(LoginActivity.this, RacingActivity.class);
+                message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, selectedCourse.getId());
+                fadeActivity(message);
+            }
+            
+            @Override
+            public void onDialogNegativeButton(BaseDialogFragment dialog) {
+                /* nothing here... */
+            }
+        };
     }
 
 }

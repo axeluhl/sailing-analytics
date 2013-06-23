@@ -23,13 +23,14 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogFragmentButtonListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.BaseDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
 public abstract class NamedListFragment<T extends Named> extends ListFragment implements LoadClient<Collection<T>>,
-        DialogFragmentButtonListener {
+        DialogListenerHost {
     
     private static String TAG = NamedListFragment.class.getName();
     
@@ -45,8 +46,8 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
 
     protected abstract void loadItems(ReadonlyDataManager manager);
 
-    protected NamedArrayAdapter<T> createAdapter(Context context, int layoutId, ArrayList<T> items) {
-        return new NamedArrayAdapter<T>(context, layoutId, items);
+    protected NamedArrayAdapter<T> createAdapter(Context context, ArrayList<T> items) {
+        return new NamedArrayAdapter<T>(context, items);
     }
 
     protected void loadItems() {
@@ -71,7 +72,7 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
         addHeader();
 
         namedList = new ArrayList<T>();
-        listAdapter = createAdapter(getActivity(), android.R.layout.simple_list_item_single_choice, namedList);
+        listAdapter = createAdapter(getActivity(), /*android.R.layout.simple_list_item_single_choice, */namedList);
 
         this.getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         this.setListAdapter(listAdapter);
@@ -138,11 +139,20 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
             ExLog.e(TAG, String.format("FragmentManager was not available to display message: %s", message));
         }
     }
-
-    public void onDialogNegativeButton() {
-    }
-
-    public void onDialogPositiveButton() {
-        loadItems();
+    
+    @Override
+    public DialogResultListener getListener() {
+        return new DialogResultListener() {
+            
+            @Override
+            public void onDialogPositiveButton(BaseDialogFragment dialog) {
+                loadItems();
+            }
+            
+            @Override
+            public void onDialogNegativeButton(BaseDialogFragment dialog) {
+                // no operation
+            }
+        };
     }
 }

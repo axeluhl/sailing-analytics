@@ -32,9 +32,9 @@ public class PositionedMarkImpl extends MarkImpl implements PositionedMark {
 
     @Override
     public Bearing getBearingFrom(Position other) {
-        double lat1R = getPosition().getLatRad();
-        double lat2R = other.getLatRad();
-        double dLngR = other.getLngRad() - getPosition().getLngRad();
+        double lat1R = other.getLatRad();
+        double lat2R = getPosition().getLatRad();
+        double dLngR = getPosition().getLngRad()-other.getLngRad();
         double a = Math.sin(dLngR) * Math.cos(lat2R);
         double b = Math.cos(lat1R) * Math.sin(lat2R) - Math.sin(lat1R) * Math.cos(lat2R) * Math.cos(dLngR);
         double bearingD = Math.toDegrees(Math.atan2(a, b));

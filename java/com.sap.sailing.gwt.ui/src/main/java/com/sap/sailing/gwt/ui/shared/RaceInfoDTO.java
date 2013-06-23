@@ -26,6 +26,7 @@ public class RaceInfoDTO implements IsSerializable {
     public Long gateLineOpeningTime;
     public boolean isRaceAbortedInPassBefore;
     public String seriesName;
+    public Date protestFinishTime;
     
     // for GWT serialization
     public RaceInfoDTO() { }
