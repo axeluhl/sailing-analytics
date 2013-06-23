@@ -90,7 +90,7 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
                 toggleDetailPanel(false);
             }
         });
-        containerPanel.addSouth(detailPanel, 120);
+        containerPanel.addSouth(detailPanel, 110);
     }
 
     public static RegattaRaceStatesSettings createRegattaRaceStatesSettingsFromURL() {
