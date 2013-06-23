@@ -454,21 +454,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                     additionalInformation.append(stringMessages.earlyStarters());
                     isInfoBefore = true;
                 }
-                if (entryDTO.raceInfo.pathfinderId != null) {
-                    if (isInfoBefore) {
-                        additionalInformation.append("  /  ");
-                    }
-                    additionalInformation.append("Pathfinder: " + entryDTO.raceInfo.pathfinderId);
-                    isInfoBefore = true;
-                }
-                if (entryDTO.raceInfo.gateLineOpeningTime != null) {
-                    if (isInfoBefore) {
-                        additionalInformation.append("  /  ");
-                    }
-                    additionalInformation.append("GateLineOpeningTime: "
-                            + (entryDTO.raceInfo.gateLineOpeningTime / (60 * 1000)) + " minutes");
-                    isInfoBefore = true;
-                }
                 if (entryDTO.raceInfo.protestFinishTime != null) {
                     if (isInfoBefore) {
                         additionalInformation.append("  /  ");
