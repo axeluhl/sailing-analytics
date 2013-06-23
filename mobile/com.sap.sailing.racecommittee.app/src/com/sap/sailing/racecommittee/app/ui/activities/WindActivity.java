@@ -37,6 +37,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
+import com.sap.sailing.racecommittee.app.utils.GeoUtils;
 
 public class WindActivity extends BaseActivity implements CompassDirectionListener, LocationListener {
 
@@ -194,8 +195,8 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
     @Override
     public void onLocationChanged(Location location) {
         currentLocation = location;
-        latitudeEditText.setText(String.valueOf(location.getLatitude()));
-        longitudeEditText.setText(String.valueOf(location.getLongitude()));
+        latitudeEditText.setText(String.valueOf(GeoUtils.getDegMinSecFormatForDecimalDegree(location.getLatitude())));
+        longitudeEditText.setText(String.valueOf(GeoUtils.getDegMinSecFormatForDecimalDegree(location.getLongitude())));
         sendButton.setEnabled(true);
     }
 
