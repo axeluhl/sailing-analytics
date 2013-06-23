@@ -432,7 +432,7 @@ if [[ "$@" == "remote-deploy" ]]; then
     REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/servers'`
     REMOTE_SERVER="$REMOTE_HOME/$SERVER"
 
-    read -s -n1 -p "I will deploy $SERVERS_HOME/$SERVER to $REMOTE_SERVER_LOGIN:$REMOTE_SERVER. Is this correct (y/n)? " answer
+    read -s -n1 -p "I will deploy $active_branch to $REMOTE_SERVER_LOGIN:$REMOTE_SERVER. Is this correct (y/n)? " answer
     case $answer in
     "Y" | "y") OK=1;;
     *) echo "Aborting... nothing has been changed on remote server!"
@@ -446,9 +446,9 @@ if [[ "$@" == "remote-deploy" ]]; then
     $SSH_CMD "rm -rf $REMOTE_SERVER/org.eclipse*.*"
     $SSH_CMD "rm -rf $REMOTE_SERVER/configuration/org.eclipse*.*"
 
-    $SCP_CMD $SERVERS_HOME/$SERVER/org.eclipse* $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
-    $SCP_CMD $SERVERS_HOME/$SERVER/configuration/org.eclipse* $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration
-    $SCP_CMD $SERVERS_HOME/$SERVER/plugins/*.jar $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/plugins/
+    $SCP_CMD $p2PluginRepository/configuration/config.ini $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
+    $SCP_CMD $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
+    $SCP_CMD $p2PluginRepository/plugins/*.jar $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/plugins/
 
     echo "Deployed successfully. I did NOT change any configuration, only code."
 
