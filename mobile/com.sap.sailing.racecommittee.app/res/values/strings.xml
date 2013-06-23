@@ -116,6 +116,7 @@
     <string name="set_pathfinder">Set Pathfinder</string>
     <string name="set_pathfinder_title">Choose the pathfinder</string>
     <string name="protest_dialog_title">Set the protest start time</string>
+    <string name="finished_dialog_title">Set the time when the race finished</string>
     <string name="protest_start_time">Protest start time: %s</string>
     <string name="protest_flag_set">Protest flag is displayed for group %s.</string>
     <string name="choose_running_course_lr">Please choose the course</string>

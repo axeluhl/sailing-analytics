@@ -670,18 +670,13 @@ public interface StringMessages extends Messages {
     String stopConnectionToMaster();
     String asLink();
     String raceIsRunning();
-    String raceIsRunningWithEarlyStarters();
     String raceIsFinishing();
     String raceIsFinished();
     String raceIsScheduled();
     String raceIsInStartphase();
     String generalRecall();
     String startPostponed();
-    String startPostponedNoMoreRacingToday();
-    String startPostponedFurtherSignalsAshore();
     String raceAbandoned();
-    String raceAbandonedNoMoreRacingToday();
-    String raceAbandonedFurtherSignalsAshore();
     String stopAllReplicas();
     String warningServerIsReplica();
     String dropReplicaConnection();
@@ -689,4 +684,9 @@ public interface StringMessages extends Messages {
     String competitorFilterExplanation();
     String protestTimeFinishesAt();
     String protestTimeFinishedAt();
+    String flags();
+    String lastUpdate();
+    String earlyStarters();
+    String noMoreRacingToday();
+    String furtherSignalsAshore();
 }

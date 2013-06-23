@@ -10,7 +10,7 @@ import java.util.Map;
 
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.cell.client.ImageResourceCell;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -18,7 +18,9 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -38,6 +40,8 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.gwt.ui.client.AnchorCell;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -73,7 +77,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     private final String eventIdAsString;
-    private final FlagImageResolver flagImageResolver;
 
     private EventDTO eventDTO;
     private List<RaceGroupDTO> raceGroupDTOs;
@@ -90,6 +93,13 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private static RegattaRaceStatesTableResources tableRes = GWT.create(RegattaRaceStatesTableResources.class);
 
     private final static String LOCAL_STORAGE_REGATTA_OVERVIEW_KEY = "sailingAnalytics.regattaOverview.settings.";
+    
+    private static final String STYLE_NAME_PREFIX = "RegattaOverview-";
+    private static final String STYLE_CIRCLE = STYLE_NAME_PREFIX + "circle";
+    private static final String STYLE_CIRCLE_BLUE = "circleBlue";
+    private static final String STYLE_CIRCLE_YELLOW = "circleYellow";
+    private static final String STYLE_CIRCLE_GREEN = "circleGreen";
+    private static final String STYLE_CIRCLE_GREY = "circleGrey";
 
     /**
      * @param timerToSynchronize
@@ -101,7 +111,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.eventIdAsString = eventIdAsString;
-        this.flagImageResolver = new FlagImageResolver();
         this.allEntries = new ArrayList<RegattaOverviewEntryDTO>();
         this.timerToSynchronize = timerToSynchronize;
 
@@ -165,9 +174,9 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             protected void handleSuccess(List<RegattaOverviewEntryDTO> result) {
                 final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
                 Date serverTimeDuringRequest = null;
-                for (RegattaOverviewEntryDTO roeDto : result) {
-                    if (roeDto.currentServerTime != null) {
-                        serverTimeDuringRequest = roeDto.currentServerTime;
+                for (RegattaOverviewEntryDTO entryDTO : result) {
+                    if (entryDTO.currentServerTime != null) {
+                        serverTimeDuringRequest = entryDTO.currentServerTime;
                     }
                 }
                 updateTable(result);
@@ -184,6 +193,36 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
         ListHandler<RegattaOverviewEntryDTO> regattaOverviewListHandler = new ListHandler<RegattaOverviewEntryDTO>(
                 regattaOverviewDataProvider.getList());
+        
+        SafeHtmlCell circleCell = new SafeHtmlCell();
+        Column<RegattaOverviewEntryDTO, SafeHtml> circleColumn = new Column<RegattaOverviewEntryDTO, SafeHtml>(circleCell) {
+
+            @Override
+            public SafeHtml getValue(RegattaOverviewEntryDTO entryDTO) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                builder.append(SafeHtmlUtils.fromTrustedString("<div class=\"" + STYLE_CIRCLE + " "));
+                switch (entryDTO.raceInfo.lastStatus) {
+                case RUNNING:
+                case FINISHING:
+                    builder.append(SafeHtmlUtils.fromTrustedString(STYLE_CIRCLE_GREEN));
+                    break;
+                case FINISHED:
+                    builder.append(SafeHtmlUtils.fromTrustedString(STYLE_CIRCLE_BLUE));
+                    break;
+                case SCHEDULED:
+                case STARTPHASE:
+                    builder.append(SafeHtmlUtils.fromTrustedString(STYLE_CIRCLE_YELLOW));
+                    break;
+                default:
+                    builder.append(SafeHtmlUtils.fromTrustedString(STYLE_CIRCLE_GREY));
+                    break;
+                }
+                
+                builder.append(SafeHtmlUtils.fromTrustedString("\"></div>"));
+                return builder.toSafeHtml();
+            }
+            
+        };
 
         TextColumn<RegattaOverviewEntryDTO> courseAreaColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
@@ -196,7 +235,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
             @Override
             public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
-                return left.courseAreaName.compareTo(right.courseAreaName);
+                return new NaturalComparator().compare(left.courseAreaName, right.courseAreaName);
             }
 
         });
@@ -219,7 +258,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
             @Override
             public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
-                return left.regattaDisplayName.compareTo(right.regattaDisplayName);
+                return new NaturalComparator().compare(left.regattaDisplayName, right.regattaDisplayName);
             }
 
         });
@@ -272,6 +311,27 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
         };
         raceStartTimeColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        raceStartTimeColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(raceStartTimeColumn, new Comparator<RegattaOverviewEntryDTO>() {
+
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                int result = 0;
+                if (left.raceInfo.startTime != null && right.raceInfo.startTime != null) {
+                    result = left.raceInfo.startTime.compareTo(right.raceInfo.startTime);
+                } else if (left.raceInfo.startTime == null && right.raceInfo.startTime == null) {
+                    result = 0;
+                } else if (left.raceInfo.startTime == null) {
+                    result = 1;
+                } else if (right.raceInfo.startTime == null) {
+                    result = -1;
+                } else {
+                    result = 0;
+                }
+                return result;
+            }
+
+        });
 
         TextColumn<RegattaOverviewEntryDTO> raceStatusColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
@@ -280,6 +340,16 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         entryDTO.raceInfo.lastLowerFlag, entryDTO.raceInfo.isLastFlagDisplayed);
             }
         };
+        raceStatusColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(raceStatusColumn, new Comparator<RegattaOverviewEntryDTO>() {
+
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                return left.raceInfo.lastStatus.compareTo(right.raceInfo.lastStatus);
+            }
+
+        });
+        raceStatusColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         Column<RegattaOverviewEntryDTO, String> raceCourseColumn = new Column<RegattaOverviewEntryDTO, String>(new ClickableTextCell()) {
             @Override
@@ -307,49 +377,80 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         });
         raceCourseColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
-        Column<RegattaOverviewEntryDTO, ImageResource> lastUpperFlagColumn = new Column<RegattaOverviewEntryDTO, ImageResource>(
-                new ImageResourceCell()) {
-            @Override
-            public ImageResource getValue(RegattaOverviewEntryDTO entryDTO) {
-                return flagImageResolver.resolveFlagToImage(entryDTO.raceInfo.lastUpperFlag);
-            }
-        };
+        SafeHtmlCell flagsCell = new SafeHtmlCell();
+        Column<RegattaOverviewEntryDTO, SafeHtml> flagColumn = new Column<RegattaOverviewEntryDTO, SafeHtml>(flagsCell) {
 
-        Column<RegattaOverviewEntryDTO, ImageResource> lastLowerFlagColumn = new Column<RegattaOverviewEntryDTO, ImageResource>(
-                new ImageResourceCell()) {
             @Override
-            public ImageResource getValue(RegattaOverviewEntryDTO entryDTO) {
-                return flagImageResolver.resolveFlagToImage(entryDTO.raceInfo.lastLowerFlag);
+            public SafeHtml getValue(RegattaOverviewEntryDTO entryDTO) {
+                String tooltip = "";
+                if (entryDTO.raceInfo.lastUpperFlag != null) {
+                    tooltip = entryDTO.raceInfo.lastUpperFlag.name();
+                    if (entryDTO.raceInfo.lastLowerFlag != null && !entryDTO.raceInfo.lastLowerFlag.equals(Flags.NONE)) {
+                        tooltip += " over " + entryDTO.raceInfo.lastLowerFlag.name();
+                    }
+                }
+                return SailingFlagsBuilder.render(
+                        entryDTO.raceInfo.lastUpperFlag,
+                        entryDTO.raceInfo.lastLowerFlag,
+                        entryDTO.raceInfo.isLastFlagDisplayed,
+                        tooltip);
+            }
+            
+        };
+        flagColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        
+        TextColumn<RegattaOverviewEntryDTO> lastUpdateColumn = new TextColumn<RegattaOverviewEntryDTO>() {
+            @Override
+            public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                String lastUpdateTime = "-";
+                if (entryDTO.raceInfo.lastUpdateTime != null) {
+                    lastUpdateTime = timeFormatter.format(entryDTO.raceInfo.lastUpdateTime);
+                }
+                return lastUpdateTime;
             }
         };
-
-        Column<RegattaOverviewEntryDTO, ImageResource> lastFlagDirectionColumn = new Column<RegattaOverviewEntryDTO, ImageResource>(
-                new ImageResourceCell()) {
-            @Override
-            public ImageResource getValue(RegattaOverviewEntryDTO entryDTO) {
-                if (entryDTO.raceInfo.lastUpperFlag != null)
-                    return flagImageResolver.resolveFlagDirectionToImage(entryDTO.raceInfo.isLastFlagDisplayed);
-                else
-                    return null;
-            }
-        };
+        lastUpdateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         TextColumn<RegattaOverviewEntryDTO> raceAdditionalInformationColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
                 StringBuffer additionalInformation = new StringBuffer();
-                if (entryDTO.raceInfo.pathfinderId != null) {
-                    additionalInformation.append("Pathfinder: " + entryDTO.raceInfo.pathfinderId);
+                boolean isInfoBefore = false;
+                if (entryDTO.raceInfo.lastLowerFlag != null && entryDTO.raceInfo.lastLowerFlag.equals(Flags.ALPHA)) {
+                    additionalInformation.append(stringMessages.noMoreRacingToday());
+                    isInfoBefore = true;
+                } else if (entryDTO.raceInfo.lastLowerFlag != null && entryDTO.raceInfo.lastLowerFlag.equals(Flags.HOTEL)) {
+                    additionalInformation.append(stringMessages.furtherSignalsAshore());
+                    isInfoBefore = true;
+                } else if (entryDTO.raceInfo.lastUpperFlag != null && entryDTO.raceInfo.lastUpperFlag.equals(Flags.XRAY) && entryDTO.raceInfo.isLastFlagDisplayed) {
+                    additionalInformation.append(stringMessages.earlyStarters());
+                    isInfoBefore = true;
                 }
-                if (entryDTO.raceInfo.pathfinderId != null && entryDTO.raceInfo.gateLineOpeningTime != null) {
-                    additionalInformation.append("  /  ");
+                if (entryDTO.raceInfo.pathfinderId != null) {
+                    if (isInfoBefore) {
+                        additionalInformation.append("  /  ");
+                    }
+                    additionalInformation.append("Pathfinder: " + entryDTO.raceInfo.pathfinderId);
+                    isInfoBefore = true;
                 }
                 if (entryDTO.raceInfo.gateLineOpeningTime != null) {
+                    if (isInfoBefore) {
+                        additionalInformation.append("  /  ");
+                    }
                     additionalInformation.append("GateLineOpeningTime: "
                             + (entryDTO.raceInfo.gateLineOpeningTime / (60 * 1000)) + " minutes");
+                    isInfoBefore = true;
+                }
+                if (entryDTO.raceInfo.finishedTime != null) {
+                    if (isInfoBefore) {
+                        additionalInformation.append("  /  ");
+                    }
+                    additionalInformation.append("Finished at: "
+                            + (timeFormatter.format(entryDTO.raceInfo.finishedTime)));
+                    isInfoBefore = true;
                 }
                 if (entryDTO.raceInfo.protestFinishTime != null) {
-                    if (entryDTO.raceInfo.pathfinderId != null || entryDTO.raceInfo.gateLineOpeningTime != null) {
+                    if (isInfoBefore) {
                         additionalInformation.append("  /  ");
                     }
                     Date now = new Date();
@@ -366,6 +467,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
         };
 
+        table.addColumn(circleColumn, "");
         table.addColumn(courseAreaColumn, stringMessages.courseArea());
         table.addColumn(regattaNameColumn, stringMessages.regatta());
         table.addColumn(seriesNameColumn, stringMessages.series());
@@ -374,12 +476,13 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         table.addColumn(raceStartTimeColumn, stringMessages.startTime());
         table.addColumn(raceStatusColumn, stringMessages.status());
         table.addColumn(raceCourseColumn, stringMessages.course());
-        table.addColumn(lastUpperFlagColumn, stringMessages.lastUpperFlag());
-        table.addColumn(lastLowerFlagColumn, stringMessages.lastLowerFlag());
-        table.addColumn(lastFlagDirectionColumn, stringMessages.flagStatus());
+        table.addColumn(flagColumn, stringMessages.flags());
+        table.addColumn(lastUpdateColumn, stringMessages.lastUpdate());
         table.addColumn(raceAdditionalInformationColumn, stringMessages.additionalInformation());
+        
         table.addColumnSortHandler(regattaOverviewListHandler);
-
+        table.getColumnSortList().push(courseAreaColumn);
+        
         return table;
     }
 
