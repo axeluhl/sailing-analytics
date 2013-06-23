@@ -132,7 +132,7 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
 
         for (EventMasterData event : events) {
             String id = event.getId();
-            Event existingEvent = toState.getEvent(id);
+            Event existingEvent = toState.getEvent(UUID.fromString(id));
             if (existingEvent == null) {
                 String name = event.getName();
                 String pubString = event.getPubUrl();
