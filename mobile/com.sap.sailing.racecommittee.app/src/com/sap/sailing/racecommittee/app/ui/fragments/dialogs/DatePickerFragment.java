@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
+import com.sap.sailing.racecommittee.app.R;
+
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -59,7 +61,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
                 DatePickerFragment.this.onDateSet(picker, picker.getYear(), picker.getMonth(), picker.getDayOfMonth());
             }
         });
-        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int which) {
                 DatePickerFragment.this.onDismiss(dialogInterface);

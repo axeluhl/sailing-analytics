@@ -14,18 +14,16 @@ public class FinishingTimeFinder extends RaceLogAnalyzer<TimePoint> {
 
     @Override
     protected TimePoint performAnalyzation() {
-        TimePoint finishingTime = null;
-        
-        for (RaceLogEvent event : getPassEvents()) {
+        for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogRaceStatusEvent) {
                 RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
                 if (statusEvent.getNextStatus().equals(RaceLogRaceStatus.FINISHING)) {
-                    finishingTime = statusEvent.getTimePoint();
+                    return statusEvent.getTimePoint();
                 }
             }
         }
         
-        return finishingTime;
+        return null;
     }
 
 }

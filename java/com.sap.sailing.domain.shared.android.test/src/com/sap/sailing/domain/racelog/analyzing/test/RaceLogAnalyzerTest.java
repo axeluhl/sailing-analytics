@@ -4,15 +4,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 import org.junit.Before;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 
-public abstract class RaceLogAnalyzerTest<AnalyzerType> {
+public abstract class RaceLogAnalyzerTest<AnalyzerType extends RaceLogAnalyzer<?>> {
 
     protected AnalyzerType analyzer;
     protected RaceLog raceLog;
@@ -26,11 +28,15 @@ public abstract class RaceLogAnalyzerTest<AnalyzerType> {
     protected abstract AnalyzerType createAnalyzer(RaceLog raceLog);
     
     protected static <T extends RaceLogEvent> T createEvent(Class<T> type, long milliseconds) {
-        return createEvent(type, milliseconds, 0, "");
+        return createEvent(type, milliseconds, 0, UUID.randomUUID());
     }
     
     protected static <T extends RaceLogEvent> T createEvent(Class<T> type, long milliseconds, Serializable id) {
         return createEvent(type, milliseconds, 0, id);
+    }
+    
+    protected static <T extends RaceLogEvent> T createEvent(Class<T> type, long milliseconds, int passId) {
+        return createEvent(type, milliseconds, passId, UUID.randomUUID());
     }
     
     protected static <T extends RaceLogEvent> T createEvent(Class<T> type, long milliseconds, int passId, Serializable id) {

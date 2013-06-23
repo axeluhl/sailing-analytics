@@ -18,8 +18,8 @@ import com.sap.sailing.racecommittee.app.R;
  */
 public class NamedArrayAdapter<T extends Named> extends ArrayAdapter<T> {
 
-    public NamedArrayAdapter(Context context, int textViewResourceId, List<T> namedList) {
-        super(context, textViewResourceId, namedList);
+    public NamedArrayAdapter(Context context, List<T> namedList) {
+        super(context, 0, namedList);
     }
 
     @Override

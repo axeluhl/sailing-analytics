@@ -5,13 +5,13 @@ import android.app.Fragment;
 public abstract class FragmentAttachedDialogFragment extends BaseDialogFragment {
 
     @Override
-    protected DialogFragmentButtonListener getHost() {
+    protected DialogListenerHost getHost() {
         Fragment targetFragment = getTargetFragment();
-        if (targetFragment instanceof DialogFragmentButtonListener) {
-            return (DialogFragmentButtonListener) targetFragment;
+        if (targetFragment instanceof DialogListenerHost) {
+            return (DialogListenerHost) targetFragment;
         }
         throw new IllegalStateException(String.format("Instance of %s must be attached to instances of %s.",
-                FragmentAttachedDialogFragment.class.getName(), DialogFragmentButtonListener.class.getName()));
+                FragmentAttachedDialogFragment.class.getName(), DialogListenerHost.class.getName()));
     }
 
 }

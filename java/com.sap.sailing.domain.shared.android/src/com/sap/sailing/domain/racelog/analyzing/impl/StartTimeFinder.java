@@ -13,15 +13,13 @@ public class StartTimeFinder extends RaceLogAnalyzer<TimePoint> {
 
     @Override
     protected TimePoint performAnalyzation() {
-        TimePoint startTime = null;
-        
-        for (RaceLogEvent event : getPassEvents()) {
+        for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogStartTimeEvent) {
-                startTime = ((RaceLogStartTimeEvent) event).getStartTime();
+                return ((RaceLogStartTimeEvent) event).getStartTime();
             }
         }
         
-        return startTime;
+        return null;
     }
 
 }

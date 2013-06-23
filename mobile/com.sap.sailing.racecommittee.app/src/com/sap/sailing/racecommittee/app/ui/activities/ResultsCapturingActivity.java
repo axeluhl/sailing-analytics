@@ -1,38 +1,44 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.io.File;
+import java.io.FileOutputStream;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
+import android.hardware.Camera.PictureCallback;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.PhotoAdapter;
+import com.sap.sailing.racecommittee.app.ui.views.CameraView;
 import com.sap.sailing.racecommittee.app.utils.MailHelper;
 
 public class ResultsCapturingActivity extends BaseActivity {
-    private static int FINISHER_IMAGE_REQUEST_CODE = 1337;
-
     private static String ARGUMENTS_KEY_SUBJECT = "subject";
     private static String ARGUMENTS_KEY_TEXT = "text";
 
+    private Camera camera; 
+    private CameraView cameraView;
+
     private int currentImageIndex;
     private File currentImageFile;
-    private PhotoAdapter listAdapter;
+    private PhotoAdapter photoList;
 
     private EditText subjectEditText;
     private EditText bodyEditText;
@@ -58,14 +64,13 @@ public class ResultsCapturingActivity extends BaseActivity {
         createAndAdvanceImageFile();
 
         setupListView();
+        setupCameraView();
 
         Button footer = (Button) findViewById(R.id.results_capturing_view_button_add_photo);
         footer.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(currentImageFile));
-                startActivityForResult(intent, FINISHER_IMAGE_REQUEST_CODE);
+                cameraView.snap(pictureHandler);
             }
         });
 
@@ -89,15 +94,59 @@ public class ResultsCapturingActivity extends BaseActivity {
 
         Button sendButton = (Button) findViewById(R.id.results_capturing_view_button_send);
         sendButton.setOnClickListener(new OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                String recipient = AppPreferences.getMailRecipient(ResultsCapturingActivity.this);
-                MailHelper.send(new String[] { recipient }, getSubjectText(), getBodyText(), listAdapter.getItems(),
+				String recipient = AppPreferences.getMailRecipient(ResultsCapturingActivity.this);
+                MailHelper.send(new String[] { recipient }, getSubjectText(), getBodyText(), photoList.getItems(),
                         ResultsCapturingActivity.this);
                 finish();
             }
         });
+    }
+
+    private void setupCameraView() {
+        cameraView = new CameraView(this);
+        FrameLayout view = (FrameLayout) findViewById(R.id.results_capturing_view_camera_preview);
+        view.addView(cameraView);
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupCamera();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        releaseCamera();
+    }
+
+    private void setupCamera() {
+        int cameraId = getBackCameraId();
+        if (cameraId >= 0) {
+            camera = Camera.open(cameraId);
+            cameraView.setCamera(camera);
+        }
+    }
+    
+    private int getBackCameraId() {
+        for (int i = 0; i < Camera.getNumberOfCameras(); i++) {
+            CameraInfo info = new CameraInfo();
+            Camera.getCameraInfo(i, info);
+            if (info.facing == CameraInfo.CAMERA_FACING_BACK) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void releaseCamera() {
+        if (camera != null) {
+            cameraView.setCamera(null);
+            camera.release();
+            camera = null;
+        }
     }
 
     private String getSubjectText() {
@@ -118,26 +167,16 @@ public class ResultsCapturingActivity extends BaseActivity {
         return true;
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == FINISHER_IMAGE_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                listAdapter.addPhoto(Uri.fromFile(currentImageFile));
-                createAndAdvanceImageFile();
-            }
-        }
-    }
-
     private void setupListView() {
         TextView header = new TextView(this);
         header.setText(getString(R.string.results_capturing_view_list_header));
         header.setTextSize(TypedValue.COMPLEX_UNIT_PT, 10.0f);
 
-        ListView list = (ListView) findViewById(R.id.results_capturing_view_list);
-        list.setEmptyView(findViewById(R.id.results_capturing_view_list_empty));
-        list.addHeaderView(header);
-        listAdapter = new PhotoAdapter(this);
-        list.setAdapter(listAdapter);
+        ListView listView = (ListView) findViewById(R.id.results_capturing_view_list);
+        listView.setEmptyView(findViewById(R.id.results_capturing_view_list_empty));
+        listView.addHeaderView(header);
+        photoList = new PhotoAdapter(this);
+        listView.setAdapter(photoList);
     }
 
     private void setupActionBar() {
@@ -151,4 +190,20 @@ public class ResultsCapturingActivity extends BaseActivity {
         imageDirectory.mkdirs();
         return new File(imageDirectory, String.format("image_%d.jpg", index));
     }
+
+    private PictureCallback pictureHandler = new PictureCallback() {
+
+        @Override
+        public void onPictureTaken(byte[] data, Camera camera) {
+            try {
+                FileOutputStream fos = new FileOutputStream(currentImageFile);
+                fos.write(data);
+                fos.close();
+                photoList.add(Uri.fromFile(currentImageFile));
+                createAndAdvanceImageFile();
+            } catch (Exception e) {
+                Toast.makeText(ResultsCapturingActivity.this, "Error writing image file.", Toast.LENGTH_LONG).show();
+            }
+        }
+    };
 }

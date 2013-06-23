@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -23,7 +22,6 @@ import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.activities.ResultsCapturingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PositioningFragment;
 
 public class FinishedRaceFragment extends RaceFragment {
 
@@ -56,16 +54,6 @@ public class FinishedRaceFragment extends RaceFragment {
         finishTimeView.setText(getFinishTimeText());
         timeLimitView.setText(getTimeLimitText());
         updateProtestStartTimeLabel();
-
-        Button positioningButton = (Button) getView().findViewById(R.id.buttonPositioning);
-        positioningButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PositioningFragment fragment = new PositioningFragment();
-                fragment.setArguments(PositioningFragment.createArguments(getRace()));
-                fragment.show(getFragmentManager(), null);
-            }
-        });
 
         ImageButton cameraButton = (ImageButton) getView().findViewById(R.id.buttonCamera);
         cameraButton.setOnClickListener(new OnClickListener() {
@@ -105,20 +93,7 @@ public class FinishedRaceFragment extends RaceFragment {
         return getString(R.string.empty);
     }
 
-    private TimePoint getTimeLimit() {
-        TimePoint startTime = getRace().getState().getStartTime();
-        TimePoint firstBoatTime = getRace().getState().getFinishingStartTime();
-        if (startTime == null || firstBoatTime == null) {
-            return null;
-        }
-        return firstBoatTime.plus((long) ((firstBoatTime.asMillis() - startTime.asMillis()) * 0.75));
-    }
-
-    private CharSequence getTimeLimitText() {
-        TimePoint timeLimit = getTimeLimit();
-        if (timeLimit != null) {
-            return String.format(getString(R.string.race_time_limit), getFormattedTime(timeLimit.asDate()));
-        }
+    protected CharSequence getTimeLimitText() {
         return getString(R.string.empty);
     }
 
@@ -153,7 +128,7 @@ public class FinishedRaceFragment extends RaceFragment {
         return String.format(String.valueOf(getText(R.string.race_finished_template)), getRace().getName());
     }
 
-    private String getFormattedTime(Date time) {
+    protected String getFormattedTime(Date time) {
         return getFormattedTimePart(time.getHours()) + ":" + getFormattedTimePart(time.getMinutes()) + ":"
                 + getFormattedTimePart(time.getSeconds());
     }
