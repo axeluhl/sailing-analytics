@@ -149,7 +149,7 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
                     alreadyExists = true;
                 }
                 if (!alreadyExists) {
-                    toState.addCourseArea(id, courseAreaEntry.getB(), courseAreaEntry.getB());
+                    toState.addCourseArea(id, courseAreaEntry.getB(), courseAreaEntry.getA());
                 }
             }
         }
