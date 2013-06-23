@@ -693,4 +693,5 @@ public interface StringMessages extends Messages {
     String startAt();
     String finishAt();
     String protestEndsAt();
+    String unknown();
 }
