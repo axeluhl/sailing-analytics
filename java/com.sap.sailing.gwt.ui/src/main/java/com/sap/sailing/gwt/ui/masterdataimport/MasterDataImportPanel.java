@@ -56,7 +56,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         hostBox.setText("http://prod2.sapsailing.com/");
         hostBox.setWidth("300px");
         serverAddressPanel.add(hostBox);
-        fetchIdsButton = new Button("Fetch Events and Leaderboard Groups");
+        fetchIdsButton = new Button("Fetch Leaderboard Group List");
         serverAddressPanel.add(fetchIdsButton);
         this.add(serverAddressPanel);
 
@@ -298,7 +298,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         leaderboardgroupListBox = new ListBox(true);
         contentPanel.add(leaderboardgroupListBox);
 
-        importLeaderboardGroupsButton = new Button("Import selected LGs");
+        importLeaderboardGroupsButton = new Button("Import selected Leaderboard Groups");
         contentPanel.add(importLeaderboardGroupsButton);
     }
 
