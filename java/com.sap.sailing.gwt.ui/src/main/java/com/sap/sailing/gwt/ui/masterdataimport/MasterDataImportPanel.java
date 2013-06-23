@@ -5,6 +5,9 @@ import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -30,9 +33,7 @@ import com.sap.sailing.gwt.ui.client.URLEncoder;
 
 public class MasterDataImportPanel extends VerticalPanel {
 
-    private ListBox eventListBox;
     private ListBox leaderboardgroupListBox;
-    private Button importEventsButton;
     private TextBox hostBox;
     private Button importLeaderboardGroupsButton;
     private Button fetchIdsButton;
@@ -59,20 +60,13 @@ public class MasterDataImportPanel extends VerticalPanel {
         serverAddressPanel.add(fetchIdsButton);
         this.add(serverAddressPanel);
 
-        HorizontalPanel splitPanel = new HorizontalPanel();
-        ScrollPanel leftScrollPanel = new ScrollPanel();
-        ScrollPanel rightScrollPanel = new ScrollPanel();
-        splitPanel.add(leftScrollPanel);
-        splitPanel.add(rightScrollPanel);
-        this.add(splitPanel);
+        ScrollPanel scrollPanel = new ScrollPanel();
+        this.add(scrollPanel);
 
-        VerticalPanel leftContentPanel = new VerticalPanel();
-        leftScrollPanel.setWidget(leftContentPanel);
-        VerticalPanel rightContentPanel = new VerticalPanel();
-        rightScrollPanel.setWidget(rightContentPanel);
+        VerticalPanel contentPanel = new VerticalPanel();
+        scrollPanel.setWidget(contentPanel);
 
-        addContentToLeftPanel(leftContentPanel);
-        addContentToRightPanel(rightContentPanel);
+        addContentToLeftPanel(contentPanel);
 
         setListeners();
     }
@@ -83,6 +77,16 @@ public class MasterDataImportPanel extends VerticalPanel {
             @Override
             public void onClick(ClickEvent event) {
                 fireIdRequestsAndFillLists();
+            }
+        });
+        
+        hostBox.addKeyDownHandler(new KeyDownHandler() {
+            
+            @Override
+            public void onKeyDown(KeyDownEvent event) {
+                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                    fireIdRequestsAndFillLists();
+                } 
             }
         });
 
@@ -208,7 +212,6 @@ public class MasterDataImportPanel extends VerticalPanel {
     protected void fireIdRequestsAndFillLists() {
         String host = hostBox.getText();
         if (host != null && !host.isEmpty()) {
-            fireEventIdRequestAndFillList(host);
             fireLgIdRequestAndFillList(host);
         }
     }
@@ -274,59 +277,8 @@ public class MasterDataImportPanel extends VerticalPanel {
         }
     }
 
-    private void fireEventIdRequestAndFillList(String host) {
-        final String getEventsUrl = createGetEventsUrl(host);
-        if (!isValidUrl(getEventsUrl, false)) {
-            showErrorAlert("Not a valid URL for fetching events: " + getEventsUrl);
-            return;
-        }
-        RequestBuilder getEventsRequestBuilder = new RequestBuilder(RequestBuilder.GET, getEventsUrl);
-        getEventsRequestBuilder.setCallback(new RequestCallback() {
-
-            @Override
-            public void onResponseReceived(Request request, Response response) {
-                if (response.getStatusCode() != 200) {
-                    showErrorAlert("GET events request failed with error code: " + response.getStatusCode()
-                            + " For url: " + getEventsUrl);
-                }
-                int itemCount = eventListBox.getItemCount();
-                for (int i = itemCount - 1; i >= 0; i--) {
-                    eventListBox.removeItem(i);
-                }
-                String body = response.getText();
-                if (body == null || body.isEmpty()) {
-                    showErrorAlert("No data was returned by remote server.");
-                    return;
-                }
-                JSONArray events = JSONParser.parseStrict(body).isArray();
-                for (int i = 0; i < events.size(); i++) {
-                    JSONObject event = events.get(i).isObject();
-                    eventListBox.addItem(event.get("name").isString().stringValue(), event.get("id").isString()
-                            .stringValue());
-                }
-            }
-
-            @Override
-            public void onError(Request request, Throwable exception) {
-                showErrorAlert("GET events request failed with Server error: " + exception.getLocalizedMessage());
-            }
-        });
-        try {
-            getEventsRequestBuilder.send();
-        } catch (RequestException e) {
-            showErrorAlert("GET events request failed: " + e.getLocalizedMessage());
-        }
-    }
-
     private void showErrorAlert(String string) {
         Window.alert(string);
-    }
-
-    private String createGetEventsUrl(String host) {
-        StringBuffer urlBuffer = new StringBuffer(host);
-        appendHttpAndSlashIfNeeded(host, urlBuffer);
-        urlBuffer.append("sailingserver/events");
-        return urlBuffer.toString();
     }
 
     public boolean isValidUrl(String url, boolean topLevelDomainRequired) {
@@ -337,16 +289,6 @@ public class MasterDataImportPanel extends VerticalPanel {
                     .compile("^((ftp|http|https)://[\\w@.\\-\\_]+\\.[a-zA-Z]{2,}(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
         }
         return (topLevelDomainRequired ? urlPlusTldValidator : urlValidator).exec(url) != null;
-    }
-
-    private void addContentToRightPanel(VerticalPanel contentPanel) {
-        contentPanel.add(new Label("Events:"));
-
-        eventListBox = new ListBox();
-        contentPanel.add(eventListBox);
-
-        importEventsButton = new Button("Import selected events");
-        contentPanel.add(importEventsButton);
     }
 
     private void addContentToLeftPanel(VerticalPanel contentPanel) {
