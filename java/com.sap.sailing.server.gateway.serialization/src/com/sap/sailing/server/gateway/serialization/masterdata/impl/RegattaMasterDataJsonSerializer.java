@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> {
@@ -22,6 +23,8 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
     public static final String FIELD_RACE_COLUMNS = "raceColumns";
     public static final String FIELD_IS_MEDAL = "isMedal";
     public static final String FIELD_FLEETS = "fleets";
+    public static final String FIELD_IS_PERSISTENT = "isPersistent";
+    public static final String FIELD_REGATTA_NAME = "regattaName";
     
     private final JsonSerializer<Fleet> fleetSerializer;
     
@@ -46,6 +49,8 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
         result.put(FIELD_DEFAULT_COURSE_AREA_ID, regatta.getDefaultCourseArea().getId().toString());
         result.put(FIELD_SCORING_SCHEME_TYPE, regatta.getScoringScheme().getType().toString());
         result.put(FIELD_SERIES, createJsonArrayForSeries(regatta.getSeries()));
+        result.put(FIELD_IS_PERSISTENT, regatta.isPersistent());
+        result.put(FIELD_REGATTA_NAME, ((RegattaName) regatta.getRegattaIdentifier()).getRegattaName());
         return result;
     }
 

@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.util.Map;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 
 public class EventMasterData {
 
@@ -8,10 +8,10 @@ public class EventMasterData {
     private String name;
     private String venueName;
     private String pubUrl;
-    private Map<String, String> courseAreas;
+    private Iterable<Pair<String, String>> courseAreas;
     private boolean isPublic;
 
-    public EventMasterData(String id, String name, String venueName, String pubUrl, Map<String, String> courseAreas, boolean isPublic) {
+    public EventMasterData(String id, String name, String venueName, String pubUrl, Iterable<Pair<String, String>> courseAreas, boolean isPublic) {
         this.id = id;
         this.name = name;
         this.venueName = venueName;
@@ -36,7 +36,7 @@ public class EventMasterData {
         return pubUrl;
     }
 
-    public Map<String, String> getCourseAreas() {
+    public Iterable<Pair<String, String>> getCourseAreas() {
         return courseAreas;
     }
 

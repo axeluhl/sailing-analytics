@@ -1,9 +1,8 @@
-package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
+package com.sap.sailing.domain.base.impl;
 
 import java.util.Set;
 
 import com.sap.sailing.domain.base.LeaderboardMasterData;
-import com.sap.sailing.domain.base.impl.EventMasterData;
 
 /**
  * Holds leaderboard group object AND its leaderboards, etc
@@ -18,15 +17,17 @@ public class LeaderboardGroupMasterData {
     private Set<LeaderboardMasterData> leaderboards;
     private boolean displayGroupsRevese;
     private Set<EventMasterData> events;
+    private Set<RegattaMasterData> regattas;
 
     public LeaderboardGroupMasterData(String name, String description,
-            boolean displayGroupsRevese, LeaderboardMasterData overallLeaderboardMasterData, Set<LeaderboardMasterData> leaderboards, Set<EventMasterData> events) {
+            boolean displayGroupsRevese, LeaderboardMasterData overallLeaderboardMasterData, Set<LeaderboardMasterData> leaderboards, Set<EventMasterData> events, Set<RegattaMasterData> regattas) {
                 this.name = name;
                 this.description = description;
                 this.displayGroupsRevese = displayGroupsRevese;
                 this.overallLeaderboardMasterData = overallLeaderboardMasterData;
                 this.leaderboards = leaderboards;
                 this.events = events;
+                this.regattas = regattas;
     }
 
     public String getName() {
@@ -52,9 +53,10 @@ public class LeaderboardGroupMasterData {
     public Set<EventMasterData> getEvents() {
         return events;
     }
-    
-    
-    
+
+    public Set<RegattaMasterData> getRegattas() {
+        return regattas;
+    }
     
 
 }

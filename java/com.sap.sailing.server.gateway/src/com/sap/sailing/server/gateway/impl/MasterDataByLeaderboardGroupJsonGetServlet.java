@@ -44,6 +44,9 @@ public class MasterDataByLeaderboardGroupJsonGetServlet extends AbstractJsonHttp
 
         for (String name : requestedLeaderboardGroupNames) {
             LeaderboardGroup leaderboardGroup = leaderboardGroups.get(name);
+            if (leaderboardGroup == null) {
+                continue;
+            }
             JsonSerializer<LeaderboardGroup> serializer = new LeaderboardGroupMasterDataJsonSerializer(getService().getAllEvents());
             masterData.add(serializer.serialize(leaderboardGroup));
         }

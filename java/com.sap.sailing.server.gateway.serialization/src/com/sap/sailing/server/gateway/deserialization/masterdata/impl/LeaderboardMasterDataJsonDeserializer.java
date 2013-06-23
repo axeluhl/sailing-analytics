@@ -1,6 +1,8 @@
 package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.json.simple.JSONArray;
@@ -12,10 +14,12 @@ import com.sap.sailing.domain.base.LeaderboardMasterData;
 import com.sap.sailing.domain.base.impl.FlexibleLeaderboardMasterData;
 import com.sap.sailing.domain.base.impl.RegattaLeaderboardMasterData;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.LeaderboardMasterDataJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.masterdata.impl.RaceColumnMasterDataJsonSerializer;
 
 public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<LeaderboardMasterData> {
 
@@ -53,8 +57,18 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
         } else {
             ScoringScheme scoringScheme = deserializeScoringScheme((JSONObject) object.get(LeaderboardMasterDataJsonSerializer.FIELD_SCORING_SCHEME));
             String courseAreaId = deserializeCourseAreaId((JSONObject) object.get(LeaderboardMasterDataJsonSerializer.FIELD_COURSE_AREA));
-            return new FlexibleLeaderboardMasterData(name, displayName, resultDiscardingRule, competitors, scoringScheme, courseAreaId);
+            List<Pair<String, Boolean>> raceColumns = deserializeRaceColumns((JSONArray) object.get(LeaderboardMasterDataJsonSerializer.FIELD_RACE_COLUMNS));
+            return new FlexibleLeaderboardMasterData(name, displayName, resultDiscardingRule, competitors, scoringScheme, courseAreaId, raceColumns);
         }
+    }
+
+    private List<Pair<String, Boolean>> deserializeRaceColumns(JSONArray array) {
+        List<Pair<String, Boolean>> columns = new ArrayList<Pair<String,Boolean>>();
+        for (Object columnObj : array) {
+            JSONObject columnJson = (JSONObject) columnObj;
+            columns.add(new Pair<String, Boolean>((String) columnJson.get(RaceColumnMasterDataJsonSerializer.FIELD_NAME), (Boolean) columnJson.get(RaceColumnMasterDataJsonSerializer.FIELD_MEDAL_RACE)));
+        }
+        return columns;
     }
 
     private String deserializeCourseAreaId(JSONObject jsonObject) {
@@ -74,7 +88,7 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
 
     private int[] deserializeResultDesicardingRule(JSONObject jsonObject) {
         JSONArray indeces = (JSONArray) jsonObject.get(LeaderboardMasterDataJsonSerializer.FIELD_INDICES);
-        if (indeces.size() < 1) {
+        if (indeces == null) {
             return null;
         }
         int[] result = new int[indeces.size()];

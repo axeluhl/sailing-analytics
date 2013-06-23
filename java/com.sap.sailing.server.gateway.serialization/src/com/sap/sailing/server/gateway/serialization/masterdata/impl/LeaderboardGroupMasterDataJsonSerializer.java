@@ -14,7 +14,6 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
@@ -24,7 +23,6 @@ import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializ
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
-import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogSerializer;
 
 public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<LeaderboardGroup> {
 
@@ -58,10 +56,8 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
         JsonSerializer<Fleet> fleetSerializer = new FleetJsonSerializer(colorSerializer);
 
         JsonSerializer<RaceLogEvent> raceLogEventSerializer = RaceLogEventSerializer.create(competitorSerializer);
-        JsonSerializer<RaceLog> raceLogSerializer = new RaceLogSerializer(raceLogEventSerializer);
 
-        JsonSerializer<RaceColumn> raceColumnSerializer = new RaceColumnMasterDataJsonSerializer(fleetSerializer,
-                raceLogSerializer);
+        JsonSerializer<RaceColumn> raceColumnSerializer = new RaceColumnMasterDataJsonSerializer();
         eventSerializer = new EventMasterDataJsonSerializer();
         leadboardSerializer = new LeaderboardMasterDataJsonSerializer(competitorSerializer, raceColumnSerializer);
         regattaSerializer = new RegattaMasterDataJsonSerializer(fleetSerializer);

@@ -71,7 +71,6 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         jsonLeaderboard.put(FIELD_NAME, leaderboard.getName());
         jsonLeaderboard.put(FIELD_SCORE_CORRECTION, createJsonForScoreCorrection(leaderboard));
         jsonLeaderboard.put(FIELD_COMPETITORS, createJsonArrayForCompetitors(leaderboard.getAllCompetitors()));
-        jsonLeaderboard.put(FIELD_RACE_COLUMNS, createJsonArrayForRaceColumns(leaderboard.getRaceColumns()));
         jsonLeaderboard.put(FIELD_RESULT_DISCARDING_RULE, createJsonForResultDiscardingRule(leaderboard.getResultDiscardingRule()));
         jsonLeaderboard.put(FIELD_DISPLAY_NAME, leaderboard.getDisplayName());
         boolean isRegattaLeaderboard = false;
@@ -79,6 +78,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
             FlexibleLeaderboard flexibleLeaderboard = (FlexibleLeaderboard) leaderboard;
             jsonLeaderboard.put(FIELD_SCORING_SCHEME, createJsonForScoringScheme(leaderboard.getScoringScheme()));
             jsonLeaderboard.put(FIELD_COURSE_AREA, createJsonForCourseArea(flexibleLeaderboard.getDefaultCourseArea()));
+            jsonLeaderboard.put(FIELD_RACE_COLUMNS, createJsonArrayForRaceColumns(leaderboard.getRaceColumns()));
         } else {
             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
             jsonLeaderboard.put(FIELD_REGATTA_NAME, regattaLeaderboard.getRegatta().getName());
