@@ -13,16 +13,14 @@ public class LastWindFixFinder extends RaceLogAnalyzer<Wind> {
 
     @Override
     protected Wind performAnalyzation() {
-        Wind lastWind = null;
-        
-        for (RaceLogEvent event : getAllEvents()) {
+        for (RaceLogEvent event : getAllEventsDescending()) {
             if (event instanceof RaceLogWindFixEvent) {
                 RaceLogWindFixEvent windFixEvent = (RaceLogWindFixEvent) event;
-                lastWind = windFixEvent.getWindFix();
+                return windFixEvent.getWindFix();
             }
         }
         
-        return lastWind;
+        return null;
     }
 
 }

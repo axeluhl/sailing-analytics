@@ -13,10 +13,6 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public class RaceListDataTypeRace implements RaceListDataType {
 
-    private boolean updateIndicatorVisible = false;
-
-    private ManagedRace race;
-
     private static String unscheduledTemplate;
     private static String scheduldedTemplate;
     private static String startPhaseTemplate;
@@ -24,6 +20,10 @@ public class RaceListDataTypeRace implements RaceListDataType {
     private static String finishingTemplate;
     private static String finishedTemplate;
     private static String unknownTemplate;
+
+    private boolean updateIndicatorVisible = false;
+    private RaceLogRaceStatus currentStatus = RaceLogRaceStatus.UNKNOWN;
+    private ManagedRace race;
 
     private Format scheduleFormatter = new SimpleDateFormat("HH:mm", Locale.US);
 
@@ -38,18 +38,18 @@ public class RaceListDataTypeRace implements RaceListDataType {
     }
 
     public RaceListDataTypeRace(ManagedRace race) {
-        setRace(race);
-    }
-
-    public ManagedRace getRace() {
-        return race;
-    }
-
-    public void setRace(ManagedRace race) {
         this.race = race;
+        this.currentStatus = race.getStatus();
     }
 
-    public void setUpdateIndicator(boolean visible) {
+    public void onStatusChanged(RaceLogRaceStatus status, boolean allowUpdateIndicator) {
+        if (!currentStatus.equals(status)) {
+            currentStatus = status;
+            setUpdateIndicatorVisible(true && allowUpdateIndicator);
+        }
+    }
+
+    public void setUpdateIndicatorVisible(boolean visible) {
         this.updateIndicatorVisible = visible;
     }
 
@@ -58,19 +58,19 @@ public class RaceListDataTypeRace implements RaceListDataType {
     }
 
     public String getRaceName() {
-        if (race == null) {
-            return "Invalid race";
-        }
-
         return race.getName();
     }
+    
+    public ManagedRace getRace() {
+        return race;
+    }
+    
+    public RaceLogRaceStatus getCurrentStatus() {
+        return currentStatus;
+    }
 
-    public String getStatus() {
-        if (race == null) {
-            return "Invalid race";
-        }
-
-        return getStatusString(race.getStatus());
+    public String getStatusText() {
+        return getStatusString(currentStatus);
     }
 
     private String getStatusString(RaceLogRaceStatus status) {

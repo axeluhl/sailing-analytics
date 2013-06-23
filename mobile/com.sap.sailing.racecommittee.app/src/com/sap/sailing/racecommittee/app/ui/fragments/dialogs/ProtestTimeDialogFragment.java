@@ -6,16 +6,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import android.app.DialogFragment;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.view.ViewParent;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TimePicker;
 
@@ -29,7 +28,7 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 
-public class ProtestTimeDialogFragment extends DialogFragment {
+public class ProtestTimeDialogFragment extends BaseDialogFragment {
 
     private static String ARGS_RACE_IDS = ProtestTimeDialogFragment.class.getSimpleName() + ".raceids";
 
@@ -49,48 +48,91 @@ public class ProtestTimeDialogFragment extends DialogFragment {
     private List<ManagedRace> races;
     private ListView racesList;
     private TimePicker timePicker;
+    private View customView;
 
     public ProtestTimeDialogFragment() {
         races = new ArrayList<ManagedRace>();
     }
-
+    
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.protest_time_view, container, false);
+    public void onStart() {
+        super.onStart();
+        forceWrapContent(customView);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        if (getDialog() != null) {
-            getDialog().setTitle(getString(R.string.protest_dialog_title));
-        }
-
+    protected Builder createDialog(Builder builder) {
         getRacesFromArguments();
+        customView = setupView();
+        return builder.setTitle(getString(R.string.protest_dialog_title)).setView(customView);
+    }
 
-        Button okButton = (Button) getView().findViewById(R.id.protest_time_ok_button);
-        okButton.setOnClickListener(new OnClickListener() {
+    @Override
+    protected CharSequence getNegativeButtonLabel() {
+        return "Cancel";
+    }
+
+    @Override
+    protected CharSequence getPositiveButtonLabel() {
+        return "Set";
+    }
+
+    @Override
+    protected DialogListenerHost getHost() {
+        return new DialogListenerHost() {
             @Override
-            public void onClick(View view) {
-                setAndAnnounceProtestTime();
-                dismiss();
-            }
-        });
+            public DialogResultListener getListener() {
+                return new DialogResultListener() {
+                    @Override
+                    public void onDialogNegativeButton(BaseDialogFragment dialog) {
+                        // no operation
+                    }
 
-        Button cancelButton = (Button) getView().findViewById(R.id.protest_time_cancel_button);
-        cancelButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dismiss();
+                    @Override
+                    public void onDialogPositiveButton(BaseDialogFragment dialog) {
+                        setAndAnnounceProtestTime();
+                    }
+                };
             }
-        });
+        };
+    }
 
-        racesList = (ListView) getView().findViewById(R.id.protest_time_races_list);
+    private View setupView() {
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        View view = inflater.inflate(R.layout.protest_time_view, null);
+        racesList = (ListView) view.findViewById(R.id.protest_time_races_list);
         setupRacesList(racesList);
-
-        timePicker = (TimePicker) getView().findViewById(R.id.protest_time_time_time_picker);
+        timePicker = (TimePicker) view.findViewById(R.id.protest_time_time_time_picker);
         setupTimePicker(timePicker);
+        return view;
+    }
+    
+    protected void forceWrapContent(View v) {
+        // Start with the provided view
+        View current = v;
+
+        // Travel up the tree until fail, modifying the LayoutParams
+        do {
+            // Get the parent
+            ViewParent parent = current.getParent();    
+
+            // Check if the parent exists
+            if (parent != null) {
+                // Get the view
+                try {
+                    current = (View) parent;
+                } catch (ClassCastException e) {
+                    // This will happen when at the top view, it cannot be cast to a View
+                    break;
+                }
+
+                // Modify the layout
+                current.getLayoutParams().width = LayoutParams.WRAP_CONTENT;
+            }
+        } while (current.getParent() != null);
+
+        // Request a layout to be re-done
+        current.requestLayout();
     }
 
     private void setupRacesList(ListView racesList) {

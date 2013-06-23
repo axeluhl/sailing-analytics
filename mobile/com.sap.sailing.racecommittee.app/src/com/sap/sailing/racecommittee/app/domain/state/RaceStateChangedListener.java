@@ -22,7 +22,7 @@ public interface RaceStateChangedListener {
     
     /**
      * Called when the protest start time of the state has changed.
-     * @param state that changed its course.
+     * @param state that changed its protest time.
      */
     void onRaceStateProtestStartTimeChanged(RaceState state);
 }

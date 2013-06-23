@@ -3,4 +3,7 @@
     <issue id="NestedWeights">
         <ignore path="res\layout\results_capturing_view.xml" />
     </issue>
+    <issue id="UselessLeaf">
+        <ignore path="res\layout\results_capturing_view.xml" />
+    </issue>
 </lint>

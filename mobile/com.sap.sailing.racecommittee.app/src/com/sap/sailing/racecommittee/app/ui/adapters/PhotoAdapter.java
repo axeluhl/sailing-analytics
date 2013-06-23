@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +14,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.sap.sailing.racecommittee.app.R;
 
@@ -42,8 +42,8 @@ public class PhotoAdapter extends ArrayAdapter<Uri> {
         ImageButton thumbnail = (ImageButton) row.findViewById(R.id.photo_adapter_thumbnail);
         thumbnail.setOnClickListener(new OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Toast.makeText(getContext(), "Open full photo", Toast.LENGTH_LONG).show();
+            public void onClick(View view) {
+                showImage(photoUri);
             }
         });
 
@@ -62,16 +62,19 @@ public class PhotoAdapter extends ArrayAdapter<Uri> {
         return (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    public void addPhoto(Uri uri) {
-        add(uri);
-    }
-
     public List<Uri> getItems() {
         List<Uri> items = new ArrayList<Uri>();
         for (int i = 0; i < getCount(); i++) {
             items.add(getItem(i));
         }
         return items;
+    }
+
+    private void showImage(final Uri photoUri) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.setDataAndType(photoUri, "image/*");
+        getContext().startActivity(intent);
     }
 
 }

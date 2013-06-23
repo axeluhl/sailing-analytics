@@ -14,16 +14,14 @@ public class LastPublishedCourseDesignFinder extends RaceLogAnalyzer<CourseBase>
 
     @Override
     protected CourseBase performAnalyzation() {
-        CourseBase lastCourseData = null;
-        
-        for (RaceLogEvent event : getAllEvents()) {
+        for (RaceLogEvent event : getAllEventsDescending()) {
             if (event instanceof RaceLogCourseDesignChangedEvent) {
                 RaceLogCourseDesignChangedEvent courseDesignEvent = (RaceLogCourseDesignChangedEvent) event;
-                lastCourseData = courseDesignEvent.getCourseDesign();
+                return courseDesignEvent.getCourseDesign();
             }
         }
         
-        return lastCourseData;
+        return null;
     }
 
 }

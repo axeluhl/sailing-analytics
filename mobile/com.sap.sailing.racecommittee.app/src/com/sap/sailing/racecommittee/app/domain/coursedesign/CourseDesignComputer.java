@@ -80,6 +80,9 @@ public class CourseDesignComputer {
         if (startBoatPosition != null && windSpeed != null && windDirection != null && boatClass != null
                 && courseLayout != null && numberOfRounds != null && targetTime != null) {
             try {
+                if(!boatClass.getPossibleCourseLayoutsWithTargetTime().keySet().contains(courseLayout)){
+                    throw new IllegalArgumentException("The given course design for the given boat class is illegal.");
+                }
                 computedCourseDesign = courseLayout.getCourseDesignFactoryClass().newInstance()
                         .createCourseDesign(startBoatPosition, windSpeed, windDirection, boatClass, courseLayout, numberOfRounds, targetTime);
             } catch (InstantiationException e) {
