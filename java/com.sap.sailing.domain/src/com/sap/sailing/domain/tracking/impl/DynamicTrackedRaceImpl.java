@@ -433,6 +433,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         } finally {
             unlockAfterRead(markPassingsForCompetitor);
         }
+        // FIXME but 1455: after clearMarkPassings and before lockForWrite, readers will see empty mark passings
         clearMarkPassings(competitor);
         TimePoint timePointOfLatestEvent = new MillisecondsTimePoint(0);
         for (MarkPassing markPassing : markPassings) {
