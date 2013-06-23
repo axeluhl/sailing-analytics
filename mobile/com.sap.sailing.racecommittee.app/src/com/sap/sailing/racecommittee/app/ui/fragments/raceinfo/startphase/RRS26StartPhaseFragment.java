@@ -100,8 +100,32 @@ public class RRS26StartPhaseFragment extends RaceFragment implements RRS26StartP
                 infoListener.onResetTime();
             }
         });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
 
         setupUi();
+
+        getRace().getState().getStartProcedure().setStartPhaseEventListener(this);
+        ExLog.i(RRS26StartPhaseFragment.class.getName(),
+                String.format("Fragment %s is now shown", RRS26StartPhaseFragment.class.getName()));
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        getRace().getState().getStartProcedure().setStartPhaseEventListener(null);
+    }
+
+    @Override
+    public void notifyTick() {
+        TimePoint startTime = getRace().getState().getStartTime();
+        if (startTime != null) {
+            setCountdownLabels(TimeUtils.timeUntil(startTime));
+        }
     }
 
     private void setupUi() {
@@ -140,30 +164,6 @@ public class RRS26StartPhaseFragment extends RaceFragment implements RRS26StartP
                 onClassDown();
             } 
             
-        }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        getRace().getState().getStartProcedure().setStartPhaseEventListener(this);
-        ExLog.w(RRS26StartPhaseFragment.class.getName(),
-                String.format("Fragment %s is now shown", RRS26StartPhaseFragment.class.getName()));
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        getRace().getState().getStartProcedure().setStartPhaseEventListener(null);
-    }
-
-    @Override
-    public void notifyTick() {
-        TimePoint startTime = getRace().getState().getStartTime();
-        if (startTime != null) {
-            setCountdownLabels(TimeUtils.timeUntil(startTime));
         }
     }
 

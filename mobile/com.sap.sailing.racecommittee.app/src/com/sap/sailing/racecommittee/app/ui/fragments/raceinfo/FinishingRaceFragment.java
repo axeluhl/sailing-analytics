@@ -14,14 +14,12 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PositioningFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
 public class FinishingRaceFragment extends RaceFragment {
@@ -30,8 +28,6 @@ public class FinishingRaceFragment extends RaceFragment {
     protected TextView nextFlagCountdown;
     private ImageButton abortingFlagButton;
     private ImageButton blueFlagButton;
-    
-    PositioningFragment positioningFragment;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -44,14 +40,10 @@ public class FinishingRaceFragment extends RaceFragment {
         
         countUpTextView = (TextView) getView().findViewById(R.id.raceCountUp);
         nextFlagCountdown = (TextView) getView().findViewById(R.id.nextFlagCountdown);
-        nextFlagCountdown.setText(getTimeLimitText());
+        nextFlagCountdown.setText(getNextFlagCountDownText());
         
         blueFlagButton = (ImageButton) getView().findViewById(R.id.blueFlagButton);
         abortingFlagButton = (ImageButton) getView().findViewById(R.id.abortingFlagButton);
-        
-        positioningFragment = new PositioningFragment();
-        positioningFragment.setArguments(PositioningFragment.createArguments(getRace()));
-        getFragmentManager().beginTransaction().add(R.id.innerFragmentHolder, positioningFragment, null).commit();
         
         blueFlagButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -91,25 +83,12 @@ public class FinishingRaceFragment extends RaceFragment {
                 secondsString);
     }
 
-    private TimePoint getTimeLimit() {
-        TimePoint startTime = getRace().getState().getStartTime();
-        TimePoint firstBoatTime = getRace().getState().getFinishingStartTime();
-        if (startTime == null || firstBoatTime == null) {
-            return null;
-        }
-        return firstBoatTime.plus((long)((firstBoatTime.asMillis() - startTime.asMillis()) * 0.75));
+    protected CharSequence getNextFlagCountDownText() {
+        return String.format(getString(R.string.race_first_finisher), getFormattedTime(getRace().getState()
+                .getFinishingStartTime().asDate()));
     }
 
-    private CharSequence getTimeLimitText() {
-        TimePoint timeLimit = getTimeLimit();
-        if (timeLimit != null) {
-            return String.format(getString(R.string.race_first_finisher_and_time_limit),
-                    getFormattedTime(getRace().getState().getFinishingStartTime().asDate()), getFormattedTime(timeLimit.asDate()));
-        }
-        return getString(R.string.empty);
-    }
-
-    private String getFormattedTime(Date time) {
+    protected String getFormattedTime(Date time) {
         return getFormattedTimePart(time.getHours()) + ":" + getFormattedTimePart(time.getMinutes()) + ":" + getFormattedTimePart(time.getSeconds());
     }
 

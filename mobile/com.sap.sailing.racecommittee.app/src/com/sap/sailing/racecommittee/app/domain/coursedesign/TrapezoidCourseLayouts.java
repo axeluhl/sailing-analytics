@@ -33,4 +33,5 @@ public enum TrapezoidCourseLayouts implements CourseLayouts{
     public Class<? extends CourseDesignFactory> getCourseDesignFactoryClass() {
         return TrapezoidCourseDesignFactoryImpl.class;
     }
+    
 }

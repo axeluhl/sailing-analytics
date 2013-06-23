@@ -29,9 +29,9 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.UserRequiredActio
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ESSCourseDesignDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.EssFinishedRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.EssFinishingRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.EssRunningRaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishedRaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishingRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.EssStartPhaseFragment;
 
 public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
@@ -392,12 +392,12 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
 
     @Override
     public Class<? extends RaceFragment> getFinishingRaceFragment() {
-        return FinishingRaceFragment.class;
+        return EssFinishingRaceFragment.class;
     }
 
     @Override
     public Class<? extends RaceFragment> getFinishedRaceFragment() {
-        return FinishedRaceFragment.class;
+        return EssFinishedRaceFragment.class;
     }
 
     @Override

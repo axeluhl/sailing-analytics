@@ -13,14 +13,13 @@ public class StartProcedureTypeAnalyzer extends RaceLogAnalyzer<StartProcedureTy
 
     @Override
     protected StartProcedureType performAnalyzation() {
-        StartProcedureType result = null;
-        for (RaceLogEvent event : getAllEvents()) {
+        for (RaceLogEvent event : getAllEventsDescending()) {
             if (event instanceof RaceLogStartProcedureChangedEvent) {
                 RaceLogStartProcedureChangedEvent startProcedureEvent = (RaceLogStartProcedureChangedEvent) event;
-                result = startProcedureEvent.getStartProcedureType();
+                return startProcedureEvent.getStartProcedureType();
             }
         }
-        return result;
+        return null;
     }
 
 }

@@ -83,9 +83,11 @@ public class RaceGroupFactory {
 
     private Collection<RaceCell> getCells(String fleetName, List<RaceColumn> raceColumns) {
         Collection<RaceCell> cells = new ArrayList<>();
-        for (RaceColumn raceColumn : raceColumns) {
-            Fleet fleet = raceColumn.getFleetByName(fleetName);
-            cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet)));
+        if (raceColumns != null) {
+            for (RaceColumn raceColumn : raceColumns) {
+                Fleet fleet = raceColumn.getFleetByName(fleetName);
+                cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet)));
+            }
         }
         return cells;
     }

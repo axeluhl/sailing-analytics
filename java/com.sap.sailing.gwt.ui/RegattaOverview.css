@@ -156,3 +156,38 @@ table {
 .RegattaOverview-wordWrap {
 	word-wrap: break-word;
 }
+
+.RegattaOverview-circle {
+	width: 10px;
+	height: 10px;
+	-moz-border-radius-topleft: 50%;
+	-webkit-border-top-left-radius: 50%;
+	border-top-left-radius: 50%;
+	-moz-border-radius-topright: 50%;
+	-webkit-border-top-right-radius: 50%;
+	border-top-right-radius: 50%;
+	-moz-border-radius-bottomleft: 50%;
+	-webkit-border-bottom-left-radius: 50%;
+	border-bottom-left-radius: 50%;
+	-moz-border-radius-bottomright: 50%;
+	-webkit-border-bottom-right-radius: 50%;
+	border-bottom-right-radius: 50%;
+	float: left;
+	margin: 2px 6px 0 0;
+}
+
+.circleBlue {
+	background: #008fcc;
+}
+
+.circleYellow {
+	background: #fbba00;
+}
+
+.circleGreen {
+	background: #8ab54e;
+}
+
+.circleGrey {
+	background: #ebebeb;
+}

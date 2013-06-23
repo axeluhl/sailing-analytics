@@ -15,6 +15,7 @@
     <string name="current_time">Current time</string>
     <string name="race_finished_template">%s is finished</string>
     <string name="race_first_boat_finished">First boat finished at:</string>
+    <string name="race_first_finisher" formatted="false">First finisher at %s</string>
     <string name="race_first_finisher_and_time_limit" formatted="false">First finisher at %s, Race finishing limit is at %s</string>
     <string name="race_time_limit">Race finishing limit is at %s</string>
     <string name="choose_startmode">Choose the start mode for this race</string>
@@ -149,6 +150,8 @@
     <string name="unpublish">Unpublish</string>
     <string name="take_previous">Use previous course</string>
     <string name="markImage">Mark image</string>
+    <string name="cancel">Cancel</string>
+    <string name="retry">Retry</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="positionings">Positioning</string>
@@ -188,5 +191,30 @@
     <string name="store_wind_entry">4. Store wind entry</string>
     <string name="store_wind">Store wind</string>
     <string name="override_default_start_procedure_type">Override default start procedure type</string>
+    <string name="override_default_start_procedure_type_select">Default start procedure type when overriden</string>
+    
+    <string name="compass_view_compass">Compass</string>
+    <string name="compass_view_needle">Needle</string>
+    
+    <string name="racing_course_area_missing">Course area could not be loaded. Please go back to the login page.</string>
+    <string name="racing_load_success">Successfully loaded %d races.</string>
+    <string name="generic_load_failure">There was an error loading the requested data: %s\nDo you want to retry?</string>
+    <string name="set_course_layout">Set the course layout</string>
+    
+    <string-array name="course_routes">
+        <item>I</item>
+        <item>O</item>
+        <item>IS</item>
+        <item>OS</item>
+        <item>L</item>
+        <item>LS</item>
+        <item>LR</item>
+        <item>LG</item>
+        <item>IA</item>
+        <item>LA</item>
+        <item>W</item>
+    </string-array>
+    
+    <string name="loading_failure">Load failure</string>
 
 </resources>

@@ -132,7 +132,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         } else if (type == ViewType.RACE.index) {
             RaceListDataTypeRace element = (RaceListDataTypeRace) raceListElement;
             holder.line1.setText(element.getRaceName());
-            holder.line2.setText(element.getStatus());
+            holder.line2.setText(element.getStatusText());
 
             if (element.isUpdateIndicatorVisible()) {
                 holder.updateLabel.setVisibility(View.VISIBLE);
