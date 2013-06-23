@@ -14,7 +14,6 @@ import android.widget.Toast;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.racecommittee.app.R;
 
 public class RaceFinishedTimeDialog extends RaceDialogFragment {
@@ -38,7 +37,7 @@ public class RaceFinishedTimeDialog extends RaceDialogFragment {
                 getRace().getState().getStartProcedure().setFinished(finishedTime);
                 dismiss();
             }else{
-                Toast.makeText(getActivity(), "The race finish time is too early!", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "The given finish time is earlier than than the first finisher time. Please recheck the time.", Toast.LENGTH_LONG).show();
             }
         }
     }
