@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:dslv="http://schemas.android.com/apk**/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
     android:gravity="center"
+    android:orientation="vertical"
     android:padding="18dp" >
 
     <TimePicker
@@ -12,11 +11,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center" />
+
     <Button
-	        android:id="@+id/chooseFinishedTimeButton"
-	        android:layout_width="wrap_content"
-	        android:layout_height="match_parent"
-	        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"
-	        android:text="@string/choose" />
+        android:id="@+id/chooseFinishedTimeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="@string/choose"
+        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
 
 </LinearLayout>
