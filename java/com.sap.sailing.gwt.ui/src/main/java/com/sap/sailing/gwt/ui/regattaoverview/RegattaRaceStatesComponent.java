@@ -445,7 +445,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                     if (isInfoBefore) {
                         additionalInformation.append("  /  ");
                     }
-                    additionalInformation.append("Race was finished: "
+                    additionalInformation.append("Finished at: "
                             + (timeFormatter.format(entryDTO.raceInfo.finishedTime)));
                     isInfoBefore = true;
                 }
