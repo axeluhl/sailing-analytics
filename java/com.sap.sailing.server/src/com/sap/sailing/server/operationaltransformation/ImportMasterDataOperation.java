@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -106,9 +107,9 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
             String defaultCourseAreaId = singleRegattaData.getDefaultCourseAreaId();
             String scoringSchemeType = singleRegattaData.getScoringSchemeType();
             boolean isPersistent = singleRegattaData.isPersistent();
-            toState.createRegatta(baseName, boatClassName, id, series, isPersistent,
+            toState.createRegatta(baseName, boatClassName, UUID.fromString(id), series, isPersistent,
                     domainFactory.createScoringScheme(ScoringSchemeType.valueOf(scoringSchemeType)),
-                    defaultCourseAreaId);
+                    UUID.fromString(defaultCourseAreaId));
             creationCount.addOneRegatta();
         }
 
@@ -137,7 +138,7 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
                 String pubString = event.getPubUrl();
                 String venueName = event.getVenueName();
                 boolean isPublic = event.isPublic();
-                toState.addEvent(name, venueName, pubString, isPublic, id, new ArrayList<String>());
+                toState.addEvent(name, venueName, pubString, isPublic, UUID.fromString(id), new ArrayList<String>());
                 creationCount.addOneEvent();
             }
             Iterable<Pair<String, String>> courseAreas = event.getCourseAreas();
@@ -148,7 +149,7 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
                     alreadyExists = true;
                 }
                 if (!alreadyExists) {
-                    toState.addCourseArea(id, courseAreaEntry.getB(), courseAreaEntry.getA());
+                    toState.addCourseArea(UUID.fromString(id), courseAreaEntry.getB(), courseAreaEntry.getA());
                 }
             }
         }
