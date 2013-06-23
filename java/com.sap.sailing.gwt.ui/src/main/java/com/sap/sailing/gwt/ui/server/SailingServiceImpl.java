@@ -124,6 +124,7 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.common.racelog.utils.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -150,6 +151,7 @@ import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFi
 import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.ProtestStartTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.racelog.analyzing.impl.StartProcedureTypeAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
@@ -622,12 +624,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
             RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog);
             raceInfoDTO.lastStatus = raceStatusAnalyzer.analyze();
-
-            PathfinderFinder pathfinderFinder = new PathfinderFinder(raceLog);
-            raceInfoDTO.pathfinderId = pathfinderFinder.analyze();
-
-            GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
-            raceInfoDTO.gateLineOpeningTime = gateLineOpeningTimeFinder.analyze();
             
             if (raceLog.getLastRawFix() != null) {
                 raceInfoDTO.lastUpdateTime = raceLog.getLastRawFix().getTimePoint().asDate();
@@ -680,6 +676,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     raceInfoDTO.isLastFlagDisplayed = true;
                 }
             }
+            fillStartProcedureSpecifics(raceInfoDTO, raceLog);
         }
         raceInfoDTO.seriesName = seriesName;
         raceInfoDTO.raceName = raceColumn.getName();
@@ -689,6 +686,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         raceInfoDTO.isTracked = raceColumn.getTrackedRace(fleet) != null ? true : false;
 
         return raceInfoDTO;
+    }
+
+    private void fillStartProcedureSpecifics(RaceInfoDTO raceInfoDTO, RaceLog raceLog) {
+        StartProcedureTypeAnalyzer procedureAnalyzer = new StartProcedureTypeAnalyzer(raceLog);
+        StartProcedureType type = procedureAnalyzer.analyze();
+        if (type != null) {
+            switch (type) {
+            case RRS26:
+                break;
+            case GateStart:
+                PathfinderFinder pathfinderFinder = new PathfinderFinder(raceLog);
+                raceInfoDTO.pathfinderId = pathfinderFinder.analyze();
+                GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
+                raceInfoDTO.gateLineOpeningTime = gateLineOpeningTimeFinder.analyze();
+                break;
+            case ESS:
+                break;
+            }
+        }
     }
 
     private RaceCourseDTO convertCourseDesignToRaceCourseDTO(CourseBase lastCourseDesign) {

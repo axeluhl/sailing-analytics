@@ -22,11 +22,11 @@ public class RaceInfoDTO implements IsSerializable {
     public RaceCourseDTO lastCourseDesign;
     public String lastCourseName;
     public RaceIdentifier raceIdentifier;
-    public String pathfinderId;
-    public Long gateLineOpeningTime;
     public boolean isRaceAbortedInPassBefore;
     public String seriesName;
     public Date protestFinishTime;
+    public String pathfinderId;
+    public Long gateLineOpeningTime;
     
     // for GWT serialization
     public RaceInfoDTO() { }

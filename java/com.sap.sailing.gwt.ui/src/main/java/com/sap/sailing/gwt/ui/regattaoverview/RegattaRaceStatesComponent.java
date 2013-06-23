@@ -70,8 +70,9 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
  */
 public class RegattaRaceStatesComponent extends SimplePanel implements Component<RegattaRaceStatesSettings>, EventAndRaceGroupAvailabilityListener {
 
-    public interface EntryClickedHandler {
+    public interface EntryHandler {
         void onEntryClicked(RegattaOverviewEntryDTO entry);
+        void onEntryUpdated(RegattaOverviewEntryDTO entry);
     }
     
     private List<RegattaOverviewEntryDTO> allEntries;
@@ -108,9 +109,9 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private static final String STYLE_CIRCLE_GREEN = "circleGreen";
     private static final String STYLE_CIRCLE_GREY = "circleGrey";
     
-    private EntryClickedHandler entryClickedHandler;
+    private EntryHandler entryClickedHandler;
     
-    public void setEntryClickedHandler(EntryClickedHandler handler) {
+    public void setEntryClickedHandler(EntryHandler handler) {
         this.entryClickedHandler = handler;
     }
 
@@ -174,6 +175,12 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         regattaOverviewDataProvider.getList().addAll(allEntries);
         // now sort again according to selected criterion
         ColumnSortEvent.fire(regattaOverviewTable, regattaOverviewTable.getColumnSortList());
+        
+        if (entryClickedHandler != null) {
+            for (RegattaOverviewEntryDTO entry : allEntries) {
+                entryClickedHandler.onEntryUpdated(entry);
+            }
+        }
     }
 
     /**

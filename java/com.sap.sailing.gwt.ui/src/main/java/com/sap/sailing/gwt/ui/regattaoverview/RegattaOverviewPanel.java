@@ -25,7 +25,7 @@ import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesComponent.EntryClickedHandler;
+import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 
@@ -66,7 +66,7 @@ public class RegattaOverviewPanel extends SimplePanel {
     private static final String STYLE_VENUE_LABEL = STYLE_NAME_PREFIX + "VenueLabel";
     private static final String STYLE_CLOCK_LABEL = STYLE_NAME_PREFIX + "ClockLabel";
     
-    public void setEntryClickedHandler(EntryClickedHandler handler) {
+    public void setEntryClickedHandler(EntryHandler handler) {
         regattaRaceStatesComponent.setEntryClickedHandler(handler);
     }
     

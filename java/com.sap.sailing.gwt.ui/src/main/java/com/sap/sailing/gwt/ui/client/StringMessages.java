@@ -689,4 +689,8 @@ public interface StringMessages extends Messages {
     String earlyStarters();
     String noMoreRacingToday();
     String furtherSignalsAshore();
+    String showingDetailsOfRace(String raceName);
+    String startAt();
+    String finishAt();
+    String protestEndsAt();
 }

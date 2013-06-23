@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
-import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesComponent.EntryClickedHandler;
+import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
 public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
@@ -56,11 +56,16 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
         createAndAddRegattaPanel(eventIdAsString);
         toggleDetailPanel(false);
         
-        regattaPanel.setEntryClickedHandler(new EntryClickedHandler() { 
+        regattaPanel.setEntryClickedHandler(new EntryHandler() { 
             @Override
             public void onEntryClicked(RegattaOverviewEntryDTO entry) {
                 detailPanel.show(entry);
                 toggleDetailPanel(true);
+            }
+
+            @Override
+            public void onEntryUpdated(RegattaOverviewEntryDTO entry) {
+                detailPanel.update(entry);
             }
         });
     }
@@ -85,8 +90,7 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
                 toggleDetailPanel(false);
             }
         });
-        detailPanel.addStyleName("RaceDetailPanel");
-        containerPanel.addSouth(detailPanel, 96);
+        containerPanel.addSouth(detailPanel, 120);
     }
 
     public static RegattaRaceStatesSettings createRegattaRaceStatesSettingsFromURL() {
