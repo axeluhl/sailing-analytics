@@ -2,7 +2,7 @@
 
 SERVER_NAME=LIVE1
 
-MEMORY="4024m"
+MEMORY="16384m"
 
 REPLICATION_CHANNEL=sapsailinganalytics-live1
 
