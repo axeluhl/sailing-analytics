@@ -1318,7 +1318,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 trackedRace.getRace().getCourse().unlockAfterRead();
             }
         }   
-        raceTimesInfo.currentServerTime = new Date();
+        if (raceTimesInfo != null) {
+            raceTimesInfo.currentServerTime = new Date();
+        }
         return raceTimesInfo;
     }
 
