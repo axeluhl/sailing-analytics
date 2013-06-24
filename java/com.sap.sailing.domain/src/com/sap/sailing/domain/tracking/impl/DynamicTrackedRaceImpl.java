@@ -476,6 +476,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             final NamedReentrantReadWriteLock markPassingsLock2 = getMarkPassingsLock(markPassingsInOrderForWaypoint);
             LockUtil.lockForWrite(markPassingsLock2);
             try {
+                // TODO wouldn't we need to remove a previous mark passing of competitor for the same waypoint before re-adding it?
                 markPassingsInOrderForWaypoint.add(markPassing);
             } finally {
                 LockUtil.unlockAfterWrite(markPassingsLock2);
