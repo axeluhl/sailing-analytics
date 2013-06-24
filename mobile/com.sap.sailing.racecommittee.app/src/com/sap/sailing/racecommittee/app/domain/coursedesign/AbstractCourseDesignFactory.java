@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
-import com.sap.sailing.racecommittee.app.utils.GeoUtils;
+import com.sap.sailing.domain.common.racelog.utils.GeoUtils;
 
 public abstract class AbstractCourseDesignFactory implements CourseDesignFactory {
     protected CourseDesign product;

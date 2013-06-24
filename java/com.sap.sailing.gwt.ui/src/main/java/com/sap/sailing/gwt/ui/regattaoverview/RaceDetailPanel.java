@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.racelog.utils.GeoUtils;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.GateStartInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RRS26InfoDTO;
@@ -164,8 +165,8 @@ public class RaceDetailPanel extends SimplePanel {
         String windText = stringMessages.unknown();
         if (data.raceInfo.lastWind != null) {
             if (data.raceInfo.lastWind.position != null) {
-                vesselPositionText = new HTML(data.raceInfo.lastWind.position.latDeg + "&deg; "
-                        + data.raceInfo.lastWind.position.lngDeg + "&deg; ").getHTML();
+                vesselPositionText = new HTML(GeoUtils.getDegMinSecFormatForDecimalDegree(data.raceInfo.lastWind.position.latDeg)+" "
+                        + GeoUtils.getDegMinSecFormatForDecimalDegree(data.raceInfo.lastWind.position.lngDeg)+" ").getHTML();
             }
             windText = new HTML(decimalFormat.format(data.raceInfo.lastWind.trueWindFromDeg) + "&deg; "
                     + decimalFormat.format(data.raceInfo.lastWind.trueWindSpeedInKnots) + "knts").getHTML();
