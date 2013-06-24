@@ -99,7 +99,7 @@ a {
       margin: 25px 0 0 0;
       padding: 0; }
       #yield_content .headNavigation a {
-        font-family: 'OpenSans-Bold', Arial, Verdana, sans-serif;
+        font-family: 'OpenSansBold', Arial, Verdana, sans-serif;
         color: #fff; }
   /* line 47, site.css.sass */
   #yield_content #pageHeadline {
@@ -172,6 +172,8 @@ a {
             font-size: 12px;
             font-family: OpenSansRegular, Arial, Verdana, sans-serif;
             color: white; }
+          #yield_content #mainContent .innerContent .timeBar .raceSection a:hover {
+            text-decoration: none; }
       /* line 114, site.css.sass */
       #yield_content #mainContent .innerContent .timeBar .raceDescription {
         padding: 4px;

@@ -125,7 +125,6 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
-import com.sap.sailing.domain.common.racelog.utils.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -143,6 +142,7 @@ import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.polarsheets.PolarSheetsWindStepping;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
@@ -1390,7 +1390,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 trackedRace.getRace().getCourse().unlockAfterRead();
             }
         }
-        raceTimesInfo.currentServerTime = new Date();
+        if (raceTimesInfo != null) {
+            raceTimesInfo.currentServerTime = new Date();
+        }
         return raceTimesInfo;
     }
 
