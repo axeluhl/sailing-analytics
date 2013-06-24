@@ -43,7 +43,7 @@
           <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
             <Set name="host"><Property name="jetty.host" /></Set>
             <Set name="port"><Property name="jetty.port" default="8887"/></Set>
-            <Set name="maxIdleTime">300000</Set>
+            <Set name="maxIdleTime">20000</Set>
             <Set name="Acceptors">2</Set>
             <Set name="statsOn">false</Set>
             <Set name="confidentialPort">8443</Set>
