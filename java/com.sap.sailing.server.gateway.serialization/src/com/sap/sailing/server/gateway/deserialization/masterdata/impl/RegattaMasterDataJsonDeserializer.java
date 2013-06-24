@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.impl.RegattaMasterData;
 import com.sap.sailing.domain.base.impl.SeriesMasterData;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.masterdata.impl.LeaderboardMasterDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.RegattaMasterDataJsonSerializer;
 
 public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<RegattaMasterData> {
@@ -42,7 +43,8 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
             boolean isMedal = (Boolean) seriesJson.get(RegattaMasterDataJsonSerializer.FIELD_IS_MEDAL);
             Iterable<Fleet> fleets = deserializeFleets((JSONArray) seriesJson.get(RegattaMasterDataJsonSerializer.FIELD_FLEETS));
             Iterable<String> raceColumnNames = deserializeRaceColumnNames((JSONArray) seriesJson.get(RegattaMasterDataJsonSerializer.FIELD_RACE_COLUMNS));
-            series.add(new SeriesMasterData(name, isMedal, fleets, raceColumnNames));
+            int[] discardingRule = deserializeResultDesicardingRule((JSONObject) seriesJson.get(RegattaMasterDataJsonSerializer.FIELD_RESULT_DISCARDING_RULE));
+            series.add(new SeriesMasterData(name, isMedal, fleets, raceColumnNames, discardingRule));
         }
         
         return series;
@@ -70,6 +72,21 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
             
         }
         return fleets;
+    }
+    
+    private int[] deserializeResultDesicardingRule(JSONObject jsonObject) {
+        if (jsonObject == null) {
+            return null;
+        }
+        JSONArray indeces = (JSONArray) jsonObject.get(LeaderboardMasterDataJsonSerializer.FIELD_INDICES);
+        if (indeces == null) {
+            return null;
+        }
+        int[] result = new int[indeces.size()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = ((Long) indeces.get(i)).intValue();
+        }
+        return result;
     }
 
 }

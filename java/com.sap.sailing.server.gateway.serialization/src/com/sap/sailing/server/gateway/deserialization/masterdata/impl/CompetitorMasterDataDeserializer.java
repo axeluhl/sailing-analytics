@@ -1,5 +1,7 @@
 package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
 
+import java.util.UUID;
+
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Boat;
@@ -35,7 +37,7 @@ public class CompetitorMasterDataDeserializer implements JsonDeserializer<Compet
         String id = (String) object.get(CompetitorMasterDataJsonSerializer.FIELD_ID);
         Boat boat = createBoatFromJson((JSONObject) object.get(CompetitorMasterDataJsonSerializer.FIELD_BOAT));
         Team team = teamDeserializer.deserialize((JSONObject) object.get(CompetitorMasterDataJsonSerializer.FIELD_TEAM));
-        return domainFactory.getOrCreateCompetitor(id, name, team, boat);
+        return domainFactory.getOrCreateCompetitor(UUID.fromString(id), name, team, boat);
         
     }
     

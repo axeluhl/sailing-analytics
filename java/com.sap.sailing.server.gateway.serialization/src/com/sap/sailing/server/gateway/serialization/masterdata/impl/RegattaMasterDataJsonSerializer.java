@@ -8,6 +8,8 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> {
@@ -25,21 +27,19 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
     public static final String FIELD_FLEETS = "fleets";
     public static final String FIELD_IS_PERSISTENT = "isPersistent";
     public static final String FIELD_REGATTA_NAME = "regattaName";
-    
+    public static final String FIELD_RESULT_DISCARDING_RULE = "resultDiscardingRule";
+    public static final String FIELD_INDICES = "indices";
+
     private final JsonSerializer<Fleet> fleetSerializer;
-    
-    
-    
+
     public RegattaMasterDataJsonSerializer(JsonSerializer<Fleet> fleetSerializer) {
         this.fleetSerializer = fleetSerializer;
     }
-
 
     @Override
     public JSONObject serialize(Regatta regatta) {
         return createJsonForRegatta(regatta);
     }
-
 
     private JSONObject createJsonForRegatta(Regatta regatta) {
         JSONObject result = new JSONObject();
@@ -68,6 +68,24 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
         result.put(FIELD_IS_MEDAL, series.isMedal());
         result.put(FIELD_FLEETS, createJsonArrayForFleets(series.getFleets()));
         result.put(FIELD_RACE_COLUMNS, createJsonArrayForRaceColumns(series.getRaceColumns()));
+        result.put(FIELD_RESULT_DISCARDING_RULE, createJsonForResultDiscardingRule(series.getResultDiscardingRule()));
+        return result;
+    }
+
+    private JSONObject createJsonForResultDiscardingRule(ResultDiscardingRule resultDiscardingRule) {
+        if (resultDiscardingRule == null) {
+            return null;
+        }
+        JSONObject result = new JSONObject();
+        if (resultDiscardingRule instanceof ThresholdBasedResultDiscardingRule) {
+            ThresholdBasedResultDiscardingRule rule = (ThresholdBasedResultDiscardingRule) resultDiscardingRule;
+            JSONArray indices = new JSONArray();
+            int[] rawValues = rule.getDiscardIndexResultsStartingWithHowManyRaces();
+            for (int i = 0; i < rawValues.length; i++) {
+                indices.add(new Integer(rawValues[i]));
+            }
+            result.put(FIELD_INDICES, indices);
+        }
         return result;
     }
 
@@ -81,7 +99,7 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
 
     private JSONArray createJsonArrayForRaceColumns(Iterable<? extends RaceColumnInSeries> raceColumns) {
         JSONArray array = new JSONArray();
-        for (RaceColumnInSeries raceColumn: raceColumns) {
+        for (RaceColumnInSeries raceColumn : raceColumns) {
             array.add(createJsonForRaceColumn(raceColumn));
         }
         return array;

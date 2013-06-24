@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -122,7 +123,12 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
             boolean isMedal = singleSeriesData.isMedal();
             Iterable<Fleet> fleets = singleSeriesData.getFleets();
             Iterable<String> raceColumnNames = singleSeriesData.getRaceColumnNames();
-            result.add(new SeriesImpl(name, isMedal, fleets, raceColumnNames, toState));
+            SeriesImpl newSeries = new SeriesImpl(name, isMedal, fleets, raceColumnNames, toState);
+            int[] resultDiscardingRule = singleSeriesData.getDiscardingRule();
+            if (resultDiscardingRule != null) {
+                newSeries.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(resultDiscardingRule));
+            }
+            result.add(newSeries);
         }
         return result;
     }
@@ -149,7 +155,7 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
                     alreadyExists = true;
                 }
                 if (!alreadyExists) {
-                    toState.addCourseArea(UUID.fromString(id), courseAreaEntry.getB(), courseAreaEntry.getA());
+                    toState.addCourseArea(UUID.fromString(id), courseAreaEntry.getB(), UUID.fromString(courseAreaEntry.getA()));
                 }
             }
         }
@@ -181,7 +187,10 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
     private void setCourseAreaIfNecessary(LeaderboardMasterData board, RacingEventService toState) {
         if (board instanceof FlexibleLeaderboardMasterData) {
             FlexibleLeaderboardMasterData flexBoard = (FlexibleLeaderboardMasterData) board;
-            CourseArea courseArea = toState.getCourseArea(flexBoard.getCourseAreaId());
+            if (flexBoard.getCourseAreaId() == null) {
+                return;
+            }
+            CourseArea courseArea = toState.getCourseArea(UUID.fromString(flexBoard.getCourseAreaId()));
             flexBoard.setCourseArea(courseArea);
         }
     }

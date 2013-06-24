@@ -41,6 +41,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
     public static final String FIELD_ID = "id";
     public static final String FIELD_REGATTA_NAME = "regattaName";
     public static final String FIELD_DISPLAY_NAME = "displayName";
+    public static final String FIELD_COMPETITOR_ID = "competitorId";
     private final JsonSerializer<Competitor> competitorSerializer;
     private final JsonSerializer<RaceColumn> raceColumnSerializer;
     
@@ -100,7 +101,6 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         JSONObject result = new JSONObject();
         result.put(FIELD_ID, defaultCourseArea.getId());
         result.put(FIELD_NAME, defaultCourseArea.getName());
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -146,7 +146,12 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         SettableScoreCorrection correction = leaderboard.getScoreCorrection();
         JSONObject jsonScoreCorrection = new JSONObject();
         jsonScoreCorrection.put(FIELD_COMMENT, correction.getComment());
-        jsonScoreCorrection.put(FIELD_TIME_POINT, correction.getTimePointOfLastCorrectionsValidity());
+        if (correction.getTimePointOfLastCorrectionsValidity() != null) {
+            jsonScoreCorrection.put(FIELD_TIME_POINT, correction.getTimePointOfLastCorrectionsValidity().asMillis());
+        } else {
+            jsonScoreCorrection.put(FIELD_TIME_POINT, null);
+        }
+        
         jsonScoreCorrection.put(FIELD_FOR_RACE_COLUMNS,
                 createJSONArrayForScoreCorrectionsForRaceColumns(correction, leaderboard));
 
@@ -179,6 +184,8 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
                     correction.getExplicitScoreCorrection(competitor, raceColumn));
             scoreCorrectionForCompetitor.put(FIELD_MAX_POINTS_REASON,
                     correction.getMaxPointsReason(competitor, raceColumn));
+            scoreCorrectionForCompetitor.put(FIELD_COMPETITOR_ID,
+                    competitor.getId().toString());
             scoreCorrectionsForCompetitors.add(scoreCorrectionForCompetitor);
         }
 
