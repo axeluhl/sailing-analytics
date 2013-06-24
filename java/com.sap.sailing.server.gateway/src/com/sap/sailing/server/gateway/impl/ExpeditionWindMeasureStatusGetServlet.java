@@ -73,10 +73,10 @@ public class ExpeditionWindMeasureStatusGetServlet extends SailingServerHttpServ
                 out.println("Last message:" + "&nbsp;" + info.message.getOriginalMessage());
                 out.println("<br/>");
                 GPSFix gpsFix = info.message.getGPSFix();
-                out.println("Has GPS-Fix:" + "&nbsp;" + gpsFix != null ? gpsFix.toString() : "no");
+                out.println("Has GPS-Fix:" + "&nbsp;" + (gpsFix != null ? gpsFix.toString() : "no"));
                 out.println("<br/>");
                 SpeedWithBearing trueWind = info.message.getTrueWind();
-                out.println("Has TrueWind:" + "&nbsp;" + trueWind != null ? trueWind.toString() : "no");
+                out.println("Has TrueWind:" + "&nbsp;" + (trueWind != null ? trueWind.toString() : "no"));
                 out.println("<br/><br/>");
             }
             for(Integer boatID: messagesToDrop) {

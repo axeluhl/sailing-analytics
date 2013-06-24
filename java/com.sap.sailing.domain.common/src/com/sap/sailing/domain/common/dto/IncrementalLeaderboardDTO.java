@@ -597,6 +597,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                                 LegEntryDTO legDetails = newLeaderboardEntryDTO.legDetails.get(legDetailsIndex);
                                 if (previousEntryDTO != null
                                         && previousEntryDTO.legDetails != null
+                                        && previousEntryDTO.legDetails.size() > legDetailsIndex
                                         && Util.equalsWithNull(legDetails,
                                                 previousEntryDTO.legDetails.get(legDetailsIndex))) {
                                     getLegDetailsUnchanged(previousVersion).unchanged(
