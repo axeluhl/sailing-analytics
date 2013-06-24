@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.base.impl;
+package com.sap.sailing.domain.masterdataimport;
 
 import java.util.Set;
 

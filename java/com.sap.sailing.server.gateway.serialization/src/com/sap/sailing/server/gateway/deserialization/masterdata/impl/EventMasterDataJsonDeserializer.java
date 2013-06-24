@@ -8,8 +8,8 @@ import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.impl.EventMasterData;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.masterdataimport.EventMasterData;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.EventMasterDataJsonSerializer;

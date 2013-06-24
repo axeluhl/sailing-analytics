@@ -7,8 +7,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.impl.RegattaMasterData;
-import com.sap.sailing.domain.base.impl.SeriesMasterData;
+import com.sap.sailing.domain.masterdataimport.RegattaMasterData;
+import com.sap.sailing.domain.masterdataimport.SeriesMasterData;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.LeaderboardMasterDataJsonSerializer;
