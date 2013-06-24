@@ -14,10 +14,10 @@ import android.widget.Toast;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.racecommittee.app.R;
 
-public class RaceFinishedTimeDialog extends RaceDialogFragment {
+public class RaceFinishingTimeDialog extends RaceDialogFragment {
 
     private TimePicker timePicker;
 
@@ -31,19 +31,19 @@ public class RaceFinishedTimeDialog extends RaceDialogFragment {
     }
 
     private void setAndAnnounceFinishedTime() {
-        TimePoint finishedTime = getFinishedTime();
-        FinishingTimeFinder ftf = new FinishingTimeFinder(getRace().getRaceLog());
-        if (ftf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.FINISHING)) {
-            if (ftf.analyze().before(finishedTime)) {
-                getRace().getState().getStartProcedure().setFinished(finishedTime);
+        TimePoint finishingTime = getFinishingTime();
+        StartTimeFinder stf = new StartTimeFinder(getRace().getRaceLog());
+        if (stf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
+            if (stf.analyze().before(finishingTime)) {
+                getRace().getState().getStartProcedure().setFinishing(finishingTime);
                 dismiss();
             }else{
-                Toast.makeText(getActivity(), "The given finish time is earlier than than the first finisher time. Please recheck the time.", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "The selected time is before the race start.", Toast.LENGTH_LONG).show();
             }
         }
     }
 
-    private TimePoint getFinishedTime() {
+    private TimePoint getFinishingTime() {
         Calendar time = Calendar.getInstance();
         time.set(Calendar.HOUR_OF_DAY, timePicker.getCurrentHour());
         time.set(Calendar.MINUTE, timePicker.getCurrentMinute());
