@@ -1202,6 +1202,18 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
+        Set<RegattaLeaderboard> leaderboardsToRemove = new HashSet<>();
+        for (Leaderboard leaderboard : getLeaderboards().values()) {
+            if (leaderboard instanceof RegattaLeaderboard) {
+                RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                if (regattaLeaderboard.getRegatta() == regatta) {
+                    leaderboardsToRemove.add(regattaLeaderboard);
+                }
+            }
+        }
+        for (RegattaLeaderboard regattaLeaderboardToRemove : leaderboardsToRemove) {
+            removeLeaderboard(regattaLeaderboardToRemove.getName());
+        }
         for (RaceDefinition race : regatta.getAllRaces()) {
             removeRace(regatta, race);
             mongoObjectFactory.removeRegattaForRaceID(race.getName(), regatta);
