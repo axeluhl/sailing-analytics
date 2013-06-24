@@ -43,7 +43,9 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
                 LeaderboardEntryDTO entryDTO = getLeaderboard().rows.get(competitorDTO).fieldsByRaceColumnName.get(theRaceColumnDTO.getName());
                 if (entryDTO.totalPoints != null || !theRaceColumnDTO.isLiveInServerTime(entryDTO.fleet)) {
                     int raceRank = getLeaderboard().getCompetitorsFromBestToWorst(theRaceColumnDTO).indexOf(competitorDTO)+1;
-                    result = operator.matchValues(value, raceRank);
+                    if (raceRank > 0) {
+                        result = operator.matchValues(value, raceRank);
+                    }
                 }
             }
         }
