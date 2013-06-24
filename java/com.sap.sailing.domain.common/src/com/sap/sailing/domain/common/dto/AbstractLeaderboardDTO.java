@@ -265,10 +265,10 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     /**
      * @return <code>true</code> if the leaderboard contains a race which is live
      */
-    public boolean hasLiveRace() {
+    public boolean hasLiveRace(long serverTimePointAsMillis) {
         for (RaceColumnDTO race : getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
-                if (race.isLive(fleet)) {
+                if (race.isLive(fleet, serverTimePointAsMillis)) {
                     return true;
                 }
             }
@@ -276,11 +276,11 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         return false;
     }
 
-    public List<Pair<RaceColumnDTO, FleetDTO>> getLiveRaces() {
+    public List<Pair<RaceColumnDTO, FleetDTO>> getLiveRaces(long serverTimePointAsMillis) {
         List<Pair<RaceColumnDTO, FleetDTO>> result = new ArrayList<Pair<RaceColumnDTO, FleetDTO>>();
         for (RaceColumnDTO race : getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
-                if (race.isLive(fleet)) {
+                if (race.isLive(fleet, serverTimePointAsMillis)) {
                     result.add(new Pair<RaceColumnDTO, FleetDTO>(race, fleet));
                 }
             }

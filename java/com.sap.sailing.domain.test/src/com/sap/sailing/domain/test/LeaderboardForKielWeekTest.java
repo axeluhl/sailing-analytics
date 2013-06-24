@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.GregorianCalendar;
+import java.util.logging.Logger;
 
 import org.junit.Test;
 
@@ -28,6 +29,7 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
 public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
 
+    private final Logger logger = Logger.getLogger(LeaderboardForKielWeekTest.class.getName());
     private FlexibleLeaderboardImpl leaderboard;
 
     public LeaderboardForKielWeekTest() throws MalformedURLException, URISyntaxException {
@@ -65,9 +67,13 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
 
     private void loadRace(String raceId) throws MalformedURLException, IOException, InterruptedException,
             URISyntaxException {
+        logger.info("Loading race " + raceId);
         setUp("event_20110609_KielerWoch", raceId, ReceiverType.RACECOURSE, ReceiverType.RACESTARTFINISH, ReceiverType.MARKPASSINGS);
+        logger.info("Recording wind for " + raceId);
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(70))), new WindSourceImpl(WindSourceType.WEB));
+        logger.info("Fixing mark positions for " + raceId);
         fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
+        logger.info("Loaded race " + raceId);
     }
 }

@@ -71,7 +71,7 @@ public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
             latDegBox = createDoubleBox(10);
             lngDegBox = createDoubleBox(10);
         }
-        if(race.trackedRace != null && race.trackedRace.startOfTracking != null) {
+        if (race.trackedRace != null && race.trackedRace.startOfTracking != null) {
             timeBox = createDateBox(race.trackedRace.startOfTracking.getTime(), 20);
         } else {
             Date now = new Date();

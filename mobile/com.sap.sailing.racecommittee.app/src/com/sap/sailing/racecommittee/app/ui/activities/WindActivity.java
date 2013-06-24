@@ -2,6 +2,8 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -48,6 +50,7 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
     EditText longitudeEditText;
     SeekBar windSpeedSeekBar;
     Button sendButton;
+    
     LocationManager locationManager;
     Location currentLocation;
     DecimalFormat speedFormat;
@@ -118,24 +121,31 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
         });
         sendButton.setEnabled(false);
 
+        windBearingEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    compassView.setDirection(Float.valueOf(windBearingEditText.getText().toString()));
+                }
+            }
+        });
         windSpeedEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
-
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     windSpeedSeekBar.setProgress(Double.valueOf(windSpeedEditText.getText().toString()).intValue() * 10);
                 }
             }
-
         });
+        speedFormat = new DecimalFormat("#0.0", new DecimalFormatSymbols(Locale.US));
+        bearingFormat = new DecimalFormat("###", new DecimalFormatSymbols(Locale.US));
 
-        speedFormat = new DecimalFormat("#0.0");
-        bearingFormat = new DecimalFormat("###");
-
-        double enteredWindSpeed = AppPreferences.getWindSpeed(getBaseContext());
+        double enteredWindSpeed = AppPreferences.getWindSpeed(this);
         windSpeedSeekBar.setProgress(Double.valueOf(enteredWindSpeed).intValue() * 10);
         windSpeedEditText.setText(speedFormat.format(enteredWindSpeed));
-        windBearingEditText.setText(bearingFormat.format(AppPreferences.getWindBearing(getBaseContext())));
+        double enteredWindBearing = AppPreferences.getWindBearing(this);
+        compassView.setDirection((float)enteredWindBearing);
+        windBearingEditText.setText(bearingFormat.format(enteredWindBearing));
     }
 
     private void buildAlertMessageNoGps() {

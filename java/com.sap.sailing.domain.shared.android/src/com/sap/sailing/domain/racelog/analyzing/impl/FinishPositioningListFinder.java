@@ -17,15 +17,13 @@ public class FinishPositioningListFinder extends RaceLogAnalyzer<List<Triple<Ser
 
     @Override
     protected List<Triple<Serializable, String, MaxPointsReason>> performAnalyzation() {
-        List<Triple<Serializable, String, MaxPointsReason>> lastFinishPositioningList = null;
-        
-        for (RaceLogEvent event : getPassEvents()) {
+        for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogFinishPositioningListChangedEvent) {
                 RaceLogFinishPositioningListChangedEvent finishPositioningEvent = (RaceLogFinishPositioningListChangedEvent) event;
-                lastFinishPositioningList = finishPositioningEvent.getPositionedCompetitors();
+                return finishPositioningEvent.getPositionedCompetitors();
             }
         }
         
-        return lastFinishPositioningList;
+        return null;
     }
 }

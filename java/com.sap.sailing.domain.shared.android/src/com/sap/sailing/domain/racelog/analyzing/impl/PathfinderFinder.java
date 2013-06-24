@@ -12,13 +12,12 @@ public class PathfinderFinder extends RaceLogAnalyzer<String> {
 
     @Override
     protected String performAnalyzation() {
-        String pathfinderId = null;
-        for (RaceLogEvent event : getPassEvents()) {
+        for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogPathfinderEvent) {
-                pathfinderId = ((RaceLogPathfinderEvent) event).getPathfinderId();
+                return ((RaceLogPathfinderEvent) event).getPathfinderId();
             }
         }
-        return pathfinderId;
+        return null;
     }
 
 }

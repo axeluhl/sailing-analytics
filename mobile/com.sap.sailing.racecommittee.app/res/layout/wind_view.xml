@@ -122,7 +122,7 @@
 		        android:minWidth="200dp"
 		        android:clickable="false" 
         		android:cursorVisible="false" 
-        		android:focusable="false" 
+        		android:focusable="false"
         		android:focusableInTouchMode="false">
 		    </EditText>
 	       	

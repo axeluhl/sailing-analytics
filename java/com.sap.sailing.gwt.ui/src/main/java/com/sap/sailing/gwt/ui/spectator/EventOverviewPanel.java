@@ -45,7 +45,9 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
@@ -90,6 +92,7 @@ public class EventOverviewPanel extends FormPanel {
     
     private List<EventDTO> availableEvents;
     private final boolean showRaceDetails;
+    private final Timer timerForClientServerOffset;
 
     private final LeaderboardGroupOverviewTableResources tableResources = GWT.create(LeaderboardGroupOverviewTableResources.class);
 
@@ -99,6 +102,7 @@ public class EventOverviewPanel extends FormPanel {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+        this.timerForClientServerOffset = new Timer(PlayModes.Replay);
         availableEvents = new ArrayList<EventDTO>();
         
         FlowPanel mainPanel = new FlowPanel();
@@ -501,9 +505,15 @@ public class EventOverviewPanel extends FormPanel {
     }
 
     private void loadEvents() {
+        final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
         sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
             @Override
             public void onSuccess(List<EventDTO> result) {
+                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
+                if (result != null && !result.isEmpty()) {
+                    timerForClientServerOffset.adjustClientServerOffset(clientTimeWhenRequestWasSent,
+                            result.get(result.size() - 1).getCurrentServerTime(), clientTimeWhenResponseWasReceived);
+                }
                 availableEvents = new ArrayList<EventDTO>(result);
                 eventsDataProvider.getList().clear();
                 eventsDataProvider.getList().addAll(availableEvents);
@@ -611,7 +621,7 @@ public class EventOverviewPanel extends FormPanel {
             result = textContainsStringsToCheck(event.getName(), name.split("\\s"));
         }
         if (result && onlyLiveCheckBox.getValue()) {
-            result = event.leaderboardGroup.hasLiveRace();
+            result = event.leaderboardGroup.hasLiveRace(timerForClientServerOffset.getLiveTimePointInMillis());
         }else if (result) {
             Date startDate = event.leaderboardGroup.getGroupStartDate();
             if (startDate != null) {

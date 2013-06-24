@@ -19,6 +19,7 @@ import org.jdom.Element;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
@@ -174,8 +175,9 @@ public class RegattaDataPerRaceAction extends HttpAction {
                     
                     try {
                         addNamedElementWithValue(competitor_node, "name", competitor.getName());
-                        addNamedElementWithValue(competitor_node, "nationality", competitor.getTeam()
-                                .getNationality().getThreeLetterIOCAcronym());
+                        final Nationality nationality = competitor.getTeam()
+                                .getNationality();
+                        addNamedElementWithValue(competitor_node, "nationality", nationality==null?"":nationality.getThreeLetterIOCAcronym());
                         addNamedElementWithValue(competitor_node, "sail_id", competitor.getBoat().getSailID());
                                 String sail_id = competitor.getBoat().getSailID();
                                 if (sail_id.matches("^[A-Z]{3}\\s[0-9]*")) {                                        
@@ -193,7 +195,7 @@ public class RegattaDataPerRaceAction extends HttpAction {
                                 } else if (sail_id.matches("^[A-Z]{3}\\S[0-9]*")) {
                                     addNamedElementWithValue(competitor_node, "sail_id_formatted", sail_id);
                                 } else if (sail_id.matches("[0-9]*")){
-                                    addNamedElementWithValue(competitor_node, "sail_id_formatted", competitor.getTeam().getNationality().getThreeLetterIOCAcronym() + sail_id);
+                                    addNamedElementWithValue(competitor_node, "sail_id_formatted", (nationality==null?"":nationality.getThreeLetterIOCAcronym()) + sail_id);
                         } else {
                                     addNamedElementWithValue(competitor_node, "sail_id_formatted", sail_id);
                         }

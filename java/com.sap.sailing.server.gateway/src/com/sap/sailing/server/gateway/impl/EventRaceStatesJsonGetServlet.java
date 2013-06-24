@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.racelog.utils.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
