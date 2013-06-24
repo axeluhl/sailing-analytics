@@ -173,7 +173,6 @@ public class Timer {
             long offset = serverTimeDuringRequest.getTime() + responseNetworkLatencyInMillis - clientTimeWhenResponseWasReceived;
             if (clientServerOffsetHasAtLeastBeenSetOnce) {
                 final double exponentialMovingAverageFactor = 0.5;
-                // TODO are all casts in place here to avoid strange rounding effects?
                 millisecondsClientIsBehindServer = (long) (millisecondsClientIsBehindServer
                         * exponentialMovingAverageFactor + (1. - exponentialMovingAverageFactor) * offset);
             } else {
