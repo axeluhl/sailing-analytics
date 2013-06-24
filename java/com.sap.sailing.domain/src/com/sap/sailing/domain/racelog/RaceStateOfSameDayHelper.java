@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.racelog.utils;
+package com.sap.sailing.domain.racelog;
 
 import java.util.Calendar;
 import java.util.Date;
