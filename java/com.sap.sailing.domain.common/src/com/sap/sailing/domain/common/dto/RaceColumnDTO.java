@@ -177,6 +177,12 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
                 endOfLivePeriod = new Date(raceDTO.endOfRace.getTime() + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
             }
         }
+        
+        // if an empty timepoint is given then take the start of the race
+        if (serverTimePointAsMillis == 0) {
+            serverTimePointAsMillis = startOfLivePeriod.getTime()+1;
+        }
+        
         // whenLastTrackedRaceWasLive is null if there is no tracked race for fleet, or the tracked race hasn't started yet at the server time
         // when this DTO was assembled, or there were no GPS or wind data
         final boolean result =
@@ -185,6 +191,16 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
                 startOfLivePeriod.getTime() <= serverTimePointAsMillis &&
                 serverTimePointAsMillis <= endOfLivePeriod.getTime();
         return result;
+    }
+    
+    /**
+     * Returns live state for the current server time
+     * @see RaceColumnDTO#isLive(FleetDTO, long)
+     * @param fleet
+     * @return
+     */
+    public boolean isLiveInServerTime(FleetDTO fleet) {
+        return isLive(fleet, 0);
     }
 
     public boolean containsRace(RaceIdentifier preSelectedRace) {

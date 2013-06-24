@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.filter.AbstractNumberFilter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -31,11 +32,18 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
     public boolean matches(CompetitorDTO competitorDTO) {
         boolean result = false;
         if (value != null && operator != null && getLeaderboard() != null && getSelectedRace() != null) {
+            RaceColumnDTO theRaceColumnDTO = null;
             for (RaceColumnDTO raceColumnDTO : getLeaderboard().getRaceList()) {
                 if (raceColumnDTO.containsRace(getSelectedRace())) {
-                    int raceRank = getLeaderboard().getCompetitorsFromBestToWorst(raceColumnDTO).indexOf(competitorDTO)+1;
-                    result = operator.matchValues(value, raceRank);
+                    theRaceColumnDTO = raceColumnDTO;
                     break;
+                }
+            }
+            if (theRaceColumnDTO != null && getLeaderboard().rows.get(competitorDTO) != null) {
+                LeaderboardEntryDTO entryDTO = getLeaderboard().rows.get(competitorDTO).fieldsByRaceColumnName.get(theRaceColumnDTO.getName());
+                if (entryDTO.totalPoints != null || !theRaceColumnDTO.isLiveInServerTime(entryDTO.fleet)) {
+                    int raceRank = getLeaderboard().getCompetitorsFromBestToWorst(theRaceColumnDTO).indexOf(competitorDTO)+1;
+                    result = operator.matchValues(value, raceRank);
                 }
             }
         }
