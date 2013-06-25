@@ -428,6 +428,10 @@ if [[ "$@" == "remote-deploy" ]]; then
     $SCP_CMD $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
     $SCP_CMD $p2PluginRepository/plugins/*.jar $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/plugins/
 
+    echo "$VERSION_INFO-remotedly-deployed" > /tmp/version-remote-deploy.txt
+    $SCP_CMD /tmp/version-remote-deploy.txt $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/version.txt
+    rm /tmp/version-remote-deploy.txt
+
     echo "Deployed successfully. I did NOT change any configuration (no env.sh or config.ini or jetty.xml adaption), only code!"
 
     read -s -n1 -p "Do you want me to restart the remote server (y/n)? " answer
