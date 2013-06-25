@@ -630,7 +630,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private void storeRegattaRaceStatesSettings(RegattaRaceStatesSettings settings) {
         Storage localStorage = Storage.getLocalStorageIfSupported();
-        if (localStorage != null) {
+        if (localStorage != null && eventIdAsString != null) {
             // delete old value
             localStorage.removeItem(localStorageRegattaOverviewEventKey);
 
