@@ -1,6 +1,9 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
@@ -18,11 +21,17 @@ import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.racelog.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindTrack;
 
 public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     private DynamicTrackedRace trackedRace;
+    
+    private WindTrack windTrack;
+    private WindSource raceCommitteeWindSource;
 
     private RaceStatusAnalyzer statusAnalyzer;
 
@@ -38,7 +47,21 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         trackedRace.invalidateEndTime();
         courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
         statusAnalyzer = new RaceStatusAnalyzer(raceLog);
+        initializeWindTrack(raceLog);
         analyze();
+    }
+
+    /**
+     * Creates a wind track for the source type RACECOMMITTEE in tracked race, retrieves all wind fixes available in the race log and adds them to the wind track
+     * @param raceLog The race log from which the available wind fixes shall be retrieved.
+     */
+    private void initializeWindTrack(RaceLog raceLog) {
+        WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
+        raceCommitteeWindSource = new WindSourceImpl(WindSourceType.RACECOMMITTEE);
+        windTrack = trackedRace.getOrCreateWindTrack(raceCommitteeWindSource);
+        for (Wind wind : windFixesFinder.analyze()) {
+            windTrack.add(wind);
+        }
     }
 
     public void removeFrom(RaceLog raceLog) {
@@ -50,6 +73,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         // ??? trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0));
         if (raceLog != null) {
             trackedRace.invalidateStartTime();
+            //TODO detach wind source
             raceLog.removeListener(this);
         }
     }
@@ -140,6 +164,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     public void visit(RaceLogWindFixEvent event) {
         // TODO handle a new wind fix entered by the race committee
         // add the wind fix to the race committee WindTrack
+        trackedRace.recordWind(event.getWindFix(), raceCommitteeWindSource);
     }
 
 }
