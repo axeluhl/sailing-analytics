@@ -28,6 +28,7 @@ import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
 
 /**
  * Caches the expensive to compute {@link LeaderboardDTO} results of a
@@ -70,7 +71,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
     private static final Executor computeLeadearboardByNameExecutor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
             /* maximumPoolSize */ THREAD_POOL_SIZE,
             /* keepAliveTime */ 60, TimeUnit.SECONDS,
-            /* workQueue */ new LinkedBlockingQueue<Runnable>());
+            /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1));
 
     private final LeaderboardCacheManager leaderboardCacheManager;
     

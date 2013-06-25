@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
+import java.util.List;
+
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -32,20 +34,30 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
     public boolean matches(CompetitorDTO competitorDTO) {
         boolean result = false;
         if (value != null && operator != null && getLeaderboard() != null && getSelectedRace() != null) {
-            RaceColumnDTO theRaceColumnDTO = null;
+            RaceColumnDTO theRaceColumnDTOThatContainsCompetitorRace = null;
             for (RaceColumnDTO raceColumnDTO : getLeaderboard().getRaceList()) {
                 if (raceColumnDTO.containsRace(getSelectedRace())) {
-                    theRaceColumnDTO = raceColumnDTO;
+                    theRaceColumnDTOThatContainsCompetitorRace = raceColumnDTO;
                     break;
                 }
             }
-            if (theRaceColumnDTO != null && getLeaderboard().rows.get(competitorDTO) != null) {
-                LeaderboardEntryDTO entryDTO = getLeaderboard().rows.get(competitorDTO).fieldsByRaceColumnName.get(theRaceColumnDTO.getName());
-                if (entryDTO.totalPoints != null || !theRaceColumnDTO.isLiveInServerTime(entryDTO.fleet)) {
-                    int raceRank = getLeaderboard().getCompetitorsFromBestToWorst(theRaceColumnDTO).indexOf(competitorDTO)+1;
-                    if (raceRank > 0) {
-                        result = operator.matchValues(value, raceRank);
+            List<CompetitorDTO> competitors = getLeaderboard().getCompetitorsFromBestToWorst(theRaceColumnDTOThatContainsCompetitorRace);
+            if (theRaceColumnDTOThatContainsCompetitorRace != null && getLeaderboard().rows.get(competitorDTO) != null) {
+                LeaderboardEntryDTO entryDTO = getLeaderboard().rows.get(competitorDTO).fieldsByRaceColumnName.get(theRaceColumnDTOThatContainsCompetitorRace.getName());
+                int counter = 0; int raceRank = 0;
+                for (CompetitorDTO competitorDTOIterated : competitors) {
+                    LeaderboardEntryDTO entryDTOIterated = getLeaderboard().rows.get(competitorDTOIterated).fieldsByRaceColumnName.get(theRaceColumnDTOThatContainsCompetitorRace.getName());
+                    if (entryDTOIterated.fleet.equals(entryDTO.fleet)) {
+                        counter += 1;
+                        if (competitorDTOIterated.equals(competitorDTO)) {
+                            raceRank = counter+1;
+                            break;
+                        }
                     }
+                }
+                
+                if (raceRank > 0) {
+                    result = operator.matchValues(value, raceRank);
                 }
             }
         }

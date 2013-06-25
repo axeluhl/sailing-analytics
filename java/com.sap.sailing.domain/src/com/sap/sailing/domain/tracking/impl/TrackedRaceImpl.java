@@ -323,9 +323,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 try {
                     final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
                             trackedRegatta, TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
-                    synchronized (windTracks) {
-                        windTracks.putAll(loadedWindTracks);
-                    }
+                    windTracks.putAll(loadedWindTracks);
                 } finally {
                     LockUtil.unlockAfterRead(serializationLock);
                     synchronized (TrackedRaceImpl.this) {
@@ -2257,9 +2255,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public Iterable<WindSource> getWindSources() {
         while (true) {
             try {
-                synchronized (windTracks) {
-                    return new HashSet<WindSource>(windTracks.keySet());
-                }
+                return new HashSet<WindSource>(windTracks.keySet());
             } catch (ConcurrentModificationException cme) {
                 logger.info("Caught " + cme + "; trying again.");
             }
