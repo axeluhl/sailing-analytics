@@ -50,7 +50,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
                     if (entryDTOIterated.fleet.equals(entryDTO.fleet)) {
                         counter += 1;
                         if (competitorDTOIterated.equals(competitorDTO)) {
-                            raceRank = counter+1;
+                            raceRank = counter;
                             break;
                         }
                     }
