@@ -195,9 +195,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
                 }
             }
         }
-        /*competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
+        competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
         updateCompetitorsFilterContexts(competitorsFilterSets);
-        updateCompetitorsFilterControlState(competitorsFilterSets);*/
+        updateCompetitorsFilterControlState(competitorsFilterSets);
 
         timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider, raceboardViewConfiguration.isCanReplayDuringLiveRaces());
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
