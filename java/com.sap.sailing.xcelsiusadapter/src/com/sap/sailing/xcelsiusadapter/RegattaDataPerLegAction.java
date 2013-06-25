@@ -208,6 +208,8 @@ public class RegattaDataPerLegAction extends HttpAction {
                         } catch (Exception e1) {
 //                            e1.printStackTrace();
 //                            If this happens, the race is probably broken
+                            leg_node.detach();
+                            break;
                         }
                         TimePoint compFinishedLeg = compareLegEnd;
 
@@ -216,9 +218,18 @@ public class RegattaDataPerLegAction extends HttpAction {
                         if (trackedLegOfCompetitor.hasFinishedLeg(compFinishedLeg) && compareLegEnd.asMillis() != 0) {
                             // Calculate rank loss/gain
                             int posGL = 0;
-                            if (previousLeg != null) {
+                            if (previousLeg != null 
+                                    && rankAtWaypoint != null 
+                                    && rankAtWaypoint.get(competitor) != null 
+                                    && trackedLeg != null
+                                    && trackedLeg.getLeg() != null
+                                    && trackedLeg.getLeg().getTo() != null
+                                    && trackedLeg.getLeg().getFrom() != null) {
                                 posGL = rankAtWaypoint.get(competitor).get(trackedLeg.getLeg().getTo()) -
                                         rankAtWaypoint.get(competitor).get(trackedLeg.getLeg().getFrom());
+                            } else {
+                                leg_node.detach();
+                                break;
                             }
 
                             final Element competitor_node = addNamedElement(competitor_data_node, "competitor");
