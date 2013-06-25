@@ -298,6 +298,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
+    /**
+     * Removes the regatta as well as all regatta leaderboards for that regatta
+     */
     void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
     TrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);

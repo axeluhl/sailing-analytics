@@ -1162,7 +1162,6 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that
      *            may not reflect all data already received; otherwise, the method will always block for the latest
      *            cache updates to have happened before returning.
-     * @param baseDomainFactory TODO
      */
     private LeaderboardEntryDTO getLeaderboardEntryDTO(Entry entry, RaceColumn raceColumn, Competitor competitor,
             TimePoint timePoint, boolean addLegDetails, boolean waitForLatestAnalyses,
@@ -1185,25 +1184,32 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         : raceDetails.getAverageCrossTrackError().getMeters();
                 final TimePoint startOfRace = trackedRace.getStartOfRace();
                 if (startOfRace != null) {
-                    Distance distanceToStartLineAtStartOfRace = trackedRace.getDistanceToStartLine(competitor,
-                            startOfRace);
-                    entryDTO.distanceToStartLineAtStartOfRaceInMeters = distanceToStartLineAtStartOfRace == null ? null
-                            : distanceToStartLineAtStartOfRace.getMeters();
-                    Speed speedAtStartTime = trackedRace.getTrack(competitor).getEstimatedSpeed(startOfRace);
-                    entryDTO.speedOverGroundAtStartOfRaceInKnots = speedAtStartTime == null ? null : speedAtStartTime.getKnots();
+                    Waypoint startWaypoint = trackedRace.getRace().getCourse().getFirstWaypoint();
                     NavigableSet<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
                     trackedRace.lockForRead(competitorMarkPassings);
                     try {
                         if (!competitorMarkPassings.isEmpty()) {
-                            TimePoint competitorStartTime = competitorMarkPassings.iterator().next().getTimePoint();
-                            Speed competitorSpeedWhenPassingStart = trackedRace.getTrack(competitor).getEstimatedSpeed(
-                                    competitorStartTime);
-                            entryDTO.speedOverGroundAtPassingStartWaypointInKnots = competitorSpeedWhenPassingStart == null ? null
-                                    : competitorSpeedWhenPassingStart.getKnots();
-                            entryDTO.startTack = trackedRace.getTack(competitor, competitorStartTime);
-                            Distance distanceFromStarboardSideOfStartLineWhenPassingStart = trackedRace.getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor);
-                            entryDTO.distanceToStarboardSideOfStartLineInMeters = distanceFromStarboardSideOfStartLineWhenPassingStart == null ? null :
-                                distanceFromStarboardSideOfStartLineWhenPassingStart.getMeters();
+                            final MarkPassing firstMarkPassing = competitorMarkPassings.iterator().next();
+                            if (firstMarkPassing.getWaypoint() == startWaypoint) {
+                                Distance distanceToStartLineAtStartOfRace = trackedRace.getDistanceToStartLine(
+                                        competitor, startOfRace);
+                                entryDTO.distanceToStartLineAtStartOfRaceInMeters = distanceToStartLineAtStartOfRace == null ? null
+                                        : distanceToStartLineAtStartOfRace.getMeters();
+                                Speed speedAtStartTime = trackedRace.getTrack(competitor)
+                                        .getEstimatedSpeed(startOfRace);
+                                entryDTO.speedOverGroundAtStartOfRaceInKnots = speedAtStartTime == null ? null
+                                        : speedAtStartTime.getKnots();
+                                TimePoint competitorStartTime = firstMarkPassing.getTimePoint();
+                                Speed competitorSpeedWhenPassingStart = trackedRace.getTrack(competitor)
+                                        .getEstimatedSpeed(competitorStartTime);
+                                entryDTO.speedOverGroundAtPassingStartWaypointInKnots = competitorSpeedWhenPassingStart == null ? null
+                                        : competitorSpeedWhenPassingStart.getKnots();
+                                entryDTO.startTack = trackedRace.getTack(competitor, competitorStartTime);
+                                Distance distanceFromStarboardSideOfStartLineWhenPassingStart = trackedRace
+                                        .getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor);
+                                entryDTO.distanceToStarboardSideOfStartLineInMeters = distanceFromStarboardSideOfStartLineWhenPassingStart == null ? null
+                                        : distanceFromStarboardSideOfStartLineWhenPassingStart.getMeters();
+                            }
                         }
                     } finally {
                         trackedRace.unlockAfterRead(competitorMarkPassings);
