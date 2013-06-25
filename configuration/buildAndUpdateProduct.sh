@@ -405,27 +405,6 @@ if [[ "$@" == "remote-deploy" ]]; then
     SERVER=$TARGET_SERVER_NAME
     echo "Will deploy server $SERVER"
 
-    read -s -n1 -p "Did you want me to start a LOCAL build of $active_branch (without tests) for $SERVERS_HOME/$SERVER before deploying (y/n)? " answer
-    case $answer in
-    "Y" | "y") BUILD=1;;
-    *) echo "Not building anything. You have been warned!"
-    esac
-
-    if [[ $BUILD -eq 1 ]]; then
-            ACDIR=$PWD
-            cd $HOME/code
-            git co $active_branch
-            configuration/buildAndUpdateProduct.sh -t build
-            read -s -n1 -p "Has the build been successful (y/n)? " answer
-            case $answer in
-            "Y" | "y") OK=1;;
-            *) echo "Aborting..."
-            exit;;
-            esac
-            cd $ACDIR
-            echo ""
-    fi
-
     SSH_CMD="ssh $REMOTE_SERVER_LOGIN"
     SCP_CMD="scp -r"
 
