@@ -194,6 +194,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     public static final String LEADERBOARD_MARGIN_STYLE = "leaderboardMargin";
 
     private final Timer timer;
+    
+    /**
+     * A {@link LeaderboardDTO} tells something about the live delay through its {@link LeaderboardDTO#getDelayToLiveInMillisForLatestRace()} method.
+     * If this flag is <code>true</code>, the live delay in the {@link #timer} will be adjusted each time the {@link #updateLeaderboard(LeaderboardDTO)}
+     * method is invoked. Otherwise, the timer's delay will be left alone which is helpful, e.g., if the leaderboard panel is embedded
+     * in a race board panel that focuses on one particular race which may not be the same as the one controlling the leaderboard's overall
+     * live delay.
+     */
+    private final boolean adjustTimerDelay;
 
     private boolean autoExpandPreSelectedRace;
     
@@ -484,7 +493,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                                   /* autoExpandPreSelectedRace */ false, /* showOverallLeaderboardsOnSamePage */ false),
                                   /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
                             timer, leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
-                            showRaceDetails, /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false);
+                            showRaceDetails, /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
                     overallLeaderboardPanels.add(overallLeaderboardPanel);
                     overallLeaderboardsPanel.add(overallLeaderboardPanel);
                 }
@@ -1342,14 +1351,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this(sailingService, asyncActionsExecutor, settings, preSelectedRace, competitorSelectionProvider, new Timer(
                 PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
-                /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false);
+                /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            final UserAgentDetails userAgent, boolean showRaceDetails, RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn) {
+            final UserAgentDetails userAgent, boolean showRaceDetails,
+            RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -1366,6 +1376,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.raceTimesInfoProvider = optionalRaceTimesInfoProvider;
         this.selectedManeuverDetails = new ArrayList<DetailType>();
         this.showOverallLeaderboardsOnSamePage = settings.isShowOverallLeaderboardsOnSamePage();
+        this.adjustTimerDelay = adjustTimerDelay;
         overallDetailColumnMap = createOverallDetailColumnMap();
         settingsUpdatedExplicitly = !settings.updateUponPlayStateChange();
         if (settings.getLegDetailsToShow() != null) {
@@ -1961,12 +1972,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     /**
      * Based on the {@link LeaderboardDTO#getDelayToLiveInMillisForLatestRace()} for the race that has the latest
-     * {@link RaceColumnDTO#getStartDate(FleetDTO) start time}, automatically adjusts the delay accordingly unless it
-     * was manually explicitly updated.
+     * {@link RaceColumnDTO#getStartDate(FleetDTO) start time}, automatically adjusts the delay accordingly unless the
+     * {@link #adjustTimerDelay} flag is <code>false</code>
      */
     private void adjustDelayToLive() {
-        if (leaderboard.getDelayToLiveInMillisForLatestRace() != null) {
-            setDelayInMilliseconds(leaderboard.getDelayToLiveInMillisForLatestRace());
+        if (adjustTimerDelay) {
+            if (leaderboard.getDelayToLiveInMillisForLatestRace() != null) {
+                setDelayInMilliseconds(leaderboard.getDelayToLiveInMillisForLatestRace());
+            }
         }
     }
 
