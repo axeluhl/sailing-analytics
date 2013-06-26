@@ -196,6 +196,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             throw new RuntimeException("Connection failed. Could not connect to " + paramURL);
         }
         
+        logger.info("Starting race tracker: " + tractracEvent.getName() + " " + regatta.getBaseName() + " " + paramURL + " " + liveURI
+                + storedURI + " startOfTracking:" + startOfTracking.asMillis() + " endOfTracking:" + endOfTracking.asMillis());
+        
         // Initialize data controller using live and stored data sources
         controller = new DataController(liveURI, storedURI, this);
         // Start live and stored data streams
