@@ -35,6 +35,8 @@ public interface RaceColumn extends Named {
      */
     void setRaceLogInformation(RaceLogInformation information);
     
+    RaceLogInformation getRaceLogInformation();
+    
     /**
      * Gets the race column's race log associated to the passed fleet.
      * 
@@ -179,5 +181,13 @@ public interface RaceColumn extends Named {
      * @param fleet
      * @return
      */
-    RaceLogIdentifier getRaceLogIdentifier(Fleet fleet);    
+    RaceLogIdentifier getRaceLogIdentifier(Fleet fleet);
+
+    /**
+     * Sets (or reloads) {@link RaceLog} for this column with the given fleet
+     * 
+     * @param raceLogInformation
+     * @param fleetImpl
+     */
+    void setOrReloadRaceLogInformation(RaceLogInformation raceLogInformation, Fleet fleetImpl);    
 }
