@@ -71,19 +71,12 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     public void setTrackedRace(Fleet fleet, TrackedRace trackedRace) {
         TrackedRace previouslyLinkedRace = this.trackedRaces.get(fleet);
         if (trackedRace != previouslyLinkedRace) {
+            releaseTrackedRace(fleet);
             synchronized (this) {
-                if (trackedRace == null) {
-                    setRaceIdentifier(fleet, null);
-                    this.trackedRaces.remove(fleet);
-                } else {
+                if (trackedRace != null) {
                     this.trackedRaces.put(fleet, trackedRace);
                     this.setRaceIdentifier(fleet, trackedRace.getRaceIdentifier());
                 }
-            }
-            if (previouslyLinkedRace != null) {
-                RaceLogIdentifierImpl identifier = new RaceLogIdentifierImpl(raceLogInformation.getIdentifierTemplate(), getName(), fleet);
-                previouslyLinkedRace.detachRaceLog(identifier);
-                getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(this, fleet, previouslyLinkedRace);
             }
             if (trackedRace != null) {
                 trackedRace.attachRaceLog(getRaceLog(fleet));
@@ -99,18 +92,28 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public void setRaceIdentifier(Fleet fleet, RaceIdentifier raceIdentifier) {
-        if (raceIdentifier == null) {
-            this.raceIdentifiers.remove(fleet);
-        } else {
+        if (raceIdentifier != null) {
             this.raceIdentifiers.put(fleet, raceIdentifier);
         }
     }
 
     @Override
     public synchronized void releaseTrackedRace(Fleet fleet) {
-        setTrackedRace(fleet, null);
+        TrackedRace previouslyLinkedRace = this.trackedRaces.get(fleet);
+        this.trackedRaces.remove(fleet);
+        if (previouslyLinkedRace != null) {
+            RaceLogIdentifierImpl identifier = new RaceLogIdentifierImpl(raceLogInformation.getIdentifierTemplate(), getName(), fleet);
+            previouslyLinkedRace.detachRaceLog(identifier);
+            getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(this, fleet, previouslyLinkedRace);
+        }
     }
-
+    
+    @Override
+    public void removeRaceIdentifier(Fleet fleet) {
+        releaseTrackedRace(fleet);
+        this.raceIdentifiers.remove(fleet);
+    }
+    
     @Override
     public Fleet getFleetOfCompetitor(Competitor competitor) {
         for (Map.Entry<Fleet, TrackedRace> e : trackedRaces.entrySet()) {

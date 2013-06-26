@@ -1700,8 +1700,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                             }
                         }
                     } catch (NoWindException e) {
-                        logger.warning("Unable to determine leg type for race " + getRace().getName()
-                                + " while trying to estimate wind");
+                        logger.fine("Unable to determine leg type for race " + getRace().getName()
+                                + " while trying to estimate wind (Background: I've got a NoWindException)");
                         bearings = null;
                     }
                 }

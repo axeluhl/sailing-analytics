@@ -114,6 +114,8 @@ public interface RaceColumn extends Named {
      * 
      * @param fleet
      *            the fleet for which to associate a race by its identifier
+     * @param raceIdentifier
+     *            the race that should be associated with this column+fleet. It should never be null.
      */
     void setRaceIdentifier(Fleet fleet, RaceIdentifier raceIdentifier);
     
@@ -135,7 +137,7 @@ public interface RaceColumn extends Named {
 
     /**
      * Releases the {@link TrackedRace} previously set by {@link #setTrackedRace(Fleet, TrackedRace)} but leaves the
-     * {@link #getRaceIdentifier(Fleet) race identifier} untouched. Therefore, the {@link TrackedRace} may be garbage
+     * {@link #getRaceIdentifier(Fleet) race identifier} untouched(!). Therefore, the {@link TrackedRace} may be garbage
      * collected but may be re-resolved for this column using the race identifier at a later time.
      * 
      * @param fleet
@@ -189,5 +191,14 @@ public interface RaceColumn extends Named {
      * @param raceLogInformation
      * @param fleetImpl
      */
-    void setOrReloadRaceLogInformation(RaceLogInformation raceLogInformation, Fleet fleetImpl);    
+    void setOrReloadRaceLogInformation(RaceLogInformation raceLogInformation, Fleet fleetImpl);
+
+    /**
+     * Remove the association between a race and a column. This is different from
+     * {@link RaceColumn#releaseTrackedRace(Fleet)} because it will also remove the
+     * association from database.
+     * 
+     * @param fleet
+     */
+    void removeRaceIdentifier(Fleet fleet);    
 }
