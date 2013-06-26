@@ -781,11 +781,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             
             result.add(new TracTracRaceRecordDTO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
-                    raceRecord.getParamURL() != null ? raceRecord.getParamURL().toString() : "", 
-                    raceRecord.getReplayURL(), raceRecord.getLiveURI() != null ? raceRecord.getLiveURI().toString() : "",
-                    raceRecord.getStoredURI() != null ? raceRecord.getStoredURI().toString() : "", raceRecord.getTrackingStartTime().asDate(), raceRecord
-                    .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(), raceRecord.getBoatClassNames(),
-                    raceRecord.getRaceStatus(), raceRecord.getJsonURL().toString()));
+                    raceRecord.getTrackingStartTime().asDate(), 
+                    raceRecord
+                    .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(),
+                    raceRecord.getBoatClassNames(), raceRecord.getRaceStatus(), raceRecord.getJsonURL().toString()));
         }
         return new Pair<String, List<TracTracRaceRecordDTO>>(raceRecords.getA(), result);
     }
@@ -797,7 +796,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         logger.info("tracWithTracTrac for regatta "+regattaToAddTo+" for race records "+rrs+" with liveURI "+liveURI+" and storedURI "+storedURI);
         for (TracTracRaceRecordDTO rr : rrs) {
             // reload JSON and load clientparams.php
-            RaceRecord record = getService().getSingleTracTracRaceRecord(new URL(rr.jsonURL), rr.ID, /*loadClientParams*/true);
+            RaceRecord record = getService().getSingleTracTracRaceRecord(new URL(rr.jsonURL), rr.id, /*loadClientParams*/true);
             logger.info("Loaded race " + record.getName() + " in " + record.getEventName() + " start:" + record.getRaceStartTime() + " trackingStart:" + record.getTrackingStartTime() + " trackingEnd:" + record.getTrackingEndTime());
             if (liveURI == null || liveURI.trim().length() == 0) {
                 liveURI = record.getLiveURI().toString();
@@ -812,7 +811,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
                     RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow, tracTracUsername, tracTracPassword);
             if (trackWind) {
-                new Thread("Wind tracking starter for race " + rr.regattaName + "/" + rr.name) {
+                new Thread("Wind tracking starter for race " + record.getEventName() + "/" + record.getName()) {
                     public void run() {
                         try {
                             startTrackingWind(raceHandle, correctWindByDeclination,

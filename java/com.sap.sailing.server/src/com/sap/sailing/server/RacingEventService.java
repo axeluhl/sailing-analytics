@@ -221,10 +221,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Iterable<Triple<Regatta, RaceDefinition, String>> getWindTrackedRaces();
 
     /**
-     * For the JSON URL of an account / event, lists the paramURLs that can be used for {@link #addTracTracRace(URL, URI, URI, WindStore, long)}
-     * calls to individually start tracking races of this event, rather than tracking <em>all</em> races in the event which
-     * is hardly ever useful. The returned pair's first component is the event name.
-     * @param loadClientParams TODO
+     * For the JSON URL of an account / event, lists the paramURLs that can be used for
+     * {@link #addTracTracRace(URL, URI, URI, WindStore, long)} calls to individually start tracking races of this
+     * event, rather than tracking <em>all</em> races in the event which is hardly ever useful. The returned pair's
+     * first component is the event name.
+     * 
+     * @param loadClientParams
+     *            shall the properties from the clientparams.php file such as liveURI and storedURI already be loaded?
+     *            Generally, this is not necessary as the
+     *            {@link #addTracTracRace(RegattaIdentifier, URL, URI, URI, URI, TimePoint, TimePoint, RaceLogStore, WindStore, long, boolean, String, String)}
+     *            and {@link #addTracTracRace(URL, URI, URI, URI, RaceLogStore, WindStore, long, String, String)} will
+     *            fetch the JSON and clientparams.php documents to work with up-to-date data.
      */
     Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException,
     org.json.simple.parser.ParseException, URISyntaxException;

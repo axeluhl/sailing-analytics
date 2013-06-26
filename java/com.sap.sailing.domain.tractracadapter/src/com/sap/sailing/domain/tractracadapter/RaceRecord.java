@@ -126,7 +126,7 @@ public class RaceRecord {
     }
     
     public boolean hasLiveAndStoredURI() {
-        return !(liveURI == null);
+        return liveURI != null;
     }
 
     public String getName() {
