@@ -3,12 +3,15 @@ package com.sap.sailing.manage2sail.resultimport;
 import java.net.URL;
 import java.util.Date;
 
+import com.sap.sailing.domain.common.CompetitorGenderType;
+
 public class RegattaResultDescriptor {
     private String id;
     private String isafId;
     private String externalId;
     private String name;
     private String className;
+    private CompetitorGenderType competitorGenderType;
     private URL pdfUrl;
     private URL xrrPreliminaryUrl;
     private URL xrrFinalUrl;
@@ -81,5 +84,11 @@ public class RegattaResultDescriptor {
     }
     public void setIsFinal(Boolean isFinal) {
         this.isFinal = isFinal;
+    }
+    public CompetitorGenderType getCompetitorGenderType() {
+        return competitorGenderType;
+    }
+    public void setCompetitorGenderType(CompetitorGenderType competitorGenderType) {
+        this.competitorGenderType = competitorGenderType;
     }
 }
