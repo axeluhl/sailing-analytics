@@ -159,6 +159,8 @@ public interface RaceColumn extends Named {
     boolean isStartsWithZeroScore();
     
     boolean isDiscardable();
+    
+    boolean isCarryForward();
 
     /**
      * @param factor if <code>null</code>, {@link #getFactor()} will again compute a default value; otherwise, {@link #getFactor()} will
