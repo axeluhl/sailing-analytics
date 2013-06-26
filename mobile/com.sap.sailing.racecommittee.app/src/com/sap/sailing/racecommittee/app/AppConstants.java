@@ -36,4 +36,6 @@ public class AppConstants {
     public static final String RESET_TIME_FRAGMENT_IS_RESET = SetStartTimeRaceFragment.class.getName() + ".isReset";
 
     public static final int DefaultStartTimeMinuteOffset = 10;
+    
+    public static final int EventResendInterval = 1000 * 30; //30 seconds
 }
