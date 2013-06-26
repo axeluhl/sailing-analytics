@@ -691,4 +691,5 @@ public interface StringMessages extends Messages {
     String furtherSignalsAshore();
     String refreshRaceLog();
     String raceLogReloaded();
+    String reloadAllRaceLogs();
 }
