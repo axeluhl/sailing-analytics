@@ -717,7 +717,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+        logger.info("Retrieving TracTrac race records from " + jsonURL);
         JSONService jsonService = getTracTracDomainFactory().parseJSONURL(jsonURL);
+        logger.info("OK retrieving TracTrac race records from " + jsonURL);
         return new Pair<String, List<RaceRecord>>(jsonService.getEventName(), jsonService.getRaceRecords());
     }
 
