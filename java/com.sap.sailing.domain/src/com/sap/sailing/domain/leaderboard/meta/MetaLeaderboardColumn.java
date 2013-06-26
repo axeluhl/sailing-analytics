@@ -180,4 +180,13 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     public RaceLogIdentifier getRaceLogIdentifier(Fleet fleet) {
         return null;
     }
+
+    @Override
+    public RaceLogInformation getRaceLogInformation() {
+        return null;
+    }
+
+    @Override
+    public void setOrReloadRaceLogInformation(RaceLogInformation raceLogInformation, Fleet fleetImpl) {
+    }
 }

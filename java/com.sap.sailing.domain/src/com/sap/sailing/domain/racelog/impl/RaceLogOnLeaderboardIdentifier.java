@@ -32,4 +32,9 @@ public class RaceLogOnLeaderboardIdentifier implements RaceLogIdentifierTemplate
         return leaderboardName;
     }
 
+    @Override
+    public String getRaceColumnName() {
+        return raceColumnName;
+    }
+
 }

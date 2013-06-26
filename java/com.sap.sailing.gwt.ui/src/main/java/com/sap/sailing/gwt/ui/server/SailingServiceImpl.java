@@ -3274,4 +3274,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet) {
+        getService().reloadRaceLog(selectedLeaderboardName, raceColumnDTO, fleet);
+    }
 }
