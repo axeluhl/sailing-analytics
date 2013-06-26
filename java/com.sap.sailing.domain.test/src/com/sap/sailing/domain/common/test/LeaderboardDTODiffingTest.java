@@ -119,15 +119,6 @@ public class LeaderboardDTODiffingTest {
 
     @Test
     public void testStrippingExceptOneColumnInOneRace() {
-        Map<Pair<CompetitorDTO, String>, List<LegEntryDTO>> previousLegDetailsBeforeStripping = new HashMap<>();
-        for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : previousVersion.rows.entrySet()) {
-            for (Map.Entry<String, LeaderboardEntryDTO> e2 : e.getValue().fieldsByRaceColumnName.entrySet()) {
-                if (e2.getValue().legDetails != null) {
-                    previousLegDetailsBeforeStripping.put(new Pair<CompetitorDTO, String>(e.getKey(), e2.getKey()),
-                            new ArrayList<>(e2.getValue().legDetails));
-                }
-            }
-        }
         HashMap<CompetitorDTO, LeaderboardRowDTO> newRows = new HashMap<CompetitorDTO, LeaderboardRowDTO>(newVersion.rows);
         double newDistance = 1234;
         String nameOfRaceColumnToChange = "R9";
@@ -153,10 +144,19 @@ public class LeaderboardDTODiffingTest {
         }
         newVersion.rows = newRows;
         Map<CompetitorDTO, LeaderboardRowDTO> rowsBeforeStripping = newVersion.rows;
+        Map<Pair<CompetitorDTO, String>, List<LegEntryDTO>> previousLegDetailsBeforeStripping = new HashMap<>();
+        for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : rowsBeforeStripping.entrySet()) {
+            for (Map.Entry<String, LeaderboardEntryDTO> e2 : e.getValue().fieldsByRaceColumnName.entrySet()) {
+                if (e2.getValue().legDetails != null) {
+                    previousLegDetailsBeforeStripping.put(new Pair<CompetitorDTO, String>(e.getKey(), e2.getKey()),
+                            new ArrayList<>(e2.getValue().legDetails));
+                }
+            }
+        }
         newVersion.strip(previousVersion);
         // see bug 1455; check that the stripping doesn't kill the previous leaderboard's legDetails lists
         for (Map.Entry<Pair<CompetitorDTO, String>, List<LegEntryDTO>> e : previousLegDetailsBeforeStripping.entrySet()) {
-            final LeaderboardRowDTO leaderboardRowDTO = previousVersion.rows.get(e.getKey().getA());
+            final LeaderboardRowDTO leaderboardRowDTO = rowsBeforeStripping.get(e.getKey().getA());
             if (leaderboardRowDTO != null) {
                 List<LegEntryDTO> newLegDetails = leaderboardRowDTO.fieldsByRaceColumnName.get(e.getKey().getB()).legDetails;
                 assertEquals(e.getValue(), newLegDetails);
