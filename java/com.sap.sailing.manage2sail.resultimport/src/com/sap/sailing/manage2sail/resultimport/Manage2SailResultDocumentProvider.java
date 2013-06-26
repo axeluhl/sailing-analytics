@@ -40,12 +40,12 @@ public class Manage2SailResultDocumentProvider implements ResultDocumentProvider
                             URLConnection regattaResultConn = regattaResult.getXrrFinalUrl().openConnection();
                             result.add(new ResultDocumentDescriptorImpl((InputStream) regattaResultConn.getContent(),
                                     regattaResult.getXrrPreliminaryUrl().toString(), new MillisecondsTimePoint(regattaResult.getPublishedAt()),
-                                            eventResult.getName(), regattaResult.getName(), boatClass));
+                                            eventResult.getName(), regattaResult.getName(), boatClass, regattaResult.getCompetitorGenderType()));
                         } else if (regattaResult.getXrrPreliminaryUrl() != null) {
                             URLConnection regattaResultConn = regattaResult.getXrrPreliminaryUrl().openConnection();
                             result.add(new ResultDocumentDescriptorImpl((InputStream) regattaResultConn.getContent(),
                                     regattaResult.getXrrPreliminaryUrl().toString(), new MillisecondsTimePoint(regattaResult.getPublishedAt()),
-                                    eventResult.getName(), regattaResult.getName(), boatClass));
+                                    eventResult.getName(), regattaResult.getName(), boatClass, regattaResult.getCompetitorGenderType()));
                         }
                     }
                 }

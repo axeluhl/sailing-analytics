@@ -90,4 +90,9 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
         return !isMedalRace();
     }
 
+    @Override
+    public boolean isCarryForward() {
+        return false;
+    }
+
 }

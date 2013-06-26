@@ -54,6 +54,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util;
@@ -81,6 +82,7 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.media.DBMediaTrack;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
@@ -715,7 +717,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+        logger.info("Retrieving TracTrac race records from " + jsonURL);
         JSONService jsonService = getTracTracDomainFactory().parseJSONURL(jsonURL);
+        logger.info("OK retrieving TracTrac race records from " + jsonURL);
         return new Pair<String, List<RaceRecord>>(jsonService.getEventName(), jsonService.getRaceRecords());
     }
 
@@ -1955,6 +1959,22 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     public String toString() {
         return "RacingEventService: " + this.hashCode() + " Build: " + BuildVersion.getBuildVersion();
+    }
+
+    @Override
+    public void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet) {
+        Leaderboard leaderboard = getLeaderboardByName(selectedLeaderboardName);
+        if (leaderboard != null) {
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnDTO.getName());
+            if (raceColumn != null) {
+                Fleet fleetImpl = raceColumn.getFleetByName(fleet.getName());
+                RaceLog racelog = raceColumn.getRaceLog(fleetImpl);
+                if (racelog != null) {
+                    raceColumn.setOrReloadRaceLogInformation(raceColumn.getRaceLogInformation(), fleetImpl);
+                    logger.info("Reloaded race log for fleet " + fleetImpl + " for race column " + raceColumn.getName() + " for leaderboard " + leaderboard.getName());
+                }
+            }
+        }
     }
 
 }

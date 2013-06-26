@@ -591,6 +591,10 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                     } else {
                         LeaderboardEntryDTO newLeaderboardEntryDTO = new LeaderboardEntryDTO();
                         cloner.clone(raceColumnNameAndLeaderboardEntry.getValue(), newLeaderboardEntryDTO);
+                        // clone the leg details collection to ensure that when we need to manipulate it we don't manipulate the original
+                        if (newLeaderboardEntryDTO.legDetails != null) {
+                            newLeaderboardEntryDTO.legDetails = new ArrayList<LegEntryDTO>(newLeaderboardEntryDTO.legDetails);
+                        }
                         newFieldsByRaceColumnName.put(raceColumnNameAndLeaderboardEntry.getKey(), newLeaderboardEntryDTO);
                         if (newLeaderboardEntryDTO.legDetails != null) {
                             for (int legDetailsIndex = 0; legDetailsIndex < newLeaderboardEntryDTO.legDetails.size(); legDetailsIndex++) {

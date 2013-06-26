@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.racelog;
 
+import java.util.HashSet;
+
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventComparator;
 import com.sap.sailing.domain.tracking.Track;
@@ -47,6 +49,12 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
     void removeListener(RaceLogEventVisitor listener);
     
     /**
+     * Removes all listeners
+     * @return 
+     */
+    HashSet<RaceLogEventVisitor> removeAllListeners();
+    
+    /**
      * Checks if the race log is empty.
      */
     boolean isEmpty();
@@ -54,4 +62,8 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
     Iterable<RaceLogEvent> getRawFixesDescending();
 
     Iterable<RaceLogEvent> getFixesDescending();
+
+    void addAllListeners(HashSet<RaceLogEventVisitor> listeners);
+
+    Iterable<RaceLogEventVisitor> getAllListeners();
 }

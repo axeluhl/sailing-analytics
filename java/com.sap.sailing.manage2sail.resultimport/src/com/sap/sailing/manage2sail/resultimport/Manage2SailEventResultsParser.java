@@ -12,6 +12,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.common.CompetitorGenderType;
 import com.sap.sailing.util.DateParser;
 import com.sap.sailing.util.InvalidDateException;
 
@@ -39,6 +40,7 @@ public class Manage2SailEventResultsParser {
                 regattaResult.setIsafId((String) jsonRegatta.get("IsafId"));
                 regattaResult.setExternalId((String) jsonRegatta.get("ExternalId"));
                 regattaResult.setName((String) jsonRegatta.get("Name"));
+                regattaResult.setCompetitorGenderType(parseCompetitorGenderType(jsonRegatta, "Gender"));
                 regattaResult.setClassName((String) jsonRegatta.get("ClassName"));
                 regattaResult.setPdfUrl(parseURL(jsonRegatta, "PdfUrl"));
                 regattaResult.setXrrPreliminaryUrl(parseURL(jsonRegatta, "XrrPreliminaryUrl"));
@@ -53,6 +55,20 @@ public class Manage2SailEventResultsParser {
             e.printStackTrace();
         } finally { 
             is.close();
+        }
+        return result;
+    }
+
+    private CompetitorGenderType parseCompetitorGenderType(JSONObject jsonDate, String attributeName) {
+        CompetitorGenderType result = null;
+        String genderTypeAsString = (String) jsonDate.get(attributeName);
+        if(genderTypeAsString != null) {
+            switch(genderTypeAsString) {
+                case "M" : result = CompetitorGenderType.Men; break;
+                case "W" : result = CompetitorGenderType.Women; break;
+                case "X" : result = CompetitorGenderType.Mixed; break;
+                case "Open" : result = CompetitorGenderType.Open; break;
+            }
         }
         return result;
     }

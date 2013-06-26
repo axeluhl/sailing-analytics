@@ -6,7 +6,6 @@ import java.util.List;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
-import com.sap.sailing.racecommittee.app.domain.coursedesign.TargetTime;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.TrapezoidCourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.WindWardLeeWardCourseLayouts;
 
