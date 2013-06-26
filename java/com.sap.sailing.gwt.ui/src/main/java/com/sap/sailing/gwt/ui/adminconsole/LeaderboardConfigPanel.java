@@ -492,6 +492,8 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                     editRaceColumnOfLeaderboard(object);
                 } else if (LeaderboardRaceConfigImagesBarCell.ACTION_UNLINK.equals(value)) {
                     unlinkRaceColumnFromTrackedRace(object.getA().getRaceColumnName(), object.getB());
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_REFRESH_RACELOG.equals(value)) {
+                    refreshRaceLog(object.getA(), object.getB());
                 }
             }
         });
@@ -672,6 +674,20 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 trackedRacesListComposite.clearSelection();
                 getSelectedRaceColumnWithFleet().getA().setRaceIdentifier(fleet, null);
                 raceColumnAndFleetList.refresh();
+            }
+        });
+    }
+    
+    private void refreshRaceLog(final RaceColumnDTO raceColumnDTO, final FleetDTO fleet) {
+        final String selectedLeaderboardName = getSelectedLeaderboardName();
+        sailingService.reloadRaceLog(selectedLeaderboardName, raceColumnDTO, fleet, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+            }
+            @Override
+            public void onSuccess(Void result) {
+                Window.alert(stringMessages.raceLogReloaded());
             }
         });
     }
