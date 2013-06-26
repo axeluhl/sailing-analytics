@@ -91,8 +91,8 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
         TimePoint now = MillisecondsTimePoint.now();
         long fromTime = startOfTracking == null ? 0l : startOfTracking.compareTo(now) > 0 ? now.asMillis() : startOfTracking.asMillis();
         long toTime = endOfTracking == null ? Long.MAX_VALUE : endOfTracking.asMillis();
-        logger.fine("subscribing to ControlPointPositionData for time range "+new MillisecondsTimePoint(fromTime)+"/"+
-                new MillisecondsTimePoint(toTime));
+        logger.info("Subscribing to ControlPointPositionData for time range "+new MillisecondsTimePoint(fromTime)+"/"+
+                new MillisecondsTimePoint(toTime) + " for event " + getTracTracEvent().getName());
         TypeController controlPointListener = ControlPointPositionData.subscribe(getTracTracEvent(),
                 new ICallbackData<ControlPoint, ControlPointPositionData>() {
                     @Override
