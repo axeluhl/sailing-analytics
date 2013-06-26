@@ -203,9 +203,16 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                     break;
                 }
             }
-            if((lastRaceTimesInfo.endOfRace == null && newRaceTimesInfo.endOfRace != null) ||
-               (lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace == null) ||
-               lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace != null && lastRaceTimesInfo.endOfRace.getTime() != newRaceTimesInfo.endOfRace.getTime()) {
+            if ((lastRaceTimesInfo.startOfRace == null && newRaceTimesInfo.startOfRace != null)
+                    || (lastRaceTimesInfo.startOfRace != null && newRaceTimesInfo.startOfRace == null)
+                    || (lastRaceTimesInfo.startOfRace != null && newRaceTimesInfo.startOfRace != null
+                    && lastRaceTimesInfo.startOfRace.getTime() != newRaceTimesInfo.startOfRace.getTime())) {
+                requiresMarkerUpdate = true;
+            }
+            if ((lastRaceTimesInfo.endOfRace == null && newRaceTimesInfo.endOfRace != null)
+                    || (lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace == null)
+                    || (lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace != null
+                    && lastRaceTimesInfo.endOfRace.getTime() != newRaceTimesInfo.endOfRace.getTime())) {
                 requiresMarkerUpdate = true;
             }
         }
@@ -217,13 +224,22 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private void redrawAllMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
         List<MarkPassingTimesDTO> markPassingTimes = newRaceTimesInfo.getMarkPassingTimes();
         timeSlider.clearMarkers();
+        if(newRaceTimesInfo.startOfRace != null) {
+            long markerTime = newRaceTimesInfo.startOfRace.getTime();
+            if(!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
+                timeSlider.addMarker("S", new Double(markerTime));
+            }
+        }
+        int markPassingCounter = 1;
         for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
-            if (markPassingTimesDTO.firstPassingDate != null) {
+            // ignore the start mark passing
+            if(markPassingCounter > 1 && markPassingTimesDTO.firstPassingDate != null) {
                 long markerTime = markPassingTimesDTO.firstPassingDate.getTime();
                 if(!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
                     timeSlider.addMarker(markPassingTimesDTO.getName(), new Double(markerTime));
                 }
             }
+            markPassingCounter++;
         }
         if (newRaceTimesInfo.endOfRace != null) {
             long markerTime = newRaceTimesInfo.endOfRace.getTime();
