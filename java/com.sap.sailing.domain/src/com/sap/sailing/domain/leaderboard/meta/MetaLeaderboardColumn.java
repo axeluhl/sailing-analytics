@@ -189,4 +189,8 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     @Override
     public void setOrReloadRaceLogInformation(RaceLogInformation raceLogInformation, Fleet fleetImpl) {
     }
+
+    @Override
+    public void removeRaceIdentifier(Fleet fleet) {
+    }
 }
