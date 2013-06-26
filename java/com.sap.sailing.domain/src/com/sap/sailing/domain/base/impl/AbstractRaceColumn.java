@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogIdentifierImpl;
@@ -34,6 +35,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
      * RaceLogStore for persistence purposes.
      */
     private transient RaceLogInformation raceLogInformation;
+    private RaceLogIdentifierTemplate raceLogIdentifierTemplate;
 
     public AbstractRaceColumn() {
         this.trackedRaces = new HashMap<Fleet, TrackedRace>();
@@ -167,7 +169,8 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 raceLogs.remove(fleetImpl);
             }
             
-            RaceLogIdentifier identifier = raceLogInformation.getIdentifierTemplate().compileRaceLogIdentifier(fleetImpl);
+            raceLogIdentifierTemplate = raceLogInformation.getIdentifierTemplate();
+            RaceLogIdentifier identifier = raceLogIdentifierTemplate.compileRaceLogIdentifier(fleetImpl);
             RaceLog raceLog = store.getRaceLog(identifier, /*ignoreCache*/ true);
             
             if (listeners.isEmpty()) {
@@ -188,7 +191,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         for (Entry<Fleet, RaceLog> entry : raceLogs.entrySet()) {
             Fleet fleet = entry.getKey();
             RaceLog raceLog = entry.getValue();
-            raceLog.addListener(new RaceColumnRaceLogReplicator(this, raceLogInformation.getIdentifierTemplate().compileRaceLogIdentifier(fleet)));
+            raceLog.addListener(new RaceColumnRaceLogReplicator(this, raceLogIdentifierTemplate.compileRaceLogIdentifier(fleet)));
         }
     }
 }
