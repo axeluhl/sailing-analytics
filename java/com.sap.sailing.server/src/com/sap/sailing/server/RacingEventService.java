@@ -224,9 +224,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * For the JSON URL of an account / event, lists the paramURLs that can be used for {@link #addTracTracRace(URL, URI, URI, WindStore, long)}
      * calls to individually start tracking races of this event, rather than tracking <em>all</em> races in the event which
      * is hardly ever useful. The returned pair's first component is the event name.
+     * @param loadClientParams TODO
      */
-    Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL) throws IOException, ParseException,
+    Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException,
     org.json.simple.parser.ParseException, URISyntaxException;
+    
+    RaceRecord getSingleTracTracRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws Exception;
 
     List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port, boolean canSendRequests)
             throws InterruptedException, UnknownHostException, IOException, ParseException;

@@ -7,6 +7,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class TracTracRaceRecordDTO implements IsSerializable {
     public String regattaName;
     public String name;
+    public String jsonURL;
     public String replayURL;
     public String liveURI;
     public String storedURI;
@@ -22,7 +23,7 @@ public class TracTracRaceRecordDTO implements IsSerializable {
     
     public TracTracRaceRecordDTO(String id, String regattaName, String name, String paramURL,
             String replayURL, String liveURI, String storedURI, Date trackingStartTime, Date trackingEndTime, Date raceStartTime,
-            Iterable<String> boatClassNames, String status) {
+            Iterable<String> boatClassNames, String status, String jsonUrl) {
         super();
         this.regattaName = regattaName;
         this.name = name;
@@ -36,6 +37,7 @@ public class TracTracRaceRecordDTO implements IsSerializable {
         this.raceStartTime = raceStartTime;
         this.boatClassNames = boatClassNames;
         this.raceStatus = status;
+        this.jsonURL = jsonUrl;
     }
     
     @Override

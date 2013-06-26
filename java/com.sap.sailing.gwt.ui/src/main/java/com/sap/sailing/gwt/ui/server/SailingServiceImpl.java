@@ -773,7 +773,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces) throws MalformedURLException, IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         com.sap.sailing.domain.common.impl.Util.Pair<String,List<RaceRecord>> raceRecords;
-        raceRecords = getService().getTracTracRaceRecords(new URL(eventJsonURL));
+        raceRecords = getService().getTracTracRaceRecords(new URL(eventJsonURL), /*loadClientParam*/ false);
         List<TracTracRaceRecordDTO> result = new ArrayList<TracTracRaceRecordDTO>();
         for (RaceRecord raceRecord : raceRecords.getB()) {
             if (listHiddenRaces == false && raceRecord.getRaceStatus().equals(TracTracConnectionConstants.HIDDEN_STATUS)) {
@@ -781,10 +781,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             
             result.add(new TracTracRaceRecordDTO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
-                    raceRecord.getParamURL().toString(), raceRecord.getReplayURL(), raceRecord.getLiveURI().toString(),
-                    raceRecord.getStoredURI().toString(), raceRecord.getTrackingStartTime().asDate(), raceRecord
+                    raceRecord.getParamURL() != null ? raceRecord.getParamURL().toString() : "", 
+                    raceRecord.getReplayURL(), raceRecord.getLiveURI() != null ? raceRecord.getLiveURI().toString() : "",
+                    raceRecord.getStoredURI() != null ? raceRecord.getStoredURI().toString() : "", raceRecord.getTrackingStartTime().asDate(), raceRecord
                     .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(), raceRecord.getBoatClassNames(),
-                    raceRecord.getRaceStatus()));
+                    raceRecord.getRaceStatus(), raceRecord.getJsonURL().toString()));
         }
         return new Pair<String, List<TracTracRaceRecordDTO>>(raceRecords.getA(), result);
     }
@@ -795,15 +796,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String tracTracUsername, String tracTracPassword) throws Exception {
         logger.info("tracWithTracTrac for regatta "+regattaToAddTo+" for race records "+rrs+" with liveURI "+liveURI+" and storedURI "+storedURI);
         for (TracTracRaceRecordDTO rr : rrs) {
+            // reload JSON and load clientparams.php
+            RaceRecord record = getService().getSingleTracTracRaceRecord(new URL(rr.jsonURL), rr.ID, /*loadClientParams*/true);
+            logger.info("Loaded race " + record.getName() + " in " + record.getEventName() + " start:" + record.getRaceStartTime() + " trackingStart:" + record.getTrackingStartTime() + " trackingEnd:" + record.getTrackingEndTime());
             if (liveURI == null || liveURI.trim().length() == 0) {
-                liveURI = rr.liveURI;
+                liveURI = record.getLiveURI().toString();
             }
             if (storedURI == null || storedURI.trim().length() == 0) {
-                storedURI = rr.storedURI;
+                storedURI = record.getStoredURI().toString();
             }
-            final RacesHandle raceHandle = getService().addTracTracRace(regattaToAddTo, new URL(rr.paramURL),
-                    new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI), new MillisecondsTimePoint(rr.trackingStartTime),
-                    new MillisecondsTimePoint(rr.trackingEndTime),
+            final RacesHandle raceHandle = getService().addTracTracRace(regattaToAddTo, record.getParamURL(),
+                    new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI), new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
+                    new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                     MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
                     RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow, tracTracUsername, tracTracPassword);

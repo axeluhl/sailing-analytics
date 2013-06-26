@@ -21,7 +21,7 @@ public class JSONServiceImpl implements JSONService {
     private final String regattaName;
     private final List<RaceRecord> raceRecords;
     
-    public JSONServiceImpl(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+    public JSONServiceImpl(URL jsonURL, boolean loadLiveAndStoredURI) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         JSONObject jsonObject = parseJSONObject(jsonURL.openStream());
         raceRecords = new ArrayList<RaceRecord>();
         regattaName = (String) ((JSONObject) jsonObject.get("event")).get("name");
@@ -34,8 +34,30 @@ public class JSONServiceImpl implements JSONService {
                     (String) jsonRaceEntry.get("tracking_endtime"),
                     (String) jsonRaceEntry.get("race_starttime"),
                     (String) jsonRaceEntry.get("classes"),
-                    (String) jsonRaceEntry.get("status"));
+                    (String) jsonRaceEntry.get("status"),
+                    /*loadLiveAndStoreURI*/ loadLiveAndStoredURI);
             raceRecords.add(raceRecord);
+        }
+    }
+    
+    public JSONServiceImpl(URL jsonURL, String raceEntryId, boolean loadLiveAndStoredURI) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+        JSONObject jsonObject = parseJSONObject(jsonURL.openStream());
+        raceRecords = new ArrayList<RaceRecord>();
+        regattaName = (String) ((JSONObject) jsonObject.get("event")).get("name");
+        for (Object raceEntry : (JSONArray) jsonObject.get("races")) {
+            JSONObject jsonRaceEntry = (JSONObject) raceEntry;
+            if (jsonRaceEntry.get("id").equals(raceEntryId)) {
+                RaceRecord raceRecord = new RaceRecord(jsonURL, regattaName,
+                        (String) jsonRaceEntry.get("name"), (String) jsonRaceEntry.get("url"),
+                        (String) jsonRaceEntry.get("id"),
+                        (String) jsonRaceEntry.get("tracking_starttime"),
+                        (String) jsonRaceEntry.get("tracking_endtime"),
+                        (String) jsonRaceEntry.get("race_starttime"),
+                        (String) jsonRaceEntry.get("classes"),
+                        (String) jsonRaceEntry.get("status"),
+                        /*loadLiveAndStoreURI*/ loadLiveAndStoredURI);
+                raceRecords.add(raceRecord);
+            }
         }
     }
 

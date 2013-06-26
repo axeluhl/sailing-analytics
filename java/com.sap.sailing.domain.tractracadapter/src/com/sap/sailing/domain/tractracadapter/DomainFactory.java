@@ -208,7 +208,7 @@ public interface DomainFactory {
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, ReceiverType... types);
 
-    JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
+    JSONService parseJSONURLWithRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
     /**
      * Returns a {@link RaceDefinition} for the race if it already exists, <code>null</code> otherwise.
@@ -258,5 +258,7 @@ public interface DomainFactory {
      * Computes an ID to use for a {@link RaceDefinition} based on the TracTrac race.
      */
     Serializable getRaceID(Race tractracRace);
+
+    JSONService parseJSONURLForOneRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
 }
