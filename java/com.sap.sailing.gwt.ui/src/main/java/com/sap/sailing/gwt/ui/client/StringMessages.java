@@ -696,4 +696,5 @@ public interface StringMessages extends Messages {
     String unknown();
     String refreshRaceLog();
     String raceLogReloaded();
+    String reloadAllRaceLogs();
 }
