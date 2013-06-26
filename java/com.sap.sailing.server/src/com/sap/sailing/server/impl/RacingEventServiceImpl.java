@@ -671,7 +671,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                 mongoObjectFactory, 
                 domainObjectFactory);
-        JSONService jsonService = getTracTracDomainFactory().parseJSONURL(jsonURL);
+        JSONService jsonService = getTracTracDomainFactory().parseJSONURLWithRaceRecords(jsonURL, true);
         Regatta regatta = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
             URL paramURL = rr.getParamURL();
@@ -716,9 +716,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+    public Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         logger.info("Retrieving TracTrac race records from " + jsonURL);
-        JSONService jsonService = getTracTracDomainFactory().parseJSONURL(jsonURL);
+        JSONService jsonService = getTracTracDomainFactory().parseJSONURLWithRaceRecords(jsonURL, loadClientParams);
         logger.info("OK retrieving TracTrac race records from " + jsonURL);
         return new Pair<String, List<RaceRecord>>(jsonService.getEventName(), jsonService.getRaceRecords());
     }
@@ -1975,6 +1975,16 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 }
             }
         }
+    }
+
+    @Override
+    public RaceRecord getSingleTracTracRaceRecord(URL jsonURL, String raceId, boolean loadClientParams)
+            throws Exception {
+        JSONService service = getTracTracDomainFactory().parseJSONURLForOneRaceRecord(jsonURL, raceId, loadClientParams);
+        if (!service.getRaceRecords().isEmpty()) {
+            return service.getRaceRecords().get(0);
+        }
+        return null;
     }
 
 }

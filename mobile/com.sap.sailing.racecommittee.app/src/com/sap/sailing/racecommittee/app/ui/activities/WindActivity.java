@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.racelog.utils.GeoUtils;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -194,8 +195,8 @@ public class WindActivity extends BaseActivity implements CompassDirectionListen
     @Override
     public void onLocationChanged(Location location) {
         currentLocation = location;
-        latitudeEditText.setText(String.valueOf(location.getLatitude()));
-        longitudeEditText.setText(String.valueOf(location.getLongitude()));
+        latitudeEditText.setText(String.valueOf(GeoUtils.getDegMinSecFormatForDecimalDegree(location.getLatitude())));
+        longitudeEditText.setText(String.valueOf(GeoUtils.getDegMinSecFormatForDecimalDegree(location.getLongitude())));
         sendButton.setEnabled(true);
     }
 

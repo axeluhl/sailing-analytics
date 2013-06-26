@@ -79,7 +79,7 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
 
     @Override
     protected boolean onHomeClicked() {
-        fadeActivity(LoginActivity.class);
+        fadeActivity(LoginActivity.class, true);
         return true;
     }
 
