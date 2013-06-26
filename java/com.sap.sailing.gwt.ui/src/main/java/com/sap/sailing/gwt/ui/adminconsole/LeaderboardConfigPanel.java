@@ -504,7 +504,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 } else if (LeaderboardRaceConfigImagesBarCell.ACTION_UNLINK.equals(value)) {
                     unlinkRaceColumnFromTrackedRace(object.getA().getRaceColumnName(), object.getB());
                 } else if (LeaderboardRaceConfigImagesBarCell.ACTION_REFRESH_RACELOG.equals(value)) {
-                    refreshRaceLog(object.getA(), object.getB(), false);
+                    refreshRaceLog(object.getA(), object.getB(), true);
                 }
             }
         });
