@@ -124,7 +124,7 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.utils.RaceStateOfSameDayHelper;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -142,14 +142,18 @@ import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.polarsheets.PolarSheetsWindStepping;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.ProtestStartTimeFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.RRS26StartModeFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.racelog.analyzing.impl.StartProcedureTypeAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
@@ -201,6 +205,9 @@ import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.GateStartInfoDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RRS26InfoDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RaceInfoExtensionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -622,12 +629,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
             RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog);
             raceInfoDTO.lastStatus = raceStatusAnalyzer.analyze();
-
-            PathfinderFinder pathfinderFinder = new PathfinderFinder(raceLog);
-            raceInfoDTO.pathfinderId = pathfinderFinder.analyze();
-
-            GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
-            raceInfoDTO.gateLineOpeningTime = gateLineOpeningTimeFinder.analyze();
             
             if (raceLog.getLastRawFix() != null) {
                 raceInfoDTO.lastUpdateTime = raceLog.getLastRawFix().getTimePoint().asDate();
@@ -680,6 +681,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     raceInfoDTO.isLastFlagDisplayed = true;
                 }
             }
+            
+            LastWindFixFinder windFinder = new LastWindFixFinder(raceLog);
+            Wind wind = windFinder.analyze();
+            if (wind != null) {
+                raceInfoDTO.lastWind = createWindDTOFromAlreadyAveraged(wind, MillisecondsTimePoint.now());
+            }
+
+            fillStartProcedureSpecifics(raceInfoDTO, raceLog);
         }
         raceInfoDTO.seriesName = seriesName;
         raceInfoDTO.raceName = raceColumn.getName();
@@ -689,6 +698,29 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         raceInfoDTO.isTracked = raceColumn.getTrackedRace(fleet) != null ? true : false;
 
         return raceInfoDTO;
+    }    
+    
+    private void fillStartProcedureSpecifics(RaceInfoDTO raceInfoDTO, RaceLog raceLog) {
+        StartProcedureTypeAnalyzer procedureAnalyzer = new StartProcedureTypeAnalyzer(raceLog);
+        StartProcedureType type = procedureAnalyzer.analyze();
+        if (type != null) {
+            raceInfoDTO.startProcedure = type;
+            RaceInfoExtensionDTO info = null;
+            switch (type) {
+            case RRS26:
+                RRS26StartModeFlagFinder startModeFinder = new RRS26StartModeFlagFinder(procedureAnalyzer, raceLog);
+                info = new RRS26InfoDTO(startModeFinder.analyze());
+                break;
+            case GateStart:
+                PathfinderFinder pathfinderFinder = new PathfinderFinder(raceLog);
+                GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
+                info = new GateStartInfoDTO(pathfinderFinder.analyze(), gateLineOpeningTimeFinder.analyze());
+                break;
+            default:
+                break;
+            }
+            raceInfoDTO.startProcedureDTO = info;
+        }
     }
 
     private RaceCourseDTO convertCourseDesignToRaceCourseDTO(CourseBase lastCourseDesign) {
@@ -741,7 +773,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces) throws MalformedURLException, IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         com.sap.sailing.domain.common.impl.Util.Pair<String,List<RaceRecord>> raceRecords;
-        raceRecords = getService().getTracTracRaceRecords(new URL(eventJsonURL));
+        raceRecords = getService().getTracTracRaceRecords(new URL(eventJsonURL), /*loadClientParam*/ false);
         List<TracTracRaceRecordDTO> result = new ArrayList<TracTracRaceRecordDTO>();
         for (RaceRecord raceRecord : raceRecords.getB()) {
             if (listHiddenRaces == false && raceRecord.getRaceStatus().equals(TracTracConnectionConstants.HIDDEN_STATUS)) {
@@ -749,10 +781,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             
             result.add(new TracTracRaceRecordDTO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
-                    raceRecord.getParamURL().toString(), raceRecord.getReplayURL(), raceRecord.getLiveURI().toString(),
-                    raceRecord.getStoredURI().toString(), raceRecord.getTrackingStartTime().asDate(), raceRecord
-                    .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(), raceRecord.getBoatClassNames(),
-                    raceRecord.getRaceStatus()));
+                    raceRecord.getTrackingStartTime().asDate(), 
+                    raceRecord
+                    .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(),
+                    raceRecord.getBoatClassNames(), raceRecord.getRaceStatus(), raceRecord.getJsonURL().toString()));
         }
         return new Pair<String, List<TracTracRaceRecordDTO>>(raceRecords.getA(), result);
     }
@@ -763,20 +795,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String tracTracUsername, String tracTracPassword) throws Exception {
         logger.info("tracWithTracTrac for regatta "+regattaToAddTo+" for race records "+rrs+" with liveURI "+liveURI+" and storedURI "+storedURI);
         for (TracTracRaceRecordDTO rr : rrs) {
+            // reload JSON and load clientparams.php
+            RaceRecord record = getService().getSingleTracTracRaceRecord(new URL(rr.jsonURL), rr.id, /*loadClientParams*/true);
+            logger.info("Loaded race " + record.getName() + " in " + record.getEventName() + " start:" + record.getRaceStartTime() + " trackingStart:" + record.getTrackingStartTime() + " trackingEnd:" + record.getTrackingEndTime());
             if (liveURI == null || liveURI.trim().length() == 0) {
-                liveURI = rr.liveURI;
+                liveURI = record.getLiveURI().toString();
             }
             if (storedURI == null || storedURI.trim().length() == 0) {
-                storedURI = rr.storedURI;
+                storedURI = record.getStoredURI().toString();
             }
-            final RacesHandle raceHandle = getService().addTracTracRace(regattaToAddTo, new URL(rr.paramURL),
-                    new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI), new MillisecondsTimePoint(rr.trackingStartTime),
-                    new MillisecondsTimePoint(rr.trackingEndTime),
+            final RacesHandle raceHandle = getService().addTracTracRace(regattaToAddTo, record.getParamURL(),
+                    new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI), new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
+                    new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                     MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
                     RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow, tracTracUsername, tracTracPassword);
             if (trackWind) {
-                new Thread("Wind tracking starter for race " + rr.regattaName + "/" + rr.name) {
+                new Thread("Wind tracking starter for race " + record.getEventName() + "/" + record.getName()) {
                     public void run() {
                         try {
                             startTrackingWind(raceHandle, correctWindByDeclination,
@@ -925,7 +960,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     /**
      * Uses <code>wind</code> for both, the non-dampened and dampened fields of the {@link WindDTO} object returned
      */
-    protected WindDTO createWindDTOFromAlreadyAveraged(Wind wind, WindTrack windTrack, TimePoint requestTimepoint) {
+    protected WindDTO createWindDTOFromAlreadyAveraged(Wind wind, TimePoint requestTimepoint) {
         WindDTO windDTO = new WindDTO();
         windDTO.requestTimepoint = requestTimepoint.asMillis();
         windDTO.trueWindBearingDeg = wind.getBearing().getDegrees();
@@ -987,7 +1022,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(position, timePoint);
 
                         if (averagedWindWithConfidence != null) {
-                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(averagedWindWithConfidence.getObject(), windTrack, timePoint);
+                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(averagedWindWithConfidence.getObject(), timePoint);
                             double confidence = averagedWindWithConfidence.getConfidence();
                             windDTO.confidence = confidence;
                             windTrackInfoDTO.windFixes.add(windDTO);
@@ -1053,7 +1088,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(null, timePoint);
                         if (averagedWindWithConfidence != null) {
                             double confidence = averagedWindWithConfidence.getConfidence();
-                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(averagedWindWithConfidence.getObject(), windTrack, timePoint);
+                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(averagedWindWithConfidence.getObject(), timePoint);
                             windDTO.confidence = confidence;
                             windTrackInfoDTO.windFixes.add(windDTO);
                             if(confidence < minWindConfidence) {
@@ -1198,7 +1233,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     }
                     Iterator<GPSFixMoving> fixIter = fixes.iterator();
                     if (fixIter.hasNext()) {
-                        final WindSource windSource = new WindSourceImpl(WindSourceType.COMBINED);
                         GPSFixMoving fix = fixIter.next();
                         while (fix != null && (fix.getTimePoint().compareTo(toTimePointExcluding) < 0 ||
                                 (fix.getTimePoint().equals(toTimePointExcluding) && toTimePointExcluding.equals(fromTimePoint)))) {
@@ -1208,7 +1242,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
                                     trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
                             Wind wind = trackedRace.getWind(fix.getPosition(),toTimePointExcluding);
-                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, trackedRace.getOrCreateWindTrack(windSource), toTimePointExcluding);
+                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, toTimePointExcluding);
                             GPSFixDTO fixDTO = createGPSFixDTO(fix, fix.getSpeed(), windDTO, tack, legType, /* extrapolate */
                                     false);
                             fixesForCompetitor.add(fixDTO);
@@ -1224,7 +1258,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                                     fix.getTimePoint());
                                     SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(toTimePointExcluding);
                                     Wind wind2 = trackedRace.getWind(position, toTimePointExcluding);
-                                    WindDTO windDTO2 = createWindDTOFromAlreadyAveraged(wind2, trackedRace.getOrCreateWindTrack(windSource), toTimePointExcluding);
+                                    WindDTO windDTO2 = createWindDTOFromAlreadyAveraged(wind2, toTimePointExcluding);
                                     GPSFixDTO extrapolated = new GPSFixDTO(
                                             toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()),
                                             position==null?null:new PositionDTO(position.getLatDeg(), position.getLngDeg()),
@@ -1279,9 +1313,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 for (Pair<Waypoint, Pair<TimePoint, TimePoint>> markPassingTimes : markPassingsTimes) {
                     MarkPassingTimesDTO markPassingTimesDTO = new MarkPassingTimesDTO();
                     String name = "M" + (wayPointNumber - 1);
-                    if (wayPointNumber == 1) {
-                        name = "S";
-                    } else if (wayPointNumber == numberOfWaypoints) {
+                    if (wayPointNumber == numberOfWaypoints) {
                         name = "F";
                     }
                     markPassingTimesDTO.setName(name);
@@ -1318,7 +1350,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 trackedRace.getRace().getCourse().unlockAfterRead();
             }
         }   
-        raceTimesInfo.currentServerTime = new Date();
+        if (raceTimesInfo != null) {
+            raceTimesInfo.currentServerTime = new Date();
+        }
         return raceTimesInfo;
     }
 
@@ -2196,7 +2230,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Map<CompetitorDTO, List<GPSFixDTO>> result = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
-            final WindSource windSource = new WindSourceImpl(WindSourceType.COMBINED);
             MeterDistance maxDistance = new MeterDistance(meters);
             for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                 CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
@@ -2226,7 +2259,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
                                 trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
                         Wind wind = trackedRace.getWind(fix.getPosition(), fix.getTimePoint());
-                        WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, trackedRace.getOrCreateWindTrack(windSource), fix.getTimePoint());
+                        WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, fix.getTimePoint());
                         GPSFixDTO fixDTO = createGPSFixDTO(fix, speedWithBearing,  windDTO, tack, legType, /* extrapolated */false);
                         gpsFixDouglasList.add(fixDTO);
                     }
@@ -2729,7 +2762,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<String> result = new ArrayList<String>();
         for (ScoreCorrectionProvider scp : getAllScoreCorrectionProviders()) {
             if (scp instanceof ResultUrlProvider) {
-            	result.add(scp.getName());
+                result.add(scp.getName());
             }
         }
         return result;
@@ -2739,8 +2772,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         ResultUrlProvider result = null;
         for (ScoreCorrectionProvider scp : getAllScoreCorrectionProviders()) {
             if (scp instanceof ResultUrlProvider && scp.getName().equals(resultProviderName)) {
-            	result = (ResultUrlProvider) scp;
-            	break;
+                result = (ResultUrlProvider) scp;
+                break;
             }
         }
         return result;
@@ -3106,5 +3139,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet) {
+        getService().reloadRaceLog(selectedLeaderboardName, raceColumnDTO, fleet);
     }
 }

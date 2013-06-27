@@ -17,6 +17,10 @@ public abstract class RaceLogAnalyzer<ResultType> {
         this.raceLog = raceLog;
     }
 
+    public RaceLog getRaceLog() {
+        return raceLog;
+    }
+
     public ResultType analyze() {
         raceLog.lockForRead();
         try {

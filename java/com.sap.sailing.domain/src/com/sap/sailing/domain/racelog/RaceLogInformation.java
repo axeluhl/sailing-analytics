@@ -34,4 +34,5 @@ public interface RaceLogInformation {
      * and {@link Fleet}
      */
     RaceLog getRaceLog(RaceColumn raceColumn, Fleet fleet);
+    
 }

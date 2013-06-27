@@ -163,7 +163,7 @@ public class ResultsCapturingActivity extends BaseActivity {
 
     @Override
     protected boolean onHomeClicked() {
-        fadeActivity(LoginActivity.class);
+        fadeActivity(LoginActivity.class, true);
         return true;
     }
 

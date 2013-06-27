@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
 
 /**
  * A cache for which a background update can be triggered. Readers can decide whether they want to wait for any ongoing
@@ -99,7 +100,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     private final static Executor recalculator = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
             /* maximumPoolSize */ THREAD_POOL_SIZE,
             /* keepAliveTime */ 60, TimeUnit.SECONDS,
-            /* workQueue */ new LinkedBlockingQueue<Runnable>());
+            /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1));
 
     private final CacheUpdater<K, V, U> cacheUpdateComputer;
     

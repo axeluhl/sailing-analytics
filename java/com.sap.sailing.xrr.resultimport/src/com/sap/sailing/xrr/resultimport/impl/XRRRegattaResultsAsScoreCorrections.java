@@ -2,12 +2,13 @@ package com.sap.sailing.xrr.resultimport.impl;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
@@ -46,7 +47,7 @@ public class XRRRegattaResultsAsScoreCorrections implements RegattaScoreCorrecti
     public Iterable<ScoreCorrectionsForRace> getScoreCorrectionsForRaces() {
         final List<ScoreCorrectionsForRace> result = new ArrayList<ScoreCorrectionsForRace>();
         final Set<String> raceIDsForWhichWeHaveResults = new LinkedHashSet<>();
-        final Map<BigInteger, Set<String>> raceNumberToRaceIDs = new HashMap<>();
+        final SortedMap<BigInteger, Set<String>> raceNumberToRaceIDs = new TreeMap<>();
         // the mapping from raceID to race number is defined in the <Race> elements in the <Event> element; this
         // is particularly important for split-fleet races where this truly is a n:1 association
         for (Object o : event.getRaceOrDivisionOrRegattaSeriesResult()) {

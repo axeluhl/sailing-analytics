@@ -129,24 +129,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     }
     
     /**
-     * A race for a fleet is considered "live" if there is a tracked race for it (see {@link RaceDTO#trackedRace}) which
-     * {@link TrackedRaceDTO#hasGPSData has GPS data} and {@link TrackedRaceDTO#hasWindData wind data} and if the
-     * <code>serverTimePointAsMillis</code> is between the start and the end of the race.
-     * <p>
-     * 
-     * The pre-start phase of a race is interesting also in live mode. Therefore, if a {@link RaceDTO#startOfRace start
-     * time} is available for the race, the {@link TimingConstants#PRE_START_PHASE_DURATION_IN_MILLIS} is subtracted
-     * from the actual start time so that the pre-start phase also counts as live. If no start time is known for the
-     * race, but a {@link TrackedRaceDTO#startOfTracking start of tracking time} is known, it is used as the start of
-     * the "live" interval.
-     * <p>
-     * 
-     * If an {@link RaceDTO#endOfRace end time} is already known for the race,
-     * {@link TimingConstants#IS_LIVE_GRACE_PERIOD_IN_MILLIS} is added to that and the result is taken to be the end of
-     * the "live" period. If no end time is known but a {@link TrackedRaceDTO#timePointOfNewestEvent} is set, again the
-     * {@link TimingConstants#IS_LIVE_GRACE_PERIOD_IN_MILLIS} is added to that to mark the end of the "live" interval.
-     * <p>
-     * 
+     * @see {@link TrackedRace#isLive} for further explanation.
      * @param serverTimePointAsMillis
      *            the time point (in server clock time) at which to determine whether the race for <code>fleet</code>
      *            is/was live
@@ -177,6 +160,12 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
                 endOfLivePeriod = new Date(raceDTO.endOfRace.getTime() + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
             }
         }
+        
+        // if an empty timepoint is given then take the start of the race
+        if (serverTimePointAsMillis == 0) {
+            serverTimePointAsMillis = startOfLivePeriod.getTime()+1;
+        }
+        
         // whenLastTrackedRaceWasLive is null if there is no tracked race for fleet, or the tracked race hasn't started yet at the server time
         // when this DTO was assembled, or there were no GPS or wind data
         final boolean result =
@@ -185,6 +174,16 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
                 startOfLivePeriod.getTime() <= serverTimePointAsMillis &&
                 serverTimePointAsMillis <= endOfLivePeriod.getTime();
         return result;
+    }
+    
+    /**
+     * Returns live state for the current server time
+     * @see RaceColumnDTO#isLive(FleetDTO, long)
+     * @param fleet
+     * @return
+     */
+    public boolean isLiveInServerTime(FleetDTO fleet) {
+        return isLive(fleet, 0);
     }
 
     public boolean containsRace(RaceIdentifier preSelectedRace) {
