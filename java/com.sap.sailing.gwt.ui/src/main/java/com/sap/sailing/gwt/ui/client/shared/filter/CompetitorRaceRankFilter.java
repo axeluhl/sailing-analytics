@@ -41,13 +41,16 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
                     break;
                 }
             }
-            List<CompetitorDTO> competitors = getLeaderboard().getCompetitorsFromBestToWorst(theRaceColumnDTOThatContainsCompetitorRace);
             // There may be competitors that have no tracked race assigned in that column and therefore won't have a fleet;
             // those competitors are to be considered "worse"
             if (theRaceColumnDTOThatContainsCompetitorRace != null && getLeaderboard().rows.get(competitorDTO) != null) {
+                List<CompetitorDTO> rankedCompetitors = getLeaderboard().getCompetitorsFromBestToWorst(theRaceColumnDTOThatContainsCompetitorRace);
+                if (rankedCompetitors.isEmpty()) {
+                    rankedCompetitors = getLeaderboard().competitors;
+                }
                 LeaderboardEntryDTO entryDTO = getLeaderboard().rows.get(competitorDTO).fieldsByRaceColumnName.get(theRaceColumnDTOThatContainsCompetitorRace.getName());
-                int counter = 0; int raceRank = 0;
-                for (CompetitorDTO competitorDTOIterated : competitors) {
+                int counter = 0; int raceRank = rankedCompetitors.indexOf(competitorDTO)+1;
+                for (CompetitorDTO competitorDTOIterated : rankedCompetitors) {
                     LeaderboardEntryDTO entryDTOIterated = getLeaderboard().rows.get(competitorDTOIterated).fieldsByRaceColumnName.get(theRaceColumnDTOThatContainsCompetitorRace.getName());
                     if (entryDTOIterated.fleet == null && entryDTO.fleet == null
                             || entryDTOIterated.fleet != null && entryDTOIterated.fleet.equals(entryDTO.fleet)) {

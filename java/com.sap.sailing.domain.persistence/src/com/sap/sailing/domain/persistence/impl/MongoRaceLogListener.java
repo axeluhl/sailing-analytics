@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.persistence.impl;
 
+import java.util.logging.Logger;
+
 import com.mongodb.DB;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -23,6 +25,8 @@ public class MongoRaceLogListener implements RaceLogEventVisitor {
 
     private final RaceLogIdentifier raceLogIdentifier;
     private final MongoObjectFactoryImpl mongoObjectFactory;
+    
+    private final static Logger logger = Logger.getLogger(MongoRaceLogListener.class.getName());
 
     public MongoRaceLogListener(RaceLogIdentifier identifier, MongoObjectFactory mongoObjectFactory, DB database) {
         super();
@@ -32,6 +36,7 @@ public class MongoRaceLogListener implements RaceLogEventVisitor {
 
     private void storeEventInCollection(DBObject eventEntry) {
         this.mongoObjectFactory.getRaceLogCollection().insert(eventEntry);
+        logger.fine("Inserted event entry into mongo race log collection");
     }
 
     @Override
