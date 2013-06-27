@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
-import com.sap.sailing.domain.common.racelog.utils.GeoUtils;
+import com.sap.sailing.racecommittee.app.utils.GeoUtils;
 
 public class WindWardLeeWardCourseDesignFactoryImpl extends AbstractCourseDesignFactory {
     private final int LUV_BUOY1_ANGLE_TO_WIND = 0;

@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.racelog.utils;
+package com.sap.sailing.racecommittee.app.utils;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
