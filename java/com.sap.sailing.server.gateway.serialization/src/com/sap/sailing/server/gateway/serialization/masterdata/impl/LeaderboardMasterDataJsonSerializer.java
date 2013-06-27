@@ -42,6 +42,10 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
     public static final String FIELD_REGATTA_NAME = "regattaName";
     public static final String FIELD_DISPLAY_NAME = "displayName";
     public static final String FIELD_COMPETITOR_ID = "competitorId";
+    public static final String FIELD_CARRIED_POINTS = "carriedPoints";
+    public static final String FIELD_CARRIED = "carried";
+    
+    
     private final JsonSerializer<Competitor> competitorSerializer;
     private final JsonSerializer<RaceColumn> raceColumnSerializer;
     
@@ -71,6 +75,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         JSONObject jsonLeaderboard = new JSONObject();
         jsonLeaderboard.put(FIELD_NAME, leaderboard.getName());
         jsonLeaderboard.put(FIELD_SCORE_CORRECTION, createJsonForScoreCorrection(leaderboard));
+        jsonLeaderboard.put(FIELD_CARRIED_POINTS, createJsonArrayForCarriedPoints(leaderboard));
         jsonLeaderboard.put(FIELD_COMPETITORS, createJsonArrayForCompetitors(leaderboard.getAllCompetitors()));
         jsonLeaderboard.put(FIELD_RESULT_DISCARDING_RULE, createJsonForResultDiscardingRule(leaderboard.getResultDiscardingRule()));
         jsonLeaderboard.put(FIELD_DISPLAY_NAME, leaderboard.getDisplayName());
@@ -94,6 +99,25 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         return jsonLeaderboard;
     }
     
+    private JSONArray createJsonArrayForCarriedPoints(Leaderboard leaderboard) {
+        JSONArray jsonArray = new JSONArray();
+        for (Competitor competitor : leaderboard.getAllCompetitors()) {
+            double carriedPoints = leaderboard.getCarriedPoints(competitor);
+            if (carriedPoints != 0) {
+                jsonArray.add(createJsonForCarriedPoints(competitor.getId().toString(), carriedPoints));
+            }
+        }
+        
+        return jsonArray;
+    }
+
+    private JSONObject createJsonForCarriedPoints(String id, double carriedPoints) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(FIELD_COMPETITOR_ID, id);
+        jsonObject.put(FIELD_CARRIED, carriedPoints);
+        return jsonObject;
+    }
+
     private JSONObject createJsonForCourseArea(CourseArea defaultCourseArea) {
         if (defaultCourseArea == null) {
             return null;
