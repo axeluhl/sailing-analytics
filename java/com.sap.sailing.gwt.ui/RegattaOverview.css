@@ -191,3 +191,18 @@ table {
 .circleGrey {
 	background: #ebebeb;
 }
+
+.RaceDetailPanel {
+	background: #ebebeb;
+	border-top:5px solid #858585;
+	padding: 6px;
+}
+
+.RaceDetailPanel-header {
+	font-weight: bold;
+}
+
+.RaceDetailPanel-content td {
+	padding-right: 20px;
+}
+

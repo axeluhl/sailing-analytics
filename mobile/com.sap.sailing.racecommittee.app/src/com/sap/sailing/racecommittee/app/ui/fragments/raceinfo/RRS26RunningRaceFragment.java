@@ -27,6 +27,7 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortTypeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceFinishingTimeDialog;
 
 public class RRS26RunningRaceFragment extends RaceFragment implements RRS26RunningRaceEventListener {
     
@@ -145,23 +146,15 @@ public class RRS26RunningRaceFragment extends RaceFragment implements RRS26Runni
     }
 
     private void showDisplayBlueFlagDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(getActivity().getResources().getString(R.string.confirmation_blue_flag_display))
-        .setCancelable(true)
-        .setPositiveButton(getActivity().getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                ExLog.i(ExLog.FLAG_BLUE_SET, getRace().getId().toString(), getActivity());
-                getRace().getState().getStartProcedure().setFinishing(MillisecondsTimePoint.now());
-            }
-        })
-        .setNegativeButton(getActivity().getResources().getString(R.string.no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                ExLog.i(ExLog.FLAG_BLUE_SET_NO, getRace().getId().toString(), getActivity());
-                dialog.cancel();
-            }
-        });
-        AlertDialog alert = builder.create();
-        alert.show();
+        //TODO handle xray still up
+        FragmentManager fragmentManager = getFragmentManager();
+
+        RaceDialogFragment fragment = new RaceFinishingTimeDialog();
+        
+        Bundle args = getRecentArguments();
+        fragment.setArguments(args);
+        
+        fragment.show(fragmentManager, "dialogFinishingTime");
     }
 
 

@@ -807,4 +807,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         
     }
 
+    @Override
+    public boolean isLive(TimePoint at) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }

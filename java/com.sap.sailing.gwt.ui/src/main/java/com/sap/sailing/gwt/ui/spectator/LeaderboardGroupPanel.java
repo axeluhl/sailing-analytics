@@ -184,7 +184,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         Label leaderboardsLabel = new Label(stringMessages.leaderboards());
         leaderboardsLabel.addStyleName(STYLE_NAME_PREFIX + "LeaderboardsLabel");
         
-        if(leaderboardGroup.hasOverallLeaderboard() && !isEmbedded) {
+        if (leaderboardGroup.hasOverallLeaderboard() && !isEmbedded) {
             mainPanel.add(leaderboardsLabel);
         } else {
             flexTable.setWidget(0, 0, leaderboardsLabel);
@@ -244,14 +244,13 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             leaderboardsTable.addColumn(racesColumn, stringMessages.races());
         }
         
-        if(leaderboardGroup.displayLeaderboardsInReverseOrder) {
+        if (leaderboardGroup.displayLeaderboardsInReverseOrder) {
             leaderboardsTable.setRowData(leaderboardGroup.getLeaderboardsInReverseOrder());
         } else {
             leaderboardsTable.setRowData(leaderboardGroup.getLeaderboards());
         }
         flexTable.setWidget(1, 0,leaderboardsTable);
         flexTable.getFlexCellFormatter().setColSpan(1, 0,2);
-        
     }
 
     private Map<String, String> createOverallLeaderboardLinkParameters() {
@@ -314,12 +313,14 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         SafeHtmlBuilder b = new SafeHtmlBuilder();
         if (leaderboard.isRegattaLeaderboard && leaderboard.regattaName != null) {
             RegattaDTO regatta = regattasByName.get(leaderboard.regattaName);
-            boolean renderSeriesName = Util.size(regatta.series) > 1;
-            for (SeriesDTO series : regatta.series) {
-                b.appendHtmlConstant("<div>");
-                renderSeriesToHtml(leaderboard, series, renderSeriesName, b);
-                b.appendHtmlConstant("<div style=\"clear:both;\"></div>");
-                b.appendHtmlConstant("</div>");
+            if (regatta != null) {
+                boolean renderSeriesName = Util.size(regatta.series) > 1;
+                for (SeriesDTO series : regatta.series) {
+                    b.appendHtmlConstant("<div>");
+                    renderSeriesToHtml(leaderboard, series, renderSeriesName, b);
+                    b.appendHtmlConstant("<div style=\"clear:both;\"></div>");
+                    b.appendHtmlConstant("</div>");
+                }
             }
         } else {
             List<RaceColumnDTO> raceColumns = leaderboard.getRaceList();

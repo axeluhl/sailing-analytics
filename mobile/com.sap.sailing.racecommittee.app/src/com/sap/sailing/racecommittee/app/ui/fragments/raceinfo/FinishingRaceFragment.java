@@ -2,9 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import java.util.Date;
 
-import android.app.AlertDialog;
 import android.app.FragmentManager;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -21,6 +18,7 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceFinishedTimeDialog;
 
 public class FinishingRaceFragment extends RaceFragment {
     
@@ -109,24 +107,14 @@ public class FinishingRaceFragment extends RaceFragment {
     }
 
     private void showRemoveBlueFlagDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(getActivity().getResources().getString(R.string.confirmation_blue_flag_remove))
-        .setCancelable(true)
-        .setPositiveButton(getActivity().getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                ExLog.i(ExLog.FLAG_BLUE_REMOVE, getRace().getId().toString(), getActivity());
-                getRace().getState().getStartProcedure().setFinished(MillisecondsTimePoint.now());
-                //getRace().getState().setFinishPositioningConfirmed();
-            }
-        })
-        .setNegativeButton(getActivity().getResources().getString(R.string.no), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                ExLog.i(ExLog.FLAG_BLUE_REMOVE_NO, getRace().getId().toString(), getActivity());
-                dialog.cancel();
-            }
-        });
-        AlertDialog alert = builder.create();
-        alert.show();
+        FragmentManager fragmentManager = getFragmentManager();
+
+        RaceDialogFragment fragment = new RaceFinishedTimeDialog();
+        
+        Bundle args = getRecentArguments();
+        fragment.setArguments(args);
+        
+        fragment.show(fragmentManager, "dialogFinishedTime");
     }
     
     @Override

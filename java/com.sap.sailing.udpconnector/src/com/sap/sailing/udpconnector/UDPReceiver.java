@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType extends UDPMessageListener<MessageType>> implements Runnable {
@@ -136,9 +137,10 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.log(Level.SEVERE, "Exception while receiving UDP packet", e);
             }
         }
+        logger.info("Closing UDP socket on port "+udpSocket.getPort());
         udpSocket.close();
         if (udpSocket.isConnected()) {
             udpSocket.disconnect();

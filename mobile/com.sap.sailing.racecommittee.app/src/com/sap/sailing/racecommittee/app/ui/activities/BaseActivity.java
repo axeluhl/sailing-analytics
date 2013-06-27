@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService.EventSendingBinder;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService.EventSendingServiceLogger;
@@ -51,6 +52,8 @@ public abstract class BaseActivity extends Activity {
         }
     }
 
+    private static final String TAG = BaseActivity.class.getName();
+
     protected MenuItem menuItemLive;
 
     boolean boundSendingService = false;
@@ -77,16 +80,20 @@ public abstract class BaseActivity extends Activity {
         // Handle item selection
         switch (item.getItemId()) {
         case R.id.options_menu_settings:
-            fadeActivity(SettingsActivity.class);
+            ExLog.i(TAG, "Clicked SETTINGS.");
+            fadeActivity(SettingsActivity.class, false);
             return true;
         case R.id.options_menu_reload:
+            ExLog.i(TAG, "Clicked RESET.");
             InMemoryDataStore.INSTANCE.reset();
-            fadeActivity(LoginActivity.class);
+            fadeActivity(LoginActivity.class, true);
             return true;
         case R.id.options_menu_live:
+            ExLog.i(TAG, "Clicked LIVE.");
             Toast.makeText(this, getLiveIconText(), Toast.LENGTH_LONG).show();
             return true;
         case android.R.id.home:
+            ExLog.i(TAG, "Clicked HOME.");
             return onHomeClicked();
         default:
             return super.onOptionsItemSelected(item);
@@ -144,8 +151,12 @@ public abstract class BaseActivity extends Activity {
         return String.format("Connected to: %s\n%s", AppPreferences.getServerBaseURL(this), sendingServiceStatus);
     }
 
-    protected void fadeActivity(Class<?> activity) {
+    protected void fadeActivity(Class<?> activity, boolean newTopTask) {
         Intent intent = new Intent(getBaseContext(), activity);
+        if (newTopTask) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         fadeActivity(intent);
     }
 
