@@ -411,7 +411,7 @@ if [[ "$@" == "remote-deploy" ]]; then
     REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/servers'`
     REMOTE_SERVER="$REMOTE_HOME/$SERVER"
 
-    read -s -n1 -p "I will deploy the current GIT branch  to $REMOTE_SERVER_LOGIN:$REMOTE_SERVER. Is this correct (y/n)? " answer
+    read -s -n1 -p "I will deploy the current GIT branch to $REMOTE_SERVER_LOGIN:$REMOTE_SERVER. Is this correct (y/n)? " answer
     case $answer in
     "Y" | "y") OK=1;;
     *) echo "Aborting... nothing has been changed on remote server!"
