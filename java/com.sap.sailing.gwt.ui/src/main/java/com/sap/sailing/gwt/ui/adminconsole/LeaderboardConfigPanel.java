@@ -1186,17 +1186,17 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
         leaderboardList.getList().clear();
         if (text != null && !text.isEmpty()) {
-            for (StrippedLeaderboardDTO dao : availableLeaderboardList) {
+            for (StrippedLeaderboardDTO leaderboard : availableLeaderboardList) {
                 boolean failed = false;
                 for (String word : wordsToFilter) {
                     String textAsUppercase = word.toUpperCase().trim();
-                    if (!dao.name.toUpperCase().contains(textAsUppercase)) {
+                    if (!leaderboard.name.toUpperCase().contains(textAsUppercase) && (leaderboard.displayName == null || !leaderboard.displayName.toUpperCase().contains(textAsUppercase))) {
                         failed = true;
                         break;
                     }
                 }
                 if (!failed) {
-                    leaderboardList.getList().add(dao);
+                    leaderboardList.getList().add(leaderboard);
                 }
             }
         } else {
