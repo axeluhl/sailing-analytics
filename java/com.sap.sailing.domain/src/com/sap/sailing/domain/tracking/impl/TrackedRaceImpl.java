@@ -657,7 +657,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
     
         // if an empty timepoint is given then take the start of the race
-        if (at.asMillis() == 0) {
+        if (at == null) {
             at = new MillisecondsTimePoint(startOfLivePeriod.getTime()+1);
         }
         

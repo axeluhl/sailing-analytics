@@ -107,6 +107,9 @@ public interface TrackedRace extends Serializable {
      * {@link TimingConstants#IS_LIVE_GRACE_PERIOD_IN_MILLIS} is added to that to mark the end of the "live" interval.
      * <p>
      * 
+     * @param at
+     *            the time point at which to determine whether the race for <code>fleet</code>
+     *            is/was live. A <code>null</code> value will use the start time of the race.
      * @return
      */
     boolean isLive(TimePoint at);
