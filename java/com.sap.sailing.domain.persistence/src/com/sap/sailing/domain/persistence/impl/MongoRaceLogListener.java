@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import com.mongodb.DB;
-import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
@@ -24,17 +23,15 @@ public class MongoRaceLogListener implements RaceLogEventVisitor {
 
     private final RaceLogIdentifier raceLogIdentifier;
     private final MongoObjectFactoryImpl mongoObjectFactory;
-    private final DBCollection raceLogsCollection;
 
     public MongoRaceLogListener(RaceLogIdentifier identifier, MongoObjectFactory mongoObjectFactory, DB database) {
         super();
         this.raceLogIdentifier = identifier;
         this.mongoObjectFactory = (MongoObjectFactoryImpl) mongoObjectFactory;
-        this.raceLogsCollection = this.mongoObjectFactory.getRaceLogCollection();
     }
 
     private void storeEventInCollection(DBObject eventEntry) {
-        raceLogsCollection.insert(eventEntry);
+        this.mongoObjectFactory.getRaceLogCollection().insert(eventEntry);
     }
 
     @Override
