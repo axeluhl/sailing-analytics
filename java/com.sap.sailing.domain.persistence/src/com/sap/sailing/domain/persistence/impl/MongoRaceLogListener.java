@@ -36,7 +36,7 @@ public class MongoRaceLogListener implements RaceLogEventVisitor {
 
     private void storeEventInCollection(DBObject eventEntry) {
         this.mongoObjectFactory.getRaceLogCollection().insert(eventEntry);
-        logger.info("Inserted event entry into race log collection");
+        logger.fine("Inserted event entry into mongo race log collection");
     }
 
     @Override
