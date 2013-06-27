@@ -24,13 +24,11 @@ import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindTrack;
 
 public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     private DynamicTrackedRace trackedRace;
     
-    private WindTrack windTrack;
     private WindSource raceCommitteeWindSource;
 
     private RaceStatusAnalyzer statusAnalyzer;
@@ -58,9 +56,9 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     private void initializeWindTrack(RaceLog raceLog) {
         WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
         raceCommitteeWindSource = new WindSourceImpl(WindSourceType.RACECOMMITTEE);
-        windTrack = trackedRace.getOrCreateWindTrack(raceCommitteeWindSource);
+        trackedRace.getOrCreateWindTrack(raceCommitteeWindSource);
         for (Wind wind : windFixesFinder.analyze()) {
-            windTrack.add(wind);
+            trackedRace.recordWind(wind, raceCommitteeWindSource);
         }
     }
 
