@@ -1,41 +1,50 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.masterdataimport.EventMasterData;
 import com.sap.sailing.domain.masterdataimport.FlexibleLeaderboardMasterData;
 import com.sap.sailing.domain.masterdataimport.LeaderboardGroupMasterData;
 import com.sap.sailing.domain.masterdataimport.RegattaLeaderboardMasterData;
 import com.sap.sailing.domain.masterdataimport.RegattaMasterData;
+import com.sap.sailing.domain.masterdataimport.ScoreCorrectionMasterData;
 import com.sap.sailing.domain.masterdataimport.SeriesMasterData;
+import com.sap.sailing.domain.masterdataimport.SingleScoreCorrectionMasterData;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class ImportMasterDataOperation extends AbstractRacingEventServiceOperation<CreationCount> {
-    
+
     private static final long serialVersionUID = 3131715325307370303L;
 
     private LeaderboardGroupMasterData masterData;
-    
+
     private CreationCount creationCount = new CreationCount();
-    
+
     private DomainFactory domainFactory = DomainFactory.INSTANCE;
 
     public ImportMasterDataOperation(LeaderboardGroupMasterData masterData) {
@@ -47,8 +56,9 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
         createLeaderboardGroupWithAllRelatedObjects(masterData, toState);
         return creationCount;
     }
-    
-    private void createLeaderboardGroupWithAllRelatedObjects(LeaderboardGroupMasterData masterData, RacingEventService toState) {
+
+    private void createLeaderboardGroupWithAllRelatedObjects(LeaderboardGroupMasterData masterData,
+            RacingEventService toState) {
         List<String> leaderboardNames = new ArrayList<String>();
         Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         createCourseAreasAndEvents(masterData, toState);
@@ -68,6 +78,14 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
                 creationCount.addOneLeaderboard();
                 Leaderboard newLeaderboard = toState.getLeaderboardByName(board.getName());
                 addRaceColumnsIfNecessary(board, newLeaderboard, toState);
+                // Set dummy tracked race, so that the leaderboard caches the competitors and
+                // will accept the score corrections
+                Pair<RaceColumn, Fleet> dummyColumnAndFleet = addDummyTrackedRace(board.getCompetitors(), leaderboard);
+                if (dummyColumnAndFleet.getA() != null && dummyColumnAndFleet.getB() != null) {
+                    addScoreCorrectionsIfPossible(board.getScoreCorrection(), newLeaderboard);
+                    unsetDummy(dummyColumnAndFleet, leaderboard);
+                }
+
             }
         }
         int[] overallLeaderboardDiscardThresholds = null;
@@ -87,7 +105,63 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
         }
     }
 
-    private void addRaceColumnsIfNecessary(LeaderboardMasterData board, Leaderboard newLeaderboard, RacingEventService toState) {
+    private void unsetDummy(Pair<RaceColumn, Fleet> dummyColumnAndFleet, Leaderboard leaderboard) {
+        RaceColumn raceColumn = dummyColumnAndFleet.getA();
+        Fleet fleet = dummyColumnAndFleet.getB();
+        raceColumn.setTrackedRace(fleet, null);
+    }
+
+    /**
+     * Hack adding a dummy tracked race, so that the competitors will be added to the leaderboards
+     * 
+     * @param competitors
+     * @param leaderboard
+     * @return the race column and fleet the dummy was attached to
+     */
+    public Pair<RaceColumn,Fleet> addDummyTrackedRace(Iterable<Competitor> competitors, Leaderboard leaderboard) {
+        RaceColumn raceColumn = null;
+        Fleet fleet = null;
+        Iterable<RaceColumn> raceColumns = leaderboard.getRaceColumns();
+        Iterator<RaceColumn> raceColumnIterator = raceColumns.iterator();
+        if (raceColumnIterator.hasNext()) {
+            raceColumn = raceColumnIterator.next();
+            Iterable<? extends Fleet> fleets = raceColumn.getFleets();
+            Iterator<? extends Fleet> fleetIterator = fleets.iterator();
+            if (fleetIterator.hasNext()) {
+                fleet = fleetIterator.next();
+                DummyTrackedRace dummy = new DummyTrackedRace(competitors);
+                raceColumn.setTrackedRace(fleet, dummy);
+            }
+        }
+        return new Pair<RaceColumn, Fleet>(raceColumn, fleet);
+    }
+
+    private void addScoreCorrectionsIfPossible(ScoreCorrectionMasterData scoreCorrectionMasterData,
+            final Leaderboard leaderboard) {
+        SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
+        scoreCorrection.setComment(scoreCorrectionMasterData.getComment());
+        scoreCorrection.setTimePointOfLastCorrectionsValidity(new MillisecondsTimePoint(scoreCorrectionMasterData
+                .getTimepointMillis()));
+        for (Entry<String, Iterable<SingleScoreCorrectionMasterData>> scoreCorrectionEntry : scoreCorrectionMasterData
+                .getCorrectionForRaceColumns().entrySet()) {
+            String columnName = scoreCorrectionEntry.getKey();
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(columnName);
+            if (raceColumn != null) {
+                for (SingleScoreCorrectionMasterData singleCorrection : scoreCorrectionEntry.getValue()) {
+                    Competitor competitor = leaderboard.getCompetitorByIdAsString(singleCorrection.getCompetitorId());
+                    scoreCorrection.setMaxPointsReason(competitor, raceColumn,
+                            MaxPointsReason.valueOf(singleCorrection.getMaxPointsReason()));
+                    if (singleCorrection.getExplicitScoreCorrection() != null) {
+                        scoreCorrection.correctScore(competitor, raceColumn, singleCorrection.getExplicitScoreCorrection());
+                    }  
+                }
+            }
+        }
+
+    }
+
+    private void addRaceColumnsIfNecessary(LeaderboardMasterData board, Leaderboard newLeaderboard,
+            RacingEventService toState) {
         if (board instanceof FlexibleLeaderboardMasterData) {
             for (Pair<String, Boolean> raceColumn : ((FlexibleLeaderboardMasterData) board).getRaceColumns()) {
                 toState.addColumnToLeaderboard(raceColumn.getA(), board.getName(), raceColumn.getB());
@@ -155,7 +229,8 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
                     alreadyExists = true;
                 }
                 if (!alreadyExists) {
-                    toState.addCourseArea(UUID.fromString(id), courseAreaEntry.getB(), UUID.fromString(courseAreaEntry.getA()));
+                    toState.addCourseArea(UUID.fromString(id), courseAreaEntry.getB(),
+                            UUID.fromString(courseAreaEntry.getA()));
                 }
             }
         }
@@ -194,7 +269,6 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
             flexBoard.setCourseArea(courseArea);
         }
     }
-
 
     @Override
     public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {

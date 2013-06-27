@@ -18,8 +18,8 @@ public class RegattaLeaderboardMasterData extends LeaderboardMasterData{
     private Regatta regatta;
 
     public RegattaLeaderboardMasterData(String name, String displayName, int[] resultDiscardingRule,
-            Set<Competitor> competitors, String regattaName) {
-        super(name, displayName, resultDiscardingRule, competitors);
+            Set<Competitor> competitors, ScoreCorrectionMasterData scoreCorrection, String regattaName) {
+        super(name, displayName, resultDiscardingRule, competitors, scoreCorrection);
         this.regattaName = regattaName;
     }
 

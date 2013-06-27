@@ -5,6 +5,7 @@ import java.util.Set;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
+import com.sap.sailing.domain.masterdataimport.ScoreCorrectionMasterData;
 
 public abstract class LeaderboardMasterData {
     
@@ -16,12 +17,15 @@ public abstract class LeaderboardMasterData {
     
     private Set<Competitor> competitors;
 
+    private ScoreCorrectionMasterData scoreCorrection;
+
     public LeaderboardMasterData(String name, String displayName, int[] resultDiscardingRule,
-            Set<Competitor> competitors) {
+            Set<Competitor> competitors, ScoreCorrectionMasterData scoreCorrection) {
         this.name = name;
         this.displayName = displayName;
         this.resultDiscardingRule = resultDiscardingRule;
         this.competitors = competitors;
+        this.scoreCorrection = scoreCorrection;
     }
 
     public String getName() {
@@ -42,6 +46,10 @@ public abstract class LeaderboardMasterData {
 
     public Set<Competitor> getCompetitors() {
         return competitors;
+    }
+
+    public ScoreCorrectionMasterData getScoreCorrection() {
+        return scoreCorrection;
     }
 
     public abstract Leaderboard getLeaderboard();

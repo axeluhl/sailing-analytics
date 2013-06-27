@@ -14,6 +14,7 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -79,14 +80,14 @@ public class MasterDataImportPanel extends VerticalPanel {
                 fireIdRequestsAndFillLists();
             }
         });
-        
+
         hostBox.addKeyDownHandler(new KeyDownHandler() {
-            
+
             @Override
             public void onKeyDown(KeyDownEvent event) {
                 if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
                     fireIdRequestsAndFillLists();
-                } 
+                }
             }
         });
 
@@ -157,16 +158,18 @@ public class MasterDataImportPanel extends VerticalPanel {
 
             @Override
             public void onResponseReceived(Request request, Response response) {
-                JSONValue creationCount = JSONParser.parseStrict(response.getText());
-                JSONObject creationCountObj = (JSONObject) creationCount;
-                int leaderboardsCreated = (int) ((JSONNumber) creationCountObj.get("leaderboards")).doubleValue();
-                int leaderboardGroupsCreated = (int) ((JSONNumber) creationCountObj.get("leaderboardGroups"))
-                        .doubleValue();
-                int eventsCreated = (int) ((JSONNumber) creationCountObj.get("events"))
-                        .doubleValue();
-                int regattasCreated = (int) ((JSONNumber) creationCountObj.get("regattas"))
-                        .doubleValue();
-                showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated);
+                try {
+                    JSONValue creationCount = JSONParser.parseStrict(response.getText());
+                    JSONObject creationCountObj = (JSONObject) creationCount;
+                    int leaderboardsCreated = (int) ((JSONNumber) creationCountObj.get("leaderboards")).doubleValue();
+                    int leaderboardGroupsCreated = (int) ((JSONNumber) creationCountObj.get("leaderboardGroups"))
+                            .doubleValue();
+                    int eventsCreated = (int) ((JSONNumber) creationCountObj.get("events")).doubleValue();
+                    int regattasCreated = (int) ((JSONNumber) creationCountObj.get("regattas")).doubleValue();
+                    showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated);
+                } catch (JSONException e) {
+                    showErrorAlert("Server did not provide success Message: " + response.getText());
+                }
             }
 
             @Override
@@ -183,8 +186,10 @@ public class MasterDataImportPanel extends VerticalPanel {
         }
     }
 
-    protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated, int eventsCreated, int regattasCreated) {
-        Window.alert(stringMessages.importSuccess(leaderboardGroupsCreated, leaderboardsCreated, eventsCreated, regattasCreated));
+    protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated, int eventsCreated,
+            int regattasCreated) {
+        Window.alert(stringMessages.importSuccess(leaderboardGroupsCreated, leaderboardsCreated, eventsCreated,
+                regattasCreated));
 
     }
 

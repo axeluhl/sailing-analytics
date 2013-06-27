@@ -23,8 +23,8 @@ public class FlexibleLeaderboardMasterData extends LeaderboardMasterData {
     private List<Pair<String, Boolean>> raceColumns;
 
     public FlexibleLeaderboardMasterData(String name, String displayName, int[] resultDiscardingRule,
-            Set<Competitor> competitors, ScoringScheme scoringScheme, String courseAreaId, List<Pair<String, Boolean>> raceColumns) {
-        super(name, displayName, resultDiscardingRule, competitors);
+            Set<Competitor> competitors, ScoreCorrectionMasterData scoreCorrection, ScoringScheme scoringScheme, String courseAreaId, List<Pair<String, Boolean>> raceColumns) {
+        super(name, displayName, resultDiscardingRule, competitors, scoreCorrection);
         this.scoringScheme = scoringScheme;
         this.courseAreaId = courseAreaId;
         this.raceColumns = raceColumns;
