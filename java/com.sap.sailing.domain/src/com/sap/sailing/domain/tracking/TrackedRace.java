@@ -87,6 +87,29 @@ public interface TrackedRace extends Serializable {
      * Shorthand for <code>{@link #getStart()}.{@link TimePoint#compareTo(TimePoint) compareTo(at)} &lt;= 0</code>
      */
     boolean hasStarted(TimePoint at);
+   
+    /**
+     * A race is considered "live" if it
+     * {@link TrackedRaceDTO#hasGPSData has GPS data} and {@link TrackedRaceDTO#hasWindData wind data} and if the
+     * <code>at</code> time point is between the start and the end of the race.
+     * <p>
+     * 
+     * The pre-start phase of a race is interesting also in live mode. Therefore, if a {@link TrackedRace#getStartOfRace start
+     * time} is available for the race, the {@link TimingConstants#PRE_START_PHASE_DURATION_IN_MILLIS} is subtracted
+     * from the actual start time so that the pre-start phase also counts as live. If no start time is known for the
+     * race, but a {@link TrackedRace#getStartOfTracking start of tracking time} is known, it is used as the start of
+     * the "live" interval.
+     * <p>
+     * 
+     * If an {@link TrackedRace#getEndOfRace end time} is already known for the race,
+     * {@link TimingConstants#IS_LIVE_GRACE_PERIOD_IN_MILLIS} is added to that and the result is taken to be the end of
+     * the "live" period. If no end time is known but a {@link TrackedRace#getTimePointOfNewestEvent} is set, again the
+     * {@link TimingConstants#IS_LIVE_GRACE_PERIOD_IN_MILLIS} is added to that to mark the end of the "live" interval.
+     * <p>
+     * 
+     * @return
+     */
+    boolean isLive(TimePoint at);
 
     /**
      * Clients can safely iterate over the iterable returned because it's a non-live copy of the tracked legs of this
