@@ -58,6 +58,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -629,6 +630,46 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public boolean hasStarted(TimePoint at) {
         return getStartOfRace() != null && getStartOfRace().compareTo(at) <= 0;
     }
+    
+    @Override
+    public boolean isLive(TimePoint at) {
+        final Date startOfLivePeriod;
+        final Date endOfLivePeriod;
+        if (!hasGPSData() || !hasWindData()) {
+            startOfLivePeriod = null;
+            endOfLivePeriod = null;
+        } else {
+            if (getStartOfRace() == null) {
+                startOfLivePeriod = getStartOfTracking().asDate();
+            } else {
+                startOfLivePeriod = new Date(getStartOfRace().asMillis() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS);
+            }
+            if (getEndOfRace() == null) {
+                if (getTimePointOfNewestEvent() != null) {
+                    endOfLivePeriod = new Date(getTimePointOfNewestEvent().asMillis()
+                            + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+                } else {
+                    endOfLivePeriod = null;
+                }
+            } else {
+                endOfLivePeriod = new Date(getEndOfRace().asMillis() + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+            }
+        }
+    
+        // if an empty timepoint is given then take the start of the race
+        if (at == null) {
+            at = new MillisecondsTimePoint(startOfLivePeriod.getTime()+1);
+        }
+        
+        // whenLastTrackedRaceWasLive is null if there is no tracked race for fleet, or the tracked race hasn't started yet at the server time
+        // when this DTO was assembled, or there were no GPS or wind data
+        final boolean result =
+                startOfLivePeriod != null &&
+                endOfLivePeriod != null &&
+                startOfLivePeriod.getTime() <= at.asMillis() &&
+                at.asMillis() <= endOfLivePeriod.getTime();
+        return result;
+    }
 
     @Override
     public RaceDefinition getRace() {
@@ -653,47 +694,38 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         try {
             synchronized (markPassingsTimes) {
                 if (markPassingsTimes.isEmpty()) {
-                    int wayPointNumber = 1;
                     // Remark: sometimes it can happen that a mark passing with a wrong time stamp breaks the right time
                     // order of the waypoint times
                     Date previousLegPassingTime = null;
                     for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
                         TimePoint firstPassingTime = null;
                         TimePoint lastPassingTime = null;
-                        if (wayPointNumber == 1) {
-                            // For the first leg the use of "firstPassingDate" is not correct,
-                            // because boats can pass the start line before the actual start;
-                            // therefore we are using the calculated start time here
-                            firstPassingTime = getStartOfRace();
-                        } else {
-                            NavigableSet<MarkPassing> markPassings = getMarkPassingsInOrderAsNavigableSet(waypoint);
-                            if (markPassings != null && !markPassings.isEmpty()) {
-                                // ensure the leg times are in the right time order; there may perhaps be left-overs for
-                                // marks to be reached later that
-                                // claim it has been passed in the past which may have been an accidental tracker
-                                // read-out;
-                                // the results of getMarkPassingsInOrder(to) has by definition an ascending time-point
-                                // ordering
-                                lockForRead(markPassings);
-                                try {
-                                    for (MarkPassing currentMarkPassing : markPassings) {
-                                        Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
-                                        if (previousLegPassingTime == null
-                                                || currentPassingDate.after(previousLegPassingTime)) {
-                                            firstPassingTime = currentMarkPassing.getTimePoint();
-                                            previousLegPassingTime = currentPassingDate;
-                                            break;
-                                        }
+                        NavigableSet<MarkPassing> markPassings = getMarkPassingsInOrderAsNavigableSet(waypoint);
+                        if (markPassings != null && !markPassings.isEmpty()) {
+                            // ensure the leg times are in the right time order; there may perhaps be left-overs for
+                            // marks to be reached later that
+                            // claim it has been passed in the past which may have been an accidental tracker
+                            // read-out;
+                            // the results of getMarkPassingsInOrder(to) has by definition an ascending time-point
+                            // ordering
+                            lockForRead(markPassings);
+                            try {
+                                for (MarkPassing currentMarkPassing : markPassings) {
+                                    Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
+                                    if (previousLegPassingTime == null
+                                            || currentPassingDate.after(previousLegPassingTime)) {
+                                        firstPassingTime = currentMarkPassing.getTimePoint();
+                                        previousLegPassingTime = currentPassingDate;
+                                        break;
                                     }
-                                } finally {
-                                    unlockAfterRead(markPassings);
                                 }
+                            } finally {
+                                unlockAfterRead(markPassings);
                             }
                         }
                         Pair<TimePoint, TimePoint> timesPair = new Pair<TimePoint, TimePoint>(firstPassingTime,
                                 lastPassingTime);
                         markPassingsTimes.add(new Pair<Waypoint, Pair<TimePoint, TimePoint>>(waypoint, timesPair));
-                        wayPointNumber++;
                     }
                 }
                 return markPassingsTimes;
@@ -1700,8 +1732,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                             }
                         }
                     } catch (NoWindException e) {
-                        logger.warning("Unable to determine leg type for race " + getRace().getName()
-                                + " while trying to estimate wind");
+                        logger.fine("Unable to determine leg type for race " + getRace().getName()
+                                + " while trying to estimate wind (Background: I've got a NoWindException)");
                         bearings = null;
                     }
                 }

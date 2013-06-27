@@ -1,0 +1,1 @@
+diese jsons wurden am 27.06. von kielerwoche2013.sapsailing.com per curl als backup gezogen

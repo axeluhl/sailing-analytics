@@ -413,10 +413,21 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         trackedRacesPanel.add(trackedRacesListComposite);
         trackedRacesListComposite.addTrackedRaceChangeListener(this);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
-
-        HorizontalPanel hPanel = new HorizontalPanel();
-        hPanel.setSpacing(5);
-        vPanel.add(hPanel);
+        
+        Button reloadAllRaceLogs = new Button(stringMessages.reloadAllRaceLogs());
+        reloadAllRaceLogs.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                StrippedLeaderboardDTO leaderboard = getSelectedLeaderboard();
+                for (RaceColumnDTO column : leaderboard.getRaceList()) {
+                    for (FleetDTO fleet : column.getFleets()) {
+                        refreshRaceLog(column, fleet, false);
+                    }
+                }
+                Window.alert(stringMessages.raceLogReloaded());
+            }
+        });
+        vPanel.add(reloadAllRaceLogs);
 
         // ------------ races of the selected leaderboard ----------------
         AnchorCell raceAnchorCell = new AnchorCell();
@@ -492,6 +503,8 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                     editRaceColumnOfLeaderboard(object);
                 } else if (LeaderboardRaceConfigImagesBarCell.ACTION_UNLINK.equals(value)) {
                     unlinkRaceColumnFromTrackedRace(object.getA().getRaceColumnName(), object.getB());
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_REFRESH_RACELOG.equals(value)) {
+                    refreshRaceLog(object.getA(), object.getB(), true);
                 }
             }
         });
@@ -672,6 +685,24 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 trackedRacesListComposite.clearSelection();
                 getSelectedRaceColumnWithFleet().getA().setRaceIdentifier(fleet, null);
                 raceColumnAndFleetList.refresh();
+            }
+        });
+    }
+    
+    private void refreshRaceLog(final RaceColumnDTO raceColumnDTO, final FleetDTO fleet, final boolean showAlerts) {
+        final String selectedLeaderboardName = getSelectedLeaderboardName();
+        sailingService.reloadRaceLog(selectedLeaderboardName, raceColumnDTO, fleet, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                if (showAlerts) {
+                    errorReporter.reportError(caught.getMessage());
+                }
+            }
+            @Override
+            public void onSuccess(Void result) {
+                if (showAlerts) {
+                    Window.alert(stringMessages.raceLogReloaded());
+                }
             }
         });
     }
@@ -1155,17 +1186,17 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
         leaderboardList.getList().clear();
         if (text != null && !text.isEmpty()) {
-            for (StrippedLeaderboardDTO dao : availableLeaderboardList) {
+            for (StrippedLeaderboardDTO leaderboard : availableLeaderboardList) {
                 boolean failed = false;
                 for (String word : wordsToFilter) {
                     String textAsUppercase = word.toUpperCase().trim();
-                    if (!dao.name.toUpperCase().contains(textAsUppercase)) {
+                    if (!leaderboard.name.toUpperCase().contains(textAsUppercase) && (leaderboard.displayName == null || !leaderboard.displayName.toUpperCase().contains(textAsUppercase))) {
                         failed = true;
                         break;
                     }
                 }
                 if (!failed) {
-                    leaderboardList.getList().add(dao);
+                    leaderboardList.getList().add(leaderboard);
                 }
             }
         } else {

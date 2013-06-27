@@ -694,4 +694,7 @@ public interface StringMessages extends Messages {
     String finishAt();
     String protestEndsAt();
     String unknown();
+    String refreshRaceLog();
+    String raceLogReloaded();
+    String reloadAllRaceLogs();
 }
