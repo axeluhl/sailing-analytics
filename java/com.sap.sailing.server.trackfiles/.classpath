@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="lib" path="lib/route-converter-common-2.8.jar" sourcepath="lib/route-converter-common-2.8-sources.jar"/>
+	<classpathentry kind="lib" path="lib/route-converter-gpx-2.8.jar" sourcepath="lib/route-converter-gpx-2.8-sources.jar"/>
+	<classpathentry kind="lib" path="lib/route-converter-jaxb6-2.8.jar" sourcepath="lib/route-converter-jaxb6-2.8-sources.jar"/>
+	<classpathentry kind="lib" path="lib/route-converter-kml-2.8.jar" sourcepath="lib/route-converter-kml-2.8-sources.jar"/>
+	<classpathentry kind="lib" path="lib/route-converter-navigation-formats-2.8.jar" sourcepath="lib/route-converter-navigation-formats-2.8-sources.jar"/>
+	<classpathentry kind="lib" path="lib/route-converter-googlemaps-2.8.jar" sourcepath="lib/route-converter-googlemaps-2.8-sources.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
