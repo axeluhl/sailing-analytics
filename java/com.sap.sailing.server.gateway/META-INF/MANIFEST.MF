@@ -28,7 +28,8 @@ Require-Bundle: com.sap.sailing.domain,
  javax.servlet.jsp;bundle-version="2.1.0",
  javax.el;bundle-version="2.1.0",
  rome;bundle-version="1.0.0",
- com.sap.sailing.domain.shared.android;bundle-version="1.0.0"
+ com.sap.sailing.domain.shared.android;bundle-version="1.0.0",
+ com.sap.sailing.server.trackfiles;bundle-version="1.0.0"
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway

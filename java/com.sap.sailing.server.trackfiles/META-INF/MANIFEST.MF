@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Trackfiles
+Bundle-SymbolicName: com.sap.sailing.server.trackfiles
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Export-Package: com.sap.sailing.server.trackfiles,
+ com.sap.sailing.server.trackfiles.common,
+ com.sap.sailing.server.trackfiles.impl;x-friends:="com.sap.sailing.server.trackfiles.test"
+Require-Bundle: 
+ com.sap.sailing.domain,
+ com.sap.sailing.domain.common,
+ org.apache.commons.codec;bundle-version="1.6.0",
+ org.apache.commons.io;bundle-version="1.3.2"
+Bundle-ClassPath: .,
+ lib/route-converter-common-2.8.jar,
+ lib/route-converter-gpx-2.8.jar,
+ lib/route-converter-jaxb6-2.8.jar,
+ lib/route-converter-kml-2.8.jar,
+ lib/route-converter-navigation-formats-2.8.jar,
+ lib/route-converter-googlemaps-2.8.jar
