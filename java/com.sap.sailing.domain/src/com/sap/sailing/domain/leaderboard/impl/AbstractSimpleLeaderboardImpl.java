@@ -896,7 +896,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
                 if (!markPassings.isEmpty()) {
                     TimePoint from = trackedRace.getStartOfRace(); // start counting at race start, not when the competitor passed the line
-                    if (!timePoint.before(from)) { // but only if the race started after timePoint
+                    if (from != null && !timePoint.before(from)) { // but only if the race started after timePoint
                         TimePoint to;
                         if (timePoint.after(markPassings.last().getTimePoint())
                                 && markPassings.last().getWaypoint() == trackedRace.getRace().getCourse()
