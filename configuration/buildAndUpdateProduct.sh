@@ -447,3 +447,15 @@ if [[ "$@" == "remote-deploy" ]]; then
 
     echo "Restarted remote server. Please check."
 fi
+
+if [[ "$@" == "deploy-startpage" ]]; then
+    TARGET_DIR_STARTPAGE=$ACDIR/tmp/jetty-0.0.0.0-8889-bundlefile-_-any-/webapp/
+    read -s -n1 -p "Copying $PROJECT_HOME/java/com.sap.sailing.www/index.html to $TARGET_DIR_STARTPAGE - is this ok (y/n)?" answer
+    case $answer in
+    "Y" | "y") OK=1;;
+    *) echo "Aborting... nothing has been changed for startpage!"
+    exit;;
+    esac
+
+    cp $PROJECT_HOME/java/com.sap.sailing.www/index.html $TARGET_DIR_STARTPAGE
+fi
