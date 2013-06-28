@@ -103,7 +103,7 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
                             .getScoringScheme()
                             .getScoreComparator(/* nullScoresAreBetter */true)
                             .compare(netPointsForCompetitorPerColumn.get(raceColumn1),
-                                    netPointsForCompetitorPerColumn.get(raceColumn1));
+                                    netPointsForCompetitorPerColumn.get(raceColumn2));
                 }
             };
             Collections.sort(sortedRaces, comparator);
