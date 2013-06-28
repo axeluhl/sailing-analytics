@@ -7,9 +7,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -79,29 +81,31 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
         int resultsToDiscard = getNumberOfResultsToDiscard(competitor, raceColumnsToConsider, leaderboard, timePoint);
         Set<RaceColumn> result;
         if (resultsToDiscard > 0) {
-            result = new HashSet<RaceColumn>();
+            final Map<RaceColumn, Double> netPointsForCompetitorPerColumn = new HashMap<>();
             List<RaceColumn> sortedRaces = new ArrayList<RaceColumn>();
-            Comparator<RaceColumn> comparator = new Comparator<RaceColumn>() {
-                @Override
-                public int compare(RaceColumn o1, RaceColumn o2) {
+            for (RaceColumn raceColumn : raceColumnsToConsider) {
+                if (raceColumn.isDiscardable()) {
                     try {
-                        // invert to get bad races first; have the score comparator sort null scores as "better" so they end
-                        // up at the end of the list
-                        return -leaderboard
-                                .getScoringScheme()
-                                .getScoreComparator(/* nullScoresAreBetter */true)
-                                .compare(leaderboard.getNetPoints(competitor, o1, timePoint),
-                                        leaderboard.getNetPoints(competitor, o2, timePoint));
+                        sortedRaces.add(raceColumn);
+                        netPointsForCompetitorPerColumn.put(raceColumn, leaderboard.getNetPoints(competitor, raceColumn, timePoint));
                     } catch (NoWindException e) {
                         throw new NoWindError(e);
                     }
                 }
-            };
-            for (RaceColumn raceColumn : raceColumnsToConsider) {
-                if (raceColumn.isDiscardable()) {
-                    sortedRaces.add(raceColumn);
-                }
             }
+            result = new HashSet<RaceColumn>();
+            Comparator<RaceColumn> comparator = new Comparator<RaceColumn>() {
+                @Override
+                public int compare(RaceColumn raceColumn1, RaceColumn raceColumn2) {
+                    // invert to get bad races first; have the score comparator sort null scores as "better" so they end
+                    // up at the end of the list
+                    return -leaderboard
+                            .getScoringScheme()
+                            .getScoreComparator(/* nullScoresAreBetter */true)
+                            .compare(netPointsForCompetitorPerColumn.get(raceColumn1),
+                                    netPointsForCompetitorPerColumn.get(raceColumn1));
+                }
+            };
             Collections.sort(sortedRaces, comparator);
             int i=0;
             Iterator<RaceColumn> badRacesIter = sortedRaces.iterator();

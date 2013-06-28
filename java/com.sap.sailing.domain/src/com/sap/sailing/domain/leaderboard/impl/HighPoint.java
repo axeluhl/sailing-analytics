@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.concurrent.Callable;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -24,15 +26,21 @@ public class HighPoint extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Integer numberOfCompetitorsInRace) {
+    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher) {
         Double result;
         if (rank == 0) {
             result = null;
         } else {
-            if (numberOfCompetitorsInRace == null) {
-                result = null;
-            } else {
-                result = (double) (numberOfCompetitorsInRace - rank + 1);
+            Integer numberOfCompetitorsInRace;
+            try {
+                numberOfCompetitorsInRace = numberOfCompetitorsInRaceFetcher.call();
+                if (numberOfCompetitorsInRace == null) {
+                    result = null;
+                } else {
+                    result = (double) (numberOfCompetitorsInRace - rank + 1);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
         return result;
