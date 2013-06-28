@@ -40,7 +40,7 @@ public class RaceDetailPanel extends SimplePanel {
     private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat("dd.MM.yyyy");
     private final DurationFormat durationFormatter = new DurationFormat();
     private final NumberFormat decimalFormat = NumberFormat.getFormat("#.##");
-    private final FlagAlphabetInterpreter flagInterpreter;
+    private final RaceStateFlagsInterpreter flagInterpreter;
     private final StringMessages stringMessages;
 
     private final Button closeButton;
@@ -61,7 +61,7 @@ public class RaceDetailPanel extends SimplePanel {
 
     public RaceDetailPanel(final StringMessages stringMessages, final ClickHandler closeButtonHandler) {
         this.stringMessages = stringMessages;
-        this.flagInterpreter = new FlagAlphabetInterpreter(stringMessages);
+        this.flagInterpreter = new RaceStateFlagsInterpreter(stringMessages);
         closeButton = new Button(stringMessages.close());
         closeButton.addClickHandler(new ClickHandler() {
             @Override
