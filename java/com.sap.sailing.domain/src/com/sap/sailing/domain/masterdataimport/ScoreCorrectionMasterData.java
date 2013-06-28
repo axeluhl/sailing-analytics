@@ -5,10 +5,10 @@ import java.util.Map;
 public class ScoreCorrectionMasterData {
 
     private String comment;
-    private long timepointMillis;
+    private Long timepointMillis;
     private Map<String, Iterable<SingleScoreCorrectionMasterData>> correctionForRaceColumns;
 
-    public ScoreCorrectionMasterData(String comment, long timepointMillis,
+    public ScoreCorrectionMasterData(String comment, Long timepointMillis,
             Map<String, Iterable<SingleScoreCorrectionMasterData>> correctionForRaceColumns) {
                 this.comment = comment;
                 this.timepointMillis = timepointMillis;
@@ -19,7 +19,7 @@ public class ScoreCorrectionMasterData {
         return comment;
     }
 
-    public long getTimepointMillis() {
+    public Long getTimepointMillis() {
         return timepointMillis;
     }
 

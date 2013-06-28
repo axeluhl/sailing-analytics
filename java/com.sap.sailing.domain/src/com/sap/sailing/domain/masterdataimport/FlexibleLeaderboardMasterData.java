@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.masterdataimport;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -23,8 +23,8 @@ public class FlexibleLeaderboardMasterData extends LeaderboardMasterData {
     private List<Pair<String, Boolean>> raceColumns;
 
     public FlexibleLeaderboardMasterData(String name, String displayName, int[] resultDiscardingRule,
-            Set<Competitor> competitors, ScoreCorrectionMasterData scoreCorrection, ScoringScheme scoringScheme, String courseAreaId, List<Pair<String, Boolean>> raceColumns) {
-        super(name, displayName, resultDiscardingRule, competitors, scoreCorrection);
+            Map<String, Competitor> competitorsById, ScoreCorrectionMasterData scoreCorrection, ScoringScheme scoringScheme, String courseAreaId, List<Pair<String, Boolean>> raceColumns, Map<String, Double> carriedPoints) {
+        super(name, displayName, resultDiscardingRule, competitorsById, scoreCorrection, carriedPoints);
         this.scoringScheme = scoringScheme;
         this.courseAreaId = courseAreaId;
         this.raceColumns = raceColumns;

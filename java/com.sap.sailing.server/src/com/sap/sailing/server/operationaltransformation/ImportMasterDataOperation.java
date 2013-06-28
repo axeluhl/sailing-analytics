@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.masterdataimport.EventMasterData;
@@ -80,11 +81,12 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
                 addRaceColumnsIfNecessary(board, newLeaderboard, toState);
                 // Set dummy tracked race, so that the leaderboard caches the competitors and
                 // will accept the score corrections
-                Pair<RaceColumn, Fleet> dummyColumnAndFleet = addDummyTrackedRace(board.getCompetitors(), leaderboard);
+                Pair<RaceColumn, Fleet> dummyColumnAndFleet = addDummyTrackedRace(board.getCompetitorsById().values(), leaderboard, getRegattaIfPossible(leaderboard));
                 if (dummyColumnAndFleet.getA() != null && dummyColumnAndFleet.getB() != null) {
                     addScoreCorrectionsIfPossible(board.getScoreCorrection(), newLeaderboard);
                     unsetDummy(dummyColumnAndFleet, leaderboard);
                 }
+                addCarriedPoints(leaderboard, board.getCarriedPoints(), board.getCompetitorsById());
 
             }
         }
@@ -105,6 +107,19 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
         }
     }
 
+    private void addCarriedPoints(Leaderboard leaderboard, Map<String, Double> carriedPoints, Map<String, Competitor> competitorsById) {
+        for (Entry<String, Double> entry : carriedPoints.entrySet()) {
+            leaderboard.setCarriedPoints(competitorsById.get(entry.getKey()), entry.getValue());
+        }
+    }
+
+    private Regatta getRegattaIfPossible(Leaderboard leaderboard) {
+        if (leaderboard instanceof RegattaLeaderboard) {
+            return ((RegattaLeaderboard) leaderboard).getRegatta();
+        }
+        return null;
+    }
+
     private void unsetDummy(Pair<RaceColumn, Fleet> dummyColumnAndFleet, Leaderboard leaderboard) {
         RaceColumn raceColumn = dummyColumnAndFleet.getA();
         Fleet fleet = dummyColumnAndFleet.getB();
@@ -118,7 +133,7 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
      * @param leaderboard
      * @return the race column and fleet the dummy was attached to
      */
-    public Pair<RaceColumn,Fleet> addDummyTrackedRace(Iterable<Competitor> competitors, Leaderboard leaderboard) {
+    public Pair<RaceColumn, Fleet> addDummyTrackedRace(Iterable<Competitor> competitors, Leaderboard leaderboard, Regatta regatta) {
         RaceColumn raceColumn = null;
         Fleet fleet = null;
         Iterable<RaceColumn> raceColumns = leaderboard.getRaceColumns();
@@ -129,7 +144,7 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
             Iterator<? extends Fleet> fleetIterator = fleets.iterator();
             if (fleetIterator.hasNext()) {
                 fleet = fleetIterator.next();
-                DummyTrackedRace dummy = new DummyTrackedRace(competitors);
+                DummyTrackedRace dummy = new DummyTrackedRace(competitors, regatta);
                 raceColumn.setTrackedRace(fleet, dummy);
             }
         }
@@ -140,8 +155,10 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
             final Leaderboard leaderboard) {
         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
         scoreCorrection.setComment(scoreCorrectionMasterData.getComment());
-        scoreCorrection.setTimePointOfLastCorrectionsValidity(new MillisecondsTimePoint(scoreCorrectionMasterData
-                .getTimepointMillis()));
+        if (scoreCorrectionMasterData.getTimepointMillis() != null) {
+            scoreCorrection.setTimePointOfLastCorrectionsValidity(new MillisecondsTimePoint(scoreCorrectionMasterData
+                    .getTimepointMillis()));
+        }
         for (Entry<String, Iterable<SingleScoreCorrectionMasterData>> scoreCorrectionEntry : scoreCorrectionMasterData
                 .getCorrectionForRaceColumns().entrySet()) {
             String columnName = scoreCorrectionEntry.getKey();
@@ -152,8 +169,9 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
                     scoreCorrection.setMaxPointsReason(competitor, raceColumn,
                             MaxPointsReason.valueOf(singleCorrection.getMaxPointsReason()));
                     if (singleCorrection.getExplicitScoreCorrection() != null) {
-                        scoreCorrection.correctScore(competitor, raceColumn, singleCorrection.getExplicitScoreCorrection());
-                    }  
+                        scoreCorrection.correctScore(competitor, raceColumn,
+                                singleCorrection.getExplicitScoreCorrection());
+                    }
                 }
             }
         }

@@ -43,28 +43,41 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
         String name = (String) object.get(LeaderboardMasterDataJsonSerializer.FIELD_NAME);
         String displayName = (String) object.get(LeaderboardMasterDataJsonSerializer.FIELD_DISPLAY_NAME);
         ScoreCorrectionMasterData scoreCorrection = deserializeScoreCorrection((JSONObject) object.get(LeaderboardMasterDataJsonSerializer.FIELD_SCORE_CORRECTION));
+        Map<String, Double> carriedPoints = deserializeCarriedPoints((JSONArray) object.get(LeaderboardMasterDataJsonSerializer.FIELD_CARRIED_POINTS));
         int[] resultDiscardingRule = deserializeResultDesicardingRule((JSONObject) object
                 .get(LeaderboardMasterDataJsonSerializer.FIELD_RESULT_DISCARDING_RULE));
         boolean isRegattaLeaderBoard = (Boolean) object
                 .get(LeaderboardMasterDataJsonSerializer.FIELD_REGATTA_LEADERBOARD);
         
-        Set<Competitor> competitors = new HashSet<Competitor>();
+        Map<String, Competitor> competitorsById = new HashMap<String, Competitor>();
         JSONArray competitorsJsonArray = (JSONArray) object.get(LeaderboardMasterDataJsonSerializer.FIELD_COMPETITORS);
 
         for (Object obj : competitorsJsonArray) {
             JSONObject competitorJson = (JSONObject) obj;
-            competitors.add(competitorDeserializer.deserialize(competitorJson));
+            Competitor deserializedCompetitor = competitorDeserializer.deserialize(competitorJson);
+            competitorsById.put(deserializedCompetitor.getId().toString(), deserializedCompetitor);
         }
         if (isRegattaLeaderBoard) {
             String regattaName = (String) object.get(LeaderboardMasterDataJsonSerializer.FIELD_REGATTA_NAME); 
-            return new RegattaLeaderboardMasterData(name, displayName, resultDiscardingRule, competitors, scoreCorrection, regattaName);
+            return new RegattaLeaderboardMasterData(name, displayName, resultDiscardingRule, competitorsById, scoreCorrection, regattaName, carriedPoints);
             
         } else {
             ScoringScheme scoringScheme = deserializeScoringScheme((JSONObject) object.get(LeaderboardMasterDataJsonSerializer.FIELD_SCORING_SCHEME));
             String courseAreaId = deserializeCourseAreaId((JSONObject) object.get(LeaderboardMasterDataJsonSerializer.FIELD_COURSE_AREA));
             List<Pair<String, Boolean>> raceColumns = deserializeRaceColumns((JSONArray) object.get(LeaderboardMasterDataJsonSerializer.FIELD_RACE_COLUMNS));
-            return new FlexibleLeaderboardMasterData(name, displayName, resultDiscardingRule, competitors, scoreCorrection, scoringScheme, courseAreaId, raceColumns);
+            return new FlexibleLeaderboardMasterData(name, displayName, resultDiscardingRule, competitorsById, scoreCorrection, scoringScheme, courseAreaId, raceColumns, carriedPoints);
         }
+    }
+
+    private Map<String, Double> deserializeCarriedPoints(JSONArray jsonArray) {
+        Map<String, Double> carriedPoints = new HashMap<String, Double>();
+        for (Object obj : jsonArray) {
+            JSONObject jsonCarriedPoints = (JSONObject) obj;
+            String competitorId = (String) jsonCarriedPoints.get(LeaderboardMasterDataJsonSerializer.FIELD_COMPETITOR_ID);
+            Double carried = (Double) jsonCarriedPoints.get(LeaderboardMasterDataJsonSerializer.FIELD_CARRIED);
+            carriedPoints.put(competitorId, carried);
+        }
+        return carriedPoints;
     }
 
     private ScoreCorrectionMasterData deserializeScoreCorrection(JSONObject jsonObject) {
@@ -134,7 +147,7 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
         }
         int[] result = new int[indeces.size()];
         for (int i = 0; i < result.length; i++) {
-            result[i] = ((Long) indeces.get(i)).intValue();
+            result[i] = (Integer) indeces.get(i);
         }
         return result;
     }

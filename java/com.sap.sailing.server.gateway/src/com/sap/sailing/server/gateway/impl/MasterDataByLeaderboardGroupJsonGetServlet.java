@@ -17,13 +17,12 @@ import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.masterdata.impl.LeaderboardGroupMasterDataJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.masterdata.impl.MasterDataSerializerForNames;
 
 public class MasterDataByLeaderboardGroupJsonGetServlet extends AbstractJsonHttpServlet {
 
     private static final long serialVersionUID = 998103495657252850L;
-    
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
@@ -40,16 +39,10 @@ public class MasterDataByLeaderboardGroupJsonGetServlet extends AbstractJsonHttp
             requestedLeaderboardGroupNames.addAll(leaderboardGroups.keySet());
         }
 
-        JSONArray masterData = new JSONArray();
+        MasterDataSerializerForNames masterSerializer = new MasterDataSerializerForNames(leaderboardGroups,
+                getService().getAllEvents());
 
-        for (String name : requestedLeaderboardGroupNames) {
-            LeaderboardGroup leaderboardGroup = leaderboardGroups.get(name);
-            if (leaderboardGroup == null) {
-                continue;
-            }
-            JsonSerializer<LeaderboardGroup> serializer = new LeaderboardGroupMasterDataJsonSerializer(getService().getAllEvents());
-            masterData.add(serializer.serialize(leaderboardGroup));
-        }
+        JSONArray masterData = masterSerializer.serialize(requestedLeaderboardGroupNames);
 
         setJsonResponseHeader(resp);
         masterData.writeJSONString(resp.getWriter());
@@ -68,7 +61,7 @@ public class MasterDataByLeaderboardGroupJsonGetServlet extends AbstractJsonHttp
                 }
             }
         }
-        
+
         return names.toArray(new String[names.size()]);
     }
 

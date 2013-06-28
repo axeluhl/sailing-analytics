@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.base;
 
-import java.util.Set;
+import java.util.Map;
 
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -15,17 +15,20 @@ public abstract class LeaderboardMasterData {
     
     private int[] resultDiscardingRule;
     
-    private Set<Competitor> competitors;
+    private Map<String,Competitor>  competitorsById;
 
     private ScoreCorrectionMasterData scoreCorrection;
 
+    private Map<String, Double> carriedPoints;
+
     public LeaderboardMasterData(String name, String displayName, int[] resultDiscardingRule,
-            Set<Competitor> competitors, ScoreCorrectionMasterData scoreCorrection) {
+            Map<String,Competitor> competitorsById, ScoreCorrectionMasterData scoreCorrection, Map<String, Double> carriedPoints) {
         this.name = name;
         this.displayName = displayName;
         this.resultDiscardingRule = resultDiscardingRule;
-        this.competitors = competitors;
+        this.competitorsById = competitorsById;
         this.scoreCorrection = scoreCorrection;
+        this.carriedPoints = carriedPoints;
     }
 
     public String getName() {
@@ -44,12 +47,16 @@ public abstract class LeaderboardMasterData {
         return rule;
     }
 
-    public Set<Competitor> getCompetitors() {
-        return competitors;
+    public Map<String,Competitor> getCompetitorsById() {
+        return competitorsById;
     }
 
     public ScoreCorrectionMasterData getScoreCorrection() {
         return scoreCorrection;
+    }
+
+    public Map<String, Double> getCarriedPoints() {
+        return carriedPoints;
     }
 
     public abstract Leaderboard getLeaderboard();

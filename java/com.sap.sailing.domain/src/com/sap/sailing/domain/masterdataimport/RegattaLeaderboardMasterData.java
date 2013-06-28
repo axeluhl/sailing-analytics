@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.masterdataimport;
 
-import java.util.Set;
+import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
@@ -18,8 +18,8 @@ public class RegattaLeaderboardMasterData extends LeaderboardMasterData{
     private Regatta regatta;
 
     public RegattaLeaderboardMasterData(String name, String displayName, int[] resultDiscardingRule,
-            Set<Competitor> competitors, ScoreCorrectionMasterData scoreCorrection, String regattaName) {
-        super(name, displayName, resultDiscardingRule, competitors, scoreCorrection);
+            Map<String, Competitor> competitorsById, ScoreCorrectionMasterData scoreCorrection, String regattaName, Map<String, Double> carriedPoints) {
+        super(name, displayName, resultDiscardingRule, competitorsById, scoreCorrection, carriedPoints);
         this.regattaName = regattaName;
     }
 

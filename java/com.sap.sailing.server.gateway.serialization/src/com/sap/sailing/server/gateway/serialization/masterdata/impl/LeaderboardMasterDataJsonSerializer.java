@@ -207,7 +207,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
             scoreCorrectionForCompetitor.put(FIELD_EXPLICIT_SCORE_CORRECTION,
                     correction.getExplicitScoreCorrection(competitor, raceColumn));
             scoreCorrectionForCompetitor.put(FIELD_MAX_POINTS_REASON,
-                    correction.getMaxPointsReason(competitor, raceColumn));
+                    correction.getMaxPointsReason(competitor, raceColumn).toString());
             scoreCorrectionForCompetitor.put(FIELD_COMPETITOR_ID,
                     competitor.getId().toString());
             scoreCorrectionsForCompetitors.add(scoreCorrectionForCompetitor);
