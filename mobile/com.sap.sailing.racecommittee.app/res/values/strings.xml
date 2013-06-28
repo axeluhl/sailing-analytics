@@ -110,7 +110,7 @@
     <string name="race_startphase_countdown_class_display">%1$s until %2$s class flag is displayed</string>
     <string name="race_startphase_countdown_start">%1$s until %2$s starts&quot;</string>
     <string name="race_startphase_gate_class_over_golf_display">%1$s until Class flag over Golf flag is displayed</string>
-    <string name="race_startphase_gate_class_over_golf_removed">%1$s until Class flag over Golf flag is removed and race starts</string>
+    <string name="race_startphase_gate_class_removed">%1$s until Class flag is removed and race starts</string>
     <string name="race_startphase_gate_papa_display">%1$s until Papa flag is displayed</string>
     <string name="race_startphase_gate_papa_removed">%1$s until Papa flag is removed</string>
     <string name="set_pathfinder">Set Pathfinder</string>

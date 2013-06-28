@@ -110,7 +110,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     }
 
     protected void switchToInfoFragment(RaceFragment choosenFragment) {
-        ExLog.i(TAG, String.format("Choosed a %s fragment for race %s with status %s", choosenFragment.getClass()
+        ExLog.i(TAG, String.format("Switched to %s fragment for race %s with status %s", choosenFragment.getClass()
                 .getName(), getRace().getId(), getRace().getStatus()));
 
         this.infoFragment = choosenFragment;

@@ -2,6 +2,7 @@ package com.sap.sailing.server.impl;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -175,11 +176,17 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         return scoreHasBeenCorrected;
     }
 
-    private boolean correctScoreInLeaderboardIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint, int numberOfCompetitorsInRace, 
+    private boolean correctScoreInLeaderboardIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint,
+            final int numberOfCompetitorsInRace, 
             Competitor competitor, int rankByRaceCommittee) throws NoWindException {
         boolean scoreHasBeenCorrected = false;
-        
-        Double scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(raceColumn, competitor, rankByRaceCommittee, numberOfCompetitorsInRace);
+        Double scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(raceColumn, competitor, rankByRaceCommittee,
+                new Callable<Integer>() {
+                    @Override
+                    public Integer call() {
+                        return numberOfCompetitorsInRace;
+                    }
+                });
         Double trackedNetPoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);
         
         if (trackedNetPoints == null || !trackedNetPoints.equals(scoreByRaceCommittee)) {
