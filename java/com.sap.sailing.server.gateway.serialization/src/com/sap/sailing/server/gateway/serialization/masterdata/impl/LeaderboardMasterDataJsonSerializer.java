@@ -44,6 +44,8 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
     public static final String FIELD_COMPETITOR_ID = "competitorId";
     public static final String FIELD_CARRIED_POINTS = "carriedPoints";
     public static final String FIELD_CARRIED = "carried";
+    public static final String FIELD_SUPPRESSED_COMPETITORS = "suppressedCompetitors";
+    public static final String FIELD_COMPETITOR_DISPLAY_NAMES = "competitorDisplayNames";
     
     
     private final JsonSerializer<Competitor> competitorSerializer;
@@ -76,6 +78,8 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         jsonLeaderboard.put(FIELD_NAME, leaderboard.getName());
         jsonLeaderboard.put(FIELD_SCORE_CORRECTION, createJsonForScoreCorrection(leaderboard));
         jsonLeaderboard.put(FIELD_CARRIED_POINTS, createJsonArrayForCarriedPoints(leaderboard));
+        jsonLeaderboard.put(FIELD_SUPPRESSED_COMPETITORS, createJsonArrayForSuppressedCompetitors(leaderboard.getSuppressedCompetitors()));
+        jsonLeaderboard.put(FIELD_COMPETITOR_DISPLAY_NAMES, createJsonArrayForCompetitorDisplayNames(leaderboard));
         jsonLeaderboard.put(FIELD_COMPETITORS, createJsonArrayForCompetitors(leaderboard.getAllCompetitors()));
         jsonLeaderboard.put(FIELD_RESULT_DISCARDING_RULE, createJsonForResultDiscardingRule(leaderboard.getResultDiscardingRule()));
         jsonLeaderboard.put(FIELD_DISPLAY_NAME, leaderboard.getDisplayName());
@@ -99,6 +103,28 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         return jsonLeaderboard;
     }
     
+    private JSONArray createJsonArrayForCompetitorDisplayNames(Leaderboard leaderboard) {
+        JSONArray array = new JSONArray();
+        for (Competitor competitor : leaderboard.getAllCompetitors()) {
+            String displayName = leaderboard.getDisplayName(competitor);
+            if (displayName != null) {
+                JSONObject displayNameJson = new JSONObject();
+                displayNameJson.put(FIELD_COMPETITOR_ID, competitor.getId().toString());
+                displayNameJson.put(FIELD_DISPLAY_NAME, displayName);
+                array.add(displayNameJson);
+            }
+        }
+        return array;
+    }
+
+    private JSONArray createJsonArrayForSuppressedCompetitors(Iterable<Competitor> suppressedCompetitors) {
+        JSONArray array = new JSONArray();
+        for (Competitor competitor : suppressedCompetitors) {
+            array.add(competitor.getId().toString());
+        }
+        return array;
+    }
+
     private JSONArray createJsonArrayForCarriedPoints(Leaderboard leaderboard) {
         JSONArray jsonArray = new JSONArray();
         for (Competitor competitor : leaderboard.getAllCompetitors()) {

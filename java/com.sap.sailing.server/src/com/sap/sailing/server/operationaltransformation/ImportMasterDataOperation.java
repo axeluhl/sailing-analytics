@@ -81,12 +81,16 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
                 addRaceColumnsIfNecessary(board, newLeaderboard, toState);
                 // Set dummy tracked race, so that the leaderboard caches the competitors and
                 // will accept the score corrections
-                Pair<RaceColumn, Fleet> dummyColumnAndFleet = addDummyTrackedRace(board.getCompetitorsById().values(), leaderboard, getRegattaIfPossible(leaderboard));
+                Pair<RaceColumn, Fleet> dummyColumnAndFleet = addDummyTrackedRace(board.getCompetitorsById().values(),
+                        leaderboard, getRegattaIfPossible(leaderboard));
                 if (dummyColumnAndFleet.getA() != null && dummyColumnAndFleet.getB() != null) {
                     addScoreCorrectionsIfPossible(board.getScoreCorrection(), newLeaderboard);
                     unsetDummy(dummyColumnAndFleet, leaderboard);
                 }
                 addCarriedPoints(leaderboard, board.getCarriedPoints(), board.getCompetitorsById());
+                addSuppressedCompetitors(leaderboard, board.getSuppressedCompetitors(), board.getCompetitorsById());
+                addCompetitorDisplayNames(leaderboard, board.getDisplayNamesByCompetitorId(),
+                        board.getCompetitorsById());
 
             }
         }
@@ -104,6 +108,19 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
                     masterData.isDisplayGroupsRevese(), leaderboardNames, overallLeaderboardDiscardThresholds,
                     overallLeaderboardScoringSchemeType);
             creationCount.addOneLeaderboardGroup();
+        }
+    }
+
+    private void addCompetitorDisplayNames(Leaderboard leaderboard, Map<String, String> displayNamesByCompetitorId,
+            Map<String, Competitor> competitorsById) {
+        for (Entry<String, String> entry : displayNamesByCompetitorId.entrySet()) {
+            leaderboard.setDisplayName(competitorsById.get(entry.getKey()), entry.getValue());
+        }
+    }
+
+    private void addSuppressedCompetitors(Leaderboard leaderboard, List<String> suppressedCompetitors, Map<String, Competitor> competitorsById) {
+        for (String id : suppressedCompetitors) {
+            leaderboard.setSuppressed(competitorsById.get(id), true);
         }
     }
 

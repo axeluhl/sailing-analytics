@@ -133,35 +133,51 @@ public class MasterDataImportTest {
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
         sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, leaderboardNames, null, null);
-        
-        //Set tracked Race
+
+        // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
         UUID competitorUUID = UUID.randomUUID();
         Set<Person> sailors = new HashSet<Person>();
-        sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L), "Oberhoschy"));
-        Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L), "Der Lennart halt");
+        sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
+                "Oberhoschy"));
+        Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
+                "Der Lennart halt");
         Team team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         Boat boat = new BoatImpl("Wingy", boatClass, "GER70133");
         CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
         competitors.add(competitor);
+        UUID competitorToSuppressUUID = UUID.randomUUID();
+        Set<Person> sailors2 = new HashSet<Person>();
+        sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
+                "segelt auch mit"));
+        Person coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
+                "Bester Coach");
+        Team team2 = new TeamImpl("Noobs", sailors2, coach2);
+        Boat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
+        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
+        competitors.add(competitorToSuppress);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta);
-        
+
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         raceColumn.setTrackedRace(testFleet1, trackedRace);
-        
-        
-        //Set score correction
+
+        // Set score correction
         double scoreCorrection = 12.0;
         leaderboard.getScoreCorrection().correctScore(competitor, raceColumn, scoreCorrection);
         MaxPointsReason maxPointsReason = MaxPointsReason.DNS;
         leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, maxPointsReason);
-        
-        //Set carried Points 
+
+        // Set carried Points
         double carriedPoints = 2.0;
         leaderboard.setCarriedPoints(competitor, carriedPoints);
+
+        // Set suppressed competitor
+        leaderboard.setSuppressed(competitorToSuppress, true);
         
-        
+        // Set display name
+        String nickName = "Angie";
+        leaderboard.setDisplayName(competitorToSuppress, nickName);
 
         // Serialize
         MasterDataSerializerForNames serializer = new MasterDataSerializerForNames(
@@ -170,15 +186,15 @@ public class MasterDataImportTest {
         names.add(TEST_GROUP_NAME);
         JSONArray masterDataOverallArray = serializer.serialize(names);
         Assert.assertNotNull(masterDataOverallArray);
-        
-        //Delete all data above from the database, to allow recreating all of it on target server
+
+        // Delete all data above from the database, to allow recreating all of it on target server
         deleteCreatedDataFromDatabase();
 
-        //Deserialization copied from doPost in MasterDataByLeaderboardGroupJsonPostServlet
+        // Deserialization copied from doPost in MasterDataByLeaderboardGroupJsonPostServlet
         RacingEventService destService = new MasterDataTargetRacingEventServiceImplMock();
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         CreationCount creationCount = new CreationCount();
-        
+
         JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
         JsonDeserializer<Nationality> nationalityDeserializer = new NationalityJsonDeserialzer();
         JsonDeserializer<Person> personDeserializer = new PersonJsonDeserializer(nationalityDeserializer);
@@ -195,7 +211,7 @@ public class MasterDataImportTest {
         JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = new LeaderboardGroupMasterDataJsonDeserializer(
                 leaderboardDeserializer, eventDeserializer, regattaDeserializer);
         JSONArray leaderboardGroupsMasterDataJsonArray = masterDataOverallArray;
-        //Actual import. Roughly copied from doPost in MasterDataByLeaderboardGroupJsonPostServlet
+        // Actual import. Roughly copied from doPost in MasterDataByLeaderboardGroupJsonPostServlet
         for (Object leaderBoardGroupMasterData : leaderboardGroupsMasterDataJsonArray) {
             JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
             LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
@@ -203,7 +219,7 @@ public class MasterDataImportTest {
             ImportMasterDataOperation op = new ImportMasterDataOperation(masterData);
             creationCount.add(destService.apply(op));
         }
-        
+
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
         Assert.assertNotNull(eventOnTarget);
@@ -213,32 +229,45 @@ public class MasterDataImportTest {
         Assert.assertNotNull(leaderboardOnTarget);
         Regatta regattaOnTarget = destService.getRegattaByName(TEST_LEADERBOARD_NAME);
         Assert.assertNotNull(regattaOnTarget);
-        
+
         Assert.assertEquals(courseAreaUUID, eventOnTarget.getVenue().getCourseAreas().iterator().next().getId());
-        
+
         RaceColumn raceColumnOnTarget = leaderboardOnTarget.getRaceColumnByName(raceColumnName);
         Assert.assertNotNull(raceColumnOnTarget);
-        
-        
+
         Assert.assertTrue(leaderboardOnTarget.getScoreCorrection().hasCorrectionFor(raceColumnOnTarget));
         Competitor competitorOnTarget = domainFactory.getExistingCompetitorById(competitorUUID);
         Set<Competitor> competitorsCreatedOnTarget = new HashSet<Competitor>();
         competitorsCreatedOnTarget.add(competitorOnTarget);
-        
+
         TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget);
-        raceColumnOnTarget.setTrackedRace(raceColumnOnTarget.getFleetByName(testFleet1.getName()), trackedRaceForTarget);
-        
+        raceColumnOnTarget
+                .setTrackedRace(raceColumnOnTarget.getFleetByName(testFleet1.getName()), trackedRaceForTarget);
+
         Iterable<Competitor> competitorsOnTarget = leaderboardOnTarget.getAllCompetitors();
         Iterator<Competitor> competitorIterator = competitorsOnTarget.iterator();
         Assert.assertTrue(competitorIterator.hasNext());
         Assert.assertEquals(competitorOnTarget, competitorIterator.next());
-        
-        //Check for score corrections
-        Assert.assertEquals(scoreCorrection, leaderboardOnTarget.getScoreCorrection().getExplicitScoreCorrection(competitorOnTarget, raceColumnOnTarget));
-        Assert.assertEquals(maxPointsReason, leaderboardOnTarget.getScoreCorrection().getMaxPointsReason(competitorOnTarget, raceColumnOnTarget));
-        
-        //Check for carried points
+
+        // Check for score corrections
+        Assert.assertEquals(
+                scoreCorrection,
+                leaderboardOnTarget.getScoreCorrection().getExplicitScoreCorrection(competitorOnTarget,
+                        raceColumnOnTarget));
+        Assert.assertEquals(maxPointsReason,
+                leaderboardOnTarget.getScoreCorrection().getMaxPointsReason(competitorOnTarget, raceColumnOnTarget));
+
+        // Check for carried points
         Assert.assertEquals(carriedPoints, leaderboardOnTarget.getCarriedPoints(competitorOnTarget));
+
+        // Check for suppressed competitor
+        Assert.assertTrue(leaderboardOnTarget.getSuppressedCompetitors().iterator().hasNext());
+        Competitor suppressedCompetitorOnTarget = domainFactory.getExistingCompetitorById(competitorToSuppressUUID);
+        Assert.assertEquals(suppressedCompetitorOnTarget,
+                leaderboardOnTarget.getSuppressedCompetitors().iterator().next());
+        
+        // Check for competitor desplay name
+        Assert.assertEquals(nickName, leaderboardOnTarget.getDisplayName(suppressedCompetitorOnTarget));
     }
 
     private class MasterDataTargetRacingEventServiceImplMock extends RacingEventServiceImplMock {

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base;
 
+import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -21,14 +22,22 @@ public abstract class LeaderboardMasterData {
 
     private Map<String, Double> carriedPoints;
 
+    private List<String> suppressedCompetitors;
+
+    private Map<String, String> displayNamesByCompetitorId;
+
     public LeaderboardMasterData(String name, String displayName, int[] resultDiscardingRule,
-            Map<String,Competitor> competitorsById, ScoreCorrectionMasterData scoreCorrection, Map<String, Double> carriedPoints) {
+            Map<String, Competitor> competitorsById, ScoreCorrectionMasterData scoreCorrection,
+            Map<String, Double> carriedPoints, List<String> suppressedCompetitors,
+            Map<String, String> displayNamesByCompetitorId) {
         this.name = name;
         this.displayName = displayName;
         this.resultDiscardingRule = resultDiscardingRule;
         this.competitorsById = competitorsById;
         this.scoreCorrection = scoreCorrection;
         this.carriedPoints = carriedPoints;
+        this.suppressedCompetitors = suppressedCompetitors;
+        this.displayNamesByCompetitorId = displayNamesByCompetitorId;
     }
 
     public String getName() {
@@ -57,6 +66,14 @@ public abstract class LeaderboardMasterData {
 
     public Map<String, Double> getCarriedPoints() {
         return carriedPoints;
+    }
+
+    public List<String> getSuppressedCompetitors() {
+        return suppressedCompetitors;
+    }
+
+    public Map<String, String> getDisplayNamesByCompetitorId() {
+        return displayNamesByCompetitorId;
     }
 
     public abstract Leaderboard getLeaderboard();
