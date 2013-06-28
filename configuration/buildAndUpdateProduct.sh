@@ -458,4 +458,5 @@ if [[ "$@" == "deploy-startpage" ]]; then
     esac
 
     cp $PROJECT_HOME/java/com.sap.sailing.www/index.html $TARGET_DIR_STARTPAGE
+    echo "OK"
 fi
