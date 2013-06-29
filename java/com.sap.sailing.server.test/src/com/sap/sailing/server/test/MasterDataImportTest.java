@@ -1,6 +1,7 @@
 package com.sap.sailing.server.test;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,6 +18,9 @@ import org.json.simple.JSONObject;
 import org.junit.After;
 import org.junit.Test;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -24,8 +28,6 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.LeaderboardMasterData;
-import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
@@ -36,32 +38,24 @@ import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.masterdataimport.EventMasterData;
 import com.sap.sailing.domain.masterdataimport.LeaderboardGroupMasterData;
-import com.sap.sailing.domain.masterdataimport.RegattaMasterData;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.ColorDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.FleetDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.NationalityJsonDeserialzer;
-import com.sap.sailing.server.gateway.deserialization.impl.PersonJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.TeamJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.masterdata.impl.CompetitorMasterDataDeserializer;
-import com.sap.sailing.server.gateway.deserialization.masterdata.impl.EventMasterDataJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.masterdata.impl.LeaderboardGroupMasterDataJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.masterdata.impl.LeaderboardMasterDataJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.masterdata.impl.RegattaMasterDataJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.MasterDataSerializerForNames;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.CreationCount;
@@ -76,6 +70,11 @@ public class MasterDataImportTest {
 
     private final UUID eventUUID = UUID.randomUUID();
 
+    /**
+     * Log Events created when running test. Will be removed from db at teardown
+     */
+    private Set<Serializable> storedLogUUIDs = new HashSet<Serializable>();
+
     @After
     public void tearDown() throws MalformedURLException, IOException, InterruptedException {
         deleteCreatedDataFromDatabase();
@@ -83,6 +82,19 @@ public class MasterDataImportTest {
     }
 
     private void deleteCreatedDataFromDatabase() throws MalformedURLException, IOException, InterruptedException {
+        // Didnt use CollectionNames stuff since it was not visible in this package. Sucks as soon as these names
+        // change, I know..
+        DBCollection raceLogCollection = MongoDBService.INSTANCE.getDB().getCollection("RACE_LOGS");
+        raceLogCollection.ensureIndex(new BasicDBObject("RACE_LOG_EVENT_ID", null));
+        for (Serializable id : storedLogUUIDs) {
+            BasicDBObject query = new BasicDBObject();
+            query.put("RACE_LOG_EVENT.RACE_LOG_EVENT_ID", id);
+            DBCursor result = raceLogCollection.find(query);
+            while (result.hasNext()) {
+                raceLogCollection.remove(result.next());
+            }
+        }
+        storedLogUUIDs.clear();
         RacingEventService service = new RacingEventServiceImpl();
         LeaderboardGroup group = service.getLeaderboardGroupByName(TEST_GROUP_NAME);
         if (group != null) {
@@ -100,6 +112,10 @@ public class MasterDataImportTest {
         if (regatta != null) {
             service.removeRegatta(regatta);
         }
+        // DBCursor cursor = raceLogCollection.find();
+        // while (cursor.hasNext()) {
+        // raceLogCollection.remove(cursor.next());
+        // }
     }
 
     @Test
@@ -162,6 +178,13 @@ public class MasterDataImportTest {
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         raceColumn.setTrackedRace(testFleet1, trackedRace);
 
+        // Set log event
+        RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(new MillisecondsTimePoint(1372421236312L), 1,
+                new MillisecondsTimePoint(1372489200000L));
+        raceColumn.getRaceLog(testFleet1).add(logEvent);
+        storedLogUUIDs.add(logEvent.getId());
+
         // Set score correction
         double scoreCorrection = 12.0;
         leaderboard.getScoreCorrection().correctScore(competitor, raceColumn, scoreCorrection);
@@ -174,7 +197,7 @@ public class MasterDataImportTest {
 
         // Set suppressed competitor
         leaderboard.setSuppressed(competitorToSuppress, true);
-        
+
         // Set display name
         String nickName = "Angie";
         leaderboard.setDisplayName(competitorToSuppress, nickName);
@@ -191,25 +214,11 @@ public class MasterDataImportTest {
         deleteCreatedDataFromDatabase();
 
         // Deserialization copied from doPost in MasterDataByLeaderboardGroupJsonPostServlet
-        RacingEventService destService = new MasterDataTargetRacingEventServiceImplMock();
+        RacingEventService destService = new RacingEventServiceImplMock();
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         CreationCount creationCount = new CreationCount();
-
-        JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
-        JsonDeserializer<Nationality> nationalityDeserializer = new NationalityJsonDeserialzer();
-        JsonDeserializer<Person> personDeserializer = new PersonJsonDeserializer(nationalityDeserializer);
-        JsonDeserializer<Team> teamDeserializer = new TeamJsonDeserializer(personDeserializer);
-        JsonDeserializer<Competitor> competitorDeserializer = new CompetitorMasterDataDeserializer(
-                boatClassDeserializer, teamDeserializer, domainFactory);
-        JsonDeserializer<LeaderboardMasterData> leaderboardDeserializer = new LeaderboardMasterDataJsonDeserializer(
-                competitorDeserializer, domainFactory);
-        JsonDeserializer<EventMasterData> eventDeserializer = new EventMasterDataJsonDeserializer();
-        JsonDeserializer<Color> colorDeserializer = new ColorDeserializer();
-        JsonDeserializer<Fleet> fleetDeserializer = new FleetDeserializer(colorDeserializer);
-        JsonDeserializer<RegattaMasterData> regattaDeserializer = new RegattaMasterDataJsonDeserializer(
-                fleetDeserializer);
-        JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = new LeaderboardGroupMasterDataJsonDeserializer(
-                leaderboardDeserializer, eventDeserializer, regattaDeserializer);
+        JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = LeaderboardGroupMasterDataJsonDeserializer
+                .create(domainFactory);
         JSONArray leaderboardGroupsMasterDataJsonArray = masterDataOverallArray;
         // Actual import. Roughly copied from doPost in MasterDataByLeaderboardGroupJsonPostServlet
         for (Object leaderBoardGroupMasterData : leaderboardGroupsMasterDataJsonArray) {
@@ -241,8 +250,8 @@ public class MasterDataImportTest {
         competitorsCreatedOnTarget.add(competitorOnTarget);
 
         TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget);
-        raceColumnOnTarget
-                .setTrackedRace(raceColumnOnTarget.getFleetByName(testFleet1.getName()), trackedRaceForTarget);
+        Fleet fleet1OnTarget = raceColumnOnTarget.getFleetByName(testFleet1.getName());
+        raceColumnOnTarget.setTrackedRace(fleet1OnTarget, trackedRaceForTarget);
 
         Iterable<Competitor> competitorsOnTarget = leaderboardOnTarget.getAllCompetitors();
         Iterator<Competitor> competitorIterator = competitorsOnTarget.iterator();
@@ -263,14 +272,14 @@ public class MasterDataImportTest {
         // Check for suppressed competitor
         Assert.assertTrue(leaderboardOnTarget.getSuppressedCompetitors().iterator().hasNext());
         Competitor suppressedCompetitorOnTarget = domainFactory.getExistingCompetitorById(competitorToSuppressUUID);
-        Assert.assertEquals(suppressedCompetitorOnTarget,
-                leaderboardOnTarget.getSuppressedCompetitors().iterator().next());
-        
+        Assert.assertEquals(suppressedCompetitorOnTarget, leaderboardOnTarget.getSuppressedCompetitors().iterator()
+                .next());
+
         // Check for competitor desplay name
         Assert.assertEquals(nickName, leaderboardOnTarget.getDisplayName(suppressedCompetitorOnTarget));
-    }
 
-    private class MasterDataTargetRacingEventServiceImplMock extends RacingEventServiceImplMock {
-
+        // Check for race log event
+        Assert.assertNotNull(raceColumnOnTarget.getRaceLog(fleet1OnTarget).getFirstRawFix());
+        Assert.assertEquals(logEvent.getId(), raceColumnOnTarget.getRaceLog(fleet1OnTarget).getFirstRawFix().getId());
     }
 }

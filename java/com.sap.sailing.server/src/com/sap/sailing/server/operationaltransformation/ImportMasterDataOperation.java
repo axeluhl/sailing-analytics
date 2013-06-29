@@ -35,6 +35,8 @@ import com.sap.sailing.domain.masterdataimport.RegattaMasterData;
 import com.sap.sailing.domain.masterdataimport.ScoreCorrectionMasterData;
 import com.sap.sailing.domain.masterdataimport.SeriesMasterData;
 import com.sap.sailing.domain.masterdataimport.SingleScoreCorrectionMasterData;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -91,6 +93,7 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
                 addSuppressedCompetitors(leaderboard, board.getSuppressedCompetitors(), board.getCompetitorsById());
                 addCompetitorDisplayNames(leaderboard, board.getDisplayNamesByCompetitorId(),
                         board.getCompetitorsById());
+                addRaceLogEvents(leaderboard, board.getRaceLogEvents());
 
             }
         }
@@ -108,6 +111,22 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
                     masterData.isDisplayGroupsRevese(), leaderboardNames, overallLeaderboardDiscardThresholds,
                     overallLeaderboardScoringSchemeType);
             creationCount.addOneLeaderboardGroup();
+        }
+    }
+
+    private void addRaceLogEvents(Leaderboard leaderboard, Map<String, Map<String, List<RaceLogEvent>>> raceLogEvents) {
+        for (Entry<String, Map<String, List<RaceLogEvent>>> entry : raceLogEvents.entrySet()) {
+            String raceColumnName = entry.getKey();
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            for (Entry<String, List<RaceLogEvent>> fleetEntry : entry.getValue().entrySet()) {
+                String fleetName = fleetEntry.getKey();
+                Fleet fleet = raceColumn.getFleetByName(fleetName);
+                List<RaceLogEvent> logEvents = fleetEntry.getValue();
+                RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                for (RaceLogEvent singleEvent : logEvents) {
+                    raceLog.add(singleEvent);
+                }
+            }
         }
     }
 

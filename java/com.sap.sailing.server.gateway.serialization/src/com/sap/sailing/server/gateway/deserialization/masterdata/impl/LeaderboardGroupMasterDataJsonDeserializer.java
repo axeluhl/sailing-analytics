@@ -6,12 +6,28 @@ import java.util.Set;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
+import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.Person;
+import com.sap.sailing.domain.base.Team;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.masterdataimport.EventMasterData;
 import com.sap.sailing.domain.masterdataimport.LeaderboardGroupMasterData;
 import com.sap.sailing.domain.masterdataimport.RegattaMasterData;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.ColorDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.FleetDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.NationalityJsonDeserialzer;
+import com.sap.sailing.server.gateway.deserialization.impl.PersonJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.TeamJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.LeaderboardGroupMasterDataJsonSerializer;
 
 public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeserializer<LeaderboardGroupMasterData> {
@@ -21,6 +37,26 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
     private final JsonDeserializer<EventMasterData> eventDeserializer;
     
     private final JsonDeserializer<RegattaMasterData> regattaDeserializer;
+    
+    public static JsonDeserializer<LeaderboardGroupMasterData> create(DomainFactory domainFactory) {
+        JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
+        JsonDeserializer<Nationality> nationalityDeserializer = new NationalityJsonDeserialzer();
+        JsonDeserializer<Person> personDeserializer = new PersonJsonDeserializer(nationalityDeserializer);
+        JsonDeserializer<Team> teamDeserializer = new TeamJsonDeserializer(personDeserializer);
+        JsonDeserializer<Competitor> competitorDeserializer = new CompetitorMasterDataDeserializer(
+                boatClassDeserializer, teamDeserializer, domainFactory);
+        JsonDeserializer<RaceLogEvent> raceLogEventDeserializer = RaceLogEventDeserializer.create(domainFactory);
+        JsonDeserializer<LeaderboardMasterData> leaderboardDeserializer = new LeaderboardMasterDataJsonDeserializer(
+                competitorDeserializer, domainFactory, raceLogEventDeserializer);
+        JsonDeserializer<EventMasterData> eventDeserializer = new EventMasterDataJsonDeserializer();
+        JsonDeserializer<Color> colorDeserializer = new ColorDeserializer();
+        JsonDeserializer<Fleet> fleetDeserializer = new FleetDeserializer(colorDeserializer);
+        JsonDeserializer<RegattaMasterData> regattaDeserializer = new RegattaMasterDataJsonDeserializer(
+                fleetDeserializer);
+        JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = new LeaderboardGroupMasterDataJsonDeserializer(
+                leaderboardDeserializer, eventDeserializer, regattaDeserializer);
+        return leaderboardGroupMasterDataDeserializer;
+    }
 
     public LeaderboardGroupMasterDataJsonDeserializer(JsonDeserializer<LeaderboardMasterData> leaderboardDeserializer,
             JsonDeserializer<EventMasterData> eventDeserializer, JsonDeserializer<RegattaMasterData> regattaDeserializer) {

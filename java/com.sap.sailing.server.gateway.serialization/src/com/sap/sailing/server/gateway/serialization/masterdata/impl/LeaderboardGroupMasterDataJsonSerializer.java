@@ -59,7 +59,7 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
 
         JsonSerializer<RaceColumn> raceColumnSerializer = new RaceColumnMasterDataJsonSerializer();
         eventSerializer = new EventMasterDataJsonSerializer();
-        leadboardSerializer = new LeaderboardMasterDataJsonSerializer(competitorSerializer, raceColumnSerializer);
+        leadboardSerializer = new LeaderboardMasterDataJsonSerializer(competitorSerializer, raceColumnSerializer, raceLogEventSerializer);
         regattaSerializer = new RegattaMasterDataJsonSerializer(fleetSerializer);
     }
 

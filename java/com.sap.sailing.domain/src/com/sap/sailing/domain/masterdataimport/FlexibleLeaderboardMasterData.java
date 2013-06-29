@@ -11,6 +11,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 
 public class FlexibleLeaderboardMasterData extends LeaderboardMasterData {
 
@@ -26,9 +27,9 @@ public class FlexibleLeaderboardMasterData extends LeaderboardMasterData {
             Map<String, Competitor> competitorsById, ScoreCorrectionMasterData scoreCorrection,
             ScoringScheme scoringScheme, String courseAreaId, List<Pair<String, Boolean>> raceColumns,
             Map<String, Double> carriedPoints, List<String> suppressedCompetitors,
-            Map<String, String> displayNamesByCompetitorId) {
+            Map<String, String> displayNamesByCompetitorId, Map<String, Map<String, List<RaceLogEvent>>> raceLogEvents) {
         super(name, displayName, resultDiscardingRule, competitorsById, scoreCorrection, carriedPoints,
-                suppressedCompetitors, displayNamesByCompetitorId);
+                suppressedCompetitors, displayNamesByCompetitorId, raceLogEvents);
         this.scoringScheme = scoringScheme;
         this.courseAreaId = courseAreaId;
         this.raceColumns = raceColumns;

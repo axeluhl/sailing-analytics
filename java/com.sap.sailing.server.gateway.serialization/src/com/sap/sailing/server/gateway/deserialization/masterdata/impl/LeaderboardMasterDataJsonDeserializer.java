@@ -20,6 +20,7 @@ import com.sap.sailing.domain.masterdataimport.FlexibleLeaderboardMasterData;
 import com.sap.sailing.domain.masterdataimport.RegattaLeaderboardMasterData;
 import com.sap.sailing.domain.masterdataimport.ScoreCorrectionMasterData;
 import com.sap.sailing.domain.masterdataimport.SingleScoreCorrectionMasterData;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.LeaderboardMasterDataJsonSerializer;
@@ -29,11 +30,13 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
 
     private final JsonDeserializer<Competitor> competitorDeserializer;
     private final DomainFactory domainFactory;
+    private final JsonDeserializer<RaceLogEvent> raceLogEventDeseriaizer;
 
     public LeaderboardMasterDataJsonDeserializer(JsonDeserializer<Competitor> competitorDeserializer,
-            DomainFactory domainFactory) {
+            DomainFactory domainFactory, JsonDeserializer<RaceLogEvent> raceLogEventDeseriaizer) {
         this.competitorDeserializer = competitorDeserializer;
         this.domainFactory = domainFactory;
+        this.raceLogEventDeseriaizer = raceLogEventDeseriaizer;
     }
 
     @Override
@@ -51,6 +54,8 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
                 .get(LeaderboardMasterDataJsonSerializer.FIELD_CARRIED_POINTS));
         List<String> suppressedCompetitors = deserializeSuppressedCompetitors((JSONArray) object
                 .get(LeaderboardMasterDataJsonSerializer.FIELD_SUPPRESSED_COMPETITORS));
+        Map<String, Map<String, List<RaceLogEvent>>> raceLogEvents = deserializeRaceLogEvents((JSONArray) object
+                .get(LeaderboardMasterDataJsonSerializer.FIELD_RACE_LOG_EVENTS));
         int[] resultDiscardingRule = deserializeResultDesicardingRule((JSONObject) object
                 .get(LeaderboardMasterDataJsonSerializer.FIELD_RESULT_DISCARDING_RULE));
         boolean isRegattaLeaderBoard = (Boolean) object
@@ -67,7 +72,8 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
         if (isRegattaLeaderBoard) {
             String regattaName = (String) object.get(LeaderboardMasterDataJsonSerializer.FIELD_REGATTA_NAME);
             return new RegattaLeaderboardMasterData(name, displayName, resultDiscardingRule, competitorsById,
-                    scoreCorrection, regattaName, carriedPoints, suppressedCompetitors, displayNamesByCompetitorId);
+                    scoreCorrection, regattaName, carriedPoints, suppressedCompetitors, displayNamesByCompetitorId,
+                    raceLogEvents);
 
         } else {
             ScoringScheme scoringScheme = deserializeScoringScheme((JSONObject) object
@@ -78,12 +84,50 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
                     .get(LeaderboardMasterDataJsonSerializer.FIELD_RACE_COLUMNS));
             return new FlexibleLeaderboardMasterData(name, displayName, resultDiscardingRule, competitorsById,
                     scoreCorrection, scoringScheme, courseAreaId, raceColumns, carriedPoints, suppressedCompetitors,
-                    displayNamesByCompetitorId);
-     }
+                    displayNamesByCompetitorId, raceLogEvents);
+        }
+    }
+
+    private Map<String, Map<String, List<RaceLogEvent>>> deserializeRaceLogEvents(JSONArray jsonArray) {
+        Map<String, Map<String, List<RaceLogEvent>>> raceLogEvents = new HashMap<String, Map<String, List<RaceLogEvent>>>();
+        for (Object obj : jsonArray) {
+            JSONObject json = (JSONObject) obj;
+            String raceColumnName = (String) json.get(LeaderboardMasterDataJsonSerializer.FIELD_RACE_COLUMN_NAME);
+            Map<String, List<RaceLogEvent>> perFleet = deserializeRaceLogEventsForFleets((JSONArray) json
+                    .get(LeaderboardMasterDataJsonSerializer.FIELD_FLEETS));
+            raceLogEvents.put(raceColumnName, perFleet);
+        }
+        return raceLogEvents;
+    }
+
+    private Map<String, List<RaceLogEvent>> deserializeRaceLogEventsForFleets(JSONArray fleets) {
+        Map<String, List<RaceLogEvent>> perFleet = new HashMap<String, List<RaceLogEvent>>();
+        for (Object obj : fleets) {
+            JSONObject json = (JSONObject) obj;
+            String fleetName = (String) json.get(LeaderboardMasterDataJsonSerializer.FIELD_FLEET_NAME);
+            List<RaceLogEvent> logEvents = deserializeRaceLogEventArray((JSONArray) json
+                    .get(LeaderboardMasterDataJsonSerializer.FIELD_RACE_LOG_EVENTS));
+            perFleet.put(fleetName, logEvents);
+        }
+        return perFleet;
+    }
+
+    private List<RaceLogEvent> deserializeRaceLogEventArray(JSONArray jsonArray) {
+        List<RaceLogEvent> logEvents = new ArrayList<RaceLogEvent>();
+        for (Object obj : jsonArray) {
+            JSONObject json = (JSONObject) obj;
+            try {
+                logEvents.add(raceLogEventDeseriaizer.deserialize(json));
+            } catch (JsonDeserializationException e) {
+                // TODO Exception handling
+                e.printStackTrace();
+            }
+        }
+        return logEvents;
     }
 
     private Map<String, String> deserializeCompetitorDisplayNames(JSONArray jsonArray) {
-        Map<String, String> result = new HashMap<String, String>(); 
+        Map<String, String> result = new HashMap<String, String>();
         for (Object obj : jsonArray) {
             JSONObject json = (JSONObject) obj;
             String id = (String) json.get(LeaderboardMasterDataJsonSerializer.FIELD_COMPETITOR_ID);

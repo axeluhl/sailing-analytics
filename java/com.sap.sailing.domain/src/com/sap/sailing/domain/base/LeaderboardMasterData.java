@@ -7,16 +7,17 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.masterdataimport.ScoreCorrectionMasterData;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 
 public abstract class LeaderboardMasterData {
-    
+
     private String name;
-    
+
     private String displayName;
-    
+
     private int[] resultDiscardingRule;
-    
-    private Map<String,Competitor>  competitorsById;
+
+    private Map<String, Competitor> competitorsById;
 
     private ScoreCorrectionMasterData scoreCorrection;
 
@@ -26,10 +27,12 @@ public abstract class LeaderboardMasterData {
 
     private Map<String, String> displayNamesByCompetitorId;
 
+    private Map<String, Map<String, List<RaceLogEvent>>> raceLogEvents;
+
     public LeaderboardMasterData(String name, String displayName, int[] resultDiscardingRule,
             Map<String, Competitor> competitorsById, ScoreCorrectionMasterData scoreCorrection,
             Map<String, Double> carriedPoints, List<String> suppressedCompetitors,
-            Map<String, String> displayNamesByCompetitorId) {
+            Map<String, String> displayNamesByCompetitorId, Map<String, Map<String, List<RaceLogEvent>>> raceLogEvents) {
         this.name = name;
         this.displayName = displayName;
         this.resultDiscardingRule = resultDiscardingRule;
@@ -38,6 +41,7 @@ public abstract class LeaderboardMasterData {
         this.carriedPoints = carriedPoints;
         this.suppressedCompetitors = suppressedCompetitors;
         this.displayNamesByCompetitorId = displayNamesByCompetitorId;
+        this.raceLogEvents = raceLogEvents;
     }
 
     public String getName() {
@@ -56,7 +60,7 @@ public abstract class LeaderboardMasterData {
         return rule;
     }
 
-    public Map<String,Competitor> getCompetitorsById() {
+    public Map<String, Competitor> getCompetitorsById() {
         return competitorsById;
     }
 
@@ -76,7 +80,10 @@ public abstract class LeaderboardMasterData {
         return displayNamesByCompetitorId;
     }
 
+    public Map<String, Map<String, List<RaceLogEvent>>> getRaceLogEvents() {
+        return raceLogEvents;
+    }
+
     public abstract Leaderboard getLeaderboard();
-    
-    
+
 }

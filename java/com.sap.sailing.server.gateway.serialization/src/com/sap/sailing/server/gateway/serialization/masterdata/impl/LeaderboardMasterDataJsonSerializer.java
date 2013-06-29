@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -17,6 +18,8 @@ import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leaderboard> {
@@ -46,10 +49,14 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
     public static final String FIELD_CARRIED = "carried";
     public static final String FIELD_SUPPRESSED_COMPETITORS = "suppressedCompetitors";
     public static final String FIELD_COMPETITOR_DISPLAY_NAMES = "competitorDisplayNames";
+    public static final String FIELD_RACE_LOG_EVENTS = "raceLogEvents";
+    public static final String FIELD_FLEETS = "fleets";
+    public static final String FIELD_FLEET_NAME = "fleetName";
     
     
     private final JsonSerializer<Competitor> competitorSerializer;
     private final JsonSerializer<RaceColumn> raceColumnSerializer;
+    private final JsonSerializer<RaceLogEvent> raceLogEventSerializer;
     
     /*
      * TODO This is a hack to "remember" the course areas to allow finding the events which
@@ -64,9 +71,10 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
     
 
     public LeaderboardMasterDataJsonSerializer(JsonSerializer<Competitor> competitorSerializer,
-            JsonSerializer<RaceColumn> raceColumnSerializer) {
+            JsonSerializer<RaceColumn> raceColumnSerializer, JsonSerializer<RaceLogEvent> raceLogEventSerializer) {
         this.competitorSerializer = competitorSerializer;
         this.raceColumnSerializer = raceColumnSerializer;
+        this.raceLogEventSerializer = raceLogEventSerializer;
     }
 
     @Override
@@ -83,6 +91,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         jsonLeaderboard.put(FIELD_COMPETITORS, createJsonArrayForCompetitors(leaderboard.getAllCompetitors()));
         jsonLeaderboard.put(FIELD_RESULT_DISCARDING_RULE, createJsonForResultDiscardingRule(leaderboard.getResultDiscardingRule()));
         jsonLeaderboard.put(FIELD_DISPLAY_NAME, leaderboard.getDisplayName());
+        jsonLeaderboard.put(FIELD_RACE_LOG_EVENTS, createJsonArrayForRaceLogEventsPerRaceColumn(leaderboard));
         boolean isRegattaLeaderboard = false;
         if (leaderboard instanceof FlexibleLeaderboard) {
             FlexibleLeaderboard flexibleLeaderboard = (FlexibleLeaderboard) leaderboard;
@@ -103,6 +112,39 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         return jsonLeaderboard;
     }
     
+    private JSONArray createJsonArrayForRaceLogEventsPerRaceColumn(Leaderboard leaderboard) {
+        JSONArray array = new JSONArray();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            JSONObject raceColumnRaceLogJson = new JSONObject();
+            raceColumnRaceLogJson.put(FIELD_RACE_COLUMN_NAME, raceColumn.getName());
+            raceColumnRaceLogJson.put(FIELD_FLEETS, createJsonArrayForRaceLogEventsForFleets(raceColumn));
+            array.add(raceColumnRaceLogJson);
+        }
+        return array;
+    }
+
+    private JSONArray createJsonArrayForRaceLogEventsForFleets(RaceColumn raceColumn) {
+        JSONArray array = new JSONArray();
+        for (Fleet fleet : raceColumn.getFleets()) {
+            JSONObject fleetRaceLogJson = new JSONObject();
+            fleetRaceLogJson.put(FIELD_FLEET_NAME, fleet.getName());
+            fleetRaceLogJson.put(FIELD_RACE_LOG_EVENTS, createRaceLogEventsForFleet(raceColumn,fleet));
+            array.add(fleetRaceLogJson);
+        }
+        return array;
+    }
+
+    private JSONArray createRaceLogEventsForFleet(RaceColumn raceColumn, Fleet fleet) {
+        JSONArray array = new JSONArray();
+        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        raceLog.lockForRead();
+        for (RaceLogEvent event : raceLog.getFixes()) {
+            array.add(raceLogEventSerializer.serialize(event));
+        }
+        raceLog.unlockAfterRead();
+        return array;
+    }
+
     private JSONArray createJsonArrayForCompetitorDisplayNames(Leaderboard leaderboard) {
         JSONArray array = new JSONArray();
         for (Competitor competitor : leaderboard.getAllCompetitors()) {

@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 
 public class RegattaLeaderboardMasterData extends LeaderboardMasterData {
 
@@ -20,9 +21,9 @@ public class RegattaLeaderboardMasterData extends LeaderboardMasterData {
     public RegattaLeaderboardMasterData(String name, String displayName, int[] resultDiscardingRule,
             Map<String, Competitor> competitorsById, ScoreCorrectionMasterData scoreCorrection, String regattaName,
             Map<String, Double> carriedPoints, List<String> suppressedCompetitors,
-            Map<String, String> displayNamesByCompetitorId) {
+            Map<String, String> displayNamesByCompetitorId, Map<String, Map<String, List<RaceLogEvent>>> raceLogEvents) {
         super(name, displayName, resultDiscardingRule, competitorsById, scoreCorrection, carriedPoints,
-                suppressedCompetitors, displayNamesByCompetitorId);
+                suppressedCompetitors, displayNamesByCompetitorId, raceLogEvents);
         this.regattaName = regattaName;
     }
 
