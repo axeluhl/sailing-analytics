@@ -481,4 +481,10 @@ public class DummyTrackedRace implements TrackedRace {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public boolean isLive(TimePoint at) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }
