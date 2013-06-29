@@ -189,13 +189,12 @@ public class ExportImpl implements Export {
 
             for (I fix : fixes.get(track)) {
                 BaseNavigationPosition position = creator.getPosition(fix);
-                if (position != null)
+                if (position != null) {
                     positions.add(position.asGpxPosition());
+                }
             }
-
             GpxRoute gpxRoute = new GpxRoute(new Gpx11Format(), RouteCharacteristics.Track, track,
                     Collections.<String> emptyList(), positions);
-
             routes.add(gpxRoute);
         }
         return routes;
@@ -261,29 +260,32 @@ public class ExportImpl implements Export {
 
             TrackReader<E, F> trackReader = trackRetriever.retrieveTrackReader(element);
             trackReader.getLocker().lock();
-            Iterable<F> fixesIter = rawFixes ? trackReader.getRawTrack(element) : trackReader.getTrack(element);
-            if (fixesIter == null)
-                continue;
-
-            for (F fix : fixesIter) {
-                // TODO is putting the dynamic iterator result into a list
-                // acceptable? export will most likely only take place when
-                // race is done and over, and tracks do not change, however
-                // this goes against the concept of locking and the iterator
-                // in place
-                // if (fix.getTimePoint().before(race.getStartOfRace()))
-                // continue;
-                // if (fix.getTimePoint().after(race.getEndOfRace()))
-                // break;
-                if (!dataBeforeAfter && fix.getTimePoint().before(start))
+            try {
+                Iterable<F> fixesIter = rawFixes ? trackReader.getRawTrack(element) : trackReader.getTrack(element);
+                if (fixesIter == null) {
                     continue;
-
-                if (!dataBeforeAfter && fix.getTimePoint().after(end))
-                    break;
-
-                fixList.add(fix);
+                }
+                for (F fix : fixesIter) {
+                    // TODO is putting the dynamic iterator result into a list
+                    // acceptable? export will most likely only take place when
+                    // race is done and over, and tracks do not change, however
+                    // this goes against the concept of locking and the iterator
+                    // in place
+                    // if (fix.getTimePoint().before(race.getStartOfRace()))
+                    // continue;
+                    // if (fix.getTimePoint().after(race.getEndOfRace()))
+                    // break;
+                    if (!dataBeforeAfter && fix.getTimePoint().before(start)) {
+                        continue;
+                    }
+                    if (!dataBeforeAfter && fix.getTimePoint().after(end)) {
+                        break;
+                    }
+                    fixList.add(fix);
+                }
+            } finally {
+                trackReader.getLocker().unlock();
             }
-            trackReader.getLocker().unlock();
             fixes.put(nameReader.getName(element), fixList);
         }
         writeFixes(format, fixes, creator, out);

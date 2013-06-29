@@ -22,7 +22,7 @@ public enum WindToGpxPosition implements WaypointCreator<Wind> {
         GpxPosition p = new GpxPosition(waypoint.getPosition().getLngDeg(), // lon
                 waypoint.getPosition().getLatDeg(), // lat
                 0., // elevation
-                waypoint.getMetersPerSecond(), // speed
+                waypoint.getKilometersPerHour(), // speed
                 CompactCalendar.fromDate(waypoint.getTimePoint().asDate()), // time
                 "" // comment
         );

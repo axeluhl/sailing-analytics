@@ -73,9 +73,9 @@ public class TrackFilesExportPostServlet extends SailingServerHttpServlet {
 
         if (!(isParamValid(resp, regattaRaces, TrackFilesExportParameters.REGATTARACES)
                 && isParamValid(resp, formatString, TrackFilesExportParameters.FORMAT) && isParamValid(resp,
-                    dataString, TrackFilesExportParameters.DATA)))
+                    dataString, TrackFilesExportParameters.DATA))) {
             return;
-
+        }
         resp.setHeader("Content-Disposition", "attachment; filename=\"tracked-races.zip\"");
         resp.setContentType("application/zip");
 
@@ -83,12 +83,12 @@ public class TrackFilesExportPostServlet extends SailingServerHttpServlet {
         List<TrackedRace> trackedRaces = getTrackedRaces(regattaRaces);
         boolean beforeAfter = beforeAfterString == null ? false : true;
         boolean rawFixes = rawFixesString == null ? false : true;
-
         try {
             TrackFilesFormat format = TrackFilesFormat.valueOf(formatString);
             List<TrackFilesDataSource> data = new ArrayList<TrackFilesDataSource>();
-            for (String s : dataString)
+            for (String s : dataString) {
                 data.add(TrackFilesDataSource.valueOf(s));
+            }
             Export.INSTANCE.writeRaces(data, format, trackedRaces, beforeAfter, rawFixes, out);
         } catch (FormatNotSupportedException | NullPointerException | IllegalArgumentException e) {
             // resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, e.getMessage());

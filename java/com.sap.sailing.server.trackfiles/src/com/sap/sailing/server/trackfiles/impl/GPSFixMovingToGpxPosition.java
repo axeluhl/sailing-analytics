@@ -19,7 +19,7 @@ public enum GPSFixMovingToGpxPosition implements WaypointCreator<GPSFixMoving> {
         GpxPosition p = new GpxPosition(waypoint.getPosition().getLngDeg(), // lon
                 waypoint.getPosition().getLatDeg(), // lat
                 0., // elevation
-                waypoint.getSpeed().getMetersPerSecond(), // speed
+                waypoint.getSpeed().getKilometersPerHour(), // speed
                 CompactCalendar.fromDate(waypoint.getTimePoint().asDate()), // time
                 "" // comment
         );
