@@ -79,7 +79,7 @@ if [ $# -eq 0 ]; then
     echo "-n <package name> Name of the bundle you want to hot deploy. Needs fully qualified name like"
     echo "                  com.sap.sailing.monitoring. Only works if there is a fully built server available."
     echo "-l <telnet port>  Telnet port the OSGi server is running. Optional but enables fully automatic hot-deploy."
-    echo "-s <target server> Name of server you want to use as target for install or hot-deploy. This overrides default behaviour."
+    echo "-s <target server> Name of server you want to use as target for install, hot-deploy or remote-reploy. This overrides default behaviour."
     echo "-w <ssh target> Target for remote-deploy. Must comply with the following format: user@server."
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
@@ -89,8 +89,8 @@ if [ $# -eq 0 ]; then
     echo "hot-deploy: performs hot deployment of named bundle into OSGi server"
     echo "Example: $0 -n com.sap.sailing.www -l 14888 hot-deploy"
     echo ""
-    echo "remote-deploy: performs hot deployment of named bundle into OSGi server"
-    echo "Example: $0 -w trac@sapsailing.com remote-deploy"
+    echo "remote-deploy: performs hot deployment of the java code to a remote server"
+    echo "Example: $0 -s dev -w trac@sapsailing.com remote-deploy"
     echo ""
     echo "Active branch is $active_branch"
     echo "Project home is $PROJECT_HOME"
@@ -130,7 +130,7 @@ echo INSTALL goes to $ACDIR
 shift $((OPTIND-1))
 
 if [[ $@ == "" ]]; then
-	echo "You need to specify an action [build|install|all|hot-deploy]"
+	echo "You need to specify an action [build|install|all|hot-deploy|remote-deploy]"
 	exit 2
 fi
 
@@ -346,9 +346,10 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
         cp -v $PROJECT_HOME/java/target/start $ACDIR/
         cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+        cp -v $PROJECT_HOME/java/target/status $ACDIR/
     fi
 
-    if [[ $HAS_OVERWRITTEN_TARGET -eq 0 ]] && [ ! -f $ACDIR/no-overwrite ]; then
+    if [ ! -f $ACDIR/no-overwrite ]; then
         cp -v $p2PluginRepository/configuration/config.ini configuration/
 
         mkdir -p configuration/jetty/etc
@@ -360,6 +361,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
         cp -v $PROJECT_HOME/java/target/start $ACDIR/
         cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+        cp -v $PROJECT_HOME/java/target/status $ACDIR/
         cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
 
         cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
@@ -374,15 +376,16 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     # Make sure this script is up2date at least for the next run
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
-    echo $VERSION_INFO > $ACDIR/configuration/jetty/version.txt
-
     # make sure to save the information from env.sh
     . $ACDIR/env.sh
+
+    echo "$VERSION_INFO-$MONGODB_PORT-$MEMORY-$REPLICATION_CHANNEL" > $ACDIR/configuration/jetty/version.txt
+
     sed -i "s/mongo.port=.*$/mongo.port=$MONGODB_PORT/g" $ACDIR/configuration/config.ini
     sed -i "s/expedition.udp.port=.*$/expedition.udp.port=$EXPEDITION_PORT/g" $ACDIR/configuration/config.ini
     sed -i "s/replication.exchangeName=.*$/replication.exchangeName=$REPLICATION_CHANNEL/g" $ACDIR/configuration/config.ini
 
-    echo "I have updated the configuration with the following data:"
+    echo "I have read the following configuration from $ACDIR/env.sh:"
     echo "SERVER_NAME: $SERVER_NAME"
     echo "SERVER_PORT: $SERVER_PORT"
     echo "MEMORY: $MEMORY"
@@ -392,42 +395,15 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
     echo ""
 
+    if [ -f $ACDIR/no-overwrite ]; then
+        echo "ATTENTION: I found the file $ACDIR/no-overwrite. This means that I did NOT use env.sh from this branch."
+    fi
     echo "Installation complete. You may now start the server using ./start"
 fi
 
 if [[ "$@" == "remote-deploy" ]]; then
-    read -s -n1 -p "Which server do you want to deploy ([d]ev,[t]est,[p]rod1,p[r]od2): " answer
-    case $answer in
-    "D" | "d") SERVER="dev";;
-    "T" | "t") SERVER="test";;
-    "P" | "p") SERVER="prod1";;
-    "R" | "r") SERVER="prod2";;
-    *) echo "Aborting..."
-    exit;;
-    esac
-
+    SERVER=$TARGET_SERVER_NAME
     echo "Will deploy server $SERVER"
-
-    read -s -n1 -p "Did you want me to start a LOCAL build (without tests) for $SERVERS_HOME/$SERVER before deploying (y/n)? " answer
-    case $answer in
-    "Y" | "y") BUILD=1;;
-    *) echo "Not building anything. You have been warned!"
-    esac
-
-    if [[ $BUILD -eq 1 ]]; then
-            ACDIR=$PWD
-            cd $HOME/code
-            git co dev
-            configuration/buildAndUpdateProduct.sh -t build
-            read -s -n1 -p "Has the build been successful (y/n)? " answer
-            case $answer in
-            "Y" | "y") OK=1;;
-            *) echo "Aborting..."
-            exit;;
-            esac
-            cd $ACDIR
-            echo ""
-    fi
 
     SSH_CMD="ssh $REMOTE_SERVER_LOGIN"
     SCP_CMD="scp -r"
@@ -435,7 +411,7 @@ if [[ "$@" == "remote-deploy" ]]; then
     REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/servers'`
     REMOTE_SERVER="$REMOTE_HOME/$SERVER"
 
-    read -s -n1 -p "I will deploy $SERVERS_HOME/$SERVER to $REMOTE_SERVER_LOGIN:$REMOTE_SERVER. Is this correct (y/n)? " answer
+    read -s -n1 -p "I will deploy the current GIT branch to $REMOTE_SERVER_LOGIN:$REMOTE_SERVER. Is this correct (y/n)? " answer
     case $answer in
     "Y" | "y") OK=1;;
     *) echo "Aborting... nothing has been changed on remote server!"
@@ -449,11 +425,14 @@ if [[ "$@" == "remote-deploy" ]]; then
     $SSH_CMD "rm -rf $REMOTE_SERVER/org.eclipse*.*"
     $SSH_CMD "rm -rf $REMOTE_SERVER/configuration/org.eclipse*.*"
 
-    $SCP_CMD $SERVERS_HOME/$SERVER/org.eclipse* $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
-    $SCP_CMD $SERVERS_HOME/$SERVER/configuration/org.eclipse* $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration
-    $SCP_CMD $SERVERS_HOME/$SERVER/plugins/*.jar $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/plugins/
+    $SCP_CMD $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
+    $SCP_CMD $p2PluginRepository/plugins/*.jar $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/plugins/
 
-    echo "Deployed successfully. I did NOT change any configuration, only code."
+    echo "$VERSION_INFO-remotedly-deployed" > /tmp/version-remote-deploy.txt
+    $SCP_CMD /tmp/version-remote-deploy.txt $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/version.txt
+    rm /tmp/version-remote-deploy.txt
+
+    echo "Deployed successfully. I did NOT change any configuration (no env.sh or config.ini or jetty.xml adaption), only code!"
 
     read -s -n1 -p "Do you want me to restart the remote server (y/n)? " answer
     case $answer in
@@ -463,8 +442,21 @@ if [[ "$@" == "remote-deploy" ]]; then
     esac
 
     echo ""
-    $SSH_CMD "$REMOTE_SERVER/stop"
-    $SSH_CMD "$REMOTE_SERVER/start"
+    $SSH_CMD "cd $REMOTE_SERVER && $REMOTE_SERVER/stop"
+    $SSH_CMD "cd $REMOTE_SERVER && $REMOTE_SERVER/start"
 
     echo "Restarted remote server. Please check."
+fi
+
+if [[ "$@" == "deploy-startpage" ]]; then
+    TARGET_DIR_STARTPAGE=$ACDIR/tmp/jetty-0.0.0.0-8889-bundlefile-_-any-/webapp/
+    read -s -n1 -p "Copying $PROJECT_HOME/java/com.sap.sailing.www/index.html to $TARGET_DIR_STARTPAGE - is this ok (y/n)?" answer
+    case $answer in
+    "Y" | "y") OK=1;;
+    *) echo "Aborting... nothing has been changed for startpage!"
+    exit;;
+    esac
+
+    cp $PROJECT_HOME/java/com.sap.sailing.www/index.html $TARGET_DIR_STARTPAGE
+    echo "OK"
 fi

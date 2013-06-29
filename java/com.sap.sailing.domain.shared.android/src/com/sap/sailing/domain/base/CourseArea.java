@@ -10,6 +10,6 @@ import com.sap.sailing.domain.common.WithID;
  * @author Axel Uhl (D043530)
  *
  */
-public interface CourseArea extends Named, WithID {
+public interface CourseArea extends Named, WithID, IsManagedBySharedDomainFactory {
 
 }

@@ -35,7 +35,6 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
-import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
@@ -87,7 +86,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final String[] courseAreaNames = new String[] { "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrott" };
         final Venue venue = new VenueImpl(venueName);
         for (String courseAreaName : courseAreaNames) {
-            CourseArea courseArea = new CourseAreaImpl(courseAreaName, UUID.randomUUID());
+            CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName);
             venue.addCourseArea(courseArea);
         }
         MongoObjectFactory mof = MongoFactory.INSTANCE.getMongoObjectFactory(getMongoService());
@@ -115,7 +114,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final String publicationUrl = "http://myevent.sapsailing.com";
         final String courseAreaName = "Alpha";
         final Venue venue = new VenueImpl(venueName);
-        CourseArea courseArea = new CourseAreaImpl(courseAreaName, UUID.randomUUID());
+        CourseArea courseArea = DomainFactory.INSTANCE.getOrCreateCourseArea(UUID.randomUUID(), courseAreaName);
         venue.addCourseArea(courseArea);
 
         MongoObjectFactory mof = MongoFactory.INSTANCE.getMongoObjectFactory(getMongoService());

@@ -25,7 +25,9 @@ public class EventConfigImagesBarCell extends ImagesBarCell {
 
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
-        return Arrays.asList(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
-                new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(resources.removeIcon())));
+        return Arrays.asList(
+                new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
+                new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(resources.removeIcon()))
+                );
     }
 }

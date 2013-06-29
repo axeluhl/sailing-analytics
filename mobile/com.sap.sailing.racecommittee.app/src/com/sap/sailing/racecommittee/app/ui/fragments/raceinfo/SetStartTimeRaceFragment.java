@@ -27,13 +27,14 @@ import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.UserRequiredActionPerformedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
-public class SetStartTimeRaceFragment extends RaceFragment {
+public class SetStartTimeRaceFragment extends RaceFragment implements UserRequiredActionPerformedListener {
 
     public static SetStartTimeRaceFragment create(ManagedRace race) {
         SetStartTimeRaceFragment fragment = new SetStartTimeRaceFragment();
@@ -50,7 +51,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     protected Button btSetTime;
     protected Button btPostpone;
     protected TextView textInfoText;
-    
+
     protected DatePickerFragment datePicker;
 
     @Override
@@ -62,7 +63,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         isReset = getArguments().getBoolean(AppConstants.RESET_TIME_FRAGMENT_IS_RESET);
-        
+
         datePicker = new DatePickerFragment();
         setupDatePicker();
 
@@ -107,7 +108,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
                 Calendar startDate = Calendar.getInstance();
                 startDate.set(year, month, day);
                 Calendar today = Calendar.getInstance();
-                
+
                 if (startDate.get(Calendar.YEAR) == today.get(Calendar.YEAR)
                         && startDate.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)) {
                     btSetDate.setText("Today");
@@ -237,7 +238,29 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     }
 
     private void setStartTime(Date newStartTime) {
-        getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime), selectedStartProcedureType);
+        getRace().getState().createNewStartProcedure(selectedStartProcedureType);
+        Class<? extends RaceDialogFragment> action = getRace().getState().getStartProcedure()
+                .checkForUserActionRequiredActions(new MillisecondsTimePoint(newStartTime), this);
+        if (action == null) {
+            getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime));
+        } else {
+            FragmentManager fragmentManager = getFragmentManager();
+
+            RaceDialogFragment fragment;
+            try {
+                fragment = action.newInstance();
+                Bundle args = getRecentArguments();
+                fragment.setArguments(args);
+
+                fragment.show(fragmentManager, "userActionRequiredDialog");
+            } catch (java.lang.InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
+        }
+
     }
 
     protected void showAPModeDialog() {
@@ -250,6 +273,11 @@ public class SetStartTimeRaceFragment extends RaceFragment {
         fragment.setArguments(args);
 
         fragment.show(fragmentManager, "dialogAPMode");
+    }
+
+    @Override
+    public void onUserRequiredActionPerformed() {
+        setStartTime();
     }
 
 }

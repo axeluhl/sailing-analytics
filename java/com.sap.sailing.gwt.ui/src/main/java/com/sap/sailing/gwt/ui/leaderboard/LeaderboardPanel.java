@@ -194,6 +194,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     public static final String LEADERBOARD_MARGIN_STYLE = "leaderboardMargin";
 
     private final Timer timer;
+    
+    /**
+     * A {@link LeaderboardDTO} tells something about the live delay through its {@link LeaderboardDTO#getDelayToLiveInMillisForLatestRace()} method.
+     * If this flag is <code>true</code>, the live delay in the {@link #timer} will be adjusted each time the {@link #updateLeaderboard(LeaderboardDTO)}
+     * method is invoked. Otherwise, the timer's delay will be left alone which is helpful, e.g., if the leaderboard panel is embedded
+     * in a race board panel that focuses on one particular race which may not be the same as the one controlling the leaderboard's overall
+     * live delay.
+     */
+    private final boolean adjustTimerDelay;
 
     private boolean autoExpandPreSelectedRace;
     
@@ -405,7 +414,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             } else {
                 // apply the old column selections again
                 for (String oldNameOfRaceColumnToShow : oldNamesOfRaceColumnsToShow) {
-                    raceColumnSelection.requestRaceColumnSelection(getLeaderboard().getRaceColumnByName(oldNameOfRaceColumnToShow));
+                    final RaceColumnDTO raceColumnByName = getLeaderboard().getRaceColumnByName(oldNameOfRaceColumnToShow);
+                    if (raceColumnByName != null) {
+                        raceColumnSelection.requestRaceColumnSelection(raceColumnByName);
+                    }
                 }
                 if (newSettings.getNamesOfRacesToShow() != null) {
                     raceColumnSelection.requestClear();
@@ -430,9 +442,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         if (newSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
             timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
-        }
-        if (newSettings.getDelayInMilliseconds() != null) {
-            timer.setLivePlayDelayInMillisExplicitly(newSettings.getDelayInMilliseconds());
         }
         for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
             expandableSortableColumn.toggleExpansion();
@@ -484,7 +493,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                                   /* autoExpandPreSelectedRace */ false, /* showOverallLeaderboardsOnSamePage */ false),
                                   /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
                             timer, leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
-                            showRaceDetails, /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false);
+                            showRaceDetails, /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
                     overallLeaderboardPanels.add(overallLeaderboardPanel);
                     overallLeaderboardsPanel.add(overallLeaderboardPanel);
                 }
@@ -512,7 +521,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             // wait for the first update and adjust leaderboard once the race times have been received
             final RaceTimesInfoProviderListener raceTimesInfoProviderListener = new RaceTimesInfoProviderListener() {
                 @Override
-                public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
+                public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo, long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
+                    timer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
                     updateLeaderboard(getLeaderboard());
                     getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener(this);
                 }
@@ -687,7 +697,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         public boolean isLive(FleetDTO fleetDTO) {
-            return race.isLive(fleetDTO);
+            return race.isLive(fleetDTO, timer.getLiveTimePointInMillis());
         }
 
         @Override
@@ -1214,7 +1224,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
-            String textColor = getLeaderboard().hasLiveRace() ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
+            String textColor = getLeaderboard().hasLiveRace(timer.getLiveTimePointInMillis()) ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
         	
             sb.appendHtmlConstant("<span style=\"font-weight: bold; color:" + textColor + "\">");
             sb.appendEscaped(getValue(object));
@@ -1341,14 +1351,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this(sailingService, asyncActionsExecutor, settings, preSelectedRace, competitorSelectionProvider, new Timer(
                 PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
-                /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false);
+                /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            final UserAgentDetails userAgent, boolean showRaceDetails, RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn) {
+            final UserAgentDetails userAgent, boolean showRaceDetails,
+            RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn, boolean adjustTimerDelay) {
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -1365,6 +1376,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.raceTimesInfoProvider = optionalRaceTimesInfoProvider;
         this.selectedManeuverDetails = new ArrayList<DetailType>();
         this.showOverallLeaderboardsOnSamePage = settings.isShowOverallLeaderboardsOnSamePage();
+        this.adjustTimerDelay = adjustTimerDelay;
         overallDetailColumnMap = createOverallDetailColumnMap();
         settingsUpdatedExplicitly = !settings.updateUponPlayStateChange();
         if (settings.getLegDetailsToShow() != null) {
@@ -1777,7 +1789,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
                     getLeaderboardName(), timer.getPlayMode() == PlayModes.Live ? null : date,
                     /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                    /* previousLeaderboard */ getLeaderboard(), new AsyncCallback<LeaderboardDTO>() {
+                    /* previousLeaderboard */ getLeaderboard(), timer, errorReporter, stringMessages, new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
                             updateLeaderboard(result);
@@ -1885,7 +1897,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 scoreCorrectionLastUpdateTimeLabel.setText("");
             }
             
-            List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces();
+            List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
             boolean hasLiveRace = !liveRaces.isEmpty();
             if (hasLiveRace) {
             	String liveRaceText = "";
@@ -1960,12 +1972,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     /**
      * Based on the {@link LeaderboardDTO#getDelayToLiveInMillisForLatestRace()} for the race that has the latest
-     * {@link RaceColumnDTO#getStartDate(FleetDTO) start time}, automatically adjusts the delay accordingly unless it
-     * was manually explicitly updated.
+     * {@link RaceColumnDTO#getStartDate(FleetDTO) start time}, automatically adjusts the delay accordingly unless the
+     * {@link #adjustTimerDelay} flag is <code>false</code>
      */
     private void adjustDelayToLive() {
-        if (leaderboard.getDelayToLiveInMillisForLatestRace() != null) {
-            setDelayInMilliseconds(leaderboard.getDelayToLiveInMillisForLatestRace());
+        if (adjustTimerDelay) {
+            if (leaderboard.getDelayToLiveInMillisForLatestRace() != null) {
+                setDelayInMilliseconds(leaderboard.getDelayToLiveInMillisForLatestRace());
+            }
         }
     }
 
@@ -2410,6 +2424,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         return getLeaderboardTable().getDataProvider();
     }
 
+    /**
+     * @param date
+     *            ignored; may be <code>null</code>. The time for loading the leaderboard is determined using
+     *            {@link #getLeaderboardDisplayDate()}.
+     */
     @Override
     public void timeChanged(Date date) {
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
@@ -2488,7 +2507,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails),
                 Collections.unmodifiableList(selectedOverallDetailColumns), /* All races to select */ leaderboard.getRaceList(),
                 raceColumnSelection.getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard), raceColumnSelection, autoExpandPreSelectedRace,
-                showOverallLeaderboardsOnSamePage, timer.getRefreshInterval(), timer.getLivePlayDelayInMillis(), stringMessages);
+                showOverallLeaderboardsOnSamePage, timer.getRefreshInterval(), stringMessages);
     }
 
     @Override

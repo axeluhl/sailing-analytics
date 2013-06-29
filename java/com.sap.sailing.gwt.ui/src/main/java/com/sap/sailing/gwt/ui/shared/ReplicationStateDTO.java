@@ -14,14 +14,16 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class ReplicationStateDTO implements IsSerializable {
     private Map<String, ReplicaDTO> replicaInfoByHostname;
     private ReplicationMasterDTO replicatingFromMaster;
+    private String serverIdentifier;
     
     ReplicationStateDTO() { } // for de-serialization
     
-    public ReplicationStateDTO(ReplicationMasterDTO replicatingFromMaster, Iterable<ReplicaDTO> replicas) {
+    public ReplicationStateDTO(ReplicationMasterDTO replicatingFromMaster, Iterable<ReplicaDTO> replicas, String serverIdentifier) {
         this.replicatingFromMaster = replicatingFromMaster;
+        this.serverIdentifier = serverIdentifier;
         this.replicaInfoByHostname = new HashMap<String, ReplicaDTO>();
         for (ReplicaDTO replica : replicas) {
-            replicaInfoByHostname.put(replica.getHostname(), replica);
+            replicaInfoByHostname.put(replica.getIdentifier(), replica);
         }
     }
 
@@ -33,7 +35,7 @@ public class ReplicationStateDTO implements IsSerializable {
         return replicaInfoByHostname.values();
     }
     
-    public ReplicaDTO getReplicaByHostname(String hostname) {
-        return replicaInfoByHostname.get(hostname);
+    public String getServerIdentifier() {
+        return serverIdentifier;
     }
 }

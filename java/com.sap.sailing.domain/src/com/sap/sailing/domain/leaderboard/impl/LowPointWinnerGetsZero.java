@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.concurrent.Callable;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -28,7 +30,7 @@ public class LowPointWinnerGetsZero extends LowPoint {
     private static final long serialVersionUID = 3405249102284162690L;
 
     @Override
-    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Integer numberOfCompetitorsInRace) {
+    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRacefetcher) {
         return rank == 0 ? null : rank == 1 ? 0.0 : (double) rank;
     }
 

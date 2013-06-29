@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
@@ -229,7 +230,14 @@ public class DomainFactoryImpl implements DomainFactory {
         Competitor result = baseDomainFactory.getExistingCompetitorById(competitor.getId());
         if (result == null) {
             BoatClass boatClass = getOrCreateBoatClass(competitor.getCompetitorClass());
-            Nationality nationality = getOrCreateNationality(competitor.getNationality());
+            Nationality nationality;
+            try {
+                nationality = getOrCreateNationality(competitor.getNationality());
+            } catch (IllegalArgumentException iae) {
+                // the country code was probably not a legal IOC country code
+                nationality = null;
+                logger.log(Level.SEVERE, "Unknown nationality "+competitor.getNationality()+" for competitor "+competitor.getName()+"; leaving null", iae);
+            }
             Team team = getOrCreateTeam(competitor.getName(), nationality, competitor.getId());
             Boat boat = new BoatImpl(competitor.getShortName(), boatClass, competitor.getShortName());
             result = baseDomainFactory.createCompetitor(competitor.getId(), competitor.getName(), team, boat);
@@ -580,8 +588,8 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
-        return new JSONServiceImpl(jsonURL);
+    public JSONService parseJSONURLWithRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+        return new JSONServiceImpl(jsonURL, loadClientParams);
     }
 
     @Override
@@ -595,6 +603,11 @@ public class DomainFactoryImpl implements DomainFactory {
             boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword) {
         return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
                 delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, this, tracTracUsername, tracTracPassword);
+    }
+
+    @Override
+    public JSONService parseJSONURLForOneRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+        return new JSONServiceImpl(jsonURL, raceId, loadClientParams);
     }
 
 }

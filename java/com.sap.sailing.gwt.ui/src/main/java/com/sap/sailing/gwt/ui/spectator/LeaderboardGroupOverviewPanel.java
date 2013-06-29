@@ -43,6 +43,8 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.client.shared.components.CollapsablePanel;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -93,6 +95,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     
     private List<LeaderboardGroupDTO> availableGroups;
     private final boolean showRaceDetails;
+    private final Timer timerForClientServerOffset;
 
     public LeaderboardGroupOverviewPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages, boolean showRaceDetails) {
@@ -100,6 +103,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+        this.timerForClientServerOffset = new Timer(PlayModes.Replay);
         availableGroups = new ArrayList<LeaderboardGroupDTO>();
         
         LeaderboardGroupOverviewTableResources tableResources = GWT.create(LeaderboardGroupOverviewTableResources.class);
@@ -495,9 +499,15 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     }
 
     private void loadGroups() {
+        final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
         sailingService.getLeaderboardGroups(true /*withGeoLocationData*/, new AsyncCallback<List<LeaderboardGroupDTO>>() {
             @Override
             public void onSuccess(List<LeaderboardGroupDTO> result) {
+                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
+                if (result != null && !result.isEmpty()) {
+                    timerForClientServerOffset.adjustClientServerOffset(clientTimeWhenRequestWasSent, result
+                            .get(result.size() - 1).getCurrentServerTime(), clientTimeWhenResponseWasReceived);
+                }
                 availableGroups = result == null ? new ArrayList<LeaderboardGroupDTO>() : result;
                 groupsDataProvider.getList().clear();
                 groupsDataProvider.getList().addAll(availableGroups);
@@ -611,7 +621,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             result = textContainsStringsToCheck(forGroup.getName(), name.split("\\s"));
         }
         if (result && onlyLiveCheckBox.getValue()) {
-            result = forGroup.hasLiveRace();
+            result = forGroup.hasLiveRace(timerForClientServerOffset.getLiveTimePointInMillis());
         }else if (result) {
             Date startDate = forGroup.getGroupStartDate();
             if (startDate != null) {

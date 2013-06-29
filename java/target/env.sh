@@ -11,8 +11,8 @@ SERVER_PORT=8888
 MONGODB_PORT=27017
 EXPEDITION_PORT=2010
 
-if [[ "$JAVA_HOME" == "" ]]; then
-    JAVA_HOME=$HOME/jdk1.7.0_02
-    echo "Setting JAVA_HOME to $JAVA_HOME"
-fi
+ADDITIONAL_JAVA_ARGS="-XX:+UseMembar"
+
+JAVA_HOME=$HOME/jdk1.7.0_02
+echo "Setting JAVA_HOME to $JAVA_HOME"
 

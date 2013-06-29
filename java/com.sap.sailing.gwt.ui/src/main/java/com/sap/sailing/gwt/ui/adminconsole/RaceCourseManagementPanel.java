@@ -514,6 +514,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
     void refreshSelectedRaceData() {
         if (singleSelectedRace != null && selectedRaceDTO != null) {
             courseActionsPanel.setVisible(true);
+            // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"; this one is not so urgent as it is reached only in the AdminConsole and we expect administrators to have proper client-side time settings
             sailingService.getRaceCourse(singleSelectedRace, new Date(),  new AsyncCallback<RaceCourseDTO>() {
                 @Override
                 public void onSuccess(RaceCourseDTO raceCourseDTO) {

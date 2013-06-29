@@ -185,6 +185,10 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public List<RaceColumnDTO> getRaceList() {
         return races;
     }
+    
+    public void setRaceList(List<RaceColumnDTO> raceList) {
+        this.races = raceList;
+    }
 
     public boolean raceListContains(String raceColumnName) {
         return getRaceColumnByName(raceColumnName) != null;
@@ -261,10 +265,10 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     /**
      * @return <code>true</code> if the leaderboard contains a race which is live
      */
-    public boolean hasLiveRace() {
+    public boolean hasLiveRace(long serverTimePointAsMillis) {
         for (RaceColumnDTO race : getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
-                if (race.isLive(fleet)) {
+                if (race.isLive(fleet, serverTimePointAsMillis)) {
                     return true;
                 }
             }
@@ -272,11 +276,11 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         return false;
     }
 
-    public List<Pair<RaceColumnDTO, FleetDTO>> getLiveRaces() {
+    public List<Pair<RaceColumnDTO, FleetDTO>> getLiveRaces(long serverTimePointAsMillis) {
         List<Pair<RaceColumnDTO, FleetDTO>> result = new ArrayList<Pair<RaceColumnDTO, FleetDTO>>();
         for (RaceColumnDTO race : getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
-                if (race.isLive(fleet)) {
+                if (race.isLive(fleet, serverTimePointAsMillis)) {
                     result.add(new Pair<RaceColumnDTO, FleetDTO>(race, fleet));
                 }
             }
@@ -293,7 +297,15 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         result = prime * result + (hasCarriedPoints ? 1231 : 1237);
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((scoringScheme == null) ? 0 : scoringScheme.hashCode());
-        result = prime * result + ((races == null) ? 0 : races.hashCode());
+        if (races == null) {
+            result = prime * result;
+        } else {
+            List<String> raceNames = new ArrayList<String>();
+            for (RaceColumnDTO race : races) {
+                raceNames.add(race.getName());
+            }
+            result = prime * result + raceNames.hashCode();
+        }
         result = prime * result + ((rows == null) ? 0 : rows.hashCode());
         return result;
     }
@@ -328,13 +340,29 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         if (races == null) {
             if (other.races != null)
                 return false;
-        } else if (!races.equals(other.races))
-            return false;
-        if (rows == null) {
-            if (other.rows != null)
+        } else {
+            // compare race column names only, not the contents
+            if (races.size() != (other.races==null?0:other.races.size())) {
                 return false;
-        } else if (!rows.equals(other.rows))
-            return false;
+            }
+            List<String> raceColumnNames = new ArrayList<String>(races.size());
+            List<String> otherRaceColumnNames = new ArrayList<String>(races.size());
+            for (RaceColumnDTO race : races) {
+                raceColumnNames.add(race.getName());
+            }
+            if (other.races != null) {
+                for (RaceColumnDTO otherRace : other.races) {
+                    otherRaceColumnNames.add(otherRace.getName());
+                }
+            }
+            if (!raceColumnNames.equals(otherRaceColumnNames))
+                return false;
+            if (rows == null) {
+                if (other.rows != null)
+                    return false;
+            } else if (!rows.equals(other.rows))
+                return false;
+        }
         return true;
     }
 

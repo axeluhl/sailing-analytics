@@ -195,9 +195,11 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
                 }
             }
         }
+        /* TODO: Disabling automatic filter loading for now. Do NOT enable before
+           there are tests especially for the pre-start phase!
         competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
         updateCompetitorsFilterContexts(competitorsFilterSets);
-        updateCompetitorsFilterControlState(competitorsFilterSets);
+        updateCompetitorsFilterControlState(competitorsFilterSets);*/
 
         timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider, raceboardViewConfiguration.isCanReplayDuringLiveRaces());
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
@@ -302,7 +304,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
                         /* showOverallLeaderboardsOnSamePage */ false);
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier,
                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
-                userAgent, /* showRaceDetails */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false);
+                userAgent, /* showRaceDetails */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
+                /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false);
     }
 
     private void updateCompetitorsFilterContexts(CompetitorsFilterSets filterSets) {

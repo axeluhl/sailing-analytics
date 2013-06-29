@@ -88,6 +88,19 @@ a {
   width: 950px;
   margin: 0 auto;
   min-height: 100%; }
+  #yield_content #logoAndTitlePanel {
+    height: 52px;
+  }
+    #yield_content .sapLogo {
+      float: left;
+    }
+    #yield_content .headNavigation {
+      float: right;
+      margin: 25px 0 0 0;
+      padding: 0; }
+      #yield_content .headNavigation a {
+        font-family: 'OpenSansBold', Arial, Verdana, sans-serif;
+        color: #fff; }
   /* line 47, site.css.sass */
   #yield_content #pageHeadline {
     color: white;
@@ -159,6 +172,8 @@ a {
             font-size: 12px;
             font-family: OpenSansRegular, Arial, Verdana, sans-serif;
             color: white; }
+          #yield_content #mainContent .innerContent .timeBar .raceSection a:hover {
+            text-decoration: none; }
       /* line 114, site.css.sass */
       #yield_content #mainContent .innerContent .timeBar .raceDescription {
         padding: 4px;

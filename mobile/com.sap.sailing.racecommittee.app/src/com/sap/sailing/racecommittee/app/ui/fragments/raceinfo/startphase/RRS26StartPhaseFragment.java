@@ -18,7 +18,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartModeChoosableStartProcedure;
@@ -100,15 +100,39 @@ public class RRS26StartPhaseFragment extends RaceFragment implements RRS26StartP
                 infoListener.onResetTime();
             }
         });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
 
         setupUi();
+
+        getRace().getState().getStartProcedure().setStartPhaseEventListener(this);
+        ExLog.i(RRS26StartPhaseFragment.class.getName(),
+                String.format("Fragment %s is now shown", RRS26StartPhaseFragment.class.getName()));
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        getRace().getState().getStartProcedure().setStartPhaseEventListener(null);
+    }
+
+    @Override
+    public void notifyTick() {
+        TimePoint startTime = getRace().getState().getStartTime();
+        if (startTime != null) {
+            setCountdownLabels(TimeUtils.timeUntil(startTime));
+        }
     }
 
     private void setupUi() {
         StartModeChoosableStartProcedure startProcedure = (StartModeChoosableStartProcedure) this.getRace().getState().getStartProcedure();
         this.onStartModeFlagChosen(startProcedure.getCurrentStartModeFlag());
-        LastFlagFinder lastFlagFinder = new LastFlagFinder(this.getRace().getRaceLog());
-        RaceLogFlagEvent lastFlagEvent = lastFlagFinder.getLastFlagEvent();
+        LastFlagsFinder lastFlagFinder = new LastFlagsFinder(this.getRace().getRaceLog());
+        RaceLogFlagEvent lastFlagEvent = LastFlagsFinder.getMostRecent(lastFlagFinder.analyze());
         if(lastFlagEvent != null){
             if(lastFlagEvent.getUpperFlag().equals(Flags.CLASS) && lastFlagEvent.isDisplayed()){
                 this.onClassUp();
@@ -140,30 +164,6 @@ public class RRS26StartPhaseFragment extends RaceFragment implements RRS26StartP
                 onClassDown();
             } 
             
-        }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        getRace().getState().getStartProcedure().setStartPhaseEventListener(this);
-        ExLog.w(RRS26StartPhaseFragment.class.getName(),
-                String.format("Fragment %s is now shown", RRS26StartPhaseFragment.class.getName()));
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        getRace().getState().getStartProcedure().setStartPhaseEventListener(null);
-    }
-
-    @Override
-    public void notifyTick() {
-        TimePoint startTime = getRace().getState().getStartTime();
-        if (startTime != null) {
-            setCountdownLabels(TimeUtils.timeUntil(startTime));
         }
     }
 

@@ -91,6 +91,12 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.isFirstColumnIsNonDiscardableCarryForwardChanged(raceColumn, firstColumnIsNonDiscardableCarryForward);
+        }
+    }
+
     public void notifyListenersAboutRaceColumnAddedToContainer(RaceColumn raceColumn) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.raceColumnAddedToContainer(raceColumn);

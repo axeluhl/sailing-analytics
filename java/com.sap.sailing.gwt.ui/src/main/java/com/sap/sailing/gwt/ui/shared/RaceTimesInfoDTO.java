@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.gwt.ui.client.Timer;
 
 public class RaceTimesInfoDTO implements IsSerializable {
     private RegattaAndRaceIdentifier raceIdentifier;
@@ -19,6 +20,13 @@ public class RaceTimesInfoDTO implements IsSerializable {
     public Date endOfTracking;
     public Date endOfRace;
     public Date newestTrackingEvent;
+    
+    /**
+     * The current time on the server when this object was created. Clients can use this to synchronize a clock
+     * difference, e.g., in the {@link Timer} class.
+     */
+    public Date currentServerTime;
+    
     public long delayToLiveInMs;
 
     public RaceTimesInfoDTO(RegattaAndRaceIdentifier raceIdentifier) {
@@ -112,6 +120,7 @@ public class RaceTimesInfoDTO implements IsSerializable {
 				+ ", startOfTracking=" + startOfTracking + ", endOfTracking="
 				+ endOfTracking + ", endOfRace=" + endOfRace
 				+ ", newestTrackingEvent=" + newestTrackingEvent
+                                + ", currentServerTime=" + currentServerTime
 				+ ", delayToLiveInMs=" + delayToLiveInMs + "]";
 	}
 }

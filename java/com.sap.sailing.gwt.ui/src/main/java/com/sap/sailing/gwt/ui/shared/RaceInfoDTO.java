@@ -6,21 +6,58 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 
 public class RaceInfoDTO implements IsSerializable {
+    public interface RaceInfoExtensionDTO extends IsSerializable {
+        
+    }
+    
+    public static class GateStartInfoDTO implements RaceInfoExtensionDTO {
+        public String pathfinderId;
+        public Long gateLineOpeningTime;
+        
+        // for GWT serialization
+        public GateStartInfoDTO() { }
+        
+        public GateStartInfoDTO(String pathfinder, Long gateLineOpening) {
+            this.pathfinderId = pathfinder;
+            this.gateLineOpeningTime = gateLineOpening;
+        }
+    }
+    
+    public static class RRS26InfoDTO implements RaceInfoExtensionDTO {
+        public Flags startModeFlag;
+        
+        // for GWT serialization
+        public RRS26InfoDTO() { }
+        
+        public RRS26InfoDTO(Flags startMode) {
+            this.startModeFlag = startMode;
+        }
+    }
+    
+    public RaceIdentifier raceIdentifier;
     public String raceName;
     public String fleetName;
     public int fleetOrdering;
-    public Date startTime;
+    public String seriesName;
     public RaceLogRaceStatus lastStatus;
+    public Date startTime;
+    public Date finishedTime;
+    public Date protestFinishTime;
+    public Date lastUpdateTime;
     public Flags lastUpperFlag;
     public Flags lastLowerFlag;
     public boolean isLastFlagDisplayed;
-    public RaceCourseDTO lastCourseDesign;
-    public RaceIdentifier raceIdentifier;
-    public String pathfinderId;
-    public Long gateLineOpeningTime;
     public boolean isRaceAbortedInPassBefore;
+    public boolean isTracked;
+    public RaceCourseDTO lastCourseDesign;
+    public String lastCourseName;
+    public WindDTO lastWind;
+    public StartProcedureType startProcedure;
+    public RaceInfoExtensionDTO startProcedureDTO;
+    
     // for GWT serialization
     public RaceInfoDTO() { }
     

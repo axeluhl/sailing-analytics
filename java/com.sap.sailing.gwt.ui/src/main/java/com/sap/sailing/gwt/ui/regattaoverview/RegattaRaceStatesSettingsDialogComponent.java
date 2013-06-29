@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -18,29 +19,34 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 
 public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogComponent<RegattaRaceStatesSettings> {
 
     private final StringMessages stringMessages;
     private final RegattaRaceStatesSettings initialSettings;
+    private final String eventIdAsString;
     private final List<CourseAreaDTO> courseAreas;
-    private final List<String> regattaNames;
+    private final List<RaceGroupDTO> raceGroups;
 
     private CheckBox showOnlyRacesOfSameDayCheckBox;
     private CheckBox showOnlyCurrentlyRunningRacesCheckBox;
     private final Map<String, CheckBox> courseAreaCheckBoxMap;
     private final Map<String, CheckBox> regattaCheckBoxMap;
+    private final Anchor resultingLink;
     
     private final static String SETTINGS_DIALOG_COMPONENT = "SettingsDialogComponent";
     
     public RegattaRaceStatesSettingsDialogComponent(RegattaRaceStatesSettings settings, StringMessages stringMessages, 
-            List<CourseAreaDTO> courseAreas, List<String> regattaNames) {
+            String eventIdAsString, List<CourseAreaDTO> courseAreas, List<RaceGroupDTO> raceGroups) {
         this.stringMessages = stringMessages;
         this.initialSettings = settings;
+        this.eventIdAsString = eventIdAsString;
         this.courseAreas = courseAreas;
-        this.regattaNames = regattaNames;
+        this.raceGroups = raceGroups;
         this.courseAreaCheckBoxMap = new HashMap<String, CheckBox>();
         this.regattaCheckBoxMap = new HashMap<String, CheckBox>();
+        this.resultingLink = new Anchor(stringMessages.asLink());
     }
 
     private FlowPanel fillCourseAreaWidget(DataEntryDialog<?> dialog) {
@@ -84,7 +90,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         flowPanel.add(regattaNamesPanel);
         
         int maxRegattasPerRow = 4;
-        int numberOfRegattas = regattaNames.size();
+        int numberOfRegattas = raceGroups.size();
         int numberOfRequiredRows = numberOfRegattas / maxRegattasPerRow;
         if (numberOfRegattas % maxRegattasPerRow != 0) {
             numberOfRequiredRows++;
@@ -95,10 +101,10 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         Grid regattaGrid = new Grid(numberOfRequiredRows, maxRegattasPerRow);
         regattaNamesPanel.add(regattaGrid);
         
-        for (String regattaName : regattaNames) {
-            CheckBox checkBox = dialog.createCheckbox(regattaName);
-            checkBox.setValue(Util.contains(initialSettings.getVisibleRegattas(), regattaName));
-            regattaCheckBoxMap.put(regattaName, checkBox);
+        for (RaceGroupDTO raceGroup : raceGroups) {
+            CheckBox checkBox = dialog.createCheckbox(raceGroup.displayName);
+            checkBox.setValue(Util.contains(initialSettings.getVisibleRegattas(), raceGroup.getName()));
+            regattaCheckBoxMap.put(raceGroup.getName(), checkBox);
             
             regattaGrid.setWidget(rowIndex, columnIndex++, checkBox);
             if(columnIndex == maxRegattasPerRow) {
@@ -130,19 +136,20 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         
         additionalSettingsPanel.add(getShowOnlyRacesOfSameDayWidget(dialog));
         additionalSettingsPanel.add(getShowOnlyCurrentlyRunningRacesWidget(dialog));
-        
+
         return flowPanel;
     }
 
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
-        VerticalPanel vp = new VerticalPanel();
+        VerticalPanel verticalPanel = new VerticalPanel();
         
-        vp.add(fillCourseAreaWidget(dialog));
-        vp.add(fillRegattaNamesWidget(dialog));
-        vp.add(getAdditionalSettingsWidget(dialog));
+        verticalPanel.add(fillCourseAreaWidget(dialog));
+        verticalPanel.add(fillRegattaNamesWidget(dialog));
+        verticalPanel.add(getAdditionalSettingsWidget(dialog));
+        verticalPanel.add(resultingLink);
         
-        return vp;
+        return verticalPanel;
     }
 
     @Override
@@ -170,8 +177,11 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     public Validator<RegattaRaceStatesSettings> getValidator() {
         return new Validator<RegattaRaceStatesSettings>() {
             @Override
-            public String getErrorMessage(RegattaRaceStatesSettings valueToValidate) {
+            public String getErrorMessage(RegattaRaceStatesSettings settings) {
                 String errorMessage = null;
+                if (errorMessage == null) {
+                    updateLinkUrl(eventIdAsString, settings);
+                }
                 return errorMessage;
             }
         };
@@ -180,6 +190,18 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     @Override
     public FocusWidget getFocusWidget() {
         return null;
+    }
+    
+    private void updateLinkUrl(String eventIdAsString, RegattaRaceStatesSettings settings) {
+        boolean isSetVisibleCourseAreasInUrl = true;
+        boolean isSetVisibleRegattasInUrl = true;
+        if (settings.getVisibleCourseAreas().size() == courseAreas.size()) {
+            isSetVisibleCourseAreasInUrl = false;
+        }
+        if (settings.getVisibleRegattas().size() == raceGroups.size()) {
+            isSetVisibleRegattasInUrl = false;
+        }
+        resultingLink.setHref(RegattaOverviewEntryPoint.getUrl(eventIdAsString, settings, isSetVisibleCourseAreasInUrl, isSetVisibleRegattasInUrl));
     }
 
 }

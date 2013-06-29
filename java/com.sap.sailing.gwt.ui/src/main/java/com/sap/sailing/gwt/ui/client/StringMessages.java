@@ -598,7 +598,7 @@ public interface StringMessages extends Messages {
     /*Start of simulator related messages*/
     String simulator();
     String optionsBar();
-    String update();
+    String simulateButton();
 
     String setup();
     String strength();
@@ -656,4 +656,47 @@ public interface StringMessages extends Messages {
     String startsWithZeroScore();
     String masterDataImportPanel();
     String importSuccess(int leaderboardGroups, int leaderboards, int events, int regattas);
+    String regattaOverviewConfiguration();
+    String firstRaceIsNonDiscardableCarryForward();
+    String addReplicationMaster();
+    String connect();
+    String connectToMaster();
+    String explainReplicationHostname();
+    String explainReplicationExchangeName();
+    String explainReplicationExchangePort();
+    String explainReplicationServletPort();
+    String explainReplicasRegistered();
+    String explainConnectionsToMaster();
+    String explainNoConnectionsToMaster();
+    String explainNoConnectionsFromReplicas();
+    String stopConnectionToMaster();
+    String asLink();
+    String raceIsRunning();
+    String raceIsFinishing();
+    String raceIsFinished();
+    String raceIsScheduled();
+    String raceIsInStartphase();
+    String generalRecall();
+    String startPostponed();
+    String raceAbandoned();
+    String stopAllReplicas();
+    String warningServerIsReplica();
+    String dropReplicaConnection();
+    String timePanelName();
+    String competitorFilterExplanation();
+    String protestTimeFinishesAt();
+    String protestTimeFinishedAt();
+    String flags();
+    String lastUpdate();
+    String earlyStarters();
+    String noMoreRacingToday();
+    String furtherSignalsAshore();
+    String showingDetailsOfRace(String raceName);
+    String startAt();
+    String finishAt();
+    String protestEndsAt();
+    String unknown();
+    String refreshRaceLog();
+    String raceLogReloaded();
+    String reloadAllRaceLogs();
 }

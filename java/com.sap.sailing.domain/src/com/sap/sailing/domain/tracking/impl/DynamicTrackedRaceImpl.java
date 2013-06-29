@@ -182,6 +182,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getOrCreateTrack(mark);
     }
 
+    /**
+     * In addition to creating the track which is performed by the superclass implementation, this implementation registers
+     * a {@link GPSTrackListener} with the mark's track and {@link #notifyListeners(GPSFix, Mark) notifies the listeners}
+     * about updates. The {@link #updated(TimePoint)} method is <em>not</em> called with the mark fix's time point because
+     * mark fixes may be received also from marks that don't belong to this race.
+     */
     @Override
     protected DynamicGPSFixTrackImpl<Mark> createMarkTrack(Mark mark) {
         DynamicGPSFixTrackImpl<Mark> result = super.createMarkTrack(mark);
@@ -427,20 +433,24 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         } finally {
             unlockAfterRead(markPassingsForCompetitor);
         }
-        clearMarkPassings(competitor);
+        final NamedReentrantReadWriteLock markPassingsLock = getMarkPassingsLock(markPassingsForCompetitor);
         TimePoint timePointOfLatestEvent = new MillisecondsTimePoint(0);
-        for (MarkPassing markPassing : markPassings) {
-            // try to find corresponding old start mark passing
-            if (oldStartMarkPassing != null
-                    && markPassing.getWaypoint().getName().equals(oldStartMarkPassing.getWaypoint().getName())) {
-                if (markPassing.getTimePoint() != null && oldStartMarkPassing.getTimePoint() != null
-                        && markPassing.getTimePoint().equals(oldStartMarkPassing.getTimePoint())) {
-                    requiresStartTimeUpdate = false;
+        // Make sure that clearMarkPassings and the re-adding of the mark passings are non-interruptible by readers.
+        // Note that the write lock for the mark passings in order per waypoint is obtained inside clearMarkPassings(...)
+        // as well as inside the subsequent for-loop. It is important to always first obtain the mark passings lock for the competitor
+        // mark passings before obtaining the lock for the mark passings in order for the waypoint to avoid deadlocks.
+        LockUtil.lockForWrite(markPassingsLock);
+        try {
+            clearMarkPassings(competitor);
+            for (MarkPassing markPassing : markPassings) {
+                // try to find corresponding old start mark passing
+                if (oldStartMarkPassing != null
+                        && markPassing.getWaypoint().getName().equals(oldStartMarkPassing.getWaypoint().getName())) {
+                    if (markPassing.getTimePoint() != null && oldStartMarkPassing.getTimePoint() != null
+                            && markPassing.getTimePoint().equals(oldStartMarkPassing.getTimePoint())) {
+                        requiresStartTimeUpdate = false;
+                    }
                 }
-            }
-            final NamedReentrantReadWriteLock markPassingsLock = getMarkPassingsLock(markPassingsForCompetitor);
-            LockUtil.lockForWrite(markPassingsLock);
-            try {
                 if (!Util.contains(getRace().getCourse().getWaypoints(), markPassing.getWaypoint())) {
                     StringBuilder courseWaypointsWithID = new StringBuilder();
                     boolean first = true;
@@ -461,21 +471,22 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 } else {
                     markPassingsForCompetitor.add(markPassing);
                 }
-            } finally {
-                LockUtil.unlockAfterWrite(markPassingsLock);
+                Collection<MarkPassing> markPassingsInOrderForWaypoint = getOrCreateMarkPassingsInOrderAsNavigableSet(markPassing
+                        .getWaypoint());
+                final NamedReentrantReadWriteLock markPassingsLock2 = getMarkPassingsLock(markPassingsInOrderForWaypoint);
+                LockUtil.lockForWrite(markPassingsLock2);
+                try {
+                // TODO wouldn't we need to remove a previous mark passing of competitor for the same waypoint before re-adding it?
+                    markPassingsInOrderForWaypoint.add(markPassing);
+                } finally {
+                    LockUtil.unlockAfterWrite(markPassingsLock2);
+                }
+                if (markPassing.getTimePoint().compareTo(timePointOfLatestEvent) > 0) {
+                    timePointOfLatestEvent = markPassing.getTimePoint();
+                }
             }
-            Collection<MarkPassing> markPassingsInOrderForWaypoint = getOrCreateMarkPassingsInOrderAsNavigableSet(markPassing
-                    .getWaypoint());
-            final NamedReentrantReadWriteLock markPassingsLock2 = getMarkPassingsLock(markPassingsInOrderForWaypoint);
-            LockUtil.lockForWrite(markPassingsLock2);
-            try {
-                markPassingsInOrderForWaypoint.add(markPassing);
-            } finally {
-                LockUtil.unlockAfterWrite(markPassingsLock2);
-            }
-            if (markPassing.getTimePoint().compareTo(timePointOfLatestEvent) > 0) {
-                timePointOfLatestEvent = markPassing.getTimePoint();
-            }
+        } finally {
+            LockUtil.unlockAfterWrite(markPassingsLock);
         }
         updated(timePointOfLatestEvent);
         triggerManeuverCacheRecalculation(competitor);

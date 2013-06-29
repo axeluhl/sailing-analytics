@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -10,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,17 +20,21 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Cloner;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
+import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.test.StoredTrackBasedTest;
 import com.sap.sailing.util.ClonerImpl;
 
@@ -88,6 +94,7 @@ public class LeaderboardDTODiffingTest {
     @Test
     public void testMajorStripping() {
         newVersion.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>(newVersion.rows);
+        List<RaceColumnDTO> raceListBeforeStripping = new ArrayList<RaceColumnDTO>(newVersion.getRaceList());
         CompetitorDTO wolfgang = getPreviousCompetitorByName("HUNGER +JESS");
         assertNotNull(wolfgang);
         LeaderboardRowDTO wolfgangsRow = new LeaderboardRowDTO();
@@ -101,8 +108,13 @@ public class LeaderboardDTODiffingTest {
         assertEquals(1, newVersion.rows.size()); // only wolfgang's row should show
         assertEquals(wolfgang, newVersion.rows.keySet().iterator().next().getCompetitorFromPrevious(previousVersion));
         assertTrue(newVersion.rows.values().iterator().next().fieldsByRaceColumnName.isEmpty());
+        for (RaceColumnDTO nullRaceColumn : newVersion.getRaceList()) {
+            assertNull(nullRaceColumn); // there were no changes to the columns; expect all of them to have been eliminiated
+        }
         LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
         assertEquals(rowsBeforeStripping, applied.rows);
+        assertNotSame(raceListBeforeStripping, applied.getRaceList());
+        assertEquals(raceListBeforeStripping, applied.getRaceList());
     }
 
     @Test
@@ -132,7 +144,24 @@ public class LeaderboardDTODiffingTest {
         }
         newVersion.rows = newRows;
         Map<CompetitorDTO, LeaderboardRowDTO> rowsBeforeStripping = newVersion.rows;
+        Map<Pair<CompetitorDTO, String>, List<LegEntryDTO>> previousLegDetailsBeforeStripping = new HashMap<>();
+        for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : rowsBeforeStripping.entrySet()) {
+            for (Map.Entry<String, LeaderboardEntryDTO> e2 : e.getValue().fieldsByRaceColumnName.entrySet()) {
+                if (e2.getValue().legDetails != null) {
+                    previousLegDetailsBeforeStripping.put(new Pair<CompetitorDTO, String>(e.getKey(), e2.getKey()),
+                            new ArrayList<>(e2.getValue().legDetails));
+                }
+            }
+        }
         newVersion.strip(previousVersion);
+        // see bug 1455; check that the stripping doesn't kill the previous leaderboard's legDetails lists
+        for (Map.Entry<Pair<CompetitorDTO, String>, List<LegEntryDTO>> e : previousLegDetailsBeforeStripping.entrySet()) {
+            final LeaderboardRowDTO leaderboardRowDTO = rowsBeforeStripping.get(e.getKey().getA());
+            if (leaderboardRowDTO != null) {
+                List<LegEntryDTO> newLegDetails = leaderboardRowDTO.fieldsByRaceColumnName.get(e.getKey().getB()).legDetails;
+                assertEquals(e.getValue(), newLegDetails);
+            }
+        }
         assertAllRowsKeysAreIdenticalToAllLeaderboardRowDTOCompetitors(newVersion);
         assertNotNull(newVersion.rows);
         assertEquals(previousVersion.rows.size()-17, newVersion.rows.size()); // all rows have changed except for 17 that have no leg details in leg 8
@@ -233,7 +262,7 @@ public class LeaderboardDTODiffingTest {
     @Test
     public void testCompetitorOrderingInRaceChange() {
         RaceColumnDTO r9 = newVersion.getRaceColumnByName("R9");
-        Map<RaceColumnDTO, List<CompetitorDTO>> newCompetitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>(newVersion.getCompetitorOrderingPerRace());
+        Map<String, List<CompetitorDTO>> newCompetitorOrderingPerRace = new HashMap<String, List<CompetitorDTO>>(newVersion.getCompetitorOrderingPerRaceColumnName());
         newVersion.setCompetitorOrderingPerRace(newCompetitorOrderingPerRace);
         List<CompetitorDTO> newOrdering = new ArrayList<CompetitorDTO>(newVersion.getCompetitorsFromBestToWorst(r9));
         newVersion.setCompetitorsFromBestToWorst(r9, newOrdering);
@@ -247,10 +276,8 @@ public class LeaderboardDTODiffingTest {
         List<CompetitorDTO> newOrderBeforeStripping = new ArrayList<CompetitorDTO>(newOrdering);
         newVersion.strip(previousVersion);
         assertAllRowsKeysAreIdenticalToAllLeaderboardRowDTOCompetitors(newVersion);
-        for (RaceColumnDTO raceColumn : newVersion.getRaceList()) {
-            if (!raceColumn.getName().equals("R9")) {
-                assertNull(newVersion.getCompetitorsFromBestToWorst(raceColumn));
-            }
+        for (int i=1; i<9; i++) {
+            assertNull(newVersion.getCompetitorsFromBestToWorst("R"+i));
         }
         assertEquals(newVersion.getCompetitorsFromBestToWorst(r9).size()-1, newVersion.getCompetitorsFromBestToWorst(r9).indexOf(somebodyNew));
         for (CompetitorDTO compactSuppressedCompetitor : newVersion.getCompetitorsFromBestToWorst(r9)) {
@@ -268,5 +295,37 @@ public class LeaderboardDTODiffingTest {
                 assertSame(e.getKey(), e.getValue().competitor);
             }
         }
+    }
+
+    @Test
+    public void testPartialRaceColumnDTOCompaction() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+        // create a modified R9 RaceDTO clone in newVersion to make sure that even changing a property in the RaceDTO will keep the RaceColumnDTO from being omitted
+        RaceColumnDTO r9 = newVersion.getRaceColumnByName("R9");
+        RaceColumnDTO clonedR9 = new RaceColumnDTO(r9.isValidInTotalScore());
+        cloner.clone(r9, clonedR9);
+        // also clone the racesPerFleet map, or else we'd be modifying the previous version's one too
+        final Field racesPerFleetField = clonedR9.getClass().getDeclaredField("racesPerFleet");
+        racesPerFleetField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        final Map<FleetDTO, RaceDTO> m = (Map<FleetDTO, RaceDTO>) racesPerFleetField.get(clonedR9);
+        racesPerFleetField.set(clonedR9, new HashMap<FleetDTO, RaceDTO>(m));
+        final FleetDTO defaultFleet = r9.getFleets().iterator().next();
+        RaceDTO r9Race = r9.getRace(defaultFleet);
+        RaceDTO clonedR9Race = new RaceDTO();
+        cloner.clone(r9Race, clonedR9Race);
+        clonedR9.setRace(defaultFleet, clonedR9Race);
+        clonedR9Race.endOfRace = new MillisecondsTimePoint(r9Race.endOfRace).plus(1234).asDate();
+        List<RaceColumnDTO> clonedRaceList = new ArrayList<RaceColumnDTO>(newVersion.getRaceList());
+        clonedRaceList.set(clonedRaceList.indexOf(r9), clonedR9);
+        newVersion.setRaceList(clonedRaceList);
+        List<RaceColumnDTO> raceListBeforeStripping = new ArrayList<RaceColumnDTO>(clonedRaceList);
+        newVersion.strip(previousVersion);
+        assertAllRowsKeysAreIdenticalToAllLeaderboardRowDTOCompetitors(newVersion);
+        for (int i=0; i<8; i++) {
+            assertNull(newVersion.getRaceList().get(i));
+        }
+        assertNotNull(newVersion.getRaceList().get(8));
+        LeaderboardDTO applied = newVersion.getLeaderboardDTO(previousVersion);
+        assertEquals(raceListBeforeStripping, applied.getRaceList());
     }
 }

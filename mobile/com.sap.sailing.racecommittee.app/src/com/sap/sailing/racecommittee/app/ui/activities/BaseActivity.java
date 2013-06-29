@@ -7,15 +7,16 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.ActivityInfo;
 import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService.EventSendingBinder;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService.EventSendingServiceLogger;
@@ -51,6 +52,8 @@ public abstract class BaseActivity extends Activity {
         }
     }
 
+    private static final String TAG = BaseActivity.class.getName();
+
     protected MenuItem menuItemLive;
 
     boolean boundSendingService = false;
@@ -68,8 +71,7 @@ public abstract class BaseActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options_menu, menu);
-        menuItemLive = menu.findItem(R.id.LiveIcon);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        menuItemLive = menu.findItem(R.id.options_menu_live);
         return true;
     }
 
@@ -77,17 +79,21 @@ public abstract class BaseActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-        /*
-         * case R.id.SystemInfo: fadeActivity(InformationActivity.class); return true;
-         */
-        case R.id.OptionsSettings:
-            fadeActivity(SettingsActivity.class);
+        case R.id.options_menu_settings:
+            ExLog.i(TAG, "Clicked SETTINGS.");
+            fadeActivity(SettingsActivity.class, false);
             return true;
-        case R.id.LiveIcon:
+        case R.id.options_menu_reload:
+            ExLog.i(TAG, "Clicked RESET.");
+            InMemoryDataStore.INSTANCE.reset();
+            fadeActivity(LoginActivity.class, true);
+            return true;
+        case R.id.options_menu_live:
+            ExLog.i(TAG, "Clicked LIVE.");
             Toast.makeText(this, getLiveIconText(), Toast.LENGTH_LONG).show();
             return true;
-        case R.id.WindLog: // fadeActivity(WindActivity.class); return false;
         case android.R.id.home:
+            ExLog.i(TAG, "Clicked HOME.");
             return onHomeClicked();
         default:
             return super.onOptionsItemSelected(item);
@@ -142,11 +148,15 @@ public abstract class BaseActivity extends Activity {
     }
 
     private String getLiveIconText() {
-        return String.format("Connected to: %s\n%s", AppConstants.getServerBaseURL(this), sendingServiceStatus);
+        return String.format("Connected to: %s\n%s", AppPreferences.getServerBaseURL(this), sendingServiceStatus);
     }
 
-    protected void fadeActivity(Class<?> activity) {
+    protected void fadeActivity(Class<?> activity, boolean newTopTask) {
         Intent intent = new Intent(getBaseContext(), activity);
+        if (newTopTask) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         fadeActivity(intent);
     }
 

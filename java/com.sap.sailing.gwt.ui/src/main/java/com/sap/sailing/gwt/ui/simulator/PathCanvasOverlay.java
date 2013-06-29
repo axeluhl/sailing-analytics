@@ -61,8 +61,8 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         this.name = name;
     }
 
-    public PathCanvasOverlay(String name, Timer timer) {
-        super(timer);
+    public PathCanvasOverlay(String name, Timer timer, WindFieldGenParamsDTO windParams) {
+        super(timer, windParams);
         this.name = name;
     }
 
@@ -81,15 +81,15 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         this.pathColor = color;
     }
 
-    public PathCanvasOverlay(String name, Timer timer, long totalTimeMilliseconds) {
-        super(timer);
+    public PathCanvasOverlay(String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds) {
+        super(timer, windParams);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;
     }
 
-    public PathCanvasOverlay(String name, Timer timer, long totalTimeMilliseconds, String color) {
-        super(timer);
+    public PathCanvasOverlay(String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds, String color) {
+        super(timer, windParams);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;
@@ -153,8 +153,6 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
             double timewidth = txtmet.getWidth();
             context2d.fillText(cText, cX-(timewidth/2.0), cY-25);
         }
-
-        WindFieldGenParamsDTO windParams = new WindFieldGenParamsDTO();
 
         int numPoints = windDTOList.size();
         if (numPoints < 1) {

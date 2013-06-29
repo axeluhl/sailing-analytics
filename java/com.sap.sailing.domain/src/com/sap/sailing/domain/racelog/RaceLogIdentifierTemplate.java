@@ -34,4 +34,6 @@ public interface RaceLogIdentifierTemplate extends Serializable {
      * @param resolver the resolver that resolves this template, either for {@link Leaderboard} or for {@link Regatta}.
      */
     void resolve(RaceLogIdentifierTemplateResolver resolver);
+    
+    String getRaceColumnName();
 }
