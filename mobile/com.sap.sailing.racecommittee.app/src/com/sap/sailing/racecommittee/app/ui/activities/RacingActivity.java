@@ -25,6 +25,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment;
@@ -34,6 +35,8 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 public class RacingActivity extends BaseActivity implements RaceInfoListener {
     // private final static String TAG = RacingActivity.class.getName();
     private final static String ListFragmentTag = RacingActivity.class.getName() + ".ManagedRaceListFragment";
+    
+    private static final String TAG = RacingActivity.class.getName();
 
     private class FilterModeSelectionBinder implements OnNavigationListener {
 
@@ -158,6 +161,7 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
     }
 
     private void unloadAllRaces() {
+        ExLog.i(TAG, "Issuing intent action clear races");
         Intent intent = new Intent(AppConstants.INTENT_ACTION_CLEAR_RACES);
         this.startService(intent);
     }
@@ -165,6 +169,7 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
     private void loadRaces(final CourseArea courseArea) {
         setProgressBarIndeterminateVisibility(true);
 
+        ExLog.i(TAG, "Issuing loading of managed races from data manager");
         dataManager.loadRaces(courseArea.getId(), new LoadClient<Collection<ManagedRace>>() {
             public void onLoadSucceded(Collection<ManagedRace> data) {
                 onLoadRacesSucceded(courseArea, data);

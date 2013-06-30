@@ -3,7 +3,7 @@ package com.sap.sailing.domain.common.racelog.utils;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 
-public abstract class FlagAlphabetInterpretationTemplate {
+public abstract class RaceStateFlagsInterpretationTemplate {
 
     public String getMeaningOfRaceStateAndFlags(RaceLogRaceStatus status, Flags upperFlag, Flags lowerFlag, boolean isDisplayed) {
         String statusText = "";
