@@ -11,19 +11,19 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
-import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
 
-public class FinishedTmeFinderTest extends PassAwareRaceLogAnalyzerTest<FinishedTimeFinder, TimePoint> {
+public class FinishingTimeFinderTest extends PassAwareRaceLogAnalyzerTest<FinishingTimeFinder, TimePoint> {
 
     @Override
-    protected FinishedTimeFinder createAnalyzer(RaceLog raceLog) {
-        return new FinishedTimeFinder(raceLog);
+    protected FinishingTimeFinder createAnalyzer(RaceLog raceLog) {
+        return new FinishingTimeFinder(raceLog);
     }
     
     @Override
     protected TimePoint setupTargetEventsForPassAwareTests(int passId) {
         RaceLogRaceStatusEvent event = createEvent(RaceLogRaceStatusEvent.class, 1, passId);
-        when(event.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHED);
+        when(event.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
         raceLog.add(event);
         return event.getTimePoint();
     }
@@ -38,9 +38,9 @@ public class FinishedTmeFinderTest extends PassAwareRaceLogAnalyzerTest<Finished
     @Test
     public void testMostRecent() {
         RaceLogRaceStatusEvent event1 = createEvent(RaceLogRaceStatusEvent.class, 1);
-        when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHED);
+        when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
         RaceLogRaceStatusEvent event2 = createEvent(RaceLogRaceStatusEvent.class, 2);
-        when(event2.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHED);
+        when(event2.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
         
         raceLog.add(event1);
         raceLog.add(event2);
@@ -51,9 +51,9 @@ public class FinishedTmeFinderTest extends PassAwareRaceLogAnalyzerTest<Finished
     @Test
     public void testOnlyFinished() {
         RaceLogRaceStatusEvent event1 = createEvent(RaceLogRaceStatusEvent.class, 1);
-        when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHED);
+        when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
         RaceLogRaceStatusEvent event2 = createEvent(RaceLogRaceStatusEvent.class, 2);
-        when(event2.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
+        when(event2.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHED);
         
         raceLog.add(event1);
         raceLog.add(event2);

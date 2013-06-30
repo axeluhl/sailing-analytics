@@ -13,7 +13,7 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 
-public class StartTmeFinderTest extends PassAwareRaceLogAnalyzerTest<StartTimeFinder, TimePoint> {
+public class StartTimeFinderTest extends PassAwareRaceLogAnalyzerTest<StartTimeFinder, TimePoint> {
 
     @Override
     protected StartTimeFinder createAnalyzer(RaceLog raceLog) {
