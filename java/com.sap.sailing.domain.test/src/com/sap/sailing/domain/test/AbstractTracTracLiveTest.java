@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -41,6 +42,7 @@ import com.tractrac.clientmodule.setup.KeyValue;
  *
  */
 public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest implements Listener {
+    private static final Logger logger = Logger.getLogger(AbstractTracTracLiveTest.class.getName());
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private Event event;
@@ -118,6 +120,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     
     @After
     public void tearDown() throws MalformedURLException, IOException, InterruptedException {
+        logger.info("entering "+getClass().getName()+".tearDown()");
         Thread.sleep(500); // wait a bit before stopping the controller; in earlier versions we did a web request to stop the
         // simulator here; then, the ioThread joined flawlessly; aggressively stopping the controller doesn't let the ioThread join
         controller.stop(/* abortStored */ true);
@@ -129,6 +132,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         for (Receiver receiver : receivers) {
             receiver.stopPreemptively();
         }
+        logger.info("leaving "+getClass().getName()+".tearDown()");
     }
 
     
