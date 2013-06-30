@@ -136,10 +136,8 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
 
             fragment.show(fragmentManager, "courseDesignDialogFragment");
         } catch (java.lang.InstantiationException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
