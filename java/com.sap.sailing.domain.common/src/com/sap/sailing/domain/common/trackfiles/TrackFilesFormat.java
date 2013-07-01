@@ -6,7 +6,7 @@ public enum TrackFilesFormat {
     // GarminMapSource6("gdb"),
     MagicMapsIkt("ikt"),
     // NokiaLandmarkExchange("lmx"),
-    Ovl("ovl"), OziExplorerTrack("plt"), Tcx1("tcx"), Tcx2("tcx"), CSV("csv");
+    Ovl("ovl"), OziExplorerTrack("plt"), Tcx1("tcx"), Tcx2("tcx");
 
     public final String suffix;
 

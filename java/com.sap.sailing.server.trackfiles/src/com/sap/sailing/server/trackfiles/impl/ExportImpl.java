@@ -148,31 +148,6 @@ public class ExportImpl implements Export {
     }
 
     /**
-     * This is a quick hack to support CSV. Problem is, up to now everything was RouteConverter-based, this is not.
-     * 
-     * @param fixes
-     * @param out
-     * @param creator
-     */
-    private <I> void writeCSV(Map<String, List<I>> fixes, OutputStream out, WaypointCreator<I> creator) {
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-        PrintWriter pw = new PrintWriter(out);
-        pw.println("TrackName;Time;Latitude(deg);Longitude(deg);Heading;Comment");
-        for (String s : fixes.keySet()) {
-            for (I fix : fixes.get(s)) {
-                try {
-                    GpxPosition p = creator.getPosition(fix);
-                    pw.printf("%s;%s;%f;%f;%f;%s\n", s, df.format(p.getTime().getTime()), p.getLatitude(),
-                            p.getLongitude(), p.getHeading(), p.getComment());
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        pw.flush();
-    }
-
-    /**
      * Warning can't be helped, because there is a generic type loop if one sticks to only the abstract types.
      * 
      * @param fixes
@@ -216,13 +191,11 @@ public class ExportImpl implements Export {
 
                 @Override
                 public void write(byte[] b, int off, int len) throws IOException {
-                    // TODO Auto-generated method stub
                     out.write(b, off, len);
                 }
 
                 @Override
                 public void write(byte[] b) throws IOException {
-                    // TODO Auto-generated method stub
                     out.write(b);
                 }
             });
@@ -393,9 +366,6 @@ public class ExportImpl implements Export {
                     return route.asTcx2Format();
                 }
             }.convert(getRoutes(fixes, creator)), new Tcx2Format(), out);
-            break;
-        case CSV:
-            writeCSV(fixes, out, creator);
             break;
         default:
             throw new FormatNotSupportedException(format + " format is not supported");
