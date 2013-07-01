@@ -42,6 +42,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -910,7 +911,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         DynamicTrackedRegatta trackedRegatta = getOrCreateTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
-        return trackedRegatta.createTrackedRace(race, windStore, delayToLiveInMillis,
+        return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 /* raceDefinitionSetToUpdate */null);
     }

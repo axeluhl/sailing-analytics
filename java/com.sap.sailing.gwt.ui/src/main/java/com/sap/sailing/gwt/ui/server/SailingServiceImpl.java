@@ -60,6 +60,7 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.FleetImpl;
@@ -219,6 +220,7 @@ import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sailing.gwt.ui.shared.SidelineDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
@@ -1172,7 +1174,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate) throws NoWindException {
         return new CompactRaceMapDataDTO(getBoatPositions(raceIdentifier, fromPerCompetitorIdAsString,
-                toPerCompetitorIdAsString, extrapolate), getCoursePositions(raceIdentifier, date), getQuickRanks(
+                toPerCompetitorIdAsString, extrapolate), getCoursePositions(raceIdentifier, date), getCourseSidelines(raceIdentifier, date), getQuickRanks(
                 raceIdentifier, date));
     }    
 
@@ -1368,6 +1370,29 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return raceTimesInfos;
     }
 
+    @Override
+    public List<SidelineDTO> getCourseSidelines(RegattaAndRaceIdentifier raceIdentifier, Date date) {
+        List<SidelineDTO> result = new ArrayList<SidelineDTO>();
+        if (date != null) {
+            TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
+            TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+            if (trackedRace != null) {
+                for(Sideline sideline: trackedRace.getCourseSidelines()) {
+                    List<MarkDTO> markDTOs = new ArrayList<MarkDTO>();
+                    for (Mark mark : sideline.getMarks()) {
+                        GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
+                        Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
+                        if (positionAtDate != null) {
+                            markDTOs.add(convertToMarkDTO(mark, positionAtDate));
+                        }
+                    }
+                    result.add(new SidelineDTO(sideline.getName(), markDTOs));
+                }
+            }            
+        }
+        return result;
+    }
+        
     @Override
     public CoursePositionsDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date) {
         CoursePositionsDTO result = new CoursePositionsDTO();

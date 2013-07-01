@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
@@ -63,10 +64,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     private transient Set<CourseDesignChangedListener> courseDesignChangedListeners;
 
-    public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race,
+    public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForCacheInvalidationOfWindEstimation) {
-        super(trackedRegatta, race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+        super(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation);
         this.logListener = new DynamicTrackedRaceLogListener(this);
         this.courseDesignChangedListeners = new HashSet<>();
@@ -106,10 +107,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * the caller cannot assume that all wind tracks have yet been loaded completely. The caller may call {@link #waitUntilWindLoadingComplete()}
      * to wait until all persistent wind sources have been successfully and completely loaded.
      */
-    public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race,
+    public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
-        this(trackedRegatta, race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+        this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 millisecondsOverWhichToAverageWind/2);
     }
 

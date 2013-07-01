@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 
@@ -39,7 +40,7 @@ public interface TrackedRegatta extends Serializable {
      *            if not <code>null</code>, after creating the {@link TrackedRace}, the <code>raceDefinition</code> is
      *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace) added} to that object.
      */
-    DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
+    DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
 

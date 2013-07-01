@@ -85,6 +85,7 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.SidelineDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -115,12 +116,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * Polyline for the advantage line (the leading line for the boats, orthogonal to the wind direction; touching the leading boat).
      */
     private Polyline advantageLine;
-
+    
     /**
      * Polyline for the course middle line.
      */
     private Polyline courseMiddleLine;
 
+    private Map<SidelineDTO, Polyline> courseSidelines;
+    
     private WindTrackInfoDTO lastCombinedWindTrackInfoDTO;
     
     /**
@@ -248,6 +251,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         firstShownFix = new HashMap<CompetitorDTO, Integer>();
         lastShownFix = new HashMap<CompetitorDTO, Integer>();
         markDTOs = new HashMap<String, MarkDTO>();
+        courseSidelines = new HashMap<SidelineDTO, Polyline>();
         boatOverlays = new HashMap<CompetitorDTO, BoatOverlay>();
         competitorInfoOverlays = new HashMap<CompetitorDTO, CompetitorInfoOverlay>();
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
@@ -385,6 +389,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             
                             // Do mark specific actions
                             showCourseMarksOnMap(raceMapDataDTO.coursePositions);
+                            showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);                            
                             showStartAndFinishLines(raceMapDataDTO.coursePositions);
                             showAdvantageLine(competitorsToShow, date);
                                 
@@ -550,6 +555,48 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
+    protected void showCourseSidelinesOnMap(List<SidelineDTO> sidelinesDTOs) {
+        if (map != null && sidelinesDTOs != null ) {
+            Map<SidelineDTO, Polyline> toRemoveSidelines = new HashMap<SidelineDTO, Polyline>(courseSidelines);
+            for(SidelineDTO sidelineDTO: sidelinesDTOs) {
+                if(sidelineDTO.getMarks().size() == 2) { // right now we only support sidelines with 2 marks
+                    Polyline sideline = courseSidelines.get(sidelineDTO);
+                    LatLng[] sidelinePoints = new LatLng[2];
+                    sidelinePoints[0] = LatLng.newInstance(sidelineDTO.getMarks().get(0).position.latDeg, sidelineDTO.getMarks().get(0).position.lngDeg); 
+                    sidelinePoints[1] = LatLng.newInstance(sidelineDTO.getMarks().get(1).position.latDeg, sidelineDTO.getMarks().get(1).position.lngDeg); 
+                    if(sideline == null) {
+                        PolylineOptions options = PolylineOptions.newInstance(/* clickable must be true for hover sensititivy*/ true, /* geodesic */true);
+                        sideline = new Polyline(sidelinePoints, /* color */ "#0000FF", /* width */ 1, /* opacity */1.0, options);
+                        sideline.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
+                            @Override
+                            public void onMouseOver(PolylineMouseOverEvent event) {
+                                map.setTitle(stringMessages.sideline());
+                            }
+                        });
+                        sideline.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
+                            @Override
+                            public void onMouseOut(PolylineMouseOutEvent event) {
+                                map.setTitle("");
+                            }
+                        });
+                        courseSidelines.put(sidelineDTO, sideline);
+                        map.addOverlay(sideline);
+                    } else {
+                        sideline.deleteVertex(1);
+                        sideline.deleteVertex(0);
+                        sideline.insertVertex(0, sidelinePoints[0]);
+                        sideline.insertVertex(1, sidelinePoints[1]);
+                        toRemoveSidelines.remove(sidelineDTO);
+                    }
+                }
+            }
+            for (SidelineDTO toRemoveSideline : toRemoveSidelines.keySet()) {
+                Polyline polyline = courseSidelines.remove(toRemoveSideline);
+                map.removeOverlay(polyline);
+            }
+        }
+    }
+        
     protected void showCourseMarksOnMap(CoursePositionsDTO courseDTO) {
         if (map != null && courseDTO != null) {
             Map<String, CourseMarkOverlay> toRemoveCourseMarks = new HashMap<String, CourseMarkOverlay>(courseMarkOverlays);

@@ -24,12 +24,14 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -39,6 +41,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.base.impl.SidelineImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -222,6 +225,15 @@ public class DomainFactoryImpl implements DomainFactory {
             waypointList.add(waypoint);
         }
         return new CourseImpl(name, waypointList);
+    }
+
+    @Override
+    public Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints) {
+        List<ControlPoint> cpList = new ArrayList<ControlPoint>();
+        for (TracTracControlPoint controlPoint: controlPoints) {
+            cpList.add(getOrCreateControlPoint(controlPoint));
+        }
+        return new SidelineImpl(name, cpList);
     }
 
     @Override
@@ -463,7 +475,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta,
-            Race race, Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+            Race race, Course course, Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword) {
         synchronized (raceCache) {
             RaceDefinition raceDefinition = raceCache.get(race);
@@ -475,7 +487,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 // add to existing regatta only if boat class matches
                 if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
                     trackedRegatta.getRegatta().addRace(raceDefinition);
-                    DynamicTrackedRace trackedRace = createTrackedRace(trackedRegatta, raceDefinition, windStore,
+                    DynamicTrackedRace trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                             delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
                     logger.info("Added race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta());
                     
@@ -501,9 +513,9 @@ public class DomainFactoryImpl implements DomainFactory {
         }
     }
 
-    private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore,
+    private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
-        return trackedRegatta.createTrackedRace(race, 
+        return trackedRegatta.createTrackedRace(race, sidelines,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);

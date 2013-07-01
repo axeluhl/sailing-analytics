@@ -19,6 +19,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -266,7 +267,7 @@ public class WindTest {
                 /* trackedRegattaRegistry */ null, domainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null)),
                 new RaceDefinitionImpl("Test Race",
                         new CourseImpl("Test Course", Arrays.asList(new Waypoint[] { w1, w2, w3 })),
-                        boatClass, Collections.singleton(competitor)),
+                        boatClass, Collections.singleton(competitor)), Collections.<Sideline> emptyList(),
                         EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 1000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
                         /* millisecondsOverWhichToAverageSpeed */ 30000);

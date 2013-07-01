@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -23,7 +24,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Course;
@@ -298,6 +298,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                         logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", pfe);
                     }
                 }
+                updateSidelines(clientParams);
                 updateStartStopTimesAndLiveDelay(clientParams, simulator);
                 for (TracTracControlPoint controlPoint : clientParams.getControlPointList()) {
                     com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getOrCreateControlPoint(controlPoint);
@@ -338,7 +339,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         int controlPointsCount = controlPoints.size();
         String routeMetadataString = route.getMetadata();
         if(routeMetadataString != null) {
-            Map<String, String> routeMetadata = parseRouteMetadata(routeMetadataString);
+            Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
             for(int i = 1; i <= controlPointsCount; i++) {
                 String seqValue = routeMetadata.get("Seq." + i);
                 TracTracControlPoint controlPoint = controlPoints.get(i-1);
@@ -355,17 +356,30 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Map<String, String> parseRouteMetadata(String routeMetadata) {
+    private Map<String, String> parseMetadata(String metadata) {
         Map<String, String> metadataMap = new HashMap<String, String>();
         try {
             Properties p = new Properties();
-            p.load(new StringReader(routeMetadata));
+            p.load(new StringReader(metadata));
             metadataMap = new HashMap<String, String>((Map) p);
         } catch (IOException e) {
             // do nothing
         }
         return metadataMap;
     }
+
+    private void updateSidelines(ClientParamsPHP clientParams) {
+        String raceMetadata = clientParams.getRaceMetadata();
+        if(raceMetadata != null) {
+            Map<String, String> sidelineMetadata = parseMetadata(raceMetadata);
+            for(Entry<String, String> entry: sidelineMetadata.entrySet()) {
+                if(entry.getKey().startsWith("SIDELINE")) {
+                    System.out.println(entry);
+                }
+            }
+        }
+    }
+
     private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) {
         RaceDefinition currentRace = null;
         long delayInMillis = clientParams.getLiveDelayInMillis();

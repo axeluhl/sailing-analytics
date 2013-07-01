@@ -38,6 +38,7 @@ import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.Timed;
@@ -209,6 +210,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private transient Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
     private final ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
+    
+    private final Map<String, Sideline> courseSidelines;
 
     protected long millisecondsOverWhichToAverageSpeed;
 
@@ -254,7 +257,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private final Map<Iterable<MarkPassing>, NamedReentrantReadWriteLock> locksForMarkPassings;
 
-    public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final WindStore windStore,
+    public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines, final WindStore windStore,
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation) {
         super();
@@ -289,6 +292,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
             i++;
         }
+        courseSidelines = new LinkedHashMap<String, Sideline>();
+        for(Sideline sideline: sidelines) {
+            courseSidelines.put(sideline.getName(), sideline);
+            for (Mark mark : sideline.getMarks()) {
+                getOrCreateTrack(mark);
+            }            
+        }
+        
         trackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
         race.getCourse().lockForRead();
         try {
@@ -2303,6 +2314,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 logger.info("Caught " + cme + "; trying again.");
             }
         }
+    }
+
+    @Override
+    public Iterable<Sideline> getCourseSidelines() {
+        return new ArrayList<Sideline>(courseSidelines.values());
     }
 
     @Override
