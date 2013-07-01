@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<SailingXRR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Date="20130626" Time="191929" Type="SailingXRR" Version="1.3" xsi:noNamespaceSchemaLocation="http://www.sailing.org/uploads/xml/sailingXRR_v1.3.xsd">
+<Person FamilyName="Ruggiero" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Davide" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Anna" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Sofia" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Jakob" GivenName="" IFPersonID="GERJM44" PersonID="GERJM44" />
+<Person FamilyName="Andreas" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Clara" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Arianna" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Frederik" GivenName="" IFPersonID="DENFJ4" PersonID="DENFJ4" />
+<Person FamilyName="Oliver" GivenName="Markus" IFPersonID="" PersonID="" />
+<Person FamilyName="Davide" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Francesco" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Pierre" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Eliot" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Beste" GivenName="" IFPersonID="TURBK13" PersonID="TURBK13" />
+<Person FamilyName="Simay" GivenName="" IFPersonID="TURSA11" PersonID="TURSA11" />
+<Person FamilyName="Niels" GivenName="" IFPersonID="DENND2" PersonID="DENND2" />
+<Person FamilyName="Erik" GivenName="" IFPersonID="DENED1" PersonID="DENED1" />
+<Person FamilyName="Sara" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Marek" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Lily" GivenName="" IFPersonID="GBRLS32" PersonID="GBRLS32" />
+<Person FamilyName="Jemima" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Doga" GivenName="" IFPersonID="TURDS6" PersonID="TURDS6" />
+<Person FamilyName="Ibrahim" GivenName="" IFPersonID="TURIB4" PersonID="TURIB4" />
+<Person FamilyName="Mathilde" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Marine" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Alan" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Gray" GivenName="" IFPersonID="GBRAG57" PersonID="GBRAG57" />
+<Person FamilyName="Stephanie" GivenName="" IFPersonID="GBRSO19" PersonID="GBRSO19" />
+<Person FamilyName="Victoria" GivenName="" IFPersonID="GBRVP5" PersonID="GBRVP5" />
+<Person FamilyName="Charlotte" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Thomas" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Rhos" GivenName="" IFPersonID="GBRRH84" PersonID="GBRRH84" />
+<Person FamilyName="Benjamin" GivenName="" IFPersonID="GBRBH37" PersonID="GBRBH37" />
+<Person FamilyName="Ellie" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Lucy" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Konrad" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Michal" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Simon" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Emile" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Martyna" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Karolina" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Filip" GivenName="" IFPersonID="DENFH5" PersonID="DENFH5" />
+<Person FamilyName="Mathias" GivenName="" IFPersonID="DENMJ13" PersonID="DENMJ13" />
+<Person FamilyName="Joakim" GivenName="" IFPersonID="DENJS20" PersonID="DENJS20" />
+<Person FamilyName="Christopher" GivenName="" IFPersonID="DENCF4" PersonID="DENCF4" />
+<Person FamilyName="Ludvig" GivenName="" IFPersonID="NORLJ4" PersonID="NORLJ4" />
+<Person FamilyName="Føyen" GivenName="" IFPersonID="NORBW4" PersonID="NORBW4" />
+<Person FamilyName="Tobias" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Casper" GivenName="" IFPersonID="DENCL8" PersonID="DENCL8" />
+<Person FamilyName="Edoardo" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Alessandro" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Anisah" GivenName="" IFPersonID="GERAS55" PersonID="GERAS55" />
+<Person FamilyName="Gesa" GivenName="" IFPersonID="GERGB12" PersonID="GERGB12" />
+<Person FamilyName="Ole" GivenName="" IFPersonID="GEROK3" PersonID="GEROK3" />
+<Person FamilyName="Niclas" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Ottavia" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Davide" GivenName="" IFPersonID="" PersonID="" />
+<Person FamilyName="Alloway" GivenName="" IFPersonID="GBRWA6" PersonID="GBRWA6" />
+<Person FamilyName="Matthew" GivenName="" IFPersonID="GBRMV8" PersonID="GBRMV8" />
+<Boat BoatID="1" SailNumber="ITA 54173" />
+<Boat BoatID="7" SailNumber="ITA 54278" />
+<Boat BoatID="13" SailNumber="GER 2020" />
+<Boat BoatID="8" SailNumber="ITA 54543" />
+<Boat BoatID="14" SailNumber="DEN 1896" />
+<Boat BoatID="2" SailNumber="ITA 54552" />
+<Boat BoatID="3" SailNumber="FRA 53493" />
+<Boat BoatID="9" SailNumber="TUR 54284" />
+<Boat BoatID="15" SailNumber="DEN 935" />
+<Boat BoatID="16" SailNumber="POL 1756" />
+<Boat BoatID="10" SailNumber="GBR 53966" />
+<Boat BoatID="4" SailNumber="TUR 54288" />
+<Boat BoatID="5" SailNumber="GBR 54364" />
+<Boat BoatID="11" SailNumber="FRA 54520" />
+<Boat BoatID="17" SailNumber="GBR 1960" />
+<Boat BoatID="18" SailNumber="GER 1914" />
+<Boat BoatID="6" SailNumber="GBR 53703" />
+<Boat BoatID="12" SailNumber="GBR 52674" />
+<Boat BoatID="19" SailNumber="POL 1758" />
+<Boat BoatID="20" SailNumber="FRA 1747" />
+<Boat BoatID="21" SailNumber="POL 1772" />
+<Boat BoatID="22" SailNumber="DEN 1553" />
+<Boat BoatID="23" SailNumber="DEN 1732" />
+<Boat BoatID="24" SailNumber="NOR 1961" />
+<Boat BoatID="25" SailNumber="DEN 1776" />
+<Boat BoatID="26" SailNumber="ITA 1658" />
+<Boat BoatID="27" SailNumber="GER 1970" />
+<Boat BoatID="28" SailNumber="GER 1862" />
+<Boat BoatID="29" SailNumber="ITA 1340" />
+<Boat BoatID="30" SailNumber="GBR 900" />
+<Team NOC="ITA" TeamID="ITAITA 54173" BoatID="1" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="ITA" TeamID="ITAITA 54278" BoatID="7" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="GER" TeamID="GERGER 2020" BoatID="13" >
+<Crew PersonID="GERJM44" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="ITA" TeamID="ITAITA 54543" BoatID="8" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="DEN" TeamID="DENDEN 1896" BoatID="14" >
+<Crew PersonID="DENFJ4" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="ITA" TeamID="ITAITA 54552" BoatID="2" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="FRA" TeamID="FRAFRA 53493" BoatID="3" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="TUR" TeamID="TURTUR 54284" BoatID="9" >
+<Crew PersonID="TURBK13" Position="C" />
+<Crew PersonID="TURSA11" Position="S" />
+</Team>
+<Team NOC="DEN" TeamID="DENDEN 935" BoatID="15" >
+<Crew PersonID="DENND2" Position="S" />
+<Crew PersonID="DENED1" Position="C" />
+</Team>
+<Team NOC="POL" TeamID="POLPOL 1756" BoatID="16" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="GBR" TeamID="GBRGBR 53966" BoatID="10" >
+<Crew PersonID="GBRLS32" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="TUR" TeamID="TURTUR 54288" BoatID="4" >
+<Crew PersonID="TURDS6" Position="S" />
+<Crew PersonID="TURIB4" Position="C" />
+</Team>
+<Team NOC="GBR" TeamID="GBRGBR 54364" BoatID="5" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="GBRAG57" Position="C" />
+</Team>
+<Team NOC="FRA" TeamID="FRAFRA 54520" BoatID="11" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="GBR" TeamID="GBRGBR 1960" BoatID="17" >
+<Crew PersonID="GBRSO19" Position="S" />
+<Crew PersonID="GBRVP5" Position="C" />
+</Team>
+<Team NOC="GER" TeamID="GERGER 1914" BoatID="18" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="GBR" TeamID="GBRGBR 53703" BoatID="6" >
+<Crew PersonID="GBRRH84" Position="S" />
+<Crew PersonID="GBRBH37" Position="C" />
+</Team>
+<Team NOC="GBR" TeamID="GBRGBR 52674" BoatID="12" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="POL" TeamID="POLPOL 1758" BoatID="19" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="FRA" TeamID="FRAFRA 1747" BoatID="20" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="POL" TeamID="POLPOL 1772" BoatID="21" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="DEN" TeamID="DENDEN 1553" BoatID="22" >
+<Crew PersonID="DENFH5" Position="S" />
+<Crew PersonID="DENMJ13" Position="C" />
+</Team>
+<Team NOC="DEN" TeamID="DENDEN 1732" BoatID="23" >
+<Crew PersonID="DENJS20" Position="S" />
+<Crew PersonID="DENCF4" Position="C" />
+</Team>
+<Team NOC="NOR" TeamID="NORNOR 1961" BoatID="24" >
+<Crew PersonID="NORLJ4" Position="C" />
+<Crew PersonID="NORBW4" Position="S" />
+</Team>
+<Team NOC="DEN" TeamID="DENDEN 1776" BoatID="25" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="DENCL8" Position="C" />
+</Team>
+<Team NOC="ITA" TeamID="ITAITA 1658" BoatID="26" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="GER" TeamID="GERGER 1970" BoatID="27" >
+<Crew PersonID="GERAS55" Position="C" />
+<Crew PersonID="GERGB12" Position="S" />
+</Team>
+<Team NOC="GER" TeamID="GERGER 1862" BoatID="28" >
+<Crew PersonID="GEROK3" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="ITA" TeamID="ITAITA 1340" BoatID="29" >
+<Crew PersonID="" Position="S" />
+<Crew PersonID="" Position="C" />
+</Team>
+<Team NOC="GBR" TeamID="GBRGBR 900" BoatID="30" >
+<Crew PersonID="GBRWA6" Position="S" />
+<Crew PersonID="GBRMV8" Position="C" />
+</Team>
+<Event EventID="9999" Type="RegattaSeries" IFEventID="9999" Title="2012 Eurosaf Youth Sailing European Championship">
+<Division DivisionID="Premier" Type="FleetRace" Title="49ER" IFClassID="49ER" Gender="Open">
+<SeriesResult TeamID="ITAITA 54173" TotalPoints="3" NetPoints="3" Rank="1" />
+<SeriesResult TeamID="ITAITA 54278" TotalPoints="3" NetPoints="3" Rank="1" />
+<SeriesResult TeamID="GERGER 2020" TotalPoints="13" NetPoints="13" Rank="1" />
+<SeriesResult TeamID="ITAITA 54543" TotalPoints="4" NetPoints="4" Rank="2" />
+<SeriesResult TeamID="DENDEN 1896" TotalPoints="13" NetPoints="13" Rank="2" />
+<SeriesResult TeamID="ITAITA 54552" TotalPoints="4" NetPoints="4" Rank="2" />
+<SeriesResult TeamID="FRAFRA 53493" TotalPoints="7" NetPoints="7" Rank="3" />
+<SeriesResult TeamID="TURTUR 54284" TotalPoints="5" NetPoints="5" Rank="3" />
+<SeriesResult TeamID="DENDEN 935" TotalPoints="19" NetPoints="19" Rank="3" />
+<SeriesResult TeamID="POLPOL 1756" TotalPoints="20" NetPoints="20" Rank="4" />
+<SeriesResult TeamID="GBRGBR 53966" TotalPoints="8" NetPoints="8" Rank="4" />
+<SeriesResult TeamID="TURTUR 54288" TotalPoints="9" NetPoints="9" Rank="4" />
+<SeriesResult TeamID="GBRGBR 54364" TotalPoints="10" NetPoints="10" Rank="5" />
+<SeriesResult TeamID="FRAFRA 54520" TotalPoints="10" NetPoints="10" Rank="5" />
+<SeriesResult TeamID="GBRGBR 1960" TotalPoints="21" NetPoints="21" Rank="5" />
+<SeriesResult TeamID="GERGER 1914" TotalPoints="21" NetPoints="21" Rank="6" />
+<SeriesResult TeamID="GBRGBR 53703" TotalPoints="10" NetPoints="10" Rank="6" />
+<SeriesResult TeamID="GBRGBR 52674" TotalPoints="14" NetPoints="14" Rank="6" />
+<SeriesResult TeamID="POLPOL 1758" TotalPoints="26" NetPoints="26" Rank="7" />
+<SeriesResult TeamID="FRAFRA 1747" TotalPoints="27" NetPoints="27" Rank="8" />
+<SeriesResult TeamID="POLPOL 1772" TotalPoints="28" NetPoints="28" Rank="9" />
+<SeriesResult TeamID="DENDEN 1553" TotalPoints="29" NetPoints="29" Rank="10" />
+<SeriesResult TeamID="DENDEN 1732" TotalPoints="29" NetPoints="29" Rank="11" />
+<SeriesResult TeamID="NORNOR 1961" TotalPoints="32" NetPoints="32" Rank="12" />
+<SeriesResult TeamID="DENDEN 1776" TotalPoints="34" NetPoints="34" Rank="13" />
+<SeriesResult TeamID="ITAITA 1658" TotalPoints="35" NetPoints="35" Rank="14" />
+<SeriesResult TeamID="GERGER 1970" TotalPoints="36" NetPoints="36" Rank="15" />
+<SeriesResult TeamID="GERGER 1862" TotalPoints="39" NetPoints="39" Rank="16" />
+<SeriesResult TeamID="ITAITA 1340" TotalPoints="49" NetPoints="49" Rank="17" />
+<SeriesResult TeamID="GBRGBR 900" TotalPoints="57" NetPoints="57" Rank="18" />
+</Division>
+</Event>
+</SailingXRR>
