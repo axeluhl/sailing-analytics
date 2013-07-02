@@ -519,4 +519,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         
     }
 
+    @Override
+    public boolean isLive(TimePoint at) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }

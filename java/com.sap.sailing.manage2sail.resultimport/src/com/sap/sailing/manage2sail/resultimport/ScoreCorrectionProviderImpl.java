@@ -26,6 +26,7 @@ import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.resultimport.impl.XRRRegattaResultsAsScoreCorrections;
 import com.sap.sailing.xrr.resultimport.schema.Division;
 import com.sap.sailing.xrr.resultimport.schema.Event;
+import com.sap.sailing.xrr.resultimport.schema.EventGender;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, ResultUrlProvider {
@@ -63,6 +64,9 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
                 String eventName = resultDocDescr.getEventName() != null ? resultDocDescr.getEventName() : resultDocDescr.getRegattaName();
                 String boatClass = resultDocDescr.getBoatClass();
                 if(boatClass != null && eventName != null) {
+                    if(resultDocDescr.getCompetitorGenderType() != null) {
+                        boatClass += ", " + resultDocDescr.getCompetitorGenderType().name();
+                    }
                     Set<Pair<String, TimePoint>> eventResultsSet = result.get(eventName);
                     if(eventResultsSet == null) {
                         eventResultsSet = new HashSet<Pair<String, TimePoint>>();
@@ -92,7 +96,12 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
                             for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
                                 if (eventO instanceof Division) {
                                     Division division = (Division) eventO;
-                                    if (boatClassName.equals(parser.getBoatClassName(division))) {
+                                    EventGender divisionGender = division.getGender();
+                                    String divisionBoatClassAndGender = parser.getBoatClassName(division);
+                                    if(divisionGender != null) {
+                                        divisionBoatClassAndGender += ", " + divisionGender.name();  
+                                    }
+                                    if (boatClassName.equalsIgnoreCase(divisionBoatClassAndGender)) {
                                         return new XRRRegattaResultsAsScoreCorrections(event, division, this,
                                                 parser);
                                     }
@@ -112,7 +121,11 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     private Parser resolveParser(String eventName, String boatClassName) throws IOException {
         Parser result = null;
         for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
-            if(eventName.equals(resultDocDescr.getEventName()) && boatClassName.equals(resultDocDescr.getBoatClass())) {
+            String boatClassAndGenderType = resultDocDescr.getBoatClass();
+            if(resultDocDescr.getCompetitorGenderType() != null) {
+                boatClassAndGenderType += ", " + resultDocDescr.getCompetitorGenderType().name();
+            }
+            if(eventName.equals(resultDocDescr.getEventName()) && boatClassName.equals(boatClassAndGenderType)) {
                 result = parserFactory.createParser(resultDocDescr.getInputStream(), resultDocDescr.getEventName());
                 break;
             }

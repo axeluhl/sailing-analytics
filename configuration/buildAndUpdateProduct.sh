@@ -405,34 +405,13 @@ if [[ "$@" == "remote-deploy" ]]; then
     SERVER=$TARGET_SERVER_NAME
     echo "Will deploy server $SERVER"
 
-    read -s -n1 -p "Did you want me to start a LOCAL build of $active_branch (without tests) for $SERVERS_HOME/$SERVER before deploying (y/n)? " answer
-    case $answer in
-    "Y" | "y") BUILD=1;;
-    *) echo "Not building anything. You have been warned!"
-    esac
-
-    if [[ $BUILD -eq 1 ]]; then
-            ACDIR=$PWD
-            cd $HOME/code
-            git co $active_branch
-            configuration/buildAndUpdateProduct.sh -t build
-            read -s -n1 -p "Has the build been successful (y/n)? " answer
-            case $answer in
-            "Y" | "y") OK=1;;
-            *) echo "Aborting..."
-            exit;;
-            esac
-            cd $ACDIR
-            echo ""
-    fi
-
     SSH_CMD="ssh $REMOTE_SERVER_LOGIN"
     SCP_CMD="scp -r"
 
     REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/servers'`
     REMOTE_SERVER="$REMOTE_HOME/$SERVER"
 
-    read -s -n1 -p "I will deploy $active_branch to $REMOTE_SERVER_LOGIN:$REMOTE_SERVER. Is this correct (y/n)? " answer
+    read -s -n1 -p "I will deploy the current GIT branch to $REMOTE_SERVER_LOGIN:$REMOTE_SERVER. Is this correct (y/n)? " answer
     case $answer in
     "Y" | "y") OK=1;;
     *) echo "Aborting... nothing has been changed on remote server!"
@@ -446,11 +425,14 @@ if [[ "$@" == "remote-deploy" ]]; then
     $SSH_CMD "rm -rf $REMOTE_SERVER/org.eclipse*.*"
     $SSH_CMD "rm -rf $REMOTE_SERVER/configuration/org.eclipse*.*"
 
-    $SCP_CMD $p2PluginRepository/configuration/config.ini $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
     $SCP_CMD $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
     $SCP_CMD $p2PluginRepository/plugins/*.jar $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/plugins/
 
-    echo "Deployed successfully. I did NOT change any configuration, only code."
+    echo "$VERSION_INFO-remotedly-deployed" > /tmp/version-remote-deploy.txt
+    $SCP_CMD /tmp/version-remote-deploy.txt $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/version.txt
+    rm /tmp/version-remote-deploy.txt
+
+    echo "Deployed successfully. I did NOT change any configuration (no env.sh or config.ini or jetty.xml adaption), only code!"
 
     read -s -n1 -p "Do you want me to restart the remote server (y/n)? " answer
     case $answer in
@@ -464,4 +446,17 @@ if [[ "$@" == "remote-deploy" ]]; then
     $SSH_CMD "cd $REMOTE_SERVER && $REMOTE_SERVER/start"
 
     echo "Restarted remote server. Please check."
+fi
+
+if [[ "$@" == "deploy-startpage" ]]; then
+    TARGET_DIR_STARTPAGE=$ACDIR/tmp/jetty-0.0.0.0-8889-bundlefile-_-any-/webapp/
+    read -s -n1 -p "Copying $PROJECT_HOME/java/com.sap.sailing.www/index.html to $TARGET_DIR_STARTPAGE - is this ok (y/n)?" answer
+    case $answer in
+    "Y" | "y") OK=1;;
+    *) echo "Aborting... nothing has been changed for startpage!"
+    exit;;
+    esac
+
+    cp $PROJECT_HOME/java/com.sap.sailing.www/index.html $TARGET_DIR_STARTPAGE
+    echo "OK"
 fi

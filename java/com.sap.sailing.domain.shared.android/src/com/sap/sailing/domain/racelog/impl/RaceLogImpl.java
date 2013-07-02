@@ -149,4 +149,25 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         return getFixes().descendingSet();
     }
 
+    @Override
+    public HashSet<RaceLogEventVisitor> removeAllListeners() {
+        synchronized(listeners) {
+            HashSet<RaceLogEventVisitor> clonedListeners = new HashSet<RaceLogEventVisitor>(listeners);
+            listeners = new HashSet<RaceLogEventVisitor>();
+            return clonedListeners;
+        }
+    }
+
+    @Override
+    public void addAllListeners(HashSet<RaceLogEventVisitor> listeners) {
+        synchronized (listeners) {
+            this.listeners.addAll(listeners);
+        }
+    }
+
+    @Override
+    public Iterable<RaceLogEventVisitor> getAllListeners() {
+        return this.listeners;
+    }
+    
 }

@@ -116,6 +116,8 @@
     <string name="set_pathfinder">Set Pathfinder</string>
     <string name="set_pathfinder_title">Choose the pathfinder</string>
     <string name="protest_dialog_title">Set the protest start time</string>
+    <string name="finishing_dialog_title">Set the time when the first finisher crossed the finish line</string>
+    <string name="finished_dialog_title">Set the time when the race finished</string>
     <string name="protest_start_time">Protest start time: %s</string>
     <string name="protest_flag_set">Protest flag is displayed for group %s.</string>
     <string name="choose_running_course_lr">Please choose the course</string>
@@ -204,15 +206,10 @@
     <string-array name="course_routes">
         <item>I</item>
         <item>O</item>
-        <item>IS</item>
-        <item>OS</item>
-        <item>L</item>
-        <item>LS</item>
-        <item>LR</item>
-        <item>LG</item>
-        <item>IA</item>
-        <item>LA</item>
-        <item>W</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
     </string-array>
     
     <string name="loading_failure">Load failure</string>

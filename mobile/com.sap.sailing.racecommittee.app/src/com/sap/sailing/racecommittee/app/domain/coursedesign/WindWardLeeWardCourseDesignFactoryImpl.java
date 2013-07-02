@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sailing.racecommittee.app.utils.GeoUtils;
 
 public class WindWardLeeWardCourseDesignFactoryImpl extends AbstractCourseDesignFactory {
     private final int LUV_BUOY1_ANGLE_TO_WIND = 0;
@@ -40,10 +41,10 @@ public class WindWardLeeWardCourseDesignFactoryImpl extends AbstractCourseDesign
         Set<PositionedMark> result = new HashSet<PositionedMark>();
 
         // gate calculation
-        result.add(new PositionedMarkImpl("4S", getPositionForGivenPointDistanceAndBearing(this.product
+        result.add(new PositionedMarkImpl("4S", GeoUtils.getPositionForGivenPointDistanceAndBearing(this.product
                 .getReferencePoint(), boatClass.getHullLength().scale(GATE_LENGTH_TO_HULL_LENGTH_FACTOR / 2),
                 windDirection.add(new DegreeBearingImpl(GATE_4S_WIND_ANGLE)))));
-        result.add(new PositionedMarkImpl("4P", getPositionForGivenPointDistanceAndBearing(this.product
+        result.add(new PositionedMarkImpl("4P", GeoUtils.getPositionForGivenPointDistanceAndBearing(this.product
                 .getReferencePoint(), boatClass.getHullLength().scale(GATE_LENGTH_TO_HULL_LENGTH_FACTOR / 2),
                 windDirection.add(new DegreeBearingImpl(GATE_4P_WIND_ANGLE)))));
 
@@ -70,11 +71,11 @@ public class WindWardLeeWardCourseDesignFactoryImpl extends AbstractCourseDesign
                     * numberOfRounds.getNumberOfRounds())));
         }
         legDistance = new NauticalMileDistance(legLength);
-        Position luvBuoyPosition = getPositionForGivenPointDistanceAndBearing(this.product.getReferencePoint(),
+        Position luvBuoyPosition = GeoUtils.getPositionForGivenPointDistanceAndBearing(this.product.getReferencePoint(),
                 legDistance, windDirection.add(new DegreeBearingImpl(LUV_BUOY1_ANGLE_TO_WIND)));
         result.add(new PositionedMarkImpl("1A", luvBuoyPosition));
 
-        result.add(new PositionedMarkImpl("1", getPositionForGivenPointDistanceAndBearing(luvBuoyPosition,
+        result.add(new PositionedMarkImpl("1", GeoUtils.getPositionForGivenPointDistanceAndBearing(luvBuoyPosition,
                 LUV_BUOY1_TO_LUV_BUOY2_DISTANCE, windDirection.add(new DegreeBearingImpl(LUV_BUOY2_ANGLE_TO_WIND)))));
 
         return result;

@@ -106,4 +106,9 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     public boolean isDiscardable() {
         return !isMedalRace() && (!isFirstColumnInSeries() || !getSeries().isFirstColumnIsNonDiscardableCarryForward());
     }
+
+    @Override
+    public boolean isCarryForward() {
+        return isFirstColumnInSeries() && getSeries().isFirstColumnIsNonDiscardableCarryForward();
+    }
 }

@@ -588,8 +588,8 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
-        return new JSONServiceImpl(jsonURL);
+    public JSONService parseJSONURLWithRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+        return new JSONServiceImpl(jsonURL, loadClientParams);
     }
 
     @Override
@@ -603,6 +603,11 @@ public class DomainFactoryImpl implements DomainFactory {
             boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword) {
         return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
                 delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, this, tracTracUsername, tracTracPassword);
+    }
+
+    @Override
+    public JSONService parseJSONURLForOneRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+        return new JSONServiceImpl(jsonURL, raceId, loadClientParams);
     }
 
 }

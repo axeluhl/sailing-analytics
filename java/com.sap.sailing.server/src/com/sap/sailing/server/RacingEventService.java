@@ -32,6 +32,8 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -219,12 +221,22 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Iterable<Triple<Regatta, RaceDefinition, String>> getWindTrackedRaces();
 
     /**
-     * For the JSON URL of an account / event, lists the paramURLs that can be used for {@link #addTracTracRace(URL, URI, URI, WindStore, long)}
-     * calls to individually start tracking races of this event, rather than tracking <em>all</em> races in the event which
-     * is hardly ever useful. The returned pair's first component is the event name.
+     * For the JSON URL of an account / event, lists the paramURLs that can be used for
+     * {@link #addTracTracRace(URL, URI, URI, WindStore, long)} calls to individually start tracking races of this
+     * event, rather than tracking <em>all</em> races in the event which is hardly ever useful. The returned pair's
+     * first component is the event name.
+     * 
+     * @param loadClientParams
+     *            shall the properties from the clientparams.php file such as liveURI and storedURI already be loaded?
+     *            Generally, this is not necessary as the
+     *            {@link #addTracTracRace(RegattaIdentifier, URL, URI, URI, URI, TimePoint, TimePoint, RaceLogStore, WindStore, long, boolean, String, String)}
+     *            and {@link #addTracTracRace(URL, URI, URI, URI, RaceLogStore, WindStore, long, String, String)} will
+     *            fetch the JSON and clientparams.php documents to work with up-to-date data.
      */
-    Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL) throws IOException, ParseException,
+    Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException,
     org.json.simple.parser.ParseException, URISyntaxException;
+    
+    RaceRecord getSingleTracTracRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws Exception;
 
     List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port, boolean canSendRequests)
             throws InterruptedException, UnknownHostException, IOException, ParseException;
@@ -298,6 +310,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
+    /**
+     * Removes the regatta as well as all regatta leaderboards for that regatta
+     */
     void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
     TrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
@@ -519,5 +534,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
     Collection<MediaTrack> getAllMediaTracks();
+
+    void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
 
 }

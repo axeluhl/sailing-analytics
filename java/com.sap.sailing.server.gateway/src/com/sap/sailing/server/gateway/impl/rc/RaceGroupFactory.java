@@ -76,17 +76,26 @@ public class RaceGroupFactory {
         for (Fleet fleet : series.getFleets()) {
             // We are taking the fleet name because there might be several "default fleet"
             // objects when TrackedRaces are linked onto this Leaderboard
-            rows.add(new RaceRowImpl(fleet, getCells(fleet.getName(), raceColumns)));
+                rows.add(new RaceRowImpl(fleet, getCells(fleet.getName(), raceColumns, isFirstRaceColumnVirtual(series))));
         }
         return rows;
     }
+    
+    private boolean isFirstRaceColumnVirtual(Series series){
+        return series.isFirstColumnIsNonDiscardableCarryForward();
+    }
 
-    private Collection<RaceCell> getCells(String fleetName, List<RaceColumn> raceColumns) {
+    private Collection<RaceCell> getCells(String fleetName, List<RaceColumn> raceColumns, boolean isFirstRaceColumnVirtual) {
+        boolean skippedFirst = false;
         Collection<RaceCell> cells = new ArrayList<>();
         if (raceColumns != null) {
             for (RaceColumn raceColumn : raceColumns) {
-                Fleet fleet = raceColumn.getFleetByName(fleetName);
-                cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet)));
+                if (isFirstRaceColumnVirtual && !skippedFirst) {
+                    skippedFirst = true;
+                } else {
+                    Fleet fleet = raceColumn.getFleetByName(fleetName);
+                    cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet)));
+                }
             }
         }
         return cells;

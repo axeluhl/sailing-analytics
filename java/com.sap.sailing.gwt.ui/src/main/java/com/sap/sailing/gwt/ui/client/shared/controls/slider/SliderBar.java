@@ -460,7 +460,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * @return the total range
      */
     public double getTotalRange() {
-        if (minValue > maxValue) {
+        if (minValue == null || maxValue == null || minValue > maxValue) {
             return 0;
         } else {
             return maxValue - minValue;
