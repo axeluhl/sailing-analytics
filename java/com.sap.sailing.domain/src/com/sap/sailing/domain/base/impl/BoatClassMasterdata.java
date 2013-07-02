@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.masterdataimport;
+package com.sap.sailing.domain.base.impl;
 
 public enum BoatClassMasterdata {
     

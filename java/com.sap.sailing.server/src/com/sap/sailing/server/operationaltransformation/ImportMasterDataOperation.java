@@ -242,7 +242,7 @@ public class ImportMasterDataOperation extends
             String defaultCourseAreaId = singleRegattaData.getDefaultCourseAreaId();
             String scoringSchemeType = singleRegattaData.getScoringSchemeType();
             boolean isPersistent = singleRegattaData.isPersistent();
-            toState.createRegattaWithoutReplication(baseName, boatClassName, UUID.fromString(id), series, isPersistent,
+            toState.getOrCreateRegattaWithoutReplication(baseName, boatClassName, UUID.fromString(id), series, isPersistent,
                     domainFactory.createScoringScheme(ScoringSchemeType.valueOf(scoringSchemeType)),
                     UUID.fromString(defaultCourseAreaId));
             creationCount.addOneRegatta();

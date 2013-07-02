@@ -701,7 +701,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public Regatta createRegatta(String baseRegattaName, String boatClassName,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId) {
-        Pair<Regatta, Boolean> regattaWithCreatedFlag = createRegattaWithoutReplication(baseRegattaName, boatClassName, id, series, persistent,
+        Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(baseRegattaName, boatClassName, id, series, persistent,
                 scoringScheme, defaultCourseAreaId);
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
@@ -711,7 +711,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Pair<Regatta, Boolean> createRegattaWithoutReplication(String baseRegattaName, String boatClassName, Serializable id,
+    public Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId) {
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
