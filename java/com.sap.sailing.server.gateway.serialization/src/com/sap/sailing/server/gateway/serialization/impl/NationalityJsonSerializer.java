@@ -11,6 +11,9 @@ public class NationalityJsonSerializer implements JsonSerializer<Nationality> {
 
     @Override
     public JSONObject serialize(Nationality object) {
+        if (object == null) {
+            return null;
+        }
         JSONObject result = new JSONObject();
         result.put(FIELD_IOC, object.getThreeLetterIOCAcronym());
         return result;

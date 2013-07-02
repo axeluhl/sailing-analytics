@@ -13,6 +13,9 @@ public class NationalityJsonDeserialzer implements JsonDeserializer<Nationality>
     @Override
     public Nationality deserialize(JSONObject object) throws JsonDeserializationException {
         String threeLetterIOCAcronym = (String) object.get(NationalityJsonSerializer.FIELD_IOC);
+        if (threeLetterIOCAcronym == null) {
+            return null;
+        }
         return new NationalityImpl(threeLetterIOCAcronym);
     }
     
