@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -42,9 +45,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.google.gwt.regexp.shared.RegExp;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -75,6 +82,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindError;
@@ -115,6 +123,7 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationTriggerResponseImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
@@ -132,6 +141,7 @@ import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
+import com.sap.sailing.domain.masterdataimport.LeaderboardGroupMasterData;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -236,6 +246,9 @@ import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.masterdata.impl.LeaderboardGroupMasterDataJsonDeserializer;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
@@ -246,6 +259,7 @@ import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboar
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.DisconnectLeaderboardColumnFromTrackedRace;
+import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 import com.sap.sailing.server.operationaltransformation.MoveColumnInSeriesDown;
 import com.sap.sailing.server.operationaltransformation.MoveColumnInSeriesUp;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDown;
@@ -3145,4 +3159,123 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet) {
         getService().reloadRaceLog(selectedLeaderboardName, raceColumnDTO, fleet);
     }
+    
+    @Override
+    public MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames) {
+        String getMasterDataUrl = createGetMasterDataForLgsUrl(host);
+        if (!isValidUrl(getMasterDataUrl, false)) {
+            throw new RuntimeException("Not a valid URL for fetching leaderboardgroups masterdata: " + getMasterDataUrl);
+        }
+        String query = createLeaderboardQuery(groupNames);
+        HttpURLConnection connection = null;
+        BufferedReader rd  = null;
+        StringBuilder sb = null;
+        String line = null;
+      
+        URL serverAddress = null;
+      
+        try {
+            serverAddress = parseUrl(getMasterDataUrl + query);
+            //set up out communications stuff
+            connection = null;
+          
+            //Set up the initial connection
+            connection = (HttpURLConnection)serverAddress.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setDoOutput(true);
+            connection.setReadTimeout(10000);
+                      
+            connection.connect();
+          
+            //read the result from the server
+            rd  = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            sb = new StringBuilder();
+
+            while ((line = rd.readLine()) != null) {
+                sb.append(line);
+            }
+
+            return importFromHttpResponse(sb.toString());
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            // close the connection, set all objects to null
+            connection.disconnect();
+            rd = null;
+            sb = null;
+            connection = null;
+        }
+    }
+    
+    private URL parseUrl(String s) throws Exception {
+        URL u = new URL(s);
+        return new URI(
+               u.getProtocol(), 
+               u.getAuthority(), 
+               u.getPath(),
+               u.getQuery(), 
+               u.getRef()).
+               toURL();
+   }
+    
+    protected MasterDataImportObjectCreationCountImpl importFromHttpResponse(String response) {
+        MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
+        JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = LeaderboardGroupMasterDataJsonDeserializer
+                .create(baseDomainFactory);
+        JSONParser parser = new JSONParser();
+        try {
+            JSONArray leaderboardGroupsMasterDataJsonArray = (JSONArray) parser.parse(response);
+            for (Object leaderBoardGroupMasterData : leaderboardGroupsMasterDataJsonArray) {
+                JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
+                LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
+                        .deserialize(leaderBoardGroupMasterDataJson);
+                ImportMasterDataOperation op = new ImportMasterDataOperation(masterData);
+                creationCount.add(getService().apply(op));
+            }
+        } catch (org.json.simple.parser.ParseException e) {
+            throw new RuntimeException(e);
+        } catch (JsonDeserializationException e) {
+            throw new RuntimeException(e);
+        }
+        
+        return creationCount;
+    }
+
+    private String createLeaderboardQuery(String[] groupNames) {
+        StringBuffer queryStringBuffer = new StringBuffer("?");
+        for (int i = 0; i < groupNames.length; i++) {
+            queryStringBuffer.append("names[]=" + groupNames[i] + "&");
+        }
+        if (queryStringBuffer.length() == 1) {
+            return "";
+        } else {
+            // Delete last "&"
+            queryStringBuffer.deleteCharAt(queryStringBuffer.length() - 1);
+        }
+        return queryStringBuffer.toString();
+    }
+    
+    private boolean isValidUrl(String url, boolean topLevelDomainRequired) {
+            RegExp urlValidator = RegExp
+                    .compile("^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
+        return urlValidator.exec(url) != null;
+    }
+    
+    private String createGetMasterDataForLgsUrl(String host) {
+        StringBuffer urlBuffer = new StringBuffer(host);
+        appendHttpAndSlashIfNeeded(host, urlBuffer);
+        urlBuffer.append("sailingserver/masterdata/leaderboardgroups");
+        return urlBuffer.toString();
+    }
+    
+    private void appendHttpAndSlashIfNeeded(String host, StringBuffer urlBuffer) {
+        if (!host.endsWith("/")) {
+            urlBuffer.append("/");
+        }
+        if (!host.startsWith("http://")) {
+            urlBuffer.insert(0, "http://");
+        }
+    }
+
 }

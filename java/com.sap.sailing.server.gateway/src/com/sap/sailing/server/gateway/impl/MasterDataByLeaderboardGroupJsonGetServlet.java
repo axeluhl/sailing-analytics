@@ -17,7 +17,7 @@ import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
-import com.sap.sailing.server.gateway.serialization.masterdata.impl.MasterDataSerializerForNames;
+import com.sap.sailing.server.gateway.serialization.masterdata.impl.TopLevelMasterDataSerializer;
 
 public class MasterDataByLeaderboardGroupJsonGetServlet extends AbstractJsonHttpServlet {
 
@@ -39,7 +39,7 @@ public class MasterDataByLeaderboardGroupJsonGetServlet extends AbstractJsonHttp
             requestedLeaderboardGroupNames.addAll(leaderboardGroups.keySet());
         }
 
-        MasterDataSerializerForNames masterSerializer = new MasterDataSerializerForNames(leaderboardGroups,
+        TopLevelMasterDataSerializer masterSerializer = new TopLevelMasterDataSerializer(leaderboardGroups,
                 getService().getAllEvents());
 
         JSONArray masterData = masterSerializer.serialize(requestedLeaderboardGroupNames);
