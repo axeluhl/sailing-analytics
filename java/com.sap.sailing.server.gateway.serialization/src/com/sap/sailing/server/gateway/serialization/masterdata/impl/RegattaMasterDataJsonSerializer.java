@@ -4,6 +4,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
@@ -31,9 +32,11 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
     public static final String FIELD_INDICES = "indices";
 
     private final JsonSerializer<Fleet> fleetSerializer;
+    private final JsonSerializer<RaceColumn> raceColumnSerializer;
 
-    public RegattaMasterDataJsonSerializer(JsonSerializer<Fleet> fleetSerializer) {
+    public RegattaMasterDataJsonSerializer(JsonSerializer<Fleet> fleetSerializer, JsonSerializer<RaceColumn> raceColumnSerializer) {
         this.fleetSerializer = fleetSerializer;
+        this.raceColumnSerializer = raceColumnSerializer;
     }
 
     @Override
@@ -106,9 +109,7 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
     }
 
     private JSONObject createJsonForRaceColumn(RaceColumnInSeries raceColumn) {
-        JSONObject result = new JSONObject();
-        result.put(FIELD_NAME, raceColumn.getName());
-        return result;
+        return raceColumnSerializer.serialize(raceColumn);
     }
 
 }

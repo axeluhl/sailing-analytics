@@ -51,16 +51,13 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
         BoatClassJsonSerializer boatClassSerializer = new BoatClassJsonSerializer();
         CompetitorMasterDataJsonSerializer competitorSerializer = new CompetitorMasterDataJsonSerializer(
                 boatClassSerializer, teamSerializer);
-        
         JsonSerializer<Color> colorSerializer = new ColorJsonSerializer();
         JsonSerializer<Fleet> fleetSerializer = new FleetJsonSerializer(colorSerializer);
-
-        JsonSerializer<RaceLogEvent> raceLogEventSerializer = RaceLogEventSerializer.create(competitorSerializer);
-
         JsonSerializer<RaceColumn> raceColumnSerializer = new RaceColumnMasterDataJsonSerializer();
+        JsonSerializer<RaceLogEvent> raceLogEventSerializer = RaceLogEventSerializer.create(competitorSerializer);
         eventSerializer = new EventMasterDataJsonSerializer();
         leadboardSerializer = new LeaderboardMasterDataJsonSerializer(competitorSerializer, raceColumnSerializer, raceLogEventSerializer);
-        regattaSerializer = new RegattaMasterDataJsonSerializer(fleetSerializer);
+        regattaSerializer = new RegattaMasterDataJsonSerializer(fleetSerializer, raceColumnSerializer);
     }
 
     @Override

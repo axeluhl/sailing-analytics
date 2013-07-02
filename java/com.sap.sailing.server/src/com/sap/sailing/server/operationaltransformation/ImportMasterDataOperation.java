@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.EventImpl;
@@ -261,8 +262,21 @@ public class ImportMasterDataOperation extends
             String name = singleSeriesData.getName();
             boolean isMedal = singleSeriesData.isMedal();
             Iterable<Fleet> fleets = singleSeriesData.getFleets();
-            Iterable<String> raceColumnNames = singleSeriesData.getRaceColumnNames();
+            Iterable<RaceColumnMasterData> raceColumnMasterData = singleSeriesData.getRaceColumnNames();
+            List<String> raceColumnNames = new ArrayList<String>();
+            for (RaceColumnMasterData rcmd : raceColumnMasterData) {
+                raceColumnNames.add(rcmd.getName());
+            }
             SeriesImpl newSeries = new SeriesImpl(name, isMedal, fleets, raceColumnNames, toState);
+            Iterator<RaceColumnMasterData> raceColumnMasterDataIter = raceColumnMasterData.iterator();
+            Iterator<? extends RaceColumnInSeries> raceColumnIter = newSeries.getRaceColumns().iterator();
+            while (raceColumnMasterDataIter.hasNext()) {
+                RaceColumnMasterData rcmd = raceColumnMasterDataIter.next();
+                RaceColumnInSeries raceColumn = raceColumnIter.next();
+                for (Map.Entry<String, RaceIdentifier> e : rcmd.getRaceIdentifiersByFleetName().entrySet()) {
+                    raceColumn.setRaceIdentifier(raceColumn.getFleetByName(e.getKey()), e.getValue());
+                }
+            }
             int[] resultDiscardingRule = singleSeriesData.getDiscardingRule();
             if (resultDiscardingRule != null) {
                 newSeries.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(resultDiscardingRule));
