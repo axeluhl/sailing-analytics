@@ -12,13 +12,17 @@ public class NationalityJsonDeserialzer implements JsonDeserializer<Nationality>
 
     @Override
     public Nationality deserialize(JSONObject object) throws JsonDeserializationException {
-        String threeLetterIOCAcronym = (String) object.get(NationalityJsonSerializer.FIELD_IOC);
-        if (threeLetterIOCAcronym == null) {
-            return null;
+        final Nationality result;
+        if (object == null) {
+            result = null;
+        } else {
+            String threeLetterIOCAcronym = (String) object.get(NationalityJsonSerializer.FIELD_IOC);
+            if (threeLetterIOCAcronym == null) {
+                result = null;
+            } else {
+                result = new NationalityImpl(threeLetterIOCAcronym);
+            }
         }
-        return new NationalityImpl(threeLetterIOCAcronym);
+        return result;
     }
-    
-    
-
 }
