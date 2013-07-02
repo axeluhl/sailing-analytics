@@ -56,7 +56,7 @@ import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.masterdata.impl.LeaderboardGroupMasterDataJsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.masterdata.impl.MasterDataSerializerForNames;
+import com.sap.sailing.server.gateway.serialization.masterdata.impl.TopLevelMasterDataSerializer;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.CreationCount;
 import com.sap.sailing.server.operationaltransformation.DummyTrackedRace;
@@ -203,7 +203,7 @@ public class MasterDataImportTest {
         leaderboard.setDisplayName(competitorToSuppress, nickName);
 
         // Serialize
-        MasterDataSerializerForNames serializer = new MasterDataSerializerForNames(
+        TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
                 sourceService.getLeaderboardGroups(), sourceService.getAllEvents());
         Set<String> names = new HashSet<String>();
         names.add(TEST_GROUP_NAME);
