@@ -46,11 +46,12 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
 
     @Override
-    public void addMediaTrack(MediaTrack mediaTrack) {
+    public String addMediaTrack(MediaTrack mediaTrack) {
         if (mediaTrack.dbId != null) {
             throw new IllegalStateException("Property dbId must not be null for newly created media track.");
         }
         racingEventService().mediaTrackAdded(mediaTrack);
+        return mediaTrack.dbId;
     }
 
     @Override
@@ -77,4 +78,5 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     public void updateDuration(MediaTrack mediaTrack) {
         racingEventService().mediaTrackDurationChanged(mediaTrack);
     }
+
 }
