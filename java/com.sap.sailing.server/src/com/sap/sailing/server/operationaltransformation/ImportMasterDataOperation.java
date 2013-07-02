@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
@@ -32,6 +33,7 @@ import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRul
 import com.sap.sailing.domain.masterdataimport.EventMasterData;
 import com.sap.sailing.domain.masterdataimport.FlexibleLeaderboardMasterData;
 import com.sap.sailing.domain.masterdataimport.LeaderboardGroupMasterData;
+import com.sap.sailing.domain.masterdataimport.RaceColumnMasterData;
 import com.sap.sailing.domain.masterdataimport.RegattaLeaderboardMasterData;
 import com.sap.sailing.domain.masterdataimport.RegattaMasterData;
 import com.sap.sailing.domain.masterdataimport.ScoreCorrectionMasterData;
@@ -223,8 +225,11 @@ public class ImportMasterDataOperation extends
     private void addRaceColumnsIfNecessary(LeaderboardMasterData board, Leaderboard newLeaderboard,
             RacingEventService toState) {
         if (board instanceof FlexibleLeaderboardMasterData) {
-            for (Pair<String, Boolean> raceColumn : ((FlexibleLeaderboardMasterData) board).getRaceColumns()) {
-                toState.addColumnToLeaderboard(raceColumn.getA(), board.getName(), raceColumn.getB());
+            for (RaceColumnMasterData raceColumnMasterData : ((FlexibleLeaderboardMasterData) board).getRaceColumns()) {
+                RaceColumn raceColumn = toState.addColumnToLeaderboard(raceColumnMasterData.getName(), board.getName(), raceColumnMasterData.isMedal());
+                for (Map.Entry<String, RaceIdentifier> e : raceColumnMasterData.getRaceIdentifiersByFleetName().entrySet()) {
+                    raceColumn.setRaceIdentifier(raceColumn.getFleetByName(e.getKey()), e.getValue());
+                }
             }
         }
     }
