@@ -442,8 +442,8 @@ if [[ "$@" == "remote-deploy" ]]; then
     esac
 
     echo ""
-    $SSH_CMD "cd $REMOTE_SERVER && bash -l c $REMOTE_SERVER/stop"
-    $SSH_CMD "cd $REMOTE_SERVER && bash -l c $REMOTE_SERVER/start"
+    $SSH_CMD "cd $REMOTE_SERVER && bash -l -c $REMOTE_SERVER/stop"
+    $SSH_CMD "cd $REMOTE_SERVER && bash -l -c $REMOTE_SERVER/start"
 
     echo "Restarted remote server. Please check."
 fi
