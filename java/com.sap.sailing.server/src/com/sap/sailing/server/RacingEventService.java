@@ -541,4 +541,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId);
 
+    void createEventWithoutReplication(Event result);
+
+    Event addCourseAreaWithoutReplication(Serializable eventId, CourseArea courseArea);
+
 }

@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.LeaderboardMasterData;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -41,7 +42,8 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class ImportMasterDataOperation extends AbstractRacingEventServiceOperation<MasterDataImportObjectCreationCountImpl> {
+public class ImportMasterDataOperation extends
+        AbstractRacingEventServiceOperation<MasterDataImportObjectCreationCountImpl> {
 
     private static final long serialVersionUID = 3131715325307370303L;
 
@@ -138,13 +140,15 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
         }
     }
 
-    private void addSuppressedCompetitors(Leaderboard leaderboard, List<String> suppressedCompetitors, Map<String, Competitor> competitorsById) {
+    private void addSuppressedCompetitors(Leaderboard leaderboard, List<String> suppressedCompetitors,
+            Map<String, Competitor> competitorsById) {
         for (String id : suppressedCompetitors) {
             leaderboard.setSuppressed(competitorsById.get(id), true);
         }
     }
 
-    private void addCarriedPoints(Leaderboard leaderboard, Map<String, Double> carriedPoints, Map<String, Competitor> competitorsById) {
+    private void addCarriedPoints(Leaderboard leaderboard, Map<String, Double> carriedPoints,
+            Map<String, Competitor> competitorsById) {
         for (Entry<String, Double> entry : carriedPoints.entrySet()) {
             leaderboard.setCarriedPoints(competitorsById.get(entry.getKey()), entry.getValue());
         }
@@ -170,7 +174,8 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
      * @param leaderboard
      * @return the race column and fleet the dummy was attached to
      */
-    public Pair<RaceColumn, Fleet> addDummyTrackedRace(Iterable<Competitor> competitors, Leaderboard leaderboard, Regatta regatta) {
+    public Pair<RaceColumn, Fleet> addDummyTrackedRace(Iterable<Competitor> competitors, Leaderboard leaderboard,
+            Regatta regatta) {
         RaceColumn raceColumn = null;
         Fleet fleet = null;
         Iterable<RaceColumn> raceColumns = leaderboard.getRaceColumns();
@@ -273,7 +278,8 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
                 String pubString = event.getPubUrl();
                 String venueName = event.getVenueName();
                 boolean isPublic = event.isPublic();
-                toState.addEvent(name, venueName, pubString, isPublic, UUID.fromString(id), new ArrayList<String>());
+                Event newEvent= new EventImpl(name, venueName, pubString, isPublic, UUID.fromString(id));
+                toState.createEventWithoutReplication(newEvent);
                 creationCount.addOneEvent();
             }
             Iterable<Pair<String, String>> courseAreas = event.getCourseAreas();
@@ -284,8 +290,8 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
                     alreadyExists = true;
                 }
                 if (!alreadyExists) {
-                    toState.addCourseArea(UUID.fromString(id), courseAreaEntry.getB(),
-                            UUID.fromString(courseAreaEntry.getA()));
+                    CourseArea courseArea = domainFactory.getOrCreateCourseArea(UUID.fromString(courseAreaEntry.getA()), courseAreaEntry.getB());
+                    toState.addCourseAreaWithoutReplication(UUID.fromString(id), courseArea);
                 }
             }
         }

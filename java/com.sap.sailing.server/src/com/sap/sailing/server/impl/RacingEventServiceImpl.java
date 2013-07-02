@@ -1814,14 +1814,22 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public Event addEvent(String eventName, String venue, String publicationUrl, boolean isPublic, Serializable id, List<String> courseAreaNames) {
         Event result = new EventImpl(eventName, venue, publicationUrl, isPublic, id);
         synchronized (eventsById) {
-            if (eventsById.containsKey(result.getId())) {
-                throw new IllegalArgumentException("Event with ID " + result.getId() + " already exists which is pretty surprising...");
-            }
-            eventsById.put(result.getId(), result);
+            createEventWithoutReplication(result);
             replicate(new CreateEvent(eventName, venue, publicationUrl, isPublic, id, courseAreaNames));
         }
         mongoObjectFactory.storeEvent(result);
         return result;
+    }
+
+    @Override
+    public void createEventWithoutReplication(Event result) {
+        synchronized (eventsById) {
+            if (eventsById.containsKey(result.getId())) {
+                throw new IllegalArgumentException("Event with ID " + result.getId()
+                        + " already exists which is pretty surprising...");
+            }
+            eventsById.put(result.getId(), result);
+        }
     }
 
     @Override
@@ -1890,15 +1898,23 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public CourseArea addCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId) {
         CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaId, courseAreaName);
         synchronized (eventsById) {
+            Event event = addCourseAreaWithoutReplication(eventId, courseArea);
+            replicate(new AddCourseArea(eventId, courseAreaName, courseAreaId));
+            mongoObjectFactory.storeEvent(event);
+        }
+        return courseArea;
+    }
+
+    @Override
+    public Event addCourseAreaWithoutReplication(Serializable eventId, CourseArea courseArea) {
+        synchronized (eventsById) {
             if (!eventsById.containsKey(eventId)) {
                 throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
             }
             Event event = eventsById.get(eventId);
             event.getVenue().addCourseArea(courseArea);
-            replicate(new AddCourseArea(eventId, courseAreaName, courseAreaId));
-            mongoObjectFactory.storeEvent(event);
+            return event;
         }
-        return courseArea;
     }
 
     @Override
