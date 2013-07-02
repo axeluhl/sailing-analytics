@@ -6,6 +6,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
@@ -54,9 +55,11 @@ public class SeriesJsonSerializer implements JsonSerializer<Series> {
                 raceColumnJson.put(FIELD_NAME, raceColumn.getName());
                 raceColumnJson.put("isMedalRace" , raceColumn.isMedalRace());
                 if (trackedRace != null) {
+                    raceColumnJson.put("isLive", trackedRace.isLive(MillisecondsTimePoint.now()));
                     raceColumnJson.put("isTracked", true);
                     raceColumnJson.put("trackedRaceName", trackedRace.getRace().getName());
                 } else {
+                    raceColumnJson.put("isLive", false);
                     raceColumnJson.put("isTracked", false);
                     raceColumnJson.put("trackedRaceName", null);
                 }

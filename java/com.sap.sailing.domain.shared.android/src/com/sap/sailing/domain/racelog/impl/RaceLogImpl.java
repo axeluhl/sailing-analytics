@@ -160,7 +160,9 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
 
     @Override
     public void addAllListeners(HashSet<RaceLogEventVisitor> listeners) {
-        this.listeners = listeners;
+        synchronized (listeners) {
+            this.listeners.addAll(listeners);
+        }
     }
 
     @Override

@@ -225,15 +225,21 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * of the <code>raceColumn</code>, meaning there cannot be a tracked rank for the competitor regardless what
      * <code>trackedRankProvider</code> delivers.
      */
-    protected Double getCorrectedNonMaxedScore(Competitor competitor, RaceColumn raceColumn,
-            Callable<Integer> trackedRankProvider, ScoringScheme scoringScheme, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
+    protected Double getCorrectedNonMaxedScore(final Competitor competitor, final RaceColumn raceColumn,
+            Callable<Integer> trackedRankProvider, ScoringScheme scoringScheme,
+            final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
         Double correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
         Double result;
         if (correctedNonMaxedScore == null) {
             try {
                 int trackedRank = trackedRankProvider.call();
                 result = scoringScheme.getScoreForRank(raceColumn, competitor, trackedRank,
-                        getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher));
+                        new Callable<Integer>() {
+                            @Override
+                            public Integer call() {
+                                return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
+                            }
+                        });
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

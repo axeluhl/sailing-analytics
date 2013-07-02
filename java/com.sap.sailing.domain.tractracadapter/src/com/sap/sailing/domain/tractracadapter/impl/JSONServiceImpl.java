@@ -27,17 +27,23 @@ public class JSONServiceImpl implements JSONService {
         regattaName = (String) ((JSONObject) jsonObject.get("event")).get("name");
         for (Object raceEntry : (JSONArray) jsonObject.get("races")) {
             JSONObject jsonRaceEntry = (JSONObject) raceEntry;
-            RaceRecord raceRecord = new RaceRecord(jsonURL, regattaName,
-                    (String) jsonRaceEntry.get("name"), (String) jsonRaceEntry.get("url"),
-                    (String) jsonRaceEntry.get("id"),
-                    (String) jsonRaceEntry.get("tracking_starttime"),
-                    (String) jsonRaceEntry.get("tracking_endtime"),
-                    (String) jsonRaceEntry.get("race_starttime"),
-                    (String) jsonRaceEntry.get("classes"),
-                    (String) jsonRaceEntry.get("status"),
-                    /*loadLiveAndStoreURI*/ loadLiveAndStoredURI);
+            RaceRecord raceRecord = createRaceRecord(jsonURL, loadLiveAndStoredURI, jsonRaceEntry);
             raceRecords.add(raceRecord);
         }
+    }
+
+    private RaceRecord createRaceRecord(URL jsonURL, boolean loadLiveAndStoredURI, JSONObject jsonRaceEntry)
+            throws URISyntaxException, IOException {
+        RaceRecord raceRecord = new RaceRecord(jsonURL, regattaName,
+                (String) jsonRaceEntry.get("name"), (String) jsonRaceEntry.get("url"),
+                (String) jsonRaceEntry.get("id"),
+                (String) jsonRaceEntry.get("tracking_starttime"),
+                (String) jsonRaceEntry.get("tracking_endtime"),
+                (String) jsonRaceEntry.get("race_starttime"),
+                (String) jsonRaceEntry.get("classes"),
+                (String) jsonRaceEntry.get("status"),
+                /*loadLiveAndStoreURI*/ loadLiveAndStoredURI);
+        return raceRecord;
     }
     
     public JSONServiceImpl(URL jsonURL, String raceEntryId, boolean loadLiveAndStoredURI) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
@@ -47,15 +53,7 @@ public class JSONServiceImpl implements JSONService {
         for (Object raceEntry : (JSONArray) jsonObject.get("races")) {
             JSONObject jsonRaceEntry = (JSONObject) raceEntry;
             if (jsonRaceEntry.get("id").equals(raceEntryId)) {
-                RaceRecord raceRecord = new RaceRecord(jsonURL, regattaName,
-                        (String) jsonRaceEntry.get("name"), (String) jsonRaceEntry.get("url"),
-                        (String) jsonRaceEntry.get("id"),
-                        (String) jsonRaceEntry.get("tracking_starttime"),
-                        (String) jsonRaceEntry.get("tracking_endtime"),
-                        (String) jsonRaceEntry.get("race_starttime"),
-                        (String) jsonRaceEntry.get("classes"),
-                        (String) jsonRaceEntry.get("status"),
-                        /*loadLiveAndStoreURI*/ loadLiveAndStoredURI);
+                RaceRecord raceRecord = createRaceRecord(jsonURL, loadLiveAndStoredURI, jsonRaceEntry);
                 raceRecords.add(raceRecord);
             }
         }

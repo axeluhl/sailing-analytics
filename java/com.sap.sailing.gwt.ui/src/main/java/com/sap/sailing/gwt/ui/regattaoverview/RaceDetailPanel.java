@@ -1,12 +1,8 @@
 package com.sap.sailing.gwt.ui.regattaoverview;
 
-import java.util.Date;
-
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.i18n.client.constants.TimeZoneConstants;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Button;
@@ -18,7 +14,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.racelog.utils.GeoUtils;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.GateStartInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RRS26InfoDTO;
@@ -26,10 +21,24 @@ import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
 public class RaceDetailPanel extends SimplePanel {
 
+    public static String getDegMinSecFormatForDecimalDegree(double degree) {
+        degree = java.lang.Math.abs(degree);
+        int d = (int) degree;
+        degree = (degree - d) * 60.0;
+        int m = (int) degree;
+        double s = (degree - m) * 60;
+        if (degree < 0) { // put the sign back on the degrees
+            d = -d;
+        }
+        NumberFormat decimalFormat = NumberFormat.getFormat("##.###");
+        return "" + d + '\u00B0' + m + '\u2032' + decimalFormat.format(s) + '\u2033'; // add º, ', " symbols
+    }
+
     private static final int MAX_PROCEDURE_FIELDS = 2;
+
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
     private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat("dd.MM.yyyy");
-    private final DateTimeFormat durationFormatter = DateTimeFormat.getFormat("H'h' m'min' s'sec'");
+    private final DurationFormat durationFormatter = new DurationFormat();
     private final NumberFormat decimalFormat = NumberFormat.getFormat("#.##");
     private final FlagAlphabetInterpreter flagInterpreter;
     private final StringMessages stringMessages;
@@ -59,7 +68,7 @@ public class RaceDetailPanel extends SimplePanel {
             public void onClick(ClickEvent event) {
                 data = null;
                 if (closeButtonHandler != null) {
-                    closeButton.addClickHandler(closeButtonHandler);
+                    closeButtonHandler.onClick(event);
                 }
             }
         });
@@ -148,8 +157,8 @@ public class RaceDetailPanel extends SimplePanel {
 
         String finishDurationText = "";
         if (data.raceInfo.finishedTime != null && data.raceInfo.startTime != null) {
-            Date raceDuration = new Date(data.raceInfo.finishedTime.getTime() - data.raceInfo.startTime.getTime());
-            finishDurationText = "(" + durationFormatter.format(raceDuration) + ")";
+            finishDurationText = "(" + durationFormatter.format(data.raceInfo.startTime, data.raceInfo.finishedTime)
+                    + ")";
         }
         finishDurationLabel.setText(finishDurationText);
 
@@ -164,11 +173,14 @@ public class RaceDetailPanel extends SimplePanel {
         String vesselPositionText = stringMessages.unknown();
         String windText = stringMessages.unknown();
         if (data.raceInfo.lastWind != null) {
-            if (data.raceInfo.lastWind.position != null) {
-                vesselPositionText = new HTML(GeoUtils.getDegMinSecFormatForDecimalDegree(data.raceInfo.lastWind.position.latDeg)+" "
-                        + GeoUtils.getDegMinSecFormatForDecimalDegree(data.raceInfo.lastWind.position.lngDeg)+" ").getHTML();
+            if (data.raceInfo.lastWind.position != null) 
+            {
+                vesselPositionText = new HTML(
+                        getDegMinSecFormatForDecimalDegree(data.raceInfo.lastWind.position.latDeg) + " "
+                                + getDegMinSecFormatForDecimalDegree(data.raceInfo.lastWind.position.lngDeg) + " ")
+                        .getHTML();
             }
-            windText = new HTML(decimalFormat.format(data.raceInfo.lastWind.trueWindFromDeg) + "&deg; "
+            windText = new HTML(decimalFormat.format(data.raceInfo.lastWind.trueWindBearingDeg) + "&deg; "
                     + decimalFormat.format(data.raceInfo.lastWind.trueWindSpeedInKnots) + "knts").getHTML();
         }
         vesselPositionLabel.setText(vesselPositionText);
@@ -176,8 +188,6 @@ public class RaceDetailPanel extends SimplePanel {
 
         updateUiStartProcedureSpecifics();
     }
-
-    final TimeZoneConstants timeZoneConstants = GWT.create(TimeZoneConstants.class);
 
     private void updateUiStartProcedureSpecifics() {
         resetProcedureGrid();

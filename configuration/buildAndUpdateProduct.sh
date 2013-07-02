@@ -411,7 +411,7 @@ if [[ "$@" == "remote-deploy" ]]; then
     REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/servers'`
     REMOTE_SERVER="$REMOTE_HOME/$SERVER"
 
-    read -s -n1 -p "I will deploy the current GIT branch  to $REMOTE_SERVER_LOGIN:$REMOTE_SERVER. Is this correct (y/n)? " answer
+    read -s -n1 -p "I will deploy the current GIT branch to $REMOTE_SERVER_LOGIN:$REMOTE_SERVER. Is this correct (y/n)? " answer
     case $answer in
     "Y" | "y") OK=1;;
     *) echo "Aborting... nothing has been changed on remote server!"
@@ -446,4 +446,17 @@ if [[ "$@" == "remote-deploy" ]]; then
     $SSH_CMD "cd $REMOTE_SERVER && $REMOTE_SERVER/start"
 
     echo "Restarted remote server. Please check."
+fi
+
+if [[ "$@" == "deploy-startpage" ]]; then
+    TARGET_DIR_STARTPAGE=$ACDIR/tmp/jetty-0.0.0.0-8889-bundlefile-_-any-/webapp/
+    read -s -n1 -p "Copying $PROJECT_HOME/java/com.sap.sailing.www/index.html to $TARGET_DIR_STARTPAGE - is this ok (y/n)?" answer
+    case $answer in
+    "Y" | "y") OK=1;;
+    *) echo "Aborting... nothing has been changed for startpage!"
+    exit;;
+    esac
+
+    cp $PROJECT_HOME/java/com.sap.sailing.www/index.html $TARGET_DIR_STARTPAGE
+    echo "OK"
 fi

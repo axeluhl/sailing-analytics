@@ -82,6 +82,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
 
@@ -124,9 +126,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     private final RaceColumnListeners raceColumnListeners;
     
     /**
-     * A synchronized set that manages the difference between {@link #getCompetitors()} and {@link #getAllCompetitors()}.
+     * A set that manages the difference between {@link #getCompetitors()} and {@link #getAllCompetitors()}. Access
+     * is controlled by the {@link #suppressedCompetitorsLock} lock.
      */
     private final Set<Competitor> suppressedCompetitors;
+    private final NamedReentrantReadWriteLock suppressedCompetitorsLock;
 
     private final Map<Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>> raceDetailsAtEndOfTrackingCache;
 
@@ -341,7 +345,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
         this.crossLeaderboardResultDiscardingRule = resultDiscardingRule;
-        this.suppressedCompetitors = Collections.synchronizedSet(new HashSet<Competitor>());
+        this.suppressedCompetitors = new HashSet<Competitor>();
+        this.suppressedCompetitorsLock = new NamedReentrantReadWriteLock("suppressedCompetitorsLock", /* fair */ false);
         this.raceColumnListeners = new RaceColumnListeners();
         this.raceDetailsAtEndOfTrackingCache = new HashMap<Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>>();
         initTransientFields();
@@ -891,7 +896,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
                 if (!markPassings.isEmpty()) {
                     TimePoint from = trackedRace.getStartOfRace(); // start counting at race start, not when the competitor passed the line
-                    if (!timePoint.before(from)) { // but only if the race started after timePoint
+                    if (from != null && !timePoint.before(from)) { // but only if the race started after timePoint
                         TimePoint to;
                         if (timePoint.after(markPassings.last().getTimePoint())
                                 && markPassings.last().getWaypoint() == trackedRace.getRace().getCourse()
@@ -962,24 +967,37 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      * nor {@link #getCompetitorsFromBestToWorst(RaceColumn, TimePoint)}.
      */
     private boolean isSuppressed(Competitor competitor) {
-        // no synchronization required because we use a synchronized set as implementation
-        return suppressedCompetitors.contains(competitor);
+        LockUtil.lockForRead(suppressedCompetitorsLock);
+        try {
+            return suppressedCompetitors.contains(competitor);
+        } finally {
+            LockUtil.unlockAfterRead(suppressedCompetitorsLock);
+        }
     }
     
     @Override
     public Iterable<Competitor> getSuppressedCompetitors() {
-        return new HashSet<Competitor>(suppressedCompetitors);
+        LockUtil.lockForRead(suppressedCompetitorsLock);
+        try {
+            return new HashSet<Competitor>(suppressedCompetitors);
+        } finally {
+            LockUtil.unlockAfterRead(suppressedCompetitorsLock);
+        }
     }
     
     @Override
     public void setSuppressed(Competitor competitor, boolean suppressed) {
-        // no synchronization required because we use a synchronized set as implementation
-        if (suppressed) {
-            suppressedCompetitors.add(competitor);
-        } else {
-            suppressedCompetitors.remove(competitor);
+        LockUtil.lockForWrite(suppressedCompetitorsLock);
+        try {
+            if (suppressed) {
+                suppressedCompetitors.add(competitor);
+            } else {
+                suppressedCompetitors.remove(competitor);
+            }
+            getScoreCorrection().notifyListenersAboutIsSuppressedChange(competitor, suppressed);
+        } finally {
+            LockUtil.unlockAfterWrite(suppressedCompetitorsLock);
         }
-        getScoreCorrection().notifyListenersAboutIsSuppressedChange(competitor, suppressed);
     }
 
     @Override
