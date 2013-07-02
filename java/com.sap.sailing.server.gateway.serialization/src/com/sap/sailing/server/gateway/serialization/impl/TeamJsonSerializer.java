@@ -10,6 +10,8 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 public class TeamJsonSerializer implements JsonSerializer<Team> {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_SAILORS = "sailors";
+    public static final String FIELD_COACH = "coach";
+    public static final String FIELD_NATIONALITY = "nationality";
     
     private final JsonSerializer<Person> personJsonSerializer;
 
@@ -21,6 +23,8 @@ public class TeamJsonSerializer implements JsonSerializer<Team> {
     public JSONObject serialize(Team team) {
         JSONObject result = new JSONObject();
         result.put(FIELD_NAME, team.getName());
+        
+        result.put(FIELD_COACH, personJsonSerializer.serialize(team.getCoach()));
         
         JSONArray jsonSailors = new JSONArray();
         for (Person sailor : team.getSailors()) {
