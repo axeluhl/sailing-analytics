@@ -701,18 +701,39 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public Regatta createRegatta(String baseRegattaName, String boatClassName,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId) {
+        Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(baseRegattaName, boatClassName, id, series, persistent,
+                scoringScheme, defaultCourseAreaId);
+        Regatta regatta = regattaWithCreatedFlag.getA();
+        if (regattaWithCreatedFlag.getB()) {
+            replicateSpecificRegattaWithoutRaceColumns(regatta);
+        }
+        return regatta;
+    }
+
+    @Override
+    public Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName, Serializable id,
+            Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
+            Serializable defaultCourseAreaId) {
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                 mongoObjectFactory, 
                 domainObjectFactory);
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
         Regatta regatta = new RegattaImpl(raceLogStore, baseRegattaName,
                 getBaseDomainFactory().getOrCreateBoatClass(boatClassName), series, persistent, scoringScheme, id, courseArea);
+        boolean wasCreated = false;
+        if (!regattasByName.containsKey(regatta.getName())) {
+            wasCreated  = true;
+            logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName of "+this);
+            regattasByName.put(regatta.getName(), regatta);
+            regatta.addRegattaListener(this);
+            regatta.addRaceColumnListener(raceLogReplicator);
+            regatta.addRaceColumnListener(raceLogScoringReplicator);
+        }
         logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on "+this);
-        cacheAndReplicateSpecificRegattaWithoutRaceColumns(regatta);
         if (persistent) {
             updateStoredRegatta(regatta);
         }
-        return regatta;
+        return new Pair<Regatta, Boolean>(regatta, wasCreated);
     }
 
     @Override
@@ -835,35 +856,25 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     /**
-     * If <code>regatta</code> is not yet in {@link #regattasByName}, it is added, this service is
-     * {@link Regatta#addRegattaListener(RegattaListener) added} as regatta listener, and the regatta and all its
+     * The regatta and all its
      * contained {@link Regatta#getAllRaces() races} are replicated to all replica.
      * 
      * @param regatta
      *            the series of this regatta must not have any {@link Series#getRaceColumns() race columns associated
      *            (yet)}.
      */
-    private void cacheAndReplicateSpecificRegattaWithoutRaceColumns(Regatta regatta) {
-        if (!regattasByName.containsKey(regatta.getName())) {
-            logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName of "+this);
-            regattasByName.put(regatta.getName(), regatta);
-            regatta.addRegattaListener(this);
-            regatta.addRaceColumnListener(raceLogReplicator);
-            regatta.addRaceColumnListener(raceLogScoringReplicator);
-
-            Serializable courseAreaId = null;
-            if (regatta.getDefaultCourseArea() != null) {
-                courseAreaId = regatta.getDefaultCourseArea().getId();
-            }
-
-            replicate(new AddSpecificRegatta(
-                    regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta
-                            .getBoatClass().getName(), regatta.getId(), getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta),
-                            regatta.isPersistent(), regatta.getScoringScheme(), courseAreaId));
-            RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
-            for (RaceDefinition race : regatta.getAllRaces()) {
-                replicate(new AddRaceDefinition(regattaIdentifier, race));
-            }
+    private void replicateSpecificRegattaWithoutRaceColumns(Regatta regatta) {
+        Serializable courseAreaId = null;
+        if (regatta.getDefaultCourseArea() != null) {
+            courseAreaId = regatta.getDefaultCourseArea().getId();
+        }
+        replicate(new AddSpecificRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta
+                .getBoatClass().getName(), regatta.getId(),
+                getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent(),
+                regatta.getScoringScheme(), courseAreaId));
+        RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
+        for (RaceDefinition race : regatta.getAllRaces()) {
+            replicate(new AddRaceDefinition(regattaIdentifier, race));
         }
     }
 
@@ -1803,14 +1814,22 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public Event addEvent(String eventName, String venue, String publicationUrl, boolean isPublic, Serializable id, List<String> courseAreaNames) {
         Event result = new EventImpl(eventName, venue, publicationUrl, isPublic, id);
         synchronized (eventsById) {
-            if (eventsById.containsKey(result.getId())) {
-                throw new IllegalArgumentException("Event with ID " + result.getId() + " already exists which is pretty surprising...");
-            }
-            eventsById.put(result.getId(), result);
+            createEventWithoutReplication(result);
             replicate(new CreateEvent(eventName, venue, publicationUrl, isPublic, id, courseAreaNames));
         }
         mongoObjectFactory.storeEvent(result);
         return result;
+    }
+
+    @Override
+    public void createEventWithoutReplication(Event result) {
+        synchronized (eventsById) {
+            if (eventsById.containsKey(result.getId())) {
+                throw new IllegalArgumentException("Event with ID " + result.getId()
+                        + " already exists which is pretty surprising...");
+            }
+            eventsById.put(result.getId(), result);
+        }
     }
 
     @Override
@@ -1879,15 +1898,23 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public CourseArea addCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId) {
         CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaId, courseAreaName);
         synchronized (eventsById) {
+            Event event = addCourseAreaWithoutReplication(eventId, courseArea);
+            replicate(new AddCourseArea(eventId, courseAreaName, courseAreaId));
+            mongoObjectFactory.storeEvent(event);
+        }
+        return courseArea;
+    }
+
+    @Override
+    public Event addCourseAreaWithoutReplication(Serializable eventId, CourseArea courseArea) {
+        synchronized (eventsById) {
             if (!eventsById.containsKey(eventId)) {
                 throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
             }
             Event event = eventsById.get(eventId);
             event.getVenue().addCourseArea(courseArea);
-            replicate(new AddCourseArea(eventId, courseAreaName, courseAreaId));
-            mongoObjectFactory.storeEvent(event);
+            return event;
         }
-        return courseArea;
     }
 
     @Override
