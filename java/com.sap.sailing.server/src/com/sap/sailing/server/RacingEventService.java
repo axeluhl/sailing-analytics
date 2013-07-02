@@ -537,4 +537,16 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
 
+    /**
+     * @return a pair with the found or created regatta, and a boolean that tells whether the regatta was created during
+     *         the call
+     */
+    Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName, Serializable id,
+            Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
+            Serializable defaultCourseAreaId);
+
+    void createEventWithoutReplication(Event result);
+
+    Event addCourseAreaWithoutReplication(Serializable eventId, CourseArea courseArea);
+
 }

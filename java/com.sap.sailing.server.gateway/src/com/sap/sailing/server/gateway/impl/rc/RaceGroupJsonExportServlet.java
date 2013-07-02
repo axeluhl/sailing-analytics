@@ -20,6 +20,7 @@ import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceCellJsonSerializer;
@@ -88,7 +89,8 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
     }
 
     private static JsonSerializer<RaceLog> createRaceLogSerializer() {
-        return new RaceLogSerializer(RaceLogEventSerializer.create(new CompetitorJsonSerializer(new TeamJsonSerializer(new PersonJsonSerializer()))));
+        return new RaceLogSerializer(RaceLogEventSerializer.create(new CompetitorJsonSerializer(new TeamJsonSerializer(
+                new PersonJsonSerializer(new NationalityJsonSerializer())))));
     }
 
 }
