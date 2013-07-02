@@ -1,6 +1,8 @@
 package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.json.simple.JSONArray;
@@ -67,7 +69,7 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
 
     @Override
     public LeaderboardGroupMasterData deserialize(JSONObject object) throws JsonDeserializationException {
-        Set<LeaderboardMasterData> leaderboards = new HashSet<LeaderboardMasterData>();
+        List<LeaderboardMasterData> leaderboards = new ArrayList<LeaderboardMasterData>();
         JSONArray leaderboardsJson = (JSONArray) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_LEADERBOARDS);
         for (Object leaderboardObject : leaderboardsJson) {
             JSONObject leaderboardJson = (JSONObject) leaderboardObject;
