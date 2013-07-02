@@ -22,6 +22,7 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -40,13 +41,13 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class ImportMasterDataOperation extends AbstractRacingEventServiceOperation<CreationCount> {
+public class ImportMasterDataOperation extends AbstractRacingEventServiceOperation<MasterDataImportObjectCreationCountImpl> {
 
     private static final long serialVersionUID = 3131715325307370303L;
 
     private LeaderboardGroupMasterData masterData;
 
-    private CreationCount creationCount = new CreationCount();
+    private MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
 
     private DomainFactory domainFactory = DomainFactory.INSTANCE;
 
@@ -55,7 +56,7 @@ public class ImportMasterDataOperation extends AbstractRacingEventServiceOperati
     }
 
     @Override
-    public CreationCount internalApplyTo(RacingEventService toState) throws Exception {
+    public MasterDataImportObjectCreationCountImpl internalApplyTo(RacingEventService toState) throws Exception {
         createLeaderboardGroupWithAllRelatedObjects(masterData, toState);
         return creationCount;
     }

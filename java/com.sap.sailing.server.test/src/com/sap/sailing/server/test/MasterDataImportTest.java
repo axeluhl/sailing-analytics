@@ -18,7 +18,6 @@ import org.json.simple.JSONObject;
 import org.junit.After;
 import org.junit.Test;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.sap.sailing.domain.base.Boat;
@@ -44,6 +43,8 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
@@ -58,7 +59,6 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.masterdata.impl.LeaderboardGroupMasterDataJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.TopLevelMasterDataSerializer;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
-import com.sap.sailing.server.operationaltransformation.CreationCount;
 import com.sap.sailing.server.operationaltransformation.DummyTrackedRace;
 import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 
@@ -82,18 +82,6 @@ public class MasterDataImportTest {
     }
 
     private void deleteCreatedDataFromDatabase() throws MalformedURLException, IOException, InterruptedException {
-        // Didnt use CollectionNames stuff since it was not visible in this package. Sucks as soon as these names
-        // change, I know..
-        DBCollection raceLogCollection = MongoDBService.INSTANCE.getDB().getCollection("RACE_LOGS");
-        raceLogCollection.ensureIndex(new BasicDBObject("RACE_LOG_EVENT_ID", null));
-        for (Serializable id : storedLogUUIDs) {
-            BasicDBObject query = new BasicDBObject();
-            query.put("RACE_LOG_EVENT.RACE_LOG_EVENT_ID", id);
-            DBCursor result = raceLogCollection.find(query);
-            while (result.hasNext()) {
-                raceLogCollection.remove(result.next());
-            }
-        }
         storedLogUUIDs.clear();
         RacingEventService service = new RacingEventServiceImpl();
         LeaderboardGroup group = service.getLeaderboardGroupByName(TEST_GROUP_NAME);
@@ -112,9 +100,23 @@ public class MasterDataImportTest {
         if (regatta != null) {
             service.removeRegatta(regatta);
         }
-        // DBCursor cursor = raceLogCollection.find();
-        // while (cursor.hasNext()) {
-        // raceLogCollection.remove(cursor.next());
+        DBCollection raceLogCollection = MongoDBService.INSTANCE.getDB().getCollection("RACE_LOGS");
+        //Removes all race log events
+        DBCursor cursor = raceLogCollection.find();
+        while (cursor.hasNext()) {
+            raceLogCollection.remove(cursor.next());
+        }
+        // This should only delete those logs created during this test. Sadly it doesn't seem to work.
+        // Didnt use CollectionNames stuff since it was not visible in this package. Sucks as soon as these names
+        // change, I know..
+        // raceLogCollection.ensureIndex(new BasicDBObject("RACE_LOG_EVENT_ID", null));
+        // for (Serializable id : storedLogUUIDs) {
+        // BasicDBObject query = new BasicDBObject();
+        // query.put("RACE_LOG_EVENT.RACE_LOG_EVENT_ID", id);
+        // DBCursor result = raceLogCollection.find(query);
+        // while (result.hasNext()) {
+        // raceLogCollection.remove(result.next());
+        // }
         // }
     }
 
@@ -180,8 +182,9 @@ public class MasterDataImportTest {
 
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
-        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(new MillisecondsTimePoint(1372421236312L), 1,
-                new MillisecondsTimePoint(1372489200000L));
+        TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1,
+                logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
 
@@ -216,7 +219,7 @@ public class MasterDataImportTest {
         // Deserialization copied from doPost in MasterDataByLeaderboardGroupJsonPostServlet
         RacingEventService destService = new RacingEventServiceImplMock();
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        CreationCount creationCount = new CreationCount();
+        MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
         JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = LeaderboardGroupMasterDataJsonDeserializer
                 .create(domainFactory);
         JSONArray leaderboardGroupsMasterDataJsonArray = masterDataOverallArray;
@@ -280,6 +283,6 @@ public class MasterDataImportTest {
 
         // Check for race log event
         Assert.assertNotNull(raceColumnOnTarget.getRaceLog(fleet1OnTarget).getFirstRawFix());
-        Assert.assertEquals(logEvent.getId(), raceColumnOnTarget.getRaceLog(fleet1OnTarget).getFirstRawFix().getId());
+        Assert.assertEquals(logEvent.getId(), raceColumnOnTarget.getRaceLog(fleet1OnTarget).getFirstRawFixAtOrAfter(logTimePoint).getId());
     }
 }
