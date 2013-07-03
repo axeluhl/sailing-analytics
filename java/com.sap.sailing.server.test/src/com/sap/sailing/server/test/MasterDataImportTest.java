@@ -458,6 +458,176 @@ public class MasterDataImportTest {
     }
     
     @Test
+    public void testMasterDataImportWithOverrideWithoutHttpStack() throws MalformedURLException, IOException, InterruptedException {
+        // Setup source service
+        RacingEventService sourceService = new RacingEventServiceImpl();
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID,
+                new ArrayList<String>());
+        UUID courseAreaUUID = UUID.randomUUID();
+        CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
+        event.getVenue().addCourseArea(courseArea);
+
+        List<String> raceColumnNames = new ArrayList<String>();
+        String raceColumnName = "T1";
+        raceColumnNames.add(raceColumnName);
+        raceColumnNames.add("T2");
+
+        List<Series> series = new ArrayList<Series>();
+        List<Fleet> fleets = new ArrayList<Fleet>();
+        FleetImpl testFleet1 = new FleetImpl("testFleet1");
+        fleets.add(testFleet1);
+        fleets.add(new FleetImpl("testFleet2"));
+        series.add(new SeriesImpl("testSeries", false, fleets, raceColumnNames, sourceService));
+        UUID regattaUUID = UUID.randomUUID();
+        Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
+                courseAreaUUID);
+        event.addRegatta(regatta);
+        int[] discardRule = { 1, 2, 3, 4 };
+        Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
+                "testDisplayName", discardRule);
+        List<String> leaderboardNames = new ArrayList<String>();
+        leaderboardNames.add(leaderboard.getName());
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
+                leaderboardNames, null, null);
+
+        // Set tracked Race with competitors
+        Set<Competitor> competitors = new HashSet<Competitor>();
+        UUID competitorUUID = UUID.randomUUID();
+        Set<Person> sailors = new HashSet<Person>();
+        sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
+                "Oberhoschy"));
+        Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
+                "Der Lennart halt");
+        Team team = new TeamImpl("Pros", sailors, coach);
+        BoatClass boatClass = new BoatClassImpl("H16", true);
+        Boat boat = new BoatImpl("Wingy", boatClass, "GER70133");
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
+        competitors.add(competitor);
+        UUID competitorToSuppressUUID = UUID.randomUUID();
+        Set<Person> sailors2 = new HashSet<Person>();
+        sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
+                "segelt auch mit"));
+        Person coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
+                "Bester Coach");
+        Team team2 = new TeamImpl("Noobs", sailors2, coach2);
+        Boat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
+        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
+        competitors.add(competitorToSuppress);
+        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta);
+
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        raceColumn.setTrackedRace(testFleet1, trackedRace);
+
+        // Set log event
+        RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
+        TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1,
+                logTimePoint);
+        raceColumn.getRaceLog(testFleet1).add(logEvent);
+        storedLogUUIDs.add(logEvent.getId());
+
+        // Set score correction
+        double scoreCorrection = 12.0;
+        leaderboard.getScoreCorrection().correctScore(competitor, raceColumn, scoreCorrection);
+        MaxPointsReason maxPointsReason = MaxPointsReason.DNS;
+        leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, maxPointsReason);
+
+        // Set carried Points
+        double carriedPoints = 2.0;
+        leaderboard.setCarriedPoints(competitor, carriedPoints);
+
+        // Set suppressed competitor
+        leaderboard.setSuppressed(competitorToSuppress, true);
+
+        // Set display name
+        String nickName = "Angie";
+        leaderboard.setDisplayName(competitorToSuppress, nickName);
+
+        // Serialize
+        TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
+                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(), sourceService.getPersistentRegattasForRaceIDs());
+        Set<String> names = new HashSet<String>();
+        names.add(TEST_GROUP_NAME);
+        JSONArray masterDataOverallArray = serializer.serialize(names);
+        Assert.assertNotNull(masterDataOverallArray);
+
+        // Delete all data above from the database, to allow recreating all of it on target server
+        deleteCreatedDataFromDatabase();
+        
+        // Create existing data on target
+        RacingEventService destService = new RacingEventServiceImplMock();
+        String venueNameToOverride = "Override";
+        Event eventToOverride = destService.addEvent(TEST_EVENT_NAME, venueNameToOverride, "", false, eventUUID,
+                new ArrayList<String>());
+        CourseArea courseAreaToOverride = new CourseAreaImpl("testAreaToOverride", courseAreaUUID);
+        eventToOverride.getVenue().addCourseArea(courseAreaToOverride);
+        
+        List<String> raceColumnNamesToOverride = new ArrayList<String>();
+        String raceColumnNameToOveride = "T1tooverride";
+        raceColumnNamesToOverride.add(raceColumnNameToOveride);
+
+        List<Series> seriesToOverride = new ArrayList<Series>();
+        List<Fleet> fleetsToOverride = new ArrayList<Fleet>();
+        FleetImpl testFleet1ToOverride = new FleetImpl("testFleet1");
+        fleetsToOverride.add(testFleet1ToOverride);
+        seriesToOverride.add(new SeriesImpl("testSeries", false, fleetsToOverride, raceColumnNamesToOverride, destService));
+        Regatta regattaToOverride = destService.createRegatta("testRegatta", "29er", regattaUUID, seriesToOverride, true, new LowPoint(),
+                courseAreaUUID);
+        event.addRegatta(regattaToOverride);
+        Leaderboard leaderboardToOverride = destService.addRegattaLeaderboard(regattaToOverride.getRegattaIdentifier(),
+                "testDisplayNameNotToOverride", discardRule);
+        List<String> leaderboardNamesToOverride = new ArrayList<String>();
+        leaderboardNamesToOverride.add(leaderboardToOverride.getName());
+        destService.addLeaderboardGroup(TEST_GROUP_NAME,
+                "testGroupDescNotToOverride", false, leaderboardNamesToOverride, null, null);
+
+        // Deserialization copied from SailingServiceImpl
+        
+        DomainFactory domainFactory = DomainFactory.INSTANCE;
+        MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
+        JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = LeaderboardGroupMasterDataJsonDeserializer
+                .create(domainFactory);
+        JSONArray leaderboardGroupsMasterDataJsonArray = masterDataOverallArray;
+        // Actual import. Roughly copied from SailingServiceImpl
+        for (Object leaderBoardGroupMasterData : leaderboardGroupsMasterDataJsonArray) {
+            JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
+            LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
+                    .deserialize(leaderBoardGroupMasterDataJson);
+            ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, true);
+            creationCount.add(destService.apply(op));
+        }
+        
+        //---Asserts---
+        
+        Assert.assertNotNull(creationCount);
+        Event eventOnTarget = destService.getEvent(eventUUID);
+        Assert.assertNotNull(eventOnTarget);
+        
+        //Check if existing event didn't survive import
+        Assert.assertEquals(event.getVenue().getName(), eventOnTarget.getVenue().getName());
+        
+        //Check if existing course area survive import
+        Assert.assertEquals(courseArea.getName(), eventOnTarget.getVenue().getCourseAreas().iterator().next().getName());
+        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        Assert.assertNotNull(leaderboardGroupOnTarget);
+        //Check if existing leaderboard group didn't survive import
+        Assert.assertEquals(group.getDescription(), leaderboardGroupOnTarget.getDescription());
+        Leaderboard leaderboardOnTarget = destService.getLeaderboardByName(TEST_LEADERBOARD_NAME);
+        Assert.assertNotNull(leaderboardOnTarget);
+        Regatta regattaOnTarget = destService.getRegattaByName(TEST_LEADERBOARD_NAME);
+        Assert.assertNotNull(regattaOnTarget);
+
+        Assert.assertEquals(courseAreaUUID, eventOnTarget.getVenue().getCourseAreas().iterator().next().getId());
+
+        RaceColumn raceColumnOnTarget = leaderboardOnTarget.getRaceColumnByName(raceColumnName);
+        Assert.assertNotNull(raceColumnOnTarget);
+        //Check if existing leaderboard didn't survive import
+        Assert.assertEquals(leaderboard.getDisplayName(), leaderboardOnTarget.getDisplayName());
+        Assert.assertTrue(leaderboardOnTarget.getScoreCorrection().hasCorrectionFor(raceColumnOnTarget));
+        
+    }
+    
+    @Test
     public void testMasterDataImportForRegattaWithoutCourseArea() throws MalformedURLException, IOException, InterruptedException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();

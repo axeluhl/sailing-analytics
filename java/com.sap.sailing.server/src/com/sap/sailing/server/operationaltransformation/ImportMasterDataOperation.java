@@ -77,9 +77,9 @@ public class ImportMasterDataOperation extends
     private void createLeaderboardGroupWithAllRelatedObjects(LeaderboardGroupMasterData masterData,
             RacingEventService toState) {
         List<String> leaderboardNames = new ArrayList<String>();
-        Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         createCourseAreasAndEvents(masterData, toState);
         createRegattas(masterData, toState);
+        Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         for (LeaderboardMasterData board : masterData.getLeaderboards()) {
             if (existingLeaderboards.containsKey(board.getName())) {
                 if (override) {
