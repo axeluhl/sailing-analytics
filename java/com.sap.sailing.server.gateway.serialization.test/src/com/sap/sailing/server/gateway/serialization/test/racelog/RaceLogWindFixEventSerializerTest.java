@@ -28,6 +28,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeseriali
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogWindFixEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
@@ -35,22 +36,23 @@ import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogWindFixEventSerializer;
 
 public class RaceLogWindFixEventSerializerTest {
-    
+
     private RaceLogWindFixEventSerializer serializer;
     private RaceLogWindFixEventDeserializer deserializer;
     private RaceLogWindFixEvent event;
     private TimePoint now;
-    
+
     @Before
     public void setUp() {
         SharedDomainFactory factory = DomainFactory.INSTANCE;
-        serializer = new RaceLogWindFixEventSerializer(new CompetitorJsonSerializer(new TeamJsonSerializer(new PersonJsonSerializer())), 
-                new WindJsonSerializer(new PositionJsonSerializer()));
-        deserializer = new RaceLogWindFixEventDeserializer(new CompetitorDeserializer(factory), 
+        serializer = new RaceLogWindFixEventSerializer(new CompetitorJsonSerializer(new TeamJsonSerializer(
+                new PersonJsonSerializer(new NationalityJsonSerializer()))), new WindJsonSerializer(
+                new PositionJsonSerializer()));
+        deserializer = new RaceLogWindFixEventDeserializer(new CompetitorDeserializer(factory),
                 new WindJsonDeserializer(new PositionJsonDeserializer()));
 
         now = MillisecondsTimePoint.now();
-        
+
         event = RaceLogEventFactory.INSTANCE.createWindFixEvent(now, 0, createWindFix());
     }
 
@@ -58,16 +60,16 @@ public class RaceLogWindFixEventSerializerTest {
     public void testSerializeAndDeserializeRaceLogWindFixEvent() throws JsonDeserializationException {
         JSONObject jsonWindFixEvent = serializer.serialize(event);
         RaceLogWindFixEvent deserializedEvent = (RaceLogWindFixEvent) deserializer.deserialize(jsonWindFixEvent);
-        
+
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
         assertEquals(event.getTimePoint(), deserializedEvent.getTimePoint());
         assertEquals(0, Util.size(event.getInvolvedBoats()));
         assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
-        
+
         compareWind(event.getWindFix(), deserializedEvent.getWindFix());
     }
-    
+
     private void compareWind(Wind serializedWindFix, Wind deserializedWindFix) {
         assertEquals(serializedWindFix.getTimePoint(), deserializedWindFix.getTimePoint());
         assertNotNull(serializedWindFix.getPosition());
@@ -86,5 +88,5 @@ public class RaceLogWindFixEventSerializerTest {
         SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(10.4, bearing);
         return new WindImpl(position, now, speedBearing);
     }
-    
+
 }
