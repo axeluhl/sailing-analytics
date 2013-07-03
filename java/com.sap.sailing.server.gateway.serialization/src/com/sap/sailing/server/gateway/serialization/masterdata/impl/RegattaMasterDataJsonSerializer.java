@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -56,7 +57,12 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
         result.put(FIELD_ID, regatta.getId().toString());
         result.put(FIELD_BASE_NAME, regatta.getBaseName());
         result.put(FIELD_BOAT_CLASS_NAME, regatta.getBoatClass().getName());
-        result.put(FIELD_DEFAULT_COURSE_AREA_ID, regatta.getDefaultCourseArea().getId().toString());
+        CourseArea defaultCourseArea = regatta.getDefaultCourseArea();
+        if (defaultCourseArea != null) {
+            result.put(FIELD_DEFAULT_COURSE_AREA_ID, defaultCourseArea.getId().toString());
+        } else {
+            result.put(FIELD_DEFAULT_COURSE_AREA_ID, null);
+        }
         result.put(FIELD_SCORING_SCHEME_TYPE, regatta.getScoringScheme().getType().toString());
         result.put(FIELD_SERIES, createJsonArrayForSeries(regatta.getSeries()));
         result.put(FIELD_IS_PERSISTENT, regatta.isPersistent());
