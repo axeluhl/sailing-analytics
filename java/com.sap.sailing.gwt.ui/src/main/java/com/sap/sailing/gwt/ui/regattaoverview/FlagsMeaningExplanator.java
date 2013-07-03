@@ -1,68 +1,65 @@
 package com.sap.sailing.gwt.ui.regattaoverview;
 
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class FlagsMeaningExplanator {
 
-    public static String getFlagsMeaning(Flags upperFlag, Flags lowerFlag, boolean displayed) {
+    public static String getFlagsMeaning(StringMessages stringMessages, Flags upperFlag, Flags lowerFlag, boolean displayed) {
         if (upperFlag.equals(Flags.CLASS) && lowerFlag.equals(Flags.GOLF) && displayed) {
-            return "Flag displayed - five minutes till start - the startprocedure is a gate start";
+            return stringMessages.classAndGolfUp();
         } else if (upperFlag.equals(Flags.CLASS) && displayed) {
-            return "Flag displayed - five minutes till start";
+            return stringMessages.classDisplayed();
         } else if (upperFlag.equals(Flags.PAPA) && displayed) {
-            return "Start mode flag - four minutes till start";
+            return stringMessages.papaDisplayed();
         } else if (upperFlag.equals(Flags.BLACK) && displayed) {
-            return "Start mode flag - disqualification for early starters - four minutes till start";
-        } else if (upperFlag.equals(Flags.ZULU) && displayed) {
-            return "Start mode flag - penalties for early starters - four minutes till start";
-        } else if (upperFlag.equals(Flags.INDIA) && displayed) {
-            return "Start mode flag - penalties for early starters - one minute till start";
+            return stringMessages.blackDisplayed();
+        } else if ((upperFlag.equals(Flags.ZULU) || upperFlag.equals(Flags.INDIA)) && displayed) {
+            return stringMessages.zuluIndiaDisplayed();
         } else if (upperFlag.equals(Flags.PAPA) && !displayed) {
-            return "Start mode flag - one minute till start";
+            return stringMessages.papaRemoved();
         } else if (upperFlag.equals(Flags.BLACK) && !displayed) {
-            return "Start mode flag - disqualification for early starters - one minute till start";
-        } else if (upperFlag.equals(Flags.ZULU) && !displayed) {
-            return "Start mode flag - start with penalties for early starters - one minute till start";
-        } else if (upperFlag.equals(Flags.INDIA) && !displayed) {
-            return "Start mode flag - start with penalties for early starters - one minute till start";
+            return stringMessages.blackRemoved();
+        } else if ((upperFlag.equals(Flags.ZULU) || upperFlag.equals(Flags.INDIA)) && !displayed) {
+            return stringMessages.zuluIndiaRemoved();
         } else if (upperFlag.equals(Flags.CLASS) && !displayed) {
-            return "Flag removed - race starting signal";
+            return stringMessages.classFlagRemoved();
         } else if (upperFlag.equals(Flags.XRAY)) {
-            return "Individual recall - had early starters";
+            return stringMessages.xray();
         } else if (upperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
-            return "General recall - had too many early starters - start procedure will be repeated";
+            return stringMessages.firstSubstitute();
         } else if (upperFlag.equals(Flags.BLUE) && displayed) {
-            return "Flag displayed - first competitor passed the finishing line";
+            return stringMessages.blueFlagDisplayed();
         } else if (upperFlag.equals(Flags.BLUE) && !displayed) {
-            return "Flag removed - last competitor passed the finishing line or the finish time limit is passed";
+            return stringMessages.blueFlagRemoved();
         } else if (upperFlag.equals(Flags.GOLF) && !displayed) {
-            return "Flag removed - gate is closed";
+            return stringMessages.golfRemoved();
         } else if (upperFlag.equals(Flags.AP) && lowerFlag.equals(Flags.ALPHA) && displayed) {
-            return "Flag displayed - start postponed - no more racing today";
+            return stringMessages.answeringPennantOverAlphaDisplayed();
         } else if (upperFlag.equals(Flags.AP) && lowerFlag.equals(Flags.HOTEL) && displayed) {
-            return "Flag displayed - start postponed - further signals ashore";
+            return stringMessages.answeringPennantOverHotelDisplayed();
         } else if (upperFlag.equals(Flags.AP) && displayed) {
-            return "Flag displayed - start postponed";
+            return stringMessages.answeringPennantDisplayed();
         } else if (upperFlag.equals(Flags.AP) && !displayed) {
-            return "Flag removed - start procedure starts in one minute";
+            return stringMessages.answeringPennantRemoved();
         } else if (upperFlag.equals(Flags.NOVEMBER) && lowerFlag.equals(Flags.ALPHA) && displayed) {
-            return "Flag displayed - race abandoned - no more racing today";
+            return stringMessages.novemberOverAlphaDisplayed();
         } else if (upperFlag.equals(Flags.NOVEMBER) && lowerFlag.equals(Flags.HOTEL) && displayed) {
-            return "Flag displayed - start abandoned - further signals ashore";
+            return stringMessages.novemberOverHotelDisplayed();
         } else if (upperFlag.equals(Flags.NOVEMBER) && displayed) {
-            return "Flag displayed - start abandoned";
+            return stringMessages.novemberDisplayed();
         } else if (upperFlag.equals(Flags.BRAVO) && displayed) {
-            return "Protest time started";
+            return stringMessages.bravoDisplayed();
         } else if (upperFlag.equals(Flags.BRAVO) && !displayed) {
-            return "Protest time ended";
+            return stringMessages.bravoRemoved();
         } else if (upperFlag.equals(Flags.ESSTHREE) && displayed) {
-            return "Three minutes till start";
+            return stringMessages.essThreeDisplayed();
         } else if (upperFlag.equals(Flags.ESSTWO) && displayed) {
-            return "Two minutes till start";
+            return stringMessages.essTwoDisplayed();
         } else if (upperFlag.equals(Flags.ESSONE) && displayed) {
-            return "One minute till start";
+            return stringMessages.essOneDisplayed();
         } else if (upperFlag.equals(Flags.ESSONE) && !displayed) {
-            return "Race starting signal";
+            return stringMessages.essOneRemoved();
         }
         return "";
     }

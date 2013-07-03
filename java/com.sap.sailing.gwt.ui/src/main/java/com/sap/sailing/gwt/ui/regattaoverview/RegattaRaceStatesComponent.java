@@ -416,7 +416,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                     if (!entryDTO.raceInfo.lastLowerFlag.equals(Flags.NONE)) {
                         tooltip += " over " + entryDTO.raceInfo.lastLowerFlag.name();
                     }
-                    tooltip += " " + FlagsMeaningExplanator.getFlagsMeaning(
+                    tooltip += " " + FlagsMeaningExplanator.getFlagsMeaning(stringMessages,
                             entryDTO.raceInfo.lastUpperFlag, 
                             entryDTO.raceInfo.lastLowerFlag, 
                             entryDTO.raceInfo.isLastFlagDisplayed);
