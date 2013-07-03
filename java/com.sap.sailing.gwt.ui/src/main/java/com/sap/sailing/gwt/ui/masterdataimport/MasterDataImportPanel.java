@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -48,10 +49,12 @@ public class MasterDataImportPanel extends VerticalPanel {
     private String currentHost;
     private SailingServiceAsync sailingService;
     private CheckBox overrideSwitch;
+    private final RegattaRefresher regattaRefresher;
 
-    public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService) {
+    public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService, RegattaRefresher regattaRefresher) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
+        this.regattaRefresher = regattaRefresher;
 
         HorizontalPanel serverAddressPanel = new HorizontalPanel();
         serverAddressPanel.add(new Label("Remote host:"));
@@ -114,6 +117,7 @@ public class MasterDataImportPanel extends VerticalPanel {
                         int leaderboardGroupsCreated = result.getLeaderboardGroupCount();
                         int eventsCreated = result.getEventCount();
                         int regattasCreated = result.getRegattaCount();
+                        regattaRefresher.fillRegattas();
                         showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated);
                     }
 
