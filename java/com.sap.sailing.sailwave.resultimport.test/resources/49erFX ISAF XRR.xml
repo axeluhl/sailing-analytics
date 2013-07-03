@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<SailingXRR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Date="2013-07-02" Time="18:04:55" Type="SailingXRR" Version="1.3" xsi:noNamespaceSchemaLocation="http://www.sailing.org/uploads/xml/sailingXRR_v1.3.xsd">
+<Person FamilyName="Marie" GivenName="Ida" IFPersonID="DENIB1" PersonID="DENIB1" />
+<Person FamilyName="Thusgaard" GivenName="Marie" IFPersonID="DENMO2" PersonID="DENMO2" />
+<Person FamilyName="Dobson" GivenName="Charlotte" IFPersonID="GBRCD15" PersonID="GBRCD15" />
+<Person FamilyName="Ainsworth" GivenName="Sophie" IFPersonID="GBRSA18" PersonID="GBRSA18" />
+<Person FamilyName="Soffiatti" GivenName="Martine" IFPersonID="BRAMS13" PersonID="BRAMS13" />
+<Person FamilyName="Larsen" GivenName="Kattena" IFPersonID="BRAKK1" PersonID="BRAKK1" />
+<Person FamilyName="Jurczok" GivenName="Victoria" IFPersonID="GERVJ1" PersonID="GERVJ1" />
+<Person FamilyName="Lorenz" GivenName="Anika" IFPersonID="GERAL5" PersonID="GERAL5" />
+<Person FamilyName="Parkinson" GivenName="Tessa" IFPersonID="38574" PersonID="38574" />
+<Person FamilyName="Hall" GivenName="Chelsea" IFPersonID="51124" PersonID="51124" />
+<Person FamilyName="Bekkering" GivenName="Annemiek" IFPersonID="NEDAB5" PersonID="NEDAB5" />
+<Person FamilyName="Blom" GivenName="Claire" IFPersonID="NEDCB3" PersonID="NEDCB3" />
+<Person FamilyName="Lutz" GivenName="Tina" IFPersonID="GERTL7" PersonID="GERTL7" />
+<Person FamilyName="Beucke" GivenName="Susann" IFPersonID="GERSB7" PersonID="GERSB7" />
+<Person FamilyName="Mai" GivenName="Jena" IFPersonID="DENJH8" PersonID="DENJH8" />
+<Person FamilyName="Salskov-Iversen" GivenName="Katja" IFPersonID="DENKS11" PersonID="DENKS11" />
+<Person FamilyName="Giudice" GivenName="Ella" IFPersonID="AUSEG2" PersonID="AUSEG2" />
+<Person FamilyName="Lathouras" GivenName="Kate" IFPersonID="AUSKL11" PersonID="AUSKL11" />
+<Person FamilyName="Maloney" GivenName="Alexandra" IFPersonID="NZL AM 13" PersonID="NZL AM 13" />
+<Person FamilyName="Meech" GivenName="Molly" IFPersonID="NZL MMEE2" PersonID="NZL MMEE2" />
+<Person FamilyName="Ea" GivenName="Lin" IFPersonID="DENLC4" PersonID="DENLC4" />
+<Person FamilyName="Just" GivenName="Line" IFPersonID="DENLJ2" PersonID="DENLJ2" />
+<Person FamilyName="Vandame" GivenName="Caroline" IFPersonID="FRACV12" PersonID="FRACV12" />
+<Person FamilyName="Lili" GivenName="Sebesi" IFPersonID="FRASL22" PersonID="FRASL22" />
+<Person FamilyName="Conti" GivenName="Giulia" IFPersonID="ITAGC4" PersonID="ITAGC4" />
+<Person FamilyName="Clapcich" GivenName="Francesca" IFPersonID="ITAFC24" PersonID="ITAFC24" />
+<Person FamilyName="Peters" GivenName="Frances" IFPersonID="GBRFP3" PersonID="GBRFP3" />
+<Person FamilyName="Groves" GivenName="Nicola" IFPersonID="GBRNG33" PersonID="GBRNG33" />
+<Person FamilyName="Meyer" GivenName="Leouie" IFPersonID="GERLM11" PersonID="GERLM11" />
+<Person FamilyName="Hahlbrode" GivenName="Maren" IFPersonID="GERMH10" PersonID="GERMH10" />
+<Person FamilyName="Pennanen" GivenName="Miikka" IFPersonID="FINMP8" PersonID="FINMP8" />
+<Person FamilyName="Kanerva" GivenName="Silja" IFPersonID="FINSK1" PersonID="FINSK1" />
+<Person FamilyName="Khng" GivenName="Griselda" IFPersonID="SINGK1" PersonID="SINGK1" />
+<Person FamilyName="Tan" GivenName="Sara" IFPersonID="SINST8" PersonID="SINST8" />
+<Person FamilyName="Outteridge" GivenName="Haylee" IFPersonID="AUSHO5" PersonID="AUSHO5" />
+<Person FamilyName="Curtis" GivenName="Nina" IFPersonID="AUSNC4" PersonID="AUSNC4" />
+<Person FamilyName="Cantero" GivenName="María" IFPersonID="ESPMC35" PersonID="ESPMC35" />
+<Person FamilyName="Hernández" GivenName="Ana" IFPersonID="ESPAH5" PersonID="ESPAH5" />
+<Person FamilyName="Tunnicliffe" GivenName="Anna" IFPersonID="USAAT1" PersonID="USAAT1" />
+<Person FamilyName="Vandemoer" GivenName="Molly" IFPersonID="USAMOB13" PersonID="USAMOB13" />
+<Person FamilyName="Neville" GivenName="Christine" IFPersonID="USACN18" PersonID="USACN18" />
+<Person FamilyName="Lane" GivenName="Kristen" IFPersonID="USAKL20" PersonID="USAKL20" />
+<Person FamilyName="Næss" GivenName="Helene" IFPersonID="NORHN2" PersonID="NORHN2" />
+<Person FamilyName="Rønningen" GivenName="Marie" IFPersonID="NORMR8" PersonID="NORMR8" />
+<Person FamilyName="Macgregor" GivenName="Kate" IFPersonID="GBRKM34" PersonID="GBRKM34" />
+<Person FamilyName="Rook" GivenName="Mary" IFPersonID="GBRMR43" PersonID="GBRMR43" />
+<Person FamilyName="STEYAERT" GivenName="Sarah" IFPersonID="FRASS1" PersonID="FRASS1" />
+<Person FamilyName="BOSSARD" GivenName="Julie" IFPersonID="FRAJB7" PersonID="FRAJB7" />
+<Person FamilyName="Brien" GivenName="Tiffany" IFPersonID="IRLTB8" PersonID="IRLTB8" />
+<Person FamilyName="Tidey" GivenName="Saskia" IFPersonID="IRLST15" PersonID="IRLST15" />
+<Person FamilyName="Foght" GivenName="Maiken" IFPersonID="MS4" PersonID="MS4" />
+<Person FamilyName="Foght" GivenName="Anne-Julie" IFPersonID="AS6" PersonID="AS6" />
+<Person FamilyName="Sommarlund" GivenName="Johanna" IFPersonID="Swejs30" PersonID="Swejs30" />
+<Person FamilyName="Reisenaver" GivenName="Kevin" IFPersonID="GERKR9" PersonID="GERKR9" />
+<Person FamilyName="Görge" GivenName="Jule" IFPersonID="GERJG13" PersonID="GERJG13" />
+<Person FamilyName="Görge" GivenName="Lotta" IFPersonID="GERLG7" PersonID="GERLG7" />
+<Person FamilyName="Echegoyen" GivenName="Tamara" IFPersonID="ESPTE2" PersonID="ESPTE2" />
+<Person FamilyName="Betanzos" GivenName="Berta" IFPersonID="ESPBB2" PersonID="ESPBB2" />
+<Person FamilyName="Keijzer" GivenName="Nina" IFPersonID="NEDNK2" PersonID="NEDNK2" />
+<Person FamilyName="Duetz" GivenName="Annette" IFPersonID="NEDAD15" PersonID="NEDAD15" />
+<Person FamilyName="Ruskola" GivenName="Noora" IFPersonID="FINNR5" PersonID="FINNR5" />
+<Person FamilyName="Cedercreutz" GivenName="Camilla" IFPersonID="FINCC2" PersonID="FINCC2" />
+<Person FamilyName="Senfft" GivenName="Juliana" IFPersonID="BRAJS2" PersonID="BRAJS2" />
+<Person FamilyName="Nicolino" GivenName="Gabriela" IFPersonID="BRAGN3" PersonID="BRAGN3" />
+<Person FamilyName="Brewster" GivenName="Andrea" IFPersonID="IRLAB41" PersonID="IRLAB41" />
+<Person FamilyName="Murphy" GivenName="Claudine" IFPersonID="IRLCM75" PersonID="IRLCM75" />
+<Person FamilyName="BERGAMASCHI" GivenName="PAOLA" IFPersonID="ITAPB58" PersonID="ITAPB58" />
+<Person FamilyName="TEZZA" GivenName="LAVINIA" IFPersonID="ITALT28" PersonID="ITALT28" />
+<Person FamilyName="Gross" GivenName="Julia" IFPersonID="SWEJG13" PersonID="SWEJG13" />
+<Person FamilyName="Jonsson" GivenName="Cecilia" IFPersonID="SWECJ6" PersonID="SWECJ6" />
+<Person FamilyName="Price" GivenName="Olivia" IFPersonID="AUSOP1" PersonID="AUSOP1" />
+<Person FamilyName="Elks" GivenName="Caitlin" IFPersonID="AUSCE8" PersonID="AUSCE8" />
+<Person FamilyName="Kurtbay" GivenName="Sinem" IFPersonID="FINSK2" PersonID="FINSK2" />
+<Person FamilyName="Lehtinen" GivenName="Edward" IFPersonID="RSAEL1" PersonID="RSAEL1" />
+<Boat BoatID="1" SailNumber="241" />
+<Boat BoatID="2" SailNumber="808" />
+<Boat BoatID="3" SailNumber="321" />
+<Boat BoatID="4" SailNumber="712" />
+<Boat BoatID="5" SailNumber="117" />
+<Boat BoatID="6" SailNumber="131" />
+<Boat BoatID="7" SailNumber="161" />
+<Boat BoatID="8" SailNumber="136" />
+<Boat BoatID="9" SailNumber="708" />
+<Boat BoatID="10" SailNumber="111" />
+<Boat BoatID="11" SailNumber="112" />
+<Boat BoatID="12" SailNumber="222" />
+<Boat BoatID="13" SailNumber="747" />
+<Boat BoatID="14" SailNumber="121" />
+<Boat BoatID="15" SailNumber="777" />
+<Boat BoatID="16" SailNumber="701" />
+<Boat BoatID="17" SailNumber="396" />
+<Boat BoatID="18" SailNumber="999" />
+<Boat BoatID="19" SailNumber="989" />
+<Boat BoatID="20" SailNumber="816" />
+<Boat BoatID="21" SailNumber="216" />
+<Boat BoatID="22" SailNumber="123" />
+<Boat BoatID="23" SailNumber="370" />
+<Boat BoatID="24" SailNumber="871" />
+<Boat BoatID="25" SailNumber="727" />
+<Boat BoatID="26" SailNumber="104" />
+<Boat BoatID="27" SailNumber="113" />
+<Boat BoatID="28" SailNumber="810" />
+<Boat BoatID="29" SailNumber="323" />
+<Boat BoatID="30" SailNumber="110" />
+<Boat BoatID="31" SailNumber="101" />
+<Boat BoatID="32" SailNumber="198" />
+<Boat BoatID="33" SailNumber="997" />
+<Boat BoatID="34" SailNumber="143" />
+<Boat BoatID="35" SailNumber="116" />
+<Boat BoatID="36" SailNumber="848" />
+<Boat BoatID="37" SailNumber="707" />
+<Team NOC="DEN" TeamID="DEN241" BoatID="1" >
+<Crew PersonID="DENIB1" Position="S" />
+<Crew PersonID="DENMO2" Position="C" />
+</Team>
+<Team NOC="GBR" TeamID="GBR808" BoatID="2" >
+<Crew PersonID="GBRCD15" Position="S" />
+<Crew PersonID="GBRSA18" Position="C" />
+</Team>
+<Team NOC="BRA" TeamID="BRA321" BoatID="3" >
+<Crew PersonID="BRAMS13" Position="S" />
+<Crew PersonID="BRAKK1" Position="C" />
+</Team>
+<Team NOC="GER" TeamID="GER712" BoatID="4" >
+<Crew PersonID="GERVJ1" Position="S" />
+<Crew PersonID="GERAL5" Position="C" />
+</Team>
+<Team NOC="AUS" TeamID="AUS117" BoatID="5" >
+<Crew PersonID="38574" Position="S" />
+<Crew PersonID="51124" Position="C" />
+</Team>
+<Team NOC="NED" TeamID="NED131" BoatID="6" >
+<Crew PersonID="NEDAB5" Position="S" />
+<Crew PersonID="NEDCB3" Position="C" />
+</Team>
+<Team NOC="GER" TeamID="GER161" BoatID="7" >
+<Crew PersonID="GERTL7" Position="S" />
+<Crew PersonID="GERSB7" Position="C" />
+</Team>
+<Team NOC="DEN" TeamID="DEN136" BoatID="8" >
+<Crew PersonID="DENJH8" Position="S" />
+<Crew PersonID="DENKS11" Position="C" />
+</Team>
+<Team NOC="AUS" TeamID="AUS708" BoatID="9" >
+<Crew PersonID="AUSEG2" Position="S" />
+<Crew PersonID="AUSKL11" Position="C" />
+</Team>
+<Team NOC="NZL" TeamID="NZL111" BoatID="10" >
+<Crew PersonID="NZL AM 13" Position="S" />
+<Crew PersonID="NZL MMEE2" Position="C" />
+</Team>
+<Team NOC="DEN" TeamID="DEN112" BoatID="11" >
+<Crew PersonID="DENLC4" Position="S" />
+<Crew PersonID="DENLJ2" Position="C" />
+</Team>
+<Team NOC="FRA" TeamID="FRA222" BoatID="12" >
+<Crew PersonID="FRACV12" Position="C" />
+<Crew PersonID="FRASL22" Position="S" />
+</Team>
+<Team NOC="ITA" TeamID="ITA747" BoatID="13" >
+<Crew PersonID="ITAGC4" Position="S" />
+<Crew PersonID="ITAFC24" Position="C" />
+</Team>
+<Team NOC="GBR" TeamID="GBR121" BoatID="14" >
+<Crew PersonID="GBRFP3" Position="S" />
+<Crew PersonID="GBRNG33" Position="C" />
+</Team>
+<Team NOC="GER" TeamID="GER777" BoatID="15" >
+<Crew PersonID="GERLM11" Position="S" />
+<Crew PersonID="GERMH10" Position="C" />
+</Team>
+<Team NOC="FIN" TeamID="FIN701" BoatID="16" >
+<Crew PersonID="FINMP8" Position="C" />
+<Crew PersonID="FINSK1" Position="S" />
+</Team>
+<Team NOC="SIN" TeamID="SIN396" BoatID="17" >
+<Crew PersonID="SINGK1" Position="S" />
+<Crew PersonID="SINST8" Position="C" />
+</Team>
+<Team NOC="AUS" TeamID="AUS999" BoatID="18" >
+<Crew PersonID="AUSHO5" Position="S" />
+<Crew PersonID="AUSNC4" Position="C" />
+</Team>
+<Team NOC="ESP" TeamID="ESP989" BoatID="19" >
+<Crew PersonID="ESPMC35" Position="S" />
+<Crew PersonID="ESPAH5" Position="C" />
+</Team>
+<Team NOC="USA" TeamID="USA816" BoatID="20" >
+<Crew PersonID="USAAT1" Position="S" />
+<Crew PersonID="USAMOB13" Position="C" />
+</Team>
+<Team NOC="USA" TeamID="USA216" BoatID="21" >
+<Crew PersonID="USACN18" Position="C" />
+<Crew PersonID="USAKL20" Position="S" />
+</Team>
+<Team NOC="NOR" TeamID="NOR123" BoatID="22" >
+<Crew PersonID="NORHN2" Position="S" />
+<Crew PersonID="NORMR8" Position="C" />
+</Team>
+<Team NOC="GBR" TeamID="GBR370" BoatID="23" >
+<Crew PersonID="GBRKM34" Position="S" />
+<Crew PersonID="GBRMR43" Position="C" />
+</Team>
+<Team NOC="FRA" TeamID="FRA871" BoatID="24" >
+<Crew PersonID="FRASS1" Position="S" />
+<Crew PersonID="FRAJB7" Position="C" />
+</Team>
+<Team NOC="IRL" TeamID="IRL727" BoatID="25" >
+<Crew PersonID="IRLTB8" Position="S" />
+<Crew PersonID="IRLST15" Position="C" />
+</Team>
+<Team NOC="DEN" TeamID="DEN104" BoatID="26" >
+<Crew PersonID="MS4" Position="S" />
+<Crew PersonID="AS6" Position="C" />
+</Team>
+<Team NOC="SWE" TeamID="SWE113" BoatID="27" >
+<Crew PersonID="Swejs30" Position="S" />
+<Crew PersonID="GERKR9" Position="C" />
+</Team>
+<Team NOC="GER" TeamID="GER810" BoatID="28" >
+<Crew PersonID="GERJG13" Position="S" />
+<Crew PersonID="GERLG7" Position="C" />
+</Team>
+<Team NOC="ESP" TeamID="ESP323" BoatID="29" >
+<Crew PersonID="ESPTE2" Position="S" />
+<Crew PersonID="ESPBB2" Position="C" />
+</Team>
+<Team NOC="NED" TeamID="NED110" BoatID="30" >
+<Crew PersonID="NEDNK2" Position="S" />
+<Crew PersonID="NEDAD15" Position="C" />
+</Team>
+<Team NOC="FIN" TeamID="FIN101" BoatID="31" >
+<Crew PersonID="FINNR5" Position="S" />
+<Crew PersonID="FINCC2" Position="C" />
+</Team>
+<Team NOC="BRA" TeamID="BRA198" BoatID="32" >
+<Crew PersonID="BRAJS2" Position="S" />
+<Crew PersonID="BRAGN3" Position="C" />
+</Team>
+<Team NOC="IRL" TeamID="IRL997" BoatID="33" >
+<Crew PersonID="IRLAB41" Position="S" />
+<Crew PersonID="IRLCM75" Position="C" />
+</Team>
+<Team NOC="ITA" TeamID="ITA143" BoatID="34" >
+<Crew PersonID="ITAPB58" Position="C" />
+<Crew PersonID="ITALT28" Position="S" />
+</Team>
+<Team NOC="SWE" TeamID="SWE116" BoatID="35" >
+<Crew PersonID="SWEJG13" Position="S" />
+<Crew PersonID="SWECJ6" Position="C" />
+</Team>
+<Team NOC="AUS" TeamID="AUS848" BoatID="36" >
+<Crew PersonID="AUSOP1" Position="S" />
+<Crew PersonID="AUSCE8" Position="C" />
+</Team>
+<Team NOC="FIN" TeamID="FIN707" BoatID="37" >
+<Crew PersonID="FINSK2" Position="S" />
+<Crew PersonID="RSAEL1" Position="C" />
+</Team>
+<Event EventID="9999" Type="RegattaSeries" IFEventID="9999" Title="49erFX European Championship">
+<Division DivisionID="Premier" Type="FleetRace" Title="49ERFX" IFClassID="49ERFX" Gender="Women">
+<SeriesResult TeamID="DEN241" TotalPoints="1" NetPoints="1" Rank="1" />
+<SeriesResult TeamID="GBR808" TotalPoints="2" NetPoints="2" Rank="2" />
+<SeriesResult TeamID="BRA321" TotalPoints="3" NetPoints="3" Rank="3" />
+<SeriesResult TeamID="GER712" TotalPoints="4" NetPoints="4" Rank="4" />
+<SeriesResult TeamID="AUS117" TotalPoints="5" NetPoints="5" Rank="5" />
+<SeriesResult TeamID="NED131" TotalPoints="6" NetPoints="6" Rank="6" />
+<SeriesResult TeamID="GER161" TotalPoints="7" NetPoints="7" Rank="7" />
+<SeriesResult TeamID="DEN136" TotalPoints="8" NetPoints="8" Rank="8" />
+<SeriesResult TeamID="AUS708" TotalPoints="9" NetPoints="9" Rank="9" />
+<SeriesResult TeamID="NZL111" TotalPoints="10" NetPoints="10" Rank="10" />
+<SeriesResult TeamID="DEN112" TotalPoints="11" NetPoints="11" Rank="11" />
+<SeriesResult TeamID="FRA222" TotalPoints="12" NetPoints="12" Rank="12" />
+<SeriesResult TeamID="ITA747" TotalPoints="13" NetPoints="13" Rank="13" />
+<SeriesResult TeamID="GBR121" TotalPoints="14" NetPoints="14" Rank="14" />
+<SeriesResult TeamID="GER777" TotalPoints="15" NetPoints="15" Rank="15" />
+<SeriesResult TeamID="FIN701" TotalPoints="16" NetPoints="16" Rank="16" />
+<SeriesResult TeamID="SIN396" TotalPoints="17" NetPoints="17" Rank="17" />
+<SeriesResult TeamID="AUS999" TotalPoints="18" NetPoints="18" Rank="18" />
+<SeriesResult TeamID="ESP989" TotalPoints="19" NetPoints="19" Rank="19" />
+<SeriesResult TeamID="USA816" TotalPoints="20" NetPoints="20" Rank="20" />
+<SeriesResult TeamID="USA216" TotalPoints="21" NetPoints="21" Rank="21" />
+<SeriesResult TeamID="NOR123" TotalPoints="22" NetPoints="22" Rank="22" />
+<SeriesResult TeamID="GBR370" TotalPoints="23" NetPoints="23" Rank="23" />
+<SeriesResult TeamID="FRA871" TotalPoints="24" NetPoints="24" Rank="24" />
+<SeriesResult TeamID="IRL727" TotalPoints="25" NetPoints="25" Rank="25" />
+<SeriesResult TeamID="DEN104" TotalPoints="26" NetPoints="26" Rank="26" />
+<SeriesResult TeamID="SWE113" TotalPoints="27" NetPoints="27" Rank="27" />
+<SeriesResult TeamID="GER810" TotalPoints="28" NetPoints="28" Rank="28" />
+<SeriesResult TeamID="ESP323" TotalPoints="29" NetPoints="29" Rank="29" />
+<SeriesResult TeamID="NED110" TotalPoints="30" NetPoints="30" Rank="30" />
+<SeriesResult TeamID="FIN101" TotalPoints="31" NetPoints="31" Rank="31" />
+<SeriesResult TeamID="BRA198" TotalPoints="32" NetPoints="32" Rank="32" />
+<SeriesResult TeamID="IRL997" TotalPoints="33" NetPoints="33" Rank="33" />
+<SeriesResult TeamID="ITA143" TotalPoints="34" NetPoints="34" Rank="34" />
+<SeriesResult TeamID="SWE116" TotalPoints="35" NetPoints="35" Rank="35" />
+<SeriesResult TeamID="AUS848" TotalPoints="36" NetPoints="36" Rank="36" />
+<SeriesResult TeamID="FIN707" TotalPoints="38" NetPoints="38" Rank="37" />
+</Division>
+</Event>
+</SailingXRR>

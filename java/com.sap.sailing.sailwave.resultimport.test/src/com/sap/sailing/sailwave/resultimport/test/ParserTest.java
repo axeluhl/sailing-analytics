@@ -36,8 +36,13 @@ import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 
 public class ParserTest {
     private static final String SAMPLE_INPUT_NAME_49er = "EYSEC 2012 - TEST ISAF XRR.xml";
+    private static final String SAMPLE_INPUT_NAME_49er_FX = "49erFX ISAf XRR.xml";
+    
     private static final String EUROSAF_YOUTH_EVENT_NAME = "2012 Eurosaf Youth Sailing European Championship";
+    private static final String _49FX_EUROPEANS_EVENT_NAME = "49erFX European Championship";
+    
     private static final String ISAF_ID_49ER = "49ER";
+    private static final String ISAF_ID_49FX = "49ERFX";
     
     private static final String RESOURCES = "resources/";
 
@@ -60,6 +65,10 @@ public class ParserTest {
                     result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_49er),
                             null, new MillisecondsTimePoint(_49erDate), EUROSAF_YOUTH_EVENT_NAME , null, ISAF_ID_49ER));
 
+                    Date _49erFXDate = DatatypeConverter.parseDateTime("2013-07-02T20:04:55.000Z").getTime();
+                    result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_49er_FX),
+                            null, new MillisecondsTimePoint(_49erFXDate), _49FX_EUROPEANS_EVENT_NAME , null, ISAF_ID_49FX));
+                    
                     return result;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -71,10 +80,12 @@ public class ParserTest {
     @Test
     public void testSimpleParsingSomeSailwaveDocuments() throws JAXBException, IOException {
         RegattaResults r1 = ParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_49er), EUROSAF_YOUTH_EVENT_NAME).parse();
-        
-        // TimePoint calculateTimePointForRegattaResults = XRRParserUtil.calculateTimePointForRegattaResults(r1);
-        
         assertNotNull(r1);
+
+        RegattaResults r2 = ParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_49er_FX), _49FX_EUROPEANS_EVENT_NAME).parse();
+        assertNotNull(r2);
+
+        // TimePoint calculateTimePointForRegattaResults = XRRParserUtil.calculateTimePointForRegattaResults(r1);
     }
 
     @Test
@@ -88,6 +99,11 @@ public class ParserTest {
         assertNotNull(resultsForEUROSAF);
 
         assertEquals(1, resultsForEUROSAF.size());
+        
+        Set<Pair<String, TimePoint>> resultsFor49erFXEuropeans = hasResultsFor.get(_49FX_EUROPEANS_EVENT_NAME);
+        assertNotNull(resultsFor49erFXEuropeans);
+
+        assertEquals(1, resultsFor49erFXEuropeans.size());
     }
     
     @Test
