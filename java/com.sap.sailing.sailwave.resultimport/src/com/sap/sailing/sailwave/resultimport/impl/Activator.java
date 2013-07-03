@@ -1,4 +1,4 @@
-package com.sap.sailing.sailwave.resultimport;
+package com.sap.sailing.sailwave.resultimport.impl;
 
 import java.io.File;
 
@@ -7,8 +7,7 @@ import org.osgi.framework.BundleContext;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.resultimport.impl.AbstractFileBasedScoreCorrectionProviderActivator;
 import com.sap.sailing.resultimport.impl.FileBasedResultDocumentProvider;
-import com.sap.sailing.xrr.resultimport.ParserFactory;
-import com.sap.sailing.xrr.resultimport.impl.ScoreCorrectionProviderImpl;
+import com.sap.sailing.sailwave.resultimport.CsvParserFactory;
 
 public class Activator extends AbstractFileBasedScoreCorrectionProviderActivator {
     private static final String SCAN_DIR_PATH_PROPERTY_NAME = "sailwave.results";
@@ -24,6 +23,6 @@ public class Activator extends AbstractFileBasedScoreCorrectionProviderActivator
 
     @Override
     protected ScoreCorrectionProvider create(File scanDir) {
-        return new ScoreCorrectionProviderImpl(new FileBasedResultDocumentProvider(scanDir), ParserFactory.INSTANCE);
+        return new ScoreCorrectionProviderImpl(new FileBasedResultDocumentProvider(scanDir), CsvParserFactory.INSTANCE);
     }
 }
