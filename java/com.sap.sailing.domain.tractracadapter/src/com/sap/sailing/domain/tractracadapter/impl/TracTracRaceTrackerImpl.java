@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -298,7 +297,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                         logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", pfe);
                     }
                 }
-                updateSidelines(clientParams);
                 updateStartStopTimesAndLiveDelay(clientParams, simulator);
                 for (TracTracControlPoint controlPoint : clientParams.getControlPointList()) {
                     com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getOrCreateControlPoint(controlPoint);
@@ -366,18 +364,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             // do nothing
         }
         return metadataMap;
-    }
-
-    private void updateSidelines(ClientParamsPHP clientParams) {
-        String raceMetadata = clientParams.getRaceMetadata();
-        if(raceMetadata != null) {
-            Map<String, String> sidelineMetadata = parseMetadata(raceMetadata);
-            for(Entry<String, String> entry: sidelineMetadata.entrySet()) {
-                if(entry.getKey().startsWith("SIDELINE")) {
-                    System.out.println(entry);
-                }
-            }
-        }
     }
 
     private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) {

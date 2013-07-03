@@ -229,11 +229,14 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints) {
-        List<ControlPoint> cpList = new ArrayList<ControlPoint>();
-        for (TracTracControlPoint controlPoint: controlPoints) {
-            cpList.add(getOrCreateControlPoint(controlPoint));
+        List<Mark> marks = new ArrayList<Mark>();
+        for (TracTracControlPoint controlPoint : controlPoints) {
+            ControlPoint cp = getOrCreateControlPoint(controlPoint);
+            for (Mark mark : cp.getMarks()) {
+                marks.add(mark);
+            }
         }
-        return new SidelineImpl(name, cpList);
+        return new SidelineImpl(name, marks);
     }
 
     @Override

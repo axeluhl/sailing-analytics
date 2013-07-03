@@ -99,9 +99,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     @Override
     protected void handleEvent(Triple<Route, RouteData, Race> event) {
         System.out.print("R");
-        
         Map<Integer, NauticalSide> courseWaypointPassingSides = parseAdditionalCourseDataFromMetadata(event.getA(), event.getB().getPoints());
-     
         List<Util.Pair<TracTracControlPoint, NauticalSide>> ttControlPoints = new ArrayList<>();
         int i = 1;
         for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
@@ -110,15 +108,15 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             i++;
         }
         Course course = getDomainFactory().createCourse(event.getA().getName(), ttControlPoints);
-        
         List<Sideline> sidelines = new ArrayList<Sideline>();
-        Map<String, Iterable<TracTracControlPoint>> sidelinesMetadata = parseSidelinesFromRaceMetadata(event.getC(), event.getC().getEvent().getControlPointList());
-        for(Entry<String, Iterable<TracTracControlPoint>> sidelineEntry: sidelinesMetadata.entrySet()) {
-            if(Util.size(sidelineEntry.getValue()) > 0) {
+        Map<String, Iterable<TracTracControlPoint>> sidelinesMetadata = parseSidelinesFromRaceMetadata(event.getC(),
+                event.getC().getEvent().getControlPointList());
+        for (Entry<String, Iterable<TracTracControlPoint>> sidelineEntry : sidelinesMetadata.entrySet()) {
+            if (Util.size(sidelineEntry.getValue()) > 0) {
                 sidelines.add(getDomainFactory().createSideline(sidelineEntry.getKey(), sidelineEntry.getValue()));
             }
         }
-        
+
         RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(event.getC());
         if (existingRaceDefinitionForRace != null) {
             logger.log(Level.INFO, "Received course update for existing race "+event.getC().getName()+": "+
@@ -141,7 +139,6 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
                     getTrackedRegatta(), event.getC(), course, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, courseDesignUpdateURI, 
                     getTracTracEvent().getId(), tracTracUsername, tracTracPassword);
-            
             if (getSimulator() != null) {
                 getSimulator().setTrackedRace(trackedRace);
             }
@@ -181,22 +178,25 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     /**
      * Parses the race metadata for sideline information
      * The sidelines of a race (course) are encoded like this...
-     * SIDELINE1=(TR-A) 3
-     * SIDELINE2=(TR-A) Start
+     * <pre>
+     *  SIDELINE1=(TR-A) 3
+     *  SIDELINE2=(TR-A) Start
+     * </pre>
      * Each sideline is defined right now through a simple gate, but this might change in the future
      */
-    private Map<String, Iterable<TracTracControlPoint>> parseSidelinesFromRaceMetadata(Race race, Collection<com.tractrac.clientmodule.ControlPoint> controlPoints) {
+    private Map<String, Iterable<TracTracControlPoint>> parseSidelinesFromRaceMetadata(Race race,
+            Collection<com.tractrac.clientmodule.ControlPoint> controlPoints) {
         Map<String, Iterable<TracTracControlPoint>> result = new HashMap<String, Iterable<TracTracControlPoint>>();
         String raceMetadataString = race.getMetadata() != null ? race.getMetadata().getText() : null;
-        if(raceMetadataString != null) {
+        if (raceMetadataString != null) {
             Map<String, String> sidelineMetadata = parseMetadata(raceMetadataString);
-            for(Entry<String, String> entry: sidelineMetadata.entrySet()) {
-                if(entry.getKey().startsWith("SIDELINE")) {
+            for (Entry<String, String> entry : sidelineMetadata.entrySet()) {
+                if (entry.getKey().startsWith("SIDELINE")) {
                     List<TracTracControlPoint> sidelineCPs = new ArrayList<>();
-                    result.put(entry.getKey(), sidelineCPs); 
-                    for(com.tractrac.clientmodule.ControlPoint cp: controlPoints) {
-                        String cpName = cp.getName().trim(); 
-                        if(cpName.equals(entry.getValue())) {
+                    result.put(entry.getKey(), sidelineCPs);
+                    for (com.tractrac.clientmodule.ControlPoint cp : controlPoints) {
+                        String cpName = cp.getName().trim();
+                        if (cpName.equals(entry.getValue())) {
                             sidelineCPs.add(new ControlPointAdapter(cp));
                         }
                     }

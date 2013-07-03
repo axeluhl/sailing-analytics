@@ -293,11 +293,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             i++;
         }
         courseSidelines = new LinkedHashMap<String, Sideline>();
-        for(Sideline sideline: sidelines) {
+        for (Sideline sideline : sidelines) {
             courseSidelines.put(sideline.getName(), sideline);
             for (Mark mark : sideline.getMarks()) {
                 getOrCreateTrack(mark);
-            }            
+            }
         }
         
         trackedLegs = new LinkedHashMap<Leg, TrackedLeg>();

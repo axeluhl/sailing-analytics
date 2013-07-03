@@ -9,7 +9,5 @@ import com.sap.sailing.domain.common.WithID;
  *
  */
 public interface Sideline extends Named, WithID {
-    Iterable<ControlPoint> getControlPoints();
-
     Iterable<Mark> getMarks();
 }

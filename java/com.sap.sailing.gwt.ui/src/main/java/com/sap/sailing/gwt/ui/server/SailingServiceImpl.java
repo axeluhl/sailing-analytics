@@ -1384,14 +1384,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return raceTimesInfos;
     }
 
-    @Override
-    public List<SidelineDTO> getCourseSidelines(RegattaAndRaceIdentifier raceIdentifier, Date date) {
+    private List<SidelineDTO> getCourseSidelines(RegattaAndRaceIdentifier raceIdentifier, Date date) {
         List<SidelineDTO> result = new ArrayList<SidelineDTO>();
         if (date != null) {
             TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
             TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
             if (trackedRace != null) {
-                for(Sideline sideline: trackedRace.getCourseSidelines()) {
+                for (Sideline sideline : trackedRace.getCourseSidelines()) {
                     List<MarkDTO> markDTOs = new ArrayList<MarkDTO>();
                     for (Mark mark : sideline.getMarks()) {
                         GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
@@ -1402,7 +1401,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     }
                     result.add(new SidelineDTO(sideline.getName(), markDTOs));
                 }
-            }            
+            }
         }
         return result;
     }
