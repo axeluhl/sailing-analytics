@@ -7,14 +7,14 @@ public class SeriesMasterData {
     private String name;
     private boolean isMedal;
     private Iterable<Fleet> fleets;
-    private Iterable<String> raceColumnNames;
+    private Iterable<RaceColumnMasterData> raceColumns;
     private int[] discardingRule;
 
-    public SeriesMasterData(String name, boolean isMedal, Iterable<Fleet> fleets, Iterable<String> raceColumnNames, int[] discardingRule) {
+    public SeriesMasterData(String name, boolean isMedal, Iterable<Fleet> fleets, Iterable<RaceColumnMasterData> raceColumns, int[] discardingRule) {
         this.name = name;
         this.isMedal = isMedal;
         this.fleets = fleets;
-        this.raceColumnNames = raceColumnNames;
+        this.raceColumns = raceColumns;
         this.discardingRule = discardingRule;
     }
 
@@ -30,8 +30,8 @@ public class SeriesMasterData {
         return fleets;
     }
 
-    public Iterable<String> getRaceColumnNames() {
-        return raceColumnNames;
+    public Iterable<RaceColumnMasterData> getRaceColumnNames() {
+        return raceColumns;
     }
 
     public int[] getDiscardingRule() {

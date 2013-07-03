@@ -2,10 +2,12 @@ package com.sap.sailing.server.gateway.serialization.masterdata.impl;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
@@ -21,10 +23,12 @@ public class TopLevelMasterDataSerializer  {
     
     private final Map<String, LeaderboardGroup> allLeaderboardGroups;
     private final Iterable<Event> allEvents;
+    private final ConcurrentHashMap<String, Regatta> regattaForRaceIdStrings;
 
-    public TopLevelMasterDataSerializer(Map<String, LeaderboardGroup> allLeaderboardGroups, Iterable<Event> allEvents) {
+    public TopLevelMasterDataSerializer(Map<String, LeaderboardGroup> allLeaderboardGroups, Iterable<Event> allEvents, ConcurrentHashMap<String, Regatta> regattaForRaceIdString) {
         this.allLeaderboardGroups = allLeaderboardGroups;
         this.allEvents = allEvents;
+        this.regattaForRaceIdStrings = regattaForRaceIdString;
         
     }
 
@@ -36,7 +40,7 @@ public class TopLevelMasterDataSerializer  {
             if (leaderboardGroup == null) {
                 continue;
             }
-            JsonSerializer<LeaderboardGroup> serializer = new LeaderboardGroupMasterDataJsonSerializer(allEvents);
+            JsonSerializer<LeaderboardGroup> serializer = new LeaderboardGroupMasterDataJsonSerializer(allEvents, regattaForRaceIdStrings);
             masterData.add(serializer.serialize(leaderboardGroup));
         }
         

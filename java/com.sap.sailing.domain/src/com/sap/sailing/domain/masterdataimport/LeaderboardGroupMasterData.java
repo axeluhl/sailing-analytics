@@ -14,13 +14,13 @@ public class LeaderboardGroupMasterData {
     private String name;
     private String description;
     private LeaderboardMasterData overallLeaderboardMasterData;
-    private Set<LeaderboardMasterData> leaderboards;
+    private Iterable<LeaderboardMasterData> leaderboards;
     private boolean displayGroupsRevese;
     private Set<EventMasterData> events;
     private Set<RegattaMasterData> regattas;
 
     public LeaderboardGroupMasterData(String name, String description,
-            boolean displayGroupsRevese, LeaderboardMasterData overallLeaderboardMasterData, Set<LeaderboardMasterData> leaderboards, Set<EventMasterData> events, Set<RegattaMasterData> regattas) {
+            boolean displayGroupsRevese, LeaderboardMasterData overallLeaderboardMasterData, Iterable<LeaderboardMasterData> leaderboards, Set<EventMasterData> events, Set<RegattaMasterData> regattas) {
                 this.name = name;
                 this.description = description;
                 this.displayGroupsRevese = displayGroupsRevese;
@@ -42,7 +42,7 @@ public class LeaderboardGroupMasterData {
         return overallLeaderboardMasterData;
     }
 
-    public Set<LeaderboardMasterData> getLeaderboards() {
+    public Iterable<LeaderboardMasterData> getLeaderboards() {
         return leaderboards;
     }
 
