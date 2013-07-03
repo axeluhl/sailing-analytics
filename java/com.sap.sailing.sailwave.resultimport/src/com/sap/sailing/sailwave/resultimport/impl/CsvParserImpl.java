@@ -88,38 +88,40 @@ public class CsvParserImpl implements CsvParser {
                         Integer totalRank = Integer.parseInt(splittedRow[0]);
                         List<String> names = new ArrayList<String>();
                         List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded = new ArrayList<>();
-                        
+
+                        names.add(splittedRow[4]);
+                        names.add(splittedRow[5]);
+
                         int index = startIndexForRacePoints;
                         while(index <= endIndexForRacePoints) {
-                            Integer rank = null;
-                            String maxPointsReason;
-                            Double points;
-                            boolean discarded = false;
-                            
-                            names.add(splittedRow[4]);
-                            names.add(splittedRow[5]);
-                            
-                            // sample for points and maxPointReason and discard in one field: (32,DNF)
                             String pointsAndMaxPointsReasonAndDiscard = splittedRow[index];
-                            if(pointsAndMaxPointsReasonAndDiscard.startsWith("(") && pointsAndMaxPointsReasonAndDiscard.endsWith(")")) {
-                                pointsAndMaxPointsReasonAndDiscard = pointsAndMaxPointsReasonAndDiscard.substring(1, pointsAndMaxPointsReasonAndDiscard.length() - 1);
-                                discarded = true;
-                            }
-                            if(pointsAndMaxPointsReasonAndDiscard.contains(",")) {
-                                String[] splittedPointsAndMaxPointReason = pointsAndMaxPointsReasonAndDiscard.split(",");
-                                points = Double.valueOf(splittedPointsAndMaxPointReason[0]);
-                                maxPointsReason = splittedPointsAndMaxPointReason[1];
-                            } else {
-                                points = Double.valueOf(pointsAndMaxPointsReasonAndDiscard);
-                                maxPointsReason = null;
-                            }
-                            
-                            if (points != 0.0) {
-                                CompetitorEntry entry = new DefaultCompetitorEntryImpl(rank,
-                                        maxPointsReason, points, discarded);
-                                rankAndMaxPointsReasonAndPointsAndDiscarded.add(entry);
-                            } else {
-                                rankAndMaxPointsReasonAndPointsAndDiscarded.add(null);
+                            if(pointsAndMaxPointsReasonAndDiscard != null && !pointsAndMaxPointsReasonAndDiscard.isEmpty()) {
+                                Integer rank = null;
+                                String maxPointsReason;
+                                Double points;
+                                boolean discarded = false;
+                                
+                                // sample for points and maxPointReason and discard in one field: (32,DNF)
+                                if(pointsAndMaxPointsReasonAndDiscard.startsWith("(") && pointsAndMaxPointsReasonAndDiscard.endsWith(")")) {
+                                    pointsAndMaxPointsReasonAndDiscard = pointsAndMaxPointsReasonAndDiscard.substring(1, pointsAndMaxPointsReasonAndDiscard.length() - 1);
+                                    discarded = true;
+                                }
+                                if(pointsAndMaxPointsReasonAndDiscard.contains(",")) {
+                                    String[] splittedPointsAndMaxPointReason = pointsAndMaxPointsReasonAndDiscard.split(",");
+                                    points = Double.valueOf(splittedPointsAndMaxPointReason[0]);
+                                    maxPointsReason = splittedPointsAndMaxPointReason[1];
+                                } else {
+                                    points = Double.valueOf(pointsAndMaxPointsReasonAndDiscard);
+                                    maxPointsReason = null;
+                                }
+                                
+                                if (points != 0.0) {
+                                    CompetitorEntry entry = new DefaultCompetitorEntryImpl(rank,
+                                            maxPointsReason, points, discarded);
+                                    rankAndMaxPointsReasonAndPointsAndDiscarded.add(entry);
+                                } else {
+                                    rankAndMaxPointsReasonAndPointsAndDiscarded.add(null);
+                                }
                             }
                             index++;
                         }

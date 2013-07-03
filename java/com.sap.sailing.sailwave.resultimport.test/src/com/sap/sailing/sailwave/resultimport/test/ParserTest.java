@@ -72,7 +72,7 @@ public class ParserTest {
     }
 
     @Test
-    public void testScoreCorrectionProviderNixdorfFinal() throws Exception {
+    public void testScoreCorrectionProvider49er() throws Exception {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 CsvParserFactory.INSTANCE);
         Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
@@ -81,18 +81,13 @@ public class ParserTest {
         assertNotNull(result49er);
         Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces = result49er.getScoreCorrectionsForRaces();
         assertNotNull(scoreCorrectionsForRaces);
-        assertEquals(5, Util.size(scoreCorrectionsForRaces)); // 5 races
+        assertEquals(6, Util.size(scoreCorrectionsForRaces)); // 6 races
         {
             final ScoreCorrectionsForRace resultsForR2 = Util.get(scoreCorrectionsForRaces, 1);
-            assertEquals(40, resultsForR2.getScoreCorrectionForCompetitor("ITA8400").getPoints(), 0.00000001);
-            assertSame(MaxPointsReason.DNF, resultsForR2.getScoreCorrectionForCompetitor("ITA8400").getMaxPointsReason());
-            assertEquals("Müllejans, Christian+Morf, Karsten",
-                    resultsForR2.getScoreCorrectionForCompetitor("ITA8400").getCompetitorName());
-        }
-        {
-            final ScoreCorrectionsForRace resultsForR2 = Util.get(scoreCorrectionsForRaces, 1);
-            assertEquals(11, resultsForR2.getScoreCorrectionForCompetitor("GER8055").getPoints(), 0.00000001);
-            assertSame(null, resultsForR2.getScoreCorrectionForCompetitor("GER8055").getMaxPointsReason());
+            assertEquals(32, resultsForR2.getScoreCorrectionForCompetitor("SWE 116").getPoints(), 0.00000001);
+            assertSame(MaxPointsReason.BFD, resultsForR2.getScoreCorrectionForCompetitor("SWE 116").getMaxPointsReason());
+            assertEquals("Fritiof Hedström+Jonatan Bergström",
+                    resultsForR2.getScoreCorrectionForCompetitor("SWE 116").getCompetitorName());
         }
     }
 }
