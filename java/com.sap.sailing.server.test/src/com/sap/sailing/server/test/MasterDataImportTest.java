@@ -230,7 +230,7 @@ public class MasterDataImportTest {
             JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
             LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
                     .deserialize(leaderBoardGroupMasterDataJson);
-            ImportMasterDataOperation op = new ImportMasterDataOperation(masterData);
+            ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, false);
             creationCount.add(destService.apply(op));
         }
 
@@ -423,7 +423,7 @@ public class MasterDataImportTest {
             JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
             LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
                     .deserialize(leaderBoardGroupMasterDataJson);
-            ImportMasterDataOperation op = new ImportMasterDataOperation(masterData);
+            ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, false);
             creationCount.add(destService.apply(op));
         }
         
@@ -571,7 +571,7 @@ public class MasterDataImportTest {
             JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
             LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
                     .deserialize(leaderBoardGroupMasterDataJson);
-            ImportMasterDataOperation op = new ImportMasterDataOperation(masterData);
+            ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, false);
             creationCount.add(destService.apply(op));
         }
 

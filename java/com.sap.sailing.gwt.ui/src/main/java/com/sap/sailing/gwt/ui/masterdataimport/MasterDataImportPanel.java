@@ -20,6 +20,7 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -46,6 +47,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     private final StringMessages stringMessages;
     private String currentHost;
     private SailingServiceAsync sailingService;
+    private CheckBox overrideSwitch;
 
     public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService) {
         this.sailingService = sailingService;
@@ -102,22 +104,24 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     protected void importLeaderboardGroups() {
         String[] groupNames = createLeaderBoardGroupNamesFromListBox();
-        sailingService.importMasterData(currentHost, groupNames, new AsyncCallback<MasterDataImportObjectCreationCount>() {
-            
-            @Override
-            public void onSuccess(MasterDataImportObjectCreationCount result) {
-                int leaderboardsCreated = result.getLeaderboardCount();
-                int leaderboardGroupsCreated = result.getLeaderboardGroupCount();
-                int eventsCreated = result.getEventCount();
-                int regattasCreated = result.getRegattaCount();
-                showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated);
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                showErrorAlert(caught.getLocalizedMessage());
-            }
-        });
+        boolean override = overrideSwitch.getValue();
+        sailingService.importMasterData(currentHost, groupNames, override,
+                new AsyncCallback<MasterDataImportObjectCreationCount>() {
+
+                    @Override
+                    public void onSuccess(MasterDataImportObjectCreationCount result) {
+                        int leaderboardsCreated = result.getLeaderboardCount();
+                        int leaderboardGroupsCreated = result.getLeaderboardGroupCount();
+                        int eventsCreated = result.getEventCount();
+                        int regattasCreated = result.getRegattaCount();
+                        showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        showErrorAlert(caught.getLocalizedMessage());
+                    }
+                });
     }
 
 
@@ -226,6 +230,9 @@ public class MasterDataImportPanel extends VerticalPanel {
 
         leaderboardgroupListBox = new ListBox(true);
         contentPanel.add(leaderboardgroupListBox);
+        
+        overrideSwitch = new CheckBox("Override existing data if names and ids match");
+        overrideSwitch.setValue(false);
 
         importLeaderboardGroupsButton = new Button("Import selected Leaderboard Groups");
         contentPanel.add(importLeaderboardGroupsButton);

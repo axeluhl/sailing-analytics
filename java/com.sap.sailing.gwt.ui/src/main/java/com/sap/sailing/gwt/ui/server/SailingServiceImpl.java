@@ -3161,7 +3161,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames) {
+    public MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override) {
         String getMasterDataUrl = createGetMasterDataForLgsUrl(host);
         if (!isValidUrl(getMasterDataUrl, false)) {
             throw new RuntimeException("Not a valid URL for fetching leaderboardgroups masterdata: " + getMasterDataUrl);
@@ -3195,7 +3195,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 sb.append(line);
             }
 
-            return importFromHttpResponse(sb.toString());
+            return importFromHttpResponse(sb.toString(), override);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -3219,7 +3219,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                toURL();
    }
     
-    protected MasterDataImportObjectCreationCountImpl importFromHttpResponse(String response) {
+    protected MasterDataImportObjectCreationCountImpl importFromHttpResponse(String response, boolean override) {
         MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
         JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = LeaderboardGroupMasterDataJsonDeserializer
                 .create(baseDomainFactory);
@@ -3230,7 +3230,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
                 LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
                         .deserialize(leaderBoardGroupMasterDataJson);
-                ImportMasterDataOperation op = new ImportMasterDataOperation(masterData);
+                ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, override);
                 creationCount.add(getService().apply(op));
             }
         } catch (org.json.simple.parser.ParseException e) {
