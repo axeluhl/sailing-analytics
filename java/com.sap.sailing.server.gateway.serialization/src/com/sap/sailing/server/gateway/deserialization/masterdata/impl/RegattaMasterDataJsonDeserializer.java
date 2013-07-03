@@ -1,12 +1,15 @@
 package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.masterdataimport.RaceColumnMasterData;
 import com.sap.sailing.domain.masterdataimport.RegattaMasterData;
 import com.sap.sailing.domain.masterdataimport.SeriesMasterData;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -17,9 +20,11 @@ import com.sap.sailing.server.gateway.serialization.masterdata.impl.RegattaMaste
 public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<RegattaMasterData> {
     
     private final JsonDeserializer<Fleet> fleetDeserializer;
+    private final JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer;
 
-    public RegattaMasterDataJsonDeserializer(JsonDeserializer<Fleet> fleetDeserializer) {
+    public RegattaMasterDataJsonDeserializer(JsonDeserializer<Fleet> fleetDeserializer, JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer) {
         this.fleetDeserializer = fleetDeserializer;
+        this.raceColumnDeserializer = raceColumnDeserializer;
     }
 
     @Override
@@ -32,17 +37,27 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
         String scoringSchemeType = (String) object.get(RegattaMasterDataJsonSerializer.FIELD_SCORING_SCHEME_TYPE);
         boolean isPersistent = (Boolean) object.get(RegattaMasterDataJsonSerializer.FIELD_IS_PERSISTENT);
         Iterable<SeriesMasterData> series = deserializeSeries((JSONArray) object.get(RegattaMasterDataJsonSerializer.FIELD_SERIES));
-        return new RegattaMasterData(id, baseName, defaultCourseAreaId, boatClassName, scoringSchemeType, series, isPersistent, regattaName);
+        Iterable<String> raceIds = deserializeRaceIds((JSONArray) object.get(RegattaMasterDataJsonSerializer.FIELD_REGATTA_RACE_IDS));
+        return new RegattaMasterData(id, baseName, defaultCourseAreaId, boatClassName, scoringSchemeType, series, isPersistent, regattaName, raceIds);
     }
 
-    private Iterable<SeriesMasterData> deserializeSeries(JSONArray jsonArray) {
+    private Iterable<String> deserializeRaceIds(JSONArray jsonArray) {
+        Set<String> raceIdStrings = new HashSet<String>();
+        for (Object obj : jsonArray) {
+            String id = (String) obj;
+            raceIdStrings.add(id);
+        }
+        return raceIdStrings;
+    }
+
+    private Iterable<SeriesMasterData> deserializeSeries(JSONArray jsonArray) throws JsonDeserializationException {
         List<SeriesMasterData> series = new ArrayList<SeriesMasterData>();
         for (Object seriesObject : jsonArray) {
             JSONObject seriesJson = (JSONObject) seriesObject;
             String name = (String) seriesJson.get(RegattaMasterDataJsonSerializer.FIELD_NAME);
             boolean isMedal = (Boolean) seriesJson.get(RegattaMasterDataJsonSerializer.FIELD_IS_MEDAL);
             Iterable<Fleet> fleets = deserializeFleets((JSONArray) seriesJson.get(RegattaMasterDataJsonSerializer.FIELD_FLEETS));
-            Iterable<String> raceColumnNames = deserializeRaceColumnNames((JSONArray) seriesJson.get(RegattaMasterDataJsonSerializer.FIELD_RACE_COLUMNS));
+            Iterable<RaceColumnMasterData> raceColumnNames = deserializeRaceColumnNames((JSONArray) seriesJson.get(RegattaMasterDataJsonSerializer.FIELD_RACE_COLUMNS));
             int[] discardingRule = deserializeResultDesicardingRule((JSONObject) seriesJson.get(RegattaMasterDataJsonSerializer.FIELD_RESULT_DISCARDING_RULE));
             series.add(new SeriesMasterData(name, isMedal, fleets, raceColumnNames, discardingRule));
         }
@@ -50,13 +65,13 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
         return series;
     }
 
-    private Iterable<String> deserializeRaceColumnNames(JSONArray jsonArray) {
-        List<String> raceColumnNames = new ArrayList<String>();
-        for (Object nameObject : jsonArray) {
-            JSONObject nameJson = (JSONObject) nameObject;
-            raceColumnNames.add((String) nameJson.get(RegattaMasterDataJsonSerializer.FIELD_NAME));
+    private Iterable<RaceColumnMasterData> deserializeRaceColumnNames(JSONArray jsonArray) throws JsonDeserializationException {
+        List<RaceColumnMasterData> raceColumns = new ArrayList<RaceColumnMasterData>();
+        for (Object raceColumnObject : jsonArray) {
+            JSONObject jsonRaceColumn = (JSONObject) raceColumnObject;
+            raceColumns.add(raceColumnDeserializer.deserialize(jsonRaceColumn));
         }
-        return raceColumnNames;
+        return raceColumns;
     }
 
     private Iterable<Fleet> deserializeFleets(JSONArray jsonArray) {

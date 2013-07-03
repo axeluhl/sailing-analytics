@@ -23,7 +23,7 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leaderboard> {
-    
+
     public static final String FIELD_FOR_RACE_COLUMNS = "forRaceColumns";
     public static final String FIELD_TIME_POINT = "timePoint";
     public static final String FIELD_COMMENT = "comment";
@@ -52,23 +52,19 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
     public static final String FIELD_RACE_LOG_EVENTS = "raceLogEvents";
     public static final String FIELD_FLEETS = "fleets";
     public static final String FIELD_FLEET_NAME = "fleetName";
-    
-    
+
     private final JsonSerializer<Competitor> competitorSerializer;
     private final JsonSerializer<RaceColumn> raceColumnSerializer;
     private final JsonSerializer<RaceLogEvent> raceLogEventSerializer;
-    
+
     /*
-     * TODO This is a hack to "remember" the course areas to allow finding the events which
-     * own the course areas. This way regatta leaderboard can be completely exported, because all events, their regattas, etc 
-     * can be exported too.
-     * Their should be a proper connection between regatta and event soon. 
+     * TODO This is a hack to "remember" the course areas to allow finding the events which own the course areas. This
+     * way regatta leaderboard can be completely exported, because all events, their regattas, etc can be exported too.
+     * Their should be a proper connection between regatta and event soon.
      */
     private final Set<String> courseAreaIds = new HashSet<String>();
-    
+
     private final Set<Regatta> regattas = new HashSet<Regatta>();
-    
-    
 
     public LeaderboardMasterDataJsonSerializer(JsonSerializer<Competitor> competitorSerializer,
             JsonSerializer<RaceColumn> raceColumnSerializer, JsonSerializer<RaceLogEvent> raceLogEventSerializer) {
@@ -86,10 +82,12 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         jsonLeaderboard.put(FIELD_NAME, leaderboard.getName());
         jsonLeaderboard.put(FIELD_SCORE_CORRECTION, createJsonForScoreCorrection(leaderboard));
         jsonLeaderboard.put(FIELD_CARRIED_POINTS, createJsonArrayForCarriedPoints(leaderboard));
-        jsonLeaderboard.put(FIELD_SUPPRESSED_COMPETITORS, createJsonArrayForSuppressedCompetitors(leaderboard.getSuppressedCompetitors()));
+        jsonLeaderboard.put(FIELD_SUPPRESSED_COMPETITORS,
+                createJsonArrayForSuppressedCompetitors(leaderboard.getSuppressedCompetitors()));
         jsonLeaderboard.put(FIELD_COMPETITOR_DISPLAY_NAMES, createJsonArrayForCompetitorDisplayNames(leaderboard));
         jsonLeaderboard.put(FIELD_COMPETITORS, createJsonArrayForCompetitors(leaderboard.getAllCompetitors()));
-        jsonLeaderboard.put(FIELD_RESULT_DISCARDING_RULE, createJsonForResultDiscardingRule(leaderboard.getResultDiscardingRule()));
+        jsonLeaderboard.put(FIELD_RESULT_DISCARDING_RULE,
+                createJsonForResultDiscardingRule(leaderboard.getResultDiscardingRule()));
         jsonLeaderboard.put(FIELD_DISPLAY_NAME, leaderboard.getDisplayName());
         jsonLeaderboard.put(FIELD_RACE_LOG_EVENTS, createJsonArrayForRaceLogEventsPerRaceColumn(leaderboard));
         boolean isRegattaLeaderboard = false;
@@ -102,16 +100,18 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
             jsonLeaderboard.put(FIELD_REGATTA_NAME, regattaLeaderboard.getRegatta().getName());
             CourseArea courseArea = regattaLeaderboard.getRegatta().getDefaultCourseArea();
-            courseAreaIds.add(courseArea.getId().toString());
+            if (courseArea != null) {
+                courseAreaIds.add(courseArea.getId().toString());
+            }
             regattas.add(regattaLeaderboard.getRegatta());
             isRegattaLeaderboard = true;
         }
-        
+
         jsonLeaderboard.put(FIELD_REGATTA_LEADERBOARD, isRegattaLeaderboard);
 
         return jsonLeaderboard;
     }
-    
+
     private JSONArray createJsonArrayForRaceLogEventsPerRaceColumn(Leaderboard leaderboard) {
         JSONArray array = new JSONArray();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
@@ -128,7 +128,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         for (Fleet fleet : raceColumn.getFleets()) {
             JSONObject fleetRaceLogJson = new JSONObject();
             fleetRaceLogJson.put(FIELD_FLEET_NAME, fleet.getName());
-            fleetRaceLogJson.put(FIELD_RACE_LOG_EVENTS, createRaceLogEventsForFleet(raceColumn,fleet));
+            fleetRaceLogJson.put(FIELD_RACE_LOG_EVENTS, createRaceLogEventsForFleet(raceColumn, fleet));
             array.add(fleetRaceLogJson);
         }
         return array;
@@ -175,7 +175,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
                 jsonArray.add(createJsonForCarriedPoints(competitor.getId().toString(), carriedPoints));
             }
         }
-        
+
         return jsonArray;
     }
 
@@ -224,7 +224,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         }
         return jsonRaceColumns;
     }
-    
+
     private JSONArray createJsonArrayForCompetitors(Iterable<Competitor> allCompetitors) {
         JSONArray jsonCompetitors = new JSONArray();
         for (Competitor competitor : allCompetitors) {
@@ -233,7 +233,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         }
         return jsonCompetitors;
     }
-    
+
     private JSONObject createJsonForScoreCorrection(Leaderboard leaderboard) {
         SettableScoreCorrection correction = leaderboard.getScoreCorrection();
         JSONObject jsonScoreCorrection = new JSONObject();
@@ -243,7 +243,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         } else {
             jsonScoreCorrection.put(FIELD_TIME_POINT, null);
         }
-        
+
         jsonScoreCorrection.put(FIELD_FOR_RACE_COLUMNS,
                 createJSONArrayForScoreCorrectionsForRaceColumns(correction, leaderboard));
 
@@ -276,8 +276,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
                     correction.getExplicitScoreCorrection(competitor, raceColumn));
             scoreCorrectionForCompetitor.put(FIELD_MAX_POINTS_REASON,
                     correction.getMaxPointsReason(competitor, raceColumn).toString());
-            scoreCorrectionForCompetitor.put(FIELD_COMPETITOR_ID,
-                    competitor.getId().toString());
+            scoreCorrectionForCompetitor.put(FIELD_COMPETITOR_ID, competitor.getId().toString());
             scoreCorrectionsForCompetitors.add(scoreCorrectionForCompetitor);
         }
 
@@ -291,7 +290,5 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
     public Iterable<Regatta> getRegattas() {
         return regattas;
     }
-    
-    
 
 }

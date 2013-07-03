@@ -10,10 +10,12 @@ public class RegattaMasterData {
     private Iterable<SeriesMasterData> series;
     private boolean isPersistent;
     private String regattaName;
+    private Iterable<String> raceIds;
     
 
     public RegattaMasterData(String id, String baseName, String defaultCourseAreaId, String boatClassName,
-            String scoringSchemeType, Iterable<SeriesMasterData> series, boolean isPersistent, String regattaName) {
+            String scoringSchemeType, Iterable<SeriesMasterData> series, boolean isPersistent, String regattaName,
+            Iterable<String> raceIds) {
                 this.id = id;
                 this.baseName = baseName;
                 this.defaultCourseAreaId = defaultCourseAreaId;
@@ -22,6 +24,11 @@ public class RegattaMasterData {
                 this.series = series;
                 this.isPersistent = isPersistent;
                 this.regattaName = regattaName;
+                this.raceIds = raceIds;
+    }
+
+    public Iterable<String> getRaceIds() {
+        return raceIds;
     }
 
     public String getId() {
