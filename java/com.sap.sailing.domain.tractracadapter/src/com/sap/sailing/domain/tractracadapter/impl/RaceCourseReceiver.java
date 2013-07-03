@@ -148,10 +148,12 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     /**
      * Parses the route metadata for additional course information
      * The 'passing side' for each course waypoint is encoded like this...
-     * Seq.1=GATE
-     * Seq.2=PORT
-     * Seq.3=GATE
-     * Seq.4=STARBOARD
+     * <pre>
+     *  Seq.1=GATE
+     *  Seq.2=PORT
+     *  Seq.3=GATE
+     *  Seq.4=STARBOARD
+     * </pre>
      */
     private Map<Integer, NauticalSide> parseAdditionalCourseDataFromMetadata(Route route, 
             List<com.tractrac.clientmodule.ControlPoint> controlPoints) {
