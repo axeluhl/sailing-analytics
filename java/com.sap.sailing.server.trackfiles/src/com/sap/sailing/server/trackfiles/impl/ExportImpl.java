@@ -236,7 +236,7 @@ public class ExportImpl implements Export {
 
             String name = nameReader.getName(element);
             GpxRoute route = new GpxRoute(new Gpx11Format(), RouteCharacteristics.Track, name,
-                    Collections.<String> emptyList(), Collections.<GpxPosition> emptyList());
+                    Collections.<String> emptyList(), new ArrayList<GpxPosition>());
             routes.add(route);
 
             TrackReader<E, F> trackReader = trackRetriever.retrieveTrackReader(element);
