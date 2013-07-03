@@ -3,6 +3,8 @@ package com.sap.sailing.server.gateway.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletException;
@@ -21,6 +23,7 @@ import com.sap.sailing.server.trackfiles.common.FormatNotSupportedException;
 
 public class TrackFilesExportPostServlet extends SailingServerHttpServlet {
     private static final long serialVersionUID = 1120226743039934620L;
+    private static final Logger log = Logger.getLogger(TrackFilesExportPostServlet.class.toString());
 
     private TrackedRace getTrackedRace(String regattaString, String raceString) {
         Regatta regatta = getService().getRegattaByName(regattaString);
@@ -83,17 +86,16 @@ public class TrackFilesExportPostServlet extends SailingServerHttpServlet {
         List<TrackedRace> trackedRaces = getTrackedRaces(regattaRaces);
         boolean beforeAfter = beforeAfterString == null ? false : true;
         boolean rawFixes = rawFixesString == null ? false : true;
+        TrackFilesFormat format = TrackFilesFormat.valueOf(formatString);
+        List<TrackFilesDataSource> data = new ArrayList<TrackFilesDataSource>();
+        for (String s : dataString) {
+            data.add(TrackFilesDataSource.valueOf(s));
+        }
         try {
-            TrackFilesFormat format = TrackFilesFormat.valueOf(formatString);
-            List<TrackFilesDataSource> data = new ArrayList<TrackFilesDataSource>();
-            for (String s : dataString) {
-                data.add(TrackFilesDataSource.valueOf(s));
-            }
             Export.INSTANCE.writeRaces(data, format, trackedRaces, beforeAfter, rawFixes, out);
-        } catch (FormatNotSupportedException | NullPointerException | IllegalArgumentException e) {
-            // resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, e.getMessage());
-            e.printStackTrace();
-            return;
+        } catch (FormatNotSupportedException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            log.log(Level.WARNING, e.getMessage());
         }
 
         out.flush();

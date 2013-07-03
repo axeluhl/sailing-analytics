@@ -1,7 +1,6 @@
 package com.sap.sailing.server.trackfiles;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
 
@@ -20,18 +19,18 @@ import com.sap.sailing.server.trackfiles.impl.ExportImpl;
 public interface Export {
     Export INSTANCE = new ExportImpl();
 
-    void writeCompetitors(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes,
-            OutputStream out) throws FormatNotSupportedException, IOException;
+    byte[] writeCompetitors(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes)
+            throws FormatNotSupportedException, IOException;
 
-    void writeWind(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes,
-            OutputStream out) throws FormatNotSupportedException, IOException;
+    byte[] writeWind(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes)
+            throws FormatNotSupportedException, IOException;
 
-    void writeBuoys(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes,
-            OutputStream out) throws FormatNotSupportedException, IOException;
+    byte[] writeBuoys(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes)
+            throws FormatNotSupportedException, IOException;
 
-    void writeManeuvers(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes,
-            OutputStream out) throws FormatNotSupportedException, IOException;
+    byte[] writeManeuvers(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes)
+            throws FormatNotSupportedException, IOException;
 
-    void writeRaces(List<TrackFilesDataSource> data, TrackFilesFormat format, List<TrackedRace> races, boolean dataBeforeAfter,
-            boolean rawFixes, ZipOutputStream out) throws FormatNotSupportedException;
+    void writeRaces(List<TrackFilesDataSource> data, TrackFilesFormat format, List<TrackedRace> races,
+            boolean dataBeforeAfter, boolean rawFixes, ZipOutputStream out) throws FormatNotSupportedException;
 }

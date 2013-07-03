@@ -1,7 +1,7 @@
 package com.sap.sailing.server.trackfiles.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -10,11 +10,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import slash.navigation.base.BaseNavigationFormat;
-import slash.navigation.base.BaseNavigationPosition;
 import slash.navigation.base.BaseRoute;
 import slash.navigation.base.MultipleRoutesFormat;
 import slash.navigation.base.RouteCharacteristics;
@@ -60,6 +65,8 @@ import com.sap.sailing.server.trackfiles.common.FormatNotSupportedException;
  * 
  */
 public class ExportImpl implements Export {
+    private static final Logger log = Logger.getLogger(ExportImpl.class.toString());
+
     private interface NameReader<E> {
         String getName(E e);
     }
@@ -137,72 +144,70 @@ public class ExportImpl implements Export {
 
     @SuppressWarnings("rawtypes")
     private abstract class RouteConverter {
-        abstract BaseRoute convert(BaseRoute route);
+        abstract BaseRoute convert(GpxRoute route);
 
-        List<BaseRoute> convert(List<BaseRoute> routes) {
+        List<BaseRoute> convert(List<GpxRoute> routes) {
             List<BaseRoute> result = new ArrayList<BaseRoute>(routes.size());
-            for (BaseRoute route : routes)
+            for (GpxRoute route : routes)
                 result.add(convert(route));
             return result;
         }
     }
 
-    /**
-     * Warning can't be helped, because there is a generic type loop if one sticks to only the abstract types.
-     * 
-     * @param fixes
-     * @param creator
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    private <I> List<BaseRoute> getRoutes(Map<String, List<I>> fixes, WaypointCreator<I> creator) {
-        List<BaseRoute> routes = new ArrayList<BaseRoute>();
+    private class WriteRaceCallable implements Callable<byte[]> {
+        private final TrackedRace race;
+        private final TrackFilesDataSource data;
+        private final TrackFilesFormat format;
+        private final boolean dataBeforeAfter;
+        private final boolean rawFixes;
 
-        for (String track : fixes.keySet()) {
-            // one implementation of BaseRoute has to be chosen
-            List<GpxPosition> positions = new ArrayList<GpxPosition>();
-
-            for (I fix : fixes.get(track)) {
-                BaseNavigationPosition position = creator.getPosition(fix);
-                if (position != null) {
-                    positions.add(position.asGpxPosition());
-                }
-            }
-            GpxRoute gpxRoute = new GpxRoute(new Gpx11Format(), RouteCharacteristics.Track, track,
-                    Collections.<String> emptyList(), positions);
-            routes.add(gpxRoute);
+        public WriteRaceCallable(TrackedRace race, TrackFilesDataSource data, TrackFilesFormat format,
+                boolean dataBeforeAfter, boolean rawFixes) {
+            super();
+            this.race = race;
+            this.data = data;
+            this.format = format;
+            this.dataBeforeAfter = dataBeforeAfter;
+            this.rawFixes = rawFixes;
         }
-        return routes;
+
+        public TrackedRace getRace() {
+            return race;
+        }
+
+        public TrackFilesFormat getFormat() {
+            return format;
+        }
+
+        public byte[] call() throws Exception {
+            switch (data) {
+            case BUOYS:
+                return writeBuoys(format, race, dataBeforeAfter, rawFixes);
+            case COMPETITORS:
+                return writeCompetitors(format, race, dataBeforeAfter, rawFixes);
+            case WIND:
+                return writeWind(format, race, dataBeforeAfter, rawFixes);
+            case MANEUVERS:
+                return writeManeuvers(format, race, dataBeforeAfter, rawFixes);
+            }
+            return new byte[0];
+        }
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private <F extends BaseNavigationFormat<? extends BaseRoute>> void writeRoutesInternal(List<BaseRoute> routes,
-            F format, final OutputStream out) throws IOException, FormatNotSupportedException {
+    private <F extends BaseNavigationFormat<? extends BaseRoute>> byte[] writeRoutesInternal(List<BaseRoute> routes,
+            F format) throws IOException, FormatNotSupportedException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         if (format instanceof MultipleRoutesFormat) {
             MultipleRoutesFormat<BaseRoute> mFormat = (MultipleRoutesFormat<BaseRoute>) format;
 
             // necessary as GpxFormat11.write() seems to flush afterwards, thus
             // closing the HttpServletResponse Outputstream
-            mFormat.write((List<BaseRoute>) routes, new OutputStream() {
-                @Override
-                public void write(int b) throws IOException {
-                    out.write(b);
-                }
-
-                @Override
-                public void write(byte[] b, int off, int len) throws IOException {
-                    out.write(b, off, len);
-                }
-
-                @Override
-                public void write(byte[] b) throws IOException {
-                    out.write(b);
-                }
-            });
+            mFormat.write((List<BaseRoute>) routes, out);
         } else {
             throw new FormatNotSupportedException("Format cannot contain multiple routes per file");
         }
-        out.flush();
+        return out.toByteArray();
     }
 
     private void writeRaceMetaData(TrackedRace race, ZipOutputStream out) {
@@ -220,16 +225,19 @@ public class ExportImpl implements Export {
         pw.flush();
     }
 
-    private <E, F extends Timed, T> void writeRaceInternal(TrackFilesFormat format, TrackedRace race,
-            boolean dataBeforeAfter, boolean rawFixes, OutputStream out, WaypointCreator<F> creator,
-            Iterable<E> elements, NameReader<E> nameReader, TrackReaderRetriever<E, F> trackRetriever)
-            throws FormatNotSupportedException, IOException {
-        Map<String, List<F>> fixes = new HashMap<String, List<F>>();
+    private <E, F extends Timed, T> byte[] writeRaceInternal(TrackFilesFormat format, TrackedRace race,
+            boolean dataBeforeAfter, boolean rawFixes, WaypointCreator<F> creator, Iterable<E> elements,
+            NameReader<E> nameReader, TrackReaderRetriever<E, F> trackRetriever) throws FormatNotSupportedException,
+            IOException {
+        List<GpxRoute> routes = new ArrayList<>();
         for (E element : elements) {
-            List<F> fixList = new ArrayList<F>();
-
             TimePoint start = race.getStartOfRace() != null ? race.getStartOfRace() : race.getStartOfTracking();
             TimePoint end = race.getEndOfRace() != null ? race.getEndOfRace() : race.getEndOfTracking();
+
+            String name = nameReader.getName(element);
+            GpxRoute route = new GpxRoute(new Gpx11Format(), RouteCharacteristics.Track, name,
+                    Collections.<String> emptyList(), Collections.<GpxPosition> emptyList());
+            routes.add(route);
 
             TrackReader<E, F> trackReader = trackRetriever.retrieveTrackReader(element);
             trackReader.getLocker().lock();
@@ -238,30 +246,21 @@ public class ExportImpl implements Export {
                 if (fixesIter == null) {
                     continue;
                 }
+                int i = 0;
                 for (F fix : fixesIter) {
-                    // TODO is putting the dynamic iterator result into a list
-                    // acceptable? export will most likely only take place when
-                    // race is done and over, and tracks do not change, however
-                    // this goes against the concept of locking and the iterator
-                    // in place
-                    // if (fix.getTimePoint().before(race.getStartOfRace()))
-                    // continue;
-                    // if (fix.getTimePoint().after(race.getEndOfRace()))
-                    // break;
                     if (!dataBeforeAfter && fix.getTimePoint().before(start)) {
                         continue;
                     }
                     if (!dataBeforeAfter && fix.getTimePoint().after(end)) {
                         break;
                     }
-                    fixList.add(fix);
+                    route.add(i++, creator.getPosition(fix));
                 }
             } finally {
                 trackReader.getLocker().unlock();
             }
-            fixes.put(nameReader.getName(element), fixList);
         }
-        writeFixes(format, fixes, creator, out);
+        return writeFixes(format, routes);
     }
 
     /**
@@ -271,102 +270,91 @@ public class ExportImpl implements Export {
      * @param fixes
      * @param out
      */
+    // Trying to use generics for abstract BaseRoute causes generic type loop (BaseRoute needs BaseNavigationFormat,
+    // which needs BaseRoute as type parameter)
     @SuppressWarnings("rawtypes")
-    public <I> void writeFixes(TrackFilesFormat format, Map<String, List<I>> fixes, WaypointCreator<I> creator,
-            OutputStream out) throws FormatNotSupportedException, IOException {
+    public byte[] writeFixes(TrackFilesFormat format, List<GpxRoute> routes) throws FormatNotSupportedException,
+            IOException {
 
         switch (format) {
         case Gpx10:
-            writeRoutesInternal(new RouteConverter() {
-                BaseRoute convert(BaseRoute route) {
+            return writeRoutesInternal(new RouteConverter() {
+                BaseRoute convert(GpxRoute route) {
                     return route.asGpx10Format();
                 }
-            }.convert(getRoutes(fixes, creator)), new Gpx10Format(), out);
-            break;
+            }.convert(routes), new Gpx10Format());
         case Gpx11:
-            writeRoutesInternal(new RouteConverter() {
-                BaseRoute convert(BaseRoute route) {
+            return writeRoutesInternal(new RouteConverter() {
+                BaseRoute convert(GpxRoute route) {
                     return route.asGpx11Format();
                 }
-            }.convert(getRoutes(fixes, creator)), new Gpx11Format(), out);
-            break;
+            }.convert(routes), new Gpx11Format());
         case Kml20:
-            writeRoutesInternal(new RouteConverter() {
-                BaseRoute convert(BaseRoute route) {
+            return writeRoutesInternal(new RouteConverter() {
+                BaseRoute convert(GpxRoute route) {
                     return route.asKml20Format();
                 }
-            }.convert(getRoutes(fixes, creator)), new Kml20Format(), out);
-            break;
+            }.convert(routes), new Kml20Format());
         case Kml21:
-            writeRoutesInternal(new RouteConverter() {
-                BaseRoute convert(BaseRoute route) {
+            return writeRoutesInternal(new RouteConverter() {
+                BaseRoute convert(GpxRoute route) {
                     return route.asKml21Format();
                 }
-            }.convert(getRoutes(fixes, creator)), new Kml21Format(), out);
-            break;
+            }.convert(routes), new Kml21Format());
         case Kml22:
-            writeRoutesInternal(new RouteConverter() {
-                BaseRoute convert(BaseRoute route) {
+            return writeRoutesInternal(new RouteConverter() {
+                BaseRoute convert(GpxRoute route) {
                     return route.asKml22Format();
                 }
-            }.convert(getRoutes(fixes, creator)), new Kml22Format(), out);
-            break;
+            }.convert(routes), new Kml22Format());
         case Kmz20:
-            writeRoutesInternal(new RouteConverter() {
-                BaseRoute convert(BaseRoute route) {
+            return writeRoutesInternal(new RouteConverter() {
+                BaseRoute convert(GpxRoute route) {
                     return route.asKmz20Format();
                 }
-            }.convert(getRoutes(fixes, creator)), new Kmz20Format(), out);
-            break;
+            }.convert(routes), new Kmz20Format());
         case Kmz21:
-            writeRoutesInternal(new RouteConverter() {
-                BaseRoute convert(BaseRoute route) {
+            return writeRoutesInternal(new RouteConverter() {
+                BaseRoute convert(GpxRoute route) {
                     return route.asKmz21Format();
                 }
-            }.convert(getRoutes(fixes, creator)), new Kmz21Format(), out);
-            break;
+            }.convert(routes), new Kmz21Format());
         case Kmz22:
-            writeRoutesInternal(new RouteConverter() {
-                BaseRoute convert(BaseRoute route) {
+            return writeRoutesInternal(new RouteConverter() {
+                BaseRoute convert(GpxRoute route) {
                     return route.asKmz22Format();
                 }
-            }.convert(getRoutes(fixes, creator)), new Kmz22Format(), out);
-            break;
+            }.convert(routes), new Kmz22Format());
         case MagicMapsIkt:
-            writeRoutesInternal(new RouteConverter() {
-                BaseRoute convert(BaseRoute route) {
+            return writeRoutesInternal(new RouteConverter() {
+                BaseRoute convert(GpxRoute route) {
                     return route.asMagicMapsIktFormat();
                 }
-            }.convert(getRoutes(fixes, creator)), new MagicMapsIktFormat(), out);
-            break;
+            }.convert(routes), new MagicMapsIktFormat());
         case Ovl:
-            writeRoutesInternal(new RouteConverter() {
-                BaseRoute convert(BaseRoute route) {
+            return writeRoutesInternal(new RouteConverter() {
+                BaseRoute convert(GpxRoute route) {
                     return route.asOvlFormat();
                 }
-            }.convert(getRoutes(fixes, creator)), new OvlFormat(), out);
-            break;
+            }.convert(routes), new OvlFormat());
         case OziExplorerTrack:
-            writeRoutesInternal(new RouteConverter() {
-                BaseRoute convert(BaseRoute route) {
+            return writeRoutesInternal(new RouteConverter() {
+                BaseRoute convert(GpxRoute route) {
                     return route.asOvlFormat();
                 }
-            }.convert(getRoutes(fixes, creator)), new OvlFormat(), out);
-            break;
+            }.convert(routes), new OvlFormat());
         case Tcx1:
-            writeRoutesInternal(new RouteConverter() {
-                BaseRoute convert(BaseRoute route) {
+            return writeRoutesInternal(new RouteConverter() {
+                BaseRoute convert(GpxRoute route) {
                     return route.asTcx1Format();
                 }
-            }.convert(getRoutes(fixes, creator)), new Tcx1Format(), out);
-            break;
+            }.convert(routes), new Tcx1Format());
         case Tcx2:
-            writeRoutesInternal(new RouteConverter() {
-                BaseRoute convert(BaseRoute route) {
+            return writeRoutesInternal(new RouteConverter() {
+                BaseRoute convert(GpxRoute route) {
                     return route.asTcx2Format();
                 }
-            }.convert(getRoutes(fixes, creator)), new Tcx2Format(), out);
-            break;
+            }.convert(routes), new Tcx2Format());
         default:
             throw new FormatNotSupportedException(format + " format is not supported");
         }
@@ -381,8 +369,8 @@ public class ExportImpl implements Export {
      * @throws FormatNotSupportedException
      */
     @Override
-    public void writeCompetitors(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes,
-            OutputStream out) throws FormatNotSupportedException, IOException {
+    public byte[] writeCompetitors(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter,
+            boolean rawFixes) throws FormatNotSupportedException, IOException {
 
         TrackReaderRetriever<Competitor, GPSFixMoving> retriever = new TrackReaderRetriever<Competitor, GPSFixMoving>() {
             @Override
@@ -391,7 +379,7 @@ public class ExportImpl implements Export {
             }
         };
 
-        writeRaceInternal(format, race, dataBeforeAfter, rawFixes, out, GPSFixMovingToGpxPosition.INSTANCE, race
+        return writeRaceInternal(format, race, dataBeforeAfter, rawFixes, GPSFixMovingToGpxPosition.INSTANCE, race
                 .getRace().getCompetitors(), new NameReader<Competitor>() {
             @Override
             public String getName(Competitor c) {
@@ -410,8 +398,8 @@ public class ExportImpl implements Export {
      * @throws FormatNotSupportedException
      */
     @Override
-    public void writeWind(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes,
-            OutputStream out) throws FormatNotSupportedException, IOException {
+    public byte[] writeWind(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes)
+            throws FormatNotSupportedException, IOException {
 
         TrackReaderRetriever<WindSource, Wind> retriever = new TrackReaderRetriever<WindSource, Wind>() {
             @Override
@@ -420,7 +408,7 @@ public class ExportImpl implements Export {
             }
         };
 
-        writeRaceInternal(format, race, dataBeforeAfter, rawFixes, out, WindToGpxPosition.INSTANCE,
+        return writeRaceInternal(format, race, dataBeforeAfter, rawFixes, WindToGpxPosition.INSTANCE,
                 race.getWindSources(WindSourceType.TRACK_BASED_ESTIMATION), new NameReader<WindSource>() {
                     @Override
                     public String getName(WindSource s) {
@@ -438,8 +426,8 @@ public class ExportImpl implements Export {
      * @throws FormatNotSupportedException
      */
     @Override
-    public void writeBuoys(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes,
-            OutputStream out) throws FormatNotSupportedException, IOException {
+    public byte[] writeBuoys(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes)
+            throws FormatNotSupportedException, IOException {
 
         TrackReaderRetriever<Mark, GPSFix> retriever = new TrackReaderRetriever<Mark, GPSFix>() {
             @Override
@@ -448,8 +436,8 @@ public class ExportImpl implements Export {
             }
         };
 
-        writeRaceInternal(format, race, dataBeforeAfter, rawFixes, out, GPSFixToGpxPosition.INSTANCE, race.getMarks(),
-                new NameReader<Mark>() {
+        return writeRaceInternal(format, race, dataBeforeAfter, rawFixes, GPSFixToGpxPosition.INSTANCE,
+                race.getMarks(), new NameReader<Mark>() {
                     @Override
                     public String getName(Mark m) {
                         return m.getName();
@@ -466,8 +454,8 @@ public class ExportImpl implements Export {
      * @throws FormatNotSupportedException
      */
     @Override
-    public void writeManeuvers(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes,
-            OutputStream out) throws FormatNotSupportedException, IOException {
+    public byte[] writeManeuvers(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter,
+            boolean rawFixes) throws FormatNotSupportedException, IOException {
 
         final TimePoint start = race.getStartOfRace() == null ? race.getStartOfTracking() : race.getStartOfRace();
         final TimePoint end = race.getEndOfRace() == null ? race.getEndOfTracking() : race.getEndOfRace();
@@ -505,8 +493,8 @@ public class ExportImpl implements Export {
             }
         };
 
-        writeRaceInternal(format, race, dataBeforeAfter, rawFixes, out, ManeuverToGpxPosition.INSTANCE, race.getRace()
-                .getCompetitors(), new NameReader<Competitor>() {
+        return writeRaceInternal(format, race, dataBeforeAfter, rawFixes, ManeuverToGpxPosition.INSTANCE, race
+                .getRace().getCompetitors(), new NameReader<Competitor>() {
             @Override
             public String getName(Competitor s) {
                 return s.getName();
@@ -526,45 +514,56 @@ public class ExportImpl implements Export {
      * @throws FormatNotSupportedException
      */
     @Override
-    public void writeRaces(List<TrackFilesDataSource> data, TrackFilesFormat format, List<TrackedRace> races, boolean dataBeforeAfter,
-            boolean rawFixes, ZipOutputStream out) throws FormatNotSupportedException {
-        // TODO optimize: perhaps gather gpx binary file data in parallel for
-        // different races in threads, buffer in byte arrays and join
+    public void writeRaces(List<TrackFilesDataSource> data, TrackFilesFormat format, List<TrackedRace> races,
+            boolean dataBeforeAfter, boolean rawFixes, ZipOutputStream out) throws FormatNotSupportedException {
+        Map<WriteRaceCallable, Future<byte[]>> results = new HashMap<>();
+        ExecutorService executor = Executors.newCachedThreadPool();
         for (TrackedRace race : races) {
 
-            String raceName = race.getRace().getName();
-            String regattaName = race.getRaceIdentifier().getRegattaName();
-
             try {
+                String raceName = race.getRace().getName();
+                String regattaName = race.getRaceIdentifier().getRegattaName();
                 out.putNextEntry(new ZipEntry(regattaName + "/" + raceName + " - METADATA.txt"));
                 writeRaceMetaData(race, out);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.log(Level.WARNING, "Error exporting race: " + e.getMessage());
             }
 
             for (TrackFilesDataSource d : data) {
-                try {
-                    out.putNextEntry(new ZipEntry(regattaName + "/" + raceName + " - " + d.toString() + "."
-                            + format.suffix));
+                WriteRaceCallable callable = new WriteRaceCallable(race, d, format, dataBeforeAfter, rawFixes);
+                Future<byte[]> result = executor.submit(callable);
+                results.put(callable, result);
+            }
+        }
 
-                    switch (d) {
-                    case BUOYS:
-                        writeBuoys(format, race, dataBeforeAfter, rawFixes, out);
-                        break;
-                    case COMPETITORS:
-                        writeCompetitors(format, race, dataBeforeAfter, rawFixes, out);
-                        break;
-                    case WIND:
-                        writeWind(format, race, dataBeforeAfter, rawFixes, out);
-                        break;
-                    case MANEUVERS:
-                        writeManeuvers(format, race, dataBeforeAfter, rawFixes, out);
-                        break;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+        // check for format problems first (can't write to output and then send error)
+        for (Future<byte[]> result : results.values()) {
+            try {
+                result.get();
+            } catch (Exception e) {
+                if (e instanceof FormatNotSupportedException) {
+                    throw (FormatNotSupportedException) e;
                 }
             }
         }
+
+        for (WriteRaceCallable callable : results.keySet()) {
+            try {
+                String raceName = callable.getRace().getRace().getName();
+                String regattaName = callable.getRace().getRaceIdentifier().getRegattaName();
+                TrackFilesFormat d = callable.getFormat();
+
+                out.putNextEntry(new ZipEntry(regattaName + "/" + raceName + " - " + d.toString() + "." + format.suffix));
+
+                byte[] result = results.get(callable).get();
+                out.write(result);
+            } catch (Exception e) {
+                log.log(Level.WARNING, "Error exporting race: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+        // TODO is this necessary to clean up the executor allocated resources (e.g. pooled threads)?
+        executor.shutdown();
     }
 }
