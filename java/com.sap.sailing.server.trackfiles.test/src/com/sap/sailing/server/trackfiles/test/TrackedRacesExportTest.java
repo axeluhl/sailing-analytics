@@ -53,6 +53,7 @@ public class TrackedRacesExportTest extends OnlineTracTracBasedTest {
 
 //        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
         BufferedReader in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(data)));
+        in.readLine();
         String secondLine = in.readLine();
         in.close();
         assertTrue(secondLine.contains("<gpx"));
