@@ -11,7 +11,7 @@ import com.sap.sailing.sailwave.resultimport.CsvParserFactory;
 
 public class Activator extends AbstractFileBasedScoreCorrectionProviderActivator {
     private static final String SCAN_DIR_PATH_PROPERTY_NAME = "sailwave.results";
-    private static final String DEFAULT_SCAN_DIR = "sailwaveresults";
+    private static final String DEFAULT_SCAN_DIR = "sailwave";
     
     public Activator() {
         super(SCAN_DIR_PATH_PROPERTY_NAME, DEFAULT_SCAN_DIR);
