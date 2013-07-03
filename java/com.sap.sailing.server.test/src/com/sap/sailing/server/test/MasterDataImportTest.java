@@ -207,7 +207,8 @@ public class MasterDataImportTest {
 
         // Serialize
         TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
-                sourceService.getLeaderboardGroups(), sourceService.getAllEvents());
+                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(),
+                sourceService.getPersistentRegattasForRaceIDs());
         Set<String> names = new HashSet<String>();
         names.add(TEST_GROUP_NAME);
         JSONArray masterDataOverallArray = serializer.serialize(names);
@@ -373,7 +374,7 @@ public class MasterDataImportTest {
 
         // Serialize
         TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
-                sourceService.getLeaderboardGroups(), sourceService.getAllEvents());
+                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(), sourceService.getPersistentRegattasForRaceIDs());
         Set<String> names = new HashSet<String>();
         names.add(TEST_GROUP_NAME);
         JSONArray masterDataOverallArray = serializer.serialize(names);

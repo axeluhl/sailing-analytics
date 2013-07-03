@@ -1,7 +1,9 @@
 package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -35,7 +37,17 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
         String scoringSchemeType = (String) object.get(RegattaMasterDataJsonSerializer.FIELD_SCORING_SCHEME_TYPE);
         boolean isPersistent = (Boolean) object.get(RegattaMasterDataJsonSerializer.FIELD_IS_PERSISTENT);
         Iterable<SeriesMasterData> series = deserializeSeries((JSONArray) object.get(RegattaMasterDataJsonSerializer.FIELD_SERIES));
-        return new RegattaMasterData(id, baseName, defaultCourseAreaId, boatClassName, scoringSchemeType, series, isPersistent, regattaName);
+        Iterable<String> raceIds = deserializeRaceIds((JSONArray) object.get(RegattaMasterDataJsonSerializer.FIELD_REGATTA_RACE_IDS));
+        return new RegattaMasterData(id, baseName, defaultCourseAreaId, boatClassName, scoringSchemeType, series, isPersistent, regattaName, raceIds);
+    }
+
+    private Iterable<String> deserializeRaceIds(JSONArray jsonArray) {
+        Set<String> raceIdStrings = new HashSet<String>();
+        for (Object obj : jsonArray) {
+            String id = (String) obj;
+            raceIdStrings.add(id);
+        }
+        return raceIdStrings;
     }
 
     private Iterable<SeriesMasterData> deserializeSeries(JSONArray jsonArray) throws JsonDeserializationException {

@@ -1,5 +1,8 @@
 package com.sap.sailing.server.gateway.serialization.masterdata.impl;
 
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -30,13 +33,17 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
     public static final String FIELD_REGATTA_NAME = "regattaName";
     public static final String FIELD_RESULT_DISCARDING_RULE = "resultDiscardingRule";
     public static final String FIELD_INDICES = "indices";
+    public static final String FIELD_REGATTA_RACE_IDS = "regattaRaceIds";
 
     private final JsonSerializer<Fleet> fleetSerializer;
     private final JsonSerializer<RaceColumn> raceColumnSerializer;
+    private final ConcurrentHashMap<String, Regatta> regattaForRaceIdStrings;
 
-    public RegattaMasterDataJsonSerializer(JsonSerializer<Fleet> fleetSerializer, JsonSerializer<RaceColumn> raceColumnSerializer) {
+    public RegattaMasterDataJsonSerializer(JsonSerializer<Fleet> fleetSerializer,
+            JsonSerializer<RaceColumn> raceColumnSerializer, ConcurrentHashMap<String, Regatta> regattaForRaceIdStrings) {
         this.fleetSerializer = fleetSerializer;
         this.raceColumnSerializer = raceColumnSerializer;
+        this.regattaForRaceIdStrings = regattaForRaceIdStrings;
     }
 
     @Override
@@ -54,6 +61,17 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
         result.put(FIELD_SERIES, createJsonArrayForSeries(regatta.getSeries()));
         result.put(FIELD_IS_PERSISTENT, regatta.isPersistent());
         result.put(FIELD_REGATTA_NAME, ((RegattaName) regatta.getRegattaIdentifier()).getRegattaName());
+        result.put(FIELD_REGATTA_RACE_IDS, createJsonArrayForRaceIdStrings(regatta));
+        return result;
+    }
+
+    private JSONArray createJsonArrayForRaceIdStrings(Regatta regatta) {
+        JSONArray result = new JSONArray();
+        for (Entry<String, Regatta> entry: regattaForRaceIdStrings.entrySet()) {
+            if (entry.getValue() == regatta) {
+                result.add(entry.getKey());
+            }
+        }
         return result;
     }
 

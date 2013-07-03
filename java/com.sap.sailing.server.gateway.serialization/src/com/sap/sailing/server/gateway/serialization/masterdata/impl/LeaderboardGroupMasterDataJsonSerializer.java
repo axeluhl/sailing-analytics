@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.serialization.masterdata.impl;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -42,8 +43,9 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
      * If masterdata is imported from a server where exported races are not tracked, data like race log competitor
      * data may be lost in the process of serialization
      * @param events 
+     * @param regattaForRaceIdString 
      */
-    public LeaderboardGroupMasterDataJsonSerializer(Iterable<Event> events) {
+    public LeaderboardGroupMasterDataJsonSerializer(Iterable<Event> events, ConcurrentHashMap<String, Regatta> regattaForRaceIdStrings) {
         this.allEvents = events;
         NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
         PersonJsonSerializer personSerializer = new PersonJsonSerializer(nationalityJsonSerializer);
@@ -57,7 +59,7 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
         JsonSerializer<RaceLogEvent> raceLogEventSerializer = RaceLogEventSerializer.create(competitorSerializer);
         eventSerializer = new EventMasterDataJsonSerializer();
         leadboardSerializer = new LeaderboardMasterDataJsonSerializer(competitorSerializer, raceColumnSerializer, raceLogEventSerializer);
-        regattaSerializer = new RegattaMasterDataJsonSerializer(fleetSerializer, raceColumnSerializer);
+        regattaSerializer = new RegattaMasterDataJsonSerializer(fleetSerializer, raceColumnSerializer, regattaForRaceIdStrings);
     }
 
     @Override
