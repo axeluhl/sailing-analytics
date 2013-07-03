@@ -1,4 +1,4 @@
-package com.sap.sailing.server.replication.test;
+package com.sap.sailing.server.test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

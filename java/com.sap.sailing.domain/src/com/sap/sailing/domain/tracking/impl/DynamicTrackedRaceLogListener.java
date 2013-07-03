@@ -51,7 +51,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     }
 
     /**
-     * Creates a wind track for the source type RACECOMMITTEE in tracked race, retrieves all wind fixes available in the race log and adds them to the wind track
+     * Retrieves all wind fixes available in the race log and adds them to the wind track for RACECOMMITTEEE
      * @param raceLog The race log from which the available wind fixes shall be retrieved.
      */
     private void initializeWindTrack(RaceLog raceLog) {
@@ -70,11 +70,19 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         // ??? trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0));
         if (raceLog != null) {
             trackedRace.invalidateStartTime();
-            WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
-            for (Wind wind : windFixesFinder.analyze()) {
-                trackedRace.removeWind(wind, raceCommitteeWindSource);
-            }
+            removeAllWindFixesFromWindTrack(raceLog);
             raceLog.removeListener(this);
+        }
+    }
+
+    /**
+     * Removes all wind fixes that are in the RaceLog from the RACECOMMITTEE wind source
+     * @param raceLog the RaceLog of which the wind fixes shall be removed
+     */
+    private void removeAllWindFixesFromWindTrack(RaceLog raceLog) {
+        WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
+        for (Wind wind : windFixesFinder.analyze()) {
+            trackedRace.removeWind(wind, raceCommitteeWindSource);
         }
     }
 
