@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
@@ -469,7 +470,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
+            public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
                     long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
                     DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
                 // TODO Auto-generated method stub
@@ -810,5 +811,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public boolean isLive(TimePoint at) {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public Iterable<Sideline> getCourseSidelines() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

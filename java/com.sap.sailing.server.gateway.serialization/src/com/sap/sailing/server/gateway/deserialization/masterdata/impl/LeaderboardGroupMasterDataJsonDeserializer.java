@@ -1,6 +1,8 @@
 package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.json.simple.JSONArray;
@@ -17,6 +19,7 @@ import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.masterdataimport.EventMasterData;
 import com.sap.sailing.domain.masterdataimport.LeaderboardGroupMasterData;
+import com.sap.sailing.domain.masterdataimport.RaceColumnMasterData;
 import com.sap.sailing.domain.masterdataimport.RegattaMasterData;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -51,8 +54,9 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
         JsonDeserializer<EventMasterData> eventDeserializer = new EventMasterDataJsonDeserializer();
         JsonDeserializer<Color> colorDeserializer = new ColorDeserializer();
         JsonDeserializer<Fleet> fleetDeserializer = new FleetDeserializer(colorDeserializer);
+        JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer = new RaceColumnMasterDataJsonDeserializer();
         JsonDeserializer<RegattaMasterData> regattaDeserializer = new RegattaMasterDataJsonDeserializer(
-                fleetDeserializer);
+                fleetDeserializer, raceColumnDeserializer);
         JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = new LeaderboardGroupMasterDataJsonDeserializer(
                 leaderboardDeserializer, eventDeserializer, regattaDeserializer);
         return leaderboardGroupMasterDataDeserializer;
@@ -67,7 +71,7 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
 
     @Override
     public LeaderboardGroupMasterData deserialize(JSONObject object) throws JsonDeserializationException {
-        Set<LeaderboardMasterData> leaderboards = new HashSet<LeaderboardMasterData>();
+        List<LeaderboardMasterData> leaderboards = new ArrayList<LeaderboardMasterData>();
         JSONArray leaderboardsJson = (JSONArray) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_LEADERBOARDS);
         for (Object leaderboardObject : leaderboardsJson) {
             JSONObject leaderboardJson = (JSONObject) leaderboardObject;

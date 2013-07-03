@@ -441,8 +441,9 @@ public interface SailingServiceAsync {
 
     void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
             AsyncCallback<Void> asyncCallback);
+
     
-    void importMasterData(String host, String[] names, AsyncCallback<MasterDataImportObjectCreationCount> asyncCallback);
+    void importMasterData(String host, String[] names, boolean override, AsyncCallback<MasterDataImportObjectCreationCount> asyncCallback);
     
 }
 

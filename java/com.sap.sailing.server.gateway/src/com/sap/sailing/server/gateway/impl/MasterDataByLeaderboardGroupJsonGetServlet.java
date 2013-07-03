@@ -40,7 +40,7 @@ public class MasterDataByLeaderboardGroupJsonGetServlet extends AbstractJsonHttp
         }
 
         TopLevelMasterDataSerializer masterSerializer = new TopLevelMasterDataSerializer(leaderboardGroups,
-                getService().getAllEvents());
+                getService().getAllEvents(), getService().getPersistentRegattasForRaceIDs());
 
         JSONArray masterData = masterSerializer.serialize(requestedLeaderboardGroupNames);
 

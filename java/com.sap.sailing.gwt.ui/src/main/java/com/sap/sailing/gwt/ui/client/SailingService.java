@@ -321,5 +321,5 @@ public interface SailingService extends RemoteService {
 
     void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
 
-    MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames);
+    MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override);
 }

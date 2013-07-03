@@ -13,10 +13,12 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
+import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.masterdataimport.FlexibleLeaderboardMasterData;
+import com.sap.sailing.domain.masterdataimport.RaceColumnMasterData;
 import com.sap.sailing.domain.masterdataimport.RegattaLeaderboardMasterData;
 import com.sap.sailing.domain.masterdataimport.ScoreCorrectionMasterData;
 import com.sap.sailing.domain.masterdataimport.SingleScoreCorrectionMasterData;
@@ -80,7 +82,7 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
                     .get(LeaderboardMasterDataJsonSerializer.FIELD_SCORING_SCHEME));
             String courseAreaId = deserializeCourseAreaId((JSONObject) object
                     .get(LeaderboardMasterDataJsonSerializer.FIELD_COURSE_AREA));
-            List<Pair<String, Boolean>> raceColumns = deserializeRaceColumns((JSONArray) object
+            List<RaceColumnMasterData> raceColumns = deserializeRaceColumns((JSONArray) object
                     .get(LeaderboardMasterDataJsonSerializer.FIELD_RACE_COLUMNS));
             return new FlexibleLeaderboardMasterData(name, displayName, resultDiscardingRule, competitorsById,
                     scoreCorrection, scoringScheme, courseAreaId, raceColumns, carriedPoints, suppressedCompetitors,
@@ -195,13 +197,25 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
         return new SingleScoreCorrectionMasterData(competitorId, explicitScoreCorrection, maxPointsReason);
     }
 
-    private List<Pair<String, Boolean>> deserializeRaceColumns(JSONArray array) {
-        List<Pair<String, Boolean>> columns = new ArrayList<Pair<String, Boolean>>();
+    private List<RaceColumnMasterData> deserializeRaceColumns(JSONArray array) {
+        List<RaceColumnMasterData> columns = new ArrayList<RaceColumnMasterData>();
         for (Object columnObj : array) {
             JSONObject columnJson = (JSONObject) columnObj;
-            columns.add(new Pair<String, Boolean>((String) columnJson
-                    .get(RaceColumnMasterDataJsonSerializer.FIELD_NAME), (Boolean) columnJson
-                    .get(RaceColumnMasterDataJsonSerializer.FIELD_MEDAL_RACE)));
+            String columnName = (String) columnJson
+                    .get(RaceColumnMasterDataJsonSerializer.FIELD_NAME);
+            Boolean medal = (Boolean) columnJson
+                    .get(RaceColumnMasterDataJsonSerializer.FIELD_MEDAL_RACE);
+            Map<String, RaceIdentifier> raceIdentifiers = new HashMap<String, RaceIdentifier>();
+            JSONArray jsonRaceIdentifiers = (JSONArray) columnJson.get(RaceColumnMasterDataJsonSerializer.FIELD_RACE_IDENTIFIERS);
+            for (Object raceIdentifierObject : jsonRaceIdentifiers) {
+                JSONObject jsonRaceIdentifier = (JSONObject) raceIdentifierObject;
+                String fleetName = (String) jsonRaceIdentifier.get(RaceColumnMasterDataJsonSerializer.FIELD_FLEET_NAME);
+                String raceName = (String) jsonRaceIdentifier.get(RaceColumnMasterDataJsonSerializer.FIELD_RACE_NAME);
+                String regattaName = (String) jsonRaceIdentifier.get(RaceColumnMasterDataJsonSerializer.FIELD_REGATTA_NAME);
+                RaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
+                raceIdentifiers.put(fleetName, raceIdentifier);
+            }
+            columns.add(new RaceColumnMasterData(columnName, medal, raceIdentifiers));
         }
         return columns;
     }
