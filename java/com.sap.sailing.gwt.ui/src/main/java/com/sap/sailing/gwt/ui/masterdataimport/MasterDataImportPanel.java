@@ -233,6 +233,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         
         overrideSwitch = new CheckBox("Override existing data if names and ids match");
         overrideSwitch.setValue(false);
+        contentPanel.add(overrideSwitch);
 
         importLeaderboardGroupsButton = new Button("Import selected Leaderboard Groups");
         contentPanel.add(importLeaderboardGroupsButton);
