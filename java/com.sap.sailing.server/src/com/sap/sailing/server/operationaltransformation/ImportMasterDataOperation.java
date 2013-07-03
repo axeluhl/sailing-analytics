@@ -333,8 +333,8 @@ public class ImportMasterDataOperation extends
                     toState.addCourseAreaWithoutReplication(UUID.fromString(id), courseArea);
                 } else {
                     logger.info(String
-                            .format("Course area with name %1$s for event with id %2$s already exists and hasn't been overridden.",
-                                    courseAreaEntry.getB(), id));
+                            .format("Course area with id %1$s for event with id %2$s already exists and hasn't been overridden.",
+                                    courseAreaEntry.getA(), id));
                 }
             }
         }
