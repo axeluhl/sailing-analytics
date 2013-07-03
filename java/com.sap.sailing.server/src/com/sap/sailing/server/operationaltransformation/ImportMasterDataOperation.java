@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -50,6 +51,8 @@ public class ImportMasterDataOperation extends
 
     private static final long serialVersionUID = 3131715325307370303L;
 
+    private static final Logger logger = Logger.getLogger(ImportMasterDataOperation.class.getName());
+
     private LeaderboardGroupMasterData masterData;
 
     private MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
@@ -74,7 +77,8 @@ public class ImportMasterDataOperation extends
         createRegattas(masterData, toState);
         for (LeaderboardMasterData board : masterData.getLeaderboards()) {
             if (existingLeaderboards.containsKey(board.getName())) {
-                // Leaderboard exists
+                logger.info(String.format("Leaderboard with name %1$s already exists and hasn't been overridden.",
+                        board.getName()));
                 continue;
             }
             setCourseAreaIfNecessary(board, toState);
@@ -117,6 +121,9 @@ public class ImportMasterDataOperation extends
                     masterData.isDisplayGroupsRevese(), leaderboardNames, overallLeaderboardDiscardThresholds,
                     overallLeaderboardScoringSchemeType);
             creationCount.addOneLeaderboardGroup();
+        } else {
+            logger.info(String.format("Leaderboard Group with name %1$s already exists and hasn't been overridden.",
+                    masterData.getName()));
         }
     }
 
@@ -218,6 +225,10 @@ public class ImportMasterDataOperation extends
                                 singleCorrection.getExplicitScoreCorrection());
                     }
                 }
+            } else {
+                logger.info(String
+                        .format("Race Column with name %1$s for leaderboard with name %2$s already exists and hasn't been overridden.",
+                                masterData.getName(), leaderboard.getName()));
             }
         }
 
@@ -227,8 +238,10 @@ public class ImportMasterDataOperation extends
             RacingEventService toState) {
         if (board instanceof FlexibleLeaderboardMasterData) {
             for (RaceColumnMasterData raceColumnMasterData : ((FlexibleLeaderboardMasterData) board).getRaceColumns()) {
-                RaceColumn raceColumn = toState.addColumnToLeaderboard(raceColumnMasterData.getName(), board.getName(), raceColumnMasterData.isMedal());
-                for (Map.Entry<String, RaceIdentifier> e : raceColumnMasterData.getRaceIdentifiersByFleetName().entrySet()) {
+                RaceColumn raceColumn = toState.addColumnToLeaderboard(raceColumnMasterData.getName(), board.getName(),
+                        raceColumnMasterData.isMedal());
+                for (Map.Entry<String, RaceIdentifier> e : raceColumnMasterData.getRaceIdentifiersByFleetName()
+                        .entrySet()) {
                     raceColumn.setRaceIdentifier(raceColumn.getFleetByName(e.getKey()), e.getValue());
                 }
             }
@@ -239,6 +252,9 @@ public class ImportMasterDataOperation extends
         Iterable<RegattaMasterData> regattaData = masterData.getRegattas();
         for (RegattaMasterData singleRegattaData : regattaData) {
             if (toState.getRegatta(new RegattaName(singleRegattaData.getRegattaName())) != null) {
+                logger.info(String
+                        .format("Regatta with name %1$s already exists and hasn't been overridden.",
+                                singleRegattaData.getRegattaName()));
                 continue;
             }
             String id = singleRegattaData.getId();
@@ -248,8 +264,8 @@ public class ImportMasterDataOperation extends
             String defaultCourseAreaId = singleRegattaData.getDefaultCourseAreaId();
             String scoringSchemeType = singleRegattaData.getScoringSchemeType();
             boolean isPersistent = singleRegattaData.isPersistent();
-            toState.getOrCreateRegattaWithoutReplication(baseName, boatClassName, UUID.fromString(id), series, isPersistent,
-                    domainFactory.createScoringScheme(ScoringSchemeType.valueOf(scoringSchemeType)),
+            toState.getOrCreateRegattaWithoutReplication(baseName, boatClassName, UUID.fromString(id), series,
+                    isPersistent, domainFactory.createScoringScheme(ScoringSchemeType.valueOf(scoringSchemeType)),
                     UUID.fromString(defaultCourseAreaId));
             creationCount.addOneRegatta();
         }
@@ -297,9 +313,12 @@ public class ImportMasterDataOperation extends
                 String pubString = event.getPubUrl();
                 String venueName = event.getVenueName();
                 boolean isPublic = event.isPublic();
-                Event newEvent= new EventImpl(name, venueName, pubString, isPublic, UUID.fromString(id));
+                Event newEvent = new EventImpl(name, venueName, pubString, isPublic, UUID.fromString(id));
                 toState.createEventWithoutReplication(newEvent);
                 creationCount.addOneEvent();
+            } else {
+                logger.info(String.format("Event with name %1$s already exists and hasn't been overridden.",
+                        event.getName()));
             }
             Iterable<Pair<String, String>> courseAreas = event.getCourseAreas();
             for (Pair<String, String> courseAreaEntry : courseAreas) {
@@ -309,8 +328,13 @@ public class ImportMasterDataOperation extends
                     alreadyExists = true;
                 }
                 if (!alreadyExists) {
-                    CourseArea courseArea = domainFactory.getOrCreateCourseArea(UUID.fromString(courseAreaEntry.getA()), courseAreaEntry.getB());
+                    CourseArea courseArea = domainFactory.getOrCreateCourseArea(
+                            UUID.fromString(courseAreaEntry.getA()), courseAreaEntry.getB());
                     toState.addCourseAreaWithoutReplication(UUID.fromString(id), courseArea);
+                } else {
+                    logger.info(String
+                            .format("Course area with name %1$s for event with id %2$s already exists and hasn't been overridden.",
+                                    courseAreaEntry.getB(), id));
                 }
             }
         }
