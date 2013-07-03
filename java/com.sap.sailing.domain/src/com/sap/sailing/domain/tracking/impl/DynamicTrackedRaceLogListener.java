@@ -29,7 +29,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     private DynamicTrackedRace trackedRace;
     
-    private WindSource raceCommitteeWindSource;
+    private final WindSource raceCommitteeWindSource;
 
     private RaceStatusAnalyzer statusAnalyzer;
 
@@ -37,6 +37,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     public DynamicTrackedRaceLogListener(DynamicTrackedRace trackedRace) {
         this.trackedRace = trackedRace;
+        raceCommitteeWindSource = new WindSourceImpl(WindSourceType.RACECOMMITTEE);
     }
 
     public void addTo(RaceLog raceLog) {
@@ -55,8 +56,6 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
      */
     private void initializeWindTrack(RaceLog raceLog) {
         WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
-        raceCommitteeWindSource = new WindSourceImpl(WindSourceType.RACECOMMITTEE);
-        trackedRace.getOrCreateWindTrack(raceCommitteeWindSource);
         for (Wind wind : windFixesFinder.analyze()) {
             trackedRace.recordWind(wind, raceCommitteeWindSource);
         }
@@ -71,7 +70,10 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         // ??? trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0));
         if (raceLog != null) {
             trackedRace.invalidateStartTime();
-            //TODO detach wind source
+            WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
+            for (Wind wind : windFixesFinder.analyze()) {
+                trackedRace.removeWind(wind, raceCommitteeWindSource);
+            }
             raceLog.removeListener(this);
         }
     }
@@ -160,7 +162,6 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogWindFixEvent event) {
-        // TODO handle a new wind fix entered by the race committee
         // add the wind fix to the race committee WindTrack
         trackedRace.recordWind(event.getWindFix(), raceCommitteeWindSource);
     }

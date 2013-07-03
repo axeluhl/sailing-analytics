@@ -270,6 +270,7 @@ public interface StringMessages extends Messages {
     String trackBasedEstimationWindSourceTypeName();
     String expeditionWindSourceTypeName();
     String webWindSourceTypeName();
+    String raceCommitteeWindSourceTypeName();
     String clickChartToSetTime();
     String position();
     String windSourcesUsed();

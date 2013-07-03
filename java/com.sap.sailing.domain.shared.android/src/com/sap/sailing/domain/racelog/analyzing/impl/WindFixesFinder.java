@@ -16,14 +16,13 @@ public class WindFixesFinder extends RaceLogAnalyzer<List<Wind>> {
 
     @Override
     protected List<Wind> performAnalyzation() {
-        List<Wind> windFixes = new ArrayList<Wind>();
+        final List<Wind> windFixes = new ArrayList<Wind>();
         for (RaceLogEvent event : getAllEventsDescending()) {
             if (event instanceof RaceLogWindFixEvent) {
                 RaceLogWindFixEvent windFixEvent = (RaceLogWindFixEvent) event;
                 windFixes.add(windFixEvent.getWindFix());
             }
         }
-        
         return windFixes;
     }
 
