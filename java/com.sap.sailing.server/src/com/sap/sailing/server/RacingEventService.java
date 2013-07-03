@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
@@ -536,5 +537,29 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Collection<MediaTrack> getAllMediaTracks();
 
     void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
+
+    /**
+     * @return a pair with the found or created regatta, and a boolean that tells whether the regatta was created during
+     *         the call
+     */
+    Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName, Serializable id,
+            Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
+            Serializable defaultCourseAreaId);
+
+    void createEventWithoutReplication(Event result);
+
+    Event addCourseAreaWithoutReplication(Serializable eventId, CourseArea courseArea);
+
+    /**
+     * @return map where keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to
+     * {@link #setRegattaForRace(Regatta, RaceDefinition)}. It helps remember the connection between races and regattas.
+     */
+    ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs();
+
+    /**
+     * 
+     * @param override If set to true, the mthod will override any existing connection
+     */
+    void setPersistentRegattaForRaceIDs(Regatta regatta, Iterable<String> raceIdStrings, boolean override);
 
 }

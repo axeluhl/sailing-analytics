@@ -116,10 +116,14 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         }
         logger.info("Stored data has been loaded for " + race.getName());
         for (Receiver receiver : receivers) {
+            logger.info("Stopping receiver "+receiver);
             receiver.stopAfterNotReceivingEventsForSomeTime(/* timeoutInMilliseconds */ 5000l);
+            logger.info("Stopped receiver "+receiver);
         }
         for (Receiver receiver : receivers) {
+            logger.info("Joining receiver "+receiver);
             receiver.join();
+            logger.info("Joined receiver "+receiver);
         }
         trackedRace = getTrackedRegatta().getTrackedRace(race);
     }

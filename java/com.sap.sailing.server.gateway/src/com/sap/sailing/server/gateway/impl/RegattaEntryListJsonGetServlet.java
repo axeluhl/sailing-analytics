@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
@@ -26,14 +27,17 @@ public class RegattaEntryListJsonGetServlet extends AbstractJsonHttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String regattaName = request.getParameter(PARAM_NAME_REGATTANAME);
         if (regattaName == null) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Need to specify a regatta name using the "+
-                    PARAM_NAME_REGATTANAME + " parameter");
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Need to specify a regatta name using the " + PARAM_NAME_REGATTANAME + " parameter");
         } else {
             Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
             if (regatta == null) {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Regatta " + regattaName + " not found");
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Regatta " + regattaName
+                        + " not found");
             } else {
-                CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(new TeamJsonSerializer(new PersonJsonSerializer()));
+                NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
+                CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(
+                        new TeamJsonSerializer(new PersonJsonSerializer(nationalityJsonSerializer)));
                 JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(null, competitorJsonSerializer);
                 JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
 

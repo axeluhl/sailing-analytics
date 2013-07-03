@@ -32,6 +32,7 @@
   <source path='leaderboard'/>
   <source path='raceboard'/>
   <source path='adminconsole'/>
+  <source path='masterdataimport'/>
   <source path='usermanagement'/>
   <source path='shared'/>
   <source path='common'/>
