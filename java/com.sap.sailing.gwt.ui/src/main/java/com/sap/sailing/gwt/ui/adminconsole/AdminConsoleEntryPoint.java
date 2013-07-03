@@ -120,7 +120,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         final MediaPanel mediaPanel = new MediaPanel(mediaService, this, stringMessages);
         tabPanel.add(mediaPanel, stringMessages.mediaPanel(), /* asHTML */ false);
         
-        final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(stringMessages, sailingService, this);
+        final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(stringMessages, sailingService, this, sailingEventManagementPanel);
         tabPanel.add(masterDataImportPanel, stringMessages.masterDataImportPanel(), /* asHTML */ false);
         
         tabPanel.selectTab(0);

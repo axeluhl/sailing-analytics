@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
+import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -50,11 +51,14 @@ public class MasterDataImportPanel extends VerticalPanel {
     private SailingServiceAsync sailingService;
     private CheckBox overrideSwitch;
     private final RegattaRefresher regattaRefresher;
+    private final EventRefresher eventRefresher;
 
-    public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService, RegattaRefresher regattaRefresher) {
+    public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
+            RegattaRefresher regattaRefresher, EventRefresher eventRefresher) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
+        this.eventRefresher = eventRefresher;
 
         HorizontalPanel serverAddressPanel = new HorizontalPanel();
         serverAddressPanel.add(new Label("Remote host:"));
@@ -117,7 +121,12 @@ public class MasterDataImportPanel extends VerticalPanel {
                         int leaderboardGroupsCreated = result.getLeaderboardGroupCount();
                         int eventsCreated = result.getEventCount();
                         int regattasCreated = result.getRegattaCount();
-                        regattaRefresher.fillRegattas();
+                        if (regattasCreated > 0) {
+                            regattaRefresher.fillRegattas();
+                        }
+                        if (eventsCreated > 0) {
+                            eventRefresher.fillEvents();
+                        }
                         showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated);
                     }
 
