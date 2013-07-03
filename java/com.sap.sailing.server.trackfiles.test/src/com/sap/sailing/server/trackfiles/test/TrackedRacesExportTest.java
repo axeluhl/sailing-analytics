@@ -3,10 +3,8 @@ package com.sap.sailing.server.trackfiles.test;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -45,16 +43,16 @@ public class TrackedRacesExportTest extends OnlineTracTracBasedTest {
     public void isSingleGpxCreated() throws FileNotFoundException, FormatNotSupportedException, IOException {
         TrackedRace race = getTrackedRace();
 
-        File file = File.createTempFile("gpxexport", ".gpx");
-        FileOutputStream out = new FileOutputStream(file);
-        ExportImpl.INSTANCE.writeCompetitors(TrackFilesFormat.Gpx11, race, true, true, out);
-        out.close();
+//        File file = File.createTempFile("gpxexport", ".gpx");
+//        FileOutputStream out = new FileOutputStream(file);
+        byte[] data = ExportImpl.INSTANCE.writeCompetitors(TrackFilesFormat.Gpx11, race, true, true);
+//        out.close();
 
-        assertTrue(file.exists());
-        assertTrue(file.length() > 0);
+//        assertTrue(file.exists());
+        assertTrue(data.length > 0);
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-        in.readLine();
+//        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+        BufferedReader in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(data)));
         String secondLine = in.readLine();
         in.close();
         assertTrue(secondLine.contains("<gpx"));
@@ -65,13 +63,13 @@ public class TrackedRacesExportTest extends OnlineTracTracBasedTest {
         TrackedRace race = getTrackedRace();
 
         for (TrackFilesFormat format : TrackFilesFormat.values()) {
-            File file = File.createTempFile(format.toString() + "export", "." + format.suffix);
-            FileOutputStream out = new FileOutputStream(file);
-            ExportImpl.INSTANCE.writeCompetitors(format, race, true, true, out);
-            out.close();
+//            File file = File.createTempFile(format.toString() + "export", "." + format.suffix);
+//            FileOutputStream out = new FileOutputStream(file);
+            byte[] data = ExportImpl.INSTANCE.writeCompetitors(format, race, true, true);
+//            out.close();
 
-            assertTrue(file.exists());
-            assertTrue(file.length() > 0);
+//            assertTrue(file.exists());
+            assertTrue(data.length > 0);
         }
     }
 }
