@@ -7,7 +7,6 @@ import java.util.zip.ZipOutputStream;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesDataSource;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.trackfiles.common.FormatNotSupportedException;
 import com.sap.sailing.server.trackfiles.impl.ExportImpl;
 
 /**
@@ -17,20 +16,9 @@ import com.sap.sailing.server.trackfiles.impl.ExportImpl;
  * 
  */
 public interface Export {
-    Export INSTANCE = new ExportImpl();
+	Export INSTANCE = new ExportImpl();
 
-    byte[] writeCompetitors(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes)
-            throws FormatNotSupportedException, IOException;
-
-    byte[] writeWind(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes)
-            throws FormatNotSupportedException, IOException;
-
-    byte[] writeBuoys(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes)
-            throws FormatNotSupportedException, IOException;
-
-    byte[] writeManeuvers(TrackFilesFormat format, final TrackedRace race, boolean dataBeforeAfter, boolean rawFixes)
-            throws FormatNotSupportedException, IOException;
-
-    void writeRaces(List<TrackFilesDataSource> data, TrackFilesFormat format, List<TrackedRace> races,
-            boolean dataBeforeAfter, boolean rawFixes, ZipOutputStream out) throws FormatNotSupportedException;
+	void writeAllData(List<TrackFilesDataSource> data, TrackFilesFormat format,
+			List<TrackedRace> races, boolean dataBeforeAfter, boolean rawFixes,
+			ZipOutputStream out) throws IOException;
 }

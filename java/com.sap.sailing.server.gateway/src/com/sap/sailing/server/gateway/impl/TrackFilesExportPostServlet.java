@@ -19,7 +19,6 @@ import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.server.trackfiles.Export;
-import com.sap.sailing.server.trackfiles.common.FormatNotSupportedException;
 
 public class TrackFilesExportPostServlet extends SailingServerHttpServlet {
     private static final long serialVersionUID = 1120226743039934620L;
@@ -92,8 +91,8 @@ public class TrackFilesExportPostServlet extends SailingServerHttpServlet {
             data.add(TrackFilesDataSource.valueOf(s));
         }
         try {
-            Export.INSTANCE.writeRaces(data, format, trackedRaces, beforeAfter, rawFixes, out);
-        } catch (FormatNotSupportedException e) {
+            Export.INSTANCE.writeAllData(data, format, trackedRaces, beforeAfter, rawFixes, out);
+        } catch (Exception e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
             log.log(Level.WARNING, e.getMessage());
         }
