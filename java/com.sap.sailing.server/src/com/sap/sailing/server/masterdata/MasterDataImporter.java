@@ -48,8 +48,8 @@ public class MasterDataImporter {
                 JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
                 LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
                         .deserialize(leaderBoardGroupMasterDataJson);
-                ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, override);
-                creationCount.add(racingEventService.apply(op));
+                ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, override, creationCount);
+                creationCount = racingEventService.apply(op);
             }
             JsonDeserializer<MediaTrack> mediaTrackDeserializer = new MediaTrackJsonDeserializer();
             JSONArray mediaTracks = (JSONArray) masterDataOverall.get(TopLevelMasterDataSerializer.FIELD_MEDIA);
@@ -67,7 +67,7 @@ public class MasterDataImporter {
             for (MediaTrack oneNewTrack : tracks) {
                 if (existingMap.containsKey(oneNewTrack.dbId)) {
                     if (override) {
-                        racingEventService.mediaTrackDeleted(existingMap.get(oneNewTrack));
+                        racingEventService.mediaTrackDeleted(existingMap.get(oneNewTrack.dbId));
                     } else {
                         continue;
                     }
