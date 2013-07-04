@@ -271,6 +271,11 @@ public interface SailingServiceAsync {
     void removeLeaderboardGroup(String groupName, AsyncCallback<Void> callback);
 
     /**
+     * Removes the leaderboard groups with the given names from the service and the persistant store.
+     */
+    void removeLeaderboardGroups(Set<String> groupNames, AsyncCallback<Void> asyncCallback);
+
+    /**
      * Creates a new group with the name <code>groupname</code>, the description <code>description</code> and an empty list of leaderboards.<br/>
      * @param displayGroupsInReverseOrder TODO
      */
