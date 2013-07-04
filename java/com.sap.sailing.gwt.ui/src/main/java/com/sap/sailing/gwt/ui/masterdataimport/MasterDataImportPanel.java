@@ -20,6 +20,7 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -27,6 +28,9 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
+import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.LeaderboardGroupRefresher;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -46,10 +50,19 @@ public class MasterDataImportPanel extends VerticalPanel {
     private final StringMessages stringMessages;
     private String currentHost;
     private SailingServiceAsync sailingService;
+    private CheckBox overrideSwitch;
+    private final RegattaRefresher regattaRefresher;
+    private final EventRefresher eventRefresher;
+    private final LeaderboardGroupRefresher leaderboardGroupRefresher;
 
-    public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService) {
+    public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
+            RegattaRefresher regattaRefresher, EventRefresher eventRefresher,
+            LeaderboardGroupRefresher leaderboardGroupRefresher) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
+        this.regattaRefresher = regattaRefresher;
+        this.eventRefresher = eventRefresher;
+        this.leaderboardGroupRefresher = leaderboardGroupRefresher;
 
         HorizontalPanel serverAddressPanel = new HorizontalPanel();
         serverAddressPanel.add(new Label("Remote host:"));
@@ -102,22 +115,33 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     protected void importLeaderboardGroups() {
         String[] groupNames = createLeaderBoardGroupNamesFromListBox();
-        sailingService.importMasterData(currentHost, groupNames, new AsyncCallback<MasterDataImportObjectCreationCount>() {
-            
-            @Override
-            public void onSuccess(MasterDataImportObjectCreationCount result) {
-                int leaderboardsCreated = result.getLeaderboardCount();
-                int leaderboardGroupsCreated = result.getLeaderboardGroupCount();
-                int eventsCreated = result.getEventCount();
-                int regattasCreated = result.getRegattaCount();
-                showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated);
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                showErrorAlert(caught.getLocalizedMessage());
-            }
-        });
+        boolean override = overrideSwitch.getValue();
+        sailingService.importMasterData(currentHost, groupNames, override,
+                new AsyncCallback<MasterDataImportObjectCreationCount>() {
+
+                    @Override
+                    public void onSuccess(MasterDataImportObjectCreationCount result) {
+                        int leaderboardsCreated = result.getLeaderboardCount();
+                        int leaderboardGroupsCreated = result.getLeaderboardGroupCount();
+                        int eventsCreated = result.getEventCount();
+                        int regattasCreated = result.getRegattaCount();
+                        if (regattasCreated > 0) {
+                            regattaRefresher.fillRegattas();
+                        }
+                        if (eventsCreated > 0) {
+                            eventRefresher.fillEvents();
+                        }
+                        if (leaderboardGroupsCreated > 0) {
+                            leaderboardGroupRefresher.fillLeaderboardGroups();
+                        }
+                        showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        showErrorAlert(caught.getLocalizedMessage());
+                    }
+                });
     }
 
 
@@ -226,6 +250,10 @@ public class MasterDataImportPanel extends VerticalPanel {
 
         leaderboardgroupListBox = new ListBox(true);
         contentPanel.add(leaderboardgroupListBox);
+        
+        overrideSwitch = new CheckBox("Override existing data if names and ids match");
+        overrideSwitch.setValue(false);
+        contentPanel.add(overrideSwitch);
 
         importLeaderboardGroupsButton = new Button("Import selected Leaderboard Groups");
         contentPanel.add(importLeaderboardGroupsButton);

@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.Distance;
@@ -19,9 +20,11 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLog;
 
@@ -217,6 +220,11 @@ public interface TrackedRace extends Serializable {
      * Retrieves all marks assigned to the race. They are not necessarily part of the race course.
      */
     Iterable<Mark> getMarks();
+
+    /**
+     * Retrieves all course side lines assigned to the race.
+     */
+    Iterable<Sideline> getCourseSidelines();
 
     /**
      * If the <code>waypoint</code> only has one {@link #getMarks() mark}, its position at time <code>timePoint</code>

@@ -700,6 +700,7 @@ public interface StringMessages extends Messages {
     String refreshRaceLog();
     String raceLogReloaded();
     String reloadAllRaceLogs();
+    String sideline();
     String classAndGolfUp();
     String classDisplayed();
     String papaDisplayed();

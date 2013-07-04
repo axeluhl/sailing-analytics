@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -246,7 +247,7 @@ public class CourseTest {
         final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ null,
                 new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */ true),
-                        hasso),
+                        hasso), Collections.<Sideline> emptyList(),
                         EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
                         /* millisecondsOverWhichToAverageSpeed */ 8000);
@@ -276,7 +277,7 @@ public class CourseTest {
         final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ null,
                 new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */ true),
-                        hasso),
+                        hasso), Collections.<Sideline> emptyList(),
                         EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
                         /* millisecondsOverWhichToAverageSpeed */ 8000);

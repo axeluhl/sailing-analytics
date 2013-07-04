@@ -13,7 +13,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
@@ -40,9 +40,9 @@ public class MasterDataByLeaderboardGroupJsonGetServlet extends AbstractJsonHttp
         }
 
         TopLevelMasterDataSerializer masterSerializer = new TopLevelMasterDataSerializer(leaderboardGroups,
-                getService().getAllEvents(), getService().getPersistentRegattasForRaceIDs());
+                getService().getAllEvents(), getService().getPersistentRegattasForRaceIDs(), getService().getAllMediaTracks());
 
-        JSONArray masterData = masterSerializer.serialize(requestedLeaderboardGroupNames);
+        JSONObject masterData = masterSerializer.serialize(requestedLeaderboardGroupNames);
 
         setJsonResponseHeader(resp);
         masterData.writeJSONString(resp.getWriter());
