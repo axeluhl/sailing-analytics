@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -24,6 +25,8 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
+import com.sap.sailing.gwt.ui.client.media.NewMediaDialog;
+import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -68,14 +71,6 @@ public class MediaPanel extends FlowPanel {
         });
         add(addUrlButton);
 
-        Button addYoutubeButton = new Button(stringMessages.addYoutubeTrack());
-        addYoutubeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                addYoutubeMediaTrack();
-            }
-        });
-        add(addYoutubeButton);
         createMediaTracksTable();
     }
 
@@ -313,14 +308,15 @@ public class MediaPanel extends FlowPanel {
             }
 
             @Override
-            public void onSuccess(Void allMediaTracks) {
+            public void onSuccess(Void deleteMediaTrack) {
                 loadMediaTracks();
             }
         });
     }
 
     private void addUrlMediaTrack() {
-        MediaTrackDialog dialog = new MediaTrackDialog(stringMessages, new DialogCallback<MediaTrack>() {
+        Date defaultStartTime = new Date();
+        NewMediaDialog dialog = new NewMediaDialog(defaultStartTime , stringMessages, new DialogCallback<MediaTrack>() {
 
             @Override
             public void cancel() {
@@ -328,8 +324,8 @@ public class MediaPanel extends FlowPanel {
             }
 
             @Override
-            public void ok(MediaTrack mediaTrack) {
-                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<Void>() {
+            public void ok(final MediaTrack mediaTrack) {
+                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<String>() {
 
                     @Override
                     public void onFailure(Throwable t) {
@@ -337,7 +333,8 @@ public class MediaPanel extends FlowPanel {
                     }
 
                     @Override
-                    public void onSuccess(Void allMediaTracks) {
+                    public void onSuccess(String dbId) {
+                        mediaTrack.dbId = dbId;
                         loadMediaTracks();
                     }
                 });
@@ -347,34 +344,6 @@ public class MediaPanel extends FlowPanel {
         dialog.show();
     }
     
-    protected void addYoutubeMediaTrack() {
-        MediaTrackYoutubeDialog dialog = new MediaTrackYoutubeDialog(stringMessages, new DialogCallback<MediaTrack>() {
-
-            @Override
-            public void cancel() {
-                // no op
-            }
-
-            @Override
-            public void ok(MediaTrack mediaTrack) {
-                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<Void>() {
-
-                    @Override
-                    public void onFailure(Throwable t) {
-                        errorReporter.reportError(t.toString());
-                    }
-
-                    @Override
-                    public void onSuccess(Void allMediaTracks) {
-                        loadMediaTracks();
-                    }
-                });
-
-            }
-        });
-        dialog.show();
-    }
-
     public void onShow() {
         loadMediaTracks();
     }

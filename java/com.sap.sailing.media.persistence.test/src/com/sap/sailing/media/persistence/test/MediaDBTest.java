@@ -33,6 +33,7 @@ public class MediaDBTest extends AbstractMongoDBTest {
         int durationInMillis = 23;
         String mimeType = MimeType.ogv.name();
         String dbId = mongoDB.insertMediaTrack(videoTitle, url, date, durationInMillis, mimeType);
+        assertNotNull(dbId);
         DBMediaTrack videoTrack = mongoDB.loadAllMediaTracks().iterator().next();
         assertNotNull(videoTrack);
         assertThat(videoTrack.dbId, Is.is(dbId));
