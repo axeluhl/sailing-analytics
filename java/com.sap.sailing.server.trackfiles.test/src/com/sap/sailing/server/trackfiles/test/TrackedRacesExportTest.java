@@ -70,4 +70,17 @@ public class TrackedRacesExportTest extends OnlineTracTracBasedTest {
 			assertTrue(data.length > 4000);
 		}
 	}
+
+	@Test
+	public void doAllDataSourcesWork() throws IOException,
+			FormatNotSupportedException {
+		TrackedRace race = getTrackedRace();
+
+		for (TrackFilesDataSource source : TrackFilesDataSource.values()) {
+			byte[] data = getBytes(source, TrackFilesFormat.Gpx11,
+					race, true, true);
+
+			assertTrue(data.length > 400);
+		}
+	}
 }

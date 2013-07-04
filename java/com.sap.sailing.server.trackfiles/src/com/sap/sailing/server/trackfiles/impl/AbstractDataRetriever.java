@@ -167,7 +167,6 @@ public abstract class AbstractDataRetriever implements DataRetriever {
 					RouteCharacteristics.Track, name,
 					Collections.<String> emptyList(),
 					new ArrayList<GpxPosition>());
-			routes.add(route);
 
 			TrackReader<E, F> trackReader = trackRetriever
 					.retrieveTrackReader(element);
@@ -186,10 +185,17 @@ public abstract class AbstractDataRetriever implements DataRetriever {
 					if (!dataBeforeAfter && fix.getTimePoint().after(end)) {
 						break;
 					}
-					route.add(i++, creator.getPosition(fix));
+					GpxPosition position = creator.getPosition(fix);
+					if (position != null) {
+						route.add(i++, position);
+					}
 				}
 			} finally {
 				trackReader.getLocker().unlock();
+			}
+			
+			if (! route.getPositions().isEmpty()) {
+				routes.add(route);
 			}
 		}
 		return routes;
