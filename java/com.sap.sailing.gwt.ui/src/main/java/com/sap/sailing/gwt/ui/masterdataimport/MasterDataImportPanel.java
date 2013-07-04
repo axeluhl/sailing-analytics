@@ -113,38 +113,48 @@ public class MasterDataImportPanel extends VerticalPanel {
     protected void importLeaderboardGroups() {
         String[] groupNames = createLeaderBoardGroupNamesFromListBox();
         if (groupNames.length >= 1) {
-        boolean override = overrideSwitch.getValue();
-        sailingService.importMasterData(currentHost, groupNames, override,
-                new AsyncCallback<MasterDataImportObjectCreationCount>() {
+            changeAllButtonState(false);
+            boolean override = overrideSwitch.getValue();
+            sailingService.importMasterData(currentHost, groupNames, override,
+                    new AsyncCallback<MasterDataImportObjectCreationCount>() {
 
-                    @Override
-                    public void onSuccess(MasterDataImportObjectCreationCount result) {
-                        int leaderboardsCreated = result.getLeaderboardCount();
-                        int leaderboardGroupsCreated = result.getLeaderboardGroupCount();
-                        int eventsCreated = result.getEventCount();
-                        int regattasCreated = result.getRegattaCount();
-                        if (regattasCreated > 0) {
-                            regattaRefresher.fillRegattas();
+                        @Override
+                        public void onSuccess(MasterDataImportObjectCreationCount result) {
+                            int leaderboardsCreated = result.getLeaderboardCount();
+                            int leaderboardGroupsCreated = result.getLeaderboardGroupCount();
+                            int eventsCreated = result.getEventCount();
+                            int regattasCreated = result.getRegattaCount();
+                            if (regattasCreated > 0) {
+                                regattaRefresher.fillRegattas();
+                            }
+                            if (eventsCreated > 0) {
+                                eventRefresher.fillEvents();
+                            }
+                            if (leaderboardGroupsCreated > 0) {
+                                leaderboardGroupRefresher.fillLeaderboardGroups();
+                            }
+                            showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated,
+                                    regattasCreated);
+                            changeAllButtonState(true);
                         }
-                        if (eventsCreated > 0) {
-                            eventRefresher.fillEvents();
-                        }
-                        if (leaderboardGroupsCreated > 0) {
-                            leaderboardGroupRefresher.fillLeaderboardGroups();
-                        }
-                        showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated);
-                    }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        showErrorAlert(caught.getLocalizedMessage());
-                    }
-                });
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            showErrorAlert(caught.getLocalizedMessage());
+                            changeAllButtonState(true);
+                        }
+                    });
         } else {
             showErrorAlert(stringMessages.importSelectAtLeastOne());
         }
     }
 
+
+    private void changeAllButtonState(boolean enabled) {
+        importLeaderboardGroupsButton.setEnabled(enabled);
+        overrideSwitch.setEnabled(enabled);
+        fetchIdsButton.setEnabled(enabled);
+    }
 
     protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated, int eventsCreated,
             int regattasCreated) {
@@ -177,6 +187,7 @@ public class MasterDataImportPanel extends VerticalPanel {
             showErrorAlert(stringMessages.importUrlInvalid(getLgsUrl));
             return;
         }
+        changeAllButtonState(false);
         RequestBuilder getLgsRequestBuilder = new RequestBuilder(RequestBuilder.GET, getLgsUrl);
         getLgsRequestBuilder.setCallback(new RequestCallback() {
 
@@ -192,6 +203,7 @@ public class MasterDataImportPanel extends VerticalPanel {
                 String body = response.getText();
                 if (body == null || body.isEmpty()) {
                     showErrorAlert(stringMessages.importNoDataReturned());
+                    changeAllButtonState(true);
                     return;
                 }
                 JSONArray leaderboardGroups = JSONParser.parseStrict(body).isArray();
@@ -200,17 +212,25 @@ public class MasterDataImportPanel extends VerticalPanel {
                     JSONString leaderboardGroupName = leaderboardGroups.get(i).isString();
                     leaderboardgroupListBox.addItem(leaderboardGroupName.stringValue());
                 }
+                if (leaderboardGroups.size() > 1) {
+                    importLeaderboardGroupsButton.setEnabled(true);
+                } else {
+                    importLeaderboardGroupsButton.setEnabled(false);
+                }
+                changeAllButtonState(true);
             }
 
             @Override
             public void onError(Request request, Throwable exception) {
                 showErrorAlert(stringMessages.importServerError());
+                changeAllButtonState(true);
             }
         });
         try {
             getLgsRequestBuilder.send();
         } catch (RequestException e) {
             showErrorAlert(stringMessages.importServerError());
+            changeAllButtonState(true);
         }
     }
 
@@ -255,6 +275,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         contentPanel.add(overrideSwitch);
 
         importLeaderboardGroupsButton = new Button(stringMessages.importSelectedLeaderboardGroups());
+        importLeaderboardGroupsButton.setEnabled(false);
         contentPanel.add(importLeaderboardGroupsButton);
     }
 
