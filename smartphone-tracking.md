@@ -12,12 +12,28 @@ The current plan is to use up to three channels for communicating:
 # Servlets
 ## `/sailingserver/tracking/createFlexibleLeaderboard`
 `CreateFlexibleLeaderboardPostServlet`
-**Expects:** POST request body Leaderboard-JSON (see `LeaderboardJsonSerializer`)
-**Returns:** `200` Leaderboard created
-**Throws:** `400` Invalid JSON in request, `409` Leaderboard with name %s already exists
+
+**Expects**
+* POST request body: Leaderboard-JSON (see `LeaderboardJsonSerializer`)
+
+**Returns**
+* `200` Leaderboard created
+
+**Throws**
+* `400` Invalid JSON in request
+* `409` Leaderboard with name %s already exists
 
 ## `/sailingserver/tracking/createRaceColumn`
 `CreateFlexibleLeaderboardPostServlet`
-**Expects:** Paramter: `leaderboard` leaderboard name, POST request body RaceColumn-JSON (see `RaceColumnDeserializer`)
-**Returns:** `200` RaceColumn created
-**Throws:** `400` Missing paramter / Invalid JSON in request, `404` Leaderboard not found, `409` RaceColumn with name %s already exists / Error adding RaceColumn
+
+**Expects**
+* URL Parameter: `leaderboard` leaderboard name
+* POST request body: RaceColumn-JSON (see `RaceColumnDeserializer`)
+
+**Returns**
+* `200` RaceColumn created
+
+**Throws**
+* `400` Missing paramter / Invalid JSON in request
+* `404` Leaderboard not found
+* `409` RaceColumn with name %s already exists / Error adding RaceColumn
