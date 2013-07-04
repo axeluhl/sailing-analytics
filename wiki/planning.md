@@ -4,6 +4,8 @@
 
 [[Trim Database|wiki/planning/TrimDatabase]]
 
+[[Smartphone Tracking|wiki/smartphone-tracking]]
+
 [[ORC|wiki/planning/ORC]]
 
 [[ISAF-Internal Projects|wiki/planning/ISAFInternalProjects]]
