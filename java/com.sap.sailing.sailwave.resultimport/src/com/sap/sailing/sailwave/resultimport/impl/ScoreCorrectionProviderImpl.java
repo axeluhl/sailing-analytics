@@ -1,4 +1,4 @@
-package com.sap.sailing.velum.resultimport.impl;
+package com.sap.sailing.sailwave.resultimport.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,13 +16,13 @@ import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.impl.AbstractDocumentBasedScoreCorrectionProvider;
 import com.sap.sailing.resultimport.impl.RegattaScoreCorrectionsImpl;
-import com.sap.sailing.velum.resultimport.CsvParser;
-import com.sap.sailing.velum.resultimport.CsvParserFactory;
+import com.sap.sailing.sailwave.resultimport.CsvParser;
+import com.sap.sailing.sailwave.resultimport.CsvParserFactory;
 
 public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorrectionProvider {
     private static final long serialVersionUID = 4767200739966995306L;
 
-    private static final String NAME = "Velum CSV result importer"; 
+    private static final String NAME = "Sailwave CSV result importer"; 
 
     private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
 

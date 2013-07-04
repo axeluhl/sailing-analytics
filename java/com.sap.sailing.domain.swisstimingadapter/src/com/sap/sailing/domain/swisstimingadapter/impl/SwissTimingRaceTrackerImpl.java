@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
@@ -347,7 +348,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         // now we can create the RaceDefinition and most other things
         Race swissTimingRace = messageLoader.getRace(raceID);
         race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
-        trackedRace = getTrackedRegatta().createTrackedRace(race, windStore, delayToLiveInMillis,
+        trackedRace = getTrackedRegatta().createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, delayToLiveInMillis,
                 WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 /* time over which to average speed */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 new DynamicRaceDefinitionSet() {

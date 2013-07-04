@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.common.Distance;
@@ -40,7 +41,6 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 
 public class DummyTrackedRace implements TrackedRace {
-
     private static final long serialVersionUID = -11522605089325440L;
     private Iterable<? extends Competitor> competitors;
     private Regatta regatta;
@@ -486,5 +486,11 @@ public class DummyTrackedRace implements TrackedRace {
     public boolean isLive(TimePoint at) {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public Iterable<Sideline> getCourseSidelines() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

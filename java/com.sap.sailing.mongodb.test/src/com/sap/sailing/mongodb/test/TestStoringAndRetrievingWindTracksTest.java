@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +18,7 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
@@ -84,7 +86,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                 }, /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
         RaceDefinition race = domainFactory.getAndWaitForRaceDefinition(getTracTracEvent().getRaceList().iterator().next());
-        DynamicTrackedRace trackedRace = trackedRegatta.createTrackedRace(race, EmptyWindStore.INSTANCE, 
+        DynamicTrackedRace trackedRace = trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 
                     /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 10000, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
