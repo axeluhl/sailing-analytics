@@ -421,8 +421,13 @@ public class MasterDataImportTest {
 
         
         //---Asserts---
-        
+        //Test correct number of creations
         Assert.assertNotNull(creationCount);
+        Assert.assertEquals(0,creationCount.getEventCount());
+        Assert.assertEquals(0,creationCount.getRegattaCount());
+        Assert.assertEquals(0,creationCount.getLeaderboardCount());
+        Assert.assertEquals(0,creationCount.getLeaderboardGroupCount());
+        
         Event eventOnTarget = destService.getEvent(eventUUID);
         Assert.assertNotNull(eventOnTarget);
         
@@ -584,8 +589,14 @@ public class MasterDataImportTest {
 
         
         //---Asserts---
-        
+        //Test correct number of creations
         Assert.assertNotNull(creationCount);
+        Assert.assertEquals(1,creationCount.getEventCount());
+        Assert.assertEquals(1,creationCount.getRegattaCount());
+        Assert.assertEquals(1,creationCount.getLeaderboardCount());
+        Assert.assertEquals(1,creationCount.getLeaderboardGroupCount());
+        
+        
         Event eventOnTarget = destService.getEvent(eventUUID);
         Assert.assertNotNull(eventOnTarget);
         
@@ -974,10 +985,18 @@ public class MasterDataImportTest {
         RacingEventService destService = new RacingEventServiceImplMock();
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+        //Test in override model, to find out if data that was created during import is overriden later on
+        // in the same import process. Number of creations is checked below.
         MasterDataImportObjectCreationCount creationCount = importer.importMasterData(
-                masterDataOverallObject.toString(), false);
+                masterDataOverallObject.toString(), true);
 
+        //Test correct number of creations
         Assert.assertNotNull(creationCount);
+        Assert.assertEquals(1,creationCount.getEventCount());
+        Assert.assertEquals(1,creationCount.getRegattaCount());
+        Assert.assertEquals(1,creationCount.getLeaderboardCount());
+        Assert.assertEquals(2,creationCount.getLeaderboardGroupCount());
+        
         Event eventOnTarget = destService.getEvent(eventUUID);
         Assert.assertNotNull(eventOnTarget);
         LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
