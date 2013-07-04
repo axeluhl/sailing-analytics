@@ -64,7 +64,7 @@ public class TopLevelMasterDataSerializer  {
     private JSONArray createJsonArrayForMediaTracks() {
         JSONArray array = new JSONArray();
         for (MediaTrack mediaTrack : allMediaTracks) {
-            array.add(mediaTrackSerializer);
+            array.add(mediaTrackSerializer.serialize(mediaTrack));
         }
         return array;
     }

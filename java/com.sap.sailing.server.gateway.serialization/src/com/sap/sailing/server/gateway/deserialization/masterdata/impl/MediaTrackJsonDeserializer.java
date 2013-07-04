@@ -14,10 +14,10 @@ public class MediaTrackJsonDeserializer implements JsonDeserializer<MediaTrack> 
     @Override
     public MediaTrack deserialize(JSONObject object) throws JsonDeserializationException {
         String dbId = (String) object.get(MediaTrackJsonSerializer.FIELD_DB_ID);
-        int durationInMillis = ((Double) object.get(MediaTrackJsonSerializer.FIELD_DURATION)).intValue();
+        int durationInMillis = ((Long) object.get(MediaTrackJsonSerializer.FIELD_DURATION)).intValue();
         MediaTrack.MimeType mimeType = MediaTrack.MimeType.valueOf((String) object
                 .get(MediaTrackJsonSerializer.FIELD_MIME_TYPE));
-        long startTimeInMillis = ((Double) object.get(MediaTrackJsonSerializer.FIELD_START_TIME)).longValue();
+        long startTimeInMillis = (Long) object.get(MediaTrackJsonSerializer.FIELD_START_TIME);
         Date startTime = new Date(startTimeInMillis);
         MediaTrack.Status status = MediaTrack.Status
                 .valueOf((String) object.get(MediaTrackJsonSerializer.FIELD_STATUS));

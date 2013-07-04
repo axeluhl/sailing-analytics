@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,6 +46,7 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
@@ -115,6 +117,12 @@ public class MasterDataImportTest {
         // raceLogCollection.remove(result.next());
         // }
         // }
+        
+        //Remove all media tracks
+        Collection<MediaTrack> tracks = service.getAllMediaTracks();
+        for (MediaTrack track : tracks) {
+            service.mediaTrackDeleted(track);
+        }
     }
 
     @Test
@@ -703,7 +711,7 @@ public class MasterDataImportTest {
 
         
         //---Asserts---
-        
+        Assert.assertNotNull(creationCount);
 
         
         //Check if existing event survived import
@@ -835,6 +843,51 @@ public class MasterDataImportTest {
         //Check if dummy race id has been imported to destination service
         ConcurrentHashMap<String, Regatta> map = destService.getPersistentRegattasForRaceIDs();
         Assert.assertEquals(regattaOnTarget, map.get("dummy"));
+
+    }
+    
+    @Test
+    public void testMasterDataImportForMediaTracks() throws MalformedURLException,
+            IOException, InterruptedException {
+        // Setup source service
+        RacingEventService sourceService = new RacingEventServiceImpl();
+        MediaTrack trackOnSource = new MediaTrack("test", "testTitle", "http://test/test.mp4", new Date(0),
+                2000, MediaTrack.MimeType.mp4);
+        sourceService.mediaTrackAdded(trackOnSource);
+
+        // Serialize
+        TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
+                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(),
+                sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
+        Set<String> names = new HashSet<String>();
+        JSONObject masterDataOverallObject = serializer.serialize(names);
+        Assert.assertNotNull(masterDataOverallObject);
+
+        // Delete all data above from the database, to allow recreating all of it on target server
+        deleteCreatedDataFromDatabase();
+
+        // Deserialization copied from SailingServiceImpl
+
+        RacingEventService destService = new RacingEventServiceImplMock();
+        DomainFactory domainFactory = DomainFactory.INSTANCE;
+        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(
+                masterDataOverallObject.toString(), false);
+
+
+        // ---Asserts---
+
+        Assert.assertNotNull(creationCount);
+        
+        Collection<MediaTrack> targetTracks = destService.getAllMediaTracks();
+        
+        Assert.assertEquals(1, targetTracks.size());
+        
+        MediaTrack trackOnTarget = targetTracks.iterator().next();
+        
+        Assert.assertEquals(trackOnSource.dbId, trackOnTarget.dbId);
+        
+        Assert.assertEquals(trackOnSource.url, trackOnTarget.url);
 
     }
 }
