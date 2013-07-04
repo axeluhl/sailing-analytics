@@ -25,6 +25,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
   * [[Inventar|wiki/inventar-liste]]
+  * [[Smartphone Tracking|wiki/smartphone-tracking]]
 * Planning and Event Information
   * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]
