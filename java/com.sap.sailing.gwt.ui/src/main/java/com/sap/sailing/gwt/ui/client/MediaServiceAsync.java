@@ -13,7 +13,7 @@ public interface MediaServiceAsync {
 
     void getAllMediaTracks(AsyncCallback<Collection<MediaTrack>> asyncCallback);
 
-    void addMediaTrack(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
+    void addMediaTrack(MediaTrack mediaTrack, AsyncCallback<String> asyncCallback);
 
     void deleteMediaTrack(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
 
