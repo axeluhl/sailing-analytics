@@ -52,6 +52,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
+import com.sap.sailing.gwt.ui.client.media.MediaSelector;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorSelectionProviderFilterContext;
@@ -83,6 +84,7 @@ import com.sap.sailing.gwt.ui.shared.UserDTO;
 public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, RaceSelectionChangeListener {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
+    private final UserDTO user;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final RaceBoardViewConfiguration raceboardViewConfiguration;
@@ -135,6 +137,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
+        this.user = theUser;
         this.stringMessages = stringMessages;
         this.raceboardViewConfiguration = raceboardViewConfiguration;
         this.raceSelectionProvider = theRaceSelectionProvider;
@@ -274,8 +277,8 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     }
     
     private void addMediaSelectorToNavigationMenu() {
-        MediaSelector mediaSelector = new MediaSelector(errorReporter);
-        raceTimesInfoProvider.addRaceTimesInfoProviderListener(mediaSelector);
+        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, this.user);
+//      raceTimesInfoProvider.addRaceTimesInfoProviderListener(mediaSelector);
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);
         mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);
