@@ -81,6 +81,7 @@ public class ImportMasterDataOperation extends
         createRegattas(masterData, toState);
         Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         for (LeaderboardMasterData board : masterData.getLeaderboards()) {
+            leaderboardNames.add(board.getName());
             if (existingLeaderboards.containsKey(board.getName())) {
                 if (override) {
                     toState.removeLeaderboard(board.getName());
@@ -98,7 +99,6 @@ public class ImportMasterDataOperation extends
             if (leaderboard != null) {
                 leaderboard.setDisplayName(board.getDisplayName());
                 toState.addLeaderboard(leaderboard);
-                leaderboardNames.add(board.getName());
                 creationCount.addOneLeaderboard();
                 Leaderboard newLeaderboard = toState.getLeaderboardByName(board.getName());
                 addRaceColumnsIfNecessary(board, newLeaderboard, toState);

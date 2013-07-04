@@ -67,7 +67,7 @@ public class MasterDataImporter {
             for (MediaTrack oneNewTrack : tracks) {
                 if (existingMap.containsKey(oneNewTrack.dbId)) {
                     if (override) {
-                        racingEventService.mediaTrackDeleted(existingMap.get(oneNewTrack));
+                        racingEventService.mediaTrackDeleted(existingMap.get(oneNewTrack.dbId));
                     } else {
                         continue;
                     }
