@@ -728,4 +728,7 @@ public interface StringMessages extends Messages {
     String essTwoDisplayed();
     String essOneDisplayed();
     String essOneRemoved();
+    String export();
+    String dataBeforeAfter();
+    String rawFixes();
 }

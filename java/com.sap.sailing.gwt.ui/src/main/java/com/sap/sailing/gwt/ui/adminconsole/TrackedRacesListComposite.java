@@ -31,6 +31,8 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private Button btnUntrack;
     private Button btnRemoveRace;
     private Button btnSetDelayToLive;
+    private Button btnExport;
+    private ExportPopup exportPopup;
 
     public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, RaceSelectionProvider raceSelectionProvider,
@@ -130,6 +132,17 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             }
         });
         trackedRacesButtonPanel.add(btnSetDelayToLive);
+
+        exportPopup = new ExportPopup(stringMessages);
+        btnExport = new Button(stringMessages.export());
+        btnExport.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                exportPopup.center(getSelectedRaces());
+            }
+        });
+        btnExport.setEnabled(false);
+        trackedRacesButtonPanel.add(btnExport);
     }
 
     @Override
@@ -137,9 +150,11 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         if (selectedRaces.isEmpty()) {
             btnRemoveRace.setEnabled(false);
             btnUntrack.setEnabled(false);
+            btnExport.setEnabled(false);
         } else {
             btnRemoveRace.setEnabled(true);
             btnUntrack.setEnabled(true);
+            btnExport.setEnabled(true);
         }
     }
 
@@ -149,12 +164,14 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             btnUntrack.setVisible(false);
             btnRemoveRace.setVisible(false);
             btnSetDelayToLive.setVisible(false);
+            btnExport.setVisible(false);
         } else {
             btnUntrack.setVisible(true);
             btnUntrack.setEnabled(false);
             btnRemoveRace.setVisible(true);
             btnRemoveRace.setEnabled(false);
             btnSetDelayToLive.setVisible(true);
+            btnExport.setVisible(true);
         }
     }
 
