@@ -35,7 +35,6 @@ public class TrackedRacesExportTest extends OnlineTracTracBasedTest {
 	@Before
 	public void setUp() throws URISyntaxException, IOException,
 			InterruptedException {
-		super.setUp();
 		super.setUp("event_20120905_erEuropean",
 		/* raceId */"03fa908e-fc03-11e1-9150-10bf48d758ce", new ReceiverType[] {
 				ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE,
@@ -80,7 +79,7 @@ public class TrackedRacesExportTest extends OnlineTracTracBasedTest {
 			byte[] data = getBytes(source, TrackFilesFormat.Gpx11,
 					race, true, true);
 
-			assertTrue(data.length > 400);
+			assertTrue(data.length > 40);
 		}
 	}
 }
