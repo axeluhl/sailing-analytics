@@ -42,6 +42,7 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGro
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.LeaderboardGroupRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -52,7 +53,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
-public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
+public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements LeaderboardGroupRefresher {
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
@@ -125,7 +126,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
         splitPanel.add(createLeaderboardsGUI(tableRes));
 
         //Load Data
-        loadGroups();
+        fillLeaderboardGroups();
         loadLeaderboards();
     }
 
@@ -519,7 +520,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
         return leaderboardGroupsCaptionPanel;
     }
 
-    private void loadGroups() {
+    public void fillLeaderboardGroups() {
         sailingService.getLeaderboardGroups(false /*withGeoLocationData*/, new AsyncCallback<List<LeaderboardGroupDTO>>() {
             @Override
             public void onSuccess(List<LeaderboardGroupDTO> groups) {

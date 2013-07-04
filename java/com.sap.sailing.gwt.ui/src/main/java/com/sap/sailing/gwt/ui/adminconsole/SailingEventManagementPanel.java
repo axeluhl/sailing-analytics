@@ -27,6 +27,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
@@ -39,7 +40,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
  * @author Frank Mittag (C5163974)
  * 
  */
-public class SailingEventManagementPanel extends SimplePanel {
+public class SailingEventManagementPanel extends SimplePanel implements EventRefresher {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -321,7 +322,7 @@ public class SailingEventManagementPanel extends SimplePanel {
         });
     }
 
-    private void fillEvents() {
+    public void fillEvents() {
         sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
             @Override
             public void onFailure(Throwable caught) {

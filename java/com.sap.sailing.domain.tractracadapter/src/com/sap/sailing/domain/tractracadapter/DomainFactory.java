@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -62,6 +63,8 @@ public interface DomainFactory {
     com.sap.sailing.domain.common.TimePoint createTimePoint(long timestamp);
 
     Course createCourse(String name, Iterable<Pair<TracTracControlPoint, NauticalSide>> controlPoints);
+
+    Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints);
 
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(Competitor competitor);
 
@@ -189,7 +192,7 @@ public interface DomainFactory {
      *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace) added} to that object.
      */
     DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta, Race race,
-            Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+            Course course, Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword);
 
     /**
