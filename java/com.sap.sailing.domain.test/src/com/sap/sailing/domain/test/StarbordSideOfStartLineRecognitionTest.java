@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +14,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -79,7 +81,7 @@ public class StarbordSideOfStartLineRecognitionTest {
         private static final long serialVersionUID = -8007932232555073829L;
 
         public MockedTrackedRaceImpl() {
-            super(null, null, null, 0, 0, 0, 0);
+            super(null, null, Collections.<Sideline> emptyList(), null, 0, 0, 0, 0);
         }
         
         @Override

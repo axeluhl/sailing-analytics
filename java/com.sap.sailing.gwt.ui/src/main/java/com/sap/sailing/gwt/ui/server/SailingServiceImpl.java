@@ -45,9 +45,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -67,6 +64,7 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.FleetImpl;
@@ -123,7 +121,6 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
-import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationTriggerResponseImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
@@ -141,7 +138,6 @@ import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
-import com.sap.sailing.domain.masterdataimport.LeaderboardGroupMasterData;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -229,6 +225,7 @@ import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sailing.gwt.ui.shared.SidelineDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
@@ -246,9 +243,7 @@ import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.masterdata.impl.LeaderboardGroupMasterDataJsonDeserializer;
+import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
@@ -259,7 +254,6 @@ import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboar
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.DisconnectLeaderboardColumnFromTrackedRace;
-import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 import com.sap.sailing.server.operationaltransformation.MoveColumnInSeriesDown;
 import com.sap.sailing.server.operationaltransformation.MoveColumnInSeriesUp;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDown;
@@ -1186,7 +1180,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate) throws NoWindException {
         return new CompactRaceMapDataDTO(getBoatPositions(raceIdentifier, fromPerCompetitorIdAsString,
-                toPerCompetitorIdAsString, extrapolate), getCoursePositions(raceIdentifier, date), getQuickRanks(
+                toPerCompetitorIdAsString, extrapolate), getCoursePositions(raceIdentifier, date), getCourseSidelines(raceIdentifier, date), getQuickRanks(
                 raceIdentifier, date));
     }    
 
@@ -1382,6 +1376,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return raceTimesInfos;
     }
 
+    private List<SidelineDTO> getCourseSidelines(RegattaAndRaceIdentifier raceIdentifier, Date date) {
+        List<SidelineDTO> result = new ArrayList<SidelineDTO>();
+        if (date != null) {
+            TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
+            TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+            if (trackedRace != null) {
+                for (Sideline sideline : trackedRace.getCourseSidelines()) {
+                    List<MarkDTO> markDTOs = new ArrayList<MarkDTO>();
+                    for (Mark mark : sideline.getMarks()) {
+                        GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
+                        Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
+                        if (positionAtDate != null) {
+                            markDTOs.add(convertToMarkDTO(mark, positionAtDate));
+                        }
+                    }
+                    result.add(new SidelineDTO(sideline.getName(), markDTOs));
+                }
+            }
+        }
+        return result;
+    }
+        
     @Override
     public CoursePositionsDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date) {
         CoursePositionsDTO result = new CoursePositionsDTO();
@@ -3161,7 +3177,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames) {
+    public MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override) {
         String getMasterDataUrl = createGetMasterDataForLgsUrl(host);
         if (!isValidUrl(getMasterDataUrl, false)) {
             throw new RuntimeException("Not a valid URL for fetching leaderboardgroups masterdata: " + getMasterDataUrl);
@@ -3195,7 +3211,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 sb.append(line);
             }
 
-            return importFromHttpResponse(sb.toString());
+            return importFromHttpResponse(sb.toString(), override);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -3219,27 +3235,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                toURL();
    }
     
-    protected MasterDataImportObjectCreationCountImpl importFromHttpResponse(String response) {
-        MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
-        JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = LeaderboardGroupMasterDataJsonDeserializer
-                .create(baseDomainFactory);
-        JSONParser parser = new JSONParser();
-        try {
-            JSONArray leaderboardGroupsMasterDataJsonArray = (JSONArray) parser.parse(response);
-            for (Object leaderBoardGroupMasterData : leaderboardGroupsMasterDataJsonArray) {
-                JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
-                LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
-                        .deserialize(leaderBoardGroupMasterDataJson);
-                ImportMasterDataOperation op = new ImportMasterDataOperation(masterData);
-                creationCount.add(getService().apply(op));
-            }
-        } catch (org.json.simple.parser.ParseException e) {
-            throw new RuntimeException(e);
-        } catch (JsonDeserializationException e) {
-            throw new RuntimeException(e);
-        }
-        
-        return creationCount;
+    protected MasterDataImportObjectCreationCount importFromHttpResponse(String response, boolean override) {
+        MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());       
+        return importer.importMasterData(response, override);
     }
 
     private String createLeaderboardQuery(String[] groupNames) {

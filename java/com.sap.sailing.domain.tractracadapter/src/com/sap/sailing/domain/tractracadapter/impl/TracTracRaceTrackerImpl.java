@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Fleet;
@@ -338,7 +337,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         int controlPointsCount = controlPoints.size();
         String routeMetadataString = route.getMetadata();
         if(routeMetadataString != null) {
-            Map<String, String> routeMetadata = parseRouteMetadata(routeMetadataString);
+            Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
             for(int i = 1; i <= controlPointsCount; i++) {
                 String seqValue = routeMetadata.get("Seq." + i);
                 TracTracControlPoint controlPoint = controlPoints.get(i-1);
@@ -355,17 +354,18 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Map<String, String> parseRouteMetadata(String routeMetadata) {
+    private Map<String, String> parseMetadata(String metadata) {
         Map<String, String> metadataMap = new HashMap<String, String>();
         try {
             Properties p = new Properties();
-            p.load(new StringReader(routeMetadata));
+            p.load(new StringReader(metadata));
             metadataMap = new HashMap<String, String>((Map) p);
         } catch (IOException e) {
             // do nothing
         }
         return metadataMap;
     }
+
     private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) {
         RaceDefinition currentRace = null;
         long delayInMillis = clientParams.getLiveDelayInMillis();

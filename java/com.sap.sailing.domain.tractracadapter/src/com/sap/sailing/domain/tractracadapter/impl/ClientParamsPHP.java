@@ -390,6 +390,10 @@ public class ClientParamsPHP {
         return HandicapSystem.valueOf(properties.get("RaceHandicapSystem"));
     }
 
+    public String getRaceMetadata() {
+        return properties.get("RaceDataSheet");
+    }
+    
     /**
      * Determines all control points listed in the document, regardless of whether they are part of a route/course or not
      */

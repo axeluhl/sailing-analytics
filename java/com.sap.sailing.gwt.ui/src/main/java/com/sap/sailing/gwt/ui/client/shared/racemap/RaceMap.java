@@ -30,6 +30,8 @@ import com.google.gwt.maps.client.control.ScaleControl;
 import com.google.gwt.maps.client.event.MapDragEndHandler;
 import com.google.gwt.maps.client.event.MapMouseMoveHandler;
 import com.google.gwt.maps.client.event.MapZoomEndHandler;
+import com.google.gwt.maps.client.event.PolygonMouseOutHandler;
+import com.google.gwt.maps.client.event.PolygonMouseOverHandler;
 import com.google.gwt.maps.client.event.PolylineClickHandler;
 import com.google.gwt.maps.client.event.PolylineMouseOutHandler;
 import com.google.gwt.maps.client.event.PolylineMouseOverHandler;
@@ -37,6 +39,8 @@ import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
+import com.google.gwt.maps.client.overlay.Polygon;
+import com.google.gwt.maps.client.overlay.PolygonOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.maps.client.overlay.PolylineOptions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -85,6 +89,7 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.SidelineDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -115,12 +120,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * Polyline for the advantage line (the leading line for the boats, orthogonal to the wind direction; touching the leading boat).
      */
     private Polyline advantageLine;
-
+    
     /**
      * Polyline for the course middle line.
      */
     private Polyline courseMiddleLine;
 
+    private Map<SidelineDTO, Polygon> courseSidelines;
+    
     private WindTrackInfoDTO lastCombinedWindTrackInfoDTO;
     
     /**
@@ -248,6 +255,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         firstShownFix = new HashMap<CompetitorDTO, Integer>();
         lastShownFix = new HashMap<CompetitorDTO, Integer>();
         markDTOs = new HashMap<String, MarkDTO>();
+        courseSidelines = new HashMap<SidelineDTO, Polygon>();
         boatOverlays = new HashMap<CompetitorDTO, BoatOverlay>();
         competitorInfoOverlays = new HashMap<CompetitorDTO, CompetitorInfoOverlay>();
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
@@ -385,6 +393,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             
                             // Do mark specific actions
                             showCourseMarksOnMap(raceMapDataDTO.coursePositions);
+                            showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);                            
                             showStartAndFinishLines(raceMapDataDTO.coursePositions);
                             showAdvantageLine(competitorsToShow, date);
                                 
@@ -550,6 +559,52 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
+    private void showCourseSidelinesOnMap(List<SidelineDTO> sidelinesDTOs) {
+        if (map != null && sidelinesDTOs != null ) {
+            Map<SidelineDTO, Polygon> toRemoveSidelines = new HashMap<SidelineDTO, Polygon>(courseSidelines);
+            for (SidelineDTO sidelineDTO : sidelinesDTOs) {
+                if (sidelineDTO.getMarks().size() == 2) { // right now we only support sidelines with 2 marks
+                    Polygon sideline = courseSidelines.get(sidelineDTO);
+                    LatLng[] sidelinePoints = new LatLng[sidelineDTO.getMarks().size()];
+                    int i=0;
+                    for (MarkDTO sidelineMark : sidelineDTO.getMarks()) {
+                        sidelinePoints[i] = LatLng.newInstance(sidelineMark.position.latDeg, sidelineMark.position.lngDeg);
+                        i++;
+                    }
+                    if (sideline == null) {
+                        PolygonOptions options = PolygonOptions.newInstance(/* clickable must be true for hover sensititivy*/ true);
+                        sideline = new Polygon(sidelinePoints, /* color */"#0000FF", /* width */1, /* opacity */1.0, /* fillColor */
+                                null, /* fillOpacity */1.0, options);
+                        sideline.addPolygonMouseOverHandler(new PolygonMouseOverHandler() {
+                            @Override
+                            public void onMouseOver(PolygonMouseOverEvent event) {
+                                map.setTitle(stringMessages.sideline());
+                            }
+                        });
+                        sideline.addPolygonMouseOutHandler(new PolygonMouseOutHandler() {
+                            @Override
+                            public void onMouseOut(PolygonMouseOutEvent event) {
+                                map.setTitle("");
+                            }
+                        });
+                        courseSidelines.put(sidelineDTO, sideline);
+                        map.addOverlay(sideline);
+                    } else {
+                        sideline.deleteVertex(1);
+                        sideline.deleteVertex(0);
+                        sideline.insertVertex(0, sidelinePoints[0]);
+                        sideline.insertVertex(1, sidelinePoints[1]);
+                        toRemoveSidelines.remove(sidelineDTO);
+                    }
+                }
+            }
+            for (SidelineDTO toRemoveSideline : toRemoveSidelines.keySet()) {
+                Polygon polygon = courseSidelines.remove(toRemoveSideline);
+                map.removeOverlay(polygon);
+            }
+        }
+    }
+        
     protected void showCourseMarksOnMap(CoursePositionsDTO courseDTO) {
         if (map != null && courseDTO != null) {
             Map<String, CourseMarkOverlay> toRemoveCourseMarks = new HashMap<String, CourseMarkOverlay>(courseMarkOverlays);
