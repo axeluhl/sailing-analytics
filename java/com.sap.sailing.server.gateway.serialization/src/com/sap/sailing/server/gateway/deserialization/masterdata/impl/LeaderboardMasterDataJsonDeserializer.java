@@ -241,7 +241,7 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
         }
         int[] result = new int[indeces.size()];
         for (int i = 0; i < result.length; i++) {
-            result[i] = (Integer) indeces.get(i);
+            result[i] = ((Long) indeces.get(i)).intValue();
         }
         return result;
     }

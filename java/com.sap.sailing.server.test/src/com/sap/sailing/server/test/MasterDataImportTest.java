@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,7 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import junit.framework.Assert;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.After;
 import org.junit.Test;
@@ -43,25 +43,23 @@ import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.masterdataimport.LeaderboardGroupMasterData;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.masterdata.impl.LeaderboardGroupMasterDataJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.TopLevelMasterDataSerializer;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.DummyTrackedRace;
-import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 
 public class MasterDataImportTest {
 
@@ -119,6 +117,12 @@ public class MasterDataImportTest {
         // raceLogCollection.remove(result.next());
         // }
         // }
+        
+        //Remove all media tracks
+        Collection<MediaTrack> tracks = service.getAllMediaTracks();
+        for (MediaTrack track : tracks) {
+            service.mediaTrackDeleted(track);
+        }
     }
 
     @Test
@@ -209,11 +213,11 @@ public class MasterDataImportTest {
         // Serialize
         TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
                 sourceService.getLeaderboardGroups(), sourceService.getAllEvents(),
-                sourceService.getPersistentRegattasForRaceIDs());
+                sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
         Set<String> names = new HashSet<String>();
         names.add(TEST_GROUP_NAME);
-        JSONArray masterDataOverallArray = serializer.serialize(names);
-        Assert.assertNotNull(masterDataOverallArray);
+        JSONObject masterDataOverallObject = serializer.serialize(names);
+        Assert.assertNotNull(masterDataOverallObject);
 
         // Delete all data above from the database, to allow recreating all of it on target server
         deleteCreatedDataFromDatabase();
@@ -221,18 +225,9 @@ public class MasterDataImportTest {
         // Deserialization copied from doPost in MasterDataByLeaderboardGroupJsonPostServlet
         RacingEventService destService = new RacingEventServiceImplMock();
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
-        JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = LeaderboardGroupMasterDataJsonDeserializer
-                .create(domainFactory);
-        JSONArray leaderboardGroupsMasterDataJsonArray = masterDataOverallArray;
-        // Actual import. Roughly copied from doPost in MasterDataByLeaderboardGroupJsonPostServlet
-        for (Object leaderBoardGroupMasterData : leaderboardGroupsMasterDataJsonArray) {
-            JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
-            LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
-                    .deserialize(leaderBoardGroupMasterDataJson);
-            ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, false);
-            creationCount.add(destService.apply(op));
-        }
+        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(
+                masterDataOverallObject.toString(), false);
 
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
@@ -375,11 +370,12 @@ public class MasterDataImportTest {
 
         // Serialize
         TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
-                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(), sourceService.getPersistentRegattasForRaceIDs());
+                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(),
+                sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
         Set<String> names = new HashSet<String>();
         names.add(TEST_GROUP_NAME);
-        JSONArray masterDataOverallArray = serializer.serialize(names);
-        Assert.assertNotNull(masterDataOverallArray);
+        JSONObject masterDataOverallObject = serializer.serialize(names);
+        Assert.assertNotNull(masterDataOverallObject);
 
         // Delete all data above from the database, to allow recreating all of it on target server
         deleteCreatedDataFromDatabase();
@@ -414,18 +410,10 @@ public class MasterDataImportTest {
         // Deserialization copied from SailingServiceImpl
         
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
-        JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = LeaderboardGroupMasterDataJsonDeserializer
-                .create(domainFactory);
-        JSONArray leaderboardGroupsMasterDataJsonArray = masterDataOverallArray;
-        // Actual import. Roughly copied from SailingServiceImpl
-        for (Object leaderBoardGroupMasterData : leaderboardGroupsMasterDataJsonArray) {
-            JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
-            LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
-                    .deserialize(leaderBoardGroupMasterDataJson);
-            ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, false);
-            creationCount.add(destService.apply(op));
-        }
+        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(
+                masterDataOverallObject.toString(), false);
+
         
         //---Asserts---
         
@@ -545,11 +533,12 @@ public class MasterDataImportTest {
 
         // Serialize
         TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
-                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(), sourceService.getPersistentRegattasForRaceIDs());
+                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(), sourceService.getPersistentRegattasForRaceIDs(),
+                sourceService.getAllMediaTracks());
         Set<String> names = new HashSet<String>();
         names.add(TEST_GROUP_NAME);
-        JSONArray masterDataOverallArray = serializer.serialize(names);
-        Assert.assertNotNull(masterDataOverallArray);
+        JSONObject masterDataOverallObject = serializer.serialize(names);
+        Assert.assertNotNull(masterDataOverallObject);
 
         // Delete all data above from the database, to allow recreating all of it on target server
         deleteCreatedDataFromDatabase();
@@ -584,18 +573,10 @@ public class MasterDataImportTest {
         // Deserialization copied from SailingServiceImpl
         
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
-        JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = LeaderboardGroupMasterDataJsonDeserializer
-                .create(domainFactory);
-        JSONArray leaderboardGroupsMasterDataJsonArray = masterDataOverallArray;
-        // Actual import. Roughly copied from SailingServiceImpl
-        for (Object leaderBoardGroupMasterData : leaderboardGroupsMasterDataJsonArray) {
-            JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
-            LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
-                    .deserialize(leaderBoardGroupMasterDataJson);
-            ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, true);
-            creationCount.add(destService.apply(op));
-        }
+        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(
+                masterDataOverallObject.toString(), true);
+
         
         //---Asserts---
         
@@ -708,11 +689,12 @@ public class MasterDataImportTest {
 
         // Serialize
         TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
-                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(), sourceService.getPersistentRegattasForRaceIDs());
+                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(), sourceService.getPersistentRegattasForRaceIDs(),
+                sourceService.getAllMediaTracks());
         Set<String> names = new HashSet<String>();
         names.add(TEST_GROUP_NAME);
-        JSONArray masterDataOverallArray = serializer.serialize(names);
-        Assert.assertNotNull(masterDataOverallArray);
+        JSONObject masterDataOverallObject = serializer.serialize(names);
+        Assert.assertNotNull(masterDataOverallObject);
 
         // Delete all data above from the database, to allow recreating all of it on target server
         deleteCreatedDataFromDatabase();
@@ -723,21 +705,13 @@ public class MasterDataImportTest {
         // Deserialization copied from SailingServiceImpl
         
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
-        JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = LeaderboardGroupMasterDataJsonDeserializer
-                .create(domainFactory);
-        JSONArray leaderboardGroupsMasterDataJsonArray = masterDataOverallArray;
-        // Actual import. Roughly copied from SailingServiceImpl
-        for (Object leaderBoardGroupMasterData : leaderboardGroupsMasterDataJsonArray) {
-            JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
-            LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
-                    .deserialize(leaderBoardGroupMasterDataJson);
-            ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, false);
-            creationCount.add(destService.apply(op));
-        }
+        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(
+                masterDataOverallObject.toString(), false);
+
         
         //---Asserts---
-        
+        Assert.assertNotNull(creationCount);
 
         
         //Check if existing event survived import
@@ -839,11 +813,11 @@ public class MasterDataImportTest {
         // Serialize
         TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
                 sourceService.getLeaderboardGroups(), sourceService.getAllEvents(),
-                sourceService.getPersistentRegattasForRaceIDs());
+                sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
         Set<String> names = new HashSet<String>();
         names.add(TEST_GROUP_NAME);
-        JSONArray masterDataOverallArray = serializer.serialize(names);
-        Assert.assertNotNull(masterDataOverallArray);
+        JSONObject masterDataOverallObject = serializer.serialize(names);
+        Assert.assertNotNull(masterDataOverallObject);
 
         // Delete all data above from the database, to allow recreating all of it on target server
         deleteCreatedDataFromDatabase();
@@ -852,18 +826,10 @@ public class MasterDataImportTest {
 
         RacingEventService destService = new RacingEventServiceImplMock();
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
-        JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = LeaderboardGroupMasterDataJsonDeserializer
-                .create(domainFactory);
-        JSONArray leaderboardGroupsMasterDataJsonArray = masterDataOverallArray;
-        // Actual import. Roughly copied from SailingServiceImpl
-        for (Object leaderBoardGroupMasterData : leaderboardGroupsMasterDataJsonArray) {
-            JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
-            LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
-                    .deserialize(leaderBoardGroupMasterDataJson);
-            ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, false);
-            creationCount.add(destService.apply(op));
-        }
+        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(
+                masterDataOverallObject.toString(), false);
+
 
         // ---Asserts---
 
@@ -877,6 +843,51 @@ public class MasterDataImportTest {
         //Check if dummy race id has been imported to destination service
         ConcurrentHashMap<String, Regatta> map = destService.getPersistentRegattasForRaceIDs();
         Assert.assertEquals(regattaOnTarget, map.get("dummy"));
+
+    }
+    
+    @Test
+    public void testMasterDataImportForMediaTracks() throws MalformedURLException,
+            IOException, InterruptedException {
+        // Setup source service
+        RacingEventService sourceService = new RacingEventServiceImpl();
+        MediaTrack trackOnSource = new MediaTrack("test", "testTitle", "http://test/test.mp4", new Date(0),
+                2000, MediaTrack.MimeType.mp4);
+        sourceService.mediaTrackAdded(trackOnSource);
+
+        // Serialize
+        TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
+                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(),
+                sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
+        Set<String> names = new HashSet<String>();
+        JSONObject masterDataOverallObject = serializer.serialize(names);
+        Assert.assertNotNull(masterDataOverallObject);
+
+        // Delete all data above from the database, to allow recreating all of it on target server
+        deleteCreatedDataFromDatabase();
+
+        // Deserialization copied from SailingServiceImpl
+
+        RacingEventService destService = new RacingEventServiceImplMock();
+        DomainFactory domainFactory = DomainFactory.INSTANCE;
+        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(
+                masterDataOverallObject.toString(), false);
+
+
+        // ---Asserts---
+
+        Assert.assertNotNull(creationCount);
+        
+        Collection<MediaTrack> targetTracks = destService.getAllMediaTracks();
+        
+        Assert.assertEquals(1, targetTracks.size());
+        
+        MediaTrack trackOnTarget = targetTracks.iterator().next();
+        
+        Assert.assertEquals(trackOnSource.dbId, trackOnTarget.dbId);
+        
+        Assert.assertEquals(trackOnSource.url, trackOnTarget.url);
 
     }
 }

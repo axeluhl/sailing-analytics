@@ -665,7 +665,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 //Check if the removed group was the selected one
                 LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
                 if (selectedGroup != null && selectedGroup.getName().equals(group.getName())) {
-                    groupsSelectionModel.setSelected(null, true);
+                    groupsSelectionModel.setSelected(selectedGroup, false);
                 }
             }
         });
@@ -687,34 +687,21 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         final LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
         splitPanel.setVisible(selectedGroup != null);
         if (selectedGroup != null) {
-            sailingService.getLeaderboardGroupByName(selectedGroup.getName(), false /*withGeoLocationData*/, new AsyncCallback<LeaderboardGroupDTO>() {
-                @Override
-                public void onFailure(Throwable t) {
-                    errorReporter.reportError("Error trying to obtain the leaderboard group " + selectedGroup.getName() + ": " + t.getMessage());
-                }
-                @Override
-                public void onSuccess(LeaderboardGroupDTO result) {
-                    //Updating the data lists
-                    availableLeaderboardGroups.set(availableLeaderboardGroups.indexOf(selectedGroup), result);
-                    groupsSelectionModel.setSelected(result, true);
+            //Display details of the group
+            groupDetailsCaptionPanel.setCaptionText(stringMessages.detailsOfLeaderboardGroup() + " '" + selectedGroup.getName() + "'");
+            descriptionTextArea.setText(selectedGroup.description);
+            setDescriptionEditable(false);
 
-                    //Display details of the group
-                    groupDetailsCaptionPanel.setCaptionText(stringMessages.detailsOfLeaderboardGroup() + " '" + result.getName() + "'");
-                    descriptionTextArea.setText(result.description);
-                    setDescriptionEditable(false);
+            groupDetailsSelectionModel.clear();
+            groupDetailsProvider.getList().clear();
+            groupDetailsProvider.getList().addAll(selectedGroup.leaderboards);
 
-                    groupDetailsSelectionModel.clear();
-                    groupDetailsProvider.getList().clear();
-                    groupDetailsProvider.getList().addAll(result.leaderboards);
-
-                    //Reload available leaderboards and remove leaderboards of the group from the list
-                    leaderboardsSelectionModel.clear();
-                    leaderboardsFilterTextBox.setText("");
-                    leaderboardsProvider.getList().clear();
-                    leaderboardsProvider.getList().addAll(availableLeaderboards);
-                    leaderboardsProvider.getList().removeAll(result.leaderboards);
-                }
-            });
+            //Reload available leaderboards and remove leaderboards of the group from the list
+            leaderboardsSelectionModel.clear();
+            leaderboardsFilterTextBox.setText("");
+            leaderboardsProvider.getList().clear();
+            leaderboardsProvider.getList().addAll(availableLeaderboards);
+            leaderboardsProvider.getList().removeAll(selectedGroup.leaderboards);
         }
     }
 
