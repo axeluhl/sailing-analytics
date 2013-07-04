@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client.media;
 
+import com.sap.sailing.domain.common.media.MediaTrack;
+
 public interface MediaSynchAdapter {
 
     long getOffset();
@@ -8,14 +10,14 @@ public interface MediaSynchAdapter {
 
     void setControlsVisible(boolean isVisible);
 
-    void save();
-
-    void discard();
-
     void pauseMedia();
 
     void pauseRace();
 
     void updateOffset();
+
+    MediaTrack getMediaTrack();
+
+    void forceAlign();
 
 }

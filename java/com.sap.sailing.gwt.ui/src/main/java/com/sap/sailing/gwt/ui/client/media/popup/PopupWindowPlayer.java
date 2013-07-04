@@ -39,7 +39,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
     }-*/;
 
     @Override
-    public native void destroy() /*-{
+    public native void close() /*-{
             var playerWindow = this.@com.sap.sailing.gwt.ui.client.media.popup.PopupWindowPlayer::playerWindow;
             if (!playerWindow.closed) {
                 playerWindow.close();

@@ -28,7 +28,8 @@ public abstract class AbstractMediaPlayer implements MediaPlayer {
     }
 
     public void raceTimeChanged(Date raceTime) {
-        alignTime(raceTime);
+        raceTimeInMillis = raceTime.getTime();
+        alignTime();
     }
     
     @Override
@@ -36,8 +37,7 @@ public abstract class AbstractMediaPlayer implements MediaPlayer {
         return Math.round(getCurrentMediaTime() * 1000);
     }
     
-    private void alignTime(Date raceTime) {
-        raceTimeInMillis = raceTime.getTime();
+    protected void alignTime() {
         long mediaStartTimeInMillis = mediaTrack.startTime.getTime();
         long mediaTimeInMillis = mediaStartTimeInMillis + getCurrentMediaTimeMillis();
         long mediaLaggingBehindRaceInMillis = raceTimeInMillis - mediaTimeInMillis;

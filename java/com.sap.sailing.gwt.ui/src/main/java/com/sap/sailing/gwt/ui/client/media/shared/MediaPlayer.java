@@ -29,6 +29,6 @@ public interface MediaPlayer {
 
     void setMuted(boolean isToBeMuted);
 
-    void destroy();
+    void close();
 
 }

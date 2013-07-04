@@ -404,11 +404,11 @@ img.openColumn {
    clear: both;
 }
 
-.gwt-extras-WindowBox .offset-panel {
+.gwt-extras-WindowBox .finetuning-panel {
 	margin: 10px 0;
 }
 
-.gwt-extras-WindowBox .offset-panel button {
+.gwt-extras-WindowBox .finetuning-panel button {
     margin: 0 0 0 5px;
 }
 

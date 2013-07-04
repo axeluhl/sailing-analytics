@@ -128,7 +128,7 @@ abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
     }
 
     @Override
-    public void destroy() {
+    public void close() {
         mediaControl.pause();
         mediaControl.setSrc(null);
     }

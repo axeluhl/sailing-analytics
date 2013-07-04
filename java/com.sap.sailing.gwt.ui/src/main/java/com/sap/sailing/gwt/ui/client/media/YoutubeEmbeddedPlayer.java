@@ -4,7 +4,6 @@ import java.util.Date;
 
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -22,11 +21,8 @@ public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoP
     private MediaSynchControl mediaSynchControl;
 
     private final long raceStartTimeMillis;
-    private final MediaTrack backupVideoTrack;
 
-    private final MediaServiceAsync mediaService;
     private final Timer raceTimer;
-    private final ErrorReporter errorReporter;
     private final PopupCloseListener popupCloseListener;
     private final YoutubeVideoControl videoControl;
     private final PopoutListener popoutListener;
@@ -36,22 +32,20 @@ public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoP
         this.raceTimer = raceTimer;
         this.raceStartTimeMillis = raceStartTimeMillis;
         this.popupCloseListener = popupCloseListener;
-        this.mediaService = mediaService;
-        this.errorReporter = errorReporter;
         this.popoutListener = popoutListener;
-        backupVideoTrack = new MediaTrack(null, videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.durationInMillis, videoTrack.mimeType);
 
         FlowPanel rootPanel = new FlowPanel();
         rootPanel.addStyleName("video-root-panel");
 
+        videoControl = new YoutubeVideoControl(videoTrack.url, showSynchControls); 
+        rootPanel.add(videoControl.widget());
+        
         if (showSynchControls) {
-            mediaSynchControl = new MediaSynchControl(this);
+            mediaSynchControl = new MediaSynchControl(this, mediaService, errorReporter);
             mediaSynchControl.widget().addStyleName("media-synch-control");
             rootPanel.add(mediaSynchControl.widget());
         }
 
-        videoControl = new YoutubeVideoControl(videoTrack.url); 
-        rootPanel.add(videoControl.widget());
         this.dialogBox = new WindowBox(videoTrack.title, videoTrack.toString(), rootPanel, new WindowBox.PopoutHandler() {
             
             @Override
@@ -80,7 +74,7 @@ public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoP
     }
 
     @Override
-    public void destroy() {
+    public void close() {
         hide();
     }
 
@@ -106,34 +100,6 @@ public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoP
     }
 
     @Override
-    public void save() {
-        
-        if (backupVideoTrack.startTime != getMediaTrack().startTime) {
-            mediaService.updateStartTime(getMediaTrack(), new AsyncCallback<Void>() {
-
-                @Override
-                public void onSuccess(Void result) {
-                    // nothing to do
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError(caught.toString());
-                }
-            });
-        }
-    }
-
-    @Override
-    public void discard() {
-     // For now, only start time can be changed.        
-//      getMediaTrack().title = backupVideoTrack.title;
-//      getMediaTrack().url = backupVideoTrack.url;
-//      getMediaTrack().durationInMillis = backupVideoTrack.durationInMillis;
-      getMediaTrack().startTime = backupVideoTrack.startTime;
-    }
-
-    @Override
     public void pauseRace() {
         raceTimer.pause();
     }
@@ -145,12 +111,16 @@ public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoP
 
     @Override
     public void pauseMedia() {
-        videoControl.pause();
+        if (!isEdited()) {
+            videoControl.pause();
+        }
     }
 
     @Override
     public void playMedia() {
-        videoControl.play();
+        if (!isEdited()) {
+            videoControl.play();
+        }
     }
 
     @Override
@@ -176,6 +146,17 @@ public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoP
     @Override
     public void setMuted(boolean isToBeMuted) {
         videoControl.setMuted(isToBeMuted);
+    }
+    
+    @Override
+    protected void alignTime() {
+        if (!isEdited()) {
+            super.alignTime();
+        } 
+    }
+
+    private boolean isEdited() {
+        return mediaSynchControl != null && mediaSynchControl.isEditing();
     }
 
 }

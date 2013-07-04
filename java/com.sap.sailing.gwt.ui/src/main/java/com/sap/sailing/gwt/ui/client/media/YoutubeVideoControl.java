@@ -23,41 +23,43 @@ public class YoutubeVideoControl  {
 
     private double deferredPlaybackSpeed;
 
-    YoutubeVideoControl(String videoUrl) {
+    YoutubeVideoControl(String videoUrl, boolean showControls) {
         
         containerPanel = new SimplePanel();
 
         String videoContainerId = "videoContainer-" + containerId++;
 
         containerPanel.getElement().setId(videoContainerId);
+        containerPanel.getElement().setInnerText("When the Youtube video doesn't show up, click the popout button at the upper right corner to open the video in a dedicated browser window.");
 
-        loadYoutubePlayer(videoUrl, videoContainerId);
+        if (!isYoutubeApiInitialized()) {
+            loadInitialYoutubePlayer(videoUrl, videoContainerId, showControls);
+        } else {
+            loadYoutubePlayer(videoUrl, videoContainerId, showControls);
+        }
     }
+
+    private native boolean isYoutubeApiInitialized() /*-{
+        return $wnd.youtubeApiInitialized != null;
+    }-*/;
+
+    private native void setYoutubeApiInitialized() /*-{
+        $wnd.youtubeApiInitialized = true;
+    }-*/;
 
     // Inspired by https://developers.google.com/youtube/iframe_api_reference#Examples
     // See also: https://developers.google.com/youtube/js_api_reference
     // Code Playground: https://code.google.com/apis/ajax/playground/?exp=youtube#chromeless_player
-    private native void loadYoutubePlayer(String videoUrl, String videoContainerId) /*-{
+    // Extended with API-initialization control to support multiple players on the same page. 
+    private native void loadInitialYoutubePlayer(String videoUrl, String videoContainerId, boolean showControls) /*-{
         
                 var that = this;
-
+                
                 // This function creates an <iframe> containing a YouTube player after the API code downloads.
                 var player;
                 $wnd.onYouTubeIframeAPIReady = function() {
-                        var player = new $wnd.YT.Player(videoContainerId, {
-                                videoId : videoUrl,
-                                height: '480', //see https://developers.google.com/youtube/iframe_api_reference?hl=en#Playback_quality
-                                width: '853',
-                                events: { //https://developers.google.com/youtube/iframe_api_reference?hl=en#Events
-                                    'onReady': function(event) {
-                                                    that.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::initPlayState(Lcom/google/gwt/core/client/JavaScriptObject;)(player);
-                                               }
-                                },
-                                playerVars : {
-                                        'autoplay' : 0,
-                                        'controls' : 1
-                                }
-                        });
+                        that.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::setYoutubeApiInitialized()();
+                        that.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::loadYoutubePlayer(Ljava/lang/String;Ljava/lang/String;Z)(videoUrl, videoContainerId, showControls);
                 }
 
                 // Use script tag trick to cope with browser's cross domain restrictions
@@ -65,6 +67,31 @@ public class YoutubeVideoControl  {
                 tag.src = "//www.youtube.com/iframe_api"; // This is a protocol-relative URL as described here: http://paulirish.com/2010/the-protocol-relative-url/
                 var firstScriptTag = $doc.getElementsByTagName('script')[0];
                 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    }-*/;
+
+    private native void loadYoutubePlayer(String videoUrl, String videoContainerId, boolean showControls) /*-{
+    
+        var that = this;
+        
+        var playerSetting_Controls = showControls ? 1 : 0;
+
+        var player = new $wnd.YT.Player(videoContainerId, {
+                videoId : videoUrl,
+                height: '480', //see https://developers.google.com/youtube/iframe_api_reference?hl=en#Playback_quality
+                width: '853',
+                events: { //https://developers.google.com/youtube/iframe_api_reference?hl=en#Events
+                    'onReady': function(event) {
+                                    that.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::initPlayState(Lcom/google/gwt/core/client/JavaScriptObject;)(player);
+                               }
+                },
+                playerVars : {
+                        'autoplay' : 0,
+                        'disablekb': 1, 
+                        'autohide': 0,
+                        'controls' : playerSetting_Controls
+                }
+        });
 
     }-*/;
 

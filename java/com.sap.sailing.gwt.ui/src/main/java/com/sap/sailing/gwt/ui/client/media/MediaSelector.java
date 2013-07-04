@@ -311,7 +311,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
                                                                                // videoPlayers
                 activeAudioPlayer.setMuted(true);
             } else { // pre-change audioPlayer is a dedicated audio-only player
-                activeAudioPlayer.destroy();
+                activeAudioPlayer.close();
             }
             activeAudioPlayer = null;
         }
@@ -414,7 +414,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
         mediaSelectionDialog.unselectVideo(videoTrack);
         MediaPlayer removedVideoPlayer = videoPlayers.remove(videoTrack);
         if (removedVideoPlayer != null) {
-            removedVideoPlayer.destroy();
+            removedVideoPlayer.close();
             if (removedVideoPlayer == activeAudioPlayer) { // in case this video has been the sound source, replace the
                                                            // video player with a dedicated audio player
                 if (removedVideoPlayer.getMediaTrack().isYoutube()) {
@@ -485,11 +485,11 @@ public class MediaSelector implements PlayStateListener, TimeListener,
         if (activeAudioPlayer != null) {
             videoPlayers.remove(activeAudioPlayer); // just to ensure that a potentially audio-playing video player is
                                                     // not destroyed a second time in the following video loop.
-            activeAudioPlayer.destroy();
+            activeAudioPlayer.close();
             activeAudioPlayer = null;
         }
         for (MediaPlayer videoControl : videoPlayers.values()) {
-            videoControl.destroy();
+            videoControl.close();
         }
         videoPlayers.clear();
         updateToggleButton();

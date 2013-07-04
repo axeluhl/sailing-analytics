@@ -6,7 +6,6 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.media.client.MediaBase;
 import com.google.gwt.media.client.Video;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -23,34 +22,28 @@ public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements 
     private MediaSynchControl mediaSynchControl;
 
     private final long raceStartTimeMillis;
-    private final MediaTrack backupVideoTrack;
 
-    private final MediaServiceAsync mediaService;
     private final Timer raceTimer;
-    private final ErrorReporter errorReporter;
     private final PopupCloseListener popupCloseListener;
     private final PopoutListener popoutListener;
 
     public VideoEmbeddedPlayer(final MediaTrack videoTrack, long raceStartTimeMillis, boolean showSynchControls, Timer raceTimer, MediaServiceAsync mediaService, ErrorReporter errorReporter, PopupCloseListener popCloseListener, PopoutListener popoutListener) {
         super(videoTrack);
         this.raceTimer = raceTimer;
-        this.mediaService = mediaService;
-        this.errorReporter = errorReporter;
         this.popoutListener = popoutListener;
-        backupVideoTrack = new MediaTrack(videoTrack.dbId, videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.durationInMillis, videoTrack.mimeType);
         
         
         this.raceStartTimeMillis = raceStartTimeMillis;
         this.popupCloseListener = popCloseListener;
 
         FlowPanel rootPanel = new FlowPanel();
-        rootPanel.addStyleName("FUCK");
+        rootPanel.addStyleName("video-root-panel");
         if (mediaControl != null) {
             
             rootPanel.add(mediaControl);
             
             if (showSynchControls) {                
-                mediaSynchControl = new MediaSynchControl(this);
+                mediaSynchControl = new MediaSynchControl(this, mediaService, errorReporter);
                 mediaSynchControl.widget().addStyleName("media-synch-control");
 
                 rootPanel.add(mediaSynchControl.widget());
@@ -90,8 +83,8 @@ public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements 
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
+    public void close() {
+        super.close();
         hide();
     }
 
@@ -117,36 +110,33 @@ public class VideoEmbeddedPlayer extends AbstractEmbeddedMediaPlayer implements 
     }
 
     @Override
-    public void save() {
-        
-        if (backupVideoTrack.startTime != getMediaTrack().startTime) {
-            mediaService.updateStartTime(getMediaTrack(), new AsyncCallback<Void>() {
-
-                @Override
-                public void onSuccess(Void result) {
-                    // nothing to do
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError(caught.toString());
-                }
-            });
+    public void pauseRace() {
+        raceTimer.pause();
+    }
+    
+    @Override
+    public void playMedia() {
+        if (!isEdited()) {
+            super.playMedia();
+        }
+    }
+    
+    @Override
+    public void pauseMedia() {
+        if (!isEdited()) {
+            super.pauseMedia();
         }
     }
 
     @Override
-    public void discard() {
-// For now, only start time can be changed.        
-//        getMediaTrack().title = backupVideoTrack.title;
-//        getMediaTrack().url = backupVideoTrack.url;
-//        getMediaTrack().durationInMillis = backupVideoTrack.durationInMillis;
-        getMediaTrack().startTime = backupVideoTrack.startTime;
+    protected void alignTime() {
+        if (!isEdited()) {
+            super.alignTime();
+        } 
     }
 
-    @Override
-    public void pauseRace() {
-        raceTimer.pause();
+    private boolean isEdited() {
+        return mediaSynchControl != null && mediaSynchControl.isEditing();
     }
 
 }
