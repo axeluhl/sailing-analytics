@@ -77,3 +77,6 @@ At the 505 Worlds in La Rochelle we were faced with an HTML export format. Unfor
 
 ## ESS40 Result Importer
 The Extreme Sailing Series currently manages their results through sailracer.org. The series has their own iPad app to capture the finish line passings. This app produces a CSV file managed on the series' web server before it is converted and uploaded to the sailracer.org server. We get access to the CSV files and a document listing the CSV files available for the series. Those then feed into the score correction provider.
+
+## Race Export
+Using the export feature, data from tracked races such as the fixes for competitors and buoys can be downloaded in common track formats such as GPX or KML. Though this somewhat contradicts the proposition of SAP Sailing Analytics to be the authority in analyzing tracking data, it may be handy in some cases, and therefor is available only in the admin console.
