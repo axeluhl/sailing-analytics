@@ -213,7 +213,9 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         leaderboardRemoveButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                removeLeaderboards(leaderboardSelectionModel.getSelectedSet());
+                if (Window.confirm("Do you really want to remove the leaderboards?")) {
+                    removeLeaderboards(leaderboardSelectionModel.getSelectedSet());
+                }
             }
         });
         filterPanel.add(leaderboardRemoveButton);
