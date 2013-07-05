@@ -120,7 +120,7 @@ body ::-webkit-scrollbar-track {
 
 .breadcrumbPanel-ActiveBreadcrumb {
   font-size: 18px;
-  font-family: 'UbuntuLight',Arial,Verdana,sans-serif;
+  font-family: 'OpenSansLight',Arial,Verdana,sans-serif;
   margin: 5px 10px 0 0;
 }
 
@@ -178,7 +178,7 @@ body ::-webkit-scrollbar-track {
 
 .titleLabel {
     text-align: center;
-    font-family: 'UbuntuMedium', Arial, Verdana, sans-serif;
+    font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
     font-size: 18px;
     color: #fff;
     margin-top: 13px;
@@ -186,7 +186,7 @@ body ::-webkit-scrollbar-track {
 
 .titleLabelRight {
     text-align: right;
-    font-family: 'UbuntuMedium', Arial, Verdana, sans-serif;
+    font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
     font-size: 18px;
     color: #fff;
     margin-top: 13px;
@@ -201,7 +201,7 @@ body ::-webkit-scrollbar-track {
     height: 68px;
     right: 0;
     top: 0;
-    font-family: 'UbuntuMedium', Arial, Verdana, sans-serif;
+    font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
     font-size: 16px;
     color: #fff;
     //background: url(images/titleLabelWrapper.png) right center no-repeat;
@@ -601,7 +601,7 @@ body ::-webkit-scrollbar-track {
 .SettingsDialogComponent .dialogInnerHeadline {
     background: url(images/settingsDialog_bg.png) repeat-x 0 0 #E5E5E5;
     border: 1px solid #CCCCCC;
-    font-family: UbuntuMedium,Arial,Verdana,sans-serif;
+    font-family: OpenSansSemiBold,Arial,Verdana,sans-serif;
     height: 21px;
     padding: 2px 0 0 7px;
     border-radius: 3px;
@@ -628,7 +628,7 @@ body ::-webkit-scrollbar-track {
 }
 
 .dialogInnerHeadlineOther {
-  font-family: UbuntuMedium, Arial, Verdana, sans-serif;
+  font-family: OpenSansSemiBold, Arial, Verdana, sans-serif;
   color: #e84a1a;
   padding-left: 9px;
 }
@@ -649,7 +649,7 @@ body ::-webkit-scrollbar-track {
     padding: 0px 10px 3px;
     float: left;
     background: #de8a2e url(images/alert-overlay.png) repeat-x;
-    font-family: UbuntuRegular, Arial, Verdana, sans-serif;
+    font-family: OpenSansRegular, Arial, Verdana, sans-serif;
 }
 
 
