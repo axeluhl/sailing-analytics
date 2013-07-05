@@ -31,7 +31,7 @@ iframe {display: block; width: 100%; height: 100%; border: none; overflow-y: aut
 
 body {
 	background: #ebebeb;
-	font-family: 'UbuntuRegular', Arial, Verdana, sans-serif;
+	font-family: 'OpenSansRegular', Arial, Verdana, sans-serif;
 	line-height: 1;
 	font-size: 14px;
 	font-weight: 400;
@@ -41,7 +41,7 @@ body {
 }
 
 table td,select,button {
-	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
+	font-family: 'OpenSansLight', Arial, Verdana, sans-serif;
 	line-height: 1;
 	font-size: 14px;
 }
@@ -55,7 +55,7 @@ table td,select,button {
 /** Example rules used by the template application (remove for your app) */
 h1 {
 	font-size: 2em;
-	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
+	font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
 	color: #777777;
 	margin: 40px 0px 70px;
 	text-align: center;
@@ -80,7 +80,7 @@ table {
 .leaderboardLabel {
 	border-bottom: 2px solid #007dc0;
 	padding: 0 0 6px 0;
-	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
+	font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
 }
 
 .refreshAndSettings {
@@ -98,7 +98,7 @@ table {
 	padding: 0 0 0 0;
 }
 
-.race-name {	
+.race-name {
 	line-height: 1.0;
 }
 
@@ -124,13 +124,13 @@ img.openColumn {
 .raceBoardNavigation {
 	float: left;
 	margin: 9px 0 0 12px;
-	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
+	font-family: 'OpenSansLight', Arial, Verdana, sans-serif;
 }
 
 .raceBoardControls {
 	float: right;
 	margin: 9px 0 0 12px;
-	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
+	font-family: 'OpenSansLight', Arial, Verdana, sans-serif;
 }
 
 .raceBoardNavigation-navigationitem {
@@ -158,14 +158,14 @@ img.openColumn {
 }
 
 .abstractChartPanel-importantMessageOfChart {
-    font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
+    font-family: 'OpenSansSemiBold',Arial,Verdana,sans-serif;
     font-size: 20px;
     height: 70px;
     margin: 0 auto;
     padding: 49px 0 0 80px;
     width: 300px;
     color: #7c7c7c;
-	background: url(images/important-message.png) left center no-repeat;	
+	background: url(images/important-message.png) left center no-repeat;
 }
 
 .breadcrumbPanel-NextArrow {
@@ -186,10 +186,10 @@ img.openColumn {
 	background-position: center, center 0;
 	background-repeat: no-repeat, repeat-x;
 	width: 27px;
-	height: 23px;	
+	height: 23px;
     margin: 0 12px 0 1px;
 	-webkit-border-radius: 0px 3px 3px 0px;
-	border-radius: 0px 3px 3px 0px; 
+	border-radius: 0px 3px 3px 0px;
 }
 
 .raceBoardNavigation-settingsButton:hover {
@@ -204,10 +204,10 @@ img.openColumn {
 	background-position: center, center 0;
 	background-repeat: no-repeat, repeat-x;
 	width: 27px;
-	height: 23px;	
+	height: 23px;
     margin: 0 12px 0 1px;
 	-webkit-border-radius: 0px 3px 3px 0px;
-	border-radius: 0px 3px 3px 0px; 
+	border-radius: 0px 3px 3px 0px;
 }
 
 .raceBoardNavigation-filterButton:hover {
@@ -223,11 +223,11 @@ img.openColumn {
 	border-top-left-radius: 3px;
 	color: #FFFFFF;
     cursor: pointer;
-    font-family: UbuntuBold,Verdana,Arial,sans-serif;
+    font-family: OpenSansSemiBold,Verdana,Arial,sans-serif;
     font-size: 14px;
     margin: 0 0 0 0;
     padding: 2px 7px 2px 3px;
-    height: 18px; 
+    height: 18px;
     display: inline-block;
     text-decoration: none;
     -moz-border-radius: 5px 0 0 5px;
@@ -258,11 +258,11 @@ img.openColumn {
     background: url("images/btn-cta-orangeleft.png") repeat-x scroll center 0 transparent;
 	color: #FFFFFF;
     cursor: pointer;
-    font-family: UbuntuBold,Verdana,Arial,sans-serif;
+    font-family: OpenSansSemiBold,Verdana,Arial,sans-serif;
     font-size: 14px;
     margin: 0 0 0 0;
     padding: 2px 7px 2px 3px;
-    height: 23px; 
+    height: 23px;
     display: inline-block;
     text-decoration: none;
     -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -270,7 +270,7 @@ img.openColumn {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-	border-radius: 5px 5px 5px 5px; 
+	border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 0 0 5px;
     -webkit-border-radius: 5px 5px 5px 5px;
 }
@@ -349,7 +349,7 @@ img.openColumn {
 }
 
 .gwt-extras-WindowBox .gwt-extras-dialog-container {
-  position: relative;  
+  position: relative;
 }
 
 .gwt-extras-WindowBox .gwt-extras-dialog-controls {
@@ -362,7 +362,7 @@ img.openColumn {
   cursor: pointer;
   display: block;
   height: 18px;
-  width: 17px;  
+  width: 17px;
 }
 
 .gwt-extras-WindowBox .dialogMiddleCenterInner {
@@ -380,7 +380,7 @@ img.openColumn {
 .gwt-extras-WindowBox .gwt-extras-dialog-controls a.gwt-extras-dialog-minimize {
   /*display: block;
   height: 12px;
-  width: 12px;*/  
+  width: 12px;*/
   background: transparent url(images/min-4panel.png) left top no-repeat;
 }
 
@@ -396,11 +396,11 @@ img.openColumn {
 	margin: 10px 0 10px 0;
 }
 
-.gwt-extras-WindowBox .media-synch-control:after { 
-   content: "."; 
-   visibility: hidden; 
-   display: block; 
-   height: 0; 
+.gwt-extras-WindowBox .media-synch-control:after {
+   content: ".";
+   visibility: hidden;
+   display: block;
+   height: 0;
    clear: both;
 }
 

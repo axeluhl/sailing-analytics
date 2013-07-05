@@ -556,6 +556,12 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         });
     }
 
+    /**
+     * If no leaderboard group is selected or more than one is selected, this method is a no-op because the
+     * leaderboard list displayed is defined to the be list of all leaderboards available, excluding those
+     * leaderboards that are already assigned to <em>the</em> selected leaderboard group. In other words,
+     * the leaderboard list is only well-defined in case a single leaderboard group is selected.
+     */
     private void refreshLeaderboardsList() {
         final LeaderboardGroupDTO selectedGroup = getSelectedGroup();
         final Set<StrippedLeaderboardDTO> selectedLeaderboards = leaderboardsSelectionModel.getSelectedSet();
@@ -699,7 +705,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     }
 
     private void removeLeaderboardGroup(final LeaderboardGroupDTO group) {
-        sailingService.removeLeaderboardGroup(group.getName(), new AsyncCallback<Void>() {
+        sailingService.removeLeaderboardGroups(Collections.singleton(group.getName()), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to remove leaderboard group " + group.getName() + ": "
