@@ -252,6 +252,8 @@ public interface SailingService extends RemoteService {
 
     void removeEvent(String eventIdAsString);
 
+    void removeEvents(Collection<String> eventIdsAsStrings);
+
     void renameEvent(String eventIdAsString, String newName);
 
     EventDTO getEventByName(String eventName);

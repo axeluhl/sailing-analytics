@@ -79,7 +79,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         removeRegattaButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (Window.confirm("Do you really want to remove the regattas?")) {
+                if (Window.confirm("Do you really want to remove the regattas? This will also remove all leaderboards for the regattas!")) {
                     //Creating a new Collection, because getSelectedRegattas returns an 
                     //unmodifiable collection, which can't be sent to the server.
                     Collection<RegattaIdentifier> regattas = new HashSet<RegattaIdentifier>();

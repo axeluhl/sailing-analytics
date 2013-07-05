@@ -334,6 +334,8 @@ public interface SailingServiceAsync {
      */
     void removeEvent(String eventIdAsString, AsyncCallback<Void> callback);
 
+    void removeEvents(Collection<String> eventIdsAsStrings, AsyncCallback<Void> asyncCallback);
+
     void createEvent(String eventName, String description, String publicationUrl, boolean isPublic, List<String> courseAreaNames, AsyncCallback<EventDTO> callback);
 
     void updateEvent(String eventName, String eventIdAsString, VenueDTO venue, String publicationUrl, boolean isPublic,

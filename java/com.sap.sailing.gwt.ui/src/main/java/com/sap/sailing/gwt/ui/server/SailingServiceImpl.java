@@ -2559,6 +2559,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
+    public void removeEvents(Collection<String> eventIdsAsStrings) {
+        for (String eventId : eventIdsAsStrings) {
+            removeEvent(eventId);
+        }
+    }
+
+    @Override
     public void removeEvent(String eventIdAsString) {
         UUID eventUuid = convertIdentifierStringToUuid(eventIdAsString);
         getService().apply(new RemoveEvent(eventUuid));
