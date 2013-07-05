@@ -194,6 +194,16 @@
 		<servlet-name>MasterDataByLeaderboardGroupJsonGetServlet</servlet-name>
 		<url-pattern>/masterdata/leaderboardgroups</url-pattern>
 	</servlet-mapping>
+			
+	<servlet>
+		<servlet-name>TrackFilesExportPostServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.TrackFilesExportPostServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>TrackFilesExportPostServlet</servlet-name>
+		<url-pattern>/trackfiles</url-pattern>
+	</servlet-mapping>
+
  
 	<servlet id="jsp">
      <servlet-name>jspServet</servlet-name>

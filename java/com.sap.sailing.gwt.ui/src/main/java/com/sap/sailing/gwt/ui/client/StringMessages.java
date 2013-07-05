@@ -700,4 +700,17 @@ public interface StringMessages extends Messages {
     String raceLogReloaded();
     String reloadAllRaceLogs();
     String sideline();
+    String export();
+    String dataBeforeAfter();
+    String rawFixes();
+    String importRemoteHost();
+    String importFetchRemoteLgs();
+    String importUrlInvalid(String url);
+    String importGetLeaderboardsFailed(int statusCode, String url);
+    String importNoDataReturned();
+    String importServerError();
+    String importLeaderboardGroups();
+    String importOverrideSwitchLabel();
+    String importSelectedLeaderboardGroups();
+    String importSelectAtLeastOne();
 }
