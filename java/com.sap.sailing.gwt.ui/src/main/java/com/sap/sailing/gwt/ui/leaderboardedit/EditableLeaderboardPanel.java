@@ -609,6 +609,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     @Override
                     public void onSuccess(Void noarg) {
                         updateScoreCorrectionInformation(lastScoreCorrectionComment, lastScoreCorrectionTime);
+                        Window.alert(stringMessages.successfullyUpdatedScores());
                     }
 
                     @Override

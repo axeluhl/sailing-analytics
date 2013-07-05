@@ -11,6 +11,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
@@ -36,7 +37,7 @@ public class UpdateMarkPassingTest {
         when(race.getBoatClass()).thenReturn(new BoatClassImpl("49er", /* typicallyStartsUpwind */ true));
         when(race.getCompetitors()).thenReturn(Collections.singleton(competitor));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(
-                /* trackedRegatta */ null, race, EmptyWindStore.INSTANCE,
+                /* trackedRegatta */ null, race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
                 /* delayToLiveInMillis */ 1000, /* millisecondsOverWhichToAverageWind */ 30000,
                 /* millisecondsOverWhichToAverageSpeed */ 30000);
         TimePoint now = MillisecondsTimePoint.now();

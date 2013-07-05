@@ -654,6 +654,8 @@ public interface StringMessages extends Messages {
     String addSeries();
     String regattaDefinesResultDiscardingRules();
     String startsWithZeroScore();
+    String masterDataImportPanel();
+    String importSuccess(int leaderboardGroups, int leaderboards, int events, int regattas);
     String regattaOverviewConfiguration();
     String firstRaceIsNonDiscardableCarryForward();
     String addReplicationMaster();
@@ -697,4 +699,18 @@ public interface StringMessages extends Messages {
     String refreshRaceLog();
     String raceLogReloaded();
     String reloadAllRaceLogs();
+    String sideline();
+    String export();
+    String dataBeforeAfter();
+    String rawFixes();
+    String importRemoteHost();
+    String importFetchRemoteLgs();
+    String importUrlInvalid(String url);
+    String importGetLeaderboardsFailed(int statusCode, String url);
+    String importNoDataReturned();
+    String importServerError();
+    String importLeaderboardGroups();
+    String importOverrideSwitchLabel();
+    String importSelectedLeaderboardGroups();
+    String importSelectAtLeastOne();
 }

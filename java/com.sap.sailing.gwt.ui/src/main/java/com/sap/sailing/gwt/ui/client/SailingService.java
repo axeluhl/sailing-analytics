@@ -10,6 +10,7 @@ import java.util.Set;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
@@ -214,7 +215,7 @@ public interface SailingService extends RemoteService {
     
     void renameLeaderboardGroup(String oldName, String newName);
     
-    void removeLeaderboardGroup(String groupName);
+    void removeLeaderboardGroups(Set<String> groupNames);
     
     LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
@@ -319,4 +320,6 @@ public interface SailingService extends RemoteService {
     void stopSingleReplicaInstance(String identifier);
 
     void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
+
+    MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override);
 }

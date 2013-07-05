@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -45,6 +48,7 @@ import javax.servlet.http.HttpSession;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.google.gwt.regexp.shared.RegExp;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -60,6 +64,7 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.FleetImpl;
@@ -75,6 +80,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindError;
@@ -219,6 +225,7 @@ import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sailing.gwt.ui.shared.SidelineDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
@@ -236,6 +243,7 @@ import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
@@ -1172,7 +1180,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate) throws NoWindException {
         return new CompactRaceMapDataDTO(getBoatPositions(raceIdentifier, fromPerCompetitorIdAsString,
-                toPerCompetitorIdAsString, extrapolate), getCoursePositions(raceIdentifier, date), getQuickRanks(
+                toPerCompetitorIdAsString, extrapolate), getCoursePositions(raceIdentifier, date), getCourseSidelines(raceIdentifier, date), getQuickRanks(
                 raceIdentifier, date));
     }    
 
@@ -1368,6 +1376,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return raceTimesInfos;
     }
 
+    private List<SidelineDTO> getCourseSidelines(RegattaAndRaceIdentifier raceIdentifier, Date date) {
+        List<SidelineDTO> result = new ArrayList<SidelineDTO>();
+        if (date != null) {
+            TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
+            TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+            if (trackedRace != null) {
+                for (Sideline sideline : trackedRace.getCourseSidelines()) {
+                    List<MarkDTO> markDTOs = new ArrayList<MarkDTO>();
+                    for (Mark mark : sideline.getMarks()) {
+                        GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
+                        Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
+                        if (positionAtDate != null) {
+                            markDTOs.add(convertToMarkDTO(mark, positionAtDate));
+                        }
+                    }
+                    result.add(new SidelineDTO(sideline.getName(), markDTOs));
+                }
+            }
+        }
+        return result;
+    }
+        
     @Override
     public CoursePositionsDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date) {
         CoursePositionsDTO result = new CoursePositionsDTO();
@@ -2426,7 +2456,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void removeLeaderboardGroup(String groupName) {
+    public void removeLeaderboardGroups(Set<String> groupNames) {
+        for (String groupName : groupNames) {
+            removeLeaderboardGroup(groupName);
+        }
+    }
+
+    private void removeLeaderboardGroup(String groupName) {
         getService().apply(new RemoveLeaderboardGroup(groupName));
     }
 
@@ -3145,4 +3181,105 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet) {
         getService().reloadRaceLog(selectedLeaderboardName, raceColumnDTO, fleet);
     }
+    
+    @Override
+    public MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override) {
+        String getMasterDataUrl = createGetMasterDataForLgsUrl(host);
+        if (!isValidUrl(getMasterDataUrl, false)) {
+            throw new RuntimeException("Not a valid URL for fetching leaderboardgroups masterdata: " + getMasterDataUrl);
+        }
+        String query = createLeaderboardQuery(groupNames);
+        HttpURLConnection connection = null;
+        BufferedReader rd  = null;
+        StringBuilder sb = null;
+        String line = null;
+      
+        URL serverAddress = null;
+      
+        try {
+            serverAddress = parseUrl(getMasterDataUrl + query);
+            //set up out communications stuff
+            connection = null;
+          
+            //Set up the initial connection
+            connection = (HttpURLConnection)serverAddress.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setDoOutput(true);
+            connection.setReadTimeout(10000);
+                      
+            connection.connect();
+          
+            //read the result from the server
+            rd  = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            sb = new StringBuilder();
+
+            while ((line = rd.readLine()) != null) {
+                sb.append(line);
+            }
+
+            return importFromHttpResponse(sb.toString(), override);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            // close the connection, set all objects to null
+            connection.disconnect();
+            rd = null;
+            sb = null;
+            connection = null;
+        }
+    }
+    
+    private URL parseUrl(String s) throws Exception {
+        URL u = new URL(s);
+        return new URI(
+               u.getProtocol(), 
+               u.getAuthority(), 
+               u.getPath(),
+               u.getQuery(), 
+               u.getRef()).
+               toURL();
+   }
+    
+    protected MasterDataImportObjectCreationCount importFromHttpResponse(String response, boolean override) {
+        MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());       
+        return importer.importMasterData(response, override);
+    }
+
+    private String createLeaderboardQuery(String[] groupNames) {
+        StringBuffer queryStringBuffer = new StringBuffer("?");
+        for (int i = 0; i < groupNames.length; i++) {
+            queryStringBuffer.append("names[]=" + groupNames[i] + "&");
+        }
+        if (queryStringBuffer.length() == 1) {
+            return "";
+        } else {
+            // Delete last "&"
+            queryStringBuffer.deleteCharAt(queryStringBuffer.length() - 1);
+        }
+        return queryStringBuffer.toString();
+    }
+    
+    private boolean isValidUrl(String url, boolean topLevelDomainRequired) {
+            RegExp urlValidator = RegExp
+                    .compile("^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
+        return urlValidator.exec(url) != null;
+    }
+    
+    private String createGetMasterDataForLgsUrl(String host) {
+        StringBuffer urlBuffer = new StringBuffer(host);
+        appendHttpAndSlashIfNeeded(host, urlBuffer);
+        urlBuffer.append("sailingserver/masterdata/leaderboardgroups");
+        return urlBuffer.toString();
+    }
+    
+    private void appendHttpAndSlashIfNeeded(String host, StringBuffer urlBuffer) {
+        if (!host.endsWith("/")) {
+            urlBuffer.append("/");
+        }
+        if (!host.startsWith("http://")) {
+            urlBuffer.insert(0, "http://");
+        }
+    }
+
 }

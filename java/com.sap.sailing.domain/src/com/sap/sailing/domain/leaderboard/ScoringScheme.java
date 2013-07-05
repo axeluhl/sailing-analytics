@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -48,7 +49,7 @@ public interface ScoringScheme extends Serializable {
      * the competitor participated, <code>null</code> is returned, meaning the competitor has no score assigned for that
      * race. 
      */
-    Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Integer numberOfCompetitorsInRace);
+    Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher);
     
     /**
      * If a competitor is disqualified, a penalty score is attributed by this scoring scheme. Some schemes require to

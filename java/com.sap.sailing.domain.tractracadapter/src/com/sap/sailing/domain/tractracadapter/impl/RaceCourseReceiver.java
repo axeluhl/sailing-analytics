@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,6 +18,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -96,9 +99,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     @Override
     protected void handleEvent(Triple<Route, RouteData, Race> event) {
         System.out.print("R");
-        
         Map<Integer, NauticalSide> courseWaypointPassingSides = parseAdditionalCourseDataFromMetadata(event.getA(), event.getB().getPoints());
-     
         List<Util.Pair<TracTracControlPoint, NauticalSide>> ttControlPoints = new ArrayList<>();
         int i = 1;
         for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
@@ -107,7 +108,15 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             i++;
         }
         Course course = getDomainFactory().createCourse(event.getA().getName(), ttControlPoints);
-        
+        List<Sideline> sidelines = new ArrayList<Sideline>();
+        Map<String, Iterable<TracTracControlPoint>> sidelinesMetadata = parseSidelinesFromRaceMetadata(event.getC(),
+                event.getC().getEvent().getControlPointList());
+        for (Entry<String, Iterable<TracTracControlPoint>> sidelineEntry : sidelinesMetadata.entrySet()) {
+            if (Util.size(sidelineEntry.getValue()) > 0) {
+                sidelines.add(getDomainFactory().createSideline(sidelineEntry.getKey(), sidelineEntry.getValue()));
+            }
+        }
+
         RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(event.getC());
         if (existingRaceDefinitionForRace != null) {
             logger.log(Level.INFO, "Received course update for existing race "+event.getC().getName()+": "+
@@ -117,7 +126,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             try {
                 getDomainFactory().updateCourseWaypoints(existingRaceDefinitionForRace.getCourse(), ttControlPoints);
                 if (getTrackedRegatta().getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
-                    createTrackedRace(existingRaceDefinitionForRace);
+                    createTrackedRace(existingRaceDefinitionForRace, sidelines);
                 }
             } catch (PatchFailedException e) {
                 logger.log(Level.SEVERE, "Internal error updating race course "+course+": "+e.getMessage());
@@ -127,10 +136,9 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");
             // create race definition and add to event
             DynamicTrackedRace trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
-                    getTrackedRegatta(), event.getC(), course, windStore, delayToLiveInMillis,
+                    getTrackedRegatta(), event.getC(), course, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, courseDesignUpdateURI, 
                     getTracTracEvent().getId(), tracTracUsername, tracTracPassword);
-            
             if (getSimulator() != null) {
                 getSimulator().setTrackedRace(trackedRace);
             }
@@ -140,10 +148,12 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     /**
      * Parses the route metadata for additional course information
      * The 'passing side' for each course waypoint is encoded like this...
-     * Seq.1=GATE
-     * Seq.2=PORT
-     * Seq.3=GATE
-     * Seq.4=STARBOARD
+     * <pre>
+     *  Seq.1=GATE
+     *  Seq.2=PORT
+     *  Seq.3=GATE
+     *  Seq.4=STARBOARD
+     * </pre>
      */
     private Map<Integer, NauticalSide> parseAdditionalCourseDataFromMetadata(Route route, 
             List<com.tractrac.clientmodule.ControlPoint> controlPoints) {
@@ -151,7 +161,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         int controlPointsCount = controlPoints.size();
         String routeMetadataString = route.getMetadata() != null ? route.getMetadata().getText() : null;
         if(routeMetadataString != null) {
-            Map<String, String> routeMetadata = parseRouteMetadata(routeMetadataString);
+            Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
             for(int i = 1; i <= controlPointsCount; i++) {
                 String seqValue = routeMetadata.get("Seq." + i);
                 com.tractrac.clientmodule.ControlPoint controlPoint = controlPoints.get(i-1);
@@ -167,12 +177,43 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         return result;
     }
     
+    /**
+     * Parses the race metadata for sideline information
+     * The sidelines of a race (course) are encoded like this...
+     * <pre>
+     *  SIDELINE1=(TR-A) 3
+     *  SIDELINE2=(TR-A) Start
+     * </pre>
+     * Each sideline is defined right now through a simple gate, but this might change in the future
+     */
+    private Map<String, Iterable<TracTracControlPoint>> parseSidelinesFromRaceMetadata(Race race,
+            Collection<com.tractrac.clientmodule.ControlPoint> controlPoints) {
+        Map<String, Iterable<TracTracControlPoint>> result = new HashMap<String, Iterable<TracTracControlPoint>>();
+        String raceMetadataString = race.getMetadata() != null ? race.getMetadata().getText() : null;
+        if (raceMetadataString != null) {
+            Map<String, String> sidelineMetadata = parseMetadata(raceMetadataString);
+            for (Entry<String, String> entry : sidelineMetadata.entrySet()) {
+                if (entry.getKey().startsWith("SIDELINE")) {
+                    List<TracTracControlPoint> sidelineCPs = new ArrayList<>();
+                    result.put(entry.getKey(), sidelineCPs);
+                    for (com.tractrac.clientmodule.ControlPoint cp : controlPoints) {
+                        String cpName = cp.getName().trim();
+                        if (cpName.equals(entry.getValue())) {
+                            sidelineCPs.add(new ControlPointAdapter(cp));
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Map<String, String> parseRouteMetadata(String routeMetadata) {
+    private Map<String, String> parseMetadata(String metadata) {
         Map<String, String> metadataMap = new HashMap<String, String>();
         try {
             Properties p = new Properties();
-            p.load(new StringReader(routeMetadata));
+            p.load(new StringReader(metadata));
             metadataMap = new HashMap<String, String>((Map) p);
         } catch (IOException e) {
             // do nothing
@@ -180,8 +221,8 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         return metadataMap;
     }
     
-    private void createTrackedRace(RaceDefinition race) {
-        DynamicTrackedRace trackedRace = getTrackedRegatta().createTrackedRace(race,
+    private void createTrackedRace(RaceDefinition race, Iterable<Sideline> sidelines) {
+        DynamicTrackedRace trackedRace = getTrackedRegatta().createTrackedRace(race, sidelines,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);
