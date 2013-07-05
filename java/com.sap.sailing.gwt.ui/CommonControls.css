@@ -71,7 +71,7 @@ body ::-webkit-scrollbar-track {
 }
 
 .collapsablePanel-header-text{
-  font-family: 'OpenSansBold', Arial, Verdana, sans-serif;
+  font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
   text-transform: uppercase;
   margin: 15px 0 0 13px;
   float: left;
@@ -397,7 +397,7 @@ body ::-webkit-scrollbar-track {
 }
 
 .globalNavigationLink, .globalNavigationLink:visited {
-  font-family: OpenSansBold, Verdana, Arial, sans-serif;
+  font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
     border: none;
     display: inline-block;
     padding: 2px 10px 4px;
@@ -485,7 +485,7 @@ body ::-webkit-scrollbar-track {
   -moz-border-radius-topright: 5px;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
-  font-family: OpenSansBold, Verdana, Arial, sans-serif;
+  font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
 }
 
 .gwt-DialogBox .dialogContent {
@@ -501,7 +501,7 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-Button, .gwt-Button:visited {
-  font-family: OpenSansBold, Verdana, Arial, sans-serif;
+  font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
   border: none;
 
     background: url(images/btn-cta-orangeleft.png) center top repeat-x;
