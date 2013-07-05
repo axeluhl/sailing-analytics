@@ -152,6 +152,8 @@ public interface SailingService extends RemoteService {
             ScoringSchemeType scoringSchemeType, String defaultCourseAreaId);
     
     void removeRegatta(RegattaIdentifier regattaIdentifier);
+
+    void removeRegattas(Collection<RegattaIdentifier> regattas);
     
     void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId);
     

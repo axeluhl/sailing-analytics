@@ -194,11 +194,11 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         VerticalPanel leaderboardsPanel = new VerticalPanel();
         leaderboardsCaptionPanel.add(leaderboardsPanel);
 
-        HorizontalPanel filterPanel = new HorizontalPanel();
+        HorizontalPanel leaderboardConfigControlsPanel = new HorizontalPanel();
         Label lblFilterEvents = new Label(stringMessages.filterLeaderboardsByName() + ": ");
-        filterPanel.setSpacing(5);
-        filterPanel.add(lblFilterEvents);
-        filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
+        leaderboardConfigControlsPanel.setSpacing(5);
+        leaderboardConfigControlsPanel.add(lblFilterEvents);
+        leaderboardConfigControlsPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
         filterLeaderboardTextbox = new TextBox();
         filterLeaderboardTextbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
@@ -206,7 +206,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 fillRaceListFromAvailableLeaderboardsApplyingFilter();
             }
         });
-        filterPanel.add(filterLeaderboardTextbox);
+        leaderboardConfigControlsPanel.add(filterLeaderboardTextbox);
         
         leaderboardRemoveButton = new Button(stringMessages.remove());
         leaderboardRemoveButton.setEnabled(false);
@@ -218,8 +218,8 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 }
             }
         });
-        filterPanel.add(leaderboardRemoveButton);
-        leaderboardsPanel.add(filterPanel);
+        leaderboardConfigControlsPanel.add(leaderboardRemoveButton);
+        leaderboardsPanel.add(leaderboardConfigControlsPanel);
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new CellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);

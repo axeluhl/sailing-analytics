@@ -343,6 +343,8 @@ public interface SailingServiceAsync {
 
     void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
 
+    void removeRegattas(Collection<RegattaIdentifier> regattas, AsyncCallback<Void> asyncCallback);
+
     void addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<RaceColumnInSeriesDTO> callback);
 

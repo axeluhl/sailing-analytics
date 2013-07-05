@@ -2685,6 +2685,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return regattaName;
     }
+
+    @Override
+    public void removeRegattas(Collection<RegattaIdentifier> selectedRegattas) {
+        for (RegattaIdentifier regatta : selectedRegattas) {
+            removeRegatta(regatta);
+        }
+    }
     
     @Override
     public void removeRegatta(RegattaIdentifier regattaIdentifier) {
