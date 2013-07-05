@@ -12,5 +12,5 @@ Export-Package: com.sap.sailing.server.trackfiles,
 Require-Bundle: 
  com.sap.sailing.domain,
  com.sap.sailing.domain.common,
- slash.navigation;bundle-version="2.8.0"
+ routeconverter
 

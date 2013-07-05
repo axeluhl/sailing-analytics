@@ -215,7 +215,7 @@ public interface SailingService extends RemoteService {
     
     void renameLeaderboardGroup(String oldName, String newName);
     
-    void removeLeaderboardGroup(String groupName);
+    void removeLeaderboardGroups(Set<String> groupNames);
     
     LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
