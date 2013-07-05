@@ -22,7 +22,7 @@ The current plan is to use up to three channels for communicating:
 * POST request body: Leaderboard-JSON (see `LeaderboardJsonSerializer`)
 
 **Returns**
-* `200` Leaderboard created
+* `200` Leaderboard created, body: Leaderboard as JSON
 
 **Throws**
 * `400` Invalid JSON in request
@@ -36,9 +36,30 @@ The current plan is to use up to three channels for communicating:
 * POST request body: RaceColumn-JSON (see `RaceColumnDeserializer`)
 
 **Returns**
-* `200` RaceColumn created
+* `200` RaceColumn created, body: RaceColumn as JSON
 
 **Throws**
 * `400` Missing paramter / Invalid JSON in request
 * `404` Leaderboard not found
 * `409` RaceColumn with name %s already exists / Error adding RaceColumn
+
+### `/sailingserver/tracking/createPersistentCompetitor`
+`CreatePersistentCompetitorPostServlet`
+
+**Expects**
+* POST request body: Competitor-JSON with a nested Boat-JSON and Team-JSON (see `CompetitorDeserializer`)
+
+**Returns**
+* `200` Competitor created, body: Competitor as JSON
+
+**Throws**
+* `400` Invalid JSON in request
+
+### `/sailingserver/tracking/getPersistentCompetitors`
+`PersistentCompetitorsGetServlet`
+
+**Expects**
+* GET request
+
+**Returns**
+* `200` body: JSON array of Competitor objects
