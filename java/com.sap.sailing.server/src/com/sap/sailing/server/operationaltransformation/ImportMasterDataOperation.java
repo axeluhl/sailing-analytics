@@ -63,7 +63,8 @@ public class ImportMasterDataOperation extends
 
     private final boolean override;
 
-    public ImportMasterDataOperation(LeaderboardGroupMasterData masterData, boolean override) {
+    public ImportMasterDataOperation(LeaderboardGroupMasterData masterData, boolean override, MasterDataImportObjectCreationCountImpl existingCreationCount) {
+        this.creationCount.add(existingCreationCount);
         this.masterData = masterData;
         this.override = override;
     }
@@ -81,8 +82,12 @@ public class ImportMasterDataOperation extends
         createRegattas(masterData, toState);
         Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         for (LeaderboardMasterData board : masterData.getLeaderboards()) {
+            leaderboardNames.add(board.getName());
             if (existingLeaderboards.containsKey(board.getName())) {
-                if (override) {
+                if (creationCount.alreadyAddedLeaderboardWithName(board.getName())) {
+                    //Has already been added by this operation
+                    continue;
+                } else if (override) {
                     toState.removeLeaderboard(board.getName());
                     logger.info(String.format("Leaderboard with name %1$s already existed and has been overridden.",
                             board.getName()));
@@ -98,8 +103,7 @@ public class ImportMasterDataOperation extends
             if (leaderboard != null) {
                 leaderboard.setDisplayName(board.getDisplayName());
                 toState.addLeaderboard(leaderboard);
-                leaderboardNames.add(board.getName());
-                creationCount.addOneLeaderboard();
+                creationCount.addOneLeaderboard(leaderboard.getName());
                 Leaderboard newLeaderboard = toState.getLeaderboardByName(board.getName());
                 addRaceColumnsIfNecessary(board, newLeaderboard, toState);
                 // Set dummy tracked race, so that the leaderboard caches the competitors and
@@ -138,7 +142,7 @@ public class ImportMasterDataOperation extends
             toState.addLeaderboardGroup(masterData.getName(), masterData.getDescription(),
                     masterData.isDisplayGroupsRevese(), leaderboardNames, overallLeaderboardDiscardThresholds,
                     overallLeaderboardScoringSchemeType);
-            creationCount.addOneLeaderboardGroup();
+            creationCount.addOneLeaderboardGroup(masterData.getName());
         } else {
             logger.info(String.format("Leaderboard Group with name %1$s already exists and hasn't been overridden.",
                     masterData.getName()));
@@ -267,13 +271,16 @@ public class ImportMasterDataOperation extends
         for (RegattaMasterData singleRegattaData : regattaData) {
             Regatta existingRegatta = toState.getRegatta(new RegattaName(singleRegattaData.getRegattaName()));
             if (existingRegatta != null) {
-                if (override) {
+                if (creationCount.alreadyAddedRegattaWithId(existingRegatta.getId().toString())) {
+                    //Already added earlier in this import process
+                    continue;
+                } else if (override) {
                     logger.info(String.format("Regatta with name %1$s already existed and has been overridden.",
                             singleRegattaData.getRegattaName()));
                     try {
                         toState.removeRegatta(existingRegatta);
                     } catch (IOException | InterruptedException e) {
-                        logger.info(String.format("Regatta with name %1$s could not be deleted due to an error.",
+                        logger.warning(String.format("Regatta with name %1$s could not be deleted due to an error.",
                                 singleRegattaData.getRegattaName()));
                         e.printStackTrace();
                         continue;
@@ -297,7 +304,7 @@ public class ImportMasterDataOperation extends
                     domainFactory.createScoringScheme(ScoringSchemeType.valueOf(scoringSchemeType)),
                     courseAreaUUID).getA();
             toState.setPersistentRegattaForRaceIDs(createdRegatta, singleRegattaData.getRaceIds(), override);
-            creationCount.addOneRegatta();
+            creationCount.addOneRegatta(createdRegatta.getId().toString());
         }
 
     }
@@ -338,7 +345,7 @@ public class ImportMasterDataOperation extends
         for (EventMasterData event : events) {
             String id = event.getId();
             Event existingEvent = toState.getEvent(UUID.fromString(id));
-            if (existingEvent != null && override) {
+            if (existingEvent != null && override && !creationCount.alreadyAddedEventWithId(id)) {
                 logger.info(String.format("Event with name %1$s already existed and will be overridden.",
                         event.getName()));
                 toState.removeEvent(existingEvent.getId());
@@ -351,7 +358,7 @@ public class ImportMasterDataOperation extends
                 boolean isPublic = event.isPublic();
                 Event newEvent = new EventImpl(name, venueName, pubString, isPublic, UUID.fromString(id));
                 toState.createEventWithoutReplication(newEvent);
-                creationCount.addOneEvent();
+                creationCount.addOneEvent(newEvent.getId().toString());
             } else {
                 logger.info(String.format("Event with name %1$s already exists and hasn't been overridden.",
                         event.getName()));

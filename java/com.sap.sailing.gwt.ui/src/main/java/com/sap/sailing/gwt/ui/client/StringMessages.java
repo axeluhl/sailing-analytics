@@ -703,4 +703,14 @@ public interface StringMessages extends Messages {
     String export();
     String dataBeforeAfter();
     String rawFixes();
+    String importRemoteHost();
+    String importFetchRemoteLgs();
+    String importUrlInvalid(String url);
+    String importGetLeaderboardsFailed(int statusCode, String url);
+    String importNoDataReturned();
+    String importServerError();
+    String importLeaderboardGroups();
+    String importOverrideSwitchLabel();
+    String importSelectedLeaderboardGroups();
+    String importSelectAtLeastOne();
 }

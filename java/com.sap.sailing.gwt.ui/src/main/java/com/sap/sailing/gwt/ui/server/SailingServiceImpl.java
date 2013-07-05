@@ -2456,7 +2456,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void removeLeaderboardGroup(String groupName) {
+    public void removeLeaderboardGroups(Set<String> groupNames) {
+        for (String groupName : groupNames) {
+            removeLeaderboardGroup(groupName);
+        }
+    }
+
+    private void removeLeaderboardGroup(String groupName) {
         getService().apply(new RemoveLeaderboardGroup(groupName));
     }
 

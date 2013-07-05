@@ -44,9 +44,6 @@ public class MasterDataImportPanel extends VerticalPanel {
     private RegExp urlValidator;
     private RegExp urlPlusTldValidator;
 
-    /*
-     * TODO: use string messages
-     */
     private final StringMessages stringMessages;
     private String currentHost;
     private SailingServiceAsync sailingService;
@@ -65,12 +62,12 @@ public class MasterDataImportPanel extends VerticalPanel {
         this.leaderboardGroupRefresher = leaderboardGroupRefresher;
 
         HorizontalPanel serverAddressPanel = new HorizontalPanel();
-        serverAddressPanel.add(new Label("Remote host:"));
+        serverAddressPanel.add(new Label(stringMessages.importRemoteHost()));
         hostBox = new TextBox();
-        hostBox.setText("http://prod2.sapsailing.com/");
+        hostBox.setText("http://live2.sapsailing.com/");
         hostBox.setWidth("300px");
         serverAddressPanel.add(hostBox);
-        fetchIdsButton = new Button("Fetch Leaderboard Group List");
+        fetchIdsButton = new Button(stringMessages.importFetchRemoteLgs());
         serverAddressPanel.add(fetchIdsButton);
         this.add(serverAddressPanel);
 
@@ -115,35 +112,49 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     protected void importLeaderboardGroups() {
         String[] groupNames = createLeaderBoardGroupNamesFromListBox();
-        boolean override = overrideSwitch.getValue();
-        sailingService.importMasterData(currentHost, groupNames, override,
-                new AsyncCallback<MasterDataImportObjectCreationCount>() {
+        if (groupNames.length >= 1) {
+            changeAllButtonState(false);
+            boolean override = overrideSwitch.getValue();
+            sailingService.importMasterData(currentHost, groupNames, override,
+                    new AsyncCallback<MasterDataImportObjectCreationCount>() {
 
-                    @Override
-                    public void onSuccess(MasterDataImportObjectCreationCount result) {
-                        int leaderboardsCreated = result.getLeaderboardCount();
-                        int leaderboardGroupsCreated = result.getLeaderboardGroupCount();
-                        int eventsCreated = result.getEventCount();
-                        int regattasCreated = result.getRegattaCount();
-                        if (regattasCreated > 0) {
-                            regattaRefresher.fillRegattas();
+                        @Override
+                        public void onSuccess(MasterDataImportObjectCreationCount result) {
+                            int leaderboardsCreated = result.getLeaderboardCount();
+                            int leaderboardGroupsCreated = result.getLeaderboardGroupCount();
+                            int eventsCreated = result.getEventCount();
+                            int regattasCreated = result.getRegattaCount();
+                            if (regattasCreated > 0) {
+                                regattaRefresher.fillRegattas();
+                            }
+                            if (eventsCreated > 0) {
+                                eventRefresher.fillEvents();
+                            }
+                            if (leaderboardGroupsCreated > 0) {
+                                leaderboardGroupRefresher.fillLeaderboardGroups();
+                            }
+                            showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated,
+                                    regattasCreated);
+                            changeAllButtonState(true);
                         }
-                        if (eventsCreated > 0) {
-                            eventRefresher.fillEvents();
-                        }
-                        if (leaderboardGroupsCreated > 0) {
-                            leaderboardGroupRefresher.fillLeaderboardGroups();
-                        }
-                        showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated);
-                    }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        showErrorAlert(caught.getLocalizedMessage());
-                    }
-                });
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            showErrorAlert(caught.getLocalizedMessage());
+                            changeAllButtonState(true);
+                        }
+                    });
+        } else {
+            showErrorAlert(stringMessages.importSelectAtLeastOne());
+        }
     }
 
+
+    private void changeAllButtonState(boolean enabled) {
+        importLeaderboardGroupsButton.setEnabled(enabled);
+        overrideSwitch.setEnabled(enabled);
+        fetchIdsButton.setEnabled(enabled);
+    }
 
     protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated, int eventsCreated,
             int regattasCreated) {
@@ -173,17 +184,17 @@ public class MasterDataImportPanel extends VerticalPanel {
         currentHost = host;
         final String getLgsUrl = createGetLgsUrl(host);
         if (!isValidUrl(getLgsUrl, false)) {
-            showErrorAlert("Not a valid URL for fetching leaderboardgroups: " + getLgsUrl);
+            showErrorAlert(stringMessages.importUrlInvalid(getLgsUrl));
             return;
         }
+        changeAllButtonState(false);
         RequestBuilder getLgsRequestBuilder = new RequestBuilder(RequestBuilder.GET, getLgsUrl);
         getLgsRequestBuilder.setCallback(new RequestCallback() {
 
             @Override
             public void onResponseReceived(Request request, Response response) {
                 if (response.getStatusCode() != 200) {
-                    showErrorAlert("GET leaderboardgroups request failed with error code: " + response.getStatusCode()
-                            + " For url: " + getLgsUrl);
+                    showErrorAlert(stringMessages.importGetLeaderboardsFailed(response.getStatusCode(), getLgsUrl));
                 }
                 int itemCount = leaderboardgroupListBox.getItemCount();
                 for (int i = itemCount - 1; i >= 0; i--) {
@@ -191,7 +202,8 @@ public class MasterDataImportPanel extends VerticalPanel {
                 }
                 String body = response.getText();
                 if (body == null || body.isEmpty()) {
-                    showErrorAlert("No data was returned by remote server.");
+                    showErrorAlert(stringMessages.importNoDataReturned());
+                    changeAllButtonState(true);
                     return;
                 }
                 JSONArray leaderboardGroups = JSONParser.parseStrict(body).isArray();
@@ -200,18 +212,25 @@ public class MasterDataImportPanel extends VerticalPanel {
                     JSONString leaderboardGroupName = leaderboardGroups.get(i).isString();
                     leaderboardgroupListBox.addItem(leaderboardGroupName.stringValue());
                 }
+                if (leaderboardGroups.size() > 1) {
+                    importLeaderboardGroupsButton.setEnabled(true);
+                } else {
+                    importLeaderboardGroupsButton.setEnabled(false);
+                }
+                changeAllButtonState(true);
             }
 
             @Override
             public void onError(Request request, Throwable exception) {
-                showErrorAlert("GET leaderboardgroups request failed with Server error: "
-                        + exception.getLocalizedMessage());
+                showErrorAlert(stringMessages.importServerError());
+                changeAllButtonState(true);
             }
         });
         try {
             getLgsRequestBuilder.send();
         } catch (RequestException e) {
-            showErrorAlert("GET leaderboardgroups request failed: " + e.getLocalizedMessage());
+            showErrorAlert(stringMessages.importServerError());
+            changeAllButtonState(true);
         }
     }
 
@@ -246,16 +265,17 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     private void addContentToLeftPanel(VerticalPanel contentPanel) {
-        contentPanel.add(new Label("Leaderboard Groups:"));
+        contentPanel.add(new Label(stringMessages.importLeaderboardGroups()));
 
         leaderboardgroupListBox = new ListBox(true);
         contentPanel.add(leaderboardgroupListBox);
         
-        overrideSwitch = new CheckBox("Override existing data if names and ids match");
+        overrideSwitch = new CheckBox(stringMessages.importOverrideSwitchLabel());
         overrideSwitch.setValue(false);
         contentPanel.add(overrideSwitch);
 
-        importLeaderboardGroupsButton = new Button("Import selected Leaderboard Groups");
+        importLeaderboardGroupsButton = new Button(stringMessages.importSelectedLeaderboardGroups());
+        importLeaderboardGroupsButton.setEnabled(false);
         contentPanel.add(importLeaderboardGroupsButton);
     }
 
