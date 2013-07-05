@@ -2,6 +2,7 @@ package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bson.types.ObjectId;
+import org.json.simple.JSONObject;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -20,6 +22,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -110,9 +113,12 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
+    private final CompetitorJsonDeserializer competitorDeserializer = CompetitorJsonDeserializer.create();
 
     private final DB database;
     
@@ -1255,4 +1261,23 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Mark mark = DomainFactory.INSTANCE.getOrCreateMark(markId, markName, markType, markColor, markShape, markPattern);
         return mark;
     }
+
+	@Override
+	public Collection<Competitor> loadAllCompetitors() {
+        ArrayList<Competitor> result = new ArrayList<Competitor>();
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+
+        try {
+            for (DBObject o : collection.find()) {
+            	JSONObject json = Helpers.toJSONObjectSafe(JSON.serialize(o));
+            	Competitor c = competitorDeserializer.deserialize(json);
+                result.add(c);
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors.");
+            logger.log(Level.SEVERE, "loadCompetitors", e);
+        }
+
+        return result;
+	}
 }

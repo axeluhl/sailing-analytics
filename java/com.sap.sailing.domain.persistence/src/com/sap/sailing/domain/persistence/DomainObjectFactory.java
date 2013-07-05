@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.persistence;
 
+import java.util.Collection;
 import java.util.Map;
 
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -86,4 +88,10 @@ public interface DomainObjectFactory {
     Map<String, Regatta> loadRaceIDToRegattaAssociations(RegattaRegistry regattaRegistry);
 
     RaceLog loadRaceLog(RaceLogIdentifier identifier);
+    
+    /**
+     * Loads all competitors, and resolves them via the domain factory.
+     * @return
+     */
+    Collection<Competitor> loadAllCompetitors();
 }

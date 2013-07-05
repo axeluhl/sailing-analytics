@@ -90,7 +90,7 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
 
     private static JsonSerializer<RaceLog> createRaceLogSerializer() {
         return new RaceLogSerializer(RaceLogEventSerializer.create(new CompetitorJsonSerializer(new TeamJsonSerializer(
-                new PersonJsonSerializer(new NationalityJsonSerializer())))));
+                new PersonJsonSerializer(new NationalityJsonSerializer())), null)));
     }
 
 }

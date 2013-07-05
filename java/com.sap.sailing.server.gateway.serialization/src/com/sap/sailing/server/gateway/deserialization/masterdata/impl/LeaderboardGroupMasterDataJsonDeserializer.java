@@ -28,7 +28,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ColorDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.FleetDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.NationalityJsonDeserialzer;
+import com.sap.sailing.server.gateway.deserialization.impl.NationalityJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.PersonJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.TeamJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
@@ -46,7 +46,7 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
     
     public static JsonDeserializer<LeaderboardGroupMasterData> create(DomainFactory domainFactory) {
         JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
-        JsonDeserializer<Nationality> nationalityDeserializer = new NationalityJsonDeserialzer();
+        JsonDeserializer<Nationality> nationalityDeserializer = new NationalityJsonDeserializer(domainFactory);
         JsonDeserializer<Person> personDeserializer = new PersonJsonDeserializer(nationalityDeserializer);
         JsonDeserializer<Team> teamDeserializer = new TeamJsonDeserializer(personDeserializer);
         JsonDeserializer<Competitor> competitorDeserializer = new CompetitorMasterDataDeserializer(

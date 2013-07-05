@@ -82,5 +82,4 @@ public interface SharedDomainFactory {
     
     CourseArea getExistingCourseAreaById(Serializable courseAreaId);
 
-
 }

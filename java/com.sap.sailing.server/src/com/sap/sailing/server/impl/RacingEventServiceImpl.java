@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
@@ -44,6 +45,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
+import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -191,6 +193,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private final ConcurrentHashMap<String, Leaderboard> leaderboardsByName;
 
     private final ConcurrentHashMap<String, LeaderboardGroup> leaderboardGroupsByName;
+    
+    private final ConcurrentHashMap<Serializable, Competitor> persistentCompetitorCache;
 
     private Set<DynamicTrackedRegatta> regattasObservedForDefaultLeaderboard = new HashSet<DynamicTrackedRegatta>();
 
@@ -263,6 +267,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         operationExecutionListeners = new ConcurrentHashMap<OperationExecutionListener, OperationExecutionListener>();
         courseListeners = new ConcurrentHashMap<RaceDefinition, CourseChangeReplicator>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<String, Regatta>();
+        persistentCompetitorCache = new ConcurrentHashMap<>();
         delayToLiveInMillis = TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS;
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
@@ -277,10 +282,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
+        loadStoredCompetitors();
         loadMediaLibary();
     }
 
-    public RacingEventServiceImpl(MongoDBService mongoDBService) {
+	public RacingEventServiceImpl(MongoDBService mongoDBService) {
         this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE
                 .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService));
     }
@@ -342,6 +348,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                     dbMediaTrack.startTime, dbMediaTrack.durationInMillis, mimeType);
             mediaTrackAdded(mediaTrack);
         }
+    }
+
+    private void loadStoredCompetitors() {
+    	for (Competitor c : domainObjectFactory.loadAllCompetitors()) {
+    		registerCompetitorAsPersistent(c);
+    	}
     }
 
     @Override
@@ -1746,6 +1758,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             logoutput.append(String.format("%3s\n", lg.toString()));
         }
 
+        logger.info("Serializing persisted competitors...");
+        oos.writeObject(persistentCompetitorCache);
+        logoutput.append("Serialized " + persistentCompetitorCache.size() + " persisted competitors\n");
+        for (Competitor c : persistentCompetitorCache.values()) {
+            logoutput.append(String.format("%3s\n", c.toString()));
+        }
+
         logger.info(logoutput.toString());
     }
 
@@ -1827,6 +1846,20 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             for (MediaTrack mediatrack : mediaLibrary.allTracks()) {
                 logoutput.append(String.format("%3s\n", mediatrack.toString()));
             }
+
+            mediaLibrary.deserialize(ois);
+            logoutput.append("Received " + mediaLibrary.allTracks().size() + " NEW media tracks\n");
+            for (MediaTrack mediatrack : mediaLibrary.allTracks()) {
+                logoutput.append(String.format("%3s\n", mediatrack.toString()));
+            }
+
+            persistentCompetitorCache.putAll((Map<Serializable, Competitor>) ois.readObject());
+            logoutput.append("\nReceived " + persistentCompetitorCache.size() + " NEW competitors\n");
+            for (Competitor competitor : persistentCompetitorCache.values()) {
+            	registerCompetitorAsPersistent(competitor);
+                logoutput.append(String.format("%3s\n", competitor.toString()));
+            }
+            
 
             logger.info(logoutput.toString());
             logger.info("Done with initial replication on " + this);
@@ -2072,5 +2105,27 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
         }
     }
+
+	private void registerCompetitorAsPersistent(Competitor competitor) {
+		persistentCompetitorCache.put(competitor.getId(), competitor);
+	}
+
+	@Override
+	public Competitor createPersistentCompetitor(Serializable id, String name,
+			Team team, Boat boat) {
+		Competitor c = getBaseDomainFactory().getOrCreateCompetitor(id, name, team, boat);
+		registerCompetitorAsPersistent(c);
+		return c;
+	}
+
+	@Override
+	public Collection<Competitor> getPersistentCompetitors() {
+		return persistentCompetitorCache.values();
+	}
+
+	@Override
+	public boolean isCompetitorPersistent(Competitor competitor) {
+		return persistentCompetitorCache.containsKey(competitor.getId());
+	}
 
 }

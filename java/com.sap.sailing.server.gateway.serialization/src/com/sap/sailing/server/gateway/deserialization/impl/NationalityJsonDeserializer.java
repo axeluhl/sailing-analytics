@@ -3,14 +3,20 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 
-public class NationalityJsonDeserialzer implements JsonDeserializer<Nationality> {
+public class NationalityJsonDeserializer implements JsonDeserializer<Nationality> {
+	private final SharedDomainFactory domainFactory;
 
-    @Override
+    public NationalityJsonDeserializer(SharedDomainFactory domainFactory) {
+		this.domainFactory = domainFactory;
+	}
+
+	@Override
     public Nationality deserialize(JSONObject object) throws JsonDeserializationException {
         final Nationality result;
         if (object == null) {
@@ -20,7 +26,7 @@ public class NationalityJsonDeserialzer implements JsonDeserializer<Nationality>
             if (threeLetterIOCAcronym == null) {
                 result = null;
             } else {
-                result = new NationalityImpl(threeLetterIOCAcronym);
+                result = (Nationality) new NationalityImpl(threeLetterIOCAcronym).resolve(domainFactory);
             }
         }
         return result;

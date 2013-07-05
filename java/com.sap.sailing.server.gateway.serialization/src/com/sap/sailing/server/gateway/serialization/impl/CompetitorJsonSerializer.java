@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
@@ -16,15 +17,22 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     public static final String FIELD_NATIONALITY_ISO2 = "nationalityISO2";
     public static final String FIELD_NATIONALITY_ISO3 = "nationalityISO3";
     public static final String FIELD_TEAM = "team";
+    public static final String FIELD_BOAT = "boat";
   
     private final JsonSerializer<Team> teamJsonSerializer;
-
-    public CompetitorJsonSerializer() {
-        this(null);
+    private final JsonSerializer<Boat> boatJsonSerializer;
+    
+    public static CompetitorJsonSerializer create() {
+    	return new CompetitorJsonSerializer(TeamJsonSerializer.create(), BoatJsonSerializer.create());
     }
 
-    public CompetitorJsonSerializer(JsonSerializer<Team> teamJsonSerializer) {
+    public CompetitorJsonSerializer() {
+        this(null, null);
+    }
+
+    public CompetitorJsonSerializer(JsonSerializer<Team> teamJsonSerializer, JsonSerializer<Boat> teamBoatSerializer) {
         this.teamJsonSerializer = teamJsonSerializer;
+        this.boatJsonSerializer = teamBoatSerializer;
     }
     
     @Override
@@ -41,6 +49,9 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         result.put(FIELD_NATIONALITY_ISO3, countryCode == null ? "" : countryCode.getThreeLetterISOCode());
         if(teamJsonSerializer != null) {
             result.put(FIELD_TEAM, teamJsonSerializer.serialize(competitor.getTeam()));
+        }
+        if(boatJsonSerializer != null) {
+            result.put(FIELD_BOAT, boatJsonSerializer.serialize(competitor.getBoat()));
         }
 
         return result;
