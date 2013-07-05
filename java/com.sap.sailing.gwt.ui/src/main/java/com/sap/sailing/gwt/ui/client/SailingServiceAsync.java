@@ -185,6 +185,8 @@ public interface SailingServiceAsync {
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
 
+    void removeLeaderboards(Collection<String> leaderboardNames, AsyncCallback<Void> asyncCallback);
+
     void renameLeaderboard(String leaderboardName, String newLeaderboardName, AsyncCallback<Void> asyncCallback);
 
     void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace,

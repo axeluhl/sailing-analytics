@@ -133,6 +133,8 @@ public interface SailingService extends RemoteService {
 
     void removeLeaderboard(String leaderboardName);
 
+    void removeLeaderboards(Collection<String> leaderboardNames);
+
     void renameLeaderboard(String leaderboardName, String newLeaderboardName);
 
     void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName);

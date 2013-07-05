@@ -1831,6 +1831,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Leaderboard updatedLeaderboard = getService().apply(new UpdateLeaderboard(leaderboardName, newLeaderboardName, newLeaderboardDisplayName, newDiscardingThresholds, newCourseAreaUuid));
         return createStrippedLeaderboardDTO(updatedLeaderboard, false);
     }
+    
+    @Override
+    public void removeLeaderboards(Collection<String> leaderboardNames) {
+        for (String leaderoardName : leaderboardNames) {
+            removeLeaderboard(leaderoardName);
+        }
+    }
 
     @Override
     public void removeLeaderboard(String leaderboardName) {
