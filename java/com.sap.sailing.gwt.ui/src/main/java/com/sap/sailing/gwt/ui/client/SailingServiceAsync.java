@@ -266,11 +266,6 @@ public interface SailingServiceAsync {
     void renameLeaderboardGroup(String oldName, String newName, AsyncCallback<Void> callback);
 
     /**
-     * Removes the leaderboard group with the name <code>groupName</code> from the service and the persistant store.
-     */
-    void removeLeaderboardGroup(String groupName, AsyncCallback<Void> callback);
-
-    /**
      * Removes the leaderboard groups with the given names from the service and the persistant store.
      */
     void removeLeaderboardGroups(Set<String> groupNames, AsyncCallback<Void> asyncCallback);
