@@ -16,7 +16,7 @@
 	padding: 3px 5px;
 	padding-bottom: 5px;
 	text-align: center;
-	font-family: 'OpenSansCondensedLight', 'UbuntuRegular', Arial, Verdana, sans-serif;
+	font-family: 'OpenSansCondensedLight', 'OpenSansRegular', Arial, Verdana, sans-serif;
 }
 
 .cellTableFirstColumnHeader {
@@ -57,7 +57,7 @@
 	border-bottom: 1px solid #c9caca !important;
 	padding: 5px 5px 5px !important;
 	white-space: nowrap;
-	font-family: 'OpenSansCondensedLight', 'UbuntuRegular', Arial, Verdana, sans-serif;
+	font-family: 'OpenSansCondensedLight', 'OpenSansRegular', Arial, Verdana, sans-serif;
 }
 
 .cellTableOddRow {
@@ -72,7 +72,7 @@
 	border-bottom: 1px solid #c9caca !important;
 	padding: 5px 5px 5px !important;
 	white-space: nowrap;
-	font-family: 'OpenSansCondensedLight', 'UbuntuRegular', Arial, Verdana, sans-serif;
+	font-family: 'OpenSansCondensedLight', 'OpenSansRegular', Arial, Verdana, sans-serif;
 }
 
 .cellTableHoveredRow {
