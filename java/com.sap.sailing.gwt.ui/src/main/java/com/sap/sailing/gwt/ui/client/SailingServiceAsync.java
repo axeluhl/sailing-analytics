@@ -185,6 +185,8 @@ public interface SailingServiceAsync {
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
 
+    void removeLeaderboards(Collection<String> leaderboardNames, AsyncCallback<Void> asyncCallback);
+
     void renameLeaderboard(String leaderboardName, String newLeaderboardName, AsyncCallback<Void> asyncCallback);
 
     void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace,
@@ -327,6 +329,8 @@ public interface SailingServiceAsync {
      */
     void removeEvent(String eventIdAsString, AsyncCallback<Void> callback);
 
+    void removeEvents(Collection<String> eventIdsAsStrings, AsyncCallback<Void> asyncCallback);
+
     void createEvent(String eventName, String description, String publicationUrl, boolean isPublic, List<String> courseAreaNames, AsyncCallback<EventDTO> callback);
 
     void updateEvent(String eventName, String eventIdAsString, VenueDTO venue, String publicationUrl, boolean isPublic,
@@ -335,6 +339,8 @@ public interface SailingServiceAsync {
     void createCourseArea(String eventIdAsString, String courseAreaName, AsyncCallback<CourseAreaDTO> callback);
 
     void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
+
+    void removeRegattas(Collection<RegattaIdentifier> regattas, AsyncCallback<Void> asyncCallback);
 
     void addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<RaceColumnInSeriesDTO> callback);

@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -23,8 +25,8 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
@@ -46,8 +48,9 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
     private final StringMessages stringMessages;
 
     private CellTable<EventDTO> eventTable;
-    private SingleSelectionModel<EventDTO> eventSelectionModel;
+    private MultiSelectionModel<EventDTO> eventSelectionModel;
     private ListDataProvider<EventDTO> eventProvider;
+    private Button removeEventsButton;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -88,6 +91,18 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
             }
         });
         eventsPanel.add(createEventBtn);
+        
+        removeEventsButton = new Button(stringMessages.remove());
+        removeEventsButton.setEnabled(false);
+        removeEventsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (Window.confirm("Do you really want to remove the events?")) {
+                    removeEvents(eventSelectionModel.getSelectedSet());
+                }
+            }
+        });
+        eventsPanel.add(removeEventsButton);
 
         // sailing events table
         AnchorCell anchorCell = new AnchorCell();
@@ -146,7 +161,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
             @Override
             public void update(int index, EventDTO event, String value) {
                 if (EventConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(event.getName()))) {
+                    if (Window.confirm("Do you really want to remove the event: '" + event.getName() + "' ?")) {
                         removeEvent(event);
                     }
                 } else if (EventConfigImagesBarCell.ACTION_EDIT.equals(value)) {
@@ -163,10 +178,11 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         eventTable.addColumn(courseAreasColumn, stringMessages.courseAreas());
         eventTable.addColumn(eventActionColumn, stringMessages.actions());
 
-        eventSelectionModel = new SingleSelectionModel<EventDTO>();
+        eventSelectionModel = new MultiSelectionModel<EventDTO>();
         eventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
+                removeEventsButton.setEnabled(!eventSelectionModel.getSelectedSet().isEmpty());
             }
         });
         eventTable.setSelectionModel(eventSelectionModel);
@@ -176,6 +192,25 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         mainPanel.add(eventTable);
 
         fillEvents();
+    }
+
+    protected void removeEvents(Collection<EventDTO> events) {
+        if (!events.isEmpty()) {
+            Collection<String> eventIds = new HashSet<String>();
+            for (EventDTO event : events) {
+                eventIds.add(event.id);
+            }
+            sailingService.removeEvents(eventIds, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error trying to remove the events:" + caught.getMessage());
+                }
+                @Override
+                public void onSuccess(Void result) {
+                    fillEvents();
+                }
+            });
+        }
     }
 
     private void removeEvent(final EventDTO event) {
