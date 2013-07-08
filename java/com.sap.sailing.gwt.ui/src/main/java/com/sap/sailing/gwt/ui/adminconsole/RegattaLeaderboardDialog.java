@@ -69,7 +69,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
 
     protected void adjustVisibilityOfResultDiscardingRuleComponent() {
         if (getSelectedRegatta().definesSeriesDiscardThresholds()) {
-            if(discardThresholdBoxes != null) {
+            if (discardThresholdBoxes != null) {
                 discardThresholdBoxes.getWidget().setVisible(false);
             }
             regattaDefinesDiscardsLabel.setVisible(true);
