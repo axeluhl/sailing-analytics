@@ -1,13 +1,13 @@
 package com.sap.sailing.gwt.ui.regattaoverview;
 
-import com.sap.sailing.domain.common.racelog.utils.FlagAlphabetInterpretationTemplate;
+import com.sap.sailing.domain.common.racelog.utils.RaceStateFlagsInterpretationTemplate;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class FlagAlphabetInterpreter extends FlagAlphabetInterpretationTemplate {
+public class RaceStateFlagsInterpreter extends RaceStateFlagsInterpretationTemplate {
     
     private StringMessages stringMessages;
     
-    public FlagAlphabetInterpreter(StringMessages stringMessages) {
+    public RaceStateFlagsInterpreter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
     }
 

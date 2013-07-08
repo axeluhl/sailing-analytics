@@ -36,7 +36,7 @@ public class GateStartProcedure implements StartProcedure {
     private final static long startPhaseClassOverGolfUpIntervall = 8 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhasePapaUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhasePapaDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
-    private final static long startPhaseClassOverGolfDownInterval = 0 * 60 * 1000; // minutes * seconds * milliseconds
+    private final static long startPhaseClassDownInterval = 0 * 60 * 1000; // minutes * seconds * milliseconds
     public final static long startPhaseGolfDownStandardInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
     public final static long startPhaseGolfDownStandardIntervalConstantSummand = 3 * 60 * 1000; // minutes * seconds *
                                                                                                 // milliseconds
@@ -66,7 +66,7 @@ public class GateStartProcedure implements StartProcedure {
         startProcedureEventIntervals.add(startPhaseClassOverGolfUpIntervall);
         startProcedureEventIntervals.add(startPhasePapaUpInterval);
         startProcedureEventIntervals.add(startPhasePapaDownInterval);
-        startProcedureEventIntervals.add(startPhaseClassOverGolfDownInterval);
+        startProcedureEventIntervals.add(startPhaseClassDownInterval);
     }
 
     @Override
@@ -94,8 +94,8 @@ public class GateStartProcedure implements StartProcedure {
             handlePapaUp(eventTime);
         } else if (interval == startPhasePapaDownInterval) {
             handlePapaDown(eventTime);
-        } else if (interval == startPhaseClassOverGolfDownInterval) {
-            handleClassOverGolfDown(eventTime);
+        } else if (interval == startPhaseClassDownInterval) {
+            handleClassDown(eventTime);
         }
     }
 
@@ -140,12 +140,12 @@ public class GateStartProcedure implements StartProcedure {
         }
     }
 
-    private void handleClassOverGolfDown(TimePoint eventTime) {
+    private void handleClassDown(TimePoint eventTime) {
         TimePoint essOneDownTimePoint = eventTime;
 
         RaceLogEvent essOneDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(essOneDownTimePoint,
                 UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.CLASS,
-                Flags.GOLF, /* isDisplayed */false);
+                Flags.NONE, /* isDisplayed */false);
         raceLog.add(essOneDownEvent);
 
         if (startPhaseEventListener != null) {
@@ -301,7 +301,7 @@ public class GateStartProcedure implements StartProcedure {
         if (millisecondsTillStart < startPhasePapaDownInterval) {
             milisecondsList.add(millisecondsTillStart);
             result = new Pair<String, List<Object>>(context.getResources().getString(
-                    R.string.race_startphase_gate_class_over_golf_removed), milisecondsList);
+                    R.string.race_startphase_gate_class_removed), milisecondsList);
         } else if (millisecondsTillStart < startPhasePapaUpInterval) {
             milisecondsList.add(millisecondsTillStart - startPhasePapaDownInterval);
             result = new Pair<String, List<Object>>(context.getResources().getString(

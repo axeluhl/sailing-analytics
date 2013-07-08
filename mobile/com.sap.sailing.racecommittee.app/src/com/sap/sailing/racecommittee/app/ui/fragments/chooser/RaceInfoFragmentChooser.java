@@ -31,7 +31,7 @@ public class RaceInfoFragmentChooser {
         try {
             RaceFragment fragment = fragmentClass.newInstance();
             fragment.setArguments(RaceFragment.createArguments(managedRace));
-            ExLog.i(TAG, String.format("Fragment %s is selected", fragmentClass.getName()));
+            ExLog.i(TAG, String.format("Fragment %s may be choosen", fragmentClass.getName()));
             return fragment;
         } catch (Exception e) {
             ExLog.e(TAG, String.format("Exception while instantiating race info fragment:\n%s", e.toString()));
