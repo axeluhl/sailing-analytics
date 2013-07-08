@@ -33,7 +33,7 @@
 }
 
 .gwt-SliderBar-shell:focus{
-	outline: none; 
+	outline: none;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-mark {
@@ -53,7 +53,7 @@
 .gwt-SliderBar-shell .gwt-SliderBar-ticklabel {
   font-size: 12px;
   cursor: default;
-  font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
+  font-family: 'OpenSansSemiBold',Arial,Verdana,sans-serif;
   top: 0;
 }
 
@@ -62,11 +62,11 @@
   font-size: 12px;
   color: #fcbb22;
   cursor: default;
-  font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
+  font-family: 'OpenSansSemiBold',Arial,Verdana,sans-serif;
 }
 
 .gwt-SliderBar-shell-focused {
-  
+
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-line-sliding {
