@@ -17,6 +17,7 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sailing.operationaltransformation.OperationalTransformer;
 import com.sap.sailing.operationaltransformation.Peer;
 import com.sap.sailing.operationaltransformation.Peer.Role;
 import com.sap.sailing.operationaltransformation.PeerImpl;
@@ -25,7 +26,6 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
-import com.sap.sailing.server.operationaltransformation.OperationalTransformer;
 
 
 public class RaceLogInRaceColumnTest {
@@ -39,7 +39,7 @@ public class RaceLogInRaceColumnTest {
     public void setUp() {
         MongoDBService.INSTANCE.getDB().dropDatabase();
         racingEventServiceServer = new RacingEventServiceImpl();
-        OperationalTransformer transformer = new OperationalTransformer();
+        OperationalTransformer<RacingEventService, RacingEventServiceOperation<?>> transformer = new OperationalTransformer<>();
         server = new PeerImpl<>(transformer, racingEventServiceServer, Role.SERVER);
     }
 
