@@ -93,6 +93,8 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                                 " after not having received an event during "+timeoutInMilliseconds+"ms");
                     stopAfterProcessingQueuedEvents();
                 } else {
+                    logger.info("Rescheduling the stopping of receiver "+AbstractReceiverWithQueue.this+
+                            " for another "+timeoutInMilliseconds+"ms");
                     TracTracRaceTrackerImpl.scheduler.schedule(this, timeoutInMilliseconds, TimeUnit.MILLISECONDS);
                 }
             }
