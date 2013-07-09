@@ -92,7 +92,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private TextColumn<RegattaOverviewEntryDTO> fleetNameColumn;
 
     private final RegattaRaceStatesSettings settings;
-    private final FlagAlphabetInterpreter flagInterpreter;
+    private final RaceStateFlagsInterpreter flagInterpreter;
     
     private final String localStorageRegattaOverviewEventKey;
 
@@ -133,7 +133,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         
         this.localStorageRegattaOverviewEventKey = LOCAL_STORAGE_REGATTA_OVERVIEW_KEY + eventIdAsString;
 
-        this.flagInterpreter = new FlagAlphabetInterpreter(stringMessages);
+        this.flagInterpreter = new RaceStateFlagsInterpreter(stringMessages);
 
         this.settings = new RegattaRaceStatesSettings();
         loadAndSetSettings(settings);
@@ -411,11 +411,15 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             @Override
             public SafeHtml getValue(RegattaOverviewEntryDTO entryDTO) {
                 String tooltip = "";
-                if (entryDTO.raceInfo.lastUpperFlag != null) {
+                if (entryDTO.raceInfo.lastUpperFlag != null && entryDTO.raceInfo.lastLowerFlag != null) {
                     tooltip = entryDTO.raceInfo.lastUpperFlag.name();
-                    if (entryDTO.raceInfo.lastLowerFlag != null && !entryDTO.raceInfo.lastLowerFlag.equals(Flags.NONE)) {
+                    if (!entryDTO.raceInfo.lastLowerFlag.equals(Flags.NONE)) {
                         tooltip += " over " + entryDTO.raceInfo.lastLowerFlag.name();
                     }
+                    tooltip += " " + FlagsMeaningExplanator.getFlagsMeaning(stringMessages,
+                            entryDTO.raceInfo.lastUpperFlag, 
+                            entryDTO.raceInfo.lastLowerFlag, 
+                            entryDTO.raceInfo.isLastFlagDisplayed);
                 }
                 return SailingFlagsBuilder.render(
                         entryDTO.raceInfo.lastUpperFlag,

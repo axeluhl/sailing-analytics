@@ -270,6 +270,7 @@ public interface StringMessages extends Messages {
     String trackBasedEstimationWindSourceTypeName();
     String expeditionWindSourceTypeName();
     String webWindSourceTypeName();
+    String raceCommitteeWindSourceTypeName();
     String clickChartToSetTime();
     String position();
     String windSourcesUsed();
@@ -700,6 +701,33 @@ public interface StringMessages extends Messages {
     String raceLogReloaded();
     String reloadAllRaceLogs();
     String sideline();
+    String classAndGolfUp();
+    String classDisplayed();
+    String papaDisplayed();
+    String blackDisplayed();
+    String zuluIndiaDisplayed();
+    String papaRemoved();
+    String blackRemoved();
+    String zuluIndiaRemoved();
+    String classFlagRemoved();
+    String xray();
+    String firstSubstitute();
+    String blueFlagDisplayed();
+    String blueFlagRemoved();
+    String golfRemoved();
+    String answeringPennantOverAlphaDisplayed();
+    String answeringPennantOverHotelDisplayed();
+    String answeringPennantDisplayed();
+    String answeringPennantRemoved();
+    String novemberOverAlphaDisplayed();
+    String novemberOverHotelDisplayed();
+    String novemberDisplayed();
+    String bravoDisplayed();
+    String bravoRemoved();
+    String essThreeDisplayed();
+    String essTwoDisplayed();
+    String essOneDisplayed();
+    String essOneRemoved();
     String export();
     String dataBeforeAfter();
     String rawFixes();
@@ -713,4 +741,5 @@ public interface StringMessages extends Messages {
     String importOverrideSwitchLabel();
     String importSelectedLeaderboardGroups();
     String importSelectAtLeastOne();
+    String deselectAll();
 }
