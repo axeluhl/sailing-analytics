@@ -13,6 +13,7 @@ import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
 import com.google.gwt.maps.client.overlay.Polygon;
 import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
+import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 
 public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 
@@ -225,8 +226,13 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 		}
 		if (currentRegArea != null) {
 			//simulatorMap.getMainPanel().setUpdateButtonEnabled(true);
-			raceCourseCanvasOverlay.startPoint = getDistantPoint(currentRegArea.centerPos, 0.9*currentRegArea.radius, 180.0 + raceBearing - diffBearing);
-			raceCourseCanvasOverlay.endPoint = getDistantPoint(currentRegArea.centerPos, 0.9*currentRegArea.radius, 0.0 + raceBearing - diffBearing);
+			if (raceCourseCanvasOverlay.rcDirection == SailingSimulatorUtil.RaceCourseDownwind) {
+				raceCourseCanvasOverlay.endPoint = getDistantPoint(currentRegArea.centerPos, 0.9*currentRegArea.radius, 180.0 + raceBearing - diffBearing);
+				raceCourseCanvasOverlay.startPoint = getDistantPoint(currentRegArea.centerPos, 0.9*currentRegArea.radius, 0.0 + raceBearing - diffBearing);
+			} else {
+				raceCourseCanvasOverlay.startPoint = getDistantPoint(currentRegArea.centerPos, 0.9*currentRegArea.radius, 180.0 + raceBearing - diffBearing);
+				raceCourseCanvasOverlay.endPoint = getDistantPoint(currentRegArea.centerPos, 0.9*currentRegArea.radius, 0.0 + raceBearing - diffBearing);
+			}
 		} else {
 			//simulatorMap.getMainPanel().setUpdateButtonEnabled(false);
 		}

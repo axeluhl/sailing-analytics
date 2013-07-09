@@ -51,7 +51,7 @@ public class TreeGrowTest {
         TimePoint startTime = new MillisecondsTimePoint(startDate.getTime());
         TimePoint timeStep = new MillisecondsTimePoint(20000);
         wf.generate(startTime, null, timeStep);
-        SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorUtil.freestyle);
+        SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorUtil.freestyle, true, true);
 
         /*param.setProperty("Heuristic.targetTolerance[double]", 0.05);
         param.setProperty("Heuristic.timeResolution[long]", 30000.0);

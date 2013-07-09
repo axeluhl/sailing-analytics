@@ -42,7 +42,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private MapWidget mapw;
     private boolean dataInitialized;
     private boolean overlaysInitialized;
-    private WindFieldGenParamsDTO windParams;
+    public WindFieldGenParamsDTO windParams;
     private WindStreamletsCanvasOverlay windStreamletsCanvasOverlay;
     private WindFieldCanvasOverlay windFieldCanvasOverlay;
     private WindGridCanvasOverlay windGridCanvasOverlay;
@@ -67,6 +67,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private PathPolyline pathPolyline = null;
     private static Logger LOGGER = Logger.getLogger(SimulatorMap.class.getName());
     private static boolean SHOW_ONLY_PATH_POLYLINE = false;
+    private char rcDirection; 
 
 
     public enum ViewName {
@@ -115,7 +116,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             colorPalette.reset();
 
             PathDTO currentPath = null;
-            String color = null;
+            //String color = null;
             String pathName = null;
             int noOfPaths = paths.length;
 
@@ -123,7 +124,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
                 currentPath = paths[index];
                 pathName = currentPath.getName();
-                color = colorPalette.getColor(noOfPaths - 1 - index);
+                //color = colorPalette.getColor(noOfPaths - 1 - index);
 
                 if (pathName.equals("Polyline")) {
                     pathPolyline = createPathPolyline(currentPath);
@@ -136,9 +137,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     WindFieldDTO pathWindDTO = new WindFieldDTO();
                     pathWindDTO.setMatrix(currentPath.getPoints());
 
-                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(pathName, timer, windParams);
+                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(pathName.split("#")[1], timer, windParams);
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
-                    replayPathCanvasOverlay.pathColor = color;
+                    replayPathCanvasOverlay.pathColor = colorPalette.getColor(Integer.parseInt(pathName.split("#")[0])-1);
 
                     if (this.summaryView) {
 
@@ -508,7 +509,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         this.busyIndicator.setBusy(true);
 
-        this.simulatorSvc.getSimulatorResults(this.mode, this.windParams, windPatternDisplay, true, selection, new ResultManager(summaryView));
+        this.simulatorSvc.getSimulatorResults(this.mode, this.rcDirection, this.windParams, windPatternDisplay, true, selection, new ResultManager(summaryView));
 
     }
 
@@ -785,6 +786,16 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     
     public SimulatorMainPanel getMainPanel() {
     	return this.parent;
+    }
+    
+    public void setRaceCourseDirection(char rcDirection) {
+    	this.clearOverlays();
+    	this.rcDirection = rcDirection;
+    	this.raceCourseCanvasOverlay.rcDirection = rcDirection;
+    	//System.out.println("Wind Base Bearing: "+setting.getValue());
+    	this.regattaAreaCanvasOverlay.updateRaceCourse(0, 0);
+        this.raceCourseCanvasOverlay.redraw(true);
+
     }
     
 }

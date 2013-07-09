@@ -234,9 +234,23 @@ public class SimulatorMainPanel extends SimplePanel {
         this.mode = mode;
         this.isOmniscient = new CheckBox(this.stringMessages.omniscient(), true);
         this.isOmniscient.setValue(true);
+        this.isOmniscient.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent evnet) {
+            	boolean selectedValue = isOmniscient.getValue();
+            	simulatorMap.windParams.showOmniscient = selectedValue;
+            }
+        });
 
         this.isOpportunistic = new CheckBox(this.stringMessages.opportunistic(), true);
         this.isOpportunistic.setValue(true);
+        this.isOpportunistic.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent evnet) {
+            	boolean selectedValue = isOpportunistic.getValue();
+            	simulatorMap.windParams.showOpportunist = selectedValue;
+            }
+        });
 
         this.isPathPolylineFreeMode = new CheckBox(this.stringMessages.freemode(), true);
         this.isPathPolylineFreeMode.setValue(true);
@@ -564,6 +578,15 @@ public class SimulatorMainPanel extends SimplePanel {
         if (directionSelector != null) {
             directionSelector.addItem(stringMessages.upWind());
             directionSelector.addItem(stringMessages.downWind());
+            
+            this.directionSelector.addChangeHandler(new ChangeHandler() {
+                @Override
+                public void onChange(ChangeEvent evnet) {
+                    int selectedIndex = directionSelector.getSelectedIndex();
+                    setRaceCourseDirection(selectedIndex);
+                }
+            });
+            
             hp.add(directionSelector);
         }
         return hp;
@@ -721,6 +744,25 @@ public class SimulatorMainPanel extends SimplePanel {
         sailingPanel.add(this.polarDiv);
     }
 
+    private void setRaceCourseDirection(final int selectedDirection) {
+    
+    	switch(selectedDirection) {
+    		    	
+    	case 0:
+    		simulatorMap.setRaceCourseDirection(SailingSimulatorUtil.RaceCourseUpwind);
+    		break;
+
+    	case 1:
+    		simulatorMap.setRaceCourseDirection(SailingSimulatorUtil.RaceCourseDownwind);
+    		break;
+    	
+    	default:
+    		simulatorMap.setRaceCourseDirection(SailingSimulatorUtil.RaceCourseUpwind);
+
+    	}
+    
+    }    
+    
     private void loadPolarDiagramData(final int selectedBoatClass) {
 
         this.simulatorSvc.getBoatClasses(new AsyncCallback<BoatClassDTOsAndNotificationMessage>() {

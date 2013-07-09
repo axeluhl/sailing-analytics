@@ -50,7 +50,7 @@ public class SimulatorTest {
         TimePoint timeStep = new MillisecondsTimePoint(30000);
         wf.generate(startTime, null, timeStep);
 
-        SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorUtil.freestyle);
+        SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorUtil.freestyle, true, true);
         SailingSimulatorImpl sailingSim = new SailingSimulatorImpl(param);
 
         //Map<String, Path> paths = sailingSim.getAllPathsForLeg(new SimulatorUISelectionImpl(0, 0, 0, 0));

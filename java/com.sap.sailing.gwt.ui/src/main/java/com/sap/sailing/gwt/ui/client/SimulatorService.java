@@ -35,7 +35,7 @@ public interface SimulatorService extends RemoteService {
 
     WindPatternDisplay getWindPatternDisplay(WindPatternDTO pattern);
 
-    SimulatorResultsDTO getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField,
+    SimulatorResultsDTO getSimulatorResults(char mode, char rcDirection, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField,
             SimulatorUISelectionDTO selection) throws WindPatternNotFoundException, ConfigurationException;
 
     BoatClassDTOsAndNotificationMessage getBoatClasses() throws ConfigurationException;

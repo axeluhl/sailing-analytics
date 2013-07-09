@@ -17,8 +17,11 @@ public class SimulationParametersImpl implements SimulationParameters {
     private WindFieldGenerator windField;
     private Map<String, Double> settings;
     private char mode;
+    private boolean showOmniscient;
+    private boolean showOpportunist;
 
-    public SimulationParametersImpl(List<Position> crs, PolarDiagram pd, WindFieldGenerator wf, char mode) {
+
+    public SimulationParametersImpl(List<Position> crs, PolarDiagram pd, WindFieldGenerator wf, char mode, boolean showOmniscient, boolean showOpportunist) {
         this.course = crs;
         this.polarDiagram = pd;
         this.windField = wf;
@@ -30,6 +33,9 @@ public class SimulationParametersImpl implements SimulationParameters {
         this.settings.put("Heuristic.timeResolution[long]", 30000.0);
         this.settings.put("Djikstra.gridv[int]", 10.0);
         this.settings.put("Djikstra.gridh[int]", 100.0);
+        
+        this.showOmniscient = showOmniscient;
+        this.showOpportunist = showOpportunist;
     }
 
     @Override
@@ -76,4 +82,15 @@ public class SimulationParametersImpl implements SimulationParameters {
     public Double getProperty(String name) {
         return settings.get(name);
     }
+    
+    @Override
+	public boolean showOmniscient() {
+    	return showOmniscient;
+    }
+
+    @Override
+	public boolean showOpportunist() {
+    	return showOpportunist;
+    }
+
 }

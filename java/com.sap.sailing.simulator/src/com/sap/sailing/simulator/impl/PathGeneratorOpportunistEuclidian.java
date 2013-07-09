@@ -24,6 +24,7 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
     int maxLeft;
     int maxRight;
     boolean startLeft;
+    boolean upwindLeg = false;
 
     public PathGeneratorOpportunistEuclidian(SimulationParameters params) {
         simulationParameters = params;
@@ -40,8 +41,14 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
 
         WindFieldGenerator wf = simulationParameters.getWindField();
         PolarDiagram pd = simulationParameters.getBoatPolarDiagram();
+        
         Position start = simulationParameters.getCourse().get(0);
         Position end = simulationParameters.getCourse().get(1);
+        
+        // test downwind: exchange start and end
+        //Position start = simulationParameters.getCourse().get(1);
+        //Position end = simulationParameters.getCourse().get(0);
+                
         TimePoint startTime = wf.getStartTime();// new MillisecondsTimePoint(0);
         List<TimedPositionWithSpeed> lst = new ArrayList<TimedPositionWithSpeed>();
 
@@ -71,6 +78,24 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
         logger.info("Time step :" + timeStep);
         // while there is more than 5% of the total distance to the finish
 
+        Bearing bearRCWind = wndStart.getBearing().getDifferenceTo(bearStart);
+        String legType = "downwind";
+        this.upwindLeg = false;
+        
+        if ((Math.abs(bearRCWind.getDegrees()) > 90.0)&&(Math.abs(bearRCWind.getDegrees()) < 270.0)) {
+        	legType = "upwind";
+            this.upwindLeg = true;
+        }
+        
+        int timeStepScale = 1;
+        if (!this.upwindLeg) {
+            timeStepScale = 2;
+            timeStep = timeStep / timeStepScale;
+        	turnloss = turnloss / timeStepScale;
+        }
+        
+        logger.info("Leg Direction: "+legType);
+
         //
         // StrategicPhase: start & intermediate course until close to target
         //
@@ -89,8 +114,15 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             pd.setWind(cWind);
 
             // get wind of direction
-            Bearing wLft = pd.optimalDirectionsUpwind()[0];
-            Bearing wRght = pd.optimalDirectionsUpwind()[1];
+            Bearing wLft;
+            Bearing wRght;
+            if (this.upwindLeg) {
+            	wLft = pd.optimalDirectionsUpwind()[0];
+            	wRght = pd.optimalDirectionsUpwind()[1];
+            } else {
+            	wLft = pd.optimalDirectionsDownwind()[1];
+            	wRght = pd.optimalDirectionsDownwind()[0];
+            }
             // Bearing wDirect = currentPosition.getBearingGreatCircle(end);
 
             // SpeedWithBearing sWDirect = pd.getSpeedAtBearing(wDirect);
@@ -118,15 +150,25 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             Wind lWind = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, pWLft, null));
             logger.fine("lWind speed:" + lWind.getKnots() + " angle:" + lWind.getBearing().getDegrees());
             // System.out.println("Left WindBear: " + (lWind.getBearing().getDegrees() - bearStart.getDegrees()));
-            pd.setWind(lWind);
-            Bearing lft = pd.optimalDirectionsUpwind()[0];
+            pd.setWind(lWind);            
+            Bearing lft;
+            if (this.upwindLeg) {
+            	lft = pd.optimalDirectionsUpwind()[0];
+            } else {
+            	lft = pd.optimalDirectionsDownwind()[1];            	
+            }
             slft = pd.getSpeedAtBearing(lft);
 
             Wind rWind = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, pWRght, null));
             logger.fine("rWind speed:" + rWind.getKnots() + " angle:" + rWind.getBearing().getDegrees());
             // System.out.println("Right WindBear: " + (rWind.getBearing().getDegrees() - bearStart.getDegrees()));
             pd.setWind(rWind);
-            Bearing rght = pd.optimalDirectionsUpwind()[1];
+            Bearing rght;
+            if (this.upwindLeg) {
+            	rght = pd.optimalDirectionsUpwind()[1];
+            } else {
+            	rght = pd.optimalDirectionsDownwind()[0];            	
+            }
             srght = pd.getSpeedAtBearing(rght);
 
             // System.out.println("Bearings : " + (lft.getDegrees() - bearStart.getDegrees()) + " "
@@ -234,10 +276,10 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             rightGoingTime = currentTime;
         }
 
-        gen1Turner.setEvaluationParameters(true, currentPosition, leftGoingTime, wf.getTimeStep().asMillis() / (5 * 3), 100, 0.1);
+        gen1Turner.setEvaluationParameters(true, currentPosition, end, leftGoingTime, wf.getTimeStep().asMillis() / (5 * 3 * timeStepScale), 100, 0.1, this.upwindLeg);
         Path leftPath = gen1Turner.getPath();
 
-        gen1Turner.setEvaluationParameters(false, currentPosition, rightGoingTime, wf.getTimeStep().asMillis() / (5 * 3), 100, 0.1);
+        gen1Turner.setEvaluationParameters(false, currentPosition, end, rightGoingTime, wf.getTimeStep().asMillis() / (5 * 3 * timeStepScale), 100, 0.1, this.upwindLeg);
         Path rightPath = gen1Turner.getPath();
 
         if ((leftPath.getPathPoints() != null) && (rightPath.getPathPoints() != null)) {

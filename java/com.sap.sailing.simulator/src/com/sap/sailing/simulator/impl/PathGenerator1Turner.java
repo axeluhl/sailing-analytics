@@ -37,22 +37,26 @@ public class PathGenerator1Turner extends PathGeneratorBase {
     private boolean leftSide;
     private result1Turn result;
     private Position evalStartPoint;
+    private Position evalEndPoint;
     private TimePoint evalStartTime;
     private long evalTimeStep;
     private int evalStepMax;
     private double evalTolerance;
+    private boolean upwindLeg;
     
     public PathGenerator1Turner(SimulationParameters params) {
         simulationParameters = params;
     }
 
-    public void setEvaluationParameters(boolean leftSideVal, Position startPoint, TimePoint startTime, long timeStep, int stepMax, double tolerance) {
+    public void setEvaluationParameters(boolean leftSideVal, Position startPoint, Position endPoint, TimePoint startTime, long timeStep, int stepMax, double tolerance, boolean upwindLeg) {
         this.leftSide = leftSideVal;
         this.evalStartPoint = startPoint;
+        this.evalEndPoint = endPoint;
         this.evalStartTime = startTime;
         this.evalTimeStep = timeStep;
         this.evalStepMax = stepMax;
         this.evalTolerance = tolerance;
+        this.upwindLeg = upwindLeg;
     }
 
     public int getMiddle() {
@@ -71,7 +75,13 @@ public class PathGenerator1Turner extends PathGeneratorBase {
         } else {
             start = this.evalStartPoint;            
         }
-        Position end = simulationParameters.getCourse().get(1);
+        Position end;
+        if (this.evalEndPoint == null) {
+            end = simulationParameters.getCourse().get(1);
+        } else {
+            end = this.evalEndPoint;            
+        }
+        
         TimePoint startTime;
         if (this.evalStartTime == null) {
             startTime = windField.getStartTime();// new MillisecondsTimePoint(0);
@@ -136,10 +146,18 @@ public class PathGenerator1Turner extends PathGeneratorBase {
                 SpeedWithBearing currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
                 //System.out.println("Wind: " + currentWind.getKnots() + "kn, " + currentWind.getBearing().getDegrees() + "deg");
                 polarDiagram.setWind(currentWind);
-                if (leftSide) {
-                    direction = polarDiagram.optimalDirectionsUpwind()[0];
+                if (this.upwindLeg) {
+                	if (leftSide) {
+                		direction = polarDiagram.optimalDirectionsUpwind()[0];
+                	} else {
+                		direction = polarDiagram.optimalDirectionsUpwind()[1];
+                	}
                 } else {
-                    direction = polarDiagram.optimalDirectionsUpwind()[1];
+                	if (leftSide) {
+                		direction = polarDiagram.optimalDirectionsDownwind()[1];
+                	} else {
+                		direction = polarDiagram.optimalDirectionsDownwind()[0];
+                	}
                 }
                 SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
                 //System.out.println("Boat: " + currSpeed.getKnots() + "kn, " + currSpeed.getBearing().getDegrees() + "deg");
@@ -171,16 +189,25 @@ public class PathGenerator1Turner extends PathGeneratorBase {
             int stepRight = 0;
             while ((stepRight < (stepMax - step)) && (!targetFound)) {
 
-                SpeedWithBearing currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
-                polarDiagram.setWind(currentWind);
-                if (leftSide) {
-                    direction = polarDiagram.optimalDirectionsUpwind()[1];
-                } else {
-                    direction = polarDiagram.optimalDirectionsUpwind()[0];
-                }
-                SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
-                nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeStep);
-                Position nextPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
+            	SpeedWithBearing currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
+            	polarDiagram.setWind(currentWind);
+            	if (this.upwindLeg) {
+            		if (leftSide) {
+            			direction = polarDiagram.optimalDirectionsUpwind()[1];
+            		} else {
+            			direction = polarDiagram.optimalDirectionsUpwind()[0];
+            		}
+            	} else {
+            		if (leftSide) {
+            			direction = polarDiagram.optimalDirectionsDownwind()[0];
+            		} else {
+            			direction = polarDiagram.optimalDirectionsDownwind()[1];
+            		}
+            	}
+
+            	SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
+            	nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeStep);
+            	Position nextPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
                 newDistance = nextPosition.getDistance(end).getMeters();
                 /*if (this.evalStartPoint != null) {
                     System.out.println("newDistance: "+newDistance);

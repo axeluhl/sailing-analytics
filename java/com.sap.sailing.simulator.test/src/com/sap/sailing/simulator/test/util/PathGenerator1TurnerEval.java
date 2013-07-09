@@ -45,7 +45,7 @@ public class PathGenerator1TurnerEval {
     public void initialize() throws IOException, ClassNotFoundException {
 
         this._polarDiagram = new PolarDiagramCSV(POLAR_DIAGRAM_49_STG_CSV_FILE_PATH);
-        this._simulationParameters = new SimulationParametersImpl(null, this._polarDiagram, null, SailingSimulatorUtil.measured);
+        this._simulationParameters = new SimulationParametersImpl(null, this._polarDiagram, null, SailingSimulatorUtil.measured, true, true);
         this._pathGenerator = new PathGenerator1Turner(this._simulationParameters);
 
         this._windField = readWindFieldGeneratorFromExternalFile("windField.dat");
