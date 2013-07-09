@@ -108,6 +108,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         if (e.isValidityCached()) {
             result = e.isValid();
         } else {
+            boolean fixHasValidSogAndCog = (e.getSpeed().getMetersPerSecond() != 0.0 && e.getSpeed().getBearing().getDegrees() != 0.0);
             GPSFixMoving previous = rawFixes.lower(e);
             GPSFixMoving next = rawFixes.higher(e);
             Speed speedToPrevious = Speed.NULL;
@@ -120,10 +121,10 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                 speedToNext = e.getPosition().getDistance(next.getPosition())
                         .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
             }
-            result = (previous == null || speedToPrevious.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
+            result = (!fixHasValidSogAndCog || ((previous == null || speedToPrevious.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
                     * e.getSpeed().getMetersPerSecond())
                     && (next == null || speedToNext.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
-                            * e.getSpeed().getMetersPerSecond())
+                            * e.getSpeed().getMetersPerSecond())))
                     && (maxSpeedForSmoothing == null
                             || (previous == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0) || (next == null || speedToNext
                             .compareTo(maxSpeedForSmoothing) <= 0));
