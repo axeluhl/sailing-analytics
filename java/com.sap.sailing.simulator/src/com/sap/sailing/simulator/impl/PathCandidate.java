@@ -12,7 +12,6 @@ public class PathCandidate implements Comparable<PathCandidate> {
         this.trn = trn;   // number of turns
         this.path = path; // path as sequence of steps from start to pos
         this.sid = sid;   // side of wind of step reaching pos
-        this.wind = wind;
     }
 
     TimedPosition pos;
@@ -21,7 +20,6 @@ public class PathCandidate implements Comparable<PathCandidate> {
     int trn;
     String path;
     char sid;
-    Wind wind;
 
     @Override
     // sort descending by length, width, height
