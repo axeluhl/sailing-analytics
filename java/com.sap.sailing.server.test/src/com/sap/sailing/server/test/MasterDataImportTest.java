@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -144,17 +145,23 @@ public class MasterDataImportTest {
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
         raceColumnNames.add("T2");
+        final List<String> emptyRaceColumnNamesList = Collections.emptyList();
 
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, raceColumnNames, sourceService));
+        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
+        for (String name : raceColumnNames) {
+            series.get(0).addRaceColumn(name, sourceService);
+        }
+        
+        
         int[] discardRule = { 1, 2, 3, 4 };
         Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
                 "testDisplayName", discardRule);
@@ -302,17 +309,23 @@ public class MasterDataImportTest {
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
         raceColumnNames.add("T2");
-
+        List<String> emptyRaceColumnNamesList = Collections.emptyList();
+        
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, raceColumnNames, sourceService));
+        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
+        for (String name : raceColumnNames) {
+            series.get(0).addRaceColumn(name, sourceService);
+        }
+        
+        
         int[] discardRule = { 1, 2, 3, 4 };
         Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
                 "testDisplayName", discardRule);
@@ -396,15 +409,20 @@ public class MasterDataImportTest {
         List<String> raceColumnNamesNotToOverride = new ArrayList<String>();
         String raceColumnNameNotToOveride = "T1nottooverride";
         raceColumnNamesNotToOverride.add(raceColumnNameNotToOveride);
+        emptyRaceColumnNamesList = Collections.emptyList();
 
         List<Series> seriesNotToOverride = new ArrayList<Series>();
         List<Fleet> fleetsNotToOverride = new ArrayList<Fleet>();
         FleetImpl testFleet1NotToOverride = new FleetImpl("testFleet1");
         fleetsNotToOverride.add(testFleet1NotToOverride);
-        seriesNotToOverride.add(new SeriesImpl("testSeries", false, fleetsNotToOverride, raceColumnNamesNotToOverride, destService));
+        seriesNotToOverride.add(new SeriesImpl("testSeries", false, fleetsNotToOverride, emptyRaceColumnNamesList, destService));
         Regatta regattaNotToOverride = destService.createRegatta("testRegatta", "29er", regattaUUID, seriesNotToOverride, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regattaNotToOverride);
+        for (String name : raceColumnNamesNotToOverride) {
+            seriesNotToOverride.get(0).addRaceColumn(name, destService);
+        }
+        
         Leaderboard leaderboardNotToOverride = destService.addRegattaLeaderboard(regattaNotToOverride.getRegattaIdentifier(),
                 "testDisplayNameNotToOverride", discardRule);
         List<String> leaderboardNamesNotToOverride = new ArrayList<String>();
@@ -469,17 +487,22 @@ public class MasterDataImportTest {
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
         raceColumnNames.add("T2");
+        List<String> emptyRaceColumnNamesList = Collections.emptyList();
 
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, raceColumnNames, sourceService));
+        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
+        for (String name : raceColumnNames) {
+            series.get(0).addRaceColumn(name, sourceService);
+        }
+        
         int[] discardRule = { 1, 2, 3, 4 };
         Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
                 "testDisplayName", discardRule);
@@ -564,15 +587,20 @@ public class MasterDataImportTest {
         List<String> raceColumnNamesToOverride = new ArrayList<String>();
         String raceColumnNameToOveride = "T1tooverride";
         raceColumnNamesToOverride.add(raceColumnNameToOveride);
-
+        emptyRaceColumnNamesList = Collections.emptyList();
+        
         List<Series> seriesToOverride = new ArrayList<Series>();
         List<Fleet> fleetsToOverride = new ArrayList<Fleet>();
         FleetImpl testFleet1ToOverride = new FleetImpl("testFleet1");
         fleetsToOverride.add(testFleet1ToOverride);
-        seriesToOverride.add(new SeriesImpl("testSeries", false, fleetsToOverride, raceColumnNamesToOverride, destService));
+        seriesToOverride.add(new SeriesImpl("testSeries", false, fleetsToOverride, emptyRaceColumnNamesList, destService));
         Regatta regattaToOverride = destService.createRegatta("testRegatta", "29er", regattaUUID, seriesToOverride, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regattaToOverride);
+        for (String name : raceColumnNamesToOverride) {
+            seriesToOverride.get(0).addRaceColumn(name, destService);
+        }
+        
         Leaderboard leaderboardToOverride = destService.addRegattaLeaderboard(regattaToOverride.getRegattaIdentifier(),
                 "testDisplayNameNotToOverride", discardRule);
         List<String> leaderboardNamesToOverride = new ArrayList<String>();
@@ -633,16 +661,20 @@ public class MasterDataImportTest {
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
         raceColumnNames.add("T2");
+        List<String> emptyRaceColumnNamesList = Collections.emptyList();
 
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, raceColumnNames, sourceService));
+        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
                 null);
+        for (String name : raceColumnNames) {
+            series.get(0).addRaceColumn(name, sourceService);
+        }
         int[] discardRule = { 1, 2, 3, 4 };
         Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
                 "testDisplayName", discardRule);
@@ -752,17 +784,23 @@ public class MasterDataImportTest {
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
         raceColumnNames.add("T2");
+        final List<String> emptyRaceColumnNamesList = Collections.emptyList();
 
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, raceColumnNames, sourceService));
+        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
+        for (String name : raceColumnNames) {
+            series.get(0).addRaceColumn(name, sourceService);
+        }
+        
+        
         int[] discardRule = { 1, 2, 3, 4 };
         Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
                 "testDisplayName", discardRule);
@@ -921,17 +959,22 @@ public class MasterDataImportTest {
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
         raceColumnNames.add("T2");
+        final List<String> emptyRaceColumnNamesList = Collections.emptyList();
 
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, raceColumnNames, sourceService));
+        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
+        for (String name : raceColumnNames) {
+            series.get(0).addRaceColumn(name, sourceService);
+        }
+        
         int[] discardRule = { 1, 2, 3, 4 };
         Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
                 "testDisplayName", discardRule);
