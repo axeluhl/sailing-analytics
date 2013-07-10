@@ -19,10 +19,10 @@ The current plan is to use up to three channels for communicating:
 `CreateFlexibleLeaderboardPostServlet`
 
 **Expects**
-* POST request body: Leaderboard-JSON (see `LeaderboardJsonSerializer`)
+* POST request body: LeaderboardDTO-JSON (see `LeaderboardDTOJsonSerializer`)
 
 **Returns**
-* `200` Leaderboard created, body: Leaderboard as JSON
+* `200` Leaderboard created, body: LeaderboardDTO as JSON
 
 **Throws**
 * `400` Invalid JSON in request
@@ -39,7 +39,7 @@ The current plan is to use up to three channels for communicating:
 * `200` RaceColumn created, body: RaceColumn as JSON
 
 **Throws**
-* `400` Missing paramter / Invalid JSON in request
+* `400` Missing parameter / Invalid JSON in request
 * `404` Leaderboard not found
 * `409` RaceColumn with name %s already exists / Error adding RaceColumn
 
@@ -64,6 +64,20 @@ The current plan is to use up to three channels for communicating:
 **Returns**
 * `200` body: JSON array of Competitor objects
 
+### `/sailingserver/tracking/createRace`
+`CreateRacePostServlet`
+
+**Expects**
+* POST request: no body
+
+**Returns**
+* `200` body: RaceDTO-JSON
+
+**Throws**
+* `400` Missing parameter
+* `404` Leaderboard/RaceColumn/Fleet not found
+* `409` Race has already been created
+
 ## RaceLog Events
 ### RaceLogPersistentCompetitorRegisteredEvent
 Includes a `Competitor` as well a `SmartphoneIdentifier`. On the one hand, every comptitor that is thus registered will be included in the `RaceDefinition` as soon as the race is created, on the other hand the mapping between smartphone identifier (e.g. IMEI for european phones) and competitor is later used for mapping the incoming fixes to the correct competitor.
@@ -74,6 +88,7 @@ This does not include any additional data, and merely indicates that the race sh
 ### Events that are still needed
 * Set boat class
 * Set course (reuse of existing events that Potsdam students already use)
+* Remove registered competitor (also use in RegisteredCompetitorFinder)
 
 ##Tracking App Architecture
 
@@ -88,3 +103,9 @@ Sends the location information to a web service.
 
 ### `SAP Sailor Tracker Service`
 Background process for starting, pausing and stopping tracking. Registers all receivers on a pending intent, which is send periodically.
+
+## ToDo
+* persist tracking data (GPSFixStore)
+* user management (Competitors as users, credentials so not everybody can do everything)
+* security (not everybody can start race, goes hand in hand with user management)
+* load stored tracked smartphone race (Panel in Admin Console)
