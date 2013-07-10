@@ -64,6 +64,17 @@ The current plan is to use up to three channels for communicating:
 **Returns**
 * `200` body: JSON array of Competitor objects
 
+## RaceLog Events
+### RaceLogPersistentCompetitorRegisteredEvent
+Includes a `Competitor` as well a `SmartphoneIdentifier`. On the one hand, every comptitor that is thus registered will be included in the `RaceDefinition` as soon as the race is created, on the other hand the mapping between smartphone identifier (e.g. IMEI for european phones) and competitor is later used for mapping the incoming fixes to the correct competitor.
+
+### RaceLogCreateRaceEvent
+This does not include any additional data, and merely indicates that the race should be transformed from its pre-race definition state (e.g. waiting for competitors to register, waiting for boat class, waiting for course definition) to a fixed next state, where no additional competitors can be added, the boat class is fixes, and tracking may begin.
+
+### Events that are still needed
+* Set boat class
+* Set course (reuse of existing events that Potsdam students already use)
+
 ##Tracking App Architecture
 
 ### `LocationChangedReceiver`
