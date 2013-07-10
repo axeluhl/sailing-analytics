@@ -114,10 +114,13 @@ Sends the location information to a web service.
 Background process for starting, pausing and stopping tracking. Registers all receivers on a pending intent, which is send periodically.
 
 ## ToDo
-* persist tracking data (GPSFixStore)
-* user management (Competitors as users, credentials so not everybody can do everything)
-* security (not everybody can start race, goes hand in hand with user management)
-* load stored tracked smartphone race (Panel in Admin Console, RaceLogConnector, only present such races with the necessary data in the racelog, and allow user to select whole leaderboard to restore)
-* use course update events in racelog locally, do not send to TracTrac
-* support dynamic mapping of smartphone to competitor -> so that it can change during the race
-* find methods for persistent competitors
+* Server
+ * persist tracking data (GPSFixStore)
+ * user management (Competitors as users, credentials so not everybody can do everything)
+ * security (not everybody can start race, goes hand in hand with user management)
+ * load stored tracked smartphone race (Panel in Admin Console, RaceLogConnector, only present such races with the necessary data in the racelog, and allow user to select whole leaderboard to restore)
+ * use course update events in racelog locally, do not send to TracTrac
+ * support dynamic mapping of smartphone to competitor -> so that it can change during the race
+ * find methods for persistent competitors
+* Android
+ * abstract sending service, so that all POST / GET requests and not only RaceLogEvents can be sent using the semi-connectedness functionality
