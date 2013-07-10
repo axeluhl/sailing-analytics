@@ -82,9 +82,10 @@ The current plan is to use up to three channels for communicating:
 * `409` Race has already been created, pre-race phase has not been ended
 
 ### '/sailingserver/tracking/position'
-* register mapping of smartphone to competitor e.g. in DynamicTrackedRace subclass
 * remember to also replicate this
 * then an incoming fix can be added to the TrackedRace
+* RaceLogConnector, where mapping etc. is stored should be better!
+
 
 ## RaceLog Events
 ### RaceLogPersistentCompetitorRegisteredEvent
@@ -116,4 +117,7 @@ Background process for starting, pausing and stopping tracking. Registers all re
 * persist tracking data (GPSFixStore)
 * user management (Competitors as users, credentials so not everybody can do everything)
 * security (not everybody can start race, goes hand in hand with user management)
-* load stored tracked smartphone race (Panel in Admin Console)
+* load stored tracked smartphone race (Panel in Admin Console, RaceLogConnector, only present such races with the necessary data in the racelog, and allow user to select whole leaderboard to restore)
+* use course update events in racelog locally, do not send to TracTrac
+* support dynamic mapping of smartphone to competitor -> so that it can change during the race
+* find methods for persistent competitors
