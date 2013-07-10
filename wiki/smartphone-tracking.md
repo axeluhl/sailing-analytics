@@ -67,6 +67,9 @@ The current plan is to use up to three channels for communicating:
 ### `/sailingserver/tracking/createRace`
 `CreateRacePostServlet`
 
+**Precondition**
+* `RaceLogPreRacePhaseEndedEvent` recieved via RaceLog beforehand
+
 **Expects**
 * POST request: no body
 
@@ -76,7 +79,7 @@ The current plan is to use up to three channels for communicating:
 **Throws**
 * `400` Missing parameter
 * `404` Leaderboard/RaceColumn/Fleet not found
-* `409` Race has already been created
+* `409` Race has already been created, pre-race phase has not been ended
 
 ## RaceLog Events
 ### RaceLogPersistentCompetitorRegisteredEvent
