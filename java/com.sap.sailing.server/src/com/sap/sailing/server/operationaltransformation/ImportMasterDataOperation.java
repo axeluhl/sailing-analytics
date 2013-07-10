@@ -110,15 +110,20 @@ public class ImportMasterDataOperation extends
                 // will accept the score corrections
                 Pair<RaceColumn, Fleet> dummyColumnAndFleet = addDummyTrackedRace(board.getCompetitorsById().values(),
                         leaderboard, getRegattaIfPossible(leaderboard));
+                boolean addedScoreCorrections = false;
                 if (dummyColumnAndFleet.getA() != null && dummyColumnAndFleet.getB() != null) {
                     addScoreCorrectionsIfPossible(board.getScoreCorrection(), newLeaderboard);
-                    unsetDummy(dummyColumnAndFleet, leaderboard);
+                    addedScoreCorrections = true;
                 }
                 addCarriedPoints(leaderboard, board.getCarriedPoints(), board.getCompetitorsById());
                 addSuppressedCompetitors(leaderboard, board.getSuppressedCompetitors(), board.getCompetitorsById());
                 addCompetitorDisplayNames(leaderboard, board.getDisplayNamesByCompetitorId(),
                         board.getCompetitorsById());
                 addRaceLogEvents(leaderboard, board.getRaceLogEvents());
+                toState.updateStoredLeaderboard(leaderboard);
+                if (addedScoreCorrections) {
+                    unsetDummy(dummyColumnAndFleet, leaderboard);
+                }
 
             }
         }
