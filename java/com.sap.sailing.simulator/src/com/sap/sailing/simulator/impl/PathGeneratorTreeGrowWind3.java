@@ -555,7 +555,7 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), timeStep, turnLoss, true, 'R').getA();
         double tstDist2 = startPos.getDistance(tstPosition.getPosition()).getMeters();
 
-        double hrzBinSize = (tstDist1 + tstDist2)/2.0; // horizontal bin size in meters
+        double hrzBinSize = (tstDist1 + tstDist2)/3.0; // horizontal bin size in meters
         if (debugMsgOn) {
             System.out.println("Horizontal Bin Size: "+hrzBinSize);
         }

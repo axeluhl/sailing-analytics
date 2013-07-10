@@ -117,7 +117,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
             double cWidth = Math.max(1., 1. + (cFactor * PathPolyline.knotsToMetersPerSecond(this.curSpeed) / 3.0));
             double cLength = Math.max(10., 10. + (cFactor * 2. * PathPolyline.knotsToMetersPerSecond(this.curSpeed)));
             double cX = xOffset + (rectWidth + 15.0 + txtmaxwidth + timewidth)/2.0;
-            double cY = 180;
+            double cY = yOffset + (pathOverlays.size()-1) * rectHeight + 75.0;
             context2d.setGlobalAlpha(0.80);
             context2d.setFillStyle("white");
             double bgWidth = 100.0;
