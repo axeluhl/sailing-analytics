@@ -160,6 +160,8 @@ public class MasterDataImportTest {
         for (String name : raceColumnNames) {
             series.get(0).addRaceColumn(name, sourceService);
         }
+        double factor = 3.0;
+        series.get(0).getRaceColumnByName(raceColumnName).setFactor(factor);
         
         
         int[] discardRule = { 1, 2, 3, 4 };
@@ -264,6 +266,8 @@ public class MasterDataImportTest {
         TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget);
         Fleet fleet1OnTarget = raceColumnOnTarget.getFleetByName(testFleet1.getName());
         raceColumnOnTarget.setTrackedRace(fleet1OnTarget, trackedRaceForTarget);
+        
+        Assert.assertEquals(factor, raceColumnOnTarget.getFactor());
 
         Iterable<Competitor> competitorsOnTarget = leaderboardOnTarget.getAllCompetitors();
         Iterator<Competitor> competitorIterator = competitorsOnTarget.iterator();

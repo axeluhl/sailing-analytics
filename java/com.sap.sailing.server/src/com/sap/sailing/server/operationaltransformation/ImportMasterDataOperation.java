@@ -326,6 +326,9 @@ public class ImportMasterDataOperation extends
             while (raceColumnMasterDataIter.hasNext()) {
                 RaceColumnMasterData rcmd = raceColumnMasterDataIter.next();
                 RaceColumnInSeries raceColumn = raceColumnIter.next();
+                if (rcmd.getFactor() != null) {
+                    raceColumn.setFactor(rcmd.getFactor());
+                }
                 for (Map.Entry<String, RaceIdentifier> e : rcmd.getRaceIdentifiersByFleetName().entrySet()) {
                     raceColumn.setRaceIdentifier(raceColumn.getFleetByName(e.getKey()), e.getValue());
                 }
