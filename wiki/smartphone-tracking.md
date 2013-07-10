@@ -63,3 +63,17 @@ The current plan is to use up to three channels for communicating:
 
 **Returns**
 * `200` body: JSON array of Competitor objects
+
+##Tracking App
+###Components
+####LocationChangedReceiver
+This class gets notified of location changes via intents. Depending on wether the App is in local or remote broadcast mode the corresponding service get started via an intent.
+
+####`LocalLocationUpdateService`
+Stores the location Information in a File by calling the `FileWriterUtils`.
+
+####`NetworklocationUpdateService`
+Sends the location information to a webservice.
+
+####`SAP Sailor Tracker Service`
+Background process for starting, pausing and stopping tracking. Registers all receivers on a pending intent, which is send periodically.
