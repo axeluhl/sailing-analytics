@@ -81,6 +81,11 @@ The current plan is to use up to three channels for communicating:
 * `404` Leaderboard/RaceColumn/Fleet not found
 * `409` Race has already been created, pre-race phase has not been ended
 
+### '/sailingserver/tracking/position'
+* register mapping of smartphone to competitor e.g. in DynamicTrackedRace subclass
+* remember to also replicate this
+* then an incoming fix can be added to the TrackedRace
+
 ## RaceLog Events
 ### RaceLogPersistentCompetitorRegisteredEvent
 Includes a `Competitor` as well a `SmartphoneIdentifier`. On the one hand, every comptitor that is thus registered will be included in the `RaceDefinition` as soon as the race is created, on the other hand the mapping between smartphone identifier (e.g. IMEI for european phones) and competitor is later used for mapping the incoming fixes to the correct competitor.
