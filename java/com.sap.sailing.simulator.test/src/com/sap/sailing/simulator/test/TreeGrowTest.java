@@ -20,7 +20,7 @@ import com.sap.sailing.simulator.impl.PathGeneratorTreeGrowTarget;
 import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
-import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorOscillationImpl;
@@ -51,7 +51,7 @@ public class TreeGrowTest {
         TimePoint startTime = new MillisecondsTimePoint(startDate.getTime());
         TimePoint timeStep = new MillisecondsTimePoint(20000);
         wf.generate(startTime, null, timeStep);
-        SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorUtil.freestyle, true, true);
+        SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorConstants.ModeFreestyle, true, true);
 
         /*param.setProperty("Heuristic.targetTolerance[double]", 0.05);
         param.setProperty("Heuristic.timeResolution[long]", 30000.0);

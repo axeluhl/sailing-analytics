@@ -70,7 +70,7 @@ import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.TimedPositionImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
-import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.WindFieldGeneratorFactory;
@@ -211,7 +211,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         wf.generate(startTime, null, timeStep);
 
-        if (params.getMode() != SailingSimulatorUtil.measured) {
+        if (params.getMode() != SailingSimulatorConstants.ModeMeasured) {
             Position[] gridAreaGps = new Position[2];
             gridAreaGps = course.toArray(gridAreaGps);
             wf.setGridAreaGps(gridAreaGps);
@@ -252,7 +252,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         this.controlParameters.resetBlastRandomStream = params.isKeepState();
         this.retreiveWindControlParameters(pattern);
-        if (rcDirection == SailingSimulatorUtil.RaceCourseDownwind) {
+        if (rcDirection == SailingSimulatorConstants.LegTypeDownwind) {
         	this.controlParameters.baseWindBearing += 180.0;
         }
 
@@ -262,7 +262,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             throw new WindPatternNotFoundException("Please select a valid wind pattern.");
         }
 
-        if (mode != SailingSimulatorUtil.measured) {
+        if (mode != SailingSimulatorConstants.ModeMeasured) {
             Position nw = new DegreePosition(params.getNorthWest().latDeg, params.getNorthWest().lngDeg);
             Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
             course = new ArrayList<Position>();
@@ -378,7 +378,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getA();
         String notificationMessage = polarDiagramAndNotificationMessage.getB();
 
-        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, polarDiagram, null, SailingSimulatorUtil.measured, true, true));
+        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, polarDiagram, null, SailingSimulatorConstants.ModeMeasured, true, true));
         Path gpsTrack = simulator.getLegGPSTrack(SimulatorServiceUtils.toSimulatorUISelection(requestData.selection));
 
         // Position startPoint = null;
@@ -471,7 +471,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getA();
         String notificationMessage = polarDiagramAndNotificationMessage.getB();
 
-        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, polarDiagram, null, SailingSimulatorUtil.measured, true, true));
+        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, polarDiagram, null, SailingSimulatorConstants.ModeMeasured, true, true));
         Path gpsTrack = simulator.getLegGPSTrack(SimulatorServiceUtils.toSimulatorUISelection(requestData.selection));
 
         Position startPoint = null;
@@ -545,7 +545,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         System.out.println("requestData.startToEndBearingDegrees = " + requestData.startToEndBearingDegrees + " degrees");
         System.out.println("areTowardsSameDirection = " + areTowardsSameDirection);
 
-        SimulationParameters simulationParameters = new SimulationParametersImpl(null, polarDiagram, null, SailingSimulatorUtil.measured, true, true);
+        SimulationParameters simulationParameters = new SimulationParametersImpl(null, polarDiagram, null, SailingSimulatorConstants.ModeMeasured, true, true);
         SailingSimulator sailingSimulator = new SailingSimulatorImpl(simulationParameters);
         Path gpsWind = sailingSimulator.getLegGPSTrack(SimulatorServiceUtils.toSimulatorUISelection(requestData.selection));
 
@@ -623,7 +623,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             selectedRaceIndex = 0;
         }
 
-        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, null, null, SailingSimulatorUtil.measured, true, true));
+        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, null, null, SailingSimulatorConstants.ModeMeasured, true, true));
 
         return simulator.getLegsNames(selectedRaceIndex);
     }
@@ -631,7 +631,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     @Override
     public List<String> getRacesNames() {
 
-        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, null, null, SailingSimulatorUtil.measured, true, true));
+        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, null, null, SailingSimulatorConstants.ModeMeasured, true, true));
 
         return simulator.getRacesNames();
     }
@@ -643,7 +643,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             selectedRaceIndex = 0;
         }
 
-        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, null, null, SailingSimulatorUtil.measured,true, true));
+        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, null, null, SailingSimulatorConstants.ModeMeasured,true, true));
 
         return simulator.getComeptitorsNames(selectedRaceIndex);
     }
@@ -878,16 +878,16 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         Map<String, Path> pathsAndNames = null;
 
         pathsAndNames = simulator.getAllPathsEvenTimed(wf.getTimeStep().asMillis(),
-                (mode == SailingSimulatorUtil.measured) ? SimulatorServiceUtils.toSimulatorUISelection(selection) : null);
+                (mode == SailingSimulatorConstants.ModeMeasured) ? SimulatorServiceUtils.toSimulatorUISelection(selection) : null);
 
         int noOfPaths = pathsAndNames.size();
-        if (mode == SailingSimulatorUtil.measured) {
+        if (mode == SailingSimulatorConstants.ModeMeasured) {
             noOfPaths++; // the last path is the polyline
         }
         PathDTO[] pathDTOs = new PathDTO[noOfPaths];
         int index = noOfPaths - 1;
 
-        if (mode == SailingSimulatorUtil.measured) {
+        if (mode == SailingSimulatorConstants.ModeMeasured) {
             // Adding the polyline
             pathDTOs[0] = this.getPolylinePathDTO(pathsAndNames.get("6#GPS Poly"), pathsAndNames.get("7#GPS Track"));
         }
@@ -911,7 +911,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         RaceMapDataDTO rcDTO;
-        if (mode == SailingSimulatorUtil.measured) {
+        if (mode == SailingSimulatorConstants.ModeMeasured) {
             rcDTO = new RaceMapDataDTO();
             rcDTO.coursePositions = new CoursePositionsDTO();
             rcDTO.coursePositions.waypointPositions = new ArrayList<PositionDTO>();

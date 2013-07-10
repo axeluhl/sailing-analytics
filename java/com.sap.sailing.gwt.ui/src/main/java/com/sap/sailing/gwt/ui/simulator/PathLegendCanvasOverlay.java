@@ -8,9 +8,9 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.TimeZone;
-import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
-import com.sap.sailing.gwt.ui.client.shared.racemap.CanvasOverlay;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
 
 /**
  * Class to draw the legend for the different paths on the map.
@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.CanvasOverlay;
  * @author Nidhi Sawhney (D054070)
  *
  */
-public class PathLegendCanvasOverlay extends CanvasOverlay {
+public class PathLegendCanvasOverlay extends FullCanvasOverlay {
 
     private List<PathCanvasOverlay> pathOverlays;
 
@@ -27,6 +27,9 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
     /* y coordinate where the widget is placed */
     private int widgetPosTop = 0;
 
+    private double curSpeed;
+    private double curBearing;
+
     /**
      * Offset where the legend starts
      */
@@ -34,7 +37,6 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
     private int yOffset = 20;
 
     private double rectWidth = 20;
-
     private double rectHeight = 20;
 
     public String textColor = "Black";
@@ -101,26 +103,53 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
                     path.name, getFormattedTime(path.getPathTime()),txtmaxwidth,timewidth);
             index++;
         }
+        
+        //
+        // TODO: draw current arrow
+        //
+        DegreeBearingImpl curBear = new DegreeBearingImpl(this.curBearing);
+
+        //Context2d context2d = canvas.getContext2d();
+
+        if (this.curSpeed >= 0.0) {
+            //drawScaledArrow(windDTO, dbi.getRadians(), index, true);
+            double cFactor = 12.0;
+            double cWidth = Math.max(1., 1. + (cFactor * PathPolyline.knotsToMetersPerSecond(this.curSpeed) / 3.0));
+            double cLength = Math.max(10., 10. + (cFactor * 2. * PathPolyline.knotsToMetersPerSecond(this.curSpeed)));
+            double cX = xOffset + (rectWidth + 15.0 + txtmaxwidth + timewidth)/2.0;
+            double cY = 180;
+            context2d.setGlobalAlpha(0.80);
+            context2d.setFillStyle("white");
+            double bgWidth = 100.0;
+            double bgHeight = 70.0;
+            if (this.curSpeed == 0.0) {
+            	bgHeight = 20.0;
+            }
+            context2d.fillRect(cX - bgWidth/2.0, cY - 25.0 - 15.0, bgWidth, bgHeight);
+            context2d.setGlobalAlpha(1.0);
+
+            context2d.setFont(textFont);
+            context2d.setFillStyle(textColor);
+
+            //TextMetrics txtmet;
+            String cText = "Current: " + SimulatorMainPanel.formatSliderValue(curSpeed) + "kn";
+            txtmet = context2d.measureText(cText);
+            double txtwidth = txtmet.getWidth();
+            context2d.fillText(cText, cX-(txtwidth/2.0), cY-25);
+
+            if (this.curSpeed > 0.0) {
+                drawArrowPx(cX, cY, curBear.getRadians(), cLength, cWidth, true, "Green");
+            }
+        }
+
     }
 
+    @Override
     protected void setCanvasSettings() {
-        int canvasWidth = (int) rectWidth + 200;
-        int canvasHeight = getMap().getSize().getHeight();
-
-        canvas.setWidth(String.valueOf(canvasWidth));
-        canvas.setHeight(String.valueOf(canvasHeight));
-        canvas.setCoordinateSpaceWidth(canvasWidth);
-        canvas.setCoordinateSpaceHeight(canvasHeight);
-
-        Point sw = getMap().convertLatLngToDivPixel(getMap().getBounds().getSouthWest());
-        Point ne = getMap().convertLatLngToDivPixel(getMap().getBounds().getNorthEast());
-        setWidgetPosLeft(Math.min(sw.getX(), ne.getX()));
-        setWidgetPosTop(Math.min(sw.getY(), ne.getY()));
-        //setWidgetPosLeft(xOffset);
-        //setWidgetPosTop(yOffset);
-
-        getPane().setWidgetPosition(getCanvas(), getWidgetPosLeft(), getWidgetPosTop());
-
+    	
+    	super.setCanvasSettings();	
+        canvas.getElement().getStyle().setZIndex(100000); // make legend float on-top of all overlays
+        
     }
 
     public List<PathCanvasOverlay> getPathOverlays() {
@@ -202,4 +231,10 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
                 timeDiffDate, gmt);
         return pathTimeStr;
     }
+    
+    public void setCurrent(double curSpeed, double curBearing) {
+        this.curSpeed = curSpeed;
+        this.curBearing = curBearing;
+    }
+    
 }

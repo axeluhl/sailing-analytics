@@ -154,9 +154,9 @@ public class PathGenerator1Turner extends PathGeneratorBase {
                 	}
                 } else {
                 	if (leftSide) {
-                		direction = polarDiagram.optimalDirectionsDownwind()[1];
-                	} else {
                 		direction = polarDiagram.optimalDirectionsDownwind()[0];
+                	} else {
+                		direction = polarDiagram.optimalDirectionsDownwind()[1];
                 	}
                 }
                 SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
@@ -170,16 +170,16 @@ public class PathGenerator1Turner extends PathGeneratorBase {
                 }
                 currentPosition = nextPosition;
                 currentTime = nextTime;
-                path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
+                path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, currentWind));
 
                 if (currentPosition.getDistance(end).getMeters() < reachingTolerance * courseLength.getMeters()) {
                     reachTime[step] = minimumDistance;
                     targetFound = true;
-                    if (minimumDistance < overallMinimumDistance) {
-                        overallMinimumDistance = minimumDistance;
-                        stepOfOverallMinimumDistance = step;
-                        allminpath = path;
-                    }
+                }
+                if (minimumDistance < overallMinimumDistance) {
+                    overallMinimumDistance = minimumDistance;
+                    stepOfOverallMinimumDistance = step;
+                    allminpath = path;
                 }
                 stepLeft++;
             }
@@ -199,9 +199,9 @@ public class PathGenerator1Turner extends PathGeneratorBase {
             		}
             	} else {
             		if (leftSide) {
-            			direction = polarDiagram.optimalDirectionsDownwind()[0];
-            		} else {
             			direction = polarDiagram.optimalDirectionsDownwind()[1];
+            		} else {
+            			direction = polarDiagram.optimalDirectionsDownwind()[0];
             		}
             	}
 
@@ -217,7 +217,7 @@ public class PathGenerator1Turner extends PathGeneratorBase {
                 }
                 currentPosition = nextPosition;
                 currentTime = nextTime;
-                path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null)); // currSpeed));
+                path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, currentWind));
                 /*if (this.evalStartPoint != null) {
                     System.out.println("s: "+step+" dist: "+currentPosition.getDistance(end).getMeters()+" ?<? "+reachingTolerance * courseLength.getMeters());
                 }*/
@@ -235,11 +235,11 @@ public class PathGenerator1Turner extends PathGeneratorBase {
                     if (start.getDistance(currentPosition).getMeters() > start.getDistance(end).getMeters()) {
                         targetFound = true;
                     }
-                    if (minimumDistance < overallMinimumDistance) {
-                        overallMinimumDistance = minimumDistance;
-                        stepOfOverallMinimumDistance = step;
-                        allminpath = new LinkedList<TimedPositionWithSpeed>(path);
-                    }
+                }
+                if (minimumDistance < overallMinimumDistance) {
+                    overallMinimumDistance = minimumDistance;
+                    stepOfOverallMinimumDistance = step;
+                    allminpath = new LinkedList<TimedPositionWithSpeed>(path);
                 }
                 stepRight++;
             }

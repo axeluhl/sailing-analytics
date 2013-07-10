@@ -61,7 +61,7 @@ import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
-import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
 public class SimulatorMainPanel extends SimplePanel {
 
@@ -113,6 +113,7 @@ public class SimulatorMainPanel extends SimplePanel {
     private ErrorReporter errorReporter;
     private boolean autoUpdate;
     private char mode;
+    private char event;
 
     private TimePanel<TimePanelSettings> timePanel;
     private FlowPanel fullTimePanel;
@@ -223,7 +224,7 @@ public class SimulatorMainPanel extends SimplePanel {
     }
 
     public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, boolean autoUpdate,
-            char mode, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showStreamlets) {
+            char mode, char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showStreamlets) {
 
         super();
 
@@ -232,6 +233,7 @@ public class SimulatorMainPanel extends SimplePanel {
         this.errorReporter = errorReporter;
         this.autoUpdate = autoUpdate;
         this.mode = mode;
+        this.event = event;
         this.isOmniscient = new CheckBox(this.stringMessages.omniscient(), true);
         this.isOmniscient.setValue(true);
         this.isOmniscient.addClickHandler(new ClickHandler() {
@@ -411,12 +413,12 @@ public class SimulatorMainPanel extends SimplePanel {
             @Override
             public void onSuccess(List<WindPatternDTO> patterns) {
                 for (WindPatternDTO p : patterns) {
-                    if ((mode != SailingSimulatorUtil.freestyle)||(!p.getName().equals("MEASURED"))) {
+                    if ((mode != SailingSimulatorConstants.ModeFreestyle)||(!p.getName().equals("MEASURED"))) {
                         patternSelector.addItem(p.getDisplayName());
                         patternNameDTOMap.put(p.getDisplayName(), p);
                     }
                 }
-                if (mode == SailingSimulatorUtil.measured) {
+                if (mode == SailingSimulatorConstants.ModeMeasured) {
                     patternSelector.setItemSelected(patternSelector.getItemCount()-1, true);
                     patternSelectorHandler.onChange(null);
                 } else {
@@ -523,7 +525,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
         mapOptions.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
-        if ((mode != SailingSimulatorUtil.measured)&&(mode != SailingSimulatorUtil.event)) {
+        if ((mode != SailingSimulatorConstants.ModeMeasured)&&(mode != SailingSimulatorConstants.ModeEvent)) {
         	initCourseInputButton();
             mapOptions.add(courseInputButton);
         }
@@ -533,7 +535,7 @@ public class SimulatorMainPanel extends SimplePanel {
         mainPanel.addNorth(mapOptions, 45);
 
         initDisplayOptions(mapOptions);
-        if (mode == SailingSimulatorUtil.event) {
+        if (mode == SailingSimulatorConstants.ModeEvent) {
         	summaryButton.setValue(true);
         	replayButton.setValue(false);
         	windDisplayButton.setValue(false);
@@ -708,7 +710,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
         sailingPanel.add(this.getBoatClassesSelector());
 
-        if (this.mode == SailingSimulatorUtil.measured) {
+        if (this.mode == SailingSimulatorConstants.ModeMeasured) {
 
             sailingPanel.add(this.getRacesSelector());
             sailingPanel.add(this.getCompetitorsSelector());
@@ -721,7 +723,7 @@ public class SimulatorMainPanel extends SimplePanel {
         Panel strategySelector = createStrategySelector();
         sailingPanel.add(strategySelector);
 
-        if (this.mode == SailingSimulatorUtil.measured) {
+        if (this.mode == SailingSimulatorConstants.ModeMeasured) {
             Panel pathPolylineModeSelector = this.createPathPolylineModeSelector();
             sailingPanel.add(pathPolylineModeSelector);
         }
@@ -749,15 +751,15 @@ public class SimulatorMainPanel extends SimplePanel {
     	switch(selectedDirection) {
     		    	
     	case 0:
-    		simulatorMap.setRaceCourseDirection(SailingSimulatorUtil.RaceCourseUpwind);
+    		simulatorMap.setRaceCourseDirection(SailingSimulatorConstants.LegTypeUpwind);
     		break;
 
     	case 1:
-    		simulatorMap.setRaceCourseDirection(SailingSimulatorUtil.RaceCourseDownwind);
+    		simulatorMap.setRaceCourseDirection(SailingSimulatorConstants.LegTypeDownwind);
     		break;
     	
     	default:
-    		simulatorMap.setRaceCourseDirection(SailingSimulatorUtil.RaceCourseUpwind);
+    		simulatorMap.setRaceCourseDirection(SailingSimulatorConstants.LegTypeUpwind);
 
     	}
     
@@ -851,7 +853,7 @@ public class SimulatorMainPanel extends SimplePanel {
     private void initUpdateButton() {
 
         this.updateButton = new Button(stringMessages.simulateButton());
-        if (mode == SailingSimulatorUtil.event) {
+        if (mode == SailingSimulatorConstants.ModeEvent) {
         	this.updateButton.setEnabled(true);
         }
         this.updateButton.addClickHandler(new ClickHandler() {
@@ -887,7 +889,7 @@ public class SimulatorMainPanel extends SimplePanel {
             this.showTimePanel(true);
             this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, selection, true);
         } else {
-            if (this.mode == SailingSimulatorUtil.measured) {
+            if (this.mode == SailingSimulatorConstants.ModeMeasured) {
 
                 if (selectedLegIndex % 2 != 0) {
                     errorReporter.reportError("Downwind legs are NOT supported yet. Sorry about that :)");
@@ -970,6 +972,11 @@ public class SimulatorMainPanel extends SimplePanel {
         return dialogBox;
     }
 
+    public char getEvent() {
+    	return this.event;
+    }
+    
+    
     public int getSelectedBoatClassIndex() {
         return this.boatClassSelector.getSelectedIndex();
     }

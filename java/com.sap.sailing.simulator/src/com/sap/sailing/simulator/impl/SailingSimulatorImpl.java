@@ -19,7 +19,7 @@ import com.sap.sailing.simulator.RaceProperties;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.SimulatorUISelection;
-import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 public class SailingSimulatorImpl implements SailingSimulator {
@@ -46,7 +46,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
     public SailingSimulatorImpl(SimulationParameters parameters) {
         this.simulationParameters = parameters;
-        if (this.simulationParameters.getMode() == SailingSimulatorUtil.measured) {
+        if (this.simulationParameters.getMode() == SailingSimulatorConstants.ModeMeasured) {
             this.initializePathGenerator(parameters, 0, 0, 0);
         }
     }
@@ -120,8 +120,11 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Path leftPath = genTreeGrow.getPath();
         PathCandidate leftBestCand = genTreeGrow.getBestCand();
         int left1TurnMiddle = 1000;
+        long left1TurnMidtime = 1000000000;
+        long left1TurnTimestep = genTreeGrow.getUsedTimeStep(); 
         if (leftBestCand != null) {
             left1TurnMiddle = leftBestCand.path.indexOf("LR");
+            left1TurnMidtime = left1TurnMiddle * left1TurnTimestep; 
         }
 
         // search best right-starting 1-turner
@@ -129,8 +132,11 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Path rightPath = genTreeGrow.getPath();
         PathCandidate rightBestCand = genTreeGrow.getBestCand();
         int right1TurnMiddle = 1000;
+        long right1TurnMidtime = 1000000000;
+        long right1TurnTimestep = genTreeGrow.getUsedTimeStep(); 
         if (rightBestCand != null) {
             right1TurnMiddle = rightBestCand.path.indexOf("RL");
+            right1TurnMidtime = right1TurnMiddle * right1TurnTimestep; 
         }
 
         Path optPath = null;
@@ -141,17 +147,26 @@ public class SailingSimulatorImpl implements SailingSimulator {
         }
         
     	Path oppPath = null;
+    	Path oppPathL = null;
+    	Path oppPathR = null;
         if (this.simulationParameters.showOpportunist()) {
         	// evaluate opportunistic heuristic
         	PathGeneratorOpportunistEuclidian genOpportunistic = new PathGeneratorOpportunistEuclidian(this.simulationParameters);
         	// PathGeneratorOpportunistVMG genOpportunistic = new PathGeneratorOpportunistVMG(simulationParameters);
 
         	// left-starting opportunist
-        	genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, true);
-        	Path oppPathL = genOpportunistic.getPath();
+        	genOpportunistic.setEvaluationParameters(left1TurnMidtime, right1TurnMidtime, true);
+        	oppPathL = genOpportunistic.getPath();
+        	if (genOpportunistic.getTurns() == 1) {
+        		oppPathL = leftPath;
+        	}
+        	
         	// right-starting opportunist
-        	genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, false);
-        	Path oppPathR = genOpportunistic.getPath();
+        	genOpportunistic.setEvaluationParameters(left1TurnMidtime, right1TurnMidtime, false);
+        	oppPathR = genOpportunistic.getPath();
+        	if (genOpportunistic.getTurns() == 1) {
+        		oppPathR = rightPath;
+        	}
 
         	// compare left- & right-starting opportunists
         	if (oppPathL.getPathPoints().get(oppPathL.getPathPoints().size() - 1).getTimePoint().asMillis() <= oppPathR.getPathPoints()
@@ -193,10 +208,11 @@ public class SailingSimulatorImpl implements SailingSimulator {
             }
         }
 
-        allPaths.put("4#1-Turner Right", rightPath);
-        allPaths.put("3#1-Turner Left", leftPath);
+        allPaths.put("5#1-Turner Right", rightPath);
+        allPaths.put("4#1-Turner Left", leftPath);
         if (this.simulationParameters.showOpportunist()) {
-        	allPaths.put("2#Opportunistic", oppPath);
+        	allPaths.put("3#Opportunist Right", oppPathR);
+        	allPaths.put("2#Opportunist Left", oppPathL);
         }        
         if (this.simulationParameters.showOmniscient()) {
         	allPaths.put("1#Omniscient", optPath);
@@ -238,7 +254,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         allPaths.putAll(SimulatorUtils.getSimulationPaths(this.simulationParameters, gpsPath, this.raceCourse));
 
-        if (this.simulationParameters.getMode() == SailingSimulatorUtil.measured) {
+        if (this.simulationParameters.getMode() == SailingSimulatorConstants.ModeMeasured) {
             SimulatorUtils.saveLegPathsToFiles(allPaths, this.raceCourse, selection.getRaceIndex(), selection.getCompetitorIndex(), selection.getLegIndex());
         }
 

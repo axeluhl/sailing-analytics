@@ -36,6 +36,7 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
     boolean upwindLeg = false;
     String initPathStr = "0";
     PathCandidate bestCand = null;
+    long usedTimeStep = 0;
     boolean gridStore = false;
     ArrayList<List<PathCandidate>> gridPositions = null;
     ArrayList<List<PathCandidate>> isocPositions = null;
@@ -94,6 +95,10 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
     PathCandidate getBestCand() {
         return this.bestCand;
     }
+    
+    long getUsedTimeStep() {
+    	return this.usedTimeStep;
+    }
 
 
     // generate step in one of the possible directions
@@ -118,20 +123,20 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         	if (this.upwindLeg) {
         		travelBearing = pd.optimalDirectionsUpwind()[0];
         	} else {
-        		travelBearing = pd.optimalDirectionsDownwind()[1];        		
+        		travelBearing = pd.optimalDirectionsDownwind()[0];        		
         	}
         } else if (nextDirection == 'R') {
         	if (this.upwindLeg) {
         		travelBearing = pd.optimalDirectionsUpwind()[1];
         	} else {
-        		travelBearing = pd.optimalDirectionsDownwind()[0];        		
+        		travelBearing = pd.optimalDirectionsDownwind()[1];        		
         	}
         } else if (nextDirection == 'M') {
         	if (this.upwindLeg) {
                 tmpBearing = pd.optimalDirectionsUpwind()[0];
                 travelBearing = tmpBearing.add(new DegreeBearingImpl(-offDeg));
         	} else {
-                tmpBearing = pd.optimalDirectionsDownwind()[1];
+                tmpBearing = pd.optimalDirectionsDownwind()[0];
                 travelBearing = tmpBearing.add(new DegreeBearingImpl(-offDeg));
         	}
         } else if (nextDirection == 'S') {
@@ -139,7 +144,7 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         		tmpBearing = pd.optimalDirectionsUpwind()[1];
         		travelBearing = tmpBearing.add(new DegreeBearingImpl(+offDeg));
         	} else {
-        		tmpBearing = pd.optimalDirectionsDownwind()[0];
+        		tmpBearing = pd.optimalDirectionsDownwind()[1];
         		travelBearing = tmpBearing.add(new DegreeBearingImpl(+offDeg));        		
         	}
         }
@@ -519,14 +524,15 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         }
         logger.info("Leg Direction: "+legType);
 
-        long timeStep = wf.getTimeStep().asMillis()/3;
+        long timeStep = wf.getTimeStep().asMillis()/2;
         if (!this.upwindLeg) {
-        	timeStep = timeStep * 2 / 3;
+        	timeStep = timeStep / 2;
         }
+        this.usedTimeStep = timeStep;
         logger.info("Time step :" + timeStep);
         long turnLoss = pd.getTurnLoss(); // 4000; // time lost when doing a turn
         if (!this.upwindLeg) {
-        	turnLoss = turnLoss *2 / 3;
+        	turnLoss = turnLoss / 2;
         }
         
         // calculate initial position according to initPathStr

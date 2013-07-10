@@ -21,8 +21,11 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
     SimulationParameters simulationParameters;
+    int turns;
     int maxLeft;
     int maxRight;
+    long maxLeftTime;
+    long maxRightTime;
     boolean startLeft;
     boolean upwindLeg = false;
 
@@ -36,6 +39,16 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
         this.startLeft = startLeftVal;
     }
 
+    public void setEvaluationParameters(long maxLeftTime, long maxRightTime, boolean startLeftVal) {
+        this.maxLeftTime = maxLeftTime;
+        this.maxRightTime = maxRightTime;
+        this.startLeft = startLeftVal;
+    }
+
+    public int getTurns() {
+    	return turns;
+    }
+    
     @Override
     public Path getPath() {
 
@@ -50,10 +63,11 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
         //Position end = simulationParameters.getCourse().get(0);
                 
         TimePoint startTime = wf.getStartTime();// new MillisecondsTimePoint(0);
-        List<TimedPositionWithSpeed> lst = new ArrayList<TimedPositionWithSpeed>();
+        List<TimedPositionWithSpeed> path = new ArrayList<TimedPositionWithSpeed>();
 
         Position currentPosition = start;
         TimePoint currentTime = startTime;
+        double currentHeight = start.getDistance(end).getMeters();
 
         int stepsLeft = 0;
         int stepsRight = 0;
@@ -72,9 +86,10 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
         logger.fine("wndStart speed:" + wndStart.getKnots() + " angle:" + wndStart.getBearing().getDegrees());
         pd.setWind(wndStart);
         Bearing bearStart = currentPosition.getBearingGreatCircle(end);
-        SpeedWithBearing spdStart = pd.getSpeedAtBearing(bearStart);
-        lst.add(new TimedPositionWithSpeedImpl(startTime, start, spdStart));
-        long timeStep = wf.getTimeStep().asMillis();
+        //SpeedWithBearing spdStart = pd.getSpeedAtBearing(bearStart);
+        path.add(new TimedPositionWithSpeedImpl(startTime, start, wndStart));
+        
+        long timeStep = wf.getTimeStep().asMillis()/2;
         logger.info("Time step :" + timeStep);
         // while there is more than 5% of the total distance to the finish
 
@@ -93,15 +108,20 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             timeStep = timeStep / timeStepScale;
         	turnloss = turnloss / timeStepScale;
         }
-        
+
+        if ((maxLeftTime > 0)||(maxRightTime > 0)) {
+        	this.maxLeft = (int)Math.floor((double)maxLeftTime / (double)timeStep);
+        	this.maxRight = (int)Math.floor((double)maxRightTime / (double)timeStep);
+        }
         logger.info("Leg Direction: "+legType);
 
         //
         // StrategicPhase: start & intermediate course until close to target
         //
+        turns = 0;
         SpeedWithBearing slft = null;
         SpeedWithBearing srght = null;
-        while (currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(fracFinishPhase)) > 0) {
+        while ((currentHeight > 0)&&(currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(fracFinishPhase)) > 0)&&(path.size()<500)) {
 
             // TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + 30000);
 
@@ -120,8 +140,8 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             	wLft = pd.optimalDirectionsUpwind()[0];
             	wRght = pd.optimalDirectionsUpwind()[1];
             } else {
-            	wLft = pd.optimalDirectionsDownwind()[1];
-            	wRght = pd.optimalDirectionsDownwind()[0];
+            	wLft = pd.optimalDirectionsDownwind()[0];
+            	wRght = pd.optimalDirectionsDownwind()[1];
             }
             // Bearing wDirect = currentPosition.getBearingGreatCircle(end);
 
@@ -155,7 +175,7 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             if (this.upwindLeg) {
             	lft = pd.optimalDirectionsUpwind()[0];
             } else {
-            	lft = pd.optimalDirectionsDownwind()[1];            	
+            	lft = pd.optimalDirectionsDownwind()[0];            	
             }
             slft = pd.getSpeedAtBearing(lft);
 
@@ -167,7 +187,7 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             if (this.upwindLeg) {
             	rght = pd.optimalDirectionsUpwind()[1];
             } else {
-            	rght = pd.optimalDirectionsDownwind()[0];            	
+            	rght = pd.optimalDirectionsDownwind()[1];            	
             }
             srght = pd.getSpeedAtBearing(rght);
 
@@ -215,19 +235,21 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             if (prevDirection == -1) {
 
                 if (startLeft) {
-                    lst.add(new TimedPositionWithSpeedImpl(nextTime, plft, slft));
+                    path.add(new TimedPositionWithSpeedImpl(nextTime, plft, lWind));
                     currentPosition = plft;
                     if (prevDirection == 2) {
                         allLeft = false;
+                        turns++;
                     } else {
                         stepsLeft++;
                     }
                     prevDirection = 1;
                 } else {
-                    lst.add(new TimedPositionWithSpeedImpl(nextTime, prght, srght));
+                    path.add(new TimedPositionWithSpeedImpl(nextTime, prght, rWind));
                     currentPosition = prght;
                     if (prevDirection == 1) {
                         allRight = false;
+                        turns++;
                     } else {
                         stepsRight++;
                     }
@@ -237,20 +259,22 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             } else {
                 // System.out.println("Distance Left - Right: "+lDistCM+" - "+ rDistCM);
                 if (((lDistCM <= rDistCM) && (!allLeft || (stepsLeft < maxLeft))) || (allRight && (stepsRight >= maxRight))) {
-                    lst.add(new TimedPositionWithSpeedImpl(nextTime, plft, slft));
+                    path.add(new TimedPositionWithSpeedImpl(nextTime, plft, lWind));
                     currentPosition = plft;
                     if (prevDirection == 2) {
                         allLeft = false;
+                        turns++;
                     } else {
                         stepsLeft++;
                     }
                     prevDirection = 1;
                 } else {
                     // if (((drght.compareTo(dlft) < 0)&&(stepsRight < maxRight))||(stepsLeft >= maxLeft)) {
-                    lst.add(new TimedPositionWithSpeedImpl(nextTime, prght, srght));
+                    path.add(new TimedPositionWithSpeedImpl(nextTime, prght, rWind));
                     currentPosition = prght;
                     if (prevDirection == 1) {
                         allRight = false;
+                        turns++;
                     } else {
                         stepsRight++;
                     }
@@ -259,7 +283,9 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             }
 
             currentTime = nextTime;
-
+            Position posHeight = currentPosition.projectToLineThrough(start, bearStart);
+            currentHeight = start.getDistance(end).getMeters() - posHeight.getDistance(start).getMeters();
+            //System.out.println("Height to Target: "+height);
         }
 
         //
@@ -276,26 +302,26 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             rightGoingTime = currentTime;
         }
 
-        gen1Turner.setEvaluationParameters(true, currentPosition, end, leftGoingTime, wf.getTimeStep().asMillis() / (5 * 3 * timeStepScale), 100, 0.1, this.upwindLeg);
+        gen1Turner.setEvaluationParameters(true, currentPosition, end, leftGoingTime, timeStep / (5 * 3), 100, 0.1, this.upwindLeg);
         Path leftPath = gen1Turner.getPath();
 
-        gen1Turner.setEvaluationParameters(false, currentPosition, end, rightGoingTime, wf.getTimeStep().asMillis() / (5 * 3 * timeStepScale), 100, 0.1, this.upwindLeg);
+        gen1Turner.setEvaluationParameters(false, currentPosition, end, rightGoingTime, timeStep / (5 * 3), 100, 0.1, this.upwindLeg);
         Path rightPath = gen1Turner.getPath();
 
         if ((leftPath.getPathPoints() != null) && (rightPath.getPathPoints() != null)) {
             if (leftPath.getPathPoints().get(leftPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= rightPath.getPathPoints()
                     .get(rightPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
-                lst.addAll(leftPath.getPathPoints());
+                path.addAll(leftPath.getPathPoints());
             } else {
-                lst.addAll(rightPath.getPathPoints());
+                path.addAll(rightPath.getPathPoints());
             }
         } else if (leftPath.getPathPoints() != null) {
-            lst.addAll(leftPath.getPathPoints());
+            path.addAll(leftPath.getPathPoints());
         } else if (rightPath.getPathPoints() != null) {
-            lst.addAll(rightPath.getPathPoints());
+            path.addAll(rightPath.getPathPoints());
         }
 
-        return new PathImpl(lst, wf);
+        return new PathImpl(path, wf);
 
     }
 
