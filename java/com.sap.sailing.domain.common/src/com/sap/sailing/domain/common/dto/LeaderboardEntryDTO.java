@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -53,6 +54,14 @@ public class LeaderboardEntryDTO implements Serializable {
     public Double distanceToStarboardSideOfStartLineInMeters;
     
     public Tack startTack;
+    
+    /**
+     * If we have GPS data for the competitor for whom this is a leaderboard entry, tells the time point of the last
+     * non-extrapolated GPS fix that was really received from the tracking device. The user interface may---particularly
+     * in live mode---choose to visualize the time that passed between the last fix and the query time point for which
+     * this entry was created.
+     */
+    public Date timePointOfLastPositionFix;
 
     /**
      * If <code>null</code>, no leg details are known yet, the race is not being tracked or the details
@@ -102,6 +111,7 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result
                 + ((speedOverGroundAtStartOfRaceInKnots == null) ? 0 : speedOverGroundAtStartOfRaceInKnots.hashCode());
         result = prime * result + ((startTack == null) ? 0 : startTack.hashCode());
+        result = prime * result + ((timePointOfLastPositionFix == null) ? 0 : timePointOfLastPositionFix.hashCode());
         result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
         result = prime
                 * result
@@ -172,6 +182,11 @@ public class LeaderboardEntryDTO implements Serializable {
         } else if (!speedOverGroundAtStartOfRaceInKnots.equals(other.speedOverGroundAtStartOfRaceInKnots))
             return false;
         if (startTack != other.startTack)
+            return false;
+        if (timePointOfLastPositionFix == null) {
+            if (other.timePointOfLastPositionFix != null)
+                return false;
+        } else if (!timePointOfLastPositionFix.equals(other.timePointOfLastPositionFix))
             return false;
         if (totalPoints == null) {
             if (other.totalPoints != null)
