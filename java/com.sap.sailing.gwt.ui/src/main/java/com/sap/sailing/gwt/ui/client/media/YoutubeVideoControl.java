@@ -1,18 +1,11 @@
 package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
 
 public class YoutubeVideoControl  {
 
-    private static int containerId;
-    
     private JavaScriptObject youtubePlayer;
 
-    private final Panel containerPanel;
-    
     private boolean deferredIsPlaying;
 
     private double deferredCurrentTime;
@@ -23,15 +16,8 @@ public class YoutubeVideoControl  {
 
     private double deferredPlaybackSpeed;
 
-    YoutubeVideoControl(String videoUrl, boolean showControls) {
+    YoutubeVideoControl(String videoUrl, String videoContainerId, boolean showControls) {
         
-        containerPanel = new SimplePanel();
-
-        String videoContainerId = "videoContainer-" + containerId++;
-
-        containerPanel.getElement().setId(videoContainerId);
-        containerPanel.getElement().setInnerText("When the Youtube video doesn't show up, click the popout button at the upper right corner to open the video in a dedicated browser window.");
-
         if (!isYoutubeApiInitialized()) {
             loadInitialYoutubePlayer(videoUrl, videoContainerId, showControls);
         } else {
@@ -205,10 +191,6 @@ public class YoutubeVideoControl  {
                 var player = this.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::youtubePlayer;
                 player.setPlaybackRate(newPlaySpeedFactor);
     }-*/;
-
-    public Widget widget() {
-        return containerPanel;
-    }
 
     public void setControlsVisible(boolean isVisible) {
         if (this.youtubePlayer != null) {

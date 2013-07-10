@@ -205,6 +205,7 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
                     .get(RaceColumnMasterDataJsonSerializer.FIELD_NAME);
             Boolean medal = (Boolean) columnJson
                     .get(RaceColumnMasterDataJsonSerializer.FIELD_MEDAL_RACE);
+            Double factor = (Double) columnJson.get(RaceColumnMasterDataJsonSerializer.FIELD_FACTOR);
             Map<String, RaceIdentifier> raceIdentifiers = new HashMap<String, RaceIdentifier>();
             JSONArray jsonRaceIdentifiers = (JSONArray) columnJson.get(RaceColumnMasterDataJsonSerializer.FIELD_RACE_IDENTIFIERS);
             for (Object raceIdentifierObject : jsonRaceIdentifiers) {
@@ -215,7 +216,7 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
                 RaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
                 raceIdentifiers.put(fleetName, raceIdentifier);
             }
-            columns.add(new RaceColumnMasterData(columnName, medal, raceIdentifiers));
+            columns.add(new RaceColumnMasterData(columnName, medal, raceIdentifiers, factor));
         }
         return columns;
     }
