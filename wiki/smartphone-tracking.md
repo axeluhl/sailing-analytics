@@ -85,8 +85,8 @@ The current plan is to use up to three channels for communicating:
 ### RaceLogPersistentCompetitorRegisteredEvent
 Includes a `Competitor` as well a `SmartphoneIdentifier`. On the one hand, every comptitor that is thus registered will be included in the `RaceDefinition` as soon as the race is created, on the other hand the mapping between smartphone identifier (e.g. IMEI for european phones) and competitor is later used for mapping the incoming fixes to the correct competitor.
 
-### RaceLogCreateRaceEvent
-This does not include any additional data, and merely indicates that the race should be transformed from its pre-race definition state (e.g. waiting for competitors to register, waiting for boat class, waiting for course definition) to a fixed next state, where no additional competitors can be added, the boat class is fixes, and tracking may begin.
+### RaceLogPreRacePhaseEndedEvent
+This does not include any additional data, and merely indicates that the race can be transformed from its pre-race definition state (e.g. waiting for competitors to register, waiting for boat class, waiting for course definition) to an actual race, where no additional competitors can be added, the boat class is fixes, and tracking may begin. This existence of this event in the RaceLog is a precondition for the `createRace` servlet to be callable successfully.
 
 ### Events that are still needed
 * Set boat class
