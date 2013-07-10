@@ -43,7 +43,9 @@ public class RaceLogOperationalTransformationTest {
         client2 = new PeerImpl<>(transformer, raceLogClient2, Role.CLIENT);
         server = new PeerImpl<>(transformer, raceLogServer, Role.SERVER);
         server.addPeer(client1);
+        client1.addPeer(server);
         server.addPeer(client2);
+        client2.addPeer(server);
     }
     
     @Test
@@ -56,9 +58,33 @@ public class RaceLogOperationalTransformationTest {
         server.waitForNotRunning();
         client1.waitForNotRunning();
         client2.waitForNotRunning();
-        assertEquals(1, Util.size(raceLogClient1.getRawFixes()));
-        assertEquals(1, Util.size(raceLogClient2.getRawFixes()));
-        assertEquals(raceLogServer.getRawFixes().iterator().next(), raceLogClient1.getRawFixes().iterator().next());
-        assertEquals(raceLogServer.getRawFixes().iterator().next(), raceLogClient2.getRawFixes().iterator().next());
+        raceLogClient1.lockForRead();
+        try {
+            assertEquals(1, Util.size(raceLogClient1.getRawFixes()));
+        } finally {
+            raceLogClient1.unlockAfterRead();
+        }
+        raceLogClient2.lockForRead();
+        try {
+            assertEquals(1, Util.size(raceLogClient2.getRawFixes()));
+        } finally {
+            raceLogClient2.unlockAfterRead();
+        }
+        raceLogServer.lockForRead();
+        raceLogClient1.lockForRead();
+        try {
+            assertEquals(raceLogServer.getRawFixes().iterator().next(), raceLogClient1.getRawFixes().iterator().next());
+        } finally {
+            raceLogClient1.unlockAfterRead();
+            raceLogServer.unlockAfterRead();
+        }
+        raceLogServer.lockForRead();
+        raceLogClient2.lockForRead();
+        try {
+            assertEquals(raceLogServer.getRawFixes().iterator().next(), raceLogClient2.getRawFixes().iterator().next());
+        } finally {
+            raceLogClient2.unlockAfterRead();
+            raceLogServer.unlockAfterRead();
+        }
     }
 }
