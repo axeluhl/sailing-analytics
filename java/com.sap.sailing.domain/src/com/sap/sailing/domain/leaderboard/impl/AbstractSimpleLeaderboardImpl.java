@@ -1195,7 +1195,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         entryDTO.totalPoints = entry.getTotalPoints();
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
         entryDTO.discarded = entry.isDiscarded();
-        entryDTO.timePointOfLastPositionFix = getTimePointOfLastFix(competitor, trackedRace);
+        if (trackedRace != null) {
+            entryDTO.timePointOfLastPositionFix = getTimePointOfLastFix(competitor, trackedRace);
+        }
         if (addLegDetails && trackedRace != null) {
             try {
                 RaceDetails raceDetails = getRaceDetails(trackedRace, competitor, timePoint, waitForLatestAnalyses, legRanksCache);
@@ -1251,8 +1253,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     /**
      * Determines the time point of the last raw fix (with outliers not removed) for <code>competitor</code> in
      * <code>trackedRace</code>. If the competitor's track is <code>null</code> or empty, <code>null</code> is returned.
+     * 
+     * @param trackedRace must not be <code>null</code>
      */
     private Date getTimePointOfLastFix(Competitor competitor, TrackedRace trackedRace) {
+        assert trackedRace != null;
         final Date timePointOfLastPositionFix;
         GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
         if (track == null) {
