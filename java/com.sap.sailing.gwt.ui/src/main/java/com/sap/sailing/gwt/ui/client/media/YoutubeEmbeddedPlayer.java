@@ -5,7 +5,9 @@ import java.util.Date;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -17,6 +19,8 @@ import com.sap.sailing.gwt.ui.client.shared.controls.dialog.WindowBox;
 
 public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoPlayer, CloseHandler<PopupPanel>, MediaSynchAdapter {
 
+    private static int videoCounter;
+    
     private final WindowBox dialogBox;
     private MediaSynchControl mediaSynchControl;
 
@@ -37,15 +41,14 @@ public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoP
         FlowPanel rootPanel = new FlowPanel();
         rootPanel.addStyleName("video-root-panel");
 
-        videoControl = new YoutubeVideoControl(videoTrack.url, showSynchControls); 
-        rootPanel.add(videoControl.widget());
-        
-        if (showSynchControls) {
-            mediaSynchControl = new MediaSynchControl(this, mediaService, errorReporter);
-            mediaSynchControl.widget().addStyleName("media-synch-control");
-            rootPanel.add(mediaSynchControl.widget());
-        }
+        Panel videoContainer = new SimplePanel();
 
+        String videoContainerId = "videoContainer-" + videoTrack.url + ++videoCounter;
+        videoContainer.getElement().setId(videoContainerId);
+        videoContainer.getElement().setInnerText("When the Youtube video doesn't show up, click the popout button at the upper right corner to open the video in a dedicated browser window.");
+
+        rootPanel.add(videoContainer.asWidget());
+        
         this.dialogBox = new WindowBox(videoTrack.title, videoTrack.toString(), rootPanel, new WindowBox.PopoutHandler() {
             
             @Override
@@ -56,7 +59,19 @@ public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoP
         });
         dialogBox.addCloseHandler(this);
         
+        //first show dialog to make video container visible in DOM
         show();
+        
+        //then use Youtube API to render load video into video container
+        videoControl = new YoutubeVideoControl(videoTrack.url, videoContainerId, showSynchControls); 
+
+        //then show media synch controls which refer to the video control
+        if (showSynchControls) {
+            mediaSynchControl = new MediaSynchControl(this, mediaService, errorReporter);
+            mediaSynchControl.widget().addStyleName("media-synch-control");
+            rootPanel.add(mediaSynchControl.widget());
+        }
+
     }
     
     private void show() {

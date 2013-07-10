@@ -205,6 +205,14 @@ public class SmartFutureCacheDeadlockTest {
     private static class LockingScript implements Runnable {
         private static final Logger logger = Logger.getLogger(LockingScript.class.getName());
         private boolean running;
+        
+        /**
+         * Number of commands in {@link #commandQueue}, plus 1 if there is currently one command already taken
+         * from the queue and being processed. Don't access this directly to know if there are still requests pending
+         * or being processed. Synchronization happens on {@link #commandQueue} object with notifications upon every change.
+         */
+        private int queuedAndProcessing;
+        
         private boolean waitingForLock;
         private final SmartFutureCache<String, String, EmptyUpdateInterval> sfc;
         private final NamedReentrantReadWriteLock lock;
@@ -226,14 +234,20 @@ public class SmartFutureCacheDeadlockTest {
         }
 
         public void perform(Command command) {
-            commandQueue.offer(command);
+            synchronized (commandQueue) {
+                commandQueue.offer(command);
+                queuedAndProcessing++;
+                commandQueue.notifyAll();
+            }
         }
         
         public void performAndWait(Command command) throws InterruptedException {
-            commandQueue.offer(command);
             synchronized (commandQueue) {
-                while (!commandQueue.isEmpty()) {
+                commandQueue.offer(command);
+                queuedAndProcessing++;
+                while (queuedAndProcessing > 0) {
                     commandQueue.wait();
+                    commandQueue.notifyAll();
                 }
             }
         }
@@ -248,9 +262,9 @@ public class SmartFutureCacheDeadlockTest {
                 running = true;
                 this.notifyAll();
             }
-            Command command;
             try {
-                while ((command=commandQueue.take()) != Command.EXIT) {
+                Command command;
+                while ((command = commandQueue.take()) != Command.EXIT) {
                     logger.info("Took command "+command.name()+" in thread "+Thread.currentThread().getName());
                     switch (command) {
                     case LOCK_FOR_READ:
@@ -289,6 +303,7 @@ public class SmartFutureCacheDeadlockTest {
                     }
                     logger.info("Done processing command "+command.name()+" in thread "+Thread.currentThread().getName());
                     synchronized (commandQueue) {
+                        queuedAndProcessing--;
                         commandQueue.notifyAll(); // unblock wait in performAndWait
                     }
                 }
