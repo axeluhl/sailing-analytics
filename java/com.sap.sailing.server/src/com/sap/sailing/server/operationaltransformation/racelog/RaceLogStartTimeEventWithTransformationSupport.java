@@ -6,4 +6,14 @@ public class RaceLogStartTimeEventWithTransformationSupport extends RaceLogEvent
     public RaceLogStartTimeEventWithTransformationSupport(RaceLogStartTimeEvent raceLogEvent) {
         super(raceLogEvent);
     }
+
+    @Override
+    public RaceLogEventWithTransformationSupport<?> transformClientOp(RaceLogEventWithTransformationSupport<?> serverOp) {
+        return serverOp.transformClientOpForStartTimeEvent(this);
+    }
+
+    @Override
+    public RaceLogEventWithTransformationSupport<?> transformServerOp(RaceLogEventWithTransformationSupport<?> clientOp) {
+        return clientOp.transformServerOpForStartTimeEvent(this);
+    }
 }

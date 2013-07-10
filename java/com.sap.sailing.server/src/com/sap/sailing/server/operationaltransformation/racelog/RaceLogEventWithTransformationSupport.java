@@ -18,16 +18,15 @@ public abstract class RaceLogEventWithTransformationSupport<E extends RaceLogEve
         return toState;
     }
 
-    @Override
-    public RaceLogEventWithTransformationSupport<E> transformClientOp(RaceLogEventWithTransformationSupport<?> serverOp) {
+    public RaceLogEventWithTransformationSupport<?> transformClientOpForStartTimeEvent(
+            RaceLogStartTimeEventWithTransformationSupport raceLogStartTimeEventWithTransformationSupport) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
-    public RaceLogEventWithTransformationSupport<E> transformServerOp(RaceLogEventWithTransformationSupport<?> clientOp) {
+    public RaceLogEventWithTransformationSupport<?> transformServerOpForStartTimeEvent(
+            RaceLogStartTimeEventWithTransformationSupport raceLogStartTimeEventWithTransformationSupport) {
         // TODO Auto-generated method stub
         return null;
     }
-
 }
