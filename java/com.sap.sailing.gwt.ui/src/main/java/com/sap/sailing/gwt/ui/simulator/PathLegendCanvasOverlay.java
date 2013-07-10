@@ -40,7 +40,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
     private double rectHeight = 20;
 
     public String textColor = "Black";
-    public String textFont = "normal 10pt UbuntuRegular";
+    public String textFont = "10pt OpenSansRegular";
 
     public PathLegendCanvasOverlay() {
         this.setPathOverlays(null);
