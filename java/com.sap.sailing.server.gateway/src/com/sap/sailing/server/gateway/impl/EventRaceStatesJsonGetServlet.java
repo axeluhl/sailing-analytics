@@ -23,10 +23,11 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
@@ -111,28 +112,12 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
         boolean result = false;
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
-            TimePoint startTime = new StartTimeFinder(raceLog).getStartTime();
-            TimePoint finishedTime = new FinishedTimeFinder(raceLog).getFinishedTime();
-            if(finishedTime != null) {
-                Calendar finishedTimeCal = Calendar.getInstance();
-                finishedTimeCal.setTime(finishedTime.asDate());
-                if(isSameDay(now, finishedTimeCal)) {
-                    result = true;
-                }
-            } else if(startTime != null) {
-                Calendar startTimeCal = Calendar.getInstance();
-                startTimeCal.setTime(startTime.asDate());
-                if(isSameDay(now, startTimeCal)) {
-                    result = true;
-                }
-            }
+            TimePoint startTime = new StartTimeFinder(raceLog).analyze();
+            TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
+            
+            result = RaceStateOfSameDayHelper.isRaceStateOfSameDay(startTime, finishedTime, now);
         }
         return result;
-    }
-
-    private boolean isSameDay(Calendar cal1, Calendar cal2) {
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
     
     private JSONObject createRaceStateJsonObject(RaceColumn raceColumn, Fleet fleet) {
@@ -146,20 +131,20 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
             JSONObject raceLogStateJson = new JSONObject();
             result.put("raceState", raceLogStateJson);
             StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
-            raceLogStateJson.put("startTime", startTimeFinder.getStartTime() != null ? startTimeFinder.getStartTime().toString() : null);
+            raceLogStateJson.put("startTime", startTimeFinder.analyze() != null ? startTimeFinder.analyze().toString() : null);
             FinishedTimeFinder finishedTimeFinder = new FinishedTimeFinder(raceLog);
-            raceLogStateJson.put("endTime", finishedTimeFinder.getFinishedTime() != null ? finishedTimeFinder.getFinishedTime().toString() : null);
+            raceLogStateJson.put("endTime", finishedTimeFinder.analyze() != null ? finishedTimeFinder.analyze().toString() : null);
             RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog);
-            RaceLogRaceStatus lastStatus = raceStatusAnalyzer.getStatus();
+            RaceLogRaceStatus lastStatus = raceStatusAnalyzer.analyze();
             raceLogStateJson.put("lastStatus", lastStatus.name());
             PathfinderFinder pathfinderFinder = new PathfinderFinder(raceLog);
-            raceLogStateJson.put("pathfinderId", pathfinderFinder.getPathfinderId());
+            raceLogStateJson.put("pathfinderId", pathfinderFinder.analyze());
             GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
-            raceLogStateJson.put("gateLineOpeningTime", gateLineOpeningTimeFinder.getGateLineOpeningTime());
+            raceLogStateJson.put("gateLineOpeningTime", gateLineOpeningTimeFinder.analyze());
             AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
-            RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.getAbortingFlagEvent();
-            LastFlagFinder lastFlagFinder = new LastFlagFinder(raceLog);
-            RaceLogFlagEvent lastFlagEvent = lastFlagFinder.getLastFlagEvent();
+            RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
+            LastFlagsFinder lastFlagFinder = new LastFlagsFinder(raceLog);
+            RaceLogFlagEvent lastFlagEvent = LastFlagsFinder.getMostRecent(lastFlagFinder.analyze());
             if (lastFlagEvent != null) {
                 setLastFlagField(raceLogStateJson, lastFlagEvent.getUpperFlag().name(), lastFlagEvent.getLowerFlag().name(), lastFlagEvent.isDisplayed());
             } else if (lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED) && abortingFlagEvent != null) {

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -29,7 +30,7 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
 
     @Override
     public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank,
-            Integer numberOfCompetitorsInRace) {
+            Callable<Integer> numberOfCompetitorsInRaceFetcher) {
         Double result;
         if (rank == 0) {
             result = null;

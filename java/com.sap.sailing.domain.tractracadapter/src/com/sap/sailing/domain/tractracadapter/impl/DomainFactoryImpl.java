@@ -18,17 +18,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -38,6 +41,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.base.impl.SidelineImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -224,12 +228,31 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
+    public Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints) {
+        List<Mark> marks = new ArrayList<Mark>();
+        for (TracTracControlPoint controlPoint : controlPoints) {
+            ControlPoint cp = getOrCreateControlPoint(controlPoint);
+            for (Mark mark : cp.getMarks()) {
+                marks.add(mark);
+            }
+        }
+        return new SidelineImpl(name, marks);
+    }
+
+    @Override
     public Competitor getOrCreateCompetitor(com.tractrac.clientmodule.Competitor competitor) {
         // TODO see bug 596; consider allowing for a new competitor (check for use of == throughout the code) or update existing one
         Competitor result = baseDomainFactory.getExistingCompetitorById(competitor.getId());
         if (result == null) {
             BoatClass boatClass = getOrCreateBoatClass(competitor.getCompetitorClass());
-            Nationality nationality = getOrCreateNationality(competitor.getNationality());
+            Nationality nationality;
+            try {
+                nationality = getOrCreateNationality(competitor.getNationality());
+            } catch (IllegalArgumentException iae) {
+                // the country code was probably not a legal IOC country code
+                nationality = null;
+                logger.log(Level.SEVERE, "Unknown nationality "+competitor.getNationality()+" for competitor "+competitor.getName()+"; leaving null", iae);
+            }
             Team team = getOrCreateTeam(competitor.getName(), nationality, competitor.getId());
             Boat boat = new BoatImpl(competitor.getShortName(), boatClass, competitor.getShortName());
             result = baseDomainFactory.createCompetitor(competitor.getId(), competitor.getName(), team, boat);
@@ -455,7 +478,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta,
-            Race race, Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+            Race race, Course course, Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword) {
         synchronized (raceCache) {
             RaceDefinition raceDefinition = raceCache.get(race);
@@ -467,7 +490,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 // add to existing regatta only if boat class matches
                 if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
                     trackedRegatta.getRegatta().addRace(raceDefinition);
-                    DynamicTrackedRace trackedRace = createTrackedRace(trackedRegatta, raceDefinition, windStore,
+                    DynamicTrackedRace trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                             delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
                     logger.info("Added race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta());
                     
@@ -493,9 +516,9 @@ public class DomainFactoryImpl implements DomainFactory {
         }
     }
 
-    private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore,
+    private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
-        return trackedRegatta.createTrackedRace(race, 
+        return trackedRegatta.createTrackedRace(race, sidelines,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);
@@ -580,8 +603,8 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
-        return new JSONServiceImpl(jsonURL);
+    public JSONService parseJSONURLWithRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+        return new JSONServiceImpl(jsonURL, loadClientParams);
     }
 
     @Override
@@ -595,6 +618,11 @@ public class DomainFactoryImpl implements DomainFactory {
             boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword) {
         return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
                 delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, this, tracTracUsername, tracTracPassword);
+    }
+
+    @Override
+    public JSONService parseJSONURLForOneRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+        return new JSONServiceImpl(jsonURL, raceId, loadClientParams);
     }
 
 }

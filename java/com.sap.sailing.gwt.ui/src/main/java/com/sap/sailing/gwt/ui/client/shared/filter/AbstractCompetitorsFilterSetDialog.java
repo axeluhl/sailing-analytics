@@ -251,7 +251,7 @@ public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog
             competitorsFiltersGridHeadline.setVisible(showGridHeadline);
             competitorsFiltersGridFooter.setVisible(showGridFooter);
             if(showGridHeadline) {
-                competitorsFiltersGridHeadline.setText("The filter will show all competitors matching the criterias:");
+                competitorsFiltersGridHeadline.setText(stringMessages.competitorFilterExplanation());
             }
             if(showGridFooter) {
                 competitorsFiltersGridFooter.setText("");

@@ -1,25 +1,25 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.RegattaIdentifier;
-import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
+import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
@@ -47,6 +47,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
 
     private final RegattaRefresher regattaRefresher;
     private RegattaSelectionProvider regattaSelectionProvider;
+    private Button removeRegattaButton;
 
     private RegattaListComposite regattaListComposite;
     private RegattaDetailsComposite regattaDetailsComposite;
@@ -62,19 +63,40 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
 
+        HorizontalPanel regattaManagementControlsPanel = new HorizontalPanel();
+        regattaManagementControlsPanel.setSpacing(5);
         Button addRegattaBtn = new Button(stringMessages.addRegatta());
-        mainPanel.add(addRegattaBtn);
         addRegattaBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 openCreateRegattaDialog();
             }
         });
+        regattaManagementControlsPanel.add(addRegattaBtn);
+        
+        removeRegattaButton = new Button(stringMessages.remove());
+        removeRegattaButton.setEnabled(false);
+        removeRegattaButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (Window.confirm("Do you really want to remove the regattas? This will also remove all leaderboards for the regattas!")) {
+                    //Creating a new Collection, because getSelectedRegattas returns an 
+                    //unmodifiable collection, which can't be sent to the server.
+                    Collection<RegattaIdentifier> regattas = new HashSet<RegattaIdentifier>();
+                    for (RegattaIdentifier regatta : regattaSelectionProvider.getSelectedRegattas()) {
+                        regattas.add(regatta);
+                    }
+                    removeRegattas(regattas);
+                }
+            }
+        });
+        regattaManagementControlsPanel.add(removeRegattaButton);
+        mainPanel.add(regattaManagementControlsPanel);
 
         Grid grid = new Grid(1 ,2);
         mainPanel.add(grid);
         
-        regattaSelectionProvider = new RegattaSelectionModel(false);
+        regattaSelectionProvider = new RegattaSelectionModel(true);
         regattaSelectionProvider.addRegattaSelectionChangeListener(this);
         
         regattaListComposite = new RegattaListComposite(sailingService, regattaSelectionProvider, regattaRefresher, errorReporter, stringMessages);
@@ -84,6 +106,22 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         regattaDetailsComposite = new RegattaDetailsComposite(sailingService, regattaRefresher, errorReporter, stringMessages);
         regattaDetailsComposite.setVisible(false);
         grid.setWidget(0, 1, regattaDetailsComposite);
+    }
+
+    protected void removeRegattas(Collection<RegattaIdentifier> regattas) {
+        if (!regattas.isEmpty()) {
+            sailingService.removeRegattas(regattas, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error trying to remove the regattas:" + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    regattaRefresher.fillRegattas();
+                }
+            });
+        }
     }
 
     private void openCreateRegattaDialog() {
@@ -118,20 +156,15 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     }
     
     private void createNewRegatta(final RegattaDTO newRegatta) {
-        LinkedHashMap<String, Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>> seriesStructure =
-                new LinkedHashMap<String, Triple<List<Triple<String,Integer,Color>>,Pair<Boolean, Boolean>,int[]>>();
+        LinkedHashMap<String, SeriesCreationParametersDTO> seriesStructure = new LinkedHashMap<String, SeriesCreationParametersDTO>();
         for (SeriesDTO seriesDTO : newRegatta.series) {
-            List<Triple<String, Integer, Color>> fleets = new ArrayList<Triple<String, Integer, Color>>();
-            for(FleetDTO fleetDTO : seriesDTO.getFleets()) {
-                Triple<String, Integer, Color> fleetTriple = new Triple<String, Integer, Color>(fleetDTO.getName(), fleetDTO.getOrderNo(), fleetDTO.getColor());
-                fleets.add(fleetTriple);
-            }
-            Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]> seriesPair =
-                    new Triple<List<Triple<String, Integer, Color>>, Pair<Boolean, Boolean>, int[]>(
-                    fleets, new Pair<Boolean, Boolean>(seriesDTO.isMedal(), seriesDTO.isStartsWithZeroScore()), seriesDTO.getDiscardThresholds());
+            SeriesCreationParametersDTO seriesPair = new SeriesCreationParametersDTO(seriesDTO.getFleets(),
+                    seriesDTO.isMedal(), seriesDTO.isStartsWithZeroScore(),
+                    seriesDTO.isFirstColumnIsNonDiscardableCarryForward(), seriesDTO.getDiscardThresholds());
             seriesStructure.put(seriesDTO.getName(), seriesPair);
         }
-        sailingService.createRegatta(newRegatta.getName(), newRegatta.boatClass==null?null:newRegatta.boatClass.getName(), seriesStructure, true,
+        sailingService.createRegatta(newRegatta.getName(), newRegatta.boatClass==null?null:newRegatta.boatClass.getName(),
+                new RegattaCreationParametersDTO(seriesStructure), true,
                 newRegatta.scoringScheme, newRegatta.defaultCourseAreaIdAsString, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
@@ -153,20 +186,21 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     @Override
     public void onRegattaSelectionChange(List<RegattaIdentifier> selectedRegattas) {
         final RegattaIdentifier selectedRegatta;
-        if (selectedRegattas.iterator().hasNext()) {
+        if (selectedRegattas.size() == 1 && selectedRegattas.iterator().hasNext()) {
             selectedRegatta = selectedRegattas.iterator().next();
-        if (selectedRegatta != null && regattaListComposite.getAllRegattas() != null) {
-            for(RegattaDTO regattaDTO: regattaListComposite.getAllRegattas()) {
-                if(regattaDTO.getRegattaIdentifier().equals(selectedRegatta)) {
-                    regattaDetailsComposite.setRegatta(regattaDTO);
-                    regattaDetailsComposite.setVisible(true);
-                    break;
+            if (selectedRegatta != null && regattaListComposite.getAllRegattas() != null) {
+                for (RegattaDTO regattaDTO : regattaListComposite.getAllRegattas()) {
+                    if (regattaDTO.getRegattaIdentifier().equals(selectedRegatta)) {
+                        regattaDetailsComposite.setRegatta(regattaDTO);
+                        regattaDetailsComposite.setVisible(true);
+                        break;
+                    }
                 }
             }
-        }
         } else {
             regattaDetailsComposite.setRegatta(null);
             regattaDetailsComposite.setVisible(false);
         }
+        removeRegattaButton.setEnabled(!selectedRegattas.isEmpty());
     }
 }

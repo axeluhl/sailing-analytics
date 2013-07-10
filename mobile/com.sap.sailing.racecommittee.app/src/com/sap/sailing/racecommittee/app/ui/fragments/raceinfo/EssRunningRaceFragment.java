@@ -138,7 +138,7 @@ public class EssRunningRaceFragment extends RaceFragment implements EssRunningRa
     public void onStart() {
         super.onStart();
         getRace().getState().getStartProcedure().setRunningRaceEventListener(this);
-        ExLog.w(EssRunningRaceFragment.class.getName(), String.format("Fragment %s is now shown", EssRunningRaceFragment.class.getName()));
+        ExLog.i(EssRunningRaceFragment.class.getName(), String.format("Fragment %s is now shown", EssRunningRaceFragment.class.getName()));
     }
     
     public void notifyTick() {

@@ -99,8 +99,7 @@
             android:text="@string/empty"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
-            android:ems="10"
-            android:visibility="invisible" />
+            android:ems="10" />
     </LinearLayout>
     
     <LinearLayout
@@ -116,7 +115,8 @@
             android:layout_weight="0.2"
             android:text="Confirm positionings"
             android:textSize="14pt"
-            android:ems="10" />
+            android:ems="10"
+            android:visibility="gone" />
         
         <ImageButton
             android:id="@+id/buttonCamera"

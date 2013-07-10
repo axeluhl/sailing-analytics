@@ -18,14 +18,14 @@ import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 
 public class Activator implements BundleActivator {
-    private static String MANAGE2SAIL_TEST_URL = "https://orm.manage2sail.com/shadowtest_info/api/public/links/event/58f73e6c-ec07-4655-972c-e5d730f0048e?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
+    // private static String MANAGE2SAIL_TEST_URL = "https://orm.manage2sail.com/shadowtest_info/api/public/links/event/58f73e6c-ec07-4655-972c-e5d730f0048e?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
     private static String MANAGE2SAIL_PROD_URL = "http://manage2sail.com/api/public/links/event/da33884e-24fe-44f6-8501-d253587f7cc8?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
         
     public void start(BundleContext bundleContext) throws Exception {
         final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(ParserFactory.INSTANCE, ResultUrlRegistry.INSTANCE);
         bundleContext.registerService(ScoreCorrectionProvider.class, service, /* properties */null);
         
-        ResultUrlRegistry.INSTANCE.registerResultUrl(ScoreCorrectionProviderImpl.NAME, new URL(MANAGE2SAIL_TEST_URL));
+        // ResultUrlRegistry.INSTANCE.registerResultUrl(ScoreCorrectionProviderImpl.NAME, new URL(MANAGE2SAIL_TEST_URL));
         ResultUrlRegistry.INSTANCE.registerResultUrl(ScoreCorrectionProviderImpl.NAME, new URL(MANAGE2SAIL_PROD_URL));
         
         createAnAllCertificatesTrustingManagerforSSL();

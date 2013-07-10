@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jdom.Document;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -56,15 +57,15 @@ public class RankPerRaceAction extends HttpAction {
                 if (competitorNameSet == null || competitorNameSet.contains(competitorAndRank.getKey().getName())) {
                     // Get data
                     final String competitorName = competitorAndRank.getKey().getName();
-                    final String nationality = competitorAndRank.getKey().getTeam().getNationality()
-                            .getThreeLetterIOCAcronym();
+                    final Nationality nationality = competitorAndRank.getKey().getTeam().getNationality();
+                    final String threeLetterIocCode = nationality == null ? "" : nationality.getThreeLetterIOCAcronym();
                     final String sailID = competitorAndRank.getKey().getBoat().getSailID();
                     final int overallRank = competitorAndRank.getValue();
 
                     // Write data
                     addRow();
                     addColumn("" + overallRank);
-                    addColumn(nationality);
+                    addColumn(threeLetterIocCode);
                     addColumn(sailID == null ? "null" : sailID);
                     addColumn(competitorName);
                     addColumn(URLEncoder.encode(competitorName, "UTF-8"));

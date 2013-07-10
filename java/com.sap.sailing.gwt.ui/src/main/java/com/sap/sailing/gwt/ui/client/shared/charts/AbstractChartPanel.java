@@ -197,18 +197,17 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
      * Loads the needed data (data which isn't in the {@link #chartData cache}) for the
      * {@link #getSelectedCompetitors() visible competitors} via
      * {@link SailingServiceAsync#getCompetitorsRaceData(RaceIdentifier, List, long, DetailType, AsyncCallback)}. After
-     * loading is the method {@link #drawChartData()} called.<br />
-     * If no data needs to be {@link #needsDataLoading() loaded}, the no competitors selected label is displayed.
+     * loading, the method {@link #drawChartData()} is called.
+     * <p>
+     * If no data needs to be {@link #needsDataLoading() loaded}, the "no competitors selected" label is displayed.
      */
     private void updateChart(Date from, Date to, boolean append) {
         if (hasSelectedCompetitors()) {
             setWidget(chart);
-            
             ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
             for (CompetitorDTO competitorDTO : getSelectedCompetitors()) {
                 competitorsToLoad.add(competitorDTO);
             }
-
             loadData(from, to, competitorsToLoad, append);
         } else {
             setWidget(noCompetitorsSelectedLabel);
@@ -228,7 +227,6 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                     @Override
                     public void onSuccess(final CompetitorsRaceDataDTO result) {
                         hideLoading();
-
                         if (result != null) {
                             if (result.isEmpty() && chartContainsNoData()) {
                                 setWidget(noDataFoundLabel);
@@ -301,15 +299,13 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     private synchronized void updateChartSeries(CompetitorsRaceDataDTO chartData, boolean append) {
         // Make sure the busy indicator is removed at this point, or plotting the data results in an exception
         setWidget(chart);
-
         List<Series> chartSeries = Arrays.asList(chart.getSeries());
         for (CompetitorDTO competitor : chartData.getCompetitors()) {
             Series competitorDataSeries = getOrCreateCompetitorDataSeries(competitor);
             Series markPassingSeries = getOrCreateCompetitorMarkPassingSeries(competitor);
             CompetitorRaceDataDTO competitorData = chartData.getCompetitorData(competitor);
             if (competitorData != null) {
-                Date toDate = new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis());
-                
+                Date toDate = timer.getLiveTimePointAsDate();
                 List<Triple<String, Date, Double>> markPassingsData = competitorData.getMarkPassingsData();
                 List<Point> markPassingPoints = new ArrayList<Point>();
                 for (Triple<String, Date, Double> markPassingData : markPassingsData) {

@@ -8,7 +8,7 @@ import android.os.Bundle;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
-public class LoginDialog extends ActivityDialogFragment {
+public class LoginDialog extends ActivityAttachedDialogFragment {
 
     private static final LoginType DefaultLoginType = LoginType.OFFICER;
     public enum LoginType {
@@ -33,7 +33,7 @@ public class LoginDialog extends ActivityDialogFragment {
 
     @Override
     protected CharSequence getNegativeButtonLabel() {
-        return "Cancel";
+        return getString(R.string.cancel);
     }
 
     @Override

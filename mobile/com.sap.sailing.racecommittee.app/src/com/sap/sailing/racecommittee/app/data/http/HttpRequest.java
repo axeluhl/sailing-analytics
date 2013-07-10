@@ -41,7 +41,7 @@ public abstract class HttpRequest {
     protected abstract InputStream execute(HttpURLConnection connection) throws IOException;
 
     public InputStream execute() throws Exception {
-        ExLog.i(TAG, String.format("Executing HTTP request on %s.", connection.getURL()));
+        ExLog.i(TAG, String.format("(Request %d) Executing HTTP request on %s.", this.hashCode(), connection.getURL()));
 
         connection.setConnectTimeout(5000);
         connection.setReadTimeout(15000);
@@ -50,12 +50,12 @@ public abstract class HttpRequest {
         try {
             stream = execute(connection);
         } catch (FileNotFoundException fnfe) {
-            throw new FileNotFoundException(String.format("%s\nHTTP response code: %d.\nHTTP response body: %s.",
-                    fnfe.getMessage(), connection.getResponseCode(), connection.getResponseMessage()));
+            throw new FileNotFoundException(String.format("(Request %d) %s\nHTTP response code: %d.\nHTTP response body: %s.",
+                    this.hashCode(), fnfe.getMessage(), connection.getResponseCode(), connection.getResponseMessage()));
         }
 
         validateHttpResponse(connection);
-        ExLog.i(TAG, String.format("HTTP request executed."));
+        ExLog.i(TAG, String.format("(Request %d) HTTP request executed.", this.hashCode()));
         return stream;
     }
 

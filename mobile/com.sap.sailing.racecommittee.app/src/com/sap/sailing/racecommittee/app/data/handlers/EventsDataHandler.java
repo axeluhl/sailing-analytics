@@ -8,14 +8,14 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 
 public class EventsDataHandler extends DataHandler<Collection<EventBase>> {
 
-	public EventsDataHandler(OnlineDataManager manager, LoadClient<Collection<EventBase>> client) {
-		super(manager, client);
-	}
-	
-	@Override
-	public void onLoaded(Collection<EventBase> data) {
-		super.onLoaded(data);
-		manager.addEvents(data);
-	}
+    public EventsDataHandler(OnlineDataManager manager, LoadClient<Collection<EventBase>> client) {
+        super(manager, client);
+    }
+
+    @Override
+    public void onLoaded(Collection<EventBase> data) {
+        super.onLoaded(data);
+        manager.addEvents(data);
+    }
 
 }

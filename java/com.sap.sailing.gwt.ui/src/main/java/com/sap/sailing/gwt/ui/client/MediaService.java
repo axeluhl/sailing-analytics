@@ -14,7 +14,7 @@ public interface MediaService extends RemoteService {
 
     Collection<MediaTrack> getAllMediaTracks();
 
-    void addMediaTrack(MediaTrack mediaTrack);
+    String addMediaTrack(MediaTrack mediaTrack);
 
     void deleteMediaTrack(MediaTrack mediaTrack);
 

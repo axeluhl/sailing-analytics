@@ -5,35 +5,21 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 
-public class StartTimeFinder extends RaceLogAnalyzer {
+public class StartTimeFinder extends RaceLogAnalyzer<TimePoint> {
 
     public StartTimeFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
-    public TimePoint getStartTime() {
-        TimePoint startTime = null;
-        
-        this.raceLog.lockForRead();
-        try {
-            startTime = searchForStartTime();
-        } finally {
-            this.raceLog.unlockAfterRead();
-        }
-
-        return startTime;
-    }
-
-    private TimePoint searchForStartTime() {
-        TimePoint startTime = null;
-        
-        for (RaceLogEvent event : getPassEvents()) {
+    @Override
+    protected TimePoint performAnalyzation() {
+        for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogStartTimeEvent) {
-                startTime = ((RaceLogStartTimeEvent) event).getStartTime();
+                return ((RaceLogStartTimeEvent) event).getStartTime();
             }
         }
         
-        return startTime;
+        return null;
     }
 
 }

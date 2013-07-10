@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
@@ -21,6 +22,7 @@ import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
+import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
@@ -38,6 +40,7 @@ public enum DomainFactoryImpl implements SharedDomainFactory {
     private final ConcurrentHashMap<Serializable, Waypoint> waypointCache = new ConcurrentHashMap<Serializable, Waypoint>();
     private final Set<String> mayStartWithNoUpwindLeg = new HashSet<String>(Arrays.asList(new String[] { "extreme40", "ess", "ess40" }));
     private final Map<Serializable, Competitor> competitorCache = new HashMap<Serializable, Competitor>();
+    private final Map<Serializable, CourseArea> courseAreaCache = new HashMap<Serializable, CourseArea>();
 
     public Nationality getOrCreateNationality(String threeLetterIOCCode) {
         synchronized (nationalityCache) {
@@ -147,6 +150,21 @@ public enum DomainFactoryImpl implements SharedDomainFactory {
             result = createCompetitor(competitorId, name, team, boat);
         }
         return result;
+    }
+
+    @Override
+    public CourseArea getOrCreateCourseArea(Serializable courseAreaId, String name) {
+        CourseArea result = getExistingCourseAreaById(courseAreaId);
+        if (result == null) {
+            result = new CourseAreaImpl(name, courseAreaId);
+            courseAreaCache.put(courseAreaId, result);
+        }
+        return result;
+    }
+
+    @Override
+    public CourseArea getExistingCourseAreaById(Serializable courseAreaId) {
+        return courseAreaCache.get(courseAreaId);
     }
 
 }

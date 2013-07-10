@@ -89,4 +89,8 @@ public interface Series extends SeriesBase {
     boolean isStartsWithZeroScore();
     
     void setStartsWithZeroScore(boolean startsWithZeroScore);
+
+    boolean isFirstColumnIsNonDiscardableCarryForward();
+
+    void setFirstColumnIsNonDiscardableCarryForward(boolean firstColumnIsNonDiscardableCarryForward);
 }

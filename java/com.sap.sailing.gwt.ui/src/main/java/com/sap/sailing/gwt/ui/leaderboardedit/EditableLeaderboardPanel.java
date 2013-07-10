@@ -419,8 +419,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     getBusyIndicator().setBusy(true);
                     getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.getIdAsString(), raceColumnName,
-                            value == null || value.trim().length() == 0 ? null : Double.valueOf(value.trim()), getLeaderboardDisplayDate(),
-                                    new AsyncCallback<Triple<Double, Double, Boolean>>() {
+                            value == null || value.trim().length() == 0 ? null : value.trim().equals("n/a") ? null
+                                    : Double.valueOf(value.trim()), getLeaderboardDisplayDate(),
+                            new AsyncCallback<Triple<Double, Double, Boolean>>() {
                         @Override
                         public void onFailure(Throwable t) {
                             getBusyIndicator().setBusy(false);
@@ -608,6 +609,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     @Override
                     public void onSuccess(Void noarg) {
                         updateScoreCorrectionInformation(lastScoreCorrectionComment, lastScoreCorrectionTime);
+                        Window.alert(stringMessages.successfullyUpdatedScores());
                     }
 
                     @Override

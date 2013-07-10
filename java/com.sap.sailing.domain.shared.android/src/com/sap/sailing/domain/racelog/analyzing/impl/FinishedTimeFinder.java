@@ -6,38 +6,24 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 
-public class FinishedTimeFinder extends RaceLogAnalyzer {
+public class FinishedTimeFinder extends RaceLogAnalyzer<TimePoint> {
 
     public FinishedTimeFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
-    public TimePoint getFinishedTime() {
-        TimePoint finishedTime = null;
-        
-        this.raceLog.lockForRead();
-        try {
-            finishedTime = searchForFinishedTime();
-        } finally {
-            this.raceLog.unlockAfterRead();
-        }
-
-        return finishedTime;
-    }
-    
-    private TimePoint searchForFinishedTime() {
-        TimePoint finishedTime = null;
-        
-        for (RaceLogEvent event : getPassEvents()) {
+    @Override
+    protected TimePoint performAnalyzation() {
+        for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogRaceStatusEvent) {
                 RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
                 if (statusEvent.getNextStatus().equals(RaceLogRaceStatus.FINISHED)) {
-                    finishedTime = statusEvent.getTimePoint();
+                    return statusEvent.getTimePoint();
                 }
             }
         }
         
-        return finishedTime;
+        return null;
     }
 
 }

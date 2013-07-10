@@ -25,6 +25,8 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 /**
  * Manages a {@link LeaderboardCache}. When a {@link Leaderboard} is {@link LeaderboardCache#add added} to the cache, it
@@ -37,6 +39,7 @@ import com.sap.sailing.domain.tracking.Wind;
  */
 public class LeaderboardCacheManager {
     private final WeakHashMap<Leaderboard, CacheInvalidationUponScoreCorrectionListener> scoreCorrectionListeners;
+    private final NamedReentrantReadWriteLock scoreCorrectionListenersLock;
     private final WeakHashMap<Leaderboard, Map<TrackedRace, Set<CacheInvalidationListener>>> invalidationListenersPerLeaderboard;
     private final WeakHashMap<Leaderboard, RaceColumnListener> raceColumnListeners;
     
@@ -146,6 +149,7 @@ public class LeaderboardCacheManager {
         this.invalidationListenersPerLeaderboard = new WeakHashMap<Leaderboard, Map<TrackedRace, Set<CacheInvalidationListener>>>();
         this.raceColumnListeners = new WeakHashMap<Leaderboard, RaceColumnListener>();
         this.scoreCorrectionListeners = new WeakHashMap<Leaderboard, CacheInvalidationUponScoreCorrectionListener>();
+        this.scoreCorrectionListenersLock = new NamedReentrantReadWriteLock("Score correction listeners", /* fair */ false);
     }
     
     private void removeFromCache(Leaderboard leaderboard) {
@@ -164,9 +168,14 @@ public class LeaderboardCacheManager {
         synchronized (raceColumnListeners) {
             leaderboard.removeRaceColumnListener(raceColumnListeners.remove(leaderboard));
         }
-        synchronized (scoreCorrectionListeners) {
-            leaderboard.getScoreCorrection().removeScoreCorrectionListener(scoreCorrectionListeners.remove(leaderboard));
+        LockUtil.lockForWrite(scoreCorrectionListenersLock);
+        final CacheInvalidationUponScoreCorrectionListener removedScoreCorrectionListener;
+        try {
+            removedScoreCorrectionListener = scoreCorrectionListeners.remove(leaderboard);
+        } finally {
+            LockUtil.unlockAfterWrite(scoreCorrectionListenersLock);
         }
+        leaderboard.getScoreCorrection().removeScoreCorrectionListener(removedScoreCorrectionListener);
     }
     
     public void add(Leaderboard leaderboard) {
@@ -181,103 +190,120 @@ public class LeaderboardCacheManager {
      */
     private void registerAsListener(final Leaderboard leaderboard) {
         // only add as listener again if not yet added
-        if (!scoreCorrectionListeners.containsKey(leaderboard)) {
-            for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
-                registerListener(leaderboard, trackedRace);
-            }
-            final CacheInvalidationUponScoreCorrectionListener scoreCorrectionListener = new CacheInvalidationUponScoreCorrectionListener(
-                    leaderboard);
-            leaderboard.getScoreCorrection().addScoreCorrectionListener(scoreCorrectionListener);
-            synchronized (scoreCorrectionListeners) {
-                scoreCorrectionListeners.put(leaderboard, scoreCorrectionListener);
-            }
-            final RaceColumnListener raceColumnListener = new RaceColumnListener() {
-                private static final long serialVersionUID = 8165124797028386317L;
-
-                @Override
-                public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-                    removeFromCache(leaderboard);
+        final boolean containsKey;
+        LockUtil.lockForRead(scoreCorrectionListenersLock);
+        try {
+            containsKey = scoreCorrectionListeners.containsKey(leaderboard);
+        } finally {
+            LockUtil.unlockAfterRead(scoreCorrectionListenersLock);
+        }
+        if (!containsKey) {
+            LockUtil.lockForWrite(scoreCorrectionListenersLock);
+            try {
+                for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
                     registerListener(leaderboard, trackedRace);
                 }
+                final CacheInvalidationUponScoreCorrectionListener scoreCorrectionListener = new CacheInvalidationUponScoreCorrectionListener(
+                        leaderboard);
+                leaderboard.getScoreCorrection().addScoreCorrectionListener(scoreCorrectionListener);
+                scoreCorrectionListeners.put(leaderboard, scoreCorrectionListener);
+                final RaceColumnListener raceColumnListener = new RaceColumnListener() {
+                    private static final long serialVersionUID = 8165124797028386317L;
 
-                /**
-                 * This listener must not be serialized. See also bug 952.
-                 */
-                @Override
-                public boolean isTransient() {
-                    return true;
-                }
+                    @Override
+                    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+                        removeFromCache(leaderboard);
+                        registerListener(leaderboard, trackedRace);
+                    }
 
-                @Override
-                public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-                    removeFromCache(leaderboard);
-                    Map<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard
-                            .get(leaderboard);
-                    if (listenersMap != null) {
-                        Set<CacheInvalidationListener> listeners = listenersMap.get(trackedRace);
-                        if (listeners != null) {
-                            for (CacheInvalidationListener listener : listeners) {
-                                listener.removeFromTrackedRace();
+                    /**
+                     * This listener must not be serialized. See also bug 952.
+                     */
+                    @Override
+                    public boolean isTransient() {
+                        return true;
+                    }
+
+                    @Override
+                    public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+                        removeFromCache(leaderboard);
+                        Map<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard
+                                .get(leaderboard);
+                        if (listenersMap != null) {
+                            Set<CacheInvalidationListener> listeners = listenersMap.get(trackedRace);
+                            if (listeners != null) {
+                                for (CacheInvalidationListener listener : listeners) {
+                                    listener.removeFromTrackedRace();
+                                }
                             }
                         }
                     }
-                }
 
-                @Override
-                public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
-                    removeFromCache(leaderboard);
-                }
+                    @Override
+                    public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+                        removeFromCache(leaderboard);
+                    }
 
-                @Override
-                public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
-                    removeFromCache(leaderboard);
-                }
+                    @Override
+                    public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
+                        removeFromCache(leaderboard);
+                    }
 
-                @Override
-                public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
-                    return true;
-                }
+                    @Override
+                    public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn,
+                            boolean firstColumnIsNonDiscardableCarryForward) {
+                        removeFromCache(leaderboard);
+                    }
 
-                @Override
-                public void raceColumnAddedToContainer(RaceColumn raceColumn) {
-                    removeFromCache(leaderboard);
-                }
+                    @Override
+                    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
+                        return true;
+                    }
 
-                @Override
-                public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
-                    removeFromCache(leaderboard);
-                }
+                    @Override
+                    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+                        removeFromCache(leaderboard);
+                    }
 
-                @Override
-                public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
-                    removeFromCache(leaderboard);
-                }
+                    @Override
+                    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+                        removeFromCache(leaderboard);
+                    }
 
-                @Override
-                public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
-                    removeFromCache(leaderboard);
-                }
+                    @Override
+                    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+                        removeFromCache(leaderboard);
+                    }
 
-                @Override
-                public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule) {
-                    removeFromCache(leaderboard);
-                }
+                    @Override
+                    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+                        removeFromCache(leaderboard);
+                    }
 
-                @Override
-                public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName,
-                        String displayName) {
-                    removeFromCache(leaderboard);
-                }
+                    @Override
+                    public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule,
+                            ResultDiscardingRule newDiscardingRule) {
+                        removeFromCache(leaderboard);
+                    }
 
-                @Override
-                public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier,
-                        RaceLogEvent event) {
-                    removeFromCache(leaderboard);
+                    @Override
+                    public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName,
+                            String displayName) {
+                        removeFromCache(leaderboard);
+                    }
+
+                    @Override
+                    public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier,
+                            RaceLogEvent event) {
+                        removeFromCache(leaderboard);
+                    }
+                };
+                leaderboard.addRaceColumnListener(raceColumnListener);
+                synchronized (raceColumnListeners) {
+                    raceColumnListeners.put(leaderboard, raceColumnListener);
                 }
-            };
-            leaderboard.addRaceColumnListener(raceColumnListener);
-            synchronized (raceColumnListeners) {
-                raceColumnListeners.put(leaderboard, raceColumnListener);
+            } finally {
+                LockUtil.unlockAfterWrite(scoreCorrectionListenersLock);
             }
         }
     }

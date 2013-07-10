@@ -35,6 +35,11 @@ public class ConfidenceBasedAveragerFactoryImpl implements ConfidenceFactory {
     }
     
     @Override
+    public Weigher<TimePoint> createHyperbolicSquaredTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds) {
+        return new HyperbolicSquaredTimeDifferenceWeigher(halfConfidenceAfterMilliseconds);
+    }
+    
+    @Override
     public Weigher<TimePoint> createExponentialTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds) {
         return new ExponentialTimeDifferenceWeigher(halfConfidenceAfterMilliseconds);
     }

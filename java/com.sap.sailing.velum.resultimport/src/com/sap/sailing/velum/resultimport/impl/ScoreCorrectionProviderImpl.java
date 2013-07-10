@@ -22,7 +22,7 @@ import com.sap.sailing.velum.resultimport.CsvParserFactory;
 public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorrectionProvider {
     private static final long serialVersionUID = 4767200739966995306L;
 
-    private static final String NAME = "Scores from Velum CSV exports"; 
+    private static final String NAME = "Velum CSV result importer"; 
 
     private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
 

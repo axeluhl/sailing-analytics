@@ -7,14 +7,17 @@ import java.util.Set;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SystemInformationPanel;
 import com.sap.sailing.gwt.ui.client.shared.panels.UserStatusPanel;
+import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class AdminConsoleEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
@@ -23,20 +26,27 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        
         RootPanel rootPanel = RootPanel.get();
+        VerticalPanel verticalPanel = new VerticalPanel();
+        rootPanel.add(verticalPanel);
         rootPanel.setSize("100%", "100%");
+        verticalPanel.setSize("100%", "100%");
         
+        HorizontalPanel topInformationPanel = new HorizontalPanel();
+        topInformationPanel.setSize("100%", "95%");
         UserStatusPanel userStatusPanel = new UserStatusPanel(userManagementService, this);
         userStatusPanel.ensureDebugId("UserStatus");
-        rootPanel.add(userStatusPanel);
+        topInformationPanel.add(userStatusPanel);
+        topInformationPanel.add(persistentAlertLabel);
+        
+        verticalPanel.add(topInformationPanel);
         
         TabPanel tabPanel = new TabPanel();
         tabPanel.ensureDebugId("AdministrationTabs");
         tabPanel.setAnimationEnabled(true);
-        tabPanel.setSize("95%", "95%");
-        rootPanel.add(tabPanel); //, 10, 10);
-
+        tabPanel.setSize("99%", "95%");
+        verticalPanel.add(tabPanel); //, 10, 10);
+        
         regattaDisplayers = new HashSet<RegattaDisplayer>();
 
         SailingEventManagementPanel sailingEventManagementPanel = new SailingEventManagementPanel(sailingService, this, stringMessages);
@@ -110,12 +120,15 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         final MediaPanel mediaPanel = new MediaPanel(mediaService, this, stringMessages);
         tabPanel.add(mediaPanel, stringMessages.mediaPanel(), /* asHTML */ false);
         
+        final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(stringMessages, sailingService, this, sailingEventManagementPanel, leaderboardGroupConfigPanel);
+        tabPanel.add(masterDataImportPanel, stringMessages.masterDataImportPanel(), /* asHTML */ false);
+        
         tabPanel.selectTab(0);
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
             public void onSelection(SelectionEvent<Integer> event) {
                 if (leaderboardConfigPanel.isVisible()) {
-                    leaderboardConfigPanel.loadAndRefreshLeaderboards();
+                    leaderboardConfigPanel.loadLeaderboards();
                 }
                 if (mediaPanel.isVisible()) {
                     mediaPanel.onShow();
@@ -126,7 +139,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(sailingService, this);
         sysinfoPanel.ensureDebugId("SystemInformation");
-        rootPanel.add(sysinfoPanel);
+        verticalPanel.add(sysinfoPanel);
     }
 
     @Override

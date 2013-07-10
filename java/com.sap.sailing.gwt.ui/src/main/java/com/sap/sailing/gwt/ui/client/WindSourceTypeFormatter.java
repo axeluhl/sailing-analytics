@@ -16,6 +16,8 @@ public class WindSourceTypeFormatter {
             return stringMessages.expeditionWindSourceTypeName();
         case WEB:
             return stringMessages.webWindSourceTypeName();
+        case RACECOMMITTEE:
+            return stringMessages.raceCommitteeWindSourceTypeName();
         }
         return null;
     }

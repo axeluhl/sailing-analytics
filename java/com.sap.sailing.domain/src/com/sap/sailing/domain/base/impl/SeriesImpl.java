@@ -34,7 +34,18 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     private Regatta regatta;
     private final RaceColumnListeners raceColumnListeners;
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
+    
+    /**
+     * If set, the series doesn't take over the scores from any previous series but starts with zero scores for all its
+     * competitors
+     */
     private boolean startsWithZeroScore;
+    
+    /**
+     * If set, the first race column is not discardable. This is usually very helpful if the series starts with a
+     * carry-forward score from a previous series.
+     */
+    private boolean firstColumnIsNonDiscardableCarryForward;
     
     /**
      * @param fleets
@@ -238,6 +249,11 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         raceColumnListeners.notifyListenersAboutIsStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
     }
 
+    @Override
+    public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
+        raceColumnListeners.notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(raceColumn, firstColumnIsNonDiscardableCarryForward);
+    }
+
     /**
      * A series listens on its columns; individual columns, however, don't ask whether they can be added; the series itself does.
      * 
@@ -295,6 +311,11 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
 
     @Override
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        ThresholdBasedResultDiscardingRule oldResultDiscardingRule = this.resultDiscardingRule;
+        if (!Util.equalsWithNull(oldResultDiscardingRule, resultDiscardingRule)) {
+            this.resultDiscardingRule = resultDiscardingRule;
+            raceColumnListeners.notifyListenersAboutResultDiscardingRuleChanged(oldResultDiscardingRule, resultDiscardingRule);
+        }
         this.resultDiscardingRule = resultDiscardingRule;
     }
 
@@ -331,4 +352,23 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         }
     }
 
+    @Override
+    public boolean isFirstColumnIsNonDiscardableCarryForward() {
+        return firstColumnIsNonDiscardableCarryForward;
+    }
+
+    @Override
+    public void setFirstColumnIsNonDiscardableCarryForward(boolean firstColumnIsNonDiscardableCarryForward) {
+        boolean oldFirstColumnIsNonDiscardableCarryForward = this.firstColumnIsNonDiscardableCarryForward;
+        if (oldFirstColumnIsNonDiscardableCarryForward != firstColumnIsNonDiscardableCarryForward) {
+            this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
+            RaceColumn firstRaceColumnInSeries = getFirstRaceColumn();
+            if (firstRaceColumnInSeries != null) {
+                raceColumnListeners.notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(firstRaceColumnInSeries, firstColumnIsNonDiscardableCarryForward);
+            }
+        }
+        this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
+    }
+
+    
 }

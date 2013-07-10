@@ -30,8 +30,9 @@ public class Timer {
     private Date time;
 
     /**
-     * The time delay to the current point in time in millisseconds which
-     * will only be used in {@link PlayModes#Live} play mode.  
+     * The time delay to the current point in time in milliseconds which will only be used in {@link PlayModes#Live}
+     * play mode in order to infer an approximate, server-based time point to display on the client that is independent
+     * of the client clock. Not set explicitly by the user but controlled by responses coming from the server.
      */
     private long livePlayDelayInMillis;
     
@@ -80,11 +81,20 @@ public class Timer {
     private boolean autoAdvance;
 
     /**
-     * If {@link #setLivePlayDelayInMillisExplicitly(long)} was called, this flag is set to <code>true</code> which will
-     * cause calls to {@link #setLivePlayDelayInMillis(long)} to be ignored. Then, the only way to update the live delay is
-     * to call {@link #setLivePlayDelayInMillisExplicitly(long)}.
+     * The clocks of a client cannot be expected to be synchronized to the same time source as the server clock.
+     * Therefore, there is a good chance for a significant time difference between client and server. While this does
+     * not matter in replay mode where the client requests data for some arbitrary point in time, in live mode the
+     * client at least should display the server time reasonably correct. Times in requests to the server in live mode
+     * shall always be encoded as <code>null</code> to tell the server to use its server time. This will also help
+     * improve the chances for cache hits.<p>
+     * 
+     * The time difference is maintained by applying an exponential moving average across the time differences announced through
+     * {@link #setMillisecondsClientIsCurrentlyBehindServer}. The field starts out with 0 as default value, implying the client
+     * clock has exactly the same time as the server clock.
      */
-    private boolean delaySetExplicity;
+    private long millisecondsClientIsBehindServer;
+    
+    private boolean clientServerOffsetHasAtLeastBeenSetOnce;
     
     /**
      * The timer can run in two different modes: Live and Replay
@@ -96,9 +106,11 @@ public class Timer {
     public enum PlayStates { Stopped, Playing, Paused }; 
 
     /**
-     * The timer is created in stopped state, using "now" as its current time, 1.0 as its {@link #playSpeedFactor play speed factor} and
-     * 1 second (1000ms) as the {@link #refreshInterval delay between automatic updates} should the timer be
-     * {@link #resume() started}.
+     * The timer is created in stopped state unless created with <code>playMode==PlayModes.Live</code>, using the
+     * client's "now" as its current time, 1.0 as its {@link #playSpeedFactor play speed factor} and 1 second (1000ms)
+     * as the {@link #refreshInterval delay between automatic updates} should the timer be {@link #resume() started}.
+     * The {@link #millisecondsClientIsBehindServer offset} to the server time is initially left at 0ms until
+     * updated by a call to {@link #adjustClientServerOffset(long, Date, long)}. 
      */
     public Timer(PlayModes playMode) {
         this(playMode, 1000);
@@ -112,6 +124,8 @@ public class Timer {
      */
     public Timer(PlayModes playMode, long refreshInterval) {
         this.refreshInterval = refreshInterval;
+        // Using the client's clock is only a default; the time offset between client and server is adjusted when
+        // information about the server time is present; see adjustClientServerOffset(...)
         time = new Date();
         timeListeners = new HashSet<TimeListener>();
         playStateListeners = new HashSet<PlayStateListener>();
@@ -136,6 +150,36 @@ public class Timer {
     
     public void removePlayStateListener(PlayStateListener listener) {
         playStateListeners.remove(listener);
+    }
+    
+    /**
+     * Assumes that a service request was sent to the server at <code>timePointWhenRequestWasSent</code> for which the
+     * response was received at <code>timePointWhenResponseWasReceived</code> and where the response tells
+     * <code>currentServerTime</code> as the server time during processing the request. Based on this, calculates the
+     * difference between the client's <code>System.currentTimeMillis()</code> and the current server time and, removing
+     * half the time between send and receive time point to approximate the network latency. This gives a good
+     * indication for how far client and server clock differ.
+     * 
+     * @param serverTimeDuringRequest may be <code>null</code> in which case no adjustment is performed
+     */
+    public void adjustClientServerOffset(long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
+        if (serverTimeDuringRequest != null) {
+            // Let's assume the calculation of the RaceTimesInfoDTO objects during the request takes almost no time compared
+            // to network latency. Then the difference between the client's current time and the time when the request was sent
+            // can be considered network latency. If we furthermore assume that the network latency is roughly symmetrical for
+            // request and response, dividing the total latency by two will approximately tell us the time that passed between
+            // when the server set the RaceTimesInfoDTO.currentServerTime field and the current time.
+            long responseNetworkLatencyInMillis = (clientTimeWhenResponseWasReceived-clientTimeWhenRequestWasSent)/2l;
+            long offset = serverTimeDuringRequest.getTime() + responseNetworkLatencyInMillis - clientTimeWhenResponseWasReceived;
+            if (clientServerOffsetHasAtLeastBeenSetOnce) {
+                final double exponentialMovingAverageFactor = 0.5;
+                millisecondsClientIsBehindServer = (long) (millisecondsClientIsBehindServer
+                        * exponentialMovingAverageFactor + (1. - exponentialMovingAverageFactor) * offset);
+            } else {
+                millisecondsClientIsBehindServer = offset;
+                clientServerOffsetHasAtLeastBeenSetOnce = true;
+            }
+        }
     }
     
     public void setTime(long timePointAsMillis) {
@@ -221,7 +265,7 @@ public class Timer {
         if (playState != PlayStates.Playing) {
             playState = PlayStates.Playing;
             if (playMode == PlayModes.Live) {
-                setTime(System.currentTimeMillis()-livePlayDelayInMillis);
+                setTime(getLiveTimePointInMillis());
             }
             if (autoAdvance) {
                 startAutoAdvance();
@@ -242,7 +286,7 @@ public class Timer {
                         newTime += (long) playSpeedFactor * refreshInterval;
                     } else {
                         // play mode is Live; quantize to make cache hits more likely
-                        newTime = quantizeTimeStamp(System.currentTimeMillis() - getLivePlayDelayInMillis()); 
+                        newTime = quantizeTimeStamp(getLiveTimePointInMillis()); 
                     }
                     setTime(newTime);
                 }
@@ -272,36 +316,12 @@ public class Timer {
     }
     
     public void setLivePlayDelayInMillis(long delayInMilliseconds) {
-        if (!delaySetExplicity) {
-            basicSetLivePlayDelayInMillis(delayInMilliseconds);
-        }
-    }
-    
-    /**
-     * Always updates the delay if it is different from the current delay setting. The fact that an explicit delay update was
-     * performed is recorded which will block further automatic delay updates from this point onwards.
-     */
-    public void setLivePlayDelayInMillisExplicitly(long delayInMilliseconds) {
-        basicSetLivePlayDelayInMillis(delayInMilliseconds);
-        delaySetExplicity = true;
-    }
-
-    private void basicSetLivePlayDelayInMillis(long delayInMilliseconds) {
         if (this.livePlayDelayInMillis != delayInMilliseconds) {
             this.livePlayDelayInMillis = delayInMilliseconds;
             if (getPlayMode() == PlayModes.Live) {
-                setTime(new Date().getTime() - delayInMilliseconds);
+                setTime(getLiveTimePointInMillis());
             }
         }
-    }
-    
-    /**
-     * Tells how much the timer is currently behind "now." Note that this is not the same as asking
-     * {@link #getLivePlayDelayInMillis()} which tells the delay that will be established if the timer is put
-     * into live mode.
-     */
-    public long getCurrentDelayInMillis() {
-        return System.currentTimeMillis() - getTime().getTime();
     }
     
     public long getLivePlayDelayInMillis() {
@@ -323,4 +343,13 @@ public class Timer {
     public void setAutoAdvance(boolean autoAdvance) {
         this.autoAdvance = autoAdvance;
     }
+
+    public long getLiveTimePointInMillis() {
+        return System.currentTimeMillis() - getLivePlayDelayInMillis() + millisecondsClientIsBehindServer;
+    }
+    
+    public Date getLiveTimePointAsDate() {
+        return new Date(getLiveTimePointInMillis());
+    }
+
 }

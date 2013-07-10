@@ -127,6 +127,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
+        getRaceColumnListeners().notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(raceColumn, firstColumnIsNonDiscardableCarryForward);
+    }
+
+    @Override
     public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
         return getRaceColumnListeners().canAddRaceColumnToContainer(raceColumn);
     }
@@ -174,5 +179,18 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     @Override
     public RaceLogIdentifier getRaceLogIdentifier(Fleet fleet) {
         return null;
+    }
+
+    @Override
+    public RaceLogInformation getRaceLogInformation() {
+        return null;
+    }
+
+    @Override
+    public void setOrReloadRaceLogInformation(RaceLogInformation raceLogInformation, Fleet fleetImpl) {
+    }
+
+    @Override
+    public void removeRaceIdentifier(Fleet fleet) {
     }
 }

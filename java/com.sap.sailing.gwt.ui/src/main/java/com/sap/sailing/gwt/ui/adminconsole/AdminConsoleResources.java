@@ -17,6 +17,12 @@ interface AdminConsoleResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
     ImageResource editIcon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/import.png")
+    ImageResource importIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/reload.png")
+    ImageResource reloadIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/link.png")
     ImageResource linkIcon();
 

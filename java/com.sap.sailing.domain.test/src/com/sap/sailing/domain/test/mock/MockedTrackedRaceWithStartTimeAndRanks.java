@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
@@ -517,6 +518,18 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public void detachAllRaceLogs() {
         // TODO Auto-generated method stub
         
+    }
+
+    @Override
+    public boolean isLive(TimePoint at) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Iterable<Sideline> getCourseSidelines() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

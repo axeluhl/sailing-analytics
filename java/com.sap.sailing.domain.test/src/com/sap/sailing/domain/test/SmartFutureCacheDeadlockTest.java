@@ -47,6 +47,7 @@ public class SmartFutureCacheDeadlockTest {
     private static final String CACHE_KEY = "cacheKey";
     private NamedReentrantReadWriteLock lock;
     private Thread computingThread;
+    private Object cacheUpdateBegunMonitor;
     private LockingScript reader;
     private Thread readerThread;
     private LockingScript writer;
@@ -55,12 +56,16 @@ public class SmartFutureCacheDeadlockTest {
 
     @Before
     public void setUp() throws InterruptedException {
+        cacheUpdateBegunMonitor = new Object();
         lock = new NamedReentrantReadWriteLock("testReadReadDeadlockBetweenGetterAndTrigger", /* fair */ true);
         sfc = new SmartFutureCache<String, String, SmartFutureCache.EmptyUpdateInterval>(
                 new SmartFutureCache.AbstractCacheUpdater<String, String, SmartFutureCache.EmptyUpdateInterval>() {
                     @Override
                     public String computeCacheUpdate(String key, EmptyUpdateInterval updateInterval) throws Exception {
-                        computingThread = Thread.currentThread();
+                        synchronized (cacheUpdateBegunMonitor) {
+                            computingThread = Thread.currentThread();
+                            cacheUpdateBegunMonitor.notifyAll();
+                        }
                         logger.info("Trying to obtain read lock for "+lock.getName()+" in thread "+computingThread.getName());
                         LockUtil.lockForRead(lock);
                         try {
@@ -97,12 +102,17 @@ public class SmartFutureCacheDeadlockTest {
     }
     
     @Test
-    public void testBasicCaching() {
+    public void testBasicCaching() throws InterruptedException {
         logger.info("starting testBasicCaching");
         assertNull(computingThread);
         sfc.triggerUpdate(CACHE_KEY, /* updateInterval */ null);
         String result = sfc.get(CACHE_KEY, /* waitForLatest */ true);
         assertEquals(RESULT, result);
+        synchronized (cacheUpdateBegunMonitor) {
+            if (computingThread == null) {
+                cacheUpdateBegunMonitor.wait(/* timeout in milliseconds */ 10000); // expectedly, the cache update will run, setting the computingThread field
+            }
+        }
         assertNotNull(computingThread);
     }
     
@@ -117,6 +127,11 @@ public class SmartFutureCacheDeadlockTest {
         // in suspended mode, the following will trigger a re-calculation immediately,
         // and the locks from the readerThread will be propagated to the computing thread
         reader.performAndWait(Command.GET_LATEST_FROM_CACHE);
+        synchronized (cacheUpdateBegunMonitor) {
+            if (computingThread == null) {
+                cacheUpdateBegunMonitor.wait(/* timeout in milliseconds */ 10000); // expectedly, the cache update will run, setting the computingThread field
+            }
+        }
         try {
             assertNotNull(computingThread);
         } finally {
@@ -157,6 +172,11 @@ public class SmartFutureCacheDeadlockTest {
             // in suspended mode, the following will trigger a re-calculation immediately,
             // and the locks from the readerThread will be propagated to the computing thread
             reader.performAndWait(Command.GET_LATEST_FROM_CACHE);
+            synchronized (cacheUpdateBegunMonitor) {
+                if (computingThread == null) {
+                    cacheUpdateBegunMonitor.wait(/* timeout in milliseconds */ 10000); // expectedly, the cache update will run, setting the computingThread field
+                }
+            }
             assertNotNull(computingThread);
         } finally {
             reader.performAndWait(Command.UNLOCK_AFTER_READ); // this shall unblock the writer
@@ -185,6 +205,14 @@ public class SmartFutureCacheDeadlockTest {
     private static class LockingScript implements Runnable {
         private static final Logger logger = Logger.getLogger(LockingScript.class.getName());
         private boolean running;
+        
+        /**
+         * Number of commands in {@link #commandQueue}, plus 1 if there is currently one command already taken
+         * from the queue and being processed. Don't access this directly to know if there are still requests pending
+         * or being processed. Synchronization happens on {@link #commandQueue} object with notifications upon every change.
+         */
+        private int queuedAndProcessing;
+        
         private boolean waitingForLock;
         private final SmartFutureCache<String, String, EmptyUpdateInterval> sfc;
         private final NamedReentrantReadWriteLock lock;
@@ -206,14 +234,20 @@ public class SmartFutureCacheDeadlockTest {
         }
 
         public void perform(Command command) {
-            commandQueue.offer(command);
+            synchronized (commandQueue) {
+                commandQueue.offer(command);
+                queuedAndProcessing++;
+                commandQueue.notifyAll();
+            }
         }
         
         public void performAndWait(Command command) throws InterruptedException {
-            commandQueue.offer(command);
             synchronized (commandQueue) {
-                while (!commandQueue.isEmpty()) {
+                commandQueue.offer(command);
+                queuedAndProcessing++;
+                while (queuedAndProcessing > 0) {
                     commandQueue.wait();
+                    commandQueue.notifyAll();
                 }
             }
         }
@@ -228,9 +262,9 @@ public class SmartFutureCacheDeadlockTest {
                 running = true;
                 this.notifyAll();
             }
-            Command command;
             try {
-                while ((command=commandQueue.take()) != Command.EXIT) {
+                Command command;
+                while ((command = commandQueue.take()) != Command.EXIT) {
                     logger.info("Took command "+command.name()+" in thread "+Thread.currentThread().getName());
                     switch (command) {
                     case LOCK_FOR_READ:
@@ -269,6 +303,7 @@ public class SmartFutureCacheDeadlockTest {
                     }
                     logger.info("Done processing command "+command.name()+" in thread "+Thread.currentThread().getName());
                     synchronized (commandQueue) {
+                        queuedAndProcessing--;
                         commandQueue.notifyAll(); // unblock wait in performAndWait
                     }
                 }

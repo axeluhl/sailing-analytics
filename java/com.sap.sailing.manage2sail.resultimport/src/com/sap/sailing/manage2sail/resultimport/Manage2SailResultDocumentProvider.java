@@ -34,18 +34,18 @@ public class Manage2SailResultDocumentProvider implements ResultDocumentProvider
                     // International boat classes -> IFClassID="" Title="Coachboat"
                     // Open boat classes (ORC) ->  IFClassID="" Title="Welcome Race ORC-Club"
                     // -> therefore we need to take the regatta title as boat class where the IsafID is not available
-                    String boatClass = regattaResult.getIsafId() != null ? regattaResult.getIsafId() : regattaResult.getName();
+                    String boatClass = regattaResult.getIsafId() != null && !regattaResult.getIsafId().isEmpty() ? regattaResult.getIsafId() : regattaResult.getName();
                     if (regattaResult.getIsFinal() != null && regattaResult.getPublishedAt() != null) {
                         if (regattaResult.getIsFinal() && regattaResult.getXrrFinalUrl() != null) {
                             URLConnection regattaResultConn = regattaResult.getXrrFinalUrl().openConnection();
                             result.add(new ResultDocumentDescriptorImpl((InputStream) regattaResultConn.getContent(),
                                     regattaResult.getXrrPreliminaryUrl().toString(), new MillisecondsTimePoint(regattaResult.getPublishedAt()),
-                                            eventResult.getName(), regattaResult.getName(), boatClass));
+                                            eventResult.getName(), regattaResult.getName(), boatClass, regattaResult.getCompetitorGenderType()));
                         } else if (regattaResult.getXrrPreliminaryUrl() != null) {
                             URLConnection regattaResultConn = regattaResult.getXrrPreliminaryUrl().openConnection();
                             result.add(new ResultDocumentDescriptorImpl((InputStream) regattaResultConn.getContent(),
                                     regattaResult.getXrrPreliminaryUrl().toString(), new MillisecondsTimePoint(regattaResult.getPublishedAt()),
-                                    eventResult.getName(), regattaResult.getName(), boatClass));
+                                    eventResult.getName(), regattaResult.getName(), boatClass, regattaResult.getCompetitorGenderType()));
                         }
                     }
                 }
