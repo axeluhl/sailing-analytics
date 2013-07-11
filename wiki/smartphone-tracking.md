@@ -117,7 +117,7 @@ Background process for starting, pausing and stopping tracking. Registers all re
 * Server
  * persist tracking data (GPSFixStore)
  * user management (Competitors as users, credentials so not everybody can do everything)
-  * integrate with OAuth, ISAF competitors etc.?
+   * integrate with OAuth, ISAF competitors etc.?
  * security (not everybody can start race, goes hand in hand with user management)
  * load stored tracked smartphone race (Panel in Admin Console, RaceLogConnector, only present such races with the necessary data in the racelog, and allow user to select whole leaderboard to restore)
  * use course update events in racelog locally, do not send to TracTrac
