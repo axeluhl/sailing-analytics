@@ -80,8 +80,8 @@ The current plan is to use up to three channels for communicating:
 * `404` Leaderboard/RaceColumn/Fleet not found
 * `409` Race has already been created, pre-race phase has not been ended
 
-### `/smartphone/addgpsfix`
-`AddGPSFixPostServlet`
+### `/smartphone/addfixes`
+`AddFixesPostServlet`
 **Precondition**
 * `/smartphone/createRace` has been successfully called before
 
@@ -141,6 +141,7 @@ Async task that handles the execution of post requests.
  * mapping marks to devices
  * Servlet for getting all races, which are still open to register for
  * generic method for registering listener for NMEA sentence types (e.g. to then process wind) -> move servlet for recieving NMEA out of smartphoneadapter
+ * RaceLogRaceTracker: functionality of RaceTracker as view on RaceLog?
 * Android
  * abstract sending service, so that all POST / GET requests and not only RaceLogEvents can be sent using the semi-connectedness functionality
  * simplify settings
