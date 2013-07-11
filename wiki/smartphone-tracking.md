@@ -125,5 +125,7 @@ Background process for starting, pausing and stopping tracking. Registers all re
  * support other input channels (e.g. Igtimi)
  * release mapping when race is finished
  * mapping marks to devices
+ * Servlet for getting all races, which are still open to register for
 * Android
  * abstract sending service, so that all POST / GET requests and not only RaceLogEvents can be sent using the semi-connectedness functionality
+ * login/register Activity for registering the Team and Sailor the first time the App is started
