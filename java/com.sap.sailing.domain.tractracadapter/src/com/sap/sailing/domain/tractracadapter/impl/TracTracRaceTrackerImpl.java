@@ -254,11 +254,15 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * @return the task to cancel in case the tracker wants to terminate the poller
      */
     private ScheduledFuture<?> scheduleClientParamsPHPPoller(final URL paramURL, final Simulator simulator) {
-        ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(new Runnable() {
+        final Runnable command = new Runnable() {
             @Override public void run() {
                 pollAndParseClientParamsPHP(paramURL, simulator);
             }
-        }, /* initialDelay */ 30000, /* delay */ 15000, /* unit */ TimeUnit.MILLISECONDS);
+        };
+        // now run the command once immediately and synchronously; see also bug 1345
+        command.run();
+        // then schedule for periodic execution in background
+        ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(command, /* initialDelay */ 30000, /* delay */ 15000, /* unit */ TimeUnit.MILLISECONDS);
         return task;
     }
 
@@ -446,7 +450,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         controlPointPositionPoller.cancel(/* mayInterruptIfRunning */ false);
         controller.stop(/* abortStored */ true);
         for (Receiver receiver : receivers) {
-            receiver.stopAfterProcessingQueuedEvents();
+            receiver.stopPreemptively();
         }
         ioThread.join(3000); // wait no more than three seconds
         if (ioThread.isAlive()) {

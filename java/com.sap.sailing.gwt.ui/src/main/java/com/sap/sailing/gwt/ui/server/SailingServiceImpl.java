@@ -806,14 +806,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             // reload JSON and load clientparams.php
             RaceRecord record = getService().getSingleTracTracRaceRecord(new URL(rr.jsonURL), rr.id, /*loadClientParams*/true);
             logger.info("Loaded race " + record.getName() + " in " + record.getEventName() + " start:" + record.getRaceStartTime() + " trackingStart:" + record.getTrackingStartTime() + " trackingEnd:" + record.getTrackingEndTime());
+            // note that the live URI may be null for races that were put into replay mode
             if (liveURI == null || liveURI.trim().length() == 0) {
-                liveURI = record.getLiveURI().toString();
+                liveURI = record.getLiveURI() == null ? null : record.getLiveURI().toString();
             }
             if (storedURI == null || storedURI.trim().length() == 0) {
                 storedURI = record.getStoredURI().toString();
             }
             final RacesHandle raceHandle = getService().addTracTracRace(regattaToAddTo, record.getParamURL(),
-                    new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI), new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
+                    liveURI == null ? null : new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI), new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
                     new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                     MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
