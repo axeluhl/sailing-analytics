@@ -28,11 +28,10 @@ The current plan is to use up to three channels for communicating:
 * `400` Invalid JSON in request
 * `409` Leaderboard with name %s already exists
 
-### `/smartphone/createRaceColumn`
+### `/smartphone/createRaceColumn?leaderboard=<leaderboardName>`
 `CreateFlexibleLeaderboardPostServlet`
 
 **Expects**
-* URL Parameter: `leaderboard` leaderboard name
 * POST request body: RaceColumnDTO-JSON (see `RaceColumnDTODeserializer`)
 
 **Returns**
@@ -64,7 +63,7 @@ The current plan is to use up to three channels for communicating:
 **Returns**
 * `200` body: JSON array of Competitor objects
 
-### `/smartphone/createRace`
+### `/smartphone/createRace?leaderboard=<leaderboardName>&raceColumn=<raceColumnName>&fleet=<fleetName>`
 `CreateRacePostServlet`
 
 **Precondition**
