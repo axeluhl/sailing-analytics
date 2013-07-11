@@ -81,7 +81,7 @@ The current plan is to use up to three channels for communicating:
 * `404` Leaderboard/RaceColumn/Fleet not found
 * `409` Race has already been created, pre-race phase has not been ended
 
-### '/sailingserver/tracking/position'
+### `/sailingserver/tracking/position`
 * remember to also replicate this
 * then an incoming fix can be added to the TrackedRace
 * RaceLogConnector, where mapping etc. is stored should be better!
