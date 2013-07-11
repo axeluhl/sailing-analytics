@@ -124,5 +124,6 @@ Background process for starting, pausing and stopping tracking. Registers all re
  * find methods for persistent competitors
  * support other input channels (e.g. Igtimi)
  * release mapping when race is finished
+ * mapping marks to devices
 * Android
  * abstract sending service, so that all POST / GET requests and not only RaceLogEvents can be sent using the semi-connectedness functionality
