@@ -80,6 +80,7 @@ public class SimulatorMainPanel extends SimplePanel {
     private VerticalPanel windPanel;
 
     private Button updateButton;
+    private Button polarDiagramButton;
     private Button courseInputButton;
 
     private RadioButton summaryButton;
@@ -367,10 +368,17 @@ public class SimulatorMainPanel extends SimplePanel {
         optionsPanel.setSize("100%", "45px");
         optionsPanel.add(options);
         optionsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        initUpdateButton();
-        // updateButton.getElement().getStyle().setFloat(Style.Float.RIGHT);
-        optionsPanel.add(updateButton);
 
+        HorizontalPanel buttonPanel = new HorizontalPanel();
+        buttonPanel.setWidth("0px");
+        
+        initPolarDiagramButton();
+        buttonPanel.add(polarDiagramButton);        
+
+        initUpdateButton();
+        buttonPanel.add(updateButton);
+        
+        optionsPanel.add(buttonPanel);        
         leftPanel.add(optionsPanel);
     }
 
@@ -652,51 +660,6 @@ public class SimulatorMainPanel extends SimplePanel {
         return fullTimePanel;
     }
 
-    private Panel createPolarSelector() {
-
-        HorizontalPanel polarDiagramPanel = new HorizontalPanel();
-        polarDiagramPanel.getElement().setClassName("boatClassPanel");
-        polarDiagramPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-
-        Label polarShowLabel = new Label(stringMessages.showHideComponent(""));
-        polarShowLabel.getElement().setClassName("boatClassLabel");
-        polarDiagramPanel.add(polarShowLabel);
-
-        final CheckBox cb = new CheckBox("");
-        cb.setValue(false);
-        cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                boolean checked = ((CheckBox) event.getSource()).getValue();
-
-                polarDiv.setVisible(checked);
-
-                if(checked) {
-
-                    //TODO: change the hardcoded values bellow...
-
-                    polarDiagramDialogBox.setPopupPositionAndShow(new PositionCallback() {
-                        @Override
-                        public void setPosition(int offsetWidth, int offsetHeight) {
-
-                            int width = Window.getClientWidth() - 550;
-                            int height = Window.getClientHeight() - 525;
-
-                            polarDiagramDialogBox.setPopupPosition(width, height);
-                        }
-                    });
-
-                    polarDiagramDialogCloseButton.setFocus(true);
-                    cb.setValue(false);
-                }
-            }
-        });
-
-        polarDiagramPanel.add(cb);
-
-        return polarDiagramPanel;
-    }
-
     private void createSailingSetup(Panel controlPanel) {
 
         VerticalPanel sailingPanel = new VerticalPanel();
@@ -728,18 +691,13 @@ public class SimulatorMainPanel extends SimplePanel {
             sailingPanel.add(pathPolylineModeSelector);
         }
 
-        String polarString = stringMessages.simulatorPolarHeader();
-        Label polarSetup = new Label(polarString);
-        polarSetup.getElement().setClassName("innerHeadline");
-        sailingPanel.add(polarSetup);
-
-        Panel polarShow = createPolarSelector();
-        sailingPanel.add(polarShow);
-
         this.polarDiagramDialogCloseButton = new Button("Close");
         this.polarDiagramDialogCloseButton.getElement().setId("closeButton");
+        this.polarDiagramDialogCloseButton.getElement().getStyle().setProperty("marginTop", "10px");
 
         this.polarDiv = new VerticalPanel();
+        this.polarDiv.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        this.polarDiv.getElement().getStyle().setProperty("border", "0px");
         this.polarDiv.getElement().setClassName("polarDiv");
         this.polarDiv.setVisible(false);
 
@@ -793,7 +751,7 @@ public class SimulatorMainPanel extends SimplePanel {
         .setType(Series.Type.LINE)
         .setChartTitleText("Polar diagram test")
         .setWidth(450)
-        .setHeight(300)
+        .setHeight(500)
         .setOption("/chart/polar", true)
         .setOption("pane/startAngle", 0)
         .setOption("pane/endAngle", 360)
@@ -853,6 +811,7 @@ public class SimulatorMainPanel extends SimplePanel {
     private void initUpdateButton() {
 
         this.updateButton = new Button(stringMessages.simulateButton());
+        this.updateButton.getElement().getStyle().setProperty("marginLeft", "30px");
         if (mode == SailingSimulatorConstants.ModeEvent) {
         	this.updateButton.setEnabled(true);
         }
@@ -902,9 +861,44 @@ public class SimulatorMainPanel extends SimplePanel {
         }
     }
 
+    private void initPolarDiagramButton() {
+
+    	this.polarDiagramButton =  new Button(stringMessages.polarDiagramButton());
+    	this.polarDiagramButton.addClickHandler(new ClickHandler() {
+    		@Override
+    		public void onClick(ClickEvent arg0) {
+
+    			boolean checked = polarDiv.isVisible(); //((CheckBox) event.getSource()).getValue();
+
+    			if (!checked) {
+
+    				polarDiv.setVisible(true);
+
+    				//TODO: change the hardcoded values bellow...
+
+    				polarDiagramDialogBox.setPopupPositionAndShow(new PositionCallback() {
+    					@Override
+    					public void setPosition(int offsetWidth, int offsetHeight) {
+
+    						int width = (Window.getClientWidth() - 492)/2;
+    						int height = (Window.getClientHeight() - 608)/2;
+
+    						polarDiagramDialogBox.setPopupPosition(width, height);
+    					}
+    				});
+
+    				polarDiagramDialogCloseButton.setFocus(true);
+    				//cb.setValue(false);
+
+    			}
+    		}
+    	});
+
+    }	
+
     private void initDisplayOptions(Panel mapOptions) {
 
-        this.summaryButton = new RadioButton("Map Display Options", stringMessages.summary());
+    	this.summaryButton = new RadioButton("Map Display Options", stringMessages.summary());
         this.summaryButton.getElement().setClassName("MapDisplayOptions");
         this.summaryButton.addClickHandler(new ClickHandler() {
             @Override
@@ -953,8 +947,8 @@ public class SimulatorMainPanel extends SimplePanel {
     private DialogBox createPolarDiagramDialogBox() {
 
         final DialogBox dialogBox = new DialogBox();
+        dialogBox.getElement().getStyle().setZIndex(10); // put polardiagram on-top of sapsailing header and parameter sliders
         dialogBox.setText("Polar Diagram");
-
         dialogBox.setAnimationEnabled(true);
         dialogBox.setAutoHideEnabled(false);
         dialogBox.setModal(false);
@@ -965,6 +959,7 @@ public class SimulatorMainPanel extends SimplePanel {
         this.polarDiagramDialogCloseButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+            	polarDiv.setVisible(false);
                 dialogBox.hide();
             }
         });
