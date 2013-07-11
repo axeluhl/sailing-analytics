@@ -18,15 +18,19 @@ public abstract class RaceLogEventWithTransformationSupport<E extends RaceLogEve
         return toState;
     }
 
+    /**
+     * By default, setting the start time on a CLIENT is not transformed by any SERVER operation for execution on the SERVER.
+     */
     public RaceLogEventWithTransformationSupport<?> transformClientOpForStartTimeEvent(
-            RaceLogStartTimeEventWithTransformationSupport raceLogStartTimeEventWithTransformationSupport) {
-        // TODO Auto-generated method stub
-        return null;
+            RaceLogStartTimeEventWithTransformationSupport raceLogStartTimeClientEventWithTransformationSupport) {
+        return this;
     }
 
+    /**
+     * By default, setting the start time on the SERVER is not transformed by any CLIENT operation for execution on the CLIENT.
+     */
     public RaceLogEventWithTransformationSupport<?> transformServerOpForStartTimeEvent(
-            RaceLogStartTimeEventWithTransformationSupport raceLogStartTimeEventWithTransformationSupport) {
-        // TODO Auto-generated method stub
-        return null;
+            RaceLogStartTimeEventWithTransformationSupport raceLogStartTimeServerEventWithTransformationSupport) {
+        return this;
     }
 }

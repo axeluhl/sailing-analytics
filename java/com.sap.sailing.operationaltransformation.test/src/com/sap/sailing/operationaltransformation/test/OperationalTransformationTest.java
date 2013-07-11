@@ -47,9 +47,12 @@ public class OperationalTransformationTest {
     public static class StringInsertTransformer implements Transformer<StringInsertOperation> {
         @Override
 	public ClientServerOperationPair<StringInsertOperation> transform(StringInsertOperation clientOp, StringInsertOperation serverOp) {
-	    StringInsertOperation resultClientOp;
-	    StringInsertOperation resultServerOp;
-	    if (clientOp.getPos() >= serverOp.getPos()) {
+	    final StringInsertOperation resultClientOp;
+	    final StringInsertOperation resultServerOp;
+	    if (clientOp == null || serverOp == null) {
+	        resultClientOp = clientOp;
+	        resultServerOp = serverOp;
+	    } else if (clientOp.getPos() >= serverOp.getPos()) {
 		resultServerOp = serverOp;
 		resultClientOp = new StringInsertOperation(clientOp.getPos()+serverOp.getS().length(), clientOp.getS());
 	    } else {

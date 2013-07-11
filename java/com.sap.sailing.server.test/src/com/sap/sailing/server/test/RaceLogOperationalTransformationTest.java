@@ -55,9 +55,7 @@ public class RaceLogOperationalTransformationTest {
         RaceLogStartTimeEvent startTimeEvent = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), startTime, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */ 1, startTime);
         RaceLogStartTimeEventWithTransformationSupport e = new RaceLogStartTimeEventWithTransformationSupport(startTimeEvent);
         server.apply(e);
-        server.waitForNotRunning();
-        client1.waitForNotRunning();
-        client2.waitForNotRunning();
+        waitForEventualConsistency();
         raceLogClient1.lockForRead();
         try {
             assertEquals(1, Util.size(raceLogClient1.getRawFixes()));
@@ -86,5 +84,47 @@ public class RaceLogOperationalTransformationTest {
             raceLogClient2.unlockAfterRead();
             raceLogServer.unlockAfterRead();
         }
+    }
+
+    @Test
+    public void testConflictingApplyServerWins() {
+        Calendar cServer = new GregorianCalendar(2013, 6, 7, 13, 59, 33);
+        final MillisecondsTimePoint startTimeServer = new MillisecondsTimePoint(cServer.getTime());
+        RaceLogStartTimeEvent startTimeEventServer = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), startTimeServer, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */ 1, startTimeServer);
+        RaceLogStartTimeEventWithTransformationSupport eServer = new RaceLogStartTimeEventWithTransformationSupport(startTimeEventServer);
+        server.apply(eServer);
+        Calendar cClient1 = new GregorianCalendar(2013, 6, 7, 13, 59, 33);
+        final MillisecondsTimePoint startTimeClient1 = new MillisecondsTimePoint(cClient1.getTime());
+        RaceLogStartTimeEvent startTimeEventClient1 = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), startTimeClient1, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */ 1, startTimeClient1);
+        RaceLogStartTimeEventWithTransformationSupport eClient1 = new RaceLogStartTimeEventWithTransformationSupport(startTimeEventClient1);
+        client1.apply(eClient1);
+        waitForEventualConsistency();
+        // now assert that the start time is equal on both clients and the server and equal to that set on the server
+        raceLogClient1.lockForRead();
+        try {
+            assertEquals(1, Util.size(raceLogClient1.getRawFixes()));
+            assertEquals(startTimeServer, ((RaceLogStartTimeEvent) raceLogClient1.getLastRawFix()).getStartTime());
+        } finally {
+            raceLogClient1.unlockAfterRead();
+        }
+        raceLogClient2.lockForRead();
+        try {
+            assertEquals(1, Util.size(raceLogClient2.getRawFixes()));
+            assertEquals(startTimeServer, ((RaceLogStartTimeEvent) raceLogClient2.getLastRawFix()).getStartTime());
+        } finally {
+            raceLogClient2.unlockAfterRead();
+        }
+        raceLogServer.lockForRead();
+        try {
+            assertEquals(startTimeServer, ((RaceLogStartTimeEvent) raceLogServer.getLastRawFix()).getStartTime());
+        } finally {
+            raceLogServer.unlockAfterRead();
+        }
+    }
+
+    private void waitForEventualConsistency() {
+        server.waitForNotRunning();
+        client1.waitForNotRunning();
+        client2.waitForNotRunning();
     }
 }

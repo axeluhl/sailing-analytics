@@ -16,4 +16,14 @@ public class RaceLogStartTimeEventWithTransformationSupport extends RaceLogEvent
     public RaceLogEventWithTransformationSupport<?> transformServerOp(RaceLogEventWithTransformationSupport<?> clientOp) {
         return clientOp.transformServerOpForStartTimeEvent(this);
     }
+
+    /**
+     * This is the CLIENT operation, and the SERVER start time event collides with the CLIENT start time event.
+     * The server's start time is to be set as the one that is used, and the client's event is to be removed from the log.
+     */
+    @Override
+    public RaceLogEventWithTransformationSupport<?> transformClientOpForStartTimeEvent(
+            RaceLogStartTimeEventWithTransformationSupport raceLogStartTimeServerEventWithTransformationSupport) {
+        return null;
+    }
 }

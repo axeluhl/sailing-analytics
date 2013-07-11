@@ -6,7 +6,8 @@ public class OperationalTransformer<S, O extends OperationWithTransformationSupp
     @Override
     public ClientServerOperationPair<O> transform(O clientOp, O serverOp) {
         ClientServerOperationPair<O> result = new ClientServerOperationPair<O>(
-                clientOp.transformClientOp(serverOp), serverOp.transformServerOp(clientOp));
+                clientOp == null ? null : clientOp.transformClientOp(serverOp),
+                        serverOp == null ? null : serverOp.transformServerOp(clientOp));
         return result;
     }
 
