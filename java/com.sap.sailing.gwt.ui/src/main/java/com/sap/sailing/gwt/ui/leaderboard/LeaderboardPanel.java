@@ -151,7 +151,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private LeaderboardDTO leaderboard;
 
-    private final RankColumn rankColumn;
+    private final TotalRankColumn totalRankColumn;
 
     /**
      * Passed to the {@link ManeuverCountRaceColumn}. Modifications to this list will modify the column's children list
@@ -1293,8 +1293,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
     }
 
-    private class RankColumn extends SortableColumn<LeaderboardRowDTO, String> {
-        public RankColumn() {
+    private class TotalRankColumn extends SortableColumn<LeaderboardRowDTO, String> {
+        public TotalRankColumn() {
             super(new TextCell(), SortingOrder.ASCENDING);
             setHorizontalAlignment(ALIGN_CENTER);
             setSortable(true);
@@ -1302,8 +1302,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            final int rank = getLeaderboard().getRank(object.competitor);
-            return "" + (rank == 0 ? "" : rank);
+            final int totalRank = getLeaderboard().getTotalRank(object.competitor);
+            return "" + (totalRank == 0 ? "" : totalRank);
         }
 
         @Override
@@ -1311,9 +1311,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
                 @Override
                 public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
-                    final int rank1 = getLeaderboard().getRank(o1.competitor);
-                    final int rank2 = getLeaderboard().getRank(o2.competitor);
-                    return rank1 == 0 ? rank2 == 0 ? 0 : 1 : rank2 == 0 ? -1 : rank1 - rank2;
+                    final int totalRank1 = getLeaderboard().getTotalRank(o1.competitor);
+                    final int totalRank2 = getLeaderboard().getTotalRank(o2.competitor);
+                    return totalRank1 == 0 ? totalRank2 == 0 ? 0 : 1 : totalRank2 == 0 ? -1 : totalRank1 - totalRank2;
                 }
             };
         }
@@ -1411,7 +1411,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             setRaceColumnSelectionToLastNStrategy(settings.getNumberOfLastRacesToShow());
             break;
         }
-        rankColumn = new RankColumn();
+        totalRankColumn = new TotalRankColumn();
         RACE_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableRaceColumnHeader();
         LEG_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegColumnHeader();
         LEG_DETAIL_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumnHeader();
@@ -2057,8 +2057,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
     }
 
-    private RankColumn getRankColumn() {
-        return rankColumn;
+    private TotalRankColumn getRankColumn() {
+        return totalRankColumn;
     }
 
     protected void setLeaderboard(LeaderboardDTO leaderboard) {
@@ -2318,7 +2318,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         if (getLeaderboardTable().getColumnCount() == RANK_COLUMN_INDEX) {
             addColumn(getDefaultSortColumn());
         } else {
-            if (!(getLeaderboardTable().getColumn(RANK_COLUMN_INDEX) instanceof RankColumn)) {
+            if (!(getLeaderboardTable().getColumn(RANK_COLUMN_INDEX) instanceof TotalRankColumn)) {
                 throw new RuntimeException("The first column must always be the rank column but it was of type "
                         + getLeaderboardTable().getColumn(RANK_COLUMN_INDEX).getClass().getName());
             }
