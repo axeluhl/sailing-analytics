@@ -1,7 +1,6 @@
 package com.sap.sailing.datamining.impl;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -52,17 +51,17 @@ public class EventSelector extends AbstractSelector {
     }
 
     @Override
-    public Set<GPSFixMoving> getDataFor(String xValue) {
+    public List<GPSFixMoving> getDataFor(String xValue) {
         for (Regatta regatta : regattas) {
             if (xValue.equals(regatta.getName())) {
                 return getDataOf(regatta);
             }
         }
-        return new HashSet<>();
+        return new ArrayList<>();
     }
 
-    private Set<GPSFixMoving> getDataOf(Regatta regatta) {
-        Set<GPSFixMoving> data = new HashSet<>();
+    private List<GPSFixMoving> getDataOf(Regatta regatta) {
+        List<GPSFixMoving> data = new ArrayList<>();
         for (RaceDefinition race : regatta.getAllRaces()) {
             RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), race.getName());
             TrackedRace trackedRace = racingEventService.getTrackedRace(raceIdentifier);
