@@ -140,6 +140,7 @@ Async task that handles the execution of post requests.
  * release mapping when race is finished
  * mapping marks to devices
  * Servlet for getting all races, which are still open to register for
+ * generic method for registering listener for NMEA sentence types (e.g. to then process wind) -> move servlet for recieving NMEA out of smartphoneadapter
 * Android
  * abstract sending service, so that all POST / GET requests and not only RaceLogEvents can be sent using the semi-connectedness functionality
  * simplify settings
