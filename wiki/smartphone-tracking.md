@@ -33,10 +33,10 @@ The current plan is to use up to three channels for communicating:
 
 **Expects**
 * URL Parameter: `leaderboard` leaderboard name
-* POST request body: RaceColumn-JSON (see `RaceColumnDeserializer`)
+* POST request body: RaceColumnDTO-JSON (see `RaceColumnDTODeserializer`)
 
 **Returns**
-* `200` RaceColumn created, body: RaceColumn as JSON
+* `200` RaceColumn created, body: RaceColumn-DTO as JSON
 
 **Throws**
 * `400` Missing parameter / Invalid JSON in request
