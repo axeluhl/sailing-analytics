@@ -43,7 +43,7 @@ public interface SimulatorServiceAsync {
 
     void getRacesNames(AsyncCallback<List<String>> asyncCallback);
 
-    void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField, SimulatorUISelectionDTO selection,
+    void getSimulatorResults(char mode, char rcDirection, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField, SimulatorUISelectionDTO selection,
             AsyncCallback<SimulatorResultsDTO> callback);
 
     void getCompetitorsNames(int selectedRaceIndex, AsyncCallback<List<String>> asyncCallback);

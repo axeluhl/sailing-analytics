@@ -77,3 +77,15 @@ At the 505 Worlds in La Rochelle we were faced with an HTML export format. Unfor
 
 ## ESS40 Result Importer
 The Extreme Sailing Series currently manages their results through sailracer.org. The series has their own iPad app to capture the finish line passings. This app produces a CSV file managed on the series' web server before it is converted and uploaded to the sailracer.org server. We get access to the CSV files and a document listing the CSV files available for the series. Those then feed into the score correction provider.
+
+## Race Export
+### Feature Description and related bundles
+Using the export feature, data from tracked races (such as the fixes for competitors and buoys) can be downloaded in common track formats such as GPX or KML. Though this somewhat contradicts the proposition of SAP Sailing Analytics to be _the_ authority in analyzing tracking data, it may be handy in some cases. The export functionality is mainly encapsulated in the `com.sap.sailing.server.trackfiles` bundle, and exposed to clients via a POST servlet in the `com.sap.sailing.server.gateway` bundle (`TrackFilesExportPostServlet`).
+
+### RouteConverter library
+To support different kinds of file formats, the core code of the [RouteConverter](https://github.com/cpesch/RouteConverter) project is used. Even without the GPSBabel integration (which we cannot use due to license restrictions) RouteConverter itself can write to the most important file formats. This core functionality has been converted to an OSGi bundle, for which the project `routeconverter` can be found in the branch `routeconverter-osgi`. If new versions of the code should be used, please read the `README` in that project to avoid some likely pitfalls.
+
+The approach chosen to create the OSGi-enabled JAR was using the Eclipse Plugin Development tools (instead of e.g. Bnd or PAX for OSGi-ifying a regular JAR), to have more manual control and the assistance of dependency resolution. Exporting the JAR from this project is acheived through a rightclick on `export.xml`->Run As->Ant Build, which then places the JAR bundle in the plugins directory of the git repository. As packaging new RouteConverter versions is completely independent of runtime aspects, and probably won't ever be done, this manual Ant-based step has been chosen for simplicity's sake, rather than a maven build via tycho. The exported bundle, that replaces the old RouteConverter bundle then has to be added to the target platform, as described [here](/wiki/typical-development-scenarios#Adding-a-Bundle-to-the-Target-Platform) - this step is a manual task anyway.
+
+### Using the Export feature
+Though the export functionality is theoretically accessible by everyone, the UI counterpart resides only within the admin console as an _Export_ button underneath every `TrackedRaceListComposite` (e.g. in the TracTrac panel). If races have been tracked and are selected, the button can be pressed, then the appropriate settings can be made in the popup dialog, and as a result a post request containing this configuration data and the desired races is issued automatically, which returns a ZIP file to the user.

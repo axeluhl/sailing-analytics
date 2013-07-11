@@ -28,6 +28,8 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
     public String racecourseColor = "White";
     public double racecourseBuoySize = 5;
+    public char rcDirection; 
+
 
     public LatLng startPoint;
     public LatLng endPoint;
