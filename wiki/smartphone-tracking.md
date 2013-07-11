@@ -15,7 +15,7 @@ The current plan is to use up to three channels for communicating:
 3. **Other:** The actual tracking data (perhaps also additional data: wind etc.) also has to be transferred. As we also have to deal with semi-connectedness, one idea is to reuse the communication mechanism which the RaceLog is built on top of. In case this cannot deal with the large amounts of data produced by tracking devices, or is to tightly coupled with the RaceLog semantics, a possible alternative is using CouchDB and its replication mechanism. The downside here is a further increased technology stack on client and server side, and a hetorgenous communication mechanisms between client and server. This makes setting up a development environment, understanding the architecture, development and lifecycle management of the used technologies on the server (OSGi, RabbitMQ with Erlang, MongoDB, and possibly CouchDB) even more difficult.
 
 ## Servlets
-### `/sailingserver/tracking/createFlexibleLeaderboard`
+### `/smartphone/createFlexibleLeaderboard`
 `CreateFlexibleLeaderboardPostServlet`
 
 **Expects**
@@ -28,7 +28,7 @@ The current plan is to use up to three channels for communicating:
 * `400` Invalid JSON in request
 * `409` Leaderboard with name %s already exists
 
-### `/sailingserver/tracking/createRaceColumn`
+### `/smartphone/createRaceColumn`
 `CreateFlexibleLeaderboardPostServlet`
 
 **Expects**
@@ -43,7 +43,7 @@ The current plan is to use up to three channels for communicating:
 * `404` Leaderboard not found
 * `409` RaceColumn with name %s already exists / Error adding RaceColumn
 
-### `/sailingserver/tracking/createPersistentCompetitor`
+### `/smartphone/createPersistentCompetitor`
 `CreatePersistentCompetitorPostServlet`
 
 **Expects**
@@ -55,7 +55,7 @@ The current plan is to use up to three channels for communicating:
 **Throws**
 * `400` Invalid JSON in request
 
-### `/sailingserver/tracking/getPersistentCompetitors`
+### `/smartphone/getPersistentCompetitors`
 `PersistentCompetitorsGetServlet`
 
 **Expects**
@@ -64,7 +64,7 @@ The current plan is to use up to three channels for communicating:
 **Returns**
 * `200` body: JSON array of Competitor objects
 
-### `/sailingserver/tracking/createRace`
+### `/smartphone/createRace`
 `CreateRacePostServlet`
 
 **Precondition**
@@ -81,7 +81,7 @@ The current plan is to use up to three channels for communicating:
 * `404` Leaderboard/RaceColumn/Fleet not found
 * `409` Race has already been created, pre-race phase has not been ended
 
-### `/sailingserver/tracking/position`
+### `/smartphone/position`
 * remember to also replicate this
 * then an incoming fix can be added to the TrackedRace
 * RaceLogConnector, where mapping etc. is stored should be better!
