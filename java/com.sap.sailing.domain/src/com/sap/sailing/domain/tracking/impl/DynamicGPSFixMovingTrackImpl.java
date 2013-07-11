@@ -127,7 +127,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                     && (speedToNext == null || speedToNext.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
                             * e.getSpeed().getMetersPerSecond())))
                     && (maxSpeedForSmoothing == null
-                            || (speedToNext == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0) || (next == null || speedToNext
+                            || (speedToPrevious == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0) || (speedToNext == null || speedToNext
                             .compareTo(maxSpeedForSmoothing) <= 0));
             e.cacheValidity(result);
         }
