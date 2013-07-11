@@ -112,6 +112,9 @@ Sends the location information to a web service.
 ### `SAP Sailor Tracker Service`
 Background process for starting, pausing and stopping tracking. Registers all receivers on a pending intent, which is send periodically.
 
+### `NetworkSenderTask`
+Async task that handles the execution of post requests.
+
 ## ToDo
 * Server
  * persist tracking data (GPSFixStore)
@@ -128,4 +131,5 @@ Background process for starting, pausing and stopping tracking. Registers all re
  * Servlet for getting all races, which are still open to register for
 * Android
  * abstract sending service, so that all POST / GET requests and not only RaceLogEvents can be sent using the semi-connectedness functionality
+ * simplify settings
  * login/register Activity for registering the Team and Sailor the first time the App is started
