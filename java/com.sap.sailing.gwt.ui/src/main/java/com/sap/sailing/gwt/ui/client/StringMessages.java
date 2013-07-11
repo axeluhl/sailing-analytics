@@ -742,4 +742,5 @@ public interface StringMessages extends Messages {
     String importSelectedLeaderboardGroups();
     String importSelectAtLeastOne();
     String deselectAll();
+    String polarDiagramButton();
 }

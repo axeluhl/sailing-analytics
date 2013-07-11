@@ -37,6 +37,9 @@ public class WindFieldGenParamsDTO implements IsSerializable {
     private boolean showStreamlets;
 
     private boolean showLines;
+    
+    public boolean showOmniscient = true;
+    public boolean showOpportunist = true;
 
     private char seedLines;
 
