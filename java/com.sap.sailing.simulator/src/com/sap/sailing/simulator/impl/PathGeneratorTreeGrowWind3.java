@@ -33,8 +33,10 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
 
     double oobFact = 0.75; // out-of-bounds factor
     int maxTurns = 0;
+    boolean upwindLeg = false;
     String initPathStr = "0";
     PathCandidate bestCand = null;
+    long usedTimeStep = 0;
     boolean gridStore = false;
     ArrayList<List<PathCandidate>> gridPositions = null;
     ArrayList<List<PathCandidate>> isocPositions = null;
@@ -93,6 +95,10 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
     PathCandidate getBestCand() {
         return this.bestCand;
     }
+    
+    long getUsedTimeStep() {
+    	return this.usedTimeStep;
+    }
 
 
     // generate step in one of the possible directions
@@ -114,15 +120,33 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         Bearing travelBearing = null;
         Bearing tmpBearing = null;
         if (nextDirection == 'L') {
-            travelBearing = pd.optimalDirectionsUpwind()[0];
+        	if (this.upwindLeg) {
+        		travelBearing = pd.optimalDirectionsUpwind()[0];
+        	} else {
+        		travelBearing = pd.optimalDirectionsDownwind()[0];        		
+        	}
         } else if (nextDirection == 'R') {
-            travelBearing = pd.optimalDirectionsUpwind()[1];
+        	if (this.upwindLeg) {
+        		travelBearing = pd.optimalDirectionsUpwind()[1];
+        	} else {
+        		travelBearing = pd.optimalDirectionsDownwind()[1];        		
+        	}
         } else if (nextDirection == 'M') {
-            tmpBearing = pd.optimalDirectionsUpwind()[0];
-            travelBearing = tmpBearing.add(new DegreeBearingImpl(-offDeg));
+        	if (this.upwindLeg) {
+                tmpBearing = pd.optimalDirectionsUpwind()[0];
+                travelBearing = tmpBearing.add(new DegreeBearingImpl(-offDeg));
+        	} else {
+                tmpBearing = pd.optimalDirectionsDownwind()[0];
+                travelBearing = tmpBearing.add(new DegreeBearingImpl(-offDeg));
+        	}
         } else if (nextDirection == 'S') {
-            tmpBearing = pd.optimalDirectionsUpwind()[1];
-            travelBearing = tmpBearing.add(new DegreeBearingImpl(+offDeg));
+        	if (this.upwindLeg) {
+        		tmpBearing = pd.optimalDirectionsUpwind()[1];
+        		travelBearing = tmpBearing.add(new DegreeBearingImpl(+offDeg));
+        	} else {
+        		tmpBearing = pd.optimalDirectionsDownwind()[1];
+        		travelBearing = tmpBearing.add(new DegreeBearingImpl(+offDeg));        		
+        	}
         }
 
         // determine beat-speed left and right
@@ -182,7 +206,6 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         Position posHeight = pathPos.getPosition().projectToLineThrough(posEnd, posWind.getBearing());
         Bearing bearVrt = posStart.getBearingGreatCircle(posEnd);
         Position posHeightTrgt = pathPos.getPosition().projectToLineThrough(posStart, bearVrt);
-        //Position posHeightWind = pathPos.getPosition().projectToLineThrough(posRef, posWind.getBearing());
 
         // calculate vertical distance as distance of height-position to start
         //double vrtDist = Math.round(posHeightTrgt.getDistance(posStart).getMeters()*100.0)/100.0;
@@ -192,9 +215,9 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         /*if (Math.abs(bearHeightSide) > 5.0) {
             System.out.println("bearHeightSide: "+bearHeightSide);
         }*/
-        double vrtSide = -1.0;
+        double vrtSide = (this.upwindLeg ? -1.0 : +1.0);
         if (Math.abs(bearHeightSide) > 170.0) {
-            vrtSide = 1.0;
+            vrtSide = (this.upwindLeg ? +1.0 : -1.0);
         }
         double vrtDist = vrtSide*Math.round(posHeight.getDistance(posEnd).getMeters()*100.0)/100.0;
 
@@ -229,7 +252,7 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         String pathStr = path.path + nextDirection;
         char nextBaseDirection = this.getBaseDirection(nextDirection);
 
-        return (new PathCandidate(pathPos, vrtDist, hrzDist, turnCount, pathStr, nextBaseDirection));
+        return (new PathCandidate(pathPos, vrtDist, hrzDist, turnCount, pathStr, nextBaseDirection, posWind));
     }
 
 
@@ -461,8 +484,14 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
     public Path getPath() {
         WindFieldGenerator wf = this.parameters.getWindField();
         PolarDiagram pd = this.parameters.getBoatPolarDiagram();
+        
         Position startPos = this.parameters.getCourse().get(0);
         Position endPos = this.parameters.getCourse().get(1);
+        
+        // test downwind: exchange start and end
+        //Position startPos = this.parameters.getCourse().get(1);
+        //Position endPos = this.parameters.getCourse().get(0);
+
         TimePoint startTime = wf.getStartTime();// new MillisecondsTimePoint(0);
         List<TimedPositionWithSpeed> path = new ArrayList<TimedPositionWithSpeed>();
 
@@ -472,25 +501,42 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         Distance distStartEnd = startPos.getDistance(endPos);
         double distStartEndMeters = distStartEnd.getMeters();
 
-        long timeStep = wf.getTimeStep().asMillis()/3;
-        logger.info("Time step :" + timeStep);
-        long turnLoss = pd.getTurnLoss(); // 4000; // time lost when doing a turn
-
         Wind wndStart = wf.getWind(new TimedPositionWithSpeedImpl(startTime, startPos, null));
         logger.fine("wndStart speed:" + wndStart.getKnots() + " angle:" + wndStart.getBearing().getDegrees());
         pd.setWind(wndStart);
         Bearing bearVrt = startPos.getBearingGreatCircle(endPos);
         //Bearing bearHrz = bearVrt.add(new DegreeBearingImpl(90.0));
         Position middlePos = startPos.translateGreatCircle(bearVrt, distStartEnd.scale(0.5));
-
+        
+        Bearing bearRCWind = wndStart.getBearing().getDifferenceTo(bearVrt);
+        String legType = "downwind";
+        this.upwindLeg = false;
+        
+        if ((Math.abs(bearRCWind.getDegrees()) > 90.0)&&(Math.abs(bearRCWind.getDegrees()) < 270.0)) {
+        	legType = "upwind";
+            this.upwindLeg = true;
+        }
+        
         if (debugMsgOn) {
             System.out.println("start : "+startPos.getLatDeg()+", "+startPos.getLngDeg());
             System.out.println("middle: "+middlePos.getLatDeg()+", "+middlePos.getLngDeg());
             System.out.println("end   : "+endPos.getLatDeg()+", "+endPos.getLngDeg());
         }
+        logger.info("Leg Direction: "+legType);
 
+        long timeStep = wf.getTimeStep().asMillis()/2;
+        if (!this.upwindLeg) {
+        	timeStep = timeStep / 2;
+        }
+        this.usedTimeStep = timeStep;
+        logger.info("Time step :" + timeStep);
+        long turnLoss = pd.getTurnLoss(); // 4000; // time lost when doing a turn
+        if (!this.upwindLeg) {
+        	turnLoss = turnLoss / 2;
+        }
+        
         // calculate initial position according to initPathStr
-        PathCandidate initPath = new PathCandidate(new TimedPositionImpl(currentTime, currentPosition), 0.0, 0.0, 0, "0", '0');
+        PathCandidate initPath = new PathCandidate(new TimedPositionImpl(currentTime, currentPosition), 0.0, 0.0, 0, "0", '0', wndStart);
         if (initPathStr.length()>1) {
             char nextDirection = '0';
             for(int idx=1; idx<initPathStr.length(); idx++) {
@@ -509,7 +555,7 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), timeStep, turnLoss, true, 'R').getA();
         double tstDist2 = startPos.getDistance(tstPosition.getPosition()).getMeters();
 
-        double hrzBinSize = (tstDist1 + tstDist2)/2.0; // horizontal bin size in meters
+        double hrzBinSize = (tstDist1 + tstDist2)/3.0; // horizontal bin size in meters
         if (debugMsgOn) {
             System.out.println("Horizontal Bin Size: "+hrzBinSize);
         }

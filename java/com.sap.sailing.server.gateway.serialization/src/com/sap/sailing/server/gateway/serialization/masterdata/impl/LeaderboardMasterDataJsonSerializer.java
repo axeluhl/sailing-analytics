@@ -271,13 +271,15 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
             RaceColumn raceColumn, Leaderboard leaderboard) {
         JSONArray scoreCorrectionsForCompetitors = new JSONArray();
         for (Competitor competitor : leaderboard.getAllCompetitors()) {
-            JSONObject scoreCorrectionForCompetitor = new JSONObject();
-            scoreCorrectionForCompetitor.put(FIELD_EXPLICIT_SCORE_CORRECTION,
-                    correction.getExplicitScoreCorrection(competitor, raceColumn));
-            scoreCorrectionForCompetitor.put(FIELD_MAX_POINTS_REASON,
-                    correction.getMaxPointsReason(competitor, raceColumn).toString());
-            scoreCorrectionForCompetitor.put(FIELD_COMPETITOR_ID, competitor.getId().toString());
-            scoreCorrectionsForCompetitors.add(scoreCorrectionForCompetitor);
+            if (correction.isScoreCorrected(competitor, raceColumn)) {
+                JSONObject scoreCorrectionForCompetitor = new JSONObject();
+                scoreCorrectionForCompetitor.put(FIELD_EXPLICIT_SCORE_CORRECTION,
+                        correction.getExplicitScoreCorrection(competitor, raceColumn));
+                scoreCorrectionForCompetitor.put(FIELD_MAX_POINTS_REASON,
+                        correction.getMaxPointsReason(competitor, raceColumn).toString());
+                scoreCorrectionForCompetitor.put(FIELD_COMPETITOR_ID, competitor.getId().toString());
+                scoreCorrectionsForCompetitors.add(scoreCorrectionForCompetitor);
+            }
         }
 
         return scoreCorrectionsForCompetitors;

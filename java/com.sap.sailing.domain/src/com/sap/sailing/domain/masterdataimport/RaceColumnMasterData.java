@@ -8,12 +8,15 @@ public class RaceColumnMasterData {
     private final String name;
     private final boolean medal;
     private final Map<String, RaceIdentifier> raceIdentifiersByFleetName;
+    private Double factor;
     
-    public RaceColumnMasterData(String name, boolean medal, Map<String, RaceIdentifier> raceIdentifiersByFleetName) {
+    public RaceColumnMasterData(String name, boolean medal, Map<String, RaceIdentifier> raceIdentifiersByFleetName,
+            Double factor) {
         super();
         this.name = name;
         this.medal = medal;
         this.raceIdentifiersByFleetName = raceIdentifiersByFleetName;
+        this.factor = factor;
     }
 
     public String getName() {
@@ -26,6 +29,10 @@ public class RaceColumnMasterData {
 
     public Map<String, RaceIdentifier> getRaceIdentifiersByFleetName() {
         return raceIdentifiersByFleetName;
+    }
+
+    public Double getFactor() {
+        return factor;
     }
 
 }
