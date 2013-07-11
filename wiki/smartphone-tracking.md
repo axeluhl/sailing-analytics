@@ -123,5 +123,6 @@ Background process for starting, pausing and stopping tracking. Registers all re
  * use course update events in racelog locally, do not send to TracTrac
  * support dynamic mapping of smartphone to competitor -> so that it can change during the race
  * find methods for persistent competitors
+ * support other input channels (e.g. Igtimi)
 * Android
  * abstract sending service, so that all POST / GET requests and not only RaceLogEvents can be sent using the semi-connectedness functionality
