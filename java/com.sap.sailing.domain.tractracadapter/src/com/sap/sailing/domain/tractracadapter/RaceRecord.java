@@ -109,7 +109,8 @@ public class RaceRecord {
                 String liveURIAsString = paramURLContents.get(LIVE_URI_PROPERTY);
                 liveURI = liveURIAsString == null ? null : new URI(liveURIAsString);
                 String storedURIAsString = paramURLContents.get(STORED_URI_PROPERTY);
-                if (storedURIAsString == null || storedURIAsString.startsWith("tcp:")) {
+                if (storedURIAsString == null || storedURIAsString.startsWith("tcp:") || storedURIAsString.startsWith("http:") ||
+                        storedURIAsString.startsWith("https:")) {
                     storedURI = storedURIAsString == null ? null : new URI(storedURIAsString);
                 } else {
                     storedURI = new URI(baseURL+"/"+storedURIAsString);

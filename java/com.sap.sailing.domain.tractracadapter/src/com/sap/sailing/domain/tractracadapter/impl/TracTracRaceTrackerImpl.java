@@ -283,8 +283,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                     NauticalSide nauticalSide = passingSideData.containsKey(i) ? passingSideData.get(i) : null;
                     final com.sap.sailing.domain.base.ControlPoint newControlPoint = domainFactory.getOrCreateControlPoint(newTracTracControlPoint);
                     newCourseControlPoints.add(newControlPoint);
-                    newCourseControlPointsWithPassingSide.add(new Pair<com.sap.sailing.domain.base.ControlPoint, 
-                            NauticalSide>(newControlPoint, nauticalSide));
+                    newCourseControlPointsWithPassingSide.add(
+                            new Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>(newControlPoint, nauticalSide));
                     i++;
                 }
                 List<com.sap.sailing.domain.base.ControlPoint> currentCourseControlPoints = new ArrayList<>();
@@ -293,15 +293,16 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                     currentCourseControlPoints.add(waypoint.getControlPoint());
                 }
                 if (!newCourseControlPoints.equals(currentCourseControlPoints)) {
-                    logger.info("Detected course change based on clientparams.php contents for races "+getRaces());
+                    logger.info("Detected course change based on clientparams.php contents for races " + getRaces());
                     try {
                         course.update(newCourseControlPointsWithPassingSide, domainFactory.getBaseDomainFactory());
                     } catch (PatchFailedException pfe) {
-                        logger.severe("Failed to apply course update "+newTracTracControlPoints+" to course "+course);
+                        logger.severe("Failed to apply course update " + newTracTracControlPoints + " to course " + course);
                         logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", pfe);
                     }
                 }
                 updateStartStopTimesAndLiveDelay(clientParams, simulator);
+                // set mark positions from static positions specified in document in case there is nothing loaded through TTCM yet
                 for (TracTracControlPoint controlPoint : clientParams.getControlPointList()) {
                     com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getOrCreateControlPoint(controlPoint);
                     boolean first = true;
