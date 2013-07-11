@@ -9,11 +9,21 @@ import com.sap.sailing.simulator.windfield.impl.BlastRandomSeedManagerImpl;
 public class WindControlParameters implements Serializable {
 
     private static final long serialVersionUID = -8512613791406845298L;
+    
+    public boolean showOmniscient;
+    public boolean showOpportunist;    
+    
     /**
      * Base wind speed in knots
      * Value range 0 to 30
      */
     public Double baseWindSpeed;
+    /**
+     * Base average wind direction in degrees
+     * Value range 0 to 360 degrees
+     */
+    public Double windBearing;
+
     /**
      * Base average wind direction in degrees
      * Value range 0 to 360 degrees
@@ -120,6 +130,7 @@ public class WindControlParameters implements Serializable {
         curSpeed = 0.0;
         curBearing = 0.0;
         
+        windBearing = 0.0;
         baseWindBearing = 0.0;
         frequency = 0.0; //30.0;
         amplitude = 15.0;

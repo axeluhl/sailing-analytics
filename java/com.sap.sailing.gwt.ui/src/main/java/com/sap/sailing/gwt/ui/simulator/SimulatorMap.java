@@ -35,14 +35,14 @@ import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
-import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
 public class SimulatorMap extends AbsolutePanel implements RequiresDataInitialization, TimeListenerWithStoppingCriteria {
 
     private MapWidget mapw;
     private boolean dataInitialized;
     private boolean overlaysInitialized;
-    private WindFieldGenParamsDTO windParams;
+    public WindFieldGenParamsDTO windParams;
     private WindStreamletsCanvasOverlay windStreamletsCanvasOverlay;
     private WindFieldCanvasOverlay windFieldCanvasOverlay;
     private WindGridCanvasOverlay windGridCanvasOverlay;
@@ -67,6 +67,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private PathPolyline pathPolyline = null;
     private static Logger LOGGER = Logger.getLogger(SimulatorMap.class.getName());
     private static boolean SHOW_ONLY_PATH_POLYLINE = false;
+    private char rcDirection; 
 
 
     public enum ViewName {
@@ -101,7 +102,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             long startTime = paths[0].getPoints().get(0).timepoint;
             long maxDurationTime = 0;
 
-            if (mode == SailingSimulatorUtil.measured) {
+            if (mode == SailingSimulatorConstants.ModeMeasured) {
                 PositionDTO pos = result.getRaceCourse().coursePositions.waypointPositions.get(0);
                 raceCourseCanvasOverlay.startPoint = LatLng.newInstance(pos.latDeg, pos.lngDeg);
                 pos = result.getRaceCourse().coursePositions.waypointPositions.get(1);
@@ -115,7 +116,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             colorPalette.reset();
 
             PathDTO currentPath = null;
-            String color = null;
+            //String color = null;
             String pathName = null;
             int noOfPaths = paths.length;
 
@@ -123,7 +124,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
                 currentPath = paths[index];
                 pathName = currentPath.getName();
-                color = colorPalette.getColor(noOfPaths - 1 - index);
+                //color = colorPalette.getColor(noOfPaths - 1 - index);
 
                 if (pathName.equals("Polyline")) {
                     pathPolyline = createPathPolyline(currentPath);
@@ -136,9 +137,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     WindFieldDTO pathWindDTO = new WindFieldDTO();
                     pathWindDTO.setMatrix(currentPath.getPoints());
 
-                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(pathName, timer, windParams);
+                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(pathName.split("#")[1], timer, windParams);
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
-                    replayPathCanvasOverlay.pathColor = color;
+                    replayPathCanvasOverlay.pathColor = colorPalette.getColor(Integer.parseInt(pathName.split("#")[0])-1);
 
                     if (this.summaryView) {
 
@@ -154,11 +155,11 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
                     replayPathCanvasOverlay.setWindField(pathWindDTO);
                     replayPathCanvasOverlay.setRaceCourse(raceCourseCanvasOverlay.startPoint, raceCourseCanvasOverlay.endPoint);
-                    if (index == 0) {
-                        replayPathCanvasOverlay.setCurrent(result.getWindField().curSpeed,result.getWindField().curBearing);
+                    /*if (index == 0) {
+                    	legendCanvasOverlay.setCurrent(result.getWindField().curSpeed,result.getWindField().curBearing);
                     } else {
-                        replayPathCanvasOverlay.setCurrent(-1.0,0.0);
-                    }
+                    	legendCanvasOverlay.setCurrent(-1.0,0.0);
+                    }*/
                     if (SHOW_ONLY_PATH_POLYLINE == false) {
                         replayPathCanvasOverlay.redraw(true);
                     }
@@ -170,6 +171,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     }
                 }
             }
+            
+        	legendCanvasOverlay.setCurrent(result.getWindField().curSpeed,result.getWindField().curBearing);
 
             if (timePanel != null) {
                 timePanel.setMinMax(new Date(startTime), new Date(startTime + maxDurationTime), true);
@@ -318,9 +321,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 // mapw.setContinuousZoom(true);
                 mapw.setTitle(stringMessages.simulator() + " " + stringMessages.map());
                 
-                if (mode == SailingSimulatorUtil.freestyle) {
+                if (mode == SailingSimulatorConstants.ModeFreestyle) {
                     mapw.setZoomLevel(14);                	
-                } else if (mode == SailingSimulatorUtil.event) {
+                } else if (mode == SailingSimulatorConstants.ModeEvent) {
                 	mapw.setZoomLevel(12);
                 }
 
@@ -332,7 +335,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 
                 dataInitialized = true;
 
-                if (mode == SailingSimulatorUtil.freestyle) {
+                if (mode == SailingSimulatorConstants.ModeFreestyle) {
                 	LatLng kiel = LatLng.newInstance(54.43450,10.19559167); // regatta area for TV on Kieler Woche
                 	//LatLng trave = LatLng.newInstance(54.007063, 10.838356); // in front of Timmendorfer Strand
                 	mapw.setCenter(kiel);
@@ -344,7 +347,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     private void initializeOverlays() {
     	
-    	if (this.mode == SailingSimulatorUtil.event) {
+    	if (this.mode == SailingSimulatorConstants.ModeEvent) {
     		if (regattaAreaCanvasOverlay == null) {
     			mapw.setContinuousZoom(true);
     			regattaAreaCanvasOverlay = new RegattaAreaCanvasOverlay(this);
@@ -357,7 +360,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.raceCourseCanvasOverlay = new RaceCourseCanvasOverlay();
         this.raceCourseCanvasOverlay.getCanvas().getElement().setClassName("raceCourse");
 
-        if (this.mode == SailingSimulatorUtil.event) {
+        if (this.mode == SailingSimulatorConstants.ModeEvent) {
         	this.regattaAreaCanvasOverlay.setRaceCourseCanvas(this.raceCourseCanvasOverlay);
         	this.regattaAreaCanvasOverlay.updateRaceCourse(0, 0);
         }
@@ -493,7 +496,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             return;
         }
 
-        if (this.mode != SailingSimulatorUtil.measured) {
+        if (this.mode != SailingSimulatorConstants.ModeMeasured) {
             PositionDTO startPointDTO = new PositionDTO(this.raceCourseCanvasOverlay.startPoint.getLatitude(),
                     this.raceCourseCanvasOverlay.startPoint.getLongitude());
             this.windParams.setNorthWest(startPointDTO);
@@ -508,7 +511,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         this.busyIndicator.setBusy(true);
 
-        this.simulatorSvc.getSimulatorResults(this.mode, this.windParams, windPatternDisplay, true, selection, new ResultManager(summaryView));
+        this.simulatorSvc.getSimulatorResults(this.mode, this.rcDirection, this.windParams, windPatternDisplay, true, selection, new ResultManager(summaryView));
 
     }
 
@@ -564,7 +567,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             this.generatePath(windPatternDisplay, true, selection);
         } else {
             if (this.replayPathCanvasOverlays != null && !this.replayPathCanvasOverlays.isEmpty()) {
-                System.out.println("Soft refresh");
+            	LOGGER.info("Soft refresh");
                 for (PathCanvasOverlay r : this.replayPathCanvasOverlays) {
                     r.displayWindAlongPath = true;
                     this.timer.removeTimeListener(r);
@@ -600,7 +603,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         } else {
 
             if (this.replayPathCanvasOverlays != null && !this.replayPathCanvasOverlays.isEmpty()) {
-                System.out.println("Soft refresh");
+            	LOGGER.info("Soft refresh");
                 timePanel.resetTimeSlider();
                 for (PathCanvasOverlay r : this.replayPathCanvasOverlays) {
                     r.displayWindAlongPath = false;
@@ -643,7 +646,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         } else {
 
             if (this.replayPathCanvasOverlays != null && !this.replayPathCanvasOverlays.isEmpty()) {
-                System.out.println("Soft refresh");
+            	LOGGER.info("Soft refresh");
                 timePanel.resetTimeSlider();
                 for (PathCanvasOverlay r : this.replayPathCanvasOverlays) {
                     r.setVisible(false);
@@ -689,7 +692,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         if (!this.overlaysInitialized) {
             this.initializeOverlays();
         }
-        if ((this.isCourseSet()) || (this.mode == SailingSimulatorUtil.measured)) {
+        if ((this.isCourseSet()) || (this.mode == SailingSimulatorConstants.ModeMeasured)) {
             this.mapw.setDoubleClickZoom(true);
             this.raceCourseCanvasOverlay.setSelected(false);
             this.windParams.setKeepState(!force);
@@ -710,7 +713,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 break;
             }
 
-            if (this.mode == SailingSimulatorUtil.measured && this.pathPolyline != null) {
+            if (this.mode == SailingSimulatorConstants.ModeMeasured && this.pathPolyline != null) {
                 this.pathPolyline.setBoatClassID(selection.boatClassIndex);
             }
 
@@ -785,6 +788,16 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     
     public SimulatorMainPanel getMainPanel() {
     	return this.parent;
+    }
+    
+    public void setRaceCourseDirection(char rcDirection) {
+    	this.clearOverlays();
+    	this.rcDirection = rcDirection;
+    	this.raceCourseCanvasOverlay.rcDirection = rcDirection;
+    	//System.out.println("Wind Base Bearing: "+setting.getValue());
+    	this.regattaAreaCanvasOverlay.updateRaceCourse(0, 0);
+        this.raceCourseCanvasOverlay.redraw(true);
+
     }
     
 }
