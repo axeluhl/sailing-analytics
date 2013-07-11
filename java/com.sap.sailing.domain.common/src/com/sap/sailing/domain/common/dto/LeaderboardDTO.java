@@ -124,7 +124,7 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
         return competitorOrderingPerRaceColumnName.get(raceColumn.getName());
     }
 
-    public int getRank(CompetitorDTO competitor) {
+    public int getTotalRank(CompetitorDTO competitor) {
         return competitors.indexOf(competitor) + 1;
     };
 
