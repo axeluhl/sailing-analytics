@@ -130,7 +130,7 @@ To ensure availability and to be able to separate servers holding historical dat
 <td>10201</td>
 <td>/opt/mongodb/data/mongodb-live</td>
 <td>sapsailinganalytics-live2</td>
-<td>2012</td>
+<td>2013</td>
 <td>14888</td>
 </tr>
 <tr>
