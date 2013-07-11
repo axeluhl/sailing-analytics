@@ -133,6 +133,8 @@ public interface SailingService extends RemoteService {
 
     void removeLeaderboard(String leaderboardName);
 
+    void removeLeaderboards(Collection<String> leaderboardNames);
+
     void renameLeaderboard(String leaderboardName, String newLeaderboardName);
 
     void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName);
@@ -150,6 +152,8 @@ public interface SailingService extends RemoteService {
             ScoringSchemeType scoringSchemeType, String defaultCourseAreaId);
     
     void removeRegatta(RegattaIdentifier regattaIdentifier);
+
+    void removeRegattas(Collection<RegattaIdentifier> regattas);
     
     void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId);
     
@@ -245,6 +249,8 @@ public interface SailingService extends RemoteService {
     EventDTO createEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> courseAreaNames);
 
     void removeEvent(String eventIdAsString);
+
+    void removeEvents(Collection<String> eventIdsAsStrings);
 
     void renameEvent(String eventIdAsString, String newName);
 

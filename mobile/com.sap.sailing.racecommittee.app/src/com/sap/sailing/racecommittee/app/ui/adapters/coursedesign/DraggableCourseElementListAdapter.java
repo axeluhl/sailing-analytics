@@ -16,8 +16,11 @@ import com.sap.sailing.racecommittee.app.utils.MarkImageHelper;
 
 public class DraggableCourseElementListAdapter extends ArrayAdapter<CourseListDataElement> {
 
-    public DraggableCourseElementListAdapter(Context context, List<CourseListDataElement> objects) {
+    private final MarkImageHelper markImageHelper;
+
+    public DraggableCourseElementListAdapter(Context context, List<CourseListDataElement> objects, MarkImageHelper imageHelper) {
         super(context, 0, objects);
+        markImageHelper = imageHelper;
     }
 
     @Override
@@ -45,7 +48,7 @@ public class DraggableCourseElementListAdapter extends ArrayAdapter<CourseListDa
         leftMarkImage.setVisibility(View.INVISIBLE);
 
         if (courseElement.getLeftMark() != null) {
-            int drawable = MarkImageHelper.INSTANCE.resolveMarkImage(courseElement.getLeftMark());
+            int drawable = markImageHelper.resolveMarkImage(courseElement.getLeftMark());
             leftMarkImage.setImageResource(drawable);
             leftMarkImage.setVisibility(View.VISIBLE);
         }
@@ -58,7 +61,7 @@ public class DraggableCourseElementListAdapter extends ArrayAdapter<CourseListDa
         if (courseElement.getRightMark() != null) {
             rightMarkText.setText(courseElement.getRightMark().getName());
 
-            int drawable = MarkImageHelper.INSTANCE.resolveMarkImage(courseElement.getRightMark());
+            int drawable = markImageHelper.resolveMarkImage(courseElement.getRightMark());
             rightMarkImage.setImageResource(drawable);
             rightMarkImage.setVisibility(View.VISIBLE);
         } else {

@@ -427,7 +427,10 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                     if (!rowsUnchangedForCompetitors.contains(previousCompetitor)) { // only care if not the entire row was marked unchanged
                         LeaderboardEntryDTO previousEntry = previousVersion.rows.get(previousCompetitor).fieldsByRaceColumnName.get(
                                 competitorAndColumnName.getB());
-                        rows.get(previousCompetitor).fieldsByRaceColumnName.put(competitorAndColumnName.getB(), previousEntry);
+                        final LeaderboardRowDTO row = rows.get(previousCompetitor);
+                        if (row != null) { // may be null if the competitor disappeared, e.g., because of suppression
+                            row.fieldsByRaceColumnName.put(competitorAndColumnName.getB(), previousEntry);
+                        }
                     }
                 }
             }

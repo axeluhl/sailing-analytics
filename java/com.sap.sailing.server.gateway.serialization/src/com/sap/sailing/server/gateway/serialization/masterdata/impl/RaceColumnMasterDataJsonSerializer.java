@@ -16,12 +16,14 @@ public class RaceColumnMasterDataJsonSerializer implements JsonSerializer<RaceCo
     public static final String FIELD_FLEET_NAME = "fleetName";
     public static final String FIELD_RACE_NAME = "raceName";
     public static final String FIELD_REGATTA_NAME = "regattaName";
+    public static final String FIELD_FACTOR = "factor";
     
     @Override
     public JSONObject serialize(RaceColumn raceColumn) {
         JSONObject jsonRaceColumn = new JSONObject();
         jsonRaceColumn.put(FIELD_NAME, raceColumn.getName());
         jsonRaceColumn.put(FIELD_MEDAL_RACE, raceColumn.isMedalRace());
+        jsonRaceColumn.put(FIELD_FACTOR, raceColumn.getExplicitFactor());
         JSONArray raceIdentifiers = new JSONArray();
         jsonRaceColumn.put(FIELD_RACE_IDENTIFIERS, raceIdentifiers);
         for (Fleet fleet : raceColumn.getFleets()) {

@@ -21,6 +21,7 @@ public class RaceColumnMasterDataJsonDeserializer implements JsonDeserializer<Ra
         Boolean medal = (Boolean) columnJson
                 .get(RaceColumnMasterDataJsonSerializer.FIELD_MEDAL_RACE);
         Map<String, RaceIdentifier> raceIdentifiers = new HashMap<String, RaceIdentifier>();
+        Double factor = (Double) columnJson.get(RaceColumnMasterDataJsonSerializer.FIELD_FACTOR);
         JSONArray jsonRaceIdentifiers = (JSONArray) columnJson.get(RaceColumnMasterDataJsonSerializer.FIELD_RACE_IDENTIFIERS);
         for (Object raceIdentifierObject : jsonRaceIdentifiers) {
             JSONObject jsonRaceIdentifier = (JSONObject) raceIdentifierObject;
@@ -30,6 +31,6 @@ public class RaceColumnMasterDataJsonDeserializer implements JsonDeserializer<Ra
             RaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
             raceIdentifiers.put(fleetName, raceIdentifier);
         }
-        return new RaceColumnMasterData(columnName, medal, raceIdentifiers);
+        return new RaceColumnMasterData(columnName, medal, raceIdentifiers, factor);
     }
 }

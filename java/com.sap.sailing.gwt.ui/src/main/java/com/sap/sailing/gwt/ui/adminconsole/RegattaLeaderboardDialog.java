@@ -69,7 +69,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
 
     protected void adjustVisibilityOfResultDiscardingRuleComponent() {
         if (getSelectedRegatta().definesSeriesDiscardThresholds()) {
-            if(discardThresholdBoxes != null) {
+            if (discardThresholdBoxes != null) {
                 discardThresholdBoxes.getWidget().setVisible(false);
             }
             regattaDefinesDiscardsLabel.setVisible(true);
@@ -132,9 +132,9 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         RegattaDTO result = null;
         int selIndex = regattaListBox.getSelectedIndex();
         if (selIndex > 0) { // the zero index represents the 'no selection' text
-            String itemText = regattaListBox.getItemText(selIndex);
+            String itemValue = regattaListBox.getValue(selIndex);
             for (RegattaDTO regattaDTO : existingRegattas) {
-                if (regattaDTO.getName().equals(itemText)) {
+                if (regattaDTO.getName().equals(itemValue)) {
                     result = regattaDTO;
                     break;
                 }

@@ -14,8 +14,8 @@ is encoded on which the <em>operations</em> will perform changes to transition f
 state to the next. Then, design your operations class. The trickiest part comes next. You
 have to define a transformer that maps a pair of your operations to another pair of
 operations of the same type. The transformer has to implement the
-{@link com.sap.runlet.operationaltransformation.Transformer} interface, in particular
-the {@link com.sap.runlet.operationaltransformation.Transformer#transform} method. The
+{@link com.sap.sailing.operationaltransformation.Transformer} interface, in particular
+the {@link com.sap.sailing.operationaltransformation.Transformer#transform} method. The
 transformation function assumes that both input operations have been applied to the same
 state, one on a client, the other one on the server. The resulting operation for the client
 applied on the client must lead to a state equal to the state reached on the server by
@@ -29,8 +29,8 @@ on the server, and <em>c</em> as the operation that was executed in state <em>s_
 client, and <em>s</em> as the operation executed on the server in state <em>s_s</em>, then the
 following condition must hold:<br>
 <pre>
-	t.transform(c, s).getClientOp().applyTo(c.applyTo(s_c).equals(
-		t.transform(c, s).getServerOp().applyTo(s.applyTo(s_s))
+	t.transform(c, s).getClientOp().applyTo(c.applyTo(s_c)).equals(
+		t.transform(c, s).getServerOp().applyTo(s.applyTo(s_s)))
 </pre>
 </p>
 

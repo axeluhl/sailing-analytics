@@ -7,6 +7,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -109,11 +110,18 @@ public abstract class BaseActivity extends Activity {
     protected boolean onHomeClicked() {
         return false;
     }
+    
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ExLog.i(TAG, String.format("Creating activity %s", this.getClass().getSimpleName()));
+    }
 
     @Override
     protected void onStart() {
         super.onStart();
-
+        
+        ExLog.i(TAG, String.format("Starting activity %s", this.getClass().getSimpleName()));
         Intent intent = new Intent(this, EventSendingService.class);
         bindService(intent, sendingServiceConnection, Context.BIND_AUTO_CREATE);
     }
@@ -122,6 +130,7 @@ public abstract class BaseActivity extends Activity {
     protected void onStop() {
         super.onStop();
         
+        ExLog.i(TAG, String.format("Stopping activity %s", this.getClass().getSimpleName()));
         if (boundSendingService) {
             unbindService(sendingServiceConnection);
             boundSendingService = false;

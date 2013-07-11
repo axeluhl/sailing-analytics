@@ -1870,7 +1870,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             createEventWithoutReplication(result);
             replicate(new CreateEvent(eventName, venue, publicationUrl, isPublic, id, courseAreaNames));
         }
-        mongoObjectFactory.storeEvent(result);
         return result;
     }
 
@@ -1883,6 +1882,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
             eventsById.put(result.getId(), result);
         }
+        mongoObjectFactory.storeEvent(result);
     }
 
     @Override
@@ -1952,9 +1952,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public CourseArea addCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId) {
         CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaId, courseAreaName);
         synchronized (eventsById) {
-            Event event = addCourseAreaWithoutReplication(eventId, courseArea);
+            addCourseAreaWithoutReplication(eventId, courseArea);
             replicate(new AddCourseArea(eventId, courseAreaName, courseAreaId));
-            mongoObjectFactory.storeEvent(event);
         }
         return courseArea;
     }
@@ -1967,6 +1966,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
             Event event = eventsById.get(eventId);
             event.getVenue().addCourseArea(courseArea);
+            mongoObjectFactory.storeEvent(event);
             return event;
         }
     }

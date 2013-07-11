@@ -44,6 +44,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListData
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.DraggableCourseElementListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.MarkGridAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
+import com.sap.sailing.racecommittee.app.utils.ESSMarkImageHelper;
 
 public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
     //private final static String TAG = ESSCourseDesignDialogFragment.class.getName();
@@ -87,9 +88,9 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
         courseElements = new ArrayList<CourseListDataElement>();
         previousCourseElements = new ArrayList<CourseListDataElement>();
 
-        gridAdapter = new MarkGridAdapter(getActivity(), aMarkList);
-        courseElementAdapter = new DraggableCourseElementListAdapter(getActivity(), courseElements);
-        previousCourseElementAdapter = new CourseElementListAdapter(getActivity(), previousCourseElements);
+        gridAdapter = new MarkGridAdapter(getActivity(), aMarkList, ESSMarkImageHelper.getInstance());
+        courseElementAdapter = new DraggableCourseElementListAdapter(getActivity(), courseElements, ESSMarkImageHelper.getInstance());
+        previousCourseElementAdapter = new CourseElementListAdapter(getActivity(), previousCourseElements, ESSMarkImageHelper.getInstance());
         
         loadMarks();
         loadCourseOnServer();

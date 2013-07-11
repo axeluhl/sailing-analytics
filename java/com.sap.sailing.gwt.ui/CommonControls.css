@@ -27,133 +27,133 @@ body ::-webkit-scrollbar-track {
 }
 
 .collapsablePanel {
-	background: #b6b6b6;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
-	overflow: hidden;
-	border: 1px solid #aaaaaa;
-	margin: 0 0 15px 0;
+  background: #b6b6b6;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid #aaaaaa;
+  margin: 0 0 15px 0;
 }
 
 .collapsablePanel-content {
-	background: #fff;
-	margin: 12px;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
-	width: auto !important;
-	border: 1px solid #aaaaaa;
+  background: #fff;
+  margin: 12px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  width: auto !important;
+  border: 1px solid #aaaaaa;
 }
 
 .collapsablePanel-header {
-	background: url(images/titlebar-background.png) 0 0 repeat-x;
-	padding: 0;
-	margin: 0;
-	height: 42px;
-	position: relative;
-	-webkit-border-top-left-radius: 4px;
-	-moz-border-top-left-radius: 4px;
-	border-top-left-radius: 4px;
-	-webkit-border-top-right-radius: 4px;
-	-moz-border-top-right-radius: 4px;
-	border-top-right-radius: 4px;
+  background: url(images/titlebar-background.png) 0 0 repeat-x;
+  padding: 0;
+  margin: 0;
+  height: 42px;
+  position: relative;
+  -webkit-border-top-left-radius: 4px;
+  -moz-border-top-left-radius: 4px;
+  border-top-left-radius: 4px;
+  -webkit-border-top-right-radius: 4px;
+  -moz-border-top-right-radius: 4px;
+  border-top-right-radius: 4px;
 }
 
 .collapsablePanel:last-child {
-	margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .collapsablePanel-open {
-}	
+}
 
 .collapsablePanel-closed {
 }
 
 .collapsablePanel-header-text{
-	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
-	text-transform: uppercase;
-	margin: 15px 0 0 13px;
-	float: left;
+  font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
+  text-transform: uppercase;
+  margin: 15px 0 0 13px;
+  float: left;
 }
 
 .collapsablePanel-header-image{
-	float:left;
-	margin: 13px 0 0 0;
+  float:left;
+  margin: 13px 0 0 0;
 }
 
 .collapsablePanel-header-collapse{
-	height:100%;
-	display: block;
-	padding: 0 0 0 10px;	
-	color: #3b3b3b;
+  height:100%;
+  display: block;
+  padding: 0 0 0 10px;
+  color: #3b3b3b;
 }
 
 .collapsablePanel-header-collapse:hover {
-	color: #3b3b3b;
+  color: #3b3b3b;
 }
 
-.collapsablePanel-toolbar { 
-	position: absolute;
-	top: 0;
-	right: 0;
-	height: 43px;
-	width: 43px;
-	overflow: hidden;
+.collapsablePanel-toolbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 43px;
+  width: 43px;
+  overflow: hidden;
 }
 
 .collapsablePanel-toolbar table {
-	border-collapse: collapse;
+  border-collapse: collapse;
 }
 
 .collapsablePanel-toolbar a {
-	display: block;
-	padding: 9px;
-	
+  display: block;
+  padding: 9px;
+
 }
 
 .breadcrumbPanel-NextArrow {
-	display: none;
+  display: none;
 }
 
 
 
 .breadcrumbPanel-ActiveBreadcrumb {
-	font-size: 18px;
-	font-family: 'UbuntuLight',Arial,Verdana,sans-serif;
-	margin: 5px 10px 0 0;
+  font-size: 18px;
+  font-family: 'OpenSansLight',Arial,Verdana,sans-serif;
+  margin: 5px 10px 0 0;
 }
 
 .breadcrumbPanel-InactiveBreadcrumb {
-	font-size: 24px;
+  font-size: 24px;
 }
 
 .breadcrumbPanel-ActiveBreadcrumb a, .breadcrumbPanel-InactiveBreadcrumb a, .breadcrumbPanel-NextArrow a {
-	color:#A1A1A1;
-	}
-	
-	.breadcrumbPanel-ActiveBreadcrumb, .breadcrumbPanel-InactiveBreadcrumb, .breadcrumbPanel-NextArrow {
-	color:#A1A1A1;
-	}
+  color:#A1A1A1;
+  }
+
+  .breadcrumbPanel-ActiveBreadcrumb, .breadcrumbPanel-InactiveBreadcrumb, .breadcrumbPanel-NextArrow {
+  color:#A1A1A1;
+  }
 
 .gwt-SplitLayoutPanel-HDragger {
-	width: 20px;
+  width: 20px;
 }
 
 .gwt-ToggleButton {
-	background: url(images/btn-cta-orangeleft.png) center top repeat-x;
-	padding: 8px;
-	margin: 0 11px 0 0;
-	border: 0;
+  background: url(images/btn-cta-orangeleft.png) center top repeat-x;
+  padding: 8px;
+  margin: 0 11px 0 0;
+  border: 0;
 }
 
 .gwt-ToggleButton-down {
-	background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
-	color: #fff;
+  background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
+  color: #fff;
 }
 
 .gwt-SplitLayoutPanel-HDragger {
-	width: 12px;
+  width: 12px;
 }
 
 .gwt-SplitLayoutPanel-HDragger {
@@ -167,8 +167,8 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-ToggleButton-up-hovering, .gwt-ToggleButton-down-hovering {
-	background: url(images/btn-cta-orangeleft-down.png) center top repeat-x;
-	color: #fff;
+  background: url(images/btn-cta-orangeleft-down.png) center top repeat-x;
+  color: #fff;
 }
 
 .titleLabelWrapper {
@@ -178,7 +178,7 @@ body ::-webkit-scrollbar-track {
 
 .titleLabel {
     text-align: center;
-    font-family: 'UbuntuMedium', Arial, Verdana, sans-serif;
+    font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
     font-size: 18px;
     color: #fff;
     margin-top: 13px;
@@ -186,7 +186,7 @@ body ::-webkit-scrollbar-track {
 
 .titleLabelRight {
     text-align: right;
-    font-family: 'UbuntuMedium', Arial, Verdana, sans-serif;
+    font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
     font-size: 18px;
     color: #fff;
     margin-top: 13px;
@@ -195,13 +195,13 @@ body ::-webkit-scrollbar-track {
 
 
 .subTitleLabelWrapper {
-	position: absolute;
+  position: absolute;
     min-width: 200px;
     text-align: right;
     height: 68px;
     right: 0;
     top: 0;
-    font-family: 'UbuntuMedium', Arial, Verdana, sans-serif;
+    font-family: 'OpenSansSemiBold', Arial, Verdana, sans-serif;
     font-size: 16px;
     color: #fff;
     //background: url(images/titleLabelWrapper.png) right center no-repeat;
@@ -265,32 +265,32 @@ body ::-webkit-scrollbar-track {
 }
 
 .dateBoxPopup {
-	z-Index: 2000;
+  z-Index: 2000;
 }
 
 .timeLinePanel {
-	color: #fff;
-	width: 100%;
-	position: fixed;
-	bottom: 0;
-	z-index: 9;
-	background: #7c7b7c;
-	box-shadow: 0 0 20px #858585;
-	-webkit-box-shadow: 0 0 20px #858585;
-	-moz-box-shadow: 0 0 20px #858585;
+  color: #fff;
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  z-index: 9;
+  background: #7c7b7c;
+  box-shadow: 0 0 20px #858585;
+  -webkit-box-shadow: 0 0 20px #858585;
+  -moz-box-shadow: 0 0 20px #858585;
 }
 
 .timeLineInnerBgPanel {
- 
+
 }
 
 .footerShadowPanel {
-	position: fixed;
-	height: 15px;
-	bottom: 0;
-	background: url(images/footer_shadow.png) left bottom repeat-x;
-	width: 100%;
-	z-index: 10;
+  position: fixed;
+  height: 15px;
+  bottom: 0;
+  background: url(images/footer_shadow.png) left bottom repeat-x;
+  width: 100%;
+  z-index: 10;
 }
 
 .timePanel-controls {
@@ -310,11 +310,11 @@ body ::-webkit-scrollbar-track {
 }
 
 .timePanel-controls-playSpeed {
-	vertical-align: middle;
-	line-height: 25px;
-	float:left;
-	padding: 0 14px 0 0;
-	margin: 0 14px 0 0;
+  vertical-align: middle;
+  line-height: 25px;
+  float:left;
+  padding: 0 14px 0 0;
+  margin: 0 14px 0 0;
     border-right: 1px solid #fcbb22;
     height: 24px;
 }
@@ -325,12 +325,12 @@ body ::-webkit-scrollbar-track {
 
 .timePanel-controls-time {
     float:left;
-    padding: 0 0 0 0;    
+    padding: 0 0 0 0;
 }
 
 .timePanel-controls-time .dateLabel,
 .timePanel-controls-time .timeLabel {
-    padding: 4px 20px 0 0;    	
+    padding: 4px 20px 0 0;
 }
 
 .timePanel-controls-timeDelay {
@@ -347,17 +347,17 @@ body ::-webkit-scrollbar-track {
 }
 
 .timePanel-controls-playmode .playModeLabel{
-    padding: 4px 0 0 5px;   	
+    padding: 4px 0 0 5px;
 }
 
 .timePanelSettings{
-	float: right;
+  float: right;
 }
 
 .timePanelSlider {
-	margin: 0 12px;
-	height: 49px;
-	padding-top: 5px;
+  margin: 0 12px;
+  height: 49px;
+  padding-top: 5px;
 }
 
 .timePanelInnerWrapper {
@@ -383,11 +383,11 @@ body ::-webkit-scrollbar-track {
 
 
 .LogoAndTitlePanel:after {
-	content: " ";
-	display: block;
-	height: 0;
-	clear: both;
-	visibility: hidden;
+  content: " ";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
 }
 
 .globalNavigation {
@@ -397,7 +397,7 @@ body ::-webkit-scrollbar-track {
 }
 
 .globalNavigationLink, .globalNavigationLink:visited {
-	font-family: UbuntuBold, Verdana, Arial, sans-serif;
+  font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
     border: none;
     display: inline-block;
     padding: 2px 10px 4px;
@@ -411,7 +411,7 @@ body ::-webkit-scrollbar-track {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-    cursor: pointer; 
+    cursor: pointer;
     height: 24px;
     white-space: nowrap;
 }
@@ -423,7 +423,7 @@ body ::-webkit-scrollbar-track {
 }
 
 .globalNavigationLink:hover {
-	background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
+  background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
     cursor: pointer;
 }
 
@@ -432,7 +432,7 @@ body ::-webkit-scrollbar-track {
 }
 
 .globalNavigation-leaderBoard a {
-	background: url(images/globalNavigation-leaderBoard_bg.png) 11px 8px no-repeat;
+  background: url(images/globalNavigation-leaderBoard_bg.png) 11px 8px no-repeat;
 }
 
 .globalNavigation-leaderBoardGroup, .globalNavigation-leaderBoard, .globalNavigation-home {
@@ -443,67 +443,67 @@ body ::-webkit-scrollbar-track {
 }
 
 .globalNavigation-leaderBoard {
-	margin-right: 5px;
+  margin-right: 5px;
 }
 
 .globalNavigation-leaderBoardGroup a, .globalNavigation-leaderBoard a, .globalNavigation-home a {
-	color: #fff;
-	text-decoration: none;
+  color: #fff;
+  text-decoration: none;
     display: block;
     padding: 8px 13px 6px 36px;
 }
 
 .sapLogo {
-	float: left;
-	margin-top: 13px;
-	margin-left: 12px;
+  float: left;
+  margin-top: 13px;
+  margin-left: 12px;
 }
 
 .sailingAnalyticsLabelPanel {
-	margin: 10px 0 0 0;
+  margin: 10px 0 0 0;
 }
 
 .sailingAnalyticsLabel {
-	float: left;
-	color: #fff;
-	font-size: 14px;
-	font-weight: bold;
-	margin: 15px 0 0 0;
+  float: left;
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  margin: 15px 0 0 0;
 }
 
 .gwt-DialogBox {
-	line-height: 1.4;
+  line-height: 1.4;
 }
 
-.gwt-DialogBox .Caption { 
+.gwt-DialogBox .Caption {
     font-size: 14px;
     padding: 14px 10px;
     background: url(images/dialogBox-bg.png) 0 0 repeat-x;
     -webkit-border-top-left-radius: 5px;
-	-webkit-border-top-right-radius: 5px;
-	-moz-border-radius-topleft: 5px;
-	-moz-border-radius-topright: 5px;
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;
-	font-family: UbuntuBold, Verdana, Arial, sans-serif;
+  -webkit-border-top-right-radius: 5px;
+  -moz-border-radius-topleft: 5px;
+  -moz-border-radius-topright: 5px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
 }
 
-.gwt-DialogBox .dialogContent { 
+.gwt-DialogBox .dialogContent {
     background: #ffffff;
     padding: 10px;
-    border: 10px solid #a6a6a6;	
-	-webkit-border-bottom-right-radius: 5px;
-	-webkit-border-bottom-left-radius: 5px;
-	-moz-border-radius-bottomright: 5px;
-	-moz-border-radius-bottomleft: 5px;
-	border-bottom-right-radius: 5px;
-	border-bottom-left-radius: 5px;
+    border: 10px solid #a6a6a6;
+  -webkit-border-bottom-right-radius: 5px;
+  -webkit-border-bottom-left-radius: 5px;
+  -moz-border-radius-bottomright: 5px;
+  -moz-border-radius-bottomleft: 5px;
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
 }
-	
-.gwt-Button, .gwt-Button:visited {	
-	font-family: UbuntuBold, Verdana, Arial, sans-serif;
-	border: none;
-	
+
+.gwt-Button, .gwt-Button:visited {
+  font-family: OpenSansSemiBold, Verdana, Arial, sans-serif;
+  border: none;
+
     background: url(images/btn-cta-orangeleft.png) center top repeat-x;
     display: inline-block;
     padding: 2px 10px 4px;
@@ -517,10 +517,10 @@ body ::-webkit-scrollbar-track {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-    cursor: pointer; 
+    cursor: pointer;
     height: 24px;
     white-space: nowrap;
-}	
+}
 
 .gwt-Button:active {
     top: 1px;
@@ -563,11 +563,11 @@ body ::-webkit-scrollbar-track {
 .gwt-ButtonSmall
 
 .gwt-DialogBox .boxPanel {
-	padding: 0 0 10px 0;
+  padding: 0 0 10px 0;
 }
 
 .gwt-DialogBox .boxPanel:after {
-	display: inline-block;
+  display: inline-block;
     content: " ";
     display: block;
     height: 0;
@@ -581,37 +581,37 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-DialogBox .settingsDialogValue {
-	float: right;
+  float: right;
 }
 
 .gwt-DialogBox .additionalWidgets {
-	padding: 5px 0 0 0;
-	text-align: right;
+  padding: 5px 0 0 0;
+  text-align: right;
 }
 
 .gwt-DialogBox .gwt-Label {
-	line-height: 1.4;
+  line-height: 1.4;
 }
 
 /* Dialogs */
 .SettingsDialogComponent {
-    padding: 0 0 15px 0;	
+    padding: 0 0 15px 0;
 }
 
 .SettingsDialogComponent .dialogInnerHeadline {
     background: url(images/settingsDialog_bg.png) repeat-x 0 0 #E5E5E5;
     border: 1px solid #CCCCCC;
-    font-family: UbuntuMedium,Arial,Verdana,sans-serif;
+    font-family: OpenSansSemiBold,Arial,Verdana,sans-serif;
     height: 21px;
     padding: 2px 0 0 7px;
-    border-radius: 3px; 
-    -moz-border-radius: 3px; 
+    border-radius: 3px;
+    -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
     margin: 0 0 10px 0;
 }
 
 .SettingsDialogComponent .dialogInnerContent {
-	padding: 0 9px 0 5px;
+  padding: 0 9px 0 5px;
 }
 
 .timingSettings .dialogInnerContent {
@@ -619,46 +619,46 @@ body ::-webkit-scrollbar-track {
 }
 
 .SettingsDialogComponent .gwt-CheckBox {
-	padding: 0 10px 0 0;
+  padding: 0 10px 0 0;
 }
 
 .timingSettings .gwt-Label {
-	float: left;
-	padding: 0 10px 0 0;
+  float: left;
+  padding: 0 10px 0 0;
 }
 
 .dialogInnerHeadlineOther {
-	font-family: UbuntuMedium, Arial, Verdana, sans-serif;
-	color: #e84a1a;
-	padding-left: 9px;
+  font-family: OpenSansSemiBold, Arial, Verdana, sans-serif;
+  color: #e84a1a;
+  padding-left: 9px;
 }
 
 .helpPanel {
-	margin-top: 15px;
+  margin-top: 15px;
 }
 
 .minMaxBackgroundBar {
-	left: 0px;
-	background-image: url(images/greyBar.png);
-	background-position: left;
-	background-repeat: no-repeat;
+  left: 0px;
+  background-image: url(images/greyBar.png);
+  background-position: left;
+  background-repeat: no-repeat;
 }
 
 .inlineButton {
-	height: 20px;
+  height: 20px;
     padding: 0px 10px 3px;
     float: left;
     background: #de8a2e url(images/alert-overlay.png) repeat-x;
-    font-family: UbuntuRegular, Arial, Verdana, sans-serif;
+    font-family: OpenSansRegular, Arial, Verdana, sans-serif;
 }
 
 
 .chartCloseButton {
-	cursor: pointer;
-	background: url(images/closeButton.png) right center no-repeat;
-	height: 18px;
-	width: 60px;
-	text-align: left;
+  cursor: pointer;
+  background: url(images/closeButton.png) right center no-repeat;
+  height: 18px;
+  width: 60px;
+  text-align: left;
 }
 
 video {
