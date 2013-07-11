@@ -56,7 +56,7 @@ public class SimulatorTest {
         //Map<String, Path> paths = sailingSim.getAllPathsForLeg(new SimulatorUISelectionImpl(0, 0, 0, 0));
         Map<String, Path> paths = sailingSim.getAllPaths();
 
-        System.out.println("opportunistic path points: "+paths.get("2#Opportunistic").getPathPoints().size());
+        System.out.println("opportunistic path points: "+paths.get("2#Opportunist Left").getPathPoints().size());
         System.out.println("omnciscient path points: "+paths.get("1#Omniscient").getPathPoints().size());
 
     }
