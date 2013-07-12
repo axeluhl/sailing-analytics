@@ -142,6 +142,7 @@ Async task that handles the execution of post requests.
  * Servlet for getting all races, which are still open to register for
  * generic method for registering listener for NMEA sentence types (e.g. to then process wind) -> move servlet for recieving NMEA out of smartphoneadapter
  * RaceLogRaceTracker: functionality of RaceTracker as view on RaceLog?
+ * Servlet for getting all competitors registered for a race (to in/exclude competitors)
 * Android
  * abstract sending service, so that all POST / GET requests and not only RaceLogEvents can be sent using the semi-connectedness functionality
  * simplify settings
