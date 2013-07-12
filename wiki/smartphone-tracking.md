@@ -123,9 +123,14 @@ Sends the location information to a web service.
 ### `SAP Sailor Tracker Service`
 Background process for starting, pausing and stopping tracking. Registers all receivers on a pending intent, which is send periodically.
 
-### `NetworkSenderTask`
+### `doPostTask`
 Async task that handles the execution of post requests.
 
+### `doGetTask`
+Async task that handles the execution of get requests.
+
+### `AppPreferences`
+Helper Class for accessing the App Preferences specified in settings_view.xml
 ## ToDo
 * Server
  * persist tracking data (GPSFixStore)
