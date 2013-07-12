@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.UUID;
 
 
+
+
+
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Course;
@@ -88,8 +91,9 @@ public interface DomainFactory {
      * Fetch a race definition previously created by a call to {@link #getOrCreateRaceDefinitionAndTrackedRace}. If no such
      * race definition was created so far, the call blocks until such a definition is provided by a call to
      * {@link #getOrCreateRaceDefinitionAndTrackedRace}.
+     * @param raceId TODO
      */
-    RaceDefinition getAndWaitForRaceDefinition(Race race);
+    RaceDefinition getAndWaitForRaceDefinition(UUID raceId);
 
     /**
      * Creates an {@link com.sap.sailing.domain.base.Regatta event} from a
@@ -179,21 +183,23 @@ public interface DomainFactory {
      * resulting {@link RaceDefinition} is added to the {@link com.sap.sailing.domain.base.Regatta} to which
      * <code>trackedRegatta</code> belongs (see {@link TrackedRegatta#getRegatta()}). It is added to the internal race cache.
      * The corresponding {@link TrackedRace} object is also created, and the notification of threads waiting on the race
-     * cache such as a blocking {@link #getAndWaitForRaceDefinition(Race)} happens only <em>after</em> the tracked race
+     * cache such as a blocking {@link #getAndWaitForRaceDefinition(UUID)} happens only <em>after</em> the tracked race
      * has been created and the {@link RaceDefinition} was
      * {@link com.sap.sailing.domain.base.Regatta#addRace(RaceDefinition) added} to the domain event. This ensures that
      * waiters for the {@link RaceDefinition} are guaranteed to obtain a valid, non- <code>null</code> tracked race
      * already immediately after the notification was sent, and that the {@link RaceDefinition} is already
      * {@link com.sap.sailing.domain.base.Regatta#getAllRaces() known} by its containing
      * {@link com.sap.sailing.domain.base.Regatta}.
-     * 
+     * @param raceName TODO
+     * @param competitors TODO
+     * @param boatClass TODO
      * @param raceDefinitionSetToUpdate
      *            if not <code>null</code>, after creating the {@link TrackedRace}, the {@link RaceDefinition} is
      *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace) added} to that object.
      */
-    DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta, Race race,
-            Course course, Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword);
+    DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta, UUID raceId,
+            String raceName, Iterable<com.sap.sailing.domain.base.Competitor> competitors, BoatClass boatClass, Course course, Iterable<Sideline> sidelines,
+            WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword);
 
     /**
      * The record may be for a single mark or a gate. If for a gate, the
@@ -216,7 +222,7 @@ public interface DomainFactory {
     /**
      * Returns a {@link RaceDefinition} for the race if it already exists, <code>null</code> otherwise.
      */
-    RaceDefinition getExistingRaceDefinitionForRace(Race race);
+    RaceDefinition getExistingRaceDefinitionForRace(UUID raceId);
 
     /**
      * When a course is changed dynamically, we receive an updated list of control points that now define
@@ -234,12 +240,12 @@ public interface DomainFactory {
      * <code>timeoutInMilliseconds</code> milliseconds have passed and the race definition is found not to have shown up
      * until then, <code>null</code> is returned. The unblocking may be deferred even beyond
      * <code>timeoutInMilliseconds</code> in case no modifications happen on the set of races cached by this factory.
-     * 
+     * @param raceId TODO
      * @param timeoutInMilliseconds
      *            passing -1 means an infinite timeout; 0 means return immediately with <code>null</code> as result if no
      *            race definition is found for <code>race</code>.
      */
-    RaceDefinition getAndWaitForRaceDefinition(Race race, long timeoutInMilliseconds);
+    RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds);
 
     Pair<List<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race);
     

@@ -105,8 +105,8 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         addListenersForStoredDataAndStartController(receivers);
         Race tractracRace = getTracTracEvent().getRaceList().iterator().next();
         // now we expect that there is no RaceDefinition for the TracTrac race yet:
-        assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace));
-        race = getDomainFactory().getAndWaitForRaceDefinition(tractracRace);
+        assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace.getId()));
+        race = getDomainFactory().getAndWaitForRaceDefinition(tractracRace.getId());
         assertNotNull(race);
         logger.info("Waiting for stored data to be loaded for " + race.getName());
         synchronized (getSemaphor()) {

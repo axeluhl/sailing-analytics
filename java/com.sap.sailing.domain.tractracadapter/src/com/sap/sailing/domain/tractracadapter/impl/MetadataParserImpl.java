@@ -177,15 +177,6 @@ public class MetadataParserImpl implements MetadataParser {
         return result;
     }
     
-    /**
-     * Parses the race metadata for sideline information
-     * The sidelines of a race (course) are encoded like this...
-     * <pre>
-     *  SIDELINE1=(TR-A) 3
-     *  SIDELINE2=(TR-A) Start
-     * </pre>
-     * Each sideline is defined right now through a simple gate, but this might change in the future
-     */
     @Override
     public Map<String, Iterable<TracTracControlPoint>> parseSidelinesFromRaceMetadata(String raceMetadataString,
             Iterable<? extends TracTracControlPoint> controlPoints) {

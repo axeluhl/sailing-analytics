@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -59,7 +60,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 public class ClientParamsPHP {
     private static final Logger logger = Logger.getLogger(ClientParamsPHP.class.getName());
     
-    private final Map<String, String> properties;
+    private final LinkedHashMap<String, String> properties;
     
     /**
      * Keys are UUIDs, values are property names for which this UUID was set. The values of this map can be used as
@@ -171,13 +172,6 @@ public class ClientParamsPHP {
             return getProperty("Name");
         }
 
-        /**
-         * @return the event UUID
-         */
-        public UUID getID() {
-            return UUID.fromString(getProperty("ID"));
-        }
-        
         public TimePoint getStartTime() throws ParseException {
             return getTimePoint("StartTime");
         }
@@ -202,13 +196,6 @@ public class ClientParamsPHP {
             return getProperty("Name");
         }
 
-        /**
-         * @return the race UUID
-         */
-        public UUID getID() {
-            return UUID.fromString(getProperty("ID"));
-        }
-        
         public TimePoint getStartTime() throws ParseException {
             return getTimePoint("StartTime");
         }
@@ -279,9 +266,39 @@ public class ClientParamsPHP {
         }
     }
     
+    public class BoatClass extends ObjectWithUUID {
+        public BoatClass(UUID uuid) {
+            super(uuid);
+        }
+        
+        public String getName() {
+            return getProperty("Name");
+        }
+    }
+    
     public class Competitor extends ObjectWithUUID {
         public Competitor(UUID uuid) {
             super(uuid);
+        }
+        
+        public String getName() {
+            return getProperty("Name");
+        }
+        
+        public String getShorName() {
+            return getProperty("NameShort");
+        }
+        
+        public String getColor() {
+            return getProperty("Color");
+        }
+        
+        public String getNationality() {
+            return getProperty("Nationality");
+        }
+        
+        public BoatClass getBoatClass() {
+            return new BoatClass(UUID.fromString(getProperty("ClassUUID")));
         }
     }
     
@@ -380,7 +397,7 @@ public class ClientParamsPHP {
     
     public ClientParamsPHP(Reader r) throws IOException {
         BufferedReader br = new BufferedReader(r);
-        properties = new HashMap<>();
+        properties = new LinkedHashMap<>();
         propertiesByID = new HashMap<>();
         String line;
         while ((line = br.readLine()) != null) {
@@ -424,6 +441,16 @@ public class ClientParamsPHP {
         for (Map.Entry<String, String> e : properties.entrySet()) {
             if (e.getKey().matches("ControlPoint[0-9][0-9]*UUID")) {
                 result.add(new ControlPoint(UUID.fromString(e.getValue())));
+            }
+        }
+        return result;
+    }
+    
+    public Iterable<Competitor> getCompetitors() {
+        List<Competitor> result = new ArrayList<>();
+        for (Map.Entry<String, String> e : properties.entrySet()) {
+            if (e.getKey().matches("Comp[0-9][0-9]*UUID")) {
+                result.add(new Competitor(UUID.fromString(e.getValue())));
             }
         }
         return result;

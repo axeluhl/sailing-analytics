@@ -10,6 +10,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -124,7 +126,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             }
         }
 
-        RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(event.getC());
+        RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(event.getC().getId());
         if (existingRaceDefinitionForRace != null) {
             logger.log(Level.INFO, "Received course update for existing race "+event.getC().getName()+": "+
                     event.getB().getPoints());
@@ -142,9 +144,11 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         } else {
             logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");
             // create race definition and add to event
+            Pair<List<Competitor>, BoatClass> competitorsAndDominantBoatClass = getDomainFactory().getCompetitorsAndDominantBoatClass(race);
             DynamicTrackedRace trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
-                    getTrackedRegatta(), event.getC(), course, sidelines, windStore, delayToLiveInMillis,
-                    millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, courseDesignUpdateURI, 
+                    getTrackedRegatta(), event.getC().getId(), race.getName(), competitorsAndDominantBoatClass.getA(),
+                    competitorsAndDominantBoatClass.getB(), course, sidelines, windStore, delayToLiveInMillis,
+                    millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, courseDesignUpdateURI,
                     getTracTracEvent().getId(), tracTracUsername, tracTracPassword);
             if (getSimulator() != null) {
                 getSimulator().setTrackedRace(trackedRace);

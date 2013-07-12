@@ -272,8 +272,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             try {
                 clientParams = new ClientParamsPHP(new InputStreamReader(paramURL.openStream()));
                 List<com.sap.sailing.domain.base.ControlPoint> newCourseControlPoints = new ArrayList<>();
-                List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide = new ArrayList<>();
                 final List<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRace().getDefaultRoute().getControlPoints();
+                List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide = new ArrayList<>();
                 Map<Integer, NauticalSide> passingSideData = domainFactory.getMetadataParser().parsePassingSideData(
                         clientParams.getRace().getDefaultRoute().getMetadata(), newTracTracControlPoints);
                 int i = 1;

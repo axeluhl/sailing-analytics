@@ -104,7 +104,11 @@ public class DomainFactoryImpl implements DomainFactory {
      */
     private final WeakIdentityHashMap<com.tractrac.clientmodule.Event, Regatta> weakRegattaCache = new WeakIdentityHashMap<>();
     
-    private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
+    /**
+     * Maps from the TracTrac race UUIDs to the domain model's {@link RaceDefinition} objects that represent the race
+     * identified by that UUID
+     */
+    private final Map<UUID, RaceDefinition> raceCache = new HashMap<>();
     
     private final MetadataParser metadataParser;
 
@@ -263,20 +267,20 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public RaceDefinition getExistingRaceDefinitionForRace(Race race) {
-        return raceCache.get(race);
+    public RaceDefinition getExistingRaceDefinitionForRace(UUID raceId) {
+        return raceCache.get(raceId);
     }
 
     @Override
-    public RaceDefinition getAndWaitForRaceDefinition(Race race) {
-        return getAndWaitForRaceDefinition(race, -1);
+    public RaceDefinition getAndWaitForRaceDefinition(UUID raceId) {
+        return getAndWaitForRaceDefinition(raceId, -1);
     }
 
     @Override
-    public RaceDefinition getAndWaitForRaceDefinition(Race race, long timeoutInMilliseconds) {
+    public RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds) {
         long start = System.currentTimeMillis();
         synchronized (raceCache) {
-            RaceDefinition result = raceCache.get(race);
+            RaceDefinition result = raceCache.get(raceId);
             boolean interrupted = false;
             while ((timeoutInMilliseconds == -1 || System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && result == null) {
                 try {
@@ -288,7 +292,7 @@ public class DomainFactoryImpl implements DomainFactory {
                             raceCache.wait(timeToWait);
                         }
                     }
-                    result = raceCache.get(race);
+                    result = raceCache.get(raceId);
                 } catch (InterruptedException e) {
                     interrupted = true;
                 }
@@ -396,9 +400,9 @@ public class DomainFactoryImpl implements DomainFactory {
     public void removeRace(com.tractrac.clientmodule.Event tractracEvent, Race tractracRace, TrackedRegattaRegistry trackedRegattaRegistry) {
         RaceDefinition raceDefinition;
         synchronized (raceCache) {
-            raceDefinition = getExistingRaceDefinitionForRace(tractracRace);
+            raceDefinition = getExistingRaceDefinitionForRace(tractracRace.getId());
             if (raceDefinition != null) { // otherwise, this domain factory doesn't seem to know about the race
-                raceCache.remove(tractracRace);
+                raceCache.remove(tractracRace.getId());
                 logger.info("Removed race "+raceDefinition.getName()+" from TracTrac DomainFactoryImpl");
             }
         }
@@ -439,16 +443,16 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta,
-            Race race, Course course, Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword) {
+    public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta, UUID raceId,
+            String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Course course,
+            Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
+            long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+            URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword) {
         synchronized (raceCache) {
-            RaceDefinition raceDefinition = raceCache.get(race);
+            RaceDefinition raceDefinition = raceCache.get(raceId);
             if (raceDefinition == null) {
-                Pair<List<Competitor>, BoatClass> competitorsAndDominantBoatClass = getCompetitorsAndDominantBoatClass(race);
-                logger.info("Creating RaceDefinitionImpl for race "+race.getName());
-                raceDefinition = new RaceDefinitionImpl(race.getName(), course, competitorsAndDominantBoatClass.getB(),
-                        competitorsAndDominantBoatClass.getA(), getRaceID(race));
+                logger.info("Creating RaceDefinitionImpl for race "+raceName);
+                raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
                 // add to existing regatta only if boat class matches
                 if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
                     trackedRegatta.getRegatta().addRace(raceDefinition);
@@ -462,7 +466,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     trackedRace.addCourseDesignChangedListener(courseDesignHandler);
                     
                     synchronized (raceCache) {
-                        raceCache.put(race, raceDefinition);
+                        raceCache.put(raceId, raceDefinition);
                         raceCache.notifyAll();
                     }
                     return trackedRace;
@@ -473,7 +477,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     return null;
                 }
             } else {
-                throw new RuntimeException("Race "+race.getName()+" already exists");
+                throw new RuntimeException("Race "+raceName+" already exists");
             }
         }
     }

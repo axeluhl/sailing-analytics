@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Competitor;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Event;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Race;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Route;
@@ -53,5 +54,12 @@ public class ClientParamsPHP49erFX2013Test extends AbstractClientParamsPHPTest {
         Event event = clientParams.getEvent();
         assertEquals("49er European Championship 2013", event.getName());
         assertEquals("event_20130703_erEuropean", event.getDB());
+    }
+    
+    @Test
+    public void testCompetitors() {
+        Iterable<Competitor> competitors = clientParams.getCompetitors();
+        assertEquals(9, Util.size(competitors));
+        assertEquals("Nielsen", competitors.iterator().next().getName());
     }
 }

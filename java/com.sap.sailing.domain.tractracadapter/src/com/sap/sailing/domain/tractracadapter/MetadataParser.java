@@ -40,6 +40,18 @@ public interface MetadataParser {
      */
     Iterable<ControlPointMetaData> parseControlPointMetadata(TracTracControlPoint controlPoint);
 
-    Map<String, Iterable<TracTracControlPoint>> parseSidelinesFromRaceMetadata(String raceMetadataString, Iterable<? extends TracTracControlPoint> controlPoints);
+    /**
+     * Parses the race metadata for sideline information
+     * The sidelines of a race (course) are encoded like this:
+     * <pre>
+     *  SIDELINE1=(TR-A) 3
+     *  SIDELINE2=(TR-A) Start
+     * </pre>
+     * Each sideline is defined right now through a simple gate, but this might change in the future.
+     * 
+     * @return keys are the sideline names, such as "SIDELINE1", values are the control points that form the sideline
+     */
+    Map<String, Iterable<TracTracControlPoint>> parseSidelinesFromRaceMetadata(String raceMetadataString,
+            Iterable<? extends TracTracControlPoint> controlPoints);
 
 }
