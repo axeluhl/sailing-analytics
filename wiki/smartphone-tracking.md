@@ -150,5 +150,6 @@ Helper Class for accessing the App Preferences specified in settings_view.xml
  * Servlet for getting all competitors registered for a race (to in/exclude competitors)
 * Android
  * abstract sending service, so that all POST / GET requests and not only RaceLogEvents can be sent using the semi-connectedness functionality
+  * just write JSONObjects/Strings directly into the file. The Servlet has to handle deserialization and the client doesn't have to no what type of object it is after having safed it?
  * simplify settings
  * login/register Activity for registering the Team and Sailor the first time the App is started
