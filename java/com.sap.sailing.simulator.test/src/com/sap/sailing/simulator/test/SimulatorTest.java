@@ -61,7 +61,7 @@ public class SimulatorTest {
         //System.out.println("opportunistic path points: "+paths.get("2#Opportunist Left").getPathPoints().size());
         Assert.assertNotNull(paths.get("2#Opportunist Left").getPathPoints());
         //System.out.println("omnciscient path points: "+paths.get("1#Omniscient").getPathPoints().size());
-        Assert.assertNotNull(paths.get("1#Omniscient").getPathPoints().size());
+        Assert.assertNotNull(paths.get("1#Omniscient").getPathPoints());
     }
 
 }
