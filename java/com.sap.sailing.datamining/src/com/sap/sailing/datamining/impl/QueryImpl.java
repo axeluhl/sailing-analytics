@@ -7,7 +7,7 @@ import com.sap.sailing.datamining.shared.Selector;
 
 public class QueryImpl implements Query {
     private static final long serialVersionUID = 5649156014930954522L;
-    
+
     private Selector selector;
     private Extractor extractor;
     private Aggregator aggregator;
