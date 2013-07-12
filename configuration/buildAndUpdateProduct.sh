@@ -427,6 +427,7 @@ if [[ "$@" == "remote-deploy" ]]; then
         echo "Did not find directory $REMOTE_SERVER/plugins - assuming empty server that needs to be initialized! Using data from $PROJECT_HOME"
 
         $SSH_CMD "mkdir -p $REMOTE_SERVER/plugins"
+        $SSH_CMD "mkdir -p $REMOTE_SERVER/logs"
         $SSH_CMD "mkdir -p $REMOTE_SERVER/tmp"
         $SSH_CMD "mkdir -p $REMOTE_SERVER/configuration/jetty/etc"
 
