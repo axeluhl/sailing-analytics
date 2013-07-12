@@ -276,8 +276,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 clientParams = new ClientParamsPHP(new InputStreamReader(paramURL.openStream()));
                 List<com.sap.sailing.domain.base.ControlPoint> newCourseControlPoints = new ArrayList<>();
                 List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide = new ArrayList<>();
-                final List<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRaceDefaultRoute().getControlPoints();
-                Map<Integer, NauticalSide> passingSideData = parsePassingSideData(clientParams.getRaceDefaultRoute(), newTracTracControlPoints);
+                final List<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRace().getDefaultRoute().getControlPoints();
+                Map<Integer, NauticalSide> passingSideData = parsePassingSideData(clientParams.getRace().getDefaultRoute(), newTracTracControlPoints);
                 int i = 1;
                 for (TracTracControlPoint newTracTracControlPoint : newTracTracControlPoints) {
                     NauticalSide nauticalSide = passingSideData.containsKey(i) ? passingSideData.get(i) : null;
@@ -374,7 +374,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) {
         RaceDefinition currentRace = null;
         long delayInMillis = clientParams.getLiveDelayInMillis();
-        RaceDefinition race = getRegatta().getRaceByName(clientParams.getRaceName());
+        RaceDefinition race = getRegatta().getRaceByName(clientParams.getRace().getName());
         if (race != null) {
             currentRace = race;
             final DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(currentRace);
@@ -385,12 +385,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         if (currentRace != null) {
             final DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(currentRace);
             if (trackedRace != null) {
-                TimePoint startOfTracking = clientParams.getRaceTrackingStartTime();
+                TimePoint startOfTracking = clientParams.getRace().getTrackingStartTime();
                 if (startOfTracking != null) {
                     trackedRace.setStartOfTrackingReceived(simulator == null ? startOfTracking : simulator
                             .advance(startOfTracking));
                 }
-                TimePoint endOfTracking = clientParams.getRaceTrackingEndTime();
+                TimePoint endOfTracking = clientParams.getRace().getTrackingEndTime();
                 if (endOfTracking != null) {
                     trackedRace.setEndOfTrackingReceived(simulator == null ? endOfTracking : simulator
                             .advance(endOfTracking));

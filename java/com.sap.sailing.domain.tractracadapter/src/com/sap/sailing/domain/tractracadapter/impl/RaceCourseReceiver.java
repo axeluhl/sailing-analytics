@@ -99,7 +99,9 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     @Override
     protected void handleEvent(Triple<Route, RouteData, Race> event) {
         System.out.print("R");
-        Map<Integer, NauticalSide> courseWaypointPassingSides = parseAdditionalCourseDataFromMetadata(event.getA(), event.getB().getPoints());
+        final Route route = event.getA();
+        final String routeMetadataString = route.getMetadata() != null ? route.getMetadata().getText() : null;
+        Map<Integer, NauticalSide> courseWaypointPassingSides = parseAdditionalCourseDataFromMetadata(route, event.getB().getPoints(), routeMetadataString);
         List<Util.Pair<TracTracControlPoint, NauticalSide>> ttControlPoints = new ArrayList<>();
         int i = 1;
         for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
@@ -107,7 +109,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             ttControlPoints.add(new Pair<TracTracControlPoint, NauticalSide>(new ControlPointAdapter(cp), nauticalSide));
             i++;
         }
-        Course course = getDomainFactory().createCourse(event.getA().getName(), ttControlPoints);
+        Course course = getDomainFactory().createCourse(route.getName(), ttControlPoints);
         List<Sideline> sidelines = new ArrayList<Sideline>();
         Map<String, Iterable<TracTracControlPoint>> sidelinesMetadata = parseSidelinesFromRaceMetadata(event.getC(),
                 event.getC().getEvent().getControlPointList());
@@ -154,21 +156,21 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
      *  Seq.3=GATE
      *  Seq.4=STARBOARD
      * </pre>
+     * @param routeMetadataString TODO
      */
-    private Map<Integer, NauticalSide> parseAdditionalCourseDataFromMetadata(Route route, 
-            List<com.tractrac.clientmodule.ControlPoint> controlPoints) {
-        Map<Integer, NauticalSide> result = new HashMap<Integer, NauticalSide>();;
+    private Map<Integer, NauticalSide> parseAdditionalCourseDataFromMetadata(Route route,
+            List<com.tractrac.clientmodule.ControlPoint> controlPoints, String routeMetadataString) {
+        Map<Integer, NauticalSide> result = new HashMap<Integer, NauticalSide>();
         int controlPointsCount = controlPoints.size();
-        String routeMetadataString = route.getMetadata() != null ? route.getMetadata().getText() : null;
-        if(routeMetadataString != null) {
+        if (routeMetadataString != null) {
             Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
-            for(int i = 1; i <= controlPointsCount; i++) {
+            for (int i = 1; i <= controlPointsCount; i++) {
                 String seqValue = routeMetadata.get("Seq." + i);
-                com.tractrac.clientmodule.ControlPoint controlPoint = controlPoints.get(i-1);
-                if(!controlPoint.getHasTwoPoints() && seqValue != null) {
-                    if("PORT".equalsIgnoreCase(seqValue)) {
+                com.tractrac.clientmodule.ControlPoint controlPoint = controlPoints.get(i - 1);
+                if (!controlPoint.getHasTwoPoints() && seqValue != null) {
+                    if ("PORT".equalsIgnoreCase(seqValue)) {
                         result.put(i, NauticalSide.PORT);
-                    } else if("STARBOARD".equalsIgnoreCase(seqValue)) {
+                    } else if ("STARBOARD".equalsIgnoreCase(seqValue)) {
                         result.put(i, NauticalSide.STARBOARD);
                     }
                 }
