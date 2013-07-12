@@ -264,4 +264,6 @@ public interface DomainFactory {
 
     JSONService parseJSONURLForOneRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
+    MetadataParser getMetadataParser();
+
 }

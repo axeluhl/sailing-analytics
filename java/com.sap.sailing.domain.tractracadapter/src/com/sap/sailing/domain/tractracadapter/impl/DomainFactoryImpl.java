@@ -3,7 +3,6 @@ package com.sap.sailing.domain.tractracadapter.impl;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -11,12 +10,10 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,7 +40,6 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SidelineImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -67,6 +63,8 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
+import com.sap.sailing.domain.tractracadapter.MetadataParser;
+import com.sap.sailing.domain.tractracadapter.MetadataParser.ControlPointMetaData;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
@@ -107,11 +105,19 @@ public class DomainFactoryImpl implements DomainFactory {
     private final WeakIdentityHashMap<com.tractrac.clientmodule.Event, Regatta> weakRegattaCache = new WeakIdentityHashMap<>();
     
     private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
+    
+    private final MetadataParser metadataParser;
 
     public DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory baseDomainFactory) {
         this.baseDomainFactory = baseDomainFactory;
+        this.metadataParser = new MetadataParserImpl();
     }
 
+    @Override
+    public MetadataParser getMetadataParser() {
+        return metadataParser;
+    }
+    
     @Override
     public com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
         return baseDomainFactory;
@@ -149,39 +155,22 @@ public class DomainFactoryImpl implements DomainFactory {
         synchronized (controlPointCache) {
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
             if (domainControlPoint == null) {
-                String controlPointName = controlPoint.getName();
-                final String controlPointMetadataString = controlPoint.getMetadata();
-                Map<String, String> controlPointMetadata;
-                if (controlPointMetadataString == null) {
-                    controlPointMetadata = Collections.emptyMap();
-                } else {
-                    controlPointMetadata = parseControlPointMetadata(controlPointMetadataString);
+                final Iterable<MetadataParser.ControlPointMetaData> controlPointMetadata = getMetadataParser().parseControlPointMetadata(controlPoint);
+                List<Mark> marks = new ArrayList<Mark>();
+                for (ControlPointMetaData markMetadata : controlPointMetadata) {
+                    Mark mark = baseDomainFactory.getOrCreateMark(markMetadata.getId(), markMetadata.getName(),
+                            markMetadata.getType(), markMetadata.getColor(), markMetadata.getShape(),
+                            markMetadata.getPattern());
+                    marks.add(mark);
                 }
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
-                    MarkType type1 = resolveMarkTypeFromMetadata(controlPointMetadata, "P1.Type");
-                    MarkType type2 = resolveMarkTypeFromMetadata(controlPointMetadata, "P2.Type");
-                    String color1 = controlPointMetadata.get("P1.Color");
-                    String color2 = controlPointMetadata.get("P2.Color");
-                    String shape1 = controlPointMetadata.get("P1.Shape");
-                    String shape2 = controlPointMetadata.get("P2.Shape");
-                    String pattern1 = controlPointMetadata.get("P1.Pattern");
-                    String pattern2 = controlPointMetadata.get("P2.Pattern");
-                    String mark1UUID = controlPointMetadata.get("P1.UUID");
-                    String mark2UUID = controlPointMetadata.get("P2.UUID");
-                    final String name1 = controlPointName + " (1)";
-                    final Serializable id1 = mark1UUID == null ? name1 : UUID.fromString(mark1UUID);
-                    Mark mark1 = baseDomainFactory.getOrCreateMark(id1, name1, type1, color1, shape1, pattern1);
-                    final String name2 = controlPointName + " (2)";
-                    final Serializable id2 = mark2UUID == null ? name2 : UUID.fromString(mark2UUID);
-                    Mark mark2 = baseDomainFactory.getOrCreateMark(id2, name2, type2, color2, shape2, pattern2);
-                    domainControlPoint = baseDomainFactory.createGate(controlPoint.getId(), mark1, mark2, controlPointName);
+                    Iterator<Mark> markIter = marks.iterator();
+                    Mark mark1 = markIter.next();
+                    Mark mark2 = markIter.next();
+                    domainControlPoint = baseDomainFactory.createGate(controlPoint.getId(), mark1, mark2, controlPoint.getName());
                 } else {
-                    MarkType type = resolveMarkTypeFromMetadata(controlPointMetadata, "Type");
-                    String color = controlPointMetadata.get("Color");
-                    String shape = controlPointMetadata.get("Shape");
-                    String pattern = controlPointMetadata.get("Pattern");
-                    Mark mark = baseDomainFactory.getOrCreateMark(controlPoint.getId(), controlPointName, type, color, shape, pattern);
+                    Mark mark = marks.iterator().next();
                     domainControlPoint = mark;
                 }
                 controlPointCache.put(controlPoint, domainControlPoint);
@@ -190,33 +179,6 @@ public class DomainFactoryImpl implements DomainFactory {
         }
     }
 
-    private MarkType resolveMarkTypeFromMetadata(Map<String, String> controlPointMetadata, String typePropertyName) {
-        MarkType result = MarkType.BUOY;
-        String markType = controlPointMetadata.get(typePropertyName);
-        if(markType != null && !markType.isEmpty()) {
-            for(MarkType m: MarkType.values()) {
-                if(m.name().equalsIgnoreCase(markType)) {
-                    result = m;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-    
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Map<String, String> parseControlPointMetadata(String controlPointMetadata) {
-        Map<String, String> metadataMap = new HashMap<String, String>();
-        try {
-            Properties p = new Properties();
-            p.load(new StringReader(controlPointMetadata));
-            metadataMap = new HashMap<String, String>((Map) p);
-        } catch (IOException e) {
-            // do nothing
-        }
-        return metadataMap;
-    }
-        
     @Override
     public Course createCourse(String name, Iterable<Pair<TracTracControlPoint, NauticalSide>> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();

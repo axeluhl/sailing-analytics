@@ -4,18 +4,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -277,7 +274,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 List<com.sap.sailing.domain.base.ControlPoint> newCourseControlPoints = new ArrayList<>();
                 List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide = new ArrayList<>();
                 final List<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRace().getDefaultRoute().getControlPoints();
-                Map<Integer, NauticalSide> passingSideData = parsePassingSideData(clientParams.getRace().getDefaultRoute(), newTracTracControlPoints);
+                Map<Integer, NauticalSide> passingSideData = domainFactory.getMetadataParser().parsePassingSideData(
+                        clientParams.getRace().getDefaultRoute().getMetadata(), newTracTracControlPoints);
                 int i = 1;
                 for (TracTracControlPoint newTracTracControlPoint : newTracTracControlPoints) {
                     NauticalSide nauticalSide = passingSideData.containsKey(i) ? passingSideData.get(i) : null;
@@ -327,48 +325,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", e);
             }
         }
-    }
-
-    /**
-     * Parses the route metadata for additional course information
-     * The 'passing side' for each course waypoint is encoded like this...
-     * Seq.1=GATE
-     * Seq.2=PORT
-     * Seq.3=GATE
-     * Seq.4=STARBOARD
-     */
-    private Map<Integer, NauticalSide> parsePassingSideData(ClientParamsPHP.Route route, List<? extends TracTracControlPoint> controlPoints) {
-        Map<Integer, NauticalSide> result = new HashMap<Integer, NauticalSide>();
-        int controlPointsCount = controlPoints.size();
-        String routeMetadataString = route.getMetadata();
-        if(routeMetadataString != null) {
-            Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
-            for(int i = 1; i <= controlPointsCount; i++) {
-                String seqValue = routeMetadata.get("Seq." + i);
-                TracTracControlPoint controlPoint = controlPoints.get(i-1);
-                if(!controlPoint.getHasTwoPoints() && seqValue != null) {
-                    if("PORT".equalsIgnoreCase(seqValue)) {
-                        result.put(i, NauticalSide.PORT);
-                    } else if("STARBOARD".equalsIgnoreCase(seqValue)) {
-                        result.put(i, NauticalSide.STARBOARD);
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Map<String, String> parseMetadata(String metadata) {
-        Map<String, String> metadataMap = new HashMap<String, String>();
-        try {
-            Properties p = new Properties();
-            p.load(new StringReader(metadata));
-            metadataMap = new HashMap<String, String>((Map) p);
-        } catch (IOException e) {
-            // do nothing
-        }
-        return metadataMap;
     }
 
     private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) {

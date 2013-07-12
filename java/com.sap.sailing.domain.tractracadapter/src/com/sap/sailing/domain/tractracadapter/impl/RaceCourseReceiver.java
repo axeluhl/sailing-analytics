@@ -6,6 +6,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -101,12 +103,16 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         System.out.print("R");
         final Route route = event.getA();
         final String routeMetadataString = route.getMetadata() != null ? route.getMetadata().getText() : null;
-        Map<Integer, NauticalSide> courseWaypointPassingSides = parseAdditionalCourseDataFromMetadata(route, event.getB().getPoints(), routeMetadataString);
+        final LinkedHashMap<com.tractrac.clientmodule.ControlPoint, TracTracControlPoint> ttControlPointsForOriginalControlPoints = new LinkedHashMap<>();
+        for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
+            ttControlPointsForOriginalControlPoints.put(cp, new ControlPointAdapter(cp));
+        }
+        Map<Integer, NauticalSide> courseWaypointPassingSides = parseAdditionalCourseDataFromMetadata(ttControlPointsForOriginalControlPoints.values(), routeMetadataString);
         List<Util.Pair<TracTracControlPoint, NauticalSide>> ttControlPoints = new ArrayList<>();
         int i = 1;
         for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
             NauticalSide nauticalSide = courseWaypointPassingSides.containsKey(i) ? courseWaypointPassingSides.get(i) : null;
-            ttControlPoints.add(new Pair<TracTracControlPoint, NauticalSide>(new ControlPointAdapter(cp), nauticalSide));
+            ttControlPoints.add(new Pair<TracTracControlPoint, NauticalSide>(ttControlPointsForOriginalControlPoints.get(cp), nauticalSide));
             i++;
         }
         Course course = getDomainFactory().createCourse(route.getName(), ttControlPoints);
@@ -156,17 +162,17 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
      *  Seq.3=GATE
      *  Seq.4=STARBOARD
      * </pre>
-     * @param routeMetadataString TODO
      */
-    private Map<Integer, NauticalSide> parseAdditionalCourseDataFromMetadata(Route route,
-            List<com.tractrac.clientmodule.ControlPoint> controlPoints, String routeMetadataString) {
+    private Map<Integer, NauticalSide> parseAdditionalCourseDataFromMetadata(Iterable<TracTracControlPoint> controlPoints,
+            String routeMetadataString) {
         Map<Integer, NauticalSide> result = new HashMap<Integer, NauticalSide>();
-        int controlPointsCount = controlPoints.size();
         if (routeMetadataString != null) {
             Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
-            for (int i = 1; i <= controlPointsCount; i++) {
+            Iterator<TracTracControlPoint> iter = controlPoints.iterator();
+            int i=1;
+            while (iter.hasNext()) {
                 String seqValue = routeMetadata.get("Seq." + i);
-                com.tractrac.clientmodule.ControlPoint controlPoint = controlPoints.get(i - 1);
+                TracTracControlPoint controlPoint = iter.next();
                 if (!controlPoint.getHasTwoPoints() && seqValue != null) {
                     if ("PORT".equalsIgnoreCase(seqValue)) {
                         result.put(i, NauticalSide.PORT);
@@ -174,6 +180,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
                         result.put(i, NauticalSide.STARBOARD);
                     }
                 }
+                i++;
             }
         }
         return result;
