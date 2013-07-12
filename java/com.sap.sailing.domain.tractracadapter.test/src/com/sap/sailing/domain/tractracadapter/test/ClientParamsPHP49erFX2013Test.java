@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Competitor;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Event;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Race;
@@ -60,6 +61,11 @@ public class ClientParamsPHP49erFX2013Test extends AbstractClientParamsPHPTest {
     public void testCompetitors() {
         Iterable<Competitor> competitors = clientParams.getCompetitors();
         assertEquals(9, Util.size(competitors));
-        assertEquals("Nielsen", competitors.iterator().next().getName());
+        final Competitor nielsen = competitors.iterator().next();
+        assertEquals("Nielsen", nielsen.getName());
+        com.sap.sailing.domain.base.Competitor nielsenAsCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(
+                nielsen.getId(), nielsen.getBoatClass().getName(), nielsen.getNationality(), nielsen.getName(),
+                nielsen.getShorName());
+        assertEquals("DEN", nielsenAsCompetitor.getTeam().getNationality().getThreeLetterIOCAcronym());
     }
 }
