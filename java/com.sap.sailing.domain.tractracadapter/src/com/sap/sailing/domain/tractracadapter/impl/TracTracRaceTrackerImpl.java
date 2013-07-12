@@ -193,7 +193,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             throw new RuntimeException("Connection failed. Could not connect to " + paramURL);
         }
         
-        logger.info("Starting race tracker: " + tractracEvent.getName() + " " + paramURL + " " + liveURI
+        logger.info("Starting race tracker: " + tractracEvent.getName() + " " + paramURL + " " + liveURI + " "
                 + storedURI + " startOfTracking:" + (startOfTracking != null ? startOfTracking.asMillis() : "n/a") + " endOfTracking:" + (endOfTracking != null ? endOfTracking.asMillis() : "n/a"));
         
         // Initialize data controller using live and stored data sources
@@ -251,8 +251,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * @param simulator
      *            if not <code>null</code>, use this simulator to translate start/stop tracking times received through
      *            clientparams document
-     * @param courseDesignUpdateURI 
-     * @param delayToLiveInMillis TODO
      * @return the task to cancel in case the tracker wants to terminate the poller
      */
     private ScheduledFuture<?> scheduleClientParamsPHPPoller(final URL paramURL, final Simulator simulator,
@@ -500,13 +498,21 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         ioThread.start();
     }
     
-    @SuppressWarnings("deprecation") // explicitly calling Thread.stop in case IO thread didn't join in three seconds time
     @Override
-    public void stop() throws MalformedURLException, IOException, InterruptedException {
+    public void stop() throws InterruptedException {
+        stop(/* stop receivers preemtively */ true);
+    }
+
+    @SuppressWarnings("deprecation") // explicitly calling Thread.stop in case IO thread didn't join in three seconds time
+    private void stop(boolean stopReceiversPreemtively) throws InterruptedException {
         controlPointPositionPoller.cancel(/* mayInterruptIfRunning */ false);
         controller.stop(/* abortStored */ true);
         for (Receiver receiver : receivers) {
-            receiver.stopPreemptively();
+            if (stopReceiversPreemtively) {
+                receiver.stopPreemptively();
+            } else {
+                receiver.stopAfterProcessingQueuedEvents();
+            }
         }
         ioThread.join(3000); // wait no more than three seconds
         if (ioThread.isAlive()) {
@@ -536,6 +542,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         logger.info("stopped TracTrac tracking for "+getRaces());
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
         updateStatusOfTrackedRaces();
+        try {
+            stop(/* stop receivers preemptively */ false);
+        } catch (InterruptedException e) {
+            logger.log(Level.SEVERE, "Exception trying to stop tracker for "+getRaces(), e);
+        } 
     }
 
     private void updateStatusOfTrackedRaces() {
