@@ -1,11 +1,11 @@
 package com.sap.sailing.datamining.shared;
 
-public interface Query {
+import java.io.Serializable;
+
+public interface Query extends Serializable {
     
-    public void setSelector(Selector selector);
     public Selector getSelector();
-    
-    public void setAggregator(Aggregator aggregator);
+    public Extractor getExtractor();
     public Aggregator getAggregator();
 
 }
