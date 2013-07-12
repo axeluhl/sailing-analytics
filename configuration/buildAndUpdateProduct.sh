@@ -381,9 +381,11 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 
     echo "$VERSION_INFO-$MONGODB_PORT-$MEMORY-$REPLICATION_CHANNEL" > $ACDIR/configuration/jetty/version.txt
 
+    sed -i "s/mongo.host=.*$/mongo.host=$MONGODB_HOST/g" $ACDIR/configuration/config.ini
     sed -i "s/mongo.port=.*$/mongo.port=$MONGODB_PORT/g" $ACDIR/configuration/config.ini
     sed -i "s/expedition.udp.port=.*$/expedition.udp.port=$EXPEDITION_PORT/g" $ACDIR/configuration/config.ini
     sed -i "s/replication.exchangeName=.*$/replication.exchangeName=$REPLICATION_CHANNEL/g" $ACDIR/configuration/config.ini
+    sed -i "s/replication.exchangeHost=.*$/replication.exchangeHost=$REPLICATION_HOST/g" $ACDIR/configuration/config.ini
 
     echo "I have read the following configuration from $ACDIR/env.sh:"
     echo "SERVER_NAME: $SERVER_NAME"
@@ -391,7 +393,9 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     echo "MEMORY: $MEMORY"
     echo "TELNET_PORT: $TELNET_PORT"
     echo "MONGODB_PORT: $MONGODB_PORT"
+    echo "MONGODB_HOST: $MONGODB_HOST"
     echo "EXPEDITION_PORT: $EXPEDITION_PORT"
+    echo "REPLICATION_HOST: $REPLICATION_HOST"
     echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
     echo ""
 
@@ -417,6 +421,30 @@ if [[ "$@" == "remote-deploy" ]]; then
     *) echo "Aborting... nothing has been changed on remote server!"
     exit;;
     esac
+
+    $SSH_CMD "test -d $REMOTE_SERVER/plugins"
+    if [[ $? -eq 1 ]]; then
+        echo "Did not find directory $REMOTE_SERVER/plugins - assuming empty server that needs to be initialized! Using data from $PROJECT_HOME"
+
+        $SSH_CMD "mkdir -p $REMOTE_SERVER/plugins"
+        $SSH_CMD "mkdir -p $REMOTE_SERVER/logs"
+        $SSH_CMD "mkdir -p $REMOTE_SERVER/tmp"
+        $SSH_CMD "mkdir -p $REMOTE_SERVER/configuration/jetty/etc"
+
+        $SCP_CMD $p2PluginRepository/configuration/config.ini $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
+        $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
+        $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
+        $SCP_CMD $PROJECT_HOME/java/target/configuration/monitoring.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
+ 
+        $SCP_CMD $PROJECT_HOME/java/target/env.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/start $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/stop $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/status $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/udpmirror $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+ 
+        $SCP_CMD $PROJECT_HOME/java/target/http2udpmirror $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/configuration/logging.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
+    fi
 
     echo ""
     echo "Starting deployment to $REMOTE_HOME/$SERVER..."
@@ -460,3 +488,5 @@ if [[ "$@" == "deploy-startpage" ]]; then
     cp $PROJECT_HOME/java/com.sap.sailing.www/index.html $TARGET_DIR_STARTPAGE
     echo "OK"
 fi
+
+echo "Operation finished at `date`"

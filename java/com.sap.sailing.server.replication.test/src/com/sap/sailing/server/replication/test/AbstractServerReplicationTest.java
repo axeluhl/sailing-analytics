@@ -73,6 +73,7 @@ public abstract class AbstractServerReplicationTest {
     protected Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> basicSetUp(
             boolean dropDB, RacingEventServiceImpl master, RacingEventServiceImpl replica) throws IOException, InterruptedException {
         final String exchangeName = "test-sapsailinganalytics-exchange";
+        final String exchangeHost = "localhost";
         final UUID serverUuid = UUID.randomUUID();
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
         if (dropDB) {
@@ -90,11 +91,11 @@ public abstract class AbstractServerReplicationTest {
             this.replica = new RacingEventServiceImpl(mongoDBService);
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
-        masterReplicator = new ReplicationServiceImpl(exchangeName, rim, this.master);
+        masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, rim, this.master);
         replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost(), serverUuid, "");
         masterReplicator.registerReplica(replicaDescriptor);
         masterDescriptor = new ReplicationMasterDescriptorImpl("localhost", exchangeName, SERVLET_PORT, 0, UUID.randomUUID().toString());
-        ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(exchangeName, resolveAgainst, rim,
+        ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(exchangeName, exchangeHost, resolveAgainst, rim,
                 replicaDescriptor, this.replica, this.master, masterReplicator, masterDescriptor);
         Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
         replicaReplicator.startInitialLoadTransmissionServlet();
@@ -128,12 +129,12 @@ public abstract class AbstractServerReplicationTest {
         private final ReplicationService masterReplicationService;
         private final ReplicationMasterDescriptor masterDescriptor;
         
-        public ReplicationServiceTestImpl(String exchangeName, DomainFactory resolveAgainst,
+        public ReplicationServiceTestImpl(String exchangeName, String exchangeHost, DomainFactory resolveAgainst,
                 ReplicationInstancesManager replicationInstancesManager, ReplicaDescriptor replicaDescriptor,
                 RacingEventService replica, RacingEventService master, ReplicationService masterReplicationService,
                 ReplicationMasterDescriptor masterDescriptor)
                 throws IOException {
-            super(exchangeName, replicationInstancesManager, replica);
+            super(exchangeName, exchangeHost, replicationInstancesManager, replica);
             this.resolveAgainst = resolveAgainst;
             this.replicaDescriptor = replicaDescriptor;
             this.master = master;
