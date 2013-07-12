@@ -1,17 +1,11 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -103,22 +97,27 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         System.out.print("R");
         final Route route = event.getA();
         final String routeMetadataString = route.getMetadata() != null ? route.getMetadata().getText() : null;
-        final LinkedHashMap<com.tractrac.clientmodule.ControlPoint, TracTracControlPoint> ttControlPointsForOriginalControlPoints = new LinkedHashMap<>();
-        for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
-            ttControlPointsForOriginalControlPoints.put(cp, new ControlPointAdapter(cp));
+        final LinkedHashMap<com.tractrac.clientmodule.ControlPoint, TracTracControlPoint> ttControlPointsForAllOriginalEventControlPoints = new LinkedHashMap<>();
+        for (com.tractrac.clientmodule.ControlPoint cp : event.getC().getEvent().getControlPointList()) {
+            ttControlPointsForAllOriginalEventControlPoints.put(cp, new ControlPointAdapter(cp));
         }
-        Map<Integer, NauticalSide> courseWaypointPassingSides = parseAdditionalCourseDataFromMetadata(ttControlPointsForOriginalControlPoints.values(), routeMetadataString);
+        final List<TracTracControlPoint> routeControlPoints = new ArrayList<>();
+        for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
+            routeControlPoints.add(ttControlPointsForAllOriginalEventControlPoints.get(cp));
+        }
+        Map<Integer, NauticalSide> courseWaypointPassingSides = getDomainFactory().getMetadataParser().parsePassingSideData(routeMetadataString, routeControlPoints);
         List<Util.Pair<TracTracControlPoint, NauticalSide>> ttControlPoints = new ArrayList<>();
         int i = 1;
         for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
             NauticalSide nauticalSide = courseWaypointPassingSides.containsKey(i) ? courseWaypointPassingSides.get(i) : null;
-            ttControlPoints.add(new Pair<TracTracControlPoint, NauticalSide>(ttControlPointsForOriginalControlPoints.get(cp), nauticalSide));
+            ttControlPoints.add(new Pair<TracTracControlPoint, NauticalSide>(ttControlPointsForAllOriginalEventControlPoints.get(cp), nauticalSide));
             i++;
         }
         Course course = getDomainFactory().createCourse(route.getName(), ttControlPoints);
         List<Sideline> sidelines = new ArrayList<Sideline>();
-        Map<String, Iterable<TracTracControlPoint>> sidelinesMetadata = parseSidelinesFromRaceMetadata(event.getC(),
-                event.getC().getEvent().getControlPointList());
+        Race race = event.getC();
+        Map<String, Iterable<TracTracControlPoint>> sidelinesMetadata = getDomainFactory().getMetadataParser().parseSidelinesFromRaceMetadata(
+                race.getMetadata() != null ? race.getMetadata().getText() : null, ttControlPointsForAllOriginalEventControlPoints.values());
         for (Entry<String, Iterable<TracTracControlPoint>> sidelineEntry : sidelinesMetadata.entrySet()) {
             if (Util.size(sidelineEntry.getValue()) > 0) {
                 sidelines.add(getDomainFactory().createSideline(sidelineEntry.getKey(), sidelineEntry.getValue()));
@@ -151,83 +150,6 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
                 getSimulator().setTrackedRace(trackedRace);
             }
         }
-    }
-    
-    /**
-     * Parses the route metadata for additional course information
-     * The 'passing side' for each course waypoint is encoded like this...
-     * <pre>
-     *  Seq.1=GATE
-     *  Seq.2=PORT
-     *  Seq.3=GATE
-     *  Seq.4=STARBOARD
-     * </pre>
-     */
-    private Map<Integer, NauticalSide> parseAdditionalCourseDataFromMetadata(Iterable<TracTracControlPoint> controlPoints,
-            String routeMetadataString) {
-        Map<Integer, NauticalSide> result = new HashMap<Integer, NauticalSide>();
-        if (routeMetadataString != null) {
-            Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
-            Iterator<TracTracControlPoint> iter = controlPoints.iterator();
-            int i=1;
-            while (iter.hasNext()) {
-                String seqValue = routeMetadata.get("Seq." + i);
-                TracTracControlPoint controlPoint = iter.next();
-                if (!controlPoint.getHasTwoPoints() && seqValue != null) {
-                    if ("PORT".equalsIgnoreCase(seqValue)) {
-                        result.put(i, NauticalSide.PORT);
-                    } else if ("STARBOARD".equalsIgnoreCase(seqValue)) {
-                        result.put(i, NauticalSide.STARBOARD);
-                    }
-                }
-                i++;
-            }
-        }
-        return result;
-    }
-    
-    /**
-     * Parses the race metadata for sideline information
-     * The sidelines of a race (course) are encoded like this...
-     * <pre>
-     *  SIDELINE1=(TR-A) 3
-     *  SIDELINE2=(TR-A) Start
-     * </pre>
-     * Each sideline is defined right now through a simple gate, but this might change in the future
-     */
-    private Map<String, Iterable<TracTracControlPoint>> parseSidelinesFromRaceMetadata(Race race,
-            Collection<com.tractrac.clientmodule.ControlPoint> controlPoints) {
-        Map<String, Iterable<TracTracControlPoint>> result = new HashMap<String, Iterable<TracTracControlPoint>>();
-        String raceMetadataString = race.getMetadata() != null ? race.getMetadata().getText() : null;
-        if (raceMetadataString != null) {
-            Map<String, String> sidelineMetadata = parseMetadata(raceMetadataString);
-            for (Entry<String, String> entry : sidelineMetadata.entrySet()) {
-                if (entry.getKey().startsWith("SIDELINE")) {
-                    List<TracTracControlPoint> sidelineCPs = new ArrayList<>();
-                    result.put(entry.getKey(), sidelineCPs);
-                    for (com.tractrac.clientmodule.ControlPoint cp : controlPoints) {
-                        String cpName = cp.getName().trim();
-                        if (cpName.equals(entry.getValue())) {
-                            sidelineCPs.add(new ControlPointAdapter(cp));
-                        }
-                    }
-                }
-            }
-        }
-        return result;
-    }
-    
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Map<String, String> parseMetadata(String metadata) {
-        Map<String, String> metadataMap = new HashMap<String, String>();
-        try {
-            Properties p = new Properties();
-            p.load(new StringReader(metadata));
-            metadataMap = new HashMap<String, String>((Map) p);
-        } catch (IOException e) {
-            // do nothing
-        }
-        return metadataMap;
     }
     
     private void createTrackedRace(RaceDefinition race, Iterable<Sideline> sidelines) {

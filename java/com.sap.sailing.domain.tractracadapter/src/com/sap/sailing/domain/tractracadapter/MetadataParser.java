@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tractracadapter;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.MarkType;
@@ -34,11 +33,13 @@ public interface MetadataParser {
         Serializable getId();
     }
     
-    Map<Integer, NauticalSide> parsePassingSideData(String routeMetadataString, List<? extends TracTracControlPoint> controlPoints);
+    Map<Integer, NauticalSide> parsePassingSideData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints);
 
     /**
      * Returns as many metadata objects as there are marks in the control point (two for a gate, one otherwise)
      */
     Iterable<ControlPointMetaData> parseControlPointMetadata(TracTracControlPoint controlPoint);
+
+    Map<String, Iterable<TracTracControlPoint>> parseSidelinesFromRaceMetadata(String raceMetadataString, Iterable<? extends TracTracControlPoint> controlPoints);
 
 }

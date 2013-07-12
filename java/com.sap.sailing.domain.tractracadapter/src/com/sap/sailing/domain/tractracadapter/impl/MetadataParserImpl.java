@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tractracadapter.impl;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.Map.Entry;
 
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -79,27 +81,29 @@ public class MetadataParserImpl implements MetadataParser {
     /**
      * Parses the route metadata for additional course information
      * The 'passing side' for each course waypoint is encoded like this...
-     * Seq.1=GATE
-     * Seq.2=PORT
-     * Seq.3=GATE
-     * Seq.4=STARBOARD
+     * <pre>
+     *  Seq.1=GATE
+     *  Seq.2=PORT
+     *  Seq.3=GATE
+     *  Seq.4=STARBOARD
+     * </pre>
      */
     @Override
-    public Map<Integer, NauticalSide> parsePassingSideData(String routeMetadataString, List<? extends TracTracControlPoint> controlPoints) {
+    public Map<Integer, NauticalSide> parsePassingSideData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints) {
         Map<Integer, NauticalSide> result = new HashMap<Integer, NauticalSide>();
-        int controlPointsCount = controlPoints.size();
-        if(routeMetadataString != null) {
+        if (routeMetadataString != null) {
             Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
-            for(int i = 1; i <= controlPointsCount; i++) {
+            int i=1;
+            for (TracTracControlPoint controlPoint : controlPoints) {
                 String seqValue = routeMetadata.get("Seq." + i);
-                TracTracControlPoint controlPoint = controlPoints.get(i-1);
-                if(!controlPoint.getHasTwoPoints() && seqValue != null) {
-                    if("PORT".equalsIgnoreCase(seqValue)) {
+                if (!controlPoint.getHasTwoPoints() && seqValue != null) {
+                    if ("PORT".equalsIgnoreCase(seqValue)) {
                         result.put(i, NauticalSide.PORT);
-                    } else if("STARBOARD".equalsIgnoreCase(seqValue)) {
+                    } else if ("STARBOARD".equalsIgnoreCase(seqValue)) {
                         result.put(i, NauticalSide.STARBOARD);
                     }
                 }
+                i++;
             }
         }
         return result;
@@ -167,6 +171,37 @@ public class MetadataParserImpl implements MetadataParser {
                 if(m.name().equalsIgnoreCase(markType)) {
                     result = m;
                     break;
+                }
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * Parses the race metadata for sideline information
+     * The sidelines of a race (course) are encoded like this...
+     * <pre>
+     *  SIDELINE1=(TR-A) 3
+     *  SIDELINE2=(TR-A) Start
+     * </pre>
+     * Each sideline is defined right now through a simple gate, but this might change in the future
+     */
+    @Override
+    public Map<String, Iterable<TracTracControlPoint>> parseSidelinesFromRaceMetadata(String raceMetadataString,
+            Iterable<? extends TracTracControlPoint> controlPoints) {
+        Map<String, Iterable<TracTracControlPoint>> result = new HashMap<String, Iterable<TracTracControlPoint>>();
+        if (raceMetadataString != null) {
+            Map<String, String> sidelineMetadata = parseMetadata(raceMetadataString);
+            for (Entry<String, String> entry : sidelineMetadata.entrySet()) {
+                if (entry.getKey().startsWith("SIDELINE")) {
+                    List<TracTracControlPoint> sidelineCPs = new ArrayList<>();
+                    result.put(entry.getKey(), sidelineCPs);
+                    for (TracTracControlPoint cp : controlPoints) {
+                        String cpName = cp.getName().trim();
+                        if (cpName.equals(entry.getValue())) {
+                            sidelineCPs.add(cp);
+                        }
+                    }
                 }
             }
         }
