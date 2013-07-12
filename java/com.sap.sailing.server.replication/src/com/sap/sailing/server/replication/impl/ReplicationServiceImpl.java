@@ -71,6 +71,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * serialized form. Clients need to know this name to be able to bind their queues to the exchange.
      */
     private final String exchangeName;
+    private final String exchangeHost;
     
     /**
      * UUID that identifies this server
@@ -80,7 +81,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     private Replicator replicator;
     private Thread replicatorThread;
     
-    public ReplicationServiceImpl(String exchangeName, final ReplicationInstancesManager replicationInstancesManager) throws IOException {
+    public ReplicationServiceImpl(String exchangeName, String exchangeHost, final ReplicationInstancesManager replicationInstancesManager) throws IOException {
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
         racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(
@@ -88,6 +89,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         racingEventServiceTracker.open();
         localService = null;
         this.exchangeName = exchangeName;
+        this.exchangeHost = exchangeHost;
         replicator = null;
         serverUUID = UUID.randomUUID();
         logger.info("Setting " + serverUUID.toString() + " as unique replication identifier.");
@@ -98,20 +100,21 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * an OSGi service tracker to discover the {@link RacingEventService}, the service to replicate is "injected" here.
      * @param exchangeName the name of the exchange to which replicas can bind
      */
-    public ReplicationServiceImpl(String exchangeName,
+    public ReplicationServiceImpl(String exchangeName, String exchangeHost,
             final ReplicationInstancesManager replicationInstancesManager, RacingEventService localService) throws IOException {
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>(); // XXX why is this a map? there should be only one connection to a master
         this.localService = localService;
         this.exchangeName = exchangeName;
+        this.exchangeHost = exchangeHost;
         replicator = null;
         serverUUID = UUID.randomUUID();
         logger.info("Setting " + serverUUID.toString() + " as unique replication identifier.");
     }
     
-    private Channel createMasterChannel(String exchangeName) throws IOException {
+    private Channel createMasterChannel(String exchangeName, String exchangeHost) throws IOException {
         final ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost("localhost"); // ...and use default port
+        connectionFactory.setHost(exchangeHost); // ...and use default port
         
         Channel result = null;
         try {
@@ -144,7 +147,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
             addAsListenerToRacingEventService();
             synchronized (this) {
                 if (masterChannel == null) {
-                    masterChannel = createMasterChannel(exchangeName);
+                    masterChannel = createMasterChannel(exchangeName, exchangeHost);
                 }
             }
         }
