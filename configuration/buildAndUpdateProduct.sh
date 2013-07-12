@@ -487,3 +487,5 @@ if [[ "$@" == "deploy-startpage" ]]; then
     cp $PROJECT_HOME/java/com.sap.sailing.www/index.html $TARGET_DIR_STARTPAGE
     echo "OK"
 fi
+
+echo "Operation finished at `date`"
