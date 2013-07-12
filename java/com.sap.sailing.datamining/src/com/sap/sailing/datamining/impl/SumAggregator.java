@@ -5,6 +5,7 @@ import java.util.List;
 import com.sap.sailing.datamining.shared.Aggregator;
 
 public class SumAggregator implements Aggregator {
+    private static final long serialVersionUID = 699304992480356790L;
 
     @Override
     public double aggregate(List<Double> data) {

@@ -16,9 +16,10 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
 public class EventSelector extends AbstractSelector {
+    private static final long serialVersionUID = 8527294635220237370L;
     
-    private Set<Regatta> regattas;
-    private RacingEventService racingEventService;
+    private transient Set<Regatta> regattas;
+    private transient RacingEventService racingEventService;
     
     private String[] eventNamesForSelection;
 
