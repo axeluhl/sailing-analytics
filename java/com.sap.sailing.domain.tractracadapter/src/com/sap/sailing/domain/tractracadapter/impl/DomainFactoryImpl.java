@@ -208,20 +208,32 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Competitor getOrCreateCompetitor(com.tractrac.clientmodule.Competitor competitor) {
         // TODO see bug 596; consider allowing for a new competitor (check for use of == throughout the code) or update existing one
-        Competitor result = baseDomainFactory.getExistingCompetitorById(competitor.getId());
+        final UUID competitorId = competitor.getId();
+        final String competitorClassName = competitor.getCompetitorClass()==null?null:competitor.getCompetitorClass().getName();
+        final String nationalityAsString = competitor.getNationality();
+        final String name = competitor.getName();
+        final String shortName = competitor.getShortName();
+        Competitor result = getOrCreateCompetitor(competitorId, competitorClassName, nationalityAsString, name, shortName);
+        return result;
+    }
+
+    @Override
+    public Competitor getOrCreateCompetitor(final UUID competitorId, final String competitorClassName,
+            final String nationalityAsString, final String name, final String shortName) {
+        Competitor result = baseDomainFactory.getExistingCompetitorById(competitorId);
         if (result == null) {
-            BoatClass boatClass = getOrCreateBoatClass(competitor.getCompetitorClass());
+            BoatClass boatClass = getOrCreateBoatClass(competitorClassName);
             Nationality nationality;
             try {
-                nationality = getOrCreateNationality(competitor.getNationality());
+                nationality = getOrCreateNationality(nationalityAsString);
             } catch (IllegalArgumentException iae) {
                 // the country code was probably not a legal IOC country code
                 nationality = null;
-                logger.log(Level.SEVERE, "Unknown nationality "+competitor.getNationality()+" for competitor "+competitor.getName()+"; leaving null", iae);
+                logger.log(Level.SEVERE, "Unknown nationality "+nationalityAsString+" for competitor "+name+"; leaving null", iae);
             }
-            Team team = getOrCreateTeam(competitor.getName(), nationality, competitor.getId());
-            Boat boat = new BoatImpl(competitor.getShortName(), boatClass, competitor.getShortName());
-            result = baseDomainFactory.createCompetitor(competitor.getId(), competitor.getName(), team, boat);
+            Team team = getOrCreateTeam(name, nationality, competitorId);
+            Boat boat = new BoatImpl(shortName, boatClass, shortName);
+            result = baseDomainFactory.createCompetitor(competitorId, name, team, boat);
         }
         return result;
     }
@@ -257,8 +269,8 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public BoatClass getOrCreateBoatClass(CompetitorClass competitorClass) {
-        return baseDomainFactory.getOrCreateBoatClass(competitorClass == null ? "" : competitorClass.getName());
+    public BoatClass getOrCreateBoatClass(String competitorClassName) {
+        return baseDomainFactory.getOrCreateBoatClass(competitorClassName == null ? "" : competitorClassName);
     }
 
     @Override
@@ -511,7 +523,7 @@ public class DomainFactoryImpl implements DomainFactory {
         BoatClass dominantBoatClass = null;
         int numberOfCompetitorsInDominantBoatClass = 0;
         for (CompetitorClass cc : competitorClasses) {
-            BoatClass boatClass = getOrCreateBoatClass(cc);
+            BoatClass boatClass = getOrCreateBoatClass(cc==null?null:cc.getName());
             Integer boatClassCount = countsPerBoatClass.get(boatClass);
             if (boatClassCount == null) {
                 boatClassCount = 0;

@@ -11,10 +11,6 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.UUID;
 
-
-
-
-
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Course;
@@ -47,7 +43,6 @@ import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sailing.domain.tractracadapter.impl.Simulator;
 import com.tractrac.clientmodule.Competitor;
-import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
@@ -70,6 +65,9 @@ public interface DomainFactory {
     Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints);
 
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(Competitor competitor);
+
+    com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(UUID competitorId, String competitorClassName,
+            String nationalityAsString, String name, String shortName);
 
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
@@ -148,7 +146,7 @@ public interface DomainFactory {
             WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
 
-    BoatClass getOrCreateBoatClass(CompetitorClass competitorClass);
+    BoatClass getOrCreateBoatClass(String competitorClassName);
 
     /**
      * For each race listed by the <code>tractracEvent</code>, produces {@link TypeController listeners} that, when
