@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.ui.shared.windpattern.WindPattern;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
-import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
 public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager {
 
@@ -27,7 +27,7 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
     	this.setMode(mode);
         List<WindPatternDTO> list = new ArrayList<WindPatternDTO>();
         for (WindPattern w : WindPattern.values()) {
-        	if (((w == WindPattern.MEASURED)||(w == WindPattern.NONE))&&(mode == SailingSimulatorUtil.event)) {
+        	if (((w == WindPattern.MEASURED)||(w == WindPattern.NONE))&&(mode == SailingSimulatorConstants.ModeEvent)) {
         		continue;
         	}
             list.add(new WindPatternDTO(w.name(), w.getDisplayName()));
@@ -60,7 +60,7 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
     }
 
     private void addBlastParameters(WindPatternDisplay display) {
-    	if (mode == SailingSimulatorUtil.event) {
+    	if (mode == SailingSimulatorConstants.ModeEvent) {
     		WindPatternSetting<Double> windBearingSetting = new WindPatternSettingSliderBar("windBearing",
     				"Base Bearing (Degrees)", 0, 360, 0, 36);
     		display.addSetting(windBearingSetting);
@@ -87,7 +87,7 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
     }
 
     private void addOscillationParameters(WindPatternDisplay display) {
-    	if (mode == SailingSimulatorUtil.event) {
+    	if (mode == SailingSimulatorConstants.ModeEvent) {
     		WindPatternSetting<Double> windBearingSetting = new WindPatternSettingSliderBar("windBearing",
     				"Base Bearing (Degrees)", 0, 360, 0, 36);
     		display.addSetting(windBearingSetting);

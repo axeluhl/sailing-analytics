@@ -25,4 +25,7 @@ public interface SimulationParameters {
     void setProperty(String name, Double value);
 
     Double getProperty(String name);
+    
+    boolean showOmniscient();
+    boolean showOpportunist();
 }

@@ -19,7 +19,7 @@ import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
-import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorBlastImpl;
@@ -50,13 +50,13 @@ public class SimulatorTest {
         TimePoint timeStep = new MillisecondsTimePoint(30000);
         wf.generate(startTime, null, timeStep);
 
-        SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorUtil.freestyle);
+        SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorConstants.ModeFreestyle, true, true);
         SailingSimulatorImpl sailingSim = new SailingSimulatorImpl(param);
 
         //Map<String, Path> paths = sailingSim.getAllPathsForLeg(new SimulatorUISelectionImpl(0, 0, 0, 0));
         Map<String, Path> paths = sailingSim.getAllPaths();
 
-        System.out.println("opportunistic path points: "+paths.get("2#Opportunistic").getPathPoints().size());
+        System.out.println("opportunistic path points: "+paths.get("2#Opportunist Left").getPathPoints().size());
         System.out.println("omnciscient path points: "+paths.get("1#Omniscient").getPathPoints().size());
 
     }
