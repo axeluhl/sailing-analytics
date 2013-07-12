@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -155,6 +156,19 @@ public class DomainFactoryImpl implements DomainFactory {
         courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
     }
 
+    @Override
+    public List<Sideline> createSidelines(final String raceMetadataString, final Iterable<? extends TracTracControlPoint> allEventControlPoints) {
+        List<Sideline> sidelines = new ArrayList<Sideline>();
+        Map<String, Iterable<TracTracControlPoint>> sidelinesMetadata = getMetadataParser().parseSidelinesFromRaceMetadata(
+                raceMetadataString, allEventControlPoints);
+        for (Entry<String, Iterable<TracTracControlPoint>> sidelineEntry : sidelinesMetadata.entrySet()) {
+            if (Util.size(sidelineEntry.getValue()) > 0) {
+                sidelines.add(createSideline(sidelineEntry.getKey(), sidelineEntry.getValue()));
+            }
+        }
+        return sidelines;
+    }
+    
     public com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(TracTracControlPoint controlPoint) {
         synchronized (controlPointCache) {
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
@@ -503,7 +517,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Pair<List<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race) {
+    public Pair<Iterable<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race) {
         List<CompetitorClass> competitorClasses = new ArrayList<CompetitorClass>();
         final List<Competitor> competitors = new ArrayList<Competitor>();
         for (RaceCompetitor rc : race.getRaceCompetitorList()) {
@@ -513,17 +527,27 @@ public class DomainFactoryImpl implements DomainFactory {
             competitorClasses.add(rc.getCompetitor().getCompetitorClass());
         }
         BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);
-        Pair<List<Competitor>, BoatClass> competitorsAndDominantBoatClass = new Pair<List<Competitor>, BoatClass>(
+        Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = new Pair<Iterable<Competitor>, BoatClass>(
                 competitors, dominantBoatClass);
         return competitorsAndDominantBoatClass;
     }
 
     private BoatClass getDominantBoatClass(Collection<CompetitorClass> competitorClasses) {
+        List<String> competitorClassNames = new ArrayList<>();
+        for (CompetitorClass competitorClass : competitorClasses) {
+            competitorClassNames.add(competitorClass==null?null:competitorClass.getName());
+        }
+        BoatClass dominantBoatClass = getDominantBoatClass(competitorClassNames);
+        return dominantBoatClass;
+    }
+
+    @Override
+    public BoatClass getDominantBoatClass(List<String> competitorClassNames) {
         Map<BoatClass, Integer> countsPerBoatClass = new HashMap<BoatClass, Integer>();
         BoatClass dominantBoatClass = null;
         int numberOfCompetitorsInDominantBoatClass = 0;
-        for (CompetitorClass cc : competitorClasses) {
-            BoatClass boatClass = getOrCreateBoatClass(cc==null?null:cc.getName());
+        for (String competitorClassName : competitorClassNames) {
+            BoatClass boatClass = getOrCreateBoatClass(competitorClassName);
             Integer boatClassCount = countsPerBoatClass.get(boatClass);
             if (boatClassCount == null) {
                 boatClassCount = 0;

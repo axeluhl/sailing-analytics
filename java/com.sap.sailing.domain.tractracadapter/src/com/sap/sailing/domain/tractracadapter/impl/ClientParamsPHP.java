@@ -183,6 +183,20 @@ public class ClientParamsPHP {
         public String getDB() {
             return getProperty("DB");
         }
+
+        /**
+         * Determines all control points listed in the document, regardless of whether they are part of a route/course or not.
+         * We contain them in the {@link Event} object because that's how TTCM does it as well.
+         */
+        public Iterable<ControlPoint> getControlPointList() {
+            List<ControlPoint> result = new ArrayList<>();
+            for (Map.Entry<String, String> e : properties.entrySet()) {
+                if (e.getKey().matches("ControlPoint[0-9][0-9]*UUID")) {
+                    result.add(new ControlPoint(UUID.fromString(e.getValue())));
+                }
+            }
+            return result;
+        }
     }
     
     public class Race extends ObjectWithUUID {
@@ -238,7 +252,7 @@ public class ClientParamsPHP {
             super(uuid);
         }
 
-        public Object getDescription() {
+        public String getDescription() {
             return getProperty("Description");
         }
         
@@ -285,7 +299,7 @@ public class ClientParamsPHP {
             return getProperty("Name");
         }
         
-        public String getShorName() {
+        public String getShortName() {
             return getProperty("NameShort");
         }
         
@@ -298,7 +312,14 @@ public class ClientParamsPHP {
         }
         
         public BoatClass getBoatClass() {
-            return new BoatClass(UUID.fromString(getProperty("ClassUUID")));
+            final String boatClassUUID = getProperty("ClassUUID");
+            final BoatClass result;
+            if (boatClassUUID == null) {
+                result = null;
+            } else {
+                result = new BoatClass(UUID.fromString(boatClassUUID));
+            }
+            return result;
         }
     }
     
@@ -431,19 +452,6 @@ public class ClientParamsPHP {
     
     public long getLiveDelayInMillis() {
         return new Long(properties.get("LiveDelaySecs"))*1000l;
-    }
-    
-    /**
-     * Determines all control points listed in the document, regardless of whether they are part of a route/course or not
-     */
-    public Iterable<ControlPoint> getControlPointList() {
-        List<ControlPoint> result = new ArrayList<>();
-        for (Map.Entry<String, String> e : properties.entrySet()) {
-            if (e.getKey().matches("ControlPoint[0-9][0-9]*UUID")) {
-                result.add(new ControlPoint(UUID.fromString(e.getValue())));
-            }
-        }
-        return result;
     }
     
     public Iterable<Competitor> getCompetitors() {

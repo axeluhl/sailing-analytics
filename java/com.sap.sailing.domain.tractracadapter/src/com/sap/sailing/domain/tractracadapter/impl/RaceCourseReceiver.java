@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -115,23 +114,20 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             ttControlPoints.add(new Pair<TracTracControlPoint, NauticalSide>(ttControlPointsForAllOriginalEventControlPoints.get(cp), nauticalSide));
             i++;
         }
-        Course course = getDomainFactory().createCourse(route.getName(), ttControlPoints);
-        List<Sideline> sidelines = new ArrayList<Sideline>();
-        Race race = event.getC();
-        Map<String, Iterable<TracTracControlPoint>> sidelinesMetadata = getDomainFactory().getMetadataParser().parseSidelinesFromRaceMetadata(
-                race.getMetadata() != null ? race.getMetadata().getText() : null, ttControlPointsForAllOriginalEventControlPoints.values());
-        for (Entry<String, Iterable<TracTracControlPoint>> sidelineEntry : sidelinesMetadata.entrySet()) {
-            if (Util.size(sidelineEntry.getValue()) > 0) {
-                sidelines.add(getDomainFactory().createSideline(sidelineEntry.getKey(), sidelineEntry.getValue()));
-            }
-        }
 
-        RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(event.getC().getId());
+        Course course = getDomainFactory().createCourse(route.getName(), ttControlPoints);
+        Race race = event.getC();
+        List<Sideline> sidelines = getDomainFactory().createSidelines(
+                race.getMetadata() != null ? race.getMetadata().getText() : null,
+                ttControlPointsForAllOriginalEventControlPoints.values());
+
+        RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(race.getId());
         if (existingRaceDefinitionForRace != null) {
-            logger.log(Level.INFO, "Received course update for existing race "+event.getC().getName()+": "+
+            logger.log(Level.INFO, "Received course update for existing race "+race.getName()+": "+
                     event.getB().getPoints());
             // Race already exists; this means that we obviously found a course change.
-            // Therefore, don't create TrackedRace again because it already exists.
+            // Create TrackedRace only if it doesn't exist (which is unlikely because it is usually created
+            // in the else block below together with the RaceDefinition).
             try {
                 getDomainFactory().updateCourseWaypoints(existingRaceDefinitionForRace.getCourse(), ttControlPoints);
                 if (getTrackedRegatta().getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
@@ -142,11 +138,11 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
                 logger.log(Level.SEVERE, "handleEvent", e);
             }
         } else {
-            logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");
+            logger.log(Level.INFO, "Received course for non-existing race "+race.getName()+". Creating RaceDefinition.");
             // create race definition and add to event
-            Pair<List<Competitor>, BoatClass> competitorsAndDominantBoatClass = getDomainFactory().getCompetitorsAndDominantBoatClass(race);
+            Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = getDomainFactory().getCompetitorsAndDominantBoatClass(race);
             DynamicTrackedRace trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
-                    getTrackedRegatta(), event.getC().getId(), race.getName(), competitorsAndDominantBoatClass.getA(),
+                    getTrackedRegatta(), race.getId(), race.getName(), competitorsAndDominantBoatClass.getA(),
                     competitorsAndDominantBoatClass.getB(), course, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, courseDesignUpdateURI,
                     getTracTracEvent().getId(), tracTracUsername, tracTracPassword);
@@ -155,7 +151,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             }
         }
     }
-    
+
     private void createTrackedRace(RaceDefinition race, Iterable<Sideline> sidelines) {
         DynamicTrackedRace trackedRace = getTrackedRegatta().createTrackedRace(race, sidelines,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,

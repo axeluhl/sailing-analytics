@@ -65,7 +65,7 @@ public class ClientParamsPHP49erFX2013Test extends AbstractClientParamsPHPTest {
         assertEquals("Nielsen", nielsen.getName());
         com.sap.sailing.domain.base.Competitor nielsenAsCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(
                 nielsen.getId(), nielsen.getBoatClass().getName(), nielsen.getNationality(), nielsen.getName(),
-                nielsen.getShorName());
+                nielsen.getShortName());
         assertEquals("DEN", nielsenAsCompetitor.getTeam().getNationality().getThreeLetterIOCAcronym());
     }
 }
