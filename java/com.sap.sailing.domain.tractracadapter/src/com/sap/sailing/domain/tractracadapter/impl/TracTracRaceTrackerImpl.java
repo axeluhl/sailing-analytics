@@ -187,8 +187,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         } else {
             simulator = null;
         }
-        // Read event data from configuration file
-        controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, courseDesignUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
         // can happen that TracTrac event is null (occurs when there is no Internet connection)
         // so lets raise some meaningful exception
         if (tractracEvent == null) {
@@ -218,6 +216,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         // in this case, create a default regatta based on the TracTrac event data
         this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(raceLogStore, tractracEvent, trackedRegattaRegistry) : effectiveRegatta;
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
+        // Read event data from configuration file
+        controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, courseDesignUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent, startOfTracking,
