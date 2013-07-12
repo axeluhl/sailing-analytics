@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -32,7 +34,7 @@ public class SimulatorTest {
         // race course: copacabana, rio de janeiro, brasil
         Position start = new DegreePosition(-22.975779,-43.17421);
         Position end = new DegreePosition(-22.99016,-43.156013);
-        System.out.println("race course size: "+start.getDistance(end).getKilometers());
+        //System.out.println("race course size: "+start.getDistance(end).getKilometers());
 
         List<Position> course = new LinkedList<Position>();
         course.add(start);
@@ -56,9 +58,10 @@ public class SimulatorTest {
         //Map<String, Path> paths = sailingSim.getAllPathsForLeg(new SimulatorUISelectionImpl(0, 0, 0, 0));
         Map<String, Path> paths = sailingSim.getAllPaths();
 
-        System.out.println("opportunistic path points: "+paths.get("2#Opportunistic").getPathPoints().size());
-        System.out.println("omnciscient path points: "+paths.get("1#Omniscient").getPathPoints().size());
-
+        //System.out.println("opportunistic path points: "+paths.get("2#Opportunist Left").getPathPoints().size());
+        Assert.assertEquals(paths.get("2#Opportunist Left").getPathPoints().size(), 80);
+        //System.out.println("omnciscient path points: "+paths.get("1#Omniscient").getPathPoints().size());
+        Assert.assertEquals(paths.get("1#Omniscient").getPathPoints().size(), 52);
     }
 
 }
