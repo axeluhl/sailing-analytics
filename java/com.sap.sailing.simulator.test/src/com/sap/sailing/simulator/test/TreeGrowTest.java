@@ -4,6 +4,8 @@ import java.sql.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -16,7 +18,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
-import com.sap.sailing.simulator.impl.PathGeneratorTreeGrowTarget;
+import com.sap.sailing.simulator.impl.PathGeneratorTreeGrowWind3;
 import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
@@ -58,12 +60,13 @@ public class TreeGrowTest {
         param.setProperty("Djikstra.gridv[int]", 10.0);
         param.setProperty("Djikstra.gridh[int]", 100.0);*/
 
-        PathGeneratorTreeGrowTarget treeGrow = new PathGeneratorTreeGrowTarget(param);
+        PathGeneratorTreeGrowWind3 treeGrow = new PathGeneratorTreeGrowWind3(param);
 
         Path path = treeGrow.getPath();
 
-        System.out.println("tree-grow path points: "+path.getPathPoints().size());
-
+        //System.out.println("tree-grow path points: "+path.getPathPoints().size());
+        Assert.assertEquals(path.getPathPoints().size(), 61);
+        
         //for(TimedPositionWithSpeed pos : path.getPathPoints()) {
         //    System.out.println(""+pos.getPosition().getLatDeg()+", "+pos.getPosition().getLngDeg());
         //}
