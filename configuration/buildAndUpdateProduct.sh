@@ -424,6 +424,7 @@ if [[ "$@" == "remote-deploy" ]]; then
     $SSH_CMD "rm -rf $REMOTE_SERVER/plugins/*.*"
     $SSH_CMD "rm -rf $REMOTE_SERVER/org.eclipse*.*"
     $SSH_CMD "rm -rf $REMOTE_SERVER/configuration/org.eclipse*.*"
+    $SSH_CMD "mkdir $REMOTE_SERVER/plugins"
 
     $SCP_CMD $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
     $SCP_CMD $p2PluginRepository/plugins/*.jar $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/plugins/
