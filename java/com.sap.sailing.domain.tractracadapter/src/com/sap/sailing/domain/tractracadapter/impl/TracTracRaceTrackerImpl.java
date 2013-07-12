@@ -548,7 +548,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     private void updateStatusOfTrackedRace(DynamicTrackedRace trackedRace) {
-        trackedRace.setStatus(lastStatus);
+        if (lastStatus != null) {
+            trackedRace.setStatus(lastStatus);
+        }
     }
 
     @Override
