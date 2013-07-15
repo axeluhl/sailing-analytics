@@ -178,21 +178,20 @@ Async task that handles the execution of get requests.
 Helper Class for accessing the App Preferences specified in settings_view.xml
 ## ToDo
 * Server
+ * use course update events in racelog locally, do not send to TracTrac
+ * Servlet for getting all races, which are still open to register for
  * persist tracking data (GPSFixStore)
+ * load stored tracked smartphone race (Panel in Admin Console, RaceLogConnector, only present such races with the necessary data in the racelog, and allow user to select whole leaderboard to restore)
+ * release mapping when race is finished
+ * mapping marks to devices
+ * RaceLogRaceTracker: functionality of RaceTracker as view on RaceLog (which then also makes tracking independent of smartphones, so we can mix different device types)
+ * generic method for registering listener for NMEA sentence types (e.g. to then process wind) -> move servlet for recieving NMEA out of smartphoneadapter
  * user management (Competitors as users, credentials so not everybody can do everything)
    -> integrate with OAuth, ISAF competitors etc.?
  * security (not everybody can start race, goes hand in hand with user management)
- * load stored tracked smartphone race (Panel in Admin Console, RaceLogConnector, only present such races with the necessary data in the racelog, and allow user to select whole leaderboard to restore)
- * use course update events in racelog locally, do not send to TracTrac
  * support dynamic mapping of smartphone to competitor -> so that it can change during the race
- * find methods for persistent competitors
  * support other input channels (e.g. Igtimi)
- * release mapping when race is finished
- * mapping marks to devices
- * Servlet for getting all races, which are still open to register for
- * generic method for registering listener for NMEA sentence types (e.g. to then process wind) -> move servlet for recieving NMEA out of smartphoneadapter
- * RaceLogRaceTracker: functionality of RaceTracker as view on RaceLog?
- * Servlet for getting all competitors registered for a race (to in/exclude competitors)
+ * Servlet for getting all competitors registered for a race (to in/exclude competitors) -> once RaceLog replication to all devices is implemented, this becomes unnecessary, as we then can just use the RaceLogAnalyzers
 * Android
  * abstract sending service, so that all POST / GET requests and not only RaceLogEvents can be sent using the semi-connectedness functionality --> just write JSONObjects/Strings directly into the file. The Servlet has to handle deserialization and the client doesn't have to know what type of object it is after having saved it (is this really the case?)
  * simplify settings
