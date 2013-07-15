@@ -424,7 +424,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 }
                 
                 if (Window.confirm(messageBuilder.toString())) {
-                    removeGroups(groupsSelectionModel.getSelectedSet());
+                    removeLeaderboardGroups(groupsSelectionModel.getSelectedSet());
                 }
             }
         });
@@ -682,7 +682,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         });
     }
     
-    private void removeGroups(final Collection<LeaderboardGroupDTO> groups) {
+    private void removeLeaderboardGroups(final Collection<LeaderboardGroupDTO> groups) {
         if (!groups.isEmpty()) {
             Set<String> groupNames = new HashSet<String>();
             for (LeaderboardGroupDTO group : groups) {
@@ -705,7 +705,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     }
 
     private void removeLeaderboardGroup(final LeaderboardGroupDTO group) {
-        sailingService.removeLeaderboardGroups(Collections.singleton(group.getName()), new AsyncCallback<Void>() {
+        Set<String> groups = new HashSet<String>();
+        groups.add(group.getName());
+        sailingService.removeLeaderboardGroups(groups, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to remove leaderboard group " + group.getName() + ": "
