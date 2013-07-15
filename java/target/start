@@ -37,6 +37,9 @@ sed -i "/replication.exchangeHost/d" ./configuration/config.ini
 # Ensure that Jetty Port is set correctly
 sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" ./configuration/jetty/etc/jetty.xml
 
+# Update monitoring with the right ports
+sed -i "s/127.0.0.1:[0-9][0-9][0-9][0-9]\//127.0.0.1:$SERVER_PORT\//g" ./configuration/monitoring.properties
+
 # Inject information for system
 HEAD_DATE=$(date "+%Y%m%d%H%M")
 sed -i "s/System:.*$/ System: $MONGODB_HOST:$MONGODB_PORT-$EXPEDITION_PORT-$REPLICATION_HOST\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
