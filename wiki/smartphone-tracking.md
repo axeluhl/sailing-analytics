@@ -92,7 +92,7 @@ The current plan is to use up to three channels for communicating:
 * `200`: fixes recorded
 
 **Throws**
-* `404` Device not mapped to race
+* `409` Device not mapped to race and competitor
 
 
 ## RaceLog Events
