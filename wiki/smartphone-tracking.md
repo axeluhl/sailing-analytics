@@ -20,6 +20,13 @@ The current plan is to use up to three channels for communicating:
 
 **Expects**
 * POST request body: LeaderboardDTO-JSON (see `LeaderboardDTOJsonSerializer`)
+```
+{"name": "test",
+ "displayName": "test",
+ "discardThresholds": [1,2],
+ "scoringScheme": "LOW_POINT",
+ "courseAreaId": "Kiel"}
+```
 
 **Returns**
 * `200` Leaderboard created, body: LeaderboardDTO as JSON
@@ -33,6 +40,10 @@ The current plan is to use up to three channels for communicating:
 
 **Expects**
 * POST request body: RaceColumnDTO-JSON (see `RaceColumnDTODeserializer`)
+```
+{"name": "test",
+ "isMedalRace": false}
+```
 
 **Returns**
 * `200` RaceColumn created, body: RaceColumn-DTO as JSON
@@ -47,6 +58,30 @@ The current plan is to use up to three channels for communicating:
 
 **Expects**
 * POST request body: Competitor-JSON with a nested Boat-JSON and Team-JSON (see `CompetitorDeserializer`)
+```
+{"id": "",
+ "name": "Competitor Fredrik",
+ "sailID": "1234",
+ "team": {
+   "name": "Team Fredrik",
+   "sailors": [
+     {
+       "name": "Fredrik",
+       "description": "",
+       "dateOfBirth": 2394820480284,
+       "nationality": {"IOC": "GER"}
+     }
+     ]
+ },
+ "boat": {
+   "name": "Boat Fredrik",
+   "sailID": "1234",
+   "boatClass": {
+     "name": "49er"
+   }
+ }
+}
+```
 
 **Returns**
 * `200` Competitor created, body: Competitor as JSON
@@ -87,6 +122,18 @@ The current plan is to use up to three channels for communicating:
 
 **Expects**
 * POST request body: DeviceIdentifierWithGPSFixMovingsDTO as JSON
+```
+{"imei": "12345678",
+  "data": [
+    {"unixtime": "location.getTime()",
+     "nmea"    :  "$GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A"
+    },
+    {"unixtime": "location.getTime()",
+     "nmea"    :  "$GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A"
+    }
+  ]
+}
+```
 
 **Returns**
 * `200`: fixes recorded
