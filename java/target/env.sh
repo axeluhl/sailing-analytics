@@ -4,6 +4,8 @@ SERVER_NAME=MASTER
 
 MEMORY="1024m"
 
+# Queue Host and Name of the queue where to
+# send messages for replicas (this server is master)
 REPLICATION_HOST=localhost
 REPLICATION_CHANNEL=sapsailinganalytics-master
 
@@ -12,6 +14,13 @@ SERVER_PORT=8888
 MONGODB_HOST=localhost
 MONGODB_PORT=27017
 EXPEDITION_PORT=2010
+
+# Start replication upon startup
+REPLICATE_ON_START=False
+REPLICATE_MASTER_SERVLET_HOST=
+REPLICATE_MASTER_SERVLET_PORT=
+REPLICATE_MASTER_QUEUE_HOST=
+REPLICATE_MASTER_QUEUE_PORT=
 
 ADDITIONAL_JAVA_ARGS="-XX:+UseMembar"
 
