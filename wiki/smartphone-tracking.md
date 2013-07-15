@@ -3,7 +3,7 @@
 [[_TOC_]]
 
 ## Introduction
-Some important decisions and interface specifications for smartphone tracking are recorded on this page.
+On this page the decisions, architecture and API's for using smartphones as an additional input channel for Sailing Analytics are documented. Meanwhile, the architecture of this solution is designed to be flexible enough to support other types of input devices in the future, e.g. [Igtimi](http://www.igtimi.com/) trackers.
 
 ## Communication Channels
 The current plan is to use up to three channels for communicating:
@@ -12,7 +12,14 @@ The current plan is to use up to three channels for communicating:
 
 2. **RaceLog:** All the "master data" communication concerning one race in particular should piggyback on the existing RaceLog-mechanism, which already deals with semi-connectedness, persistence and replication. Examples for this are: adding competitors to a race, mapping tracking devices to competitors, starting a race, defining the course layout.
 
-3. **Other:** The actual tracking data (perhaps also additional data: wind etc.) also has to be transferred. As we also have to deal with semi-connectedness, one idea is to reuse the communication mechanism which the RaceLog is built on top of. In case this cannot deal with the large amounts of data produced by tracking devices, or is to tightly coupled with the RaceLog semantics, a possible alternative is using CouchDB and its replication mechanism. The downside here is a further increased technology stack on client and server side, and a hetorgenous communication mechanisms between client and server. This makes setting up a development environment, understanding the architecture, development and lifecycle management of the used technologies on the server (OSGi, RabbitMQ with Erlang, MongoDB, and possibly CouchDB) even more difficult.
+3. **Other:** The actual tracking data (perhaps also additional data: wind etc.) also has to be transferred. On client side we want to reuse the communication mechanism which the RaceLog is built on top of.
+
+## Server-side Architecture
+On the server-side, the architecture of smartphone tracking is intended to be open for extension, so that different types of input devices can be used for tracking one race. Currently, some parts are still tightly coupled to smartphone tracking (e.g. `RacingEventService#createTrackedRaceForSmartphoneTracking()`), but these can be refactored to be generic.
+
+Generic device identifiers, that are qualified through a device type, are used for mapping a device to a competitor in the race log. When the race is then created, the OSGi service registry is used to find services to which the appropriate device mappings in the race log are provided, e.g. a smartphone adapter registers a `DeviceMapper` service for the device type `smartphoneImei`, and then recieves all smartphone device mappings from the race log once the race is created. The same OSGi service logic is used to find services that deal with persisting device identifiers, so that loading and persisting race log events can be used for all types of device identifiers.
+
+The reason for using the OSGi service registry is that it enables decentralized development of different kinds of device adapters. E.g., implementing a new Igtimi adapter does not mean that you have to modify the object factory for device identifier objects in the persistence bundle, but simply register a new service from within your own bundle. This is more hindering than helpful in this stage of development, but - in future - means that other device adapters could be developed without having to touch the Sailing Analytics core code, so a vendor of tracking devices could recieve a current Sailing Analytics version as an SDK and implement additional bundles only.
 
 ## Servlets
 ### `/smartphone/createFlexibleLeaderboard`
@@ -178,7 +185,9 @@ Async task that handles the execution of get requests.
 Helper Class for accessing the App Preferences specified in settings_view.xml
 ## ToDo
 * Server
- * use course update events in racelog locally, do not send to TracTrac
+ * course definition: use course update events in racelog locally, do not send to TracTrac
+ * boat class for race: in racelog
+ * remove registered competitors: in racelog
  * Servlet for getting all races, which are still open to register for
  * persist tracking data (GPSFixStore)
  * load stored tracked smartphone race (Panel in Admin Console, RaceLogConnector, only present such races with the necessary data in the racelog, and allow user to select whole leaderboard to restore)
