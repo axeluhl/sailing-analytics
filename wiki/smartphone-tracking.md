@@ -89,11 +89,10 @@ The current plan is to use up to three channels for communicating:
 * POST request body: DeviceIdentifierWithGPSFixMovingsDTO as JSON
 
 **Returns**
-* `200`
+* `200`: fixes recorded
 
 **Throws**
-* `404` Leaderboard/RaceColumn/Fleet not found
-* `409` Race has already been created, pre-race phase has not been ended
+* `404` Device not mapped to race
 
 
 ## RaceLog Events
