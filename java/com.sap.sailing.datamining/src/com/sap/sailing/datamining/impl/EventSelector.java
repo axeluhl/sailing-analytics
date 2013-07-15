@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.sap.sailing.datamining.Selector;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -15,7 +16,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
-public class EventSelector extends AbstractSelector {
+public class EventSelector implements Selector {
     private static final long serialVersionUID = 8527294635220237370L;
     
     private transient Set<Regatta> regattas;
@@ -28,7 +29,7 @@ public class EventSelector extends AbstractSelector {
     }
 
     @Override
-    protected void initializeSelection(RacingEventService racingEventService) {
+    public void initializeSelection(RacingEventService racingEventService) {
         this.racingEventService = racingEventService;
         for (Event event : racingEventService.getAllEvents()) {
             for (String eventNameForSelection : eventNamesForSelection) {

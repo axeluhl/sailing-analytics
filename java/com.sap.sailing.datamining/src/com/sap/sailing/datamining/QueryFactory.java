@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.shared;
+package com.sap.sailing.datamining;
 
 import com.sap.sailing.datamining.impl.QueryImpl;
 

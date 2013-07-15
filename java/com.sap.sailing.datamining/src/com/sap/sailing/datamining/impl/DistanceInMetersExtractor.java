@@ -3,7 +3,7 @@ package com.sap.sailing.datamining.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.datamining.shared.Extractor;
+import com.sap.sailing.datamining.Extractor;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public class DistanceInMetersExtractor implements Extractor {

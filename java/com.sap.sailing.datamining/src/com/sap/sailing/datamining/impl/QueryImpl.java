@@ -1,9 +1,14 @@
 package com.sap.sailing.datamining.impl;
 
-import com.sap.sailing.datamining.shared.Aggregator;
-import com.sap.sailing.datamining.shared.Extractor;
-import com.sap.sailing.datamining.shared.Query;
-import com.sap.sailing.datamining.shared.Selector;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.sap.sailing.datamining.Aggregator;
+import com.sap.sailing.datamining.Extractor;
+import com.sap.sailing.datamining.Query;
+import com.sap.sailing.datamining.Selector;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.server.RacingEventService;
 
 public class QueryImpl implements Query {
     private static final long serialVersionUID = 5649156014930954522L;
@@ -31,6 +36,17 @@ public class QueryImpl implements Query {
     @Override
     public Aggregator getAggregator() {
         return aggregator;
+    }
+
+    @Override
+    public List<Pair<String, Double>> run(RacingEventService racingEventService) {
+        List<Pair<String, Double>> data = new ArrayList<>();
+        getSelector().initializeSelection(racingEventService);
+        for (String xValue : getSelector().getXValues()) {
+            double dataElement = getAggregator().aggregate(getExtractor().extractDataFrom(getSelector().getDataFor(xValue)));
+            data.add(new Pair<String, Double>(xValue, dataElement));
+        }
+        return data;
     }
 
 }
