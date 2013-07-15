@@ -125,10 +125,10 @@ The current plan is to use up to three channels for communicating:
 ```
 {"imei": "12345678",
   "data": [
-    {"unixtime": "location.getTime()",
+    {"unixtime": 2394820480284,
      "nmea"    :  "$GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A"
     },
-    {"unixtime": "location.getTime()",
+    {"unixtime": 2394820480285,
      "nmea"    :  "$GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A"
     }
   ]
