@@ -80,19 +80,18 @@ The current plan is to use up to three channels for communicating:
 * `404` Leaderboard/RaceColumn/Fleet not found
 * `409` Race has already been created, pre-race phase has not been ended
 
-### `/smartphone/addfixes`
-`AddFixesPostServlet`
+### `/smartphone/recordFixes`
+`RecordFixesPostServlet`
 **Precondition**
 * `/smartphone/createRace` has been successfully called before
 
 **Expects**
-* POST request: no body
+* POST request body: DeviceIdentifierWithGPSFixMovingsDTO as JSON
 
 **Returns**
-* `200` body: RaceDTO-JSON
+* `200`
 
 **Throws**
-* `400` Missing parameter
 * `404` Leaderboard/RaceColumn/Fleet not found
 * `409` Race has already been created, pre-race phase has not been ended
 
