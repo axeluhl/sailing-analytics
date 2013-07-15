@@ -7,21 +7,15 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.datamining.Aggregator;
-import com.sap.sailing.datamining.AggregatorFactory;
-import com.sap.sailing.datamining.Extractor;
-import com.sap.sailing.datamining.ExtractorFactory;
-import com.sap.sailing.datamining.Query;
-import com.sap.sailing.datamining.QueryFactory;
-import com.sap.sailing.datamining.Selector;
-import com.sap.sailing.datamining.SelectorFactory;
+import com.sap.sailing.datamining.shared.AggregatorType;
+import com.sap.sailing.datamining.shared.ExtractorType;
+import com.sap.sailing.datamining.shared.SelectorType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleTableResources;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
@@ -79,8 +73,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
             }
         };
         
-        AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        CellTable<Pair<String,Double>> resultsTable = new CellTable<Pair<String,Double>>(1000, tableRes);
+        CellTable<Pair<String,Double>> resultsTable = new CellTable<Pair<String,Double>>();
         resultsTable.addColumn(xValues, "X Values");
         resultsTable.addColumn(results, "Results");
         resultsDataProvider.addDataDisplay(resultsTable);
@@ -89,10 +82,10 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
 
     private void createAndRunQuery() {
         final long startTime = System.currentTimeMillis();
-        Selector selector = SelectorFactory.createEventSelector("Kieler Woche 2013");
-        Extractor extractor = ExtractorFactory.createDistanceInMetersExtractor();
-        Aggregator aggregator = AggregatorFactory.createSumAggregator();
-        Query query = QueryFactory.createQuery(selector, extractor, aggregator);
+        SelectorType selectorType = SelectorType.Events;
+        String[] selectionIdentifiers = new String[] {"Kieler Woche 2013"};
+        ExtractorType extractorType = ExtractorType.DistanceInMeters;
+        AggregatorType aggregatorType = AggregatorType.Sum;
 //        sailingService.runQuery(query, new AsyncCallback<Pair<Double, List<Pair<String, Double>>>>() {
 //            @Override
 //            public void onFailure(Throwable caught) {

@@ -11,4 +11,5 @@ Import-Package: com.sap.sailing.domain.base,
  com.sap.sailing.domain.common.impl,
  com.sap.sailing.domain.tracking,
  com.sap.sailing.server
-Export-Package: com.sap.sailing.datamining.shared
+Export-Package: com.sap.sailing.datamining,
+ com.sap.sailing.datamining.shared
