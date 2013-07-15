@@ -4,6 +4,16 @@
 	<stylesheet src="../DataMining.css" />
 	<inherits name="com.google.gwt.user.User" />
 
+	<!-- Google Maps API -->
+	<inherits name='com.google.gwt.maps.GoogleMaps' />
+
+	<!-- Highcharts API -->
+	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
+
+	<!-- Other module inherits -->
+	<inherits name="com.sap.sailing.domain.SailingDomain" />
+	<inherits name="com.sap.sailing.datamining.DataMiningDomain" />
+
 	<!-- Specify the paths for translatable code -->
 	<extend-property name="locale" values="de" />
 
@@ -17,15 +27,5 @@
 	<source path='common' />
 	<source path='actions' />
 	<source path='masterdataimport'/>
-	<entry-point class="com.sap.sailing.gwt.ui.datamining.DataMiningEntryPoint">
-	</entry-point>
-
-	<!-- Google Maps API -->
-	<inherits name='com.google.gwt.maps.GoogleMaps' />
-
-	<!-- Highcharts API -->
-	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
-
-	<!-- Other module inherits -->
-	<inherits name="com.sap.sailing.domain.SailingDomain" />
+	<entry-point class="com.sap.sailing.gwt.ui.datamining.DataMiningEntryPoint"></entry-point>
 </module>

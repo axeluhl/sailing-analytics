@@ -51,7 +51,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         dataMiningElementsPanel.add(runQueryButton);
         
         resultsPanel = new FlowPanel();
-        resultsPanel.setVisible(false);
+//        resultsPanel.setVisible(false);
         rootPanel.add(resultsPanel);
         
         HorizontalPanel overallTimePanel = new HorizontalPanel();
