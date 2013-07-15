@@ -379,7 +379,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     # make sure to save the information from env.sh
     . $ACDIR/env.sh
 
-    echo "$VERSION_INFO-PLACEHOLDER" > $ACDIR/configuration/jetty/version.txt
+    echo "$VERSION_INFO System:" > $ACDIR/configuration/jetty/version.txt
 
     # When a server is installed using this script
     # then we no longer define important options in
