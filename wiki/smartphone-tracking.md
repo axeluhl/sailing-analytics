@@ -110,6 +110,7 @@ The reason for using the OSGi service registry is that it enables decentralized 
 
 **Precondition**
 * `RaceLogPreRacePhaseEndedEvent` recieved via RaceLog beforehand
+* `RaceLogCourseDesignChangedEvent` at least one course design recieved via RaceLog beforehand
 
 **Expects**
 * POST request: no body
@@ -185,7 +186,6 @@ Async task that handles the execution of get requests.
 Helper Class for accessing the App Preferences specified in settings_view.xml
 ## ToDo
 * Server
- * course definition: use course update events in racelog locally, do not send to TracTrac
  * boat class for race: in racelog
  * remove registered competitors: in racelog
  * Servlet for getting all races, which are still open to register for
