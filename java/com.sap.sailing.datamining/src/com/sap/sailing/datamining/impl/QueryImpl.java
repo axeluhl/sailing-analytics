@@ -40,7 +40,7 @@ public class QueryImpl implements Query {
 
     @Override
     public List<Pair<String, Double>> run(RacingEventService racingEventService) {
-        List<Pair<String, Double>> data = new ArrayList<>();
+        List<Pair<String, Double>> data = new ArrayList<Pair<String, Double>>();
         getSelector().initializeSelection(racingEventService);
         for (String xValue : getSelector().getXValues()) {
             double dataElement = getAggregator().aggregate(getExtractor().extractDataFrom(getSelector().getDataFor(xValue)));

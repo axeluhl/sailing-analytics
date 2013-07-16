@@ -45,7 +45,7 @@ public class EventSelector implements Selector {
 
     @Override
     public List<String> getXValues() {
-        List<String> xValues = new ArrayList<>();
+        List<String> xValues = new ArrayList<String>();
         for (Regatta regatta : regattas) {
             xValues.add(regatta.getName());
         }
@@ -59,11 +59,11 @@ public class EventSelector implements Selector {
                 return getDataOf(regatta);
             }
         }
-        return new ArrayList<>();
+        return new ArrayList<GPSFixMoving>();
     }
 
     private List<GPSFixMoving> getDataOf(Regatta regatta) {
-        List<GPSFixMoving> data = new ArrayList<>();
+        List<GPSFixMoving> data = new ArrayList<GPSFixMoving>();
         for (RaceDefinition race : regatta.getAllRaces()) {
             RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), race.getName());
             TrackedRace trackedRace = racingEventService.getTrackedRace(raceIdentifier);

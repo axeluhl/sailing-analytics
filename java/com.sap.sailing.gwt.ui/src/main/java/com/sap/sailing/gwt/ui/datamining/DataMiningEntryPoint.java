@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.datamining;
 
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -17,7 +16,6 @@ import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.ExtractorType;
 import com.sap.sailing.datamining.shared.SelectorType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleTableResources;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 
 public class DataMiningEntryPoint extends AbstractEntryPoint {
@@ -76,6 +74,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         CellTable<Pair<String,Double>> resultsTable = new CellTable<Pair<String,Double>>();
         resultsTable.addColumn(xValues, "X Values");
         resultsTable.addColumn(results, "Results");
+        resultsDataProvider = new ListDataProvider<Pair<String,Double>>();
         resultsDataProvider.addDataDisplay(resultsTable);
         resultsPanel.add(resultsTable);
     }

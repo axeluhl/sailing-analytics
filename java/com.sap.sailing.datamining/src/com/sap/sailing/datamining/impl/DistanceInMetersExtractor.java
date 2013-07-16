@@ -11,7 +11,7 @@ public class DistanceInMetersExtractor implements Extractor {
 
     @Override
     public List<Double> extractDataFrom(List<GPSFixMoving> gpsFixes) {
-        List<Double> extractedData = new ArrayList<>();
+        List<Double> extractedData = new ArrayList<Double>();
         if (gpsFixes.size() > 1) {
             for (int i = 0; i < gpsFixes.size() - 1; i++) {
                 GPSFixMoving fix1 = gpsFixes.get(i);
