@@ -39,6 +39,12 @@ import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
+/**
+ * This class implements simulation visualization using overlays on top of a Google maps widget
+ * 
+ * @author Christopher Ronnewinkel (D036654)
+ *
+ */
 public class SimulatorMap extends AbsolutePanel implements RequiresDataInitialization, TimeListenerWithStoppingCriteria {
 
     private MapWidget mapw;
@@ -395,6 +401,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 		    @Override
 		    public void onResize(ResizeEvent event) {
 		    	regattaAreaCanvasOverlay.onResize();
+		    	raceCourseCanvasOverlay.onResize();
 		    	for(PathCanvasOverlay pathCanvas : replayPathCanvasOverlays) {
 		    		pathCanvas.onResize();
 		    	}
@@ -411,6 +418,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 		    		windLineCanvasOverlay.onResize();
 		    	}
 		    	legendCanvasOverlay.onResize();
+                timePanel.resetTimeSlider();
 		    }
 		    
 		});

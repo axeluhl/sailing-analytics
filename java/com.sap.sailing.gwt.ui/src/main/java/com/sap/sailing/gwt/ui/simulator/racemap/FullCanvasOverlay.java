@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
  * full viewable area of the map
  * 
  * @author Nidhi Sawhney(D054070)
+ * @author Christopher Ronnewinkel (D036654)
  *
  */
 public abstract class FullCanvasOverlay extends CanvasOverlay implements RequiresResize {
@@ -69,9 +70,9 @@ public abstract class FullCanvasOverlay extends CanvasOverlay implements Require
         /*
          * Reset the canvas only if the pixel coordinates need to be recomputed
          */
-        //if (force) {
+        if (force) {
             setCanvasSettings();
-        //}
+        }
     }
     
     /**
