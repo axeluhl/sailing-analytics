@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.shared.racemap;
+package com.sap.sailing.gwt.ui.simulator.racemap;
 
 /**
  * Represents a vector in the bidimensional space
