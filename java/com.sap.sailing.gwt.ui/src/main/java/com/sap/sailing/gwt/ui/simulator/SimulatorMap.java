@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
 import com.google.gwt.maps.client.control.ControlAnchor;
@@ -32,9 +34,9 @@ import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
-import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
+import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
 public class SimulatorMap extends AbsolutePanel implements RequiresDataInitialization, TimeListenerWithStoppingCriteria {
@@ -351,6 +353,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     		if (regattaAreaCanvasOverlay == null) {
     			mapw.setContinuousZoom(true);
     			regattaAreaCanvasOverlay = new RegattaAreaCanvasOverlay(this);
+    			
     			mapw.addOverlay(regattaAreaCanvasOverlay);
     			regattaAreaCanvasOverlay.setVisible(true);
     			//parent.showTimePanel(false);
@@ -386,6 +389,31 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.replayPathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
         // timeListeners.add(replayPathCanvasOverlay);
         this.legendCanvasOverlay = new PathLegendCanvasOverlay();
+
+		Window.addResizeHandler(new ResizeHandler() {
+
+		    @Override
+		    public void onResize(ResizeEvent event) {
+		    	regattaAreaCanvasOverlay.onResize();
+		    	for(PathCanvasOverlay pathCanvas : replayPathCanvasOverlays) {
+		    		pathCanvas.onResize();
+		    	}
+		    	if (windFieldCanvasOverlay != null) {
+		    		windFieldCanvasOverlay.onResize();
+		    	}
+		    	if (windStreamletsCanvasOverlay != null) {
+		    		windStreamletsCanvasOverlay.onResize();
+		    	}
+		    	if (windGridCanvasOverlay != null) {
+		    		windGridCanvasOverlay.onResize();
+		    	}
+		    	if (windLineCanvasOverlay != null) {
+		    		windLineCanvasOverlay.onResize();
+		    	}
+		    	legendCanvasOverlay.onResize();
+		    }
+		    
+		});
 
         this.overlaysInitialized = true;
     }

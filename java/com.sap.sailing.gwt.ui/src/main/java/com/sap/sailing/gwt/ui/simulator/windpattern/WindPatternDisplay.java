@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.shared.windpattern;
+package com.sap.sailing.gwt.ui.simulator.windpattern;
 
 import java.util.List;
 
