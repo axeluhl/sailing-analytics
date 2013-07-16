@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.services.sending;
 
+import java.io.InputStream;
 import java.net.URI;
 
 import android.content.Intent;
@@ -43,7 +44,8 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Pair<Intent, Intege
             HttpRequest post = new HttpJsonPostRequest(URI.create(url), serializedEventAsJson);
             try {
                 // TODO read JSON-serialized race log events that need to be merged into the local race log because they were added on the server in the interim
-                post.execute().close();
+                final InputStream inputStream = post.execute();
+                inputStream.close();
             } finally {
                 post.disconnect();
             }
