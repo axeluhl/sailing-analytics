@@ -32,7 +32,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     /**
      * Clients can use the {@link #add(RaceLogEvent, UUID)} method 
      */
-    private final transient Map<UUID, Set<RaceLogEvent>> eventsDeliveredToClient = new HashMap<UUID, Set<RaceLogEvent>>();
+    private transient Map<UUID, Set<RaceLogEvent>> eventsDeliveredToClient = new HashMap<UUID, Set<RaceLogEvent>>();
     
     private final Serializable id;
     private transient Set<RaceLogEventVisitor> listeners;
@@ -177,6 +177,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         listeners = new HashSet<RaceLogEventVisitor>();
+        eventsDeliveredToClient = new HashMap<UUID, Set<RaceLogEvent>>();
     }
 
     @Override

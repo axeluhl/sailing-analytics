@@ -4,7 +4,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,18 +48,15 @@ public class EventPersistenceManager {
 
     public void persistIntent(Intent intent) {
         Bundle extras = intent.getExtras();
-
         String raceId = extras.getString(AppConstants.RACE_ID_KEY);
         String url = extras.getString(AppConstants.EXTRAS_URL);
-        Serializable serializedEvent = extras.getSerializable(AppConstants.EXTRAS_SERIALIZED_EVENT);
-        
-        persistEvent(url, raceId, serializedEvent);
+        String serializedEventAsJson = extras.getString(AppConstants.EXTRAS_JSON_SERIALIZED_EVENT);
+        persistEvent(url, raceId, serializedEventAsJson);
     }
 
-    private void persistEvent(String url, String raceId, Serializable serializedEvent) {
-        String eventLine = getSerializedIntentForPersistence(url, raceId, serializedEvent);
+    private void persistEvent(String url, String raceId, String serializedEventAsJson) {
+        String eventLine = getSerializedIntentForPersistence(url, raceId, serializedEventAsJson);
         ExLog.i(TAG, String.format("Persisting event \"%s\" for race %s.", eventLine, raceId));
-
         if (persistedEvents.contains(eventLine)) {
             ExLog.i(TAG, "The event already exists. Ignoring.");
             return;
@@ -66,30 +64,28 @@ public class EventPersistenceManager {
         saveEvent(eventLine);
     }
 
-    private String getSerializedIntentForPersistence(String url, String raceId, Serializable serializedEvent) {
-        String eventLine = String.format("%s;%s;%s", raceId, serializedEvent, url);
+    /**
+     * @param serializedEventAsJson will be URL-encoded to ensure that the resulting string does not contain newlines
+     */
+    private String getSerializedIntentForPersistence(String url, String raceId, String serializedEventAsJson) {
+        String eventLine = String.format("%s;%s;%s", raceId, URLEncoder.encode(serializedEventAsJson.toString()), url);
         return eventLine;
     }
 
     public void removeIntent(Intent intent) {
         Bundle extras = intent.getExtras();
-
         String url = extras.getString(AppConstants.EXTRAS_URL);
         String raceId = extras.getString(AppConstants.RACE_ID_KEY);
-        String serializedEvent = extras.getString(AppConstants.EXTRAS_SERIALIZED_EVENT);
-        
-
-        removeEvent(url, raceId, serializedEvent);
+        String serializedEventAsJson = extras.getString(AppConstants.EXTRAS_JSON_SERIALIZED_EVENT);
+        removeEvent(url, raceId, serializedEventAsJson);
     }
 
-    private void removeEvent(String url, String raceId, String serializedEvent) {
-        if (persistedEvents.isEmpty())
-            return;
-
-        ExLog.i(TAG,  String.format("Removing event \"%s\" for race %s.", serializedEvent, raceId));
-        String eventLine = getSerializedIntentForPersistence(url, raceId, serializedEvent);
-
-        removePersistedEvent(eventLine);
+    private void removeEvent(String url, String raceId, String serializedEventAsUrlEncodedJson) {
+        if (!persistedEvents.isEmpty()) {
+            ExLog.i(TAG, String.format("Removing event \"%s\" for race %s.", serializedEventAsUrlEncodedJson, raceId));
+            String eventLine = getSerializedIntentForPersistence(url, raceId, serializedEventAsUrlEncodedJson);
+            removePersistedEvent(eventLine);
+        }
     }
 
     /**
@@ -109,27 +105,22 @@ public class EventPersistenceManager {
 
     public List<Intent> restoreEvents() {
         List<Intent> delayedIntents = new ArrayList<Intent>();
-
         for (String persistedEvent : persistedEvents) {
-
             String[] lineParts = persistedEvent.split(";");
             String url = lineParts[2];
             String raceId = lineParts[0];
-            String serializedEvent = lineParts[1];
-            
-            addEventToLog(raceId, serializedEvent);
-
-            Intent eventIntent = EventSendingService.createEventIntent(context, url, raceId, serializedEvent);
+            String serializedEventAsUrlEncodedJson = lineParts[1];
+            addEventToLog(raceId, serializedEventAsUrlEncodedJson);
+            Intent eventIntent = EventSendingService.createEventIntent(context, url, raceId, URLDecoder.decode(serializedEventAsUrlEncodedJson));
             if (eventIntent != null) {
                 delayedIntents.add(eventIntent);
             }
         }
-
         ExLog.i(TAG, "Restored " + delayedIntents.size() + " events");
         return delayedIntents;
     }
 
-    private void addEventToLog(String raceId, String serializedEvent) {
+    private void addEventToLog(String raceId, String serializedEventAsJson) {
         ExLog.i(TAG, String.format("Trying to re-add event to race log of race %s.", raceId));
         DataStore store = DataManager.create(this.context).getDataStore();
         if (!store.hasRace(raceId)) {
@@ -138,10 +129,10 @@ public class EventPersistenceManager {
         }
         try {
             RaceLogEventDeserializer deserializer = RaceLogEventDeserializer.create(DomainFactoryImpl.INSTANCE);
-            RaceLogEvent event = deserializer.deserialize((JSONObject) new JSONParser().parse(serializedEvent));
+            RaceLogEvent event = deserializer.deserialize((JSONObject) new JSONParser().parse(serializedEventAsJson));
             boolean added = store.getRace(raceId).getRaceLog().add(event);
             if (added) {
-                ExLog.i(TAG, String.format("Event readded: %s", serializedEvent));
+                ExLog.i(TAG, String.format("Event readded: %s", serializedEventAsJson));
             } else {
                 ExLog.i(TAG, "Event didn't need to be readded. Same event already in the log");
             }

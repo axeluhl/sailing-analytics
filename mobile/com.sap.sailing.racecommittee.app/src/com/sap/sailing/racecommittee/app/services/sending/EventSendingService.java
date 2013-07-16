@@ -41,14 +41,20 @@ public class EventSendingService extends Service implements EventSendingListener
     private final IBinder mBinder = new EventSendingBinder();
     private EventPersistenceManager persistenceManager;
     private boolean isHandlerSet;
-    
+
     private EventSendingServiceLogger serviceLogger = new EventSendingServiceLogger() {
-        @Override public void onEventSentSuccessful() { }
-        @Override public void onEventSentFailed() { }
+        @Override
+        public void onEventSentSuccessful() {
+        }
+
+        @Override
+        public void onEventSentFailed() {
+        }
     };
-    
+
     public interface EventSendingServiceLogger {
         public void onEventSentSuccessful();
+
         public void onEventSentFailed();
     }
 
@@ -78,32 +84,28 @@ public class EventSendingService extends Service implements EventSendingListener
     }
 
     /**
-     * Creates an intent that contains the event to be sent and the race id which shall be sent to the back end.
-     * See constants in <code>AddEntryToRaceLogJsonPostServlet</code> for URL construction rules.
+     * Creates an intent that contains the event to be sent and the race id which shall be sent to the back end. See
+     * constants in <code>AddEntryToRaceLogJsonPostServlet</code> for URL construction rules.
      * 
      * @param context
      *            the context of the app
      * @param race
      *            the race for which the event was created
-     * @param serializedEvent
+     * @param serializedEventAsUrlEncodedJson
      *            the event serizalized to JSON
      * @return the intent that shall be sent to the EventSendingService
      */
-    public static Intent createEventIntent(Context context, ManagedRace race, Serializable serializedEvent) {
-        String url = String.format(
-                "%s/sailingserver/rc/racelog?leaderboard=%s&raceColumn=%s&fleet=%s", 
-                AppPreferences.getServerBaseURL(context),
-                URLEncoder.encode(race.getRaceGroup().getName()),
-                URLEncoder.encode(race.getName()),
-                URLEncoder.encode(race.getFleet().getName()));
-        
-        return createEventIntent(context, url, race.getId(), serializedEvent);
+    public static Intent createEventIntent(Context context, ManagedRace race, String serializedEventAsJson) {
+        String url = String.format("%s/sailingserver/rc/racelog?leaderboard=%s&raceColumn=%s&fleet=%s",
+                AppPreferences.getServerBaseURL(context), URLEncoder.encode(race.getRaceGroup().getName()),
+                URLEncoder.encode(race.getName()), URLEncoder.encode(race.getFleet().getName()));
+        return createEventIntent(context, url, race.getId(), serializedEventAsJson);
     }
-    
-    public static Intent createEventIntent(Context context, String url, Serializable raceId, Serializable serializedEvent) {
+
+    public static Intent createEventIntent(Context context, String url, Serializable raceId, String serializedEventAsJson) {
         Intent eventIntent = new Intent(AppConstants.INTENT_ACTION_SEND_EVENT);
         eventIntent.putExtra(AppConstants.RACE_ID_KEY, raceId);
-        eventIntent.putExtra(AppConstants.EXTRAS_SERIALIZED_EVENT, serializedEvent);
+        eventIntent.putExtra(AppConstants.EXTRAS_JSON_SERIALIZED_EVENT, serializedEventAsJson);
         eventIntent.putExtra(AppConstants.EXTRAS_URL, url);
         ExLog.i(TAG, "Created event " + eventIntent + " for sending to backend");
         return eventIntent;
@@ -133,7 +135,6 @@ public class EventSendingService extends Service implements EventSendingListener
             ExLog.i(TAG, "Service is restarted.");
             return START_STICKY;
         }
-
         ExLog.i(TAG, "Service is called by following intent: " + intent.getAction());
         handleCommand(intent, startId);
         // We want this service to continue running until it is explicitly
@@ -164,7 +165,6 @@ public class EventSendingService extends Service implements EventSendingListener
 
     private void handleDelayedEvents() {
         ExLog.i(TAG, String.format("Trying to resend stored events..."));
-        
         isHandlerSet = false;
         if (!isConnected()) {
             ExLog.i(TAG, String.format("Resend aborted because there is no connection."));
@@ -178,7 +178,6 @@ public class EventSendingService extends Service implements EventSendingListener
     private void sendDelayedEvents() {
         List<Intent> delayedIntents = persistenceManager.restoreEvents();
         ExLog.i(TAG, String.format("Resending %d events...", delayedIntents.size()));
-        
         for (Intent intent : delayedIntents) {
             sendEvent(intent);
         }
@@ -200,10 +199,11 @@ public class EventSendingService extends Service implements EventSendingListener
             persistenceManager.persistIntent(intent);
             if (!isHandlerSet) {
                 SendDelayedEventsCaller delayedCaller = new SendDelayedEventsCaller(this);
-                handler.postDelayed(delayedCaller, AppConstants.EventResendInterval); //after 30 sec, try the sending again
+                handler.postDelayed(delayedCaller, AppConstants.EventResendInterval); // after 30 sec, try the sending
+                                                                                      // again
                 isHandlerSet = true;
             }
-            
+
             serviceLogger.onEventSentFailed();
         } else {
             ExLog.i(TAG, "Event successfully send.");
@@ -211,7 +211,7 @@ public class EventSendingService extends Service implements EventSendingListener
                 persistenceManager.removeIntent(intent);
             }
             lastSuccessfulSend = Calendar.getInstance().getTime();
-            
+
             serviceLogger.onEventSentSuccessful();
         }
 
