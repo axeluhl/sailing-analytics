@@ -189,6 +189,7 @@ Helper Class for accessing the App Preferences specified in settings_view.xml
 ## ToDo
 
 ### Server
+* rename and move logic and naming independent of smartphones
 * begin pre race phase event
  * use for creating list of open "device tracking" races
  * use to determine whether race can be started via servlet
