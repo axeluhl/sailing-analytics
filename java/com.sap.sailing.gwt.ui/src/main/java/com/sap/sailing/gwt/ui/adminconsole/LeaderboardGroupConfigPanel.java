@@ -35,6 +35,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
@@ -424,7 +425,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 }
                 
                 if (Window.confirm(messageBuilder.toString())) {
-                    removeGroups(groupsSelectionModel.getSelectedSet());
+                    removeLeaderboardGroups(groupsSelectionModel.getSelectedSet());
                 }
             }
         });
@@ -505,7 +506,13 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         groupsTable.addColumn(groupActionsColumn, stringMessages.actions());
         groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
 
-        groupsSelectionModel = new MultiSelectionModel<LeaderboardGroupDTO>();
+        ProvidesKey<LeaderboardGroupDTO> groupsKeyProvider = new ProvidesKey<LeaderboardGroupDTO>() {
+            @Override
+            public Object getKey(LeaderboardGroupDTO group) {
+                return group.getName();
+            }
+        };
+        groupsSelectionModel = new MultiSelectionModel<LeaderboardGroupDTO>(groupsKeyProvider);
         groupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -682,7 +689,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         });
     }
     
-    private void removeGroups(final Collection<LeaderboardGroupDTO> groups) {
+    private void removeLeaderboardGroups(final Collection<LeaderboardGroupDTO> groups) {
         if (!groups.isEmpty()) {
             Set<String> groupNames = new HashSet<String>();
             for (LeaderboardGroupDTO group : groups) {
@@ -705,7 +712,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     }
 
     private void removeLeaderboardGroup(final LeaderboardGroupDTO group) {
-        sailingService.removeLeaderboardGroups(Collections.singleton(group.getName()), new AsyncCallback<Void>() {
+        Set<String> groups = new HashSet<String>();
+        groups.add(group.getName());
+        sailingService.removeLeaderboardGroups(groups, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to remove leaderboard group " + group.getName() + ": "
@@ -795,7 +804,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     }
 
     private void moveToGroup() {
-        LeaderboardGroupDTO selectedGroup = getSelectedGroup();
+        final LeaderboardGroupDTO selectedGroup = getSelectedGroup();
         ArrayList<StrippedLeaderboardDTO> selectedLeaderboards = new ArrayList<StrippedLeaderboardDTO>(leaderboardsSelectionModel.getSelectedSet());
         if (isSingleGroupSelected && selectedGroup != null && selectedLeaderboards != null && !selectedLeaderboards.isEmpty()) {
             Collections.sort(selectedLeaderboards, new Comparator<StrippedLeaderboardDTO>() {
