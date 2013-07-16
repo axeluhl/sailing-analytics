@@ -23,3 +23,16 @@ REPLICATE_MASTER_QUEUE_PORT=
 ADDITIONAL_JAVA_ARGS="-XX:+UseMembar"
 
 JAVA_HOME=$HOME/jdk1.7.0_02
+
+# Make it possible to overwrite configuration
+# by using user-data that is injected into an instance
+ON_AMAZON=`command -v ec2-metadata`
+if [[ ! -z "$ON_AMAZON" ]]; then
+  echo "This server is running on Amazon. Following data is being used (based on user-data injected into instance):"
+  VARS=$(ec2-metadata -d | sed "s/user-data\: //g")
+  for var in $VARS; do
+        echo $var
+        export $var
+  done
+fi
+
