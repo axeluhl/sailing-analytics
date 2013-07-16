@@ -1,5 +1,3 @@
 # Amazon EC2 for SAP
 
-- URL: https://skyesapicl.hana.ondemand.com/skye/
-- IO: 135676 - Project Travel Exp. Technology Sponsors.
-- Instance: RHEL
+[[Creating a new application instance|wiki/amazon-ec2-create-new-app-instance]]

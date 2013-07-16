@@ -11,6 +11,7 @@ public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
     
     private static final String PROPERTY_NAME_EXCHANGE_NAME = "replication.exchangeName";
+    private static final String PROPERTY_NAME_EXCHANGE_HOST = "replication.exchangeHost";
 
     private ReplicationInstancesManager replicationInstancesManager;
     
@@ -19,11 +20,15 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         defaultContext = bundleContext;
         String exchangeName = bundleContext.getProperty(PROPERTY_NAME_EXCHANGE_NAME);
+        String exchangeHost = bundleContext.getProperty(PROPERTY_NAME_EXCHANGE_HOST);
         if (exchangeName == null) {
             exchangeName = "sapsailinganalytics";
         }
+        if (exchangeHost == null) {
+            exchangeHost = "localhost";
+        }
         replicationInstancesManager = new ReplicationInstancesManager();
-        ReplicationService serverReplicationMasterService = new ReplicationServiceImpl(exchangeName, replicationInstancesManager);
+        ReplicationService serverReplicationMasterService = new ReplicationServiceImpl(exchangeName, exchangeHost, replicationInstancesManager);
         bundleContext.registerService(ReplicationService.class, serverReplicationMasterService, null);
         logger.info("Registered replication service "+serverReplicationMasterService+" using exchange name "+exchangeName);
     }

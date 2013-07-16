@@ -27,7 +27,30 @@ LIB_DIR=`pwd`/native-libraries
 
 echo "Script directory is $scriptdir and LIB_DIR is $LIB_DIR"
 
-nohup $JAVA_BINARY $ADDITIONAL_JAVA_ARGS -D$SERVER_NAME -Dcom.sap.sailing.server.name=$SERVER_NAME -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar -console $TELNET_PORT -configuration ./ -clean 2>/dev/null >/dev/null &
+# Make really sure that parameters from config.ini are not used
+sed -i "/mongo.host/d" ./configuration/config.ini
+sed -i "/mongo.port/d" ./configuration/config.ini
+sed -i "/expedition.udp.port/d" ./configuration/config.ini
+sed -i "/replication.exchangeName/d" ./configuration/config.ini
+sed -i "/replication.exchangeHost/d" ./configuration/config.ini
+
+# Ensure that Jetty Port is set correctly
+sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" ./configuration/jetty/etc/jetty.xml
+
+# Update monitoring with the right ports
+sed -i "s/127.0.0.1:[0-9][0-9][0-9][0-9]\//127.0.0.1:$SERVER_PORT\//g" ./configuration/monitoring.properties
+
+# Inject information for system
+HEAD_DATE=$(date "+%Y%m%d%H%M")
+sed -i "s/System:.*$/ System: $MONGODB_HOST:$MONGODB_PORT-$EXPEDITION_PORT-$REPLICATION_HOST\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
+
+# Apply app parameters from env.sh
+APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
+
+# Apply parameters for automatic replication start
+REPLICATION_PARAMETERS="-Dreplication.start=$REPLICATE_ON_START -Dreplicate.master.servlet.host=$REPLICATE_MASTER_SERVLET_HOST -Dreplicate.master.servlet.port=$REPLICATE_MASTER_SERVLET_PORT -Dreplicate.master.queue.host=$REPLICATE_MASTER_QUEUE_HOST -Dreplicate.master.queue.port=$REPLICATE_MASTER_QUEUE_PORT"
+
+nohup $JAVA_BINARY $ADDITIONAL_JAVA_ARGS -D$SERVER_NAME -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar -console $TELNET_PORT -configuration ./ -clean 2>/dev/null >/dev/null &
 
 echo "Starting server..."
 sleep 2
