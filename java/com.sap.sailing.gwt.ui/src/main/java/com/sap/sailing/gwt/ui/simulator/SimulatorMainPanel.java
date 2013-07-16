@@ -59,8 +59,8 @@ import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
-import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
-import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
+import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
+import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternSetting;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
 public class SimulatorMainPanel extends SimplePanel {

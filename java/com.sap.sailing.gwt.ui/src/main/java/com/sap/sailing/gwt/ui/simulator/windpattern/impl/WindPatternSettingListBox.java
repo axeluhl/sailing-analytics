@@ -1,10 +1,10 @@
-package com.sap.sailing.gwt.ui.shared.windpattern.impl;
+package com.sap.sailing.gwt.ui.simulator.windpattern.impl;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
+import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternSetting;
 
 public class WindPatternSettingListBox implements WindPatternSetting<String>, IsSerializable {
 

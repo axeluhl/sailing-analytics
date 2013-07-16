@@ -19,8 +19,8 @@ import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
-import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
-import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternNotFoundException;
+import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
+import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternNotFoundException;
 
 @RemoteServiceRelativePath("simulator")
 public interface SimulatorService extends RemoteService {

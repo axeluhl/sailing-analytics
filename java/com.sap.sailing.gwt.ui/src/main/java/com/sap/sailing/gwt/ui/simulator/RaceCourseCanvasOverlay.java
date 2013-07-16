@@ -15,7 +15,7 @@ import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.Overlay;
 import com.sap.sailing.domain.common.Mile;
-import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
+import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 
 /**
  * This class implements the layer to display the race course on the map. Currently the course only consists of the
