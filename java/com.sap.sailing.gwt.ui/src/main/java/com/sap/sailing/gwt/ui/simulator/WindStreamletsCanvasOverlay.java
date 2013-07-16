@@ -21,7 +21,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
-import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
+import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.ToolTip;
 import com.sap.sailing.gwt.ui.simulator.util.WindFieldMapMouseMoveHandler;
 
