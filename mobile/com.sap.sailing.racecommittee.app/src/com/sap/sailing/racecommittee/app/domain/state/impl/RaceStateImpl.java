@@ -125,29 +125,23 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     public void setStartTime(TimePoint newStartTime) {
-        
         RaceLogRaceStatus status = getStatus();
         if (status != RaceLogRaceStatus.UNSCHEDULED) {
             onRaceAborted(MillisecondsTimePoint.now());
         }
-        
         TimePoint eventTime = startProcedure.getLogicalStartTimeEventTime(newStartTime);
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(eventTime, UUID.randomUUID(), 
                 Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newStartTime);
         this.raceLog.add(event);
-        
         fireStartTimeChange(newStartTime);
     }
     
     @Override
     public void createNewStartProcedure(StartProcedureType type) {
         if (!type.equals(startProcedureTypeAnalyzer.analyze())) {
-
             RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartProcedureChangedEvent(MillisecondsTimePoint.now(), raceLog.getCurrentPassId(), type);
             this.raceLog.add(event);
-            
             registerStartProcedure();
-            
             ExLog.i(TAG, String.format("Switch start procedure to %s", this.startProcedure.getClass().getSimpleName()));
         }
     }
@@ -164,11 +158,9 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     @Override
     public void setCourseDesign(CourseBase newCourseData) {
         TimePoint eventTime = MillisecondsTimePoint.now();
-        
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(eventTime, UUID.randomUUID(),
                 Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newCourseData);
         this.raceLog.add(event);
-        
         fireCourseDesignChanged();
     }
     
@@ -176,7 +168,6 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public void onRaceAborted(TimePoint eventTime) {
         /*RaceLogEvent abortEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.UNSCHEDULED);
         this.raceLog.add(abortEvent);*/
-        
         RaceLogEvent passChangeEvent = RaceLogEventFactory.INSTANCE.createPassChangeEvent(eventTime, raceLog.getCurrentPassId() + 1);
         this.raceLog.add(passChangeEvent);
         registerStartProcedure();
