@@ -190,18 +190,22 @@ Helper Class for accessing the App Preferences specified in settings_view.xml
 
 ### Server
 * begin pre race phase event
- * use for creating list of open smartphone events
+ * use for creating list of open "device tracking" races
  * use to determine whether race can be started via servlet
 * RaceLogRaceTracker: functionality of RaceTracker as view on RaceLog (which then also makes tracking independent of smartphones, so we can mix different device types)
  * release mapping when race is finished (tracker listens for end event on RaceLog, and then calls adapters)
  * create race creates tracker, or already before that?
  * differentiate mapping device -> race and competitor and setting the TrackedRace (look at race status!)
+* ping Marks
+ * write in race log, or rather buffer on smartphone and transmit on creating race?
+* UI for setting mark roundings
+ * use RaceViewer
+ * select competitor -> checkbox for each waypoint, toggles markrounding (maybe add "addMarkRounding" to TrackedRace)
 * boat class for race: in racelog
 * remove registered competitors: in racelog
-* Servlet for getting all races, which are still open to register for
 * persist tracking data (GPSFixStore)
 * load stored tracked smartphone race (Panel in Admin Console, RaceLogConnector, only present such races with the necessary data in the racelog, and allow user to select whole leaderboard to restore)
-* mapping marks to devices
+* mapping devices to marks
 * generic method for registering listener for NMEA sentence types (e.g. to then process wind) -> move servlet for recieving NMEA out of smartphoneadapter
 * user management (Competitors as users, credentials so not everybody can do everything)
  * -> integrate with OAuth, ISAF competitors etc.?
