@@ -13,7 +13,7 @@ import com.sap.sailing.racecommittee.app.data.http.HttpJsonPostRequest;
 import com.sap.sailing.racecommittee.app.data.http.HttpRequest;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
-public class EventSenderTask extends AsyncTask<Intent, Void, Pair<Intent, Integer>> {
+public class EventSenderTask extends AsyncTask<Intent, Void, Pair<Intent, Boolean>> {
     
     private static String TAG = EventSenderTask.class.getName();
 
@@ -28,16 +28,17 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Pair<Intent, Intege
     }
 
     @Override
-    protected Pair<Intent, Integer> doInBackground(Intent... params) {
+    protected Pair<Intent, Boolean> doInBackground(Intent... params) {
+        Pair<Intent, Boolean> result;
         Intent intent = params[0];
         if (intent == null) {
-            return Pair.create(intent, -1);
+            return Pair.create(intent, false);
         }
         Bundle extras = intent.getExtras();
         String serializedEventAsJson = extras.getString(AppConstants.EXTRAS_JSON_SERIALIZED_EVENT);
         String url = extras.getString(AppConstants.EXTRAS_URL);
         if (serializedEventAsJson == null || url == null) {
-            return Pair.create(intent, -1);
+            return Pair.create(intent, false);
         }
         try {
             ExLog.i(TAG, "Posting event: " + serializedEventAsJson);
@@ -50,17 +51,18 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Pair<Intent, Intege
                 post.disconnect();
             }
             ExLog.i(TAG, "Post successful for the following event: " + serializedEventAsJson);
+            result = Pair.create(intent, true);
         } catch (Exception e) {
             ExLog.e(TAG, String.format("Post not successful, exception occured: %s", e.toString()));
-            return Pair.create(intent, -1);
+            result = Pair.create(intent, false);
         }
-        return Pair.create(intent, 0);
+        return result;
     }
 
     @Override
-    protected void onPostExecute(Pair<Intent, Integer> resultPair) {
+    protected void onPostExecute(Pair<Intent, Boolean> resultPair) {
         super.onPostExecute(resultPair);
-        listener.onResult(resultPair.first, resultPair.second == 0);
+        listener.onResult(resultPair.first, resultPair.second);
     }
 
 }
