@@ -1,10 +1,12 @@
-package com.sap.sailing.gwt.ui.shared.racemap;
+package com.sap.sailing.gwt.ui.simulator.racemap;
 
 import java.util.logging.Logger;
 
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CanvasOverlay;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
@@ -14,9 +16,10 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
  * full viewable area of the map
  * 
  * @author Nidhi Sawhney(D054070)
+ * @author Christopher Ronnewinkel (D036654)
  *
  */
-public abstract class FullCanvasOverlay extends CanvasOverlay {
+public abstract class FullCanvasOverlay extends CanvasOverlay implements RequiresResize {
 
     /* x coordinate where the widget is placed */
     private int widgetPosLeft = 0;
@@ -49,14 +52,27 @@ public abstract class FullCanvasOverlay extends CanvasOverlay {
     }
     
     @Override
+    public void onResize() {
+    	Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+    		public void execute() {
+
+    			setCanvasSettings();
+    			redraw(true);
+
+    		}
+    	});
+    }
+
+
+    @Override
     protected void redraw(boolean force) {
         logger.info("In FullCanvasOverlay.redraw" + force);
         /*
          * Reset the canvas only if the pixel coordinates need to be recomputed
          */
-        //if (force) {
+        if (force) {
             setCanvasSettings();
-        //}
+        }
     }
     
     /**

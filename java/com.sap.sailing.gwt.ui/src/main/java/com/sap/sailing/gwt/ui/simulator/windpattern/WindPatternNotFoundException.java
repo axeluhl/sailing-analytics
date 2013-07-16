@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.shared.windpattern;
+package com.sap.sailing.gwt.ui.simulator.windpattern;
 
 public class WindPatternNotFoundException extends Exception {
 
