@@ -29,14 +29,16 @@ public class MongoRaceLogStoreImpl implements RaceLogStore {
 
     @Override
     public RaceLog getRaceLog(RaceLogIdentifier identifier, boolean ignoreCache) {
+        final RaceLog result;
         if (!ignoreCache && raceLogCache.containsKey(identifier)) {
-            return raceLogCache.get(identifier);
+            result = raceLogCache.get(identifier);
+        } else {
+            result = domainObjectFactory.loadRaceLog(identifier);
+            MongoRaceLogListener listener = new MongoRaceLogListener(identifier, mongoObjectFactory, db);
+            listeners.put(result, listener);
+            result.addListener(listener);
+            raceLogCache.put(identifier, result);
         }
-        RaceLog result = domainObjectFactory.loadRaceLog(identifier);
-        MongoRaceLogListener listener = new MongoRaceLogListener(identifier, mongoObjectFactory, db);
-        listeners.put(result, listener);
-        result.addListener(listener);
-        raceLogCache.put(identifier, result);
         return result;
     }
 

@@ -3,9 +3,13 @@ package com.sap.sailing.domain.racelog.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +28,11 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     private static final long serialVersionUID = -176745401321893502L;
     private static final String DefaultLockName = RaceLogImpl.class.getName() + ".lock";
     private final static Logger logger = Logger.getLogger(RaceLogImpl.class.getName());
+    
+    /**
+     * Clients can use the {@link #add(RaceLogEvent, UUID)} method 
+     */
+    private final transient Map<UUID, Set<RaceLogEvent>> eventsDeliveredToClient = new HashMap<UUID, Set<RaceLogEvent>>();
     
     private final Serializable id;
     private transient Set<RaceLogEventVisitor> listeners;
@@ -81,6 +90,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         }
         if (isAdded) {
             logger.finer(String.format("%s (%s) was added to log.", event, event.getClass().getName()));
+            // FIXME with out-of-order delivery would destroy currentPassId; need to check at least the createdAt time point
             setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
             notifyListenersAboutReceive(event);
         } else {
@@ -89,6 +99,36 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         return isAdded;
     }
 
+    @Override
+    public Iterable<RaceLogEvent> add(RaceLogEvent event, UUID clientId) {
+        lockForWrite();
+        try {
+            final boolean isAdded = getInternalRawFixes().add(event);
+            if (isAdded) {
+                logger.finer(String.format("%s (%s) was added to log.", event, event.getClass().getName()));
+                // FIXME with out-of-order delivery would destroy currentPassId; need to check at least the createdAt time point
+                setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
+                notifyListenersAboutReceive(event);
+            } else {
+                logger.warning(String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
+            }
+            LinkedHashSet<RaceLogEvent> stillToDeliverToClient = new LinkedHashSet<RaceLogEvent>(getInternalRawFixes());
+            stillToDeliverToClient.remove(event);
+            Set<RaceLogEvent> deliveredToClient = eventsDeliveredToClient.get(clientId);
+            if (deliveredToClient != null) {
+                stillToDeliverToClient.removeAll(deliveredToClient);
+            } else {
+                deliveredToClient = new HashSet<RaceLogEvent>();
+                eventsDeliveredToClient.put(clientId, deliveredToClient);
+            }
+            deliveredToClient.addAll(stillToDeliverToClient);
+            deliveredToClient.add(event);
+            return stillToDeliverToClient;
+        } finally {
+            unlockAfterWrite();
+        }
+    }
+    
     protected void notifyListenersAboutReceive(RaceLogEvent event) {
         synchronized (listeners) {
             for (RaceLogEventVisitor listener : listeners) {

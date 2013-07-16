@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.racelog;
 
 import java.util.HashSet;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventComparator;
@@ -66,4 +67,14 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
     void addAllListeners(HashSet<RaceLogEventVisitor> listeners);
 
     Iterable<RaceLogEventVisitor> getAllListeners();
+
+    /**
+     * Adds an event to this race log and returns a superset of all race log events (excluding the new
+     * <code>event</code>) that were added to this race log but not yet returned to the client with ID
+     * <code>clientId</code> by this method. In general, the list returned is not a true superset but
+     * equals exactly those events not yet delivered to the client. However, if the server was re-started
+     * since the client last called this method, and since the underlying data structures are not durably
+     * stored, the entire set of all race log events would be delivered to the client once.
+     */
+    Iterable<RaceLogEvent> add(RaceLogEvent event, UUID clientId);
 }

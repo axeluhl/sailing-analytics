@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -47,6 +48,26 @@ public class RaceLogTest {
     }
     
     @Test
+    public void testAddingEventsFromMultipleClients() {
+        RaceLog raceLog = new RaceLogImpl("RaceLogTest", "test-identifier");
+        UUID client1Id = UUID.randomUUID();
+        UUID client2Id = UUID.randomUUID();
+        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        RaceLogStartTimeEvent startTimeEvent1 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now, 1, now.plus(1));
+        Iterable<RaceLogEvent> empty = raceLog.add(startTimeEvent1, client1Id);
+        assertTrue(Util.isEmpty(empty));
+        RaceLogStartTimeEvent startTimeEvent2 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now.plus(2), 1, now.plus(3));
+        Iterable<RaceLogEvent> nonEmpty = raceLog.add(startTimeEvent2, client2Id);
+        assertEquals(1, Util.size(nonEmpty));
+        assertSame(startTimeEvent1, nonEmpty.iterator().next());
+        RaceLogStartTimeEvent startTimeEvent3 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now.plus(4), 1, now.plus(5));
+        Iterable<RaceLogEvent> nonEmpty2 = raceLog.add(startTimeEvent3, client1Id);
+        assertEquals(1, Util.size(nonEmpty2));
+        assertSame(startTimeEvent2, nonEmpty2.iterator().next());
+        
+    }
+    
+    @Test
     public void testAddOfEvent() {
         RaceLog rcEventTrack = new RaceLogImpl("RaceLogTest", "test-identifier");
         TimePoint t1 = MillisecondsTimePoint.now();
@@ -65,9 +86,7 @@ public class RaceLogTest {
                 assertSame(iterator.next(), rcEvent);
                 count++;
             } while (iterator.hasNext());
-
             assertEquals(count, 1);
-
         } finally {
             rcEventTrack.unlockAfterRead();
         }

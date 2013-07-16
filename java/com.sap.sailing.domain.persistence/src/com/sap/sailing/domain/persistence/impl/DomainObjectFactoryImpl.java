@@ -1010,9 +1010,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             DBCollection raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
             for (DBObject o : raceLog.find(query)) {
                 RaceLogEvent raceLogEvent = loadRaceLogEvent((DBObject) o.get(FieldNames.RACE_LOG_EVENT.name()));
-
-                if (raceLogEvent != null)
+                if (raceLogEvent != null) {
                     result.add(raceLogEvent);
+                }
             }
         } catch (Throwable t) {
             // something went wrong during DB access; report, then use empty new race log
