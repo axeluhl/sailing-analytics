@@ -78,7 +78,8 @@ public class EventSendingService extends Service implements EventSendingListener
     }
 
     /**
-     * creates an intent that contains the event to be sent and the race id which shall be sent to the backend
+     * Creates an intent that contains the event to be sent and the race id which shall be sent to the back end.
+     * See constants in <code>AddEntryToRaceLogJsonPostServlet</code> for URL construction rules.
      * 
      * @param context
      *            the context of the app
@@ -178,8 +179,9 @@ public class EventSendingService extends Service implements EventSendingListener
         List<Intent> delayedIntents = persistenceManager.restoreEvents();
         ExLog.i(TAG, String.format("Resending %d events...", delayedIntents.size()));
         
-        for (Intent intent : delayedIntents)
+        for (Intent intent : delayedIntents) {
             sendEvent(intent);
+        }
     }
 
     private void sendEvent(Intent intent) {

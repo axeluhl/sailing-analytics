@@ -16,7 +16,7 @@ public class FinishPositioningListFinder extends RaceLogAnalyzer<List<Triple<Ser
     }
 
     @Override
-    protected List<Triple<Serializable, String, MaxPointsReason>> performAnalyzation() {
+    protected List<Triple<Serializable, String, MaxPointsReason>> performAnalysis() {
         for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogFinishPositioningListChangedEvent) {
                 RaceLogFinishPositioningListChangedEvent finishPositioningEvent = (RaceLogFinishPositioningListChangedEvent) event;

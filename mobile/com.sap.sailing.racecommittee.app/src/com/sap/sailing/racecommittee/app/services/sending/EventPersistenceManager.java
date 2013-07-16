@@ -130,7 +130,7 @@ public class EventPersistenceManager {
     }
 
     private void addEventToLog(String raceId, String serializedEvent) {
-        ExLog.i(TAG, String.format("Trying to readd event to race log of race %s.", raceId));
+        ExLog.i(TAG, String.format("Trying to re-add event to race log of race %s.", raceId));
         DataStore store = DataManager.create(this.context).getDataStore();
         if (!store.hasRace(raceId)) {
             ExLog.w(TAG, String.format("There is no race %s.", raceId));
@@ -177,11 +177,12 @@ public class EventPersistenceManager {
     }
 
     private void writePersistedEventsToFile() {
-        String newFileContent = "";
+        StringBuilder newFileContent = new StringBuilder();
         for (String persistedEvent : persistedEvents) {
-            newFileContent += persistedEvent + "\n";
+            newFileContent.append(persistedEvent);
+            newFileContent.append('\n');
         }
-        writeToFile(newFileContent, Context.MODE_PRIVATE);
+        writeToFile(newFileContent.toString(), Context.MODE_PRIVATE);
         ExLog.i(TAG, "Wrote file content to file: " + newFileContent);
     }
 

@@ -13,7 +13,7 @@ public class LastPublishedCourseDesignFinder extends RaceLogAnalyzer<CourseBase>
     }
 
     @Override
-    protected CourseBase performAnalyzation() {
+    protected CourseBase performAnalysis() {
         for (RaceLogEvent event : getAllEventsDescending()) {
             if (event instanceof RaceLogCourseDesignChangedEvent) {
                 RaceLogCourseDesignChangedEvent courseDesignEvent = (RaceLogCourseDesignChangedEvent) event;
