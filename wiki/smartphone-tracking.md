@@ -22,7 +22,7 @@ Generic device identifiers, that are qualified through a device type, are used f
 The reason for using the OSGi service registry is that it enables decentralized implementation of different kinds of device adapters. E.g., implementing a new Igtimi adapter does not mean that you have to modify the object factory for device identifier objects in the persistence bundle, but simply register a new service from within your own bundle. This is more hindering than helpful in this stage of development, but - in future - means that other device adapters could be developed without having to touch the Sailing Analytics core code, so a vendor of tracking devices could recieve a current Sailing Analytics version as an SDK and implement additional bundles only.
 
 ## Servlets
-### `/smartphone/createFlexibleLeaderboard`
+### `/sailingserver/devices/createFlexibleLeaderboard`
 `CreateFlexibleLeaderboardPostServlet`
 
 **Expects**
@@ -42,7 +42,7 @@ The reason for using the OSGi service registry is that it enables decentralized 
 * `400` Invalid JSON in request
 * `409` Leaderboard with name %s already exists
 
-### `/smartphone/createRaceColumn?leaderboard=<leaderboardName>`
+### `/sailingserver/devices/createRaceColumn?leaderboard=<leaderboardName>`
 `CreateFlexibleLeaderboardPostServlet`
 
 **Expects**
@@ -60,7 +60,7 @@ The reason for using the OSGi service registry is that it enables decentralized 
 * `404` Leaderboard not found
 * `409` RaceColumn with name %s already exists / Error adding RaceColumn
 
-### `/smartphone/createPersistentCompetitor`
+### `/sailingserver/devices/createPersistentCompetitor`
 `CreatePersistentCompetitorPostServlet`
 
 **Expects**
@@ -96,7 +96,7 @@ The reason for using the OSGi service registry is that it enables decentralized 
 **Throws**
 * `400` Invalid JSON in request
 
-### `/smartphone/getPersistentCompetitors`
+### `/sailingserver/devices/getPersistentCompetitors`
 `PersistentCompetitorsGetServlet`
 
 **Expects**
@@ -105,7 +105,7 @@ The reason for using the OSGi service registry is that it enables decentralized 
 **Returns**
 * `200` body: JSON array of Competitor objects
 
-### `/smartphone/createRace?leaderboard=<leaderboardName>&raceColumn=<raceColumnName>&fleet=<fleetName>`
+### `/sailingserver/devices/createRace?leaderboard=<leaderboardName>&raceColumn=<raceColumnName>&fleet=<fleetName>`
 `CreateRacePostServlet`
 
 **Precondition**
