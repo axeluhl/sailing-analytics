@@ -42,6 +42,7 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Pair<Intent, Intege
             ExLog.i(TAG, "Posting event: " + serializedEventAsJson);
             HttpRequest post = new HttpJsonPostRequest(URI.create(url), serializedEventAsJson);
             try {
+                // TODO read JSON-serialized race log events that need to be merged into the local race log because they were added on the server in the interim
                 post.execute().close();
             } finally {
                 post.disconnect();
