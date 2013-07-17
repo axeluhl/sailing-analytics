@@ -209,9 +209,9 @@ public class OnlineDataManager extends DataManager {
         
         try {
             new DataLoader<CourseBase>(context, URI.create(AppPreferences.getServerBaseURL(context)
-                    + "/sailingserver/rc/currentcourse?leaderboard=" + raceGroupName + "&raceColumn=" + raceColumnName 
-                    + "&fleet=" + fleetName), parser, handler)
-                    .forceLoad();
+                    + "/sailingserver/rc/currentcourse?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "="
+                    + raceGroupName + "&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName
+                    + "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler).forceLoad();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -234,8 +234,8 @@ public class OnlineDataManager extends DataManager {
         
         try {
             new DataLoader<Collection<Competitor>>(context, URI.create(AppPreferences.getServerBaseURL(context)
-                    + "/sailingserver/rc/competitors?leaderboard=" + raceGroupName + "&raceColumn=" + raceColumnName 
-                    + "&fleet=" + fleetName), parser, handler)
+                    + "/sailingserver/rc/competitors?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + raceGroupName + "&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName 
+                    + "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler)
                     .forceLoad();
         } catch (MalformedURLException e) {
             e.printStackTrace();
