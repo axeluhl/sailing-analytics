@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -43,16 +44,18 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         dataMiningElementsPanel.add(runQueryButton);
         
         resultsPanel = new FlowPanel();
-//        resultsPanel.setVisible(false);
+        resultsPanel.setVisible(false);
         rootPanel.add(resultsPanel);
         
         HorizontalPanel overallTimePanel = new HorizontalPanel();
+        overallTimePanel.setSpacing(5);
         overallTimePanel.add(new Label("Overall time: "));
         overallTimeLabel = new Label();
         overallTimePanel.add(overallTimeLabel);
         resultsPanel.add(overallTimePanel);
         
         HorizontalPanel serverTimePanel = new HorizontalPanel();
+        serverTimePanel.setSpacing(5);
         serverTimePanel.add(new Label("Server time: "));
         serverTimeLabel = new Label();
         serverTimePanel.add(serverTimeLabel);
@@ -97,6 +100,10 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
 //                updateResults(overallTime, result.getA(), result.getB());
 //            }
 //        });
+        List<Pair<String, Double>> results = new ArrayList<Pair<String,Double>>();
+        results.add(new Pair<String, Double>("29er", 2000.0));
+        results.add(new Pair<String, Double>("505", 1743.23));
+        updateResults(2.5, 2, results);
     }
     
     private void updateResults(double overallTime, double serverTime, List<Pair<String, Double>> results) {
