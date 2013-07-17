@@ -96,6 +96,7 @@ public class AppPreferences {
     public static List<String> getManagedCourseAreaNames(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String value = sp.getString(PREFERENCE_MANAGED_COURSE_AREAS, "");
+        value.replaceAll("\\s","");
         return Arrays.asList(value.split(","));
     }
     
