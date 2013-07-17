@@ -47,12 +47,6 @@ public interface RaceLogEvent extends Timed, WithID {
     TimePoint getCreatedAt();
 
     /**
-     * Gets the {@link TimePoint} denoting the logical event time.
-     */
-    @Override
-    TimePoint getTimePoint();
-
-    /**
      * Gets the event's pass identifier.
      * 
      * Each {@link RaceLogEvent} is associated to a certain pass. A pass is every attempt to start and run a race. A new
