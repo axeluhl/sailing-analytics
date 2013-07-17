@@ -5,6 +5,7 @@ import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import android.app.Service;
 import android.content.Context;
@@ -15,6 +16,8 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -75,6 +78,11 @@ public class EventSendingService extends Service implements EventSendingListener
 
     private Date lastSuccessfulSend;
 
+    /**
+     * a UUID that identifies this client session; can be used, e.g., to let the server identify subsequent requests coming from the same client
+     */
+    private final static UUID uuid = UUID.randomUUID();
+
     public int getDelayedIntentsCount() {
         return persistenceManager.getEventCount();
     }
@@ -96,9 +104,13 @@ public class EventSendingService extends Service implements EventSendingListener
      * @return the intent that shall be sent to the EventSendingService
      */
     public static Intent createEventIntent(Context context, ManagedRace race, String serializedEventAsJson) {
-        String url = String.format("%s/sailingserver/rc/racelog?leaderboard=%s&raceColumn=%s&fleet=%s",
+        String url = String.format("%s/sailingserver/rc/racelog?"+
+                RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
+                RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
+                RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s"+
+                RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
                 AppPreferences.getServerBaseURL(context), URLEncoder.encode(race.getRaceGroup().getName()),
-                URLEncoder.encode(race.getName()), URLEncoder.encode(race.getFleet().getName()));
+                URLEncoder.encode(race.getName()), URLEncoder.encode(race.getFleet().getName()), uuid);
         return createEventIntent(context, url, race.getId(), serializedEventAsJson);
     }
 
@@ -193,7 +205,7 @@ public class EventSendingService extends Service implements EventSendingListener
     }
 
     @Override
-    public void onResult(Intent intent, boolean success) {
+    public void onResult(Intent intent, boolean success, Iterable<RaceLogEvent> eventsToAddToRaceLog) {
         if (!success) {
             ExLog.w(TAG, "Error while posting intent to server. Will persist intent...");
             persistenceManager.persistIntent(intent);
@@ -202,7 +214,6 @@ public class EventSendingService extends Service implements EventSendingListener
                 handler.postDelayed(delayedCaller, AppConstants.EventResendInterval); // after 30 sec, try the sending again
                 isHandlerSet = true;
             }
-
             serviceLogger.onEventSentFailed();
         } else {
             ExLog.i(TAG, "Event successfully send.");
@@ -210,10 +221,8 @@ public class EventSendingService extends Service implements EventSendingListener
                 persistenceManager.removeIntent(intent);
             }
             lastSuccessfulSend = Calendar.getInstance().getTime();
-
             serviceLogger.onEventSentSuccessful();
         }
-
     }
 
     /**

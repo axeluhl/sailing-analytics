@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogServletConstants;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
@@ -35,12 +36,10 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogSerializ
 public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 4510175441769759252L;
 
-    private static final String PARAM_COURSE_AREA_FILTER = "courseArea";
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        String courseAreaFilter = request.getParameter(PARAM_COURSE_AREA_FILTER);
+        String courseAreaFilter = request.getParameter(RaceLogServletConstants.PARAM_COURSE_AREA_FILTER);
         if (courseAreaFilter == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Need to set a course area filter.");
             return;
