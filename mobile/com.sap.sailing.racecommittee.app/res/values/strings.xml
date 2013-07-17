@@ -96,7 +96,9 @@
     <string name="settings_advanced_service_header">Webservice URL</string>
     <string name="settings_advanced_service_description">Select the JSON Webservice URL</string>
     <string name="settings_time_frame_header">Race time frame after finish</string>
+    <string name="settings_protest_time_header">Protest time</string>
     <string name="settings_time_frame_description">Set a time in minutes after which no finishing sailor is counted anymore</string>
+    <string name="settings_protest_time_description">Set the protest time in minutes</string>
     <string name="race_startphase_flagdown">Flag is going down&#8230;</string>
     <string name="race_startphase_flagup">Flag is going up&#8230;</string>
     <string name="race_startphase_countdown_mode_remove">%1$s until %2$s flag is removed</string>
