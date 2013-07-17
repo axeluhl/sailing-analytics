@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.datamining.Aggregator;
 import com.sap.sailing.datamining.Extractor;
+import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.datamining.Query;
 import com.sap.sailing.datamining.Selector;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -13,13 +14,9 @@ import com.sap.sailing.server.RacingEventService;
 public class QueryImpl implements Query {
 
     private Selector selector;
-    private Extractor extractor;
-    private Aggregator aggregator;
 
-    public QueryImpl(Selector selector, Extractor extractor, Aggregator aggregator) {
+    public QueryImpl(Selector selector) {
         this.selector = selector;
-        this.extractor = extractor;
-        this.aggregator = aggregator;
     }
 
     @Override
@@ -29,22 +26,19 @@ public class QueryImpl implements Query {
 
     @Override
     public Extractor getExtractor() {
-        return extractor;
+        return null;
     }
 
     @Override
     public Aggregator getAggregator() {
-        return aggregator;
+        return null;
     }
 
     @Override
     public List<Pair<String, Double>> run(RacingEventService racingEventService) {
         List<Pair<String, Double>> data = new ArrayList<Pair<String, Double>>();
-        getSelector().initializeSelection(racingEventService);
-        for (String xValue : getSelector().getXValues()) {
-            double dataElement = getAggregator().aggregate(getExtractor().extractDataFrom(getSelector().getDataFor(xValue)));
-            data.add(new Pair<String, Double>(xValue, dataElement));
-        }
+        List<GPSFixWithContext> selectedFixes = selector.selectGPSFixes(racingEventService);
+        data.add(new Pair<String, Double>("Number of selected and retrieved fixes", new Double(selectedFixes.size())));
         return data;
     }
 
