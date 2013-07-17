@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.datamining.shared.SelectorType;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -450,6 +451,11 @@ public interface SailingServiceAsync {
 
     
     void importMasterData(String host, String[] names, boolean override, AsyncCallback<MasterDataImportObjectCreationCount> asyncCallback);
+
+    /**
+     * Creates and runs a data mining query with the specified properties.
+     */
+    void runQuery(SelectorType selectorType, String[] selectionIdentifiers, AsyncCallback<Pair<Double, List<Pair<String, Double>>>> asyncCallback);
     
 }
 

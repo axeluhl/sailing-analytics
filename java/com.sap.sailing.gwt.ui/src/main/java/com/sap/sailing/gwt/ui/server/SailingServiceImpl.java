@@ -49,6 +49,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.regexp.shared.RegExp;
+import com.sap.sailing.datamining.Query;
+import com.sap.sailing.datamining.QueryFactory;
+import com.sap.sailing.datamining.Selector;
+import com.sap.sailing.datamining.SelectorFactory;
+import com.sap.sailing.datamining.shared.SelectorType;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -3301,6 +3306,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (!host.startsWith("http://")) {
             urlBuffer.insert(0, "http://");
         }
+    }
+
+    @Override
+    public Pair<Double, List<Pair<String, Double>>> runQuery(SelectorType selectorType, String[] selectionIdentifiers) {
+        final long startTime = System.currentTimeMillis();
+        Selector selector = SelectorFactory.createSelector(selectorType, selectionIdentifiers);
+        Query query = QueryFactory.createQuery(selector);
+        List<Pair<String, Double>> result = query.run(getService());
+        long endTime = System.currentTimeMillis();
+        double serverTime = (endTime - startTime) / 1000.0;
+        return new Pair<Double, List<Pair<String,Double>>>(serverTime, result);
     }
 
 }

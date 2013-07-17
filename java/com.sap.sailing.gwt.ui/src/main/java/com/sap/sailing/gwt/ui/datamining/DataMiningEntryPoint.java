@@ -6,6 +6,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -83,18 +84,18 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         final long startTime = System.currentTimeMillis();
         SelectorType selectorType = SelectorType.Events;
         String[] selectionIdentifiers = new String[] {"Kieler Woche 2013"};
-//        sailingService.runQuery(query, new AsyncCallback<Pair<Double, List<Pair<String, Double>>>>() {
-//            @Override
-//            public void onFailure(Throwable caught) {
-//                DataMiningEntryPoint.this.reportError("Error running a query: " + caught.getMessage());
-//            }
-//            @Override
-//            public void onSuccess(Pair<Double, List<Pair<String, Double>>> result) {
-//                long endTime = System.currentTimeMillis();
-//                double overallTime = (endTime - startTime) / 1000.0;
-//                updateResults(overallTime, result.getA(), result.getB());
-//            }
-//        });
+        sailingService.runQuery(selectorType, selectionIdentifiers, new AsyncCallback<Pair<Double, List<Pair<String, Double>>>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                DataMiningEntryPoint.this.reportError("Error running a query: " + caught.getMessage());
+            }
+            @Override
+            public void onSuccess(Pair<Double, List<Pair<String, Double>>> result) {
+                long endTime = System.currentTimeMillis();
+                double overallTime = (endTime - startTime) / 1000.0;
+                updateResults(overallTime, result.getA(), result.getB());
+            }
+        });
     }
     
     private void updateResults(double overallTime, double serverTime, List<Pair<String, Double>> results) {
