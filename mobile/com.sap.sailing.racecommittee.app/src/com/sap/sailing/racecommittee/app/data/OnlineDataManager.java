@@ -178,8 +178,9 @@ public class OnlineDataManager extends DataManager {
         
         try {
             new DataLoader<Collection<Mark>>(context, URI.create(AppPreferences.getServerBaseURL(context)
-                    + "/sailingserver/rc/marks?leaderboard=" + raceGroupName + "&raceColumn=" + raceColumnName 
-                    + "&fleet=" + fleetName), parser, handler)
+                    + "/sailingserver/rc/marks?"+RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + raceGroupName +
+                    "&"+RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=" + raceColumnName 
+                    + "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler)
                     .forceLoad();
         } catch (MalformedURLException e) {
             e.printStackTrace();
