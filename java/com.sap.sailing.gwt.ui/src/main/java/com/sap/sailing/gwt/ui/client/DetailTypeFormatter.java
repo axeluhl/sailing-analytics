@@ -97,6 +97,8 @@ public class DetailTypeFormatter {
             return stringMessages.averageTackLossInMeters();
         case AVERAGE_JIBE_LOSS_IN_METERS:
             return stringMessages.averageJibeLossInMeters();
+        case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
+            return stringMessages.timeSinceLastPositionFix();
         }
         return null;
     }
@@ -141,6 +143,7 @@ public class DetailTypeFormatter {
         case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
         case RACE_GAP_TO_LEADER_IN_SECONDS:
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
+        case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
         case TIME_TRAVELED:
             return stringMessages.secondsUnit();
 
@@ -266,6 +269,8 @@ public class DetailTypeFormatter {
             return stringMessages.totalAverageSpeedOverGroundTooltip();
         case WINDWARD_DISTANCE_TO_GO_IN_METERS:
             return stringMessages.windwardDistanceToGoInMetersTooltip();
+        case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
+            return stringMessages.timeSinceLastPositionFixTooltip();
         }
         
         return "";

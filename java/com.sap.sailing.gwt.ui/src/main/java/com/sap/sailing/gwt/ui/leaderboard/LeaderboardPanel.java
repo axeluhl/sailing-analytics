@@ -799,7 +799,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 DetailType.DISTANCE_TO_START_AT_RACE_START, DetailType.SPEED_OVER_GROUND_AT_RACE_START,
                 DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
                 DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS,
-                DetailType.START_TACK };
+                DetailType.START_TACK,
+                DetailType.RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS };
     }
 
     public static DetailType[] getAvailableOverallDetailColumnTypes() {
@@ -862,6 +863,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
                 String detailColumnStyle) {
             Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
+            result.put(DetailType.RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS, 
+                            new RaceTimeSinceLastPositionFixInSeconds(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_DISTANCE_TRAVELED,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED, new RaceDistanceTraveledInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
@@ -948,6 +952,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 legColumns.set(legNumber, result);
             }
             return result;
+        }
+
+        private class RaceTimeSinceLastPositionFixInSeconds implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.timeSinceLastPositionFixInSeconds;
+                }
+                return result;
+            }
         }
 
         /**
