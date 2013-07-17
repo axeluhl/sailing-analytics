@@ -16,10 +16,13 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.receiver.ConnectivityChangedReceiver;
@@ -43,6 +46,7 @@ public class EventSendingService extends Service implements EventSendingListener
     private Handler handler;
     private final IBinder mBinder = new EventSendingBinder();
     private EventPersistenceManager persistenceManager;
+    private ReadonlyDataManager dataManager;
     private boolean isHandlerSet;
 
     private EventSendingServiceLogger serviceLogger = new EventSendingServiceLogger() {
@@ -100,7 +104,7 @@ public class EventSendingService extends Service implements EventSendingListener
      * @param race
      *            the race for which the event was created
      * @param serializedEventAsUrlEncodedJson
-     *            the event serizalized to JSON
+     *            the event serialized to JSON
      * @return the intent that shall be sent to the EventSendingService
      */
     public static Intent createEventIntent(Context context, ManagedRace race, String serializedEventAsJson) {
@@ -132,10 +136,9 @@ public class EventSendingService extends Service implements EventSendingListener
     public void onCreate() {
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         persistenceManager = new EventPersistenceManager(this);
-
+        dataManager = DataManager.create(this);
         handler = new Handler();
         isHandlerSet = false;
-
         if (persistenceManager.areIntentsDelayed()) {
             handleDelayedEvents();
         }
@@ -222,6 +225,17 @@ public class EventSendingService extends Service implements EventSendingListener
             }
             lastSuccessfulSend = Calendar.getInstance().getTime();
             serviceLogger.onEventSentSuccessful();
+            String raceId = intent.getStringExtra(AppConstants.RACE_ID_KEY);
+            RaceLog raceLog = dataManager.getDataStore().getRace(raceId).getRaceLog();
+            if (raceLog != null) {
+                ExLog.i(TAG, "Successfully retrieved race log for race ID " + raceId);
+                for (RaceLogEvent eventToAddToRaceLog : eventsToAddToRaceLog) {
+                    raceLog.add(eventToAddToRaceLog);
+                    ExLog.i(TAG, "added event "+eventToAddToRaceLog.toString()+" to client's race log");
+                }
+            } else {
+                ExLog.w(TAG, "Couldn't retrieve race log for race ID "+raceId);
+            }
         }
     }
 
