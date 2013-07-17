@@ -12,9 +12,9 @@ import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 public class RaceLogFlagEventImpl extends RaceLogEventImpl implements RaceLogFlagEvent {
 
     private static final long serialVersionUID = 6333303528852541914L;
-    private Flags upperFlag;
-    private Flags lowerFlag;
-    private boolean isDisplayed;
+    private final Flags upperFlag;
+    private final Flags lowerFlag;
+    private final boolean isDisplayed;
 
     public RaceLogFlagEventImpl(TimePoint createdAt, TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Flags pUpperFlag, Flags pLowerFlag, boolean pIsDisplayed) {
         super(createdAt, pTimePoint, pId, pInvolvedBoats, pPassId);

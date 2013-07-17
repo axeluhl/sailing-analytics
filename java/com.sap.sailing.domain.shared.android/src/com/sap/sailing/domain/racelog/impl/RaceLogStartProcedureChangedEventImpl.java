@@ -14,7 +14,7 @@ public class RaceLogStartProcedureChangedEventImpl extends RaceLogEventImpl impl
 
     private static final long serialVersionUID = -8102049547516570034L;
 
-    private StartProcedureType startProcedureType;
+    private final StartProcedureType startProcedureType;
 
     public RaceLogStartProcedureChangedEventImpl(TimePoint createdAt, TimePoint pTimePoint,
             Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, StartProcedureType startProcedureType) {

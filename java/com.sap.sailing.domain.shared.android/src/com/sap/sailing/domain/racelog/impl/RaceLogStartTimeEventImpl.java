@@ -12,7 +12,7 @@ import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 public class RaceLogStartTimeEventImpl extends RaceLogRaceStatusEventImpl implements RaceLogStartTimeEvent {
 
     private static final long serialVersionUID = 8185811395997196162L;
-    private TimePoint startTime;
+    private final TimePoint startTime;
 
     public RaceLogStartTimeEventImpl(TimePoint createdAt, TimePoint pTimePoint, Serializable pId,
             List<Competitor> pInvolvedBoats, int pPassId, TimePoint pStartTime) {

@@ -11,11 +11,11 @@ public abstract class RaceLogEventImpl implements RaceLogEvent {
 
     private static final long serialVersionUID = -5810258278984777732L;
 
-    private TimePoint createdAt;
-    private TimePoint logicalTimePoint;
-    private Serializable id;
-    private List<Competitor> involvedBoats;
-    private int passId;
+    private final TimePoint createdAt;
+    private final TimePoint logicalTimePoint;
+    private final Serializable id;
+    private final List<Competitor> involvedBoats;
+    private final int passId;
 
     public RaceLogEventImpl(TimePoint createdAt, TimePoint pTimePoint, Serializable pId,
             List<Competitor> pInvolvedBoats, int pPassId) {

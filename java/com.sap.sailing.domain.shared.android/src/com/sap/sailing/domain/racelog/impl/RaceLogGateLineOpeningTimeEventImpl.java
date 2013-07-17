@@ -11,7 +11,7 @@ import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 public class RaceLogGateLineOpeningTimeEventImpl extends RaceLogEventImpl implements RaceLogGateLineOpeningTimeEvent {
    
     private static final long serialVersionUID = 793529890804809490L;
-    private Long gateLineOpeningTime;
+    private final Long gateLineOpeningTime;
 
     public RaceLogGateLineOpeningTimeEventImpl(TimePoint createdAt,
             TimePoint pTimePoint, Serializable pId, List<Competitor> pCompetitors, int pPassId, Long gateLineOpeningTime) {

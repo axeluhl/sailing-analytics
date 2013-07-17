@@ -12,7 +12,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 public class RaceLogCourseDesignChangedEventImpl extends RaceLogEventImpl implements RaceLogCourseDesignChangedEvent {
     private static final long serialVersionUID = 1565936170747420547L;
    
-    private CourseBase courseDesign;
+    private final CourseBase courseDesign;
 
     public RaceLogCourseDesignChangedEventImpl(TimePoint createdAt,
             TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, CourseBase courseDesign) {

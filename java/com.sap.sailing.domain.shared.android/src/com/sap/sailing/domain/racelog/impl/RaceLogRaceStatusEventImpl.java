@@ -12,7 +12,7 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 public class RaceLogRaceStatusEventImpl extends RaceLogEventImpl implements RaceLogRaceStatusEvent {
     private static final long serialVersionUID = -8809758843066724482L;
 
-    protected RaceLogRaceStatus nextStatus;
+    private final RaceLogRaceStatus nextStatus;
 
     public RaceLogRaceStatusEventImpl(TimePoint createdAt, TimePoint pTimePoint, Serializable pId,
             List<Competitor> pInvolvedBoats, int pPassId, RaceLogRaceStatus nextStatus) {

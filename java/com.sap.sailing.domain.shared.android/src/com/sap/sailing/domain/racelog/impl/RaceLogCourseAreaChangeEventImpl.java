@@ -12,7 +12,7 @@ public class RaceLogCourseAreaChangeEventImpl extends RaceLogEventImpl implement
 RaceLogCourseAreaChangedEvent {
     private static final long serialVersionUID = -3943108136024977860L;
 
-    private Serializable courseAreaId;
+    private final Serializable courseAreaId;
 
     public RaceLogCourseAreaChangeEventImpl(TimePoint createdAt,
             TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Serializable courseAreaId) {

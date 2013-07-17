@@ -11,7 +11,7 @@ import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
 public class RaceLogPathfinderEventImpl extends RaceLogEventImpl implements RaceLogPathfinderEvent {
    
     private static final long serialVersionUID = -1654474931330970804L;
-    private String pathfinderId;
+    private final String pathfinderId;
 
     public RaceLogPathfinderEventImpl(TimePoint createdAt,
             TimePoint pTimePoint, Serializable pId, List<Competitor> pCompetitors, int pPassId, String pathfinderId) {

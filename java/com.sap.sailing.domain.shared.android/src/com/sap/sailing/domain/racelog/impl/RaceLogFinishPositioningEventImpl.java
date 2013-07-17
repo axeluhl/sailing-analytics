@@ -13,7 +13,7 @@ public abstract class RaceLogFinishPositioningEventImpl extends RaceLogEventImpl
 
     private static final long serialVersionUID = -8168584588697908309L;
     
-    protected List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors;
+    private final List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors;
 
     public RaceLogFinishPositioningEventImpl(TimePoint createdAt, TimePoint pTimePoint, Serializable pId,
             List<Competitor> pInvolvedBoats, int pPassId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
