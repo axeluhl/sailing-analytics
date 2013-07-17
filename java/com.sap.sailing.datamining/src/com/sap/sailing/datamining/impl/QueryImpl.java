@@ -3,8 +3,6 @@ package com.sap.sailing.datamining.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.datamining.Aggregator;
-import com.sap.sailing.datamining.Extractor;
 import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.datamining.Query;
 import com.sap.sailing.datamining.Selector;
@@ -22,16 +20,6 @@ public class QueryImpl implements Query {
     @Override
     public Selector getSelector() {
         return selector;
-    }
-
-    @Override
-    public Extractor getExtractor() {
-        return null;
-    }
-
-    @Override
-    public Aggregator getAggregator() {
-        return null;
     }
 
     @Override

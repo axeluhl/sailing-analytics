@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -13,8 +12,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.datamining.shared.AggregatorType;
-import com.sap.sailing.datamining.shared.ExtractorType;
 import com.sap.sailing.datamining.shared.SelectorType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
@@ -86,8 +83,6 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         final long startTime = System.currentTimeMillis();
         SelectorType selectorType = SelectorType.Events;
         String[] selectionIdentifiers = new String[] {"Kieler Woche 2013"};
-        ExtractorType extractorType = ExtractorType.DistanceInMeters;
-        AggregatorType aggregatorType = AggregatorType.Sum;
 //        sailingService.runQuery(query, new AsyncCallback<Pair<Double, List<Pair<String, Double>>>>() {
 //            @Override
 //            public void onFailure(Throwable caught) {
@@ -100,10 +95,6 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
 //                updateResults(overallTime, result.getA(), result.getB());
 //            }
 //        });
-        List<Pair<String, Double>> results = new ArrayList<Pair<String,Double>>();
-        results.add(new Pair<String, Double>("29er", 2000.0));
-        results.add(new Pair<String, Double>("505", 1743.23));
-        updateResults(2.5, 2, results);
     }
     
     private void updateResults(double overallTime, double serverTime, List<Pair<String, Double>> results) {

@@ -8,8 +8,6 @@ import com.sap.sailing.server.RacingEventService;
 public interface Query {
     
     public Selector getSelector();
-    public Extractor getExtractor();
-    public Aggregator getAggregator();
     
     public List<Pair<String, Double>> run(RacingEventService racingEventService);
 
