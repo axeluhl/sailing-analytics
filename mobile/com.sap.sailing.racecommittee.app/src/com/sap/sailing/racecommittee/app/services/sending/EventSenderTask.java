@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.services.sending;
 
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
 
@@ -29,7 +30,6 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Pair<Intent, Intege
 
     @Override
     protected Pair<Intent, Integer> doInBackground(Intent... params) {
-
         Intent intent = params[0];
         if (intent == null) {
             return Pair.create(intent, -1);
@@ -46,7 +46,8 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Pair<Intent, Intege
             ExLog.i(TAG, "Posting event: " + serializedEvent);
             HttpRequest post = new HttpJsonPostRequest(URI.create(url), serializedEvent.toString());
             try {
-                post.execute().close();
+                final InputStream inputStream = post.execute();
+                inputStream.close();
             } finally {
                 post.disconnect();
             }

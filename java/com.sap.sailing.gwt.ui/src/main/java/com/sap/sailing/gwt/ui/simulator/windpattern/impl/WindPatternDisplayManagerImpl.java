@@ -1,13 +1,13 @@
-package com.sap.sailing.gwt.ui.shared.windpattern.impl;
+package com.sap.sailing.gwt.ui.simulator.windpattern.impl;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
-import com.sap.sailing.gwt.ui.shared.windpattern.WindPattern;
-import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
-import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager;
-import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
+import com.sap.sailing.gwt.ui.simulator.windpattern.WindPattern;
+import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
+import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplayManager;
+import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternSetting;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
 public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager {

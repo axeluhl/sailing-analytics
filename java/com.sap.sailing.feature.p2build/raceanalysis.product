@@ -8,9 +8,6 @@
 
    <launcherArgs>
       <programArgs>-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console -clean</programArgs>
-      <vmArgs>-Declipse.ignoreApp=true -Dosgi.noShutdown=true
--Xmx1024m -Djetty.home=configuration/jetty
--XX:+UseMembar</vmArgs>
    </launcherArgs>
 
    <windowImages/>
@@ -69,12 +66,7 @@
       <plugin id="org.eclipse.jetty.xml" autoStart="true" startLevel="4" />
       <plugin id="org.mortbay.jetty.util" autoStart="true" startLevel="4" />
       <property name="eclipse.ignoreApp" value="true" />
-      <property name="expedition.udp.port" value="2010" />
-      <property name="mongo.port" value="10200" />
-      <property name="mongo.host" value="localhost" />
       <property name="osgi.noShutdown" value="true" />
-      <property name="replication.exchangeName" value="sapsailinganalytics-dev" />
-      <property name="replication.exchangeHost" value="localhost" />
    </configurations>
 
 </product>

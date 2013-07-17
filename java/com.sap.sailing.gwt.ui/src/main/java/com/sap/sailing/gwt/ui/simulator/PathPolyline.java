@@ -23,9 +23,9 @@ import com.sap.sailing.gwt.ui.shared.RequestTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.ResponseTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
-import com.sap.sailing.gwt.ui.shared.racemap.TwoDPoint;
-import com.sap.sailing.gwt.ui.shared.racemap.TwoDSegment;
-import com.sap.sailing.gwt.ui.shared.racemap.TwoDVector;
+import com.sap.sailing.gwt.ui.simulator.racemap.TwoDPoint;
+import com.sap.sailing.gwt.ui.simulator.racemap.TwoDSegment;
+import com.sap.sailing.gwt.ui.simulator.racemap.TwoDVector;
 
 /**
  * This class represents the path polyline overlay on the GWT map. This polyline is constructed with an array of turn
