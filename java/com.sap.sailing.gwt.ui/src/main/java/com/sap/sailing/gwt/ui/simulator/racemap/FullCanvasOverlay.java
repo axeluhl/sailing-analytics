@@ -46,35 +46,33 @@ public abstract class FullCanvasOverlay extends CanvasOverlay implements Require
         Point ne = getMap().convertLatLngToDivPixel(getMap().getBounds().getNorthEast());
         setWidgetPosLeft(Math.min(sw.getX(), ne.getX()));
         setWidgetPosTop(Math.min(sw.getY(), ne.getY()));
-          
+
         getPane().setWidgetPosition(getCanvas(), getWidgetPosLeft(), getWidgetPosTop());
-        
+
     }
-    
+
     @Override
     public void onResize() {
+    	
+    	// improve browser performance by deferred scheduling of redraws
     	Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
     		public void execute() {
-
-    			setCanvasSettings();
     			redraw(true);
-
     		}
     	});
+    	
     }
 
 
     @Override
     protected void redraw(boolean force) {
-        logger.info("In FullCanvasOverlay.redraw" + force);
-        /*
-         * Reset the canvas only if the pixel coordinates need to be recomputed
-         */
-        if (force) {
-            setCanvasSettings();
-        }
+    	logger.info("In FullCanvasOverlay.redraw" + force);
+
+    	// Reset the canvas, e.g. onMove() of map or onResize() of window
+    	setCanvasSettings();
+
     }
-    
+
     /**
      * Draw a point on the canvas
      * @param x coordinate wrt the canvas
