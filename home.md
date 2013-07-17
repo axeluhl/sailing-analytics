@@ -18,7 +18,7 @@ Like businesses, sailors need the latest information to make strategic decisions
 * Information for Developers
   * [[Cook Book|wiki/cook-book]]
   * [[OnBoarding Information|wiki/onboarding]]
-  * [[Typical Development Scenarios|wiki/onboarding]]
+  * [[Typical Development Scenarios|wiki/typical-development-scenarios]]
   * [[Server Replication|wiki/server-replication]]
   * [[Configure Races on Server|wiki/typical-development-scenarios]]
   * [[Development Environment|wiki/development-environment]]
