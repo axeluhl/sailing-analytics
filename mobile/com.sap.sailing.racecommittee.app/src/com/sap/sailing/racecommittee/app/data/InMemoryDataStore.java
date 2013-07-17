@@ -82,8 +82,9 @@ public enum InMemoryDataStore implements DataStore {
     public CourseArea getCourseArea(Serializable id) {
         for (EventBase event : eventsById.values()) {
             for (CourseArea courseArea : getCourseAreas(event)) {
-                if (courseArea.getId().equals(id))
+                if (courseArea.getId().equals(id)) {
                     return courseArea;
+                }
             }
         }
         return null;
@@ -92,8 +93,9 @@ public enum InMemoryDataStore implements DataStore {
     public boolean hasCourseArea(Serializable id) {
         for (EventBase event : eventsById.values()) {
             for (CourseArea courseArea : getCourseAreas(event)) {
-                if (courseArea.getId().equals(id))
+                if (courseArea.getId().equals(id)) {
                     return true;
+                }
             }
         }
         return false;

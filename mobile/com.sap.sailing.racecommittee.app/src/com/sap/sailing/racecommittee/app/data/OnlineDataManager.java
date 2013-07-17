@@ -103,7 +103,6 @@ public class OnlineDataManager extends DataManager {
     }
 
     public void loadCourseAreas(final Serializable parentEventId, final LoadClient<Collection<CourseArea>> client) {
-
         if (dataStore.hasEvent(parentEventId)) {
             EventBase event = dataStore.getEvent(parentEventId);
             client.onLoadSucceded(dataStore.getCourseAreas(event));
