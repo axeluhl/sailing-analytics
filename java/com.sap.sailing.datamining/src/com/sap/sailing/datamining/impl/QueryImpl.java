@@ -11,7 +11,6 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.server.RacingEventService;
 
 public class QueryImpl implements Query {
-    private static final long serialVersionUID = 5649156014930954522L;
 
     private Selector selector;
     private Extractor extractor;

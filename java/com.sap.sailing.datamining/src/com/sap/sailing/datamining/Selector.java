@@ -1,12 +1,11 @@
 package com.sap.sailing.datamining;
 
-import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.server.RacingEventService;
 
-public interface Selector extends Serializable {
+public interface Selector {
     
     public List<String> getXValues();
     

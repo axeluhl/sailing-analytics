@@ -17,7 +17,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
 public class EventSelector implements Selector {
-    private static final long serialVersionUID = 8527294635220237370L;
     
     private transient Set<Regatta> regattas;
     private transient RacingEventService racingEventService;

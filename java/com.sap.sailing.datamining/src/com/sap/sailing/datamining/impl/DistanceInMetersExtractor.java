@@ -7,7 +7,6 @@ import com.sap.sailing.datamining.Extractor;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public class DistanceInMetersExtractor implements Extractor {
-    private static final long serialVersionUID = 3677163735450766164L;
 
     @Override
     public List<Double> extractDataFrom(List<GPSFixMoving> gpsFixes) {

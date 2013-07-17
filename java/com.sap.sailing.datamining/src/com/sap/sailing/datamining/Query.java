@@ -1,12 +1,11 @@
 package com.sap.sailing.datamining;
 
-import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.server.RacingEventService;
 
-public interface Query extends Serializable {
+public interface Query {
     
     public Selector getSelector();
     public Extractor getExtractor();
