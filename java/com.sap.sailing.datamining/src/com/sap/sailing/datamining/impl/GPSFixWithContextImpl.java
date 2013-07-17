@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
@@ -19,6 +20,10 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
     private static final long serialVersionUID = -7871244536135981633L;
     
     private GPSFixContext context;
+
+    public GPSFixWithContextImpl(GPSFixMoving gpsFix, GPSFixContext context) {
+        this(gpsFix.getPosition(), gpsFix.getTimePoint(), gpsFix.getSpeed(), context);
+    }
 
     public GPSFixWithContextImpl(Position position, TimePoint timePoint, SpeedWithBearing speed, GPSFixContext context) {
         super(position, timePoint, speed);
@@ -42,7 +47,7 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
 
     @Override
     public TrackedRace getRace() {
-        return context.getRace();
+        return context.getTrackedRace();
     }
 
     @Override

@@ -8,7 +8,7 @@ public interface GPSFixContext {
 
     public Event getEvent();
 
-    public TrackedRace getRace();
+    public TrackedRace getTrackedRace();
 
     public Competitor getCompetitor();
 

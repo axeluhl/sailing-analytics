@@ -2,11 +2,10 @@ package com.sap.sailing.datamining.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
+import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.datamining.Selector;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -18,47 +17,17 @@ import com.sap.sailing.server.RacingEventService;
 
 public class EventSelector implements Selector {
     
-    private transient Set<Regatta> regattas;
     private transient RacingEventService racingEventService;
-    
     private String[] eventNamesForSelection;
 
     public EventSelector(String... eventNames) {
         eventNamesForSelection = eventNames;
     }
-
+    
     @Override
-    public void initializeSelection(RacingEventService racingEventService) {
-        this.racingEventService = racingEventService;
-        for (Event event : racingEventService.getAllEvents()) {
-            for (String eventNameForSelection : eventNamesForSelection) {
-                if (eventNameForSelection.equals(event.getName())) {
-                    for (Regatta regatta : event.getRegattas()) {
-                        regattas.add(regatta);
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
-    @Override
-    public List<String> getXValues() {
-        List<String> xValues = new ArrayList<String>();
-        for (Regatta regatta : regattas) {
-            xValues.add(regatta.getName());
-        }
-        return xValues;
-    }
-
-    @Override
-    public List<GPSFixMoving> getDataFor(String xValue) {
-        for (Regatta regatta : regattas) {
-            if (xValue.equals(regatta.getName())) {
-                return getDataOf(regatta);
-            }
-        }
-        return new ArrayList<GPSFixMoving>();
+    public List<GPSFixWithContext> selectGPSFixes(RacingEventService racingEventService) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     private List<GPSFixMoving> getDataOf(Regatta regatta) {
