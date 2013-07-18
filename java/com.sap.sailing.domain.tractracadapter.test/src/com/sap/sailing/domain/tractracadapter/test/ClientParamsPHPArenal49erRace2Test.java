@@ -29,6 +29,6 @@ public class ClientParamsPHPArenal49erRace2Test extends AbstractClientParamsPHPT
         calendar.set(Calendar.MINUTE, 39);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        assertEquals(calendar.getTime(), clientParams.getRaceTrackingEndTime().asDate());
+        assertEquals(calendar.getTime(), clientParams.getRace().getTrackingEndTime().asDate());
     }
 }

@@ -380,7 +380,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public void update(List<Pair<ControlPoint, NauticalSide>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
+    public void update(Iterable<Pair<ControlPoint, NauticalSide>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
         Patch<Waypoint> patch = null;
         synchronized (updateMonitor) {
             lockForRead();
