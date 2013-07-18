@@ -95,8 +95,17 @@ public class ParseTracTracJSONServiceOutputTest {
         List<RaceRecord> races = jsonService.getRaceRecords();
         assertFalse(races.isEmpty());
         for (RaceRecord race : races) {
-            assertEquals(new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4400"), race.getLiveURI());
-            assertEquals(new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4401"), race.getStoredURI());
+            if ("REPLAY".equals(race.getRaceStatus())) {
+                // replay races may have an empty / null live URI
+                assertTrue(race.getLiveURI() == null || new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4400").equals(race.getLiveURI()));
+                // and they point to stored data in the form of a binary ".mtb" file
+                String expectedSuffix = ".mtb";
+                assertTrue(race.getStoredURI().toString().endsWith(expectedSuffix) ||
+                        new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4401").equals(race.getStoredURI()));
+            } else {
+                assertEquals(new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4400"), race.getLiveURI());
+                assertEquals(new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":4401"), race.getStoredURI());
+            }
         }
     }
 
