@@ -36,13 +36,13 @@ public class JSONServiceImpl implements JSONService {
             throws URISyntaxException, IOException {
         RaceRecord raceRecord = new RaceRecord(jsonURL, regattaName,
                 (String) jsonRaceEntry.get("name"), (String) jsonRaceEntry.get("url"),
+                (String) jsonRaceEntry.get("params_url"),
                 (String) jsonRaceEntry.get("id"),
                 (String) jsonRaceEntry.get("tracking_starttime"),
                 (String) jsonRaceEntry.get("tracking_endtime"),
                 (String) jsonRaceEntry.get("race_starttime"),
                 (String) jsonRaceEntry.get("classes"),
-                (String) jsonRaceEntry.get("status"),
-                /*loadLiveAndStoreURI*/ loadLiveAndStoredURI);
+                (String) jsonRaceEntry.get("status"), /*loadLiveAndStoreURI*/ loadLiveAndStoredURI);
         return raceRecord;
     }
     

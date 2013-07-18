@@ -1,6 +1,5 @@
 package com.sap.sailing.util.impl;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -292,7 +291,7 @@ public class LockUtil {
             synchronized (map) {
                 result = map.get(thread);
                 if (result == null) {
-                    result = new HashMap<Lock, Integer>();
+                    result = new ConcurrentHashMap<Lock, Integer>();
                     map.put(thread, result);
                 }
             }
