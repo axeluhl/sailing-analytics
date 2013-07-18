@@ -7,18 +7,12 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class GPSFixContextImpl implements GPSFixContext {
     
-    private Event event;
     private TrackedRace trackedRace;
     private Competitor competitor;
 
-    public GPSFixContextImpl(Event event, TrackedRace trackedRace, Competitor competitor) {
-        this.event = event;
+    public GPSFixContextImpl(TrackedRace trackedRace, Competitor competitor) {
         this.trackedRace = trackedRace;
         this.competitor = competitor;
-    }
-
-    public Event getEvent() {
-        return event;
     }
     
     @Override

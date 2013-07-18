@@ -2,7 +2,6 @@ package com.sap.sailing.datamining;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -14,7 +13,6 @@ public interface GPSFixWithContext extends GPSFixMoving {
     public LegType getLegType();
     public TrackedRace getRace();
     public Regatta getRegatta();
-    public Event getEvent();
     CourseArea getCourseArea();
 
 }

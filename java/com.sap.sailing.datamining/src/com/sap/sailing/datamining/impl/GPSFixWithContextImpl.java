@@ -4,7 +4,6 @@ import com.sap.sailing.datamining.GPSFixContext;
 import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.LegType;
@@ -53,11 +52,6 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
     @Override
     public Regatta getRegatta() {
         return getRace().getTrackedRegatta().getRegatta();
-    }
-
-    @Override
-    public Event getEvent() {
-        return context.getEvent();
     }
     
     @Override

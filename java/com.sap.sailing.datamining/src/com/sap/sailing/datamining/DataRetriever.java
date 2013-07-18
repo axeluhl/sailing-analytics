@@ -8,8 +8,7 @@ public interface DataRetriever<T> {
     
     /**
      * Retrieves all GPS-Fixes from its target.
-     * @param initialContext Used to build the contexts of the retrieved GPS-Fixes.
      */
-    public List<GPSFixWithContext> retrieveData(GPSFixContext initialContext);
+    public List<GPSFixWithContext> retrieveData();
 
 }

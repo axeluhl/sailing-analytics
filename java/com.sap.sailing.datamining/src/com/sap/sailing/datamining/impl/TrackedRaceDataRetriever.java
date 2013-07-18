@@ -25,14 +25,14 @@ public class TrackedRaceDataRetriever implements DataRetriever<TrackedRace> {
     }
 
     @Override
-    public List<GPSFixWithContext> retrieveData(GPSFixContext initialContext) {
+    public List<GPSFixWithContext> retrieveData() {
         List<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
         for (Competitor competitor : getTarget().getRace().getCompetitors()) {
             GPSFixTrack<Competitor, GPSFixMoving> track = getTarget().getTrack(competitor);
             track.lockForRead();
             try {
                 for (GPSFixMoving gpsFix : track.getFixes()) {
-                    GPSFixContext context = new GPSFixContextImpl(initialContext.getEvent(), trackedRace, competitor);
+                    GPSFixContext context = new GPSFixContextImpl(trackedRace, competitor);
                     data.add(new GPSFixWithContextImpl(gpsFix, context));
                 }
             } finally {

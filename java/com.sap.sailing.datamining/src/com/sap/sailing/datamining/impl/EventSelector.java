@@ -22,7 +22,7 @@ public class EventSelector implements Selector {
         for (Event event : racingEventService.getAllEvents()) {
             for (String eventName : eventNamesForSelection) {
                 if (eventName.equals(event.getName())) {
-                    data.addAll(new EventDataRetriever(event, racingEventService).retrieveData(null));
+                    data.addAll(new EventDataRetriever(event, racingEventService).retrieveData());
                 }
             }
         }

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.datamining.DataRetriever;
-import com.sap.sailing.datamining.GPSFixContext;
 import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
@@ -26,13 +25,12 @@ public class EventDataRetriever implements DataRetriever<Event> {
     }
 
     @Override
-    public List<GPSFixWithContext> retrieveData(GPSFixContext initialContext) {
+    public List<GPSFixWithContext> retrieveData() {
         List<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
         for (Regatta regatta : getTarget().getRegattas()) {
             TrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
-                GPSFixContextImpl context = new GPSFixContextImpl(getTarget(), null, null);
-                data.addAll(new TrackedRegattaDataRetriever(trackedRegatta).retrieveData(context));
+                data.addAll(new TrackedRegattaDataRetriever(trackedRegatta).retrieveData());
             }
         }
         return data;
