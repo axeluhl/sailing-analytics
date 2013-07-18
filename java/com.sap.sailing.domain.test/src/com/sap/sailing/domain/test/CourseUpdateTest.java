@@ -92,8 +92,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         addListenersForStoredDataAndStartController(receivers);
         Race tractracRace = getTracTracEvent().getRaceList().iterator().next();
         // now we expect that there is no 
-        assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace));
-        race = domainFactory.getAndWaitForRaceDefinition(tractracRace);
+        assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace.getId()));
+        race = domainFactory.getAndWaitForRaceDefinition(tractracRace.getId());
         course = race.getCourse();
         assertNotNull(course);
         assertEquals(3, Util.size(course.getWaypoints()));

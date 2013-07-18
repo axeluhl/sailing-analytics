@@ -308,8 +308,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public ObjectInputStreamResolvingAgainstDomainFactory createObjectInputStreamResolvingAgainstThisFactory(
-            InputStream inputStream) throws IOException {
+    public ObjectInputStreamResolvingAgainstDomainFactory createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException {
         return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this);
     }
 

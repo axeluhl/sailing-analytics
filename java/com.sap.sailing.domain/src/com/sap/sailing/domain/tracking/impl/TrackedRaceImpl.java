@@ -2345,6 +2345,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     protected void setStatus(TrackedRaceStatus newStatus) {
+        assert newStatus != null;
         final TrackedRaceStatusEnum oldStatus;
         synchronized (getStatusNotifier()) {
             oldStatus = getStatus().getStatus();
