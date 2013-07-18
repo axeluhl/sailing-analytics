@@ -82,8 +82,8 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
 
     private void createAndRunQuery() {
         final long startTime = System.currentTimeMillis();
-        SelectorType selectorType = SelectorType.Events;
-        String[] selectionIdentifiers = new String[] {"Kieler Woche 2013"};
+        SelectorType selectorType = SelectorType.Regattas;
+        String[] selectionIdentifiers = new String[] {"KW 2013 International (STR)", "KW 2013 International (H-Boat)", "KW 2013 International (29ER)"};
         sailingService.runQuery(selectorType, selectionIdentifiers, new AsyncCallback<Pair<Double, List<Pair<String, Double>>>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -97,7 +97,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
             }
         });
     }
-    
+
     private void updateResults(double overallTime, double serverTime, List<Pair<String, Double>> results) {
         overallTimeLabel.setText(overallTime + "s");
         serverTimeLabel.setText(serverTime + "s");

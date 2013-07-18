@@ -1,21 +1,28 @@
 package com.sap.sailing.datamining;
 
 import com.sap.sailing.datamining.impl.EventSelector;
+import com.sap.sailing.datamining.impl.RegattaSelector;
 import com.sap.sailing.datamining.shared.SelectorType;
 
 public class SelectorFactory {
-    
-    public static Selector createEventSelector(String... eventNames) {
-        return new EventSelector(eventNames);
-    }
     
     public static Selector createSelector(SelectorType selectorType, String... selectionIdentifiers) {
         switch (selectorType) {
         case Events:
             return createEventSelector(selectionIdentifiers);
+        case Regattas:
+            return createRegattaSelector(selectionIdentifiers);
         default:
             throw new IllegalArgumentException("Case for the selector type '" + selectorType + "' isn't implemented.");
         }
+    }
+    
+    public static Selector createEventSelector(String... eventNames) {
+        return new EventSelector(eventNames);
+    }
+
+    private static Selector createRegattaSelector(String[] selectionIdentifiers) {
+        return new RegattaSelector(selectionIdentifiers);
     }
 
 }

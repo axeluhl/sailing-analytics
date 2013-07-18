@@ -2,7 +2,6 @@ package com.sap.sailing.datamining.impl;
 
 import com.sap.sailing.datamining.GPSFixContext;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class GPSFixContextImpl implements GPSFixContext {
