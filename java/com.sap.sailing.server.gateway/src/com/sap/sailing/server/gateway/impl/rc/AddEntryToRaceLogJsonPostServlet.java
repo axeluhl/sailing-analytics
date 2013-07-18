@@ -69,19 +69,19 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
 
         Leaderboard leaderboard = service.getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such leaderboard found.");
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Leaderboard "+leaderboardName+" not found.");
             return;
         }
 
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         if (raceColumn == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such race column found.");
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Race column "+raceColumnName+" not found.");
             return;
         }
 
         Fleet fleet = raceColumn.getFleetByName(fleetName);
         if (fleet == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such fleet found.");
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Fleet "+fleetName+" not found.");
             return;
         }
 

@@ -210,5 +210,17 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     public Iterable<RaceLogEventVisitor> getAllListeners() {
         return this.listeners;
     }
-    
+
+    @Override
+    public Iterable<RaceLogEvent> getRawFixes(UUID clientId) {
+        assertReadLock();
+        NavigableSet<RaceLogEvent> result = getRawFixes();
+        Set<RaceLogEvent> edtc = eventsDeliveredToClient.get(clientId);
+        if (edtc == null) {
+            edtc = new HashSet<RaceLogEvent>();
+            eventsDeliveredToClient.put(clientId, edtc);
+        }
+        edtc.addAll(result);
+        return result;
+    }
 }

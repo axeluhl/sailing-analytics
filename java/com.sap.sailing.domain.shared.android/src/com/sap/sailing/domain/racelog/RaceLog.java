@@ -77,4 +77,11 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
      * stored, the entire set of all race log events would be delivered to the client once.
      */
     Iterable<RaceLogEvent> add(RaceLogEvent event, UUID clientId);
+    
+    /**
+     * Returns all {@link #getRawFixes() raw fixes} and marks them as delivered to the client identified by <code>clientId</code>
+     * so that when that ID appears in a subsequent call to {@link #add(RaceLogEvent, UUID)}, the fixes returned by this call
+     * are already considered delivered to the client identified by <code>clientId</code>.
+     */
+    Iterable<RaceLogEvent> getRawFixes(UUID clientId);
 }
