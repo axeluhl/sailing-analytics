@@ -111,7 +111,7 @@ public class EventSendingService extends Service implements EventSendingListener
         String url = String.format("%s/sailingserver/rc/racelog?"+
                 RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
                 RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
-                RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s"+
+                RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s&"+
                 RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
                 AppPreferences.getServerBaseURL(context), URLEncoder.encode(race.getRaceGroup().getName()),
                 URLEncoder.encode(race.getName()), URLEncoder.encode(race.getFleet().getName()), uuid);
