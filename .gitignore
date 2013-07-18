@@ -27,5 +27,3 @@ java/com.sap.sailing.simulator/bin/com/sap/sailing/simulator/Simulator.gwt.xml
 /mobile/com.sap.sailing.racecommittee.app/res/values/keys.xml
 /mobile/google-play-services_lib/gen/*
 /mobile/google-play-services_lib/gen/com/google/android/gms/BuildConfig.java
-/mobile/com.sap.sailing.racecommittee.app/project.properties
-/mobile/com.sap.sailing.racecommittee.glue/project.properties
