@@ -330,5 +330,5 @@ public interface SailingService extends RemoteService {
 
     MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override);
 
-    Pair<Double, List<Pair<String, Double>>> runQuery(SelectorType selectorType, String[] selectionIdentifiers);
+    Pair<Double, List<Double>> runQueryAsBenchmark(SelectorType selectorType, String[] selectionIdentifiers, int times);
 }

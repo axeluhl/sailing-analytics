@@ -3309,14 +3309,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Pair<Double, List<Pair<String, Double>>> runQuery(SelectorType selectorType, String[] selectionIdentifiers) {
-        final long startTime = System.currentTimeMillis();
+    public Pair<Double, List<Double>> runQueryAsBenchmark(SelectorType selectorType, String[] selectionIdentifiers, int times) {
+        List<Double> gpsFixAmounts = new ArrayList<Double>();
+        final long startTime = System.nanoTime();
         Selector selector = SelectorFactory.createSelector(selectorType, selectionIdentifiers);
-        Query query = QueryFactory.createQuery(selector);
-        List<Pair<String, Double>> result = query.run(getService());
-        long endTime = System.currentTimeMillis();
-        double serverTime = (endTime - startTime) / 1000.0;
-        return new Pair<Double, List<Pair<String,Double>>>(serverTime, result);
+        for (int i = 0; i < times; i++) {
+            Query query = QueryFactory.createQuery(selector);
+            gpsFixAmounts.add(query.run(getService()).get(0).getB());
+        }
+        long endTime = System.nanoTime();
+        double averageServerTime = (endTime - startTime) / (1000000000.0 * times);
+        return new Pair<Double, List<Double>>(averageServerTime, gpsFixAmounts);
     }
 
 }
