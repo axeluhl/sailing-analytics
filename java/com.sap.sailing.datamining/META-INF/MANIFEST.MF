@@ -6,11 +6,8 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Import-Package: com.sap.sailing.domain.base,
- com.sap.sailing.domain.common,
- com.sap.sailing.domain.common.impl,
- com.sap.sailing.domain.tracking,
- com.sap.sailing.domain.tracking.impl,
- com.sap.sailing.server
+Import-Package: com.sap.sailing.server
 Export-Package: com.sap.sailing.datamining,
  com.sap.sailing.datamining.shared
+Require-Bundle: com.sap.sailing.domain;bundle-version="1.0.0",
+ com.sap.sailing.domain.common
