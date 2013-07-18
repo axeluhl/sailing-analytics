@@ -85,7 +85,7 @@ public class EventSendingService extends Service implements EventSendingListener
     /**
      * a UUID that identifies this client session; can be used, e.g., to let the server identify subsequent requests coming from the same client
      */
-    private final static UUID uuid = UUID.randomUUID();
+    public final static UUID uuid = UUID.randomUUID();
 
     public int getDelayedIntentsCount() {
         return persistenceManager.getEventCount();

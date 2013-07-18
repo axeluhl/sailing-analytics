@@ -35,6 +35,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
+import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseDataDeserializer;
@@ -148,7 +149,9 @@ public class OnlineDataManager extends DataManager {
         DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(this, client);
         try {
             new DataLoader<Collection<ManagedRace>>(context, URI.create(AppPreferences.getServerBaseURL(context)
-                    + "/sailingserver/rc/racegroups?"+RaceLogServletConstants.PARAM_COURSE_AREA_FILTER + "=" + courseAreaId.toString()), parser, handler)
+                    + "/sailingserver/rc/racegroups?"+
+                    RaceLogServletConstants.PARAM_COURSE_AREA_FILTER + "=" + courseAreaId.toString()+"&"+
+                    RaceLogServletConstants.PARAMS_CLIENT_UUID + "=" + EventSendingService.uuid), parser, handler)
                     .forceLoad();
         } catch (MalformedURLException e) {
             e.printStackTrace();
