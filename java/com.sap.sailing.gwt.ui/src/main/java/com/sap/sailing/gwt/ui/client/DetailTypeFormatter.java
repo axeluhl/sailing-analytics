@@ -99,6 +99,8 @@ public class DetailTypeFormatter {
             return stringMessages.averageJibeLossInMeters();
         case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
             return stringMessages.timeSinceLastPositionFix();
+        case RACE_TRACKING_QUALITY:
+            return "TQ";
         }
         return null;
     }
@@ -166,12 +168,13 @@ public class DetailTypeFormatter {
         case NUMBER_OF_MANEUVERS:
         case DISPLAY_LEGS:
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
+        case RACE_TRACKING_QUALITY:
             return "";
 
         default:
-            // Throwing an exception to get notificated if an implementation of
-            // an detail type is missing.
-            throw new UnsupportedOperationException("Theres currently no support for the enum value '" + detailType
+            // Throwing an exception to get notified if an implementation of
+            // a detail type is missing.
+            throw new UnsupportedOperationException("There is currently no support for the enum value '" + detailType
                     + "' in this method.");
         }
     }
@@ -271,6 +274,8 @@ public class DetailTypeFormatter {
             return stringMessages.windwardDistanceToGoInMetersTooltip();
         case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
             return stringMessages.timeSinceLastPositionFixTooltip();
+        case RACE_TRACKING_QUALITY:
+            return "Tracking Quality";
         }
         
         return "";
