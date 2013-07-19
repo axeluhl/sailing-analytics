@@ -14,7 +14,9 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.operationaltransformation.OperationalTransformer;
@@ -32,6 +34,7 @@ public class RaceLogOperationalTransformationTest {
     private Peer<RaceLogEventWithTransformationSupport<?>, RaceLog> client2;
     private Peer<RaceLogEventWithTransformationSupport<?>, RaceLog> server;
     private OperationalTransformer<RaceLog, RaceLogEventWithTransformationSupport<?>> transformer;
+    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
     
     @Before
     public void setUp() {

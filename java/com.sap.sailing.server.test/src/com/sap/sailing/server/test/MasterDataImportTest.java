@@ -51,8 +51,10 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.mongodb.MongoDBService;
@@ -68,6 +70,7 @@ public class MasterDataImportTest {
     private static final String TEST_EVENT_NAME = "testEvent";
     private static final String TEST_LEADERBOARD_NAME = "testRegatta (29er)";
     private static final String TEST_GROUP_NAME2 = "testGroup2";
+    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
 
     private final UUID eventUUID = UUID.randomUUID();
 

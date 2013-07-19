@@ -15,7 +15,9 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.operationaltransformation.OperationalTransformer;
 import com.sap.sailing.operationaltransformation.Peer;
@@ -34,6 +36,7 @@ public class RaceLogInRaceColumnTest {
 
     private RacingEventService racingEventServiceServer;
     private Peer<RacingEventServiceOperation<?>, RacingEventService> server;
+    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
 
     @Before
     public void setUp() {

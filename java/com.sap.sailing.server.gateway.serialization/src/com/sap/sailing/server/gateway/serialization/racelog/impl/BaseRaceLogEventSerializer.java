@@ -14,6 +14,8 @@ public abstract class BaseRaceLogEventSerializer implements JsonSerializer<RaceL
     public static final String FIELD_TIMESTAMP = "timestamp";
     public static final String FIELD_PASS_ID = "passId";
     public static final String FIELD_COMPETITORS = "competitors";
+    public static final String FIELD_AUTHOR_NAME = "authorName";
+    public static final String FIELD_AUTHOR_PRIORITY = "authorPriority";
 
     protected abstract String getClassFieldValue();
 
@@ -37,6 +39,10 @@ public abstract class BaseRaceLogEventSerializer implements JsonSerializer<RaceL
             competitors.add(competitorSerializer.serialize(competitor));
         }
         result.put(FIELD_COMPETITORS, competitors);
+        if (object.getAuthor() != null) {
+            result.put(FIELD_AUTHOR_NAME, object.getAuthor().getName());
+            result.put(FIELD_AUTHOR_PRIORITY, object.getAuthor().getPriority());
+        }
 
         return result;
     }

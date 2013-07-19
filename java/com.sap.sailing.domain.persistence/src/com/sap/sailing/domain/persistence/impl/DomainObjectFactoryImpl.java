@@ -91,6 +91,7 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
@@ -105,6 +106,7 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
@@ -1029,72 +1031,80 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Integer passId = (Integer) dbObject.get(FieldNames.RACE_LOG_EVENT_PASS_ID.name());
         BasicDBList dbCompetitors = (BasicDBList) dbObject.get(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name());
         List<Competitor> competitors = loadCompetitorsForRaceLogEvent(dbCompetitors);
+        final RaceLogEventAuthor author;
+        String authorName = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_AUTHOR_NAME.name());
+        Number authorPriority = (Number) dbObject.get(FieldNames.RACE_LOG_EVENT_AUTHOR_PRIORITY.name());
+        if (authorName != null && authorPriority != null) {
+            author = new RaceLogEventAuthorImpl(authorName, authorPriority.intValue());
+        } else {
+            author = null;
+        }
 
         String eventClass = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_CLASS.name());
         if (eventClass.equals(RaceLogStartTimeEvent.class.getSimpleName())) {
-            return loadRaceLogStartTimeEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+            return loadRaceLogStartTimeEvent(createdAt, author, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogRaceStatusEvent.class.getSimpleName())) {
-            return loadRaceLogRaceStatusEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+            return loadRaceLogRaceStatusEvent(createdAt, author, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogFlagEvent.class.getSimpleName())) {
-            return loadRaceLogFlagEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+            return loadRaceLogFlagEvent(createdAt, author, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogPassChangeEvent.class.getSimpleName())) {
-            return loadRaceLogPassChangeEvent(createdAt, timePoint, id, passId, competitors);
+            return loadRaceLogPassChangeEvent(createdAt, author, timePoint, id, passId, competitors);
         } else if (eventClass.equals(RaceLogCourseAreaChangedEvent.class.getSimpleName())) {
-            return loadRaceLogCourseAreaChangedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+            return loadRaceLogCourseAreaChangedEvent(createdAt, author, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogCourseDesignChangedEvent.class.getSimpleName())) {
-            return loadRaceLogCourseDesignChangedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+            return loadRaceLogCourseDesignChangedEvent(createdAt, author, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogFinishPositioningListChangedEvent.class.getSimpleName())) {
-            return loadRaceLogFinishPositioningListChangedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+            return loadRaceLogFinishPositioningListChangedEvent(createdAt, author, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogFinishPositioningConfirmedEvent.class.getSimpleName())) {
-            return loadRaceLogFinishPositioningConfirmedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+            return loadRaceLogFinishPositioningConfirmedEvent(createdAt, author, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogPathfinderEvent.class.getSimpleName())) {
-            return loadRaceLogPathfinderEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+            return loadRaceLogPathfinderEvent(createdAt, author, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogGateLineOpeningTimeEvent.class.getSimpleName())) {
-            return loadRaceLogGateLineOpeningTimeEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+            return loadRaceLogGateLineOpeningTimeEvent(createdAt, author, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogStartProcedureChangedEvent.class.getSimpleName())) {
-            return loadRaceLogStartProcedureChangedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+            return loadRaceLogStartProcedureChangedEvent(createdAt, author, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogProtestStartTimeEvent.class.getSimpleName())) {
-            return loadRaceLogRaceLogProtestStartTimeEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+            return loadRaceLogRaceLogProtestStartTimeEvent(createdAt, author, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogWindFixEvent.class.getSimpleName())) {
-            return loadRaceLogRaceLogWindFixEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+            return loadRaceLogRaceLogWindFixEvent(createdAt, author, timePoint, id, passId, competitors, dbObject);
         }
 
         throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
     }
 
-    private RaceLogEvent loadRaceLogRaceLogWindFixEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,
-            Integer passId, List<Competitor> competitors, DBObject dbObject) {
+    private RaceLogEvent loadRaceLogRaceLogWindFixEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint,
+            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         Wind wind = loadWind((DBObject) dbObject.get(FieldNames.WIND.name()));
         return raceLogEventFactory.createWindFixEvent(createdAt, author, timePoint, id, competitors, passId, wind);
     }
 
-    private RaceLogEvent loadRaceLogRaceLogProtestStartTimeEvent(TimePoint createdAt, TimePoint timePoint,
-            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+    private RaceLogEvent loadRaceLogRaceLogProtestStartTimeEvent(TimePoint createdAt, RaceLogEventAuthor author,
+            TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         TimePoint protestStartTime = loadTimePoint(dbObject, FieldNames.RACE_LOG_PROTEST_START_TIME);
         return raceLogEventFactory.createProtestStartTimeEvent(createdAt, author, timePoint, id, competitors, passId, protestStartTime);
     }
 
-    private RaceLogEvent loadRaceLogStartProcedureChangedEvent(TimePoint createdAt, TimePoint timePoint,
-            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+    private RaceLogEvent loadRaceLogStartProcedureChangedEvent(TimePoint createdAt, RaceLogEventAuthor author,
+            TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         StartProcedureType type = StartProcedureType.valueOf(dbObject.get(FieldNames.RACE_LOG_START_PROCEDURE_TYPE.name()).toString());
         return raceLogEventFactory.createStartProcedureChangedEvent(createdAt, author, timePoint, id, competitors, passId, type);
     }
 
-    private RaceLogEvent loadRaceLogGateLineOpeningTimeEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,
-            Integer passId, List<Competitor> competitors, DBObject dbObject) {
+    private RaceLogEvent loadRaceLogGateLineOpeningTimeEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint,
+            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         Number gateLineOpeningTime = (Number) dbObject.get(FieldNames.RACE_LOG_GATE_LINE_OPENING_TIME.name());
         return raceLogEventFactory.createGateLineOpeningTimeEvent(createdAt, author, timePoint, id, competitors,
                 passId, gateLineOpeningTime == null ? null : gateLineOpeningTime.longValue());
     }
     
-    private RaceLogEvent loadRaceLogPathfinderEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,
-            Integer passId, List<Competitor> competitors, DBObject dbObject) {
+    private RaceLogEvent loadRaceLogPathfinderEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint,
+            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         String pathfinderId = dbObject.get(FieldNames.RACE_LOG_PATHFINDER_ID.name()).toString();
         return raceLogEventFactory.createPathfinderEvent(createdAt, author, timePoint, id, competitors, passId, pathfinderId);
     }
     
-    private RaceLogEvent loadRaceLogFinishPositioningConfirmedEvent(TimePoint createdAt, TimePoint timePoint,
-            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+    private RaceLogEvent loadRaceLogFinishPositioningConfirmedEvent(TimePoint createdAt, RaceLogEventAuthor author,
+            TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         BasicDBList dbPositionedCompetitorList = (BasicDBList) dbObject.get(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name());
         List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = null;
         //When a confirmation event is loaded that does not contain the positioned competitors (this is the case for the ESS events in
@@ -1106,26 +1116,26 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return raceLogEventFactory.createFinishPositioningConfirmedEvent(createdAt, author, timePoint, id, competitors, passId, positionedCompetitors);
     }
 
-    private RaceLogEvent loadRaceLogFinishPositioningListChangedEvent(TimePoint createdAt, TimePoint timePoint,
-            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+    private RaceLogEvent loadRaceLogFinishPositioningListChangedEvent(TimePoint createdAt, RaceLogEventAuthor author,
+            TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         BasicDBList dbPositionedCompetitorList = (BasicDBList) dbObject.get(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name());
         List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = loadPositionedCompetitors(dbPositionedCompetitorList);
         
         return raceLogEventFactory.createFinishPositioningListChangedEvent(createdAt, author, timePoint, id, competitors, passId, positionedCompetitors);
     }
 
-    private RaceLogEvent loadRaceLogPassChangeEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,
-            Integer passId, List<Competitor> competitors) {
+    private RaceLogEvent loadRaceLogPassChangeEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint,
+            Serializable id, Integer passId, List<Competitor> competitors) {
         return raceLogEventFactory.createPassChangeEvent(createdAt, author, timePoint, id, competitors, passId);
     }
 
-    private RaceLogCourseDesignChangedEvent loadRaceLogCourseDesignChangedEvent(TimePoint createdAt, TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+    private RaceLogCourseDesignChangedEvent loadRaceLogCourseDesignChangedEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         String courseName = (String) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN_NAME.name());
         CourseBase courseData = loadCourseData((BasicDBList) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()), courseName);
         return raceLogEventFactory.createCourseDesignChangedEvent(createdAt, author, timePoint, id, competitors, passId, courseData);
     }
 
-    private RaceLogCourseAreaChangedEvent loadRaceLogCourseAreaChangedEvent(TimePoint createdAt, TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+    private RaceLogCourseAreaChangedEvent loadRaceLogCourseAreaChangedEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         Serializable courseAreaId = (Serializable) dbObject.get(FieldNames.COURSE_AREA_ID.name());
         return raceLogEventFactory.createCourseAreaChangedEvent(createdAt, author, timePoint, id, competitors, passId, courseAreaId);
     }
@@ -1166,7 +1176,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return competitors;
     }
 
-    private RaceLogFlagEvent loadRaceLogFlagEvent(TimePoint createdAt, TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+    private RaceLogFlagEvent loadRaceLogFlagEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         Flags upperFlag = Flags.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_FLAG_UPPER.name()));
         Flags lowerFlag = Flags.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_FLAG_LOWER.name()));
         Boolean displayed = Boolean.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_FLAG_DISPLAYED.name()));
@@ -1178,12 +1188,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return raceLogEventFactory.createFlagEvent(createdAt, author, timePoint, id, competitors, passId, upperFlag, lowerFlag, displayed);
     }
 
-    private RaceLogStartTimeEvent loadRaceLogStartTimeEvent(TimePoint createdAt, TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+    private RaceLogStartTimeEvent loadRaceLogStartTimeEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         TimePoint startTime = loadTimePoint(dbObject, FieldNames.RACE_LOG_EVENT_START_TIME);        
         return raceLogEventFactory.createStartTimeEvent(createdAt, author, timePoint, id, competitors, passId, startTime);
     }
 
-    private RaceLogRaceStatusEvent loadRaceLogRaceStatusEvent(TimePoint createdAt, TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+    private RaceLogRaceStatusEvent loadRaceLogRaceStatusEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         RaceLogRaceStatus nextStatus = RaceLogRaceStatus.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()));
         return raceLogEventFactory.createRaceStatusEvent(createdAt, author, timePoint, id, competitors, passId, nextStatus);
     }

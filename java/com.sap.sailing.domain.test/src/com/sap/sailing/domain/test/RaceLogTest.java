@@ -19,12 +19,15 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 
 public class RaceLogTest {
+    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
     
     @Test
     public void testAddingTwoEventsOfDifferentPassesButSameTimestamps() {
@@ -32,8 +35,8 @@ public class RaceLogTest {
         int passId = 0;
         RaceLog raceLog = new RaceLogImpl("RaceLogTest", "test-identifier");
         
-        RaceLogFlagEvent rcEvent1 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, author, author, UUID.randomUUID(), new ArrayList<Competitor>(), passId, Flags.CLASS, Flags.NONE, false);
-        RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, author, author, UUID.randomUUID(), new ArrayList<Competitor>(), ++passId, Flags.CLASS, Flags.NONE, false);
+        RaceLogFlagEvent rcEvent1 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, author, UUID.randomUUID(), new ArrayList<Competitor>(), passId, Flags.CLASS, Flags.NONE, false);
+        RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, author, UUID.randomUUID(), new ArrayList<Competitor>(), ++passId, Flags.CLASS, Flags.NONE, false);
         
         raceLog.add(rcEvent1);
         raceLog.add(rcEvent2);

@@ -43,6 +43,7 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
@@ -56,6 +57,7 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoDBTest {
@@ -63,10 +65,10 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     String leaderboardName = "TestLeaderboard";
     final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
     FlexibleLeaderboardImpl leaderboard = null;
-
+    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    
     public TestStoringAndRetrievingRaceLogInLeaderboards() throws UnknownHostException, MongoException {
         super();
-
     }
 
     @Before

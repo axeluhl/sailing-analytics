@@ -18,12 +18,15 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 
 public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTest {
     private static final String RACELOG_TEST_COLLECTION = "racelog_test_collection";
-
+    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    
     public TestStoringAndRetrievingRaceLogEventData() throws UnknownHostException, MongoException {
         super();
     }
