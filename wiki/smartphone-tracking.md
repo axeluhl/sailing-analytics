@@ -163,12 +163,12 @@ Helper Class for accessing the App Preferences specified in settings_view.xml
 ## ToDo
 
 ### Server
-* begin pre race phase event
- * use for creating list of open "racelogtracking" races
+* use pre race phase started event for creating list of open "racelogtracking" races
 * ping Marks
  * how does smartphone gain knowledge of course layout? reuse course designer?
  * write in race log, or rather buffer on smartphone and transmit on creating race?
  * or is this just setting the course definition and then adding fixes for the mark, without necessarily mapping a device to the mark
+* deal with passes properly in racelog tracking events
 * UI for setting mark roundings
  * use RaceViewer
  * select competitor -> checkbox for each waypoint, toggles markrounding (maybe add "addMarkRounding" to TrackedRace)
