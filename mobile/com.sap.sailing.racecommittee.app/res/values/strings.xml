@@ -215,5 +215,7 @@
     </string-array>
     
     <string name="loading_failure">Load failure</string>
-
+	<string name="wind_unknown">(click to set wind)</string>
+	<string name="wind_info" formatted="false">(%s kn, %s)</string>
+	
 </resources>
