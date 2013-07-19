@@ -22,7 +22,7 @@ Generic device identifiers, that are qualified through a device type, are used f
 The reason for using the OSGi service registry is that it enables decentralized implementation of different kinds of device adapters. E.g., implementing a new Igtimi adapter does not mean that you have to modify the object factory for device identifier objects in the persistence bundle, but simply register a new service from within your own bundle. This is more hindering than helpful in this stage of development, but - in future - means that other device adapters could be developed without having to touch the Sailing Analytics core code, so a vendor of tracking devices could recieve a current Sailing Analytics version as an SDK and implement additional bundles only.
 
 ## Servlets
-### `/sailingserver/devices/createPersistentCompetitor`
+### `/sailingserver/racelogtracking/createPersistentCompetitor`
 `CreatePersistentCompetitorPostServlet`
 
 **Expects**
@@ -58,7 +58,7 @@ The reason for using the OSGi service registry is that it enables decentralized 
 **Throws**
 * `400` Invalid JSON in request
 
-### `/sailingserver/devices/getPersistentCompetitors`
+### `/sailingserver/racelogtracking/getPersistentCompetitors`
 `PersistentCompetitorsGetServlet`
 
 **Expects**
@@ -68,7 +68,7 @@ The reason for using the OSGi service registry is that it enables decentralized 
 * `200` body: JSON array of Competitor objects
 
 
-### `/racelogtracking/getRaceLogsInPreRacePhase`
+### `/sailingserver/racelogtracking/getRaceLogsInPreRacePhase`
 `RaceLogsInPreRacePhaseGetServlet`
 
 **Expects**
@@ -136,6 +136,26 @@ If a leaderboard with the supplied does not already exist, a FlexibleLeaderboard
 
 **Throws**
 * `409` Device not mapped to race and competitor
+
+### `/sailingserver/racelogtracking/pingMark?leaderboard=<leaderboardName>&raceColumn=<raceColumnName>&fleet=<fleetName>`
+`PingMarkPostServlet`
+**Precondition**
+* race has already been started by sending a `RaceLogPreRacePhaseEndedEvent` and has not been stopped yet
+
+**Expects**
+* POST request body: PingMark as JSON
+```
+{"unixtime": 2394820480284,
+ "nmea"    :  "$GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A"
+ }
+```
+
+**Returns**
+* `200`: mark pinged
+
+**Throws**
+* `404` Leaderboard, RaceColumn or Fleet not found
+* `409` Race not in tracking state
 
 
 ## RaceLog Events
