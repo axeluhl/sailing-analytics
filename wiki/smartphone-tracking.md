@@ -173,7 +173,6 @@ Helper Class for accessing the App Preferences specified in settings_view.xml
 ## ToDo
 
 ### Server
-* use pre race phase started event for creating list of open "racelogtracking" races
 * ping Marks
  * how does smartphone gain knowledge of course layout? reuse course designer?
  * write in race log, or rather buffer on smartphone and transmit on creating race?
