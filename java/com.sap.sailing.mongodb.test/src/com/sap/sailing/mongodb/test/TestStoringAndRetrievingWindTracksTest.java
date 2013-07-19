@@ -85,7 +85,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     }
                 }, /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
-        RaceDefinition race = domainFactory.getAndWaitForRaceDefinition(getTracTracEvent().getRaceList().iterator().next());
+        RaceDefinition race = domainFactory.getAndWaitForRaceDefinition(getTracTracEvent().getRaceList().iterator().next().getId());
         DynamicTrackedRace trackedRace = trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 
                     /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 10000, new DynamicRaceDefinitionSet() {
                     @Override

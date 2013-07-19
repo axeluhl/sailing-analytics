@@ -110,7 +110,6 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
-import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
@@ -1192,8 +1191,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      * The tracker will initially try to connect to the TracTrac infrastructure to obtain basic race master data. If
      * this fails after some timeout, to avoid garbage and lingering threads, the task scheduled by this method will
      * check after the timeout expires if race master data was successfully received. If so, the tracker continues
-     * normally. Otherwise, the tracker is shut down orderly by {@link Receiver#stopPreemptively() stopping} all
-     * receivers and {@link DataController#stop(boolean) stopping} the TracTrac controller for this tracker.
+     * normally. Otherwise, the tracker is shut down orderly by calling {@link RaceTracker#stop() stopping}.
      * 
      * @return the scheduled task, in case the caller wants to {@link ScheduledFuture#cancel(boolean) cancel} it, e.g.,
      *         when the tracker is stopped or has successfully received the race
