@@ -29,12 +29,6 @@
             android:key="edittextRaceTimeFrameAfterFinish"
             android:summary="@string/settings_time_frame_description"
             android:title="@string/settings_time_frame_header" />
-        <EditTextPreference
-            android:defaultValue="90"
-            android:inputType="numberDecimal"
-            android:key="edittextProtestTime"
-            android:summary="@string/settings_protest_time_description"
-            android:title="@string/settings_protest_time_header" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/settings_category_advanced" >

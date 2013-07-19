@@ -27,7 +27,6 @@ public class AppPreferences {
     
     private final static String PREFERENCE_MAIL_RECIPIENT = "mailRecipientPreference";
     private final static String PREFERENCE_MANAGED_COURSE_AREAS = "courseAreasPref";
-    private final static String PREFERENCE_PROTEST_TIME = "edittextProtestTime";
     
     public static BoatClassType getBoatClass(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
@@ -98,12 +97,6 @@ public class AppPreferences {
         String value = sp.getString(PREFERENCE_MANAGED_COURSE_AREAS, "");
         value = value.replaceAll("\\s","");
         return Arrays.asList(value.split(","));
-    }
-    
-    public static Integer getProtestTime(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        Integer value = sp.getInt(PREFERENCE_PROTEST_TIME, 90);
-        return value;
     }
     
     public static double getWindBearing(Context context) {
