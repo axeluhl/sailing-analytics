@@ -67,6 +67,16 @@ The reason for using the OSGi service registry is that it enables decentralized 
 **Returns**
 * `200` body: JSON array of Competitor objects
 
+
+### `/racelogtracking/getRaceLogsInPreRacePhase`
+`RaceLogsInPreRacePhaseGetServlet`
+
+**Expects**
+* GET request
+
+**Returns**
+* `200` body: JSON array of RaceLogIdentifiers
+
 ### `/sailingserver/racelogtracking/createRace`
 `CreateRaceLogTrackedRacePostServlet`
 
