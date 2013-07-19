@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -23,9 +24,12 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
     private IntegerBox numberOfQueriesBox;
     private Label averageOverallTimeLabel;
     private Label averageServerTimeLabel;
+    private Label benchmarkStatusLabel;
 
     private FlowPanel resultsPanel;
-    private ListDataProvider<Pair<String, Double>> resultsDataProvider;
+    private ListDataProvider<QueryBenchmarkResult> resultsDataProvider;
+    private double overallTimeSum = 0;
+    private double serverTimeSum = 0;
     
     @Override
     protected void doOnModuleLoad() {
@@ -34,9 +38,77 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         FlowPanel dataMiningElementsPanel = new FlowPanel();
         rootPanel.add(dataMiningElementsPanel);
         
+        dataMiningElementsPanel.add(createFunctionsPanel());
+        
+        resultsPanel = new FlowPanel();
+        resultsPanel.setVisible(false);
+        dataMiningElementsPanel.add(resultsPanel);
+        resultsPanel.add(createOverallTimePanel());
+        resultsPanel.add(createServerTimePanel());
+        resultsPanel.add(createResultsTable());
+    }
+
+    private void run() {
+        benchmarkStatusLabel.setText(" | Running");
+        resetResults();
+        final int times = numberOfQueriesBox.getValue() == null ? 1 : numberOfQueriesBox.getValue();
+        String[] selectionIdentifiers = new String[] {"KW 2013 International (STR)", "KW 2013 International (H-Boat)", "KW 2013 International (29ER)",
+                "KW 2013 International (505)", "KW 2013 International (F18)", "KW 2013 International (EUR)",
+                "KW 2013 International (Folkeboot)", "KW 2013 International (H16)", "KW 2013 International (L4.7)"};
+        SelectorType selectorType = SelectorType.Regattas;
+        final Map<Integer, Long> startTimesMap = new HashMap<Integer, Long>();
+        for (int i = 0; i < times; i++) {
+            final int number = i + 1;
+            startTimesMap.put(number, System.currentTimeMillis());
+            sailingService.runQueryAsBenchmark(selectorType, selectionIdentifiers,
+                    new AsyncCallback<Pair<Double, Double>>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            DataMiningEntryPoint.this.reportError("Error running a query: " + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Pair<Double, Double> result) {
+                            long endTime = System.currentTimeMillis();
+                            double overallTime = (endTime - startTimesMap.get(number)) / 1000.0;
+                            updateResults(new QueryBenchmarkResult("Run " + number, result.getB().intValue(), result.getA(), overallTime));
+
+                            synchronized (resultsDataProvider) {
+                                if (resultsDataProvider.getList().size() == times) {
+                                    benchmarkStatusLabel.setText(" | Done");
+                                } else {
+                                    benchmarkStatusLabel.setText(" | Running (last finished: " + number + ")");
+                                }
+                            }
+                        }
+                    });
+        }
+    }
+
+    private void resetResults() {
+        overallTimeSum = 0;
+        serverTimeSum = 0;
+        resultsDataProvider.getList().clear();
+    }
+
+    private void updateResults(QueryBenchmarkResult newResult) {
+        synchronized (resultsDataProvider) {
+            resultsDataProvider.getList().add(newResult);
+            
+            overallTimeSum += newResult.getOverallTime();
+            serverTimeSum += newResult.getServerTime();
+            averageOverallTimeLabel.setText((overallTimeSum / (resultsDataProvider.getList().size())) + "s");
+            averageServerTimeLabel.setText((serverTimeSum / (resultsDataProvider.getList().size())) + "s");
+        }
+        
+        if (!resultsPanel.isVisible()) {
+            resultsPanel.setVisible(true);
+        }
+    }
+
+    private HorizontalPanel createFunctionsPanel() {
         HorizontalPanel functionsPanel = new HorizontalPanel();
         functionsPanel.setSpacing(5);
-        dataMiningElementsPanel.add(functionsPanel);
         
         Button runQueryButton = new Button("Run");
         runQueryButton.addClickHandler(new ClickHandler() {
@@ -52,80 +124,63 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         functionsPanel.add(numberOfQueriesBox);
         functionsPanel.add(new Label("times"));
         
-        resultsPanel = new FlowPanel();
-        resultsPanel.setVisible(false);
-        dataMiningElementsPanel.add(resultsPanel);
+        benchmarkStatusLabel = new Label();
+        functionsPanel.add(benchmarkStatusLabel);
+        return functionsPanel;
+    }
+
+    private CellTable<QueryBenchmarkResult> createResultsTable() {
+        TextColumn<QueryBenchmarkResult> identifierColumn = new TextColumn<QueryBenchmarkResult>() {
+            @Override
+            public String getValue(QueryBenchmarkResult result) {
+                return result.getIdentifier();
+            }
+        };
+        TextColumn<QueryBenchmarkResult> gpsFixNumberColumn = new TextColumn<QueryBenchmarkResult>() {
+            @Override
+            public String getValue(QueryBenchmarkResult result) {
+                return Integer.toString(result.getNumberOfGPSFixes());
+            }
+        };
+        TextColumn<QueryBenchmarkResult> serverTimeColumn = new TextColumn<QueryBenchmarkResult>() {
+            @Override
+            public String getValue(QueryBenchmarkResult result) {
+                return Double.toString(result.getServerTime());
+            }
+        };
+        TextColumn<QueryBenchmarkResult> overallTimeColumn = new TextColumn<QueryBenchmarkResult>() {
+            @Override
+            public String getValue(QueryBenchmarkResult result) {
+                return Double.toString(result.getOverallTime());
+            }
+        };
         
-        HorizontalPanel overallTimePanel = new HorizontalPanel();
-        overallTimePanel.setSpacing(5);
-        overallTimePanel.add(new Label("Average overall time: "));
-        averageOverallTimeLabel = new Label();
-        overallTimePanel.add(averageOverallTimeLabel);
-        resultsPanel.add(overallTimePanel);
-        
+        CellTable<QueryBenchmarkResult> resultsTable = new CellTable<QueryBenchmarkResult>(500);
+        resultsTable.addColumn(identifierColumn, "Identifier");
+        resultsTable.addColumn(gpsFixNumberColumn, "Number of GPS-Fixes");
+        resultsTable.addColumn(serverTimeColumn, "Server Time");
+        resultsTable.addColumn(overallTimeColumn, "Overall Time");
+        resultsDataProvider = new ListDataProvider<QueryBenchmarkResult>();
+        resultsDataProvider.addDataDisplay(resultsTable);
+        return resultsTable;
+    }
+
+    private HorizontalPanel createServerTimePanel() {
         HorizontalPanel serverTimePanel = new HorizontalPanel();
         serverTimePanel.setSpacing(5);
         serverTimePanel.add(new Label("Average server time: "));
         averageServerTimeLabel = new Label();
         serverTimePanel.add(averageServerTimeLabel);
-        resultsPanel.add(serverTimePanel);
-
-        TextColumn<Pair<String, Double>> xValues = new TextColumn<Pair<String,Double>>() {
-            @Override
-            public String getValue(Pair<String, Double> dateElement) {
-                return dateElement.getA();
-            }
-        };
-        TextColumn<Pair<String, Double>> results = new TextColumn<Pair<String,Double>>() {
-            @Override
-            public String getValue(Pair<String, Double> dateElement) {
-                return dateElement.getB().toString();
-            }
-        };
-        
-        CellTable<Pair<String,Double>> resultsTable = new CellTable<Pair<String,Double>>();
-        resultsTable.addColumn(xValues, "X Values");
-        resultsTable.addColumn(results, "Results");
-        resultsDataProvider = new ListDataProvider<Pair<String,Double>>();
-        resultsDataProvider.addDataDisplay(resultsTable);
-        resultsPanel.add(resultsTable);
+        return serverTimePanel;
     }
 
-    private void run() {
-        final int times = numberOfQueriesBox.getValue() == null ? 1 : numberOfQueriesBox.getValue();
-        String[] selectionIdentifiers = new String[] {"KW 2013 International (STR)", "KW 2013 International (H-Boat)", "KW 2013 International (29ER)",
-                "KW 2013 International (505)", "KW 2013 International (F18)", "KW 2013 International (EUR)",
-                "KW 2013 International (Folkeboot)", "KW 2013 International (H16)", "KW 2013 International (L4.7)"};
-        SelectorType selectorType = SelectorType.Regattas;
-        final long startTime = System.currentTimeMillis();
-        sailingService.runQueryAsBenchmark(selectorType, selectionIdentifiers, times, new AsyncCallback<Pair<Double, List<Double>>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                DataMiningEntryPoint.this.reportError("Error running a query: " + caught.getMessage());
-            }
-            @Override
-            public void onSuccess(Pair<Double, List<Double>> result) {
-                long endTime = System.currentTimeMillis();
-                double averageOverallTime = (endTime - startTime) / (1000.0 * times);
-                updateResults(averageOverallTime, result.getA(), result.getB());
-            }
-        });
-    }
-
-    private void updateResults(double averageOverallTime, double averageServerTime, List<Double> results) {
-        averageOverallTimeLabel.setText(averageOverallTime + "s");
-        averageServerTimeLabel.setText(averageServerTime + "s");
-        
-        resultsDataProvider.getList().clear();
-        int i = 1;
-        for (Double gpsFixAmount : results) {
-            resultsDataProvider.getList().add(new Pair<String, Double>(i + ". Number of selected and retrieved fixes", gpsFixAmount));
-            i++;
-        }
-        
-        if (!resultsPanel.isVisible()) {
-            resultsPanel.setVisible(true);
-        }
+    private HorizontalPanel createOverallTimePanel() {
+        HorizontalPanel overallTimePanel = new HorizontalPanel();
+        overallTimePanel.setSpacing(5);
+        overallTimePanel.add(new Label("Average overall time: "));
+        averageOverallTimeLabel = new Label();
+        overallTimePanel.add(averageOverallTimeLabel);
+        return overallTimePanel;
     }
 
 }
