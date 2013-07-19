@@ -62,6 +62,7 @@ public class LeaderboardEntryDTO implements Serializable {
      * that passed between the last fix and the query time point for which this entry was created.
      */
     public Date timePointOfLastPositionFixAtOrBeforeQueryTimePoint;
+    public Double timeSinceLastPositionFixInSeconds;
 
     /**
      * If <code>null</code>, no leg details are known yet, the race is not being tracked or the details
@@ -112,6 +113,7 @@ public class LeaderboardEntryDTO implements Serializable {
                 + ((speedOverGroundAtStartOfRaceInKnots == null) ? 0 : speedOverGroundAtStartOfRaceInKnots.hashCode());
         result = prime * result + ((startTack == null) ? 0 : startTack.hashCode());
         result = prime * result + ((timePointOfLastPositionFixAtOrBeforeQueryTimePoint == null) ? 0 : timePointOfLastPositionFixAtOrBeforeQueryTimePoint.hashCode());
+        result = prime * result + ((timeSinceLastPositionFixInSeconds == null) ? 0 : timeSinceLastPositionFixInSeconds.hashCode());
         result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
         result = prime
                 * result
@@ -187,6 +189,11 @@ public class LeaderboardEntryDTO implements Serializable {
             if (other.timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null)
                 return false;
         } else if (!timePointOfLastPositionFixAtOrBeforeQueryTimePoint.equals(other.timePointOfLastPositionFixAtOrBeforeQueryTimePoint))
+            return false;
+        if (timeSinceLastPositionFixInSeconds == null) {
+            if (other.timeSinceLastPositionFixInSeconds != null)
+                return false;
+        } else if (!timeSinceLastPositionFixInSeconds.equals(other.timeSinceLastPositionFixInSeconds))
             return false;
         if (totalPoints == null) {
             if (other.totalPoints != null)
