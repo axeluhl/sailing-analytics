@@ -30,7 +30,7 @@ public class RaceLogWindFixEventDeserializer extends BaseRaceLogEventDeserialize
         
         Wind wind = windDeserializer.deserialize(windJsonObject);
         
-        return factory.createWindFixEvent(createdAt, timePoint, id, competitors, passId, wind);
+        return factory.createWindFixEvent(createdAt, author, timePoint, id, competitors, passId, wind);
     }
 
 }

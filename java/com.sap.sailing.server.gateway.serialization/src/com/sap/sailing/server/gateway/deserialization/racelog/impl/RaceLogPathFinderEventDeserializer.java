@@ -23,7 +23,7 @@ public class RaceLogPathFinderEventDeserializer extends BaseRaceLogEventDeserial
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, TimePoint timePoint, int passId,
             List<Competitor> competitors) throws JsonDeserializationException {
         String pathfinderId = object.get(RaceLogPathfinderEventSerializer.FIELD_PATHFINDER_ID).toString();
-        return factory.createPathfinderEvent(createdAt, timePoint, id, competitors, passId, pathfinderId);
+        return factory.createPathfinderEvent(createdAt, author, timePoint, id, competitors, passId, pathfinderId);
     }
 
 }

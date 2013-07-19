@@ -130,8 +130,8 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
             onRaceAborted(MillisecondsTimePoint.now());
         }
         TimePoint eventTime = startProcedure.getLogicalStartTimeEventTime(newStartTime);
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(eventTime, UUID.randomUUID(), 
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newStartTime);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(eventTime, author, 
+                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newStartTime);
         this.raceLog.add(event);
         fireStartTimeChange(newStartTime);
     }
@@ -139,7 +139,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     @Override
     public void createNewStartProcedure(StartProcedureType type) {
         if (!type.equals(startProcedureTypeAnalyzer.analyze())) {
-            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartProcedureChangedEvent(MillisecondsTimePoint.now(), raceLog.getCurrentPassId(), type);
+            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartProcedureChangedEvent(MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), type);
             this.raceLog.add(event);
             registerStartProcedure();
             ExLog.i(TAG, String.format("Switch start procedure to %s", this.startProcedure.getClass().getSimpleName()));
@@ -158,8 +158,8 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     @Override
     public void setCourseDesign(CourseBase newCourseData) {
         TimePoint eventTime = MillisecondsTimePoint.now();
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newCourseData);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(eventTime, author,
+                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newCourseData);
         this.raceLog.add(event);
         fireCourseDesignChanged();
     }
@@ -168,7 +168,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public void onRaceAborted(TimePoint eventTime) {
         /*RaceLogEvent abortEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.UNSCHEDULED);
         this.raceLog.add(abortEvent);*/
-        RaceLogEvent passChangeEvent = RaceLogEventFactory.INSTANCE.createPassChangeEvent(eventTime, raceLog.getCurrentPassId() + 1);
+        RaceLogEvent passChangeEvent = RaceLogEventFactory.INSTANCE.createPassChangeEvent(eventTime, author, raceLog.getCurrentPassId() + 1);
         this.raceLog.add(passChangeEvent);
         registerStartProcedure();
         fireRaceAborted();
@@ -176,19 +176,19 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     
     @Override
     public void onRaceStartphaseEntered(TimePoint eventTime) {
-        RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.STARTPHASE);
+        RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, author, raceLog.getCurrentPassId(), RaceLogRaceStatus.STARTPHASE);
         this.raceLog.add(statusEvent);
     }
 
     @Override
     public void onRaceStarted(TimePoint eventTime) {
-        RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.RUNNING);
+        RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, author, raceLog.getCurrentPassId(), RaceLogRaceStatus.RUNNING);
         this.raceLog.add(statusEvent);
     }
 
     @Override
     public void onRaceFinishing(TimePoint eventTime) {
-        RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHING);
+        RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, author, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHING);
         this.raceLog.add(statusEvent);
     }
     
@@ -200,7 +200,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     @Override
     public void onRaceFinished(TimePoint eventTime) {
-        RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHED);
+        RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, author, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHED);
         this.raceLog.add(statusEvent);
     }
 
@@ -222,7 +222,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public void setFinishPositioningListChanged(List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
         TimePoint eventTime = MillisecondsTimePoint.now();
         
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningListChangedEvent(eventTime, raceLog.getCurrentPassId(), positionedCompetitors);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningListChangedEvent(eventTime, author, raceLog.getCurrentPassId(), positionedCompetitors);
         this.raceLog.add(event);        
     }
     
@@ -237,14 +237,14 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         
         List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = getFinishPositioningList();
         
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(eventTime, raceLog.getCurrentPassId(), positionedCompetitors);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(eventTime, author, raceLog.getCurrentPassId(), positionedCompetitors);
         this.raceLog.add(event);
     }
 
     @Override
     public void setProtestStartTime(TimePoint protestStartTime) {
         TimePoint eventTime = MillisecondsTimePoint.now();
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createProtestStartTimeEvent(eventTime, raceLog.getCurrentPassId(), protestStartTime);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createProtestStartTimeEvent(eventTime, author, raceLog.getCurrentPassId(), protestStartTime);
         this.raceLog.add(event);
         fireProtestStartTimeChanged();
     }
@@ -257,7 +257,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     @Override
     public void setWindFix(Wind windFix) {
         TimePoint eventTime = MillisecondsTimePoint.now();
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createWindFixEvent(eventTime, raceLog.getCurrentPassId(), windFix);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createWindFixEvent(eventTime, author, raceLog.getCurrentPassId(), windFix);
         this.raceLog.add(event);
     }
 

@@ -23,7 +23,7 @@ public class RaceLogStartProcedureChangedEventDeserializer extends BaseRaceLogEv
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, TimePoint timePoint,
             int passId, List<Competitor> competitors) throws JsonDeserializationException {
         StartProcedureType type = StartProcedureType.valueOf(object.get(RaceLogStartProcedureChangedEventSerializer.FIELD_START_PROCEDURE_TYPE).toString());
-        return factory.createStartProcedureChangedEvent(createdAt, timePoint, id, competitors, passId, type);
+        return factory.createStartProcedureChangedEvent(createdAt, author, timePoint, id, competitors, passId, type);
     }
 
 }

@@ -26,7 +26,7 @@ public class RaceLogRaceStatusEventDeserializer extends BaseRaceLogEventDeserial
         String statusValue = object.get(RaceLogRaceStatusEventSerializer.FIELD_NEXT_STATUS).toString();
         RaceLogRaceStatus nextStatus = RaceLogRaceStatus.valueOf(statusValue);
 
-        return factory.createRaceStatusEvent(createdAt, timePoint, id, competitors, passId, nextStatus);
+        return factory.createRaceStatusEvent(createdAt, author, timePoint, id, competitors, passId, nextStatus);
     }
 
 }

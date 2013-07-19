@@ -30,7 +30,7 @@ public class RaceLogCourseDesignChangedEventDeserializer extends BaseRaceLogEven
         JSONObject jsonCourseDesign = (JSONObject) object.get(RaceLogCourseDesignChangedEventSerializer.FIELD_COURSE_DESIGN);
         CourseBase courseData = courseDataDeserializer.deserialize(jsonCourseDesign);
 
-        return factory.createCourseDesignChangedEvent(createdAt, timePoint, id, competitors, passId, courseData);
+        return factory.createCourseDesignChangedEvent(createdAt, author, timePoint, id, competitors, passId, courseData);
     }
 
 }

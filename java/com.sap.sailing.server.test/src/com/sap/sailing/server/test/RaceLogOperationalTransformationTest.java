@@ -52,7 +52,7 @@ public class RaceLogOperationalTransformationTest {
     public void testSimpleApply() {
         Calendar c = new GregorianCalendar(2013, 6, 7, 13, 59, 33);
         final MillisecondsTimePoint startTime = new MillisecondsTimePoint(c.getTime());
-        RaceLogStartTimeEvent startTimeEvent = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), startTime, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */ 1, startTime);
+        RaceLogStartTimeEvent startTimeEvent = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), author, startTime, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */ 1, startTime);
         RaceLogStartTimeEventWithTransformationSupport e = new RaceLogStartTimeEventWithTransformationSupport(startTimeEvent);
         server.apply(e);
         waitForEventualConsistency();
@@ -90,12 +90,12 @@ public class RaceLogOperationalTransformationTest {
     public void testConflictingApplyServerWins() {
         Calendar cServer = new GregorianCalendar(2013, 6, 7, 13, 59, 33);
         final MillisecondsTimePoint startTimeServer = new MillisecondsTimePoint(cServer.getTime());
-        RaceLogStartTimeEvent startTimeEventServer = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), startTimeServer, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */ 1, startTimeServer);
+        RaceLogStartTimeEvent startTimeEventServer = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), author, startTimeServer, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */ 1, startTimeServer);
         RaceLogStartTimeEventWithTransformationSupport eServer = new RaceLogStartTimeEventWithTransformationSupport(startTimeEventServer);
         server.apply(eServer);
         Calendar cClient1 = new GregorianCalendar(2013, 6, 7, 13, 59, 33);
         final MillisecondsTimePoint startTimeClient1 = new MillisecondsTimePoint(cClient1.getTime());
-        RaceLogStartTimeEvent startTimeEventClient1 = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), startTimeClient1, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */ 1, startTimeClient1);
+        RaceLogStartTimeEvent startTimeEventClient1 = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), author, startTimeClient1, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */ 1, startTimeClient1);
         RaceLogStartTimeEventWithTransformationSupport eClient1 = new RaceLogStartTimeEventWithTransformationSupport(startTimeEventClient1);
         client1.apply(eClient1);
         waitForEventualConsistency();

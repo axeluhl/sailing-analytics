@@ -28,8 +28,8 @@ public class RaceLogStartTimeEventDeserializer extends RaceLogRaceStatusEventDes
 
         RaceLogRaceStatusEvent event = (RaceLogRaceStatusEvent) super.deserialize(object, id, createdAt, timePoint, passId, competitors);
 
-        return factory.createStartTimeEvent(event.getCreatedAt(), event.getTimePoint(), event.getId(), event.getInvolvedBoats(), event.getPassId(), 
-                new MillisecondsTimePoint(startTime));
+        return factory.createStartTimeEvent(event.getCreatedAt(), author, event.getTimePoint(), event.getId(), event.getInvolvedBoats(), 
+                event.getPassId(), new MillisecondsTimePoint(startTime));
     }
 
 }

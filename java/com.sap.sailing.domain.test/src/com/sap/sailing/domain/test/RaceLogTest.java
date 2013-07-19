@@ -32,8 +32,8 @@ public class RaceLogTest {
         int passId = 0;
         RaceLog raceLog = new RaceLogImpl("RaceLogTest", "test-identifier");
         
-        RaceLogFlagEvent rcEvent1 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, UUID.randomUUID(), new ArrayList<Competitor>(), passId, Flags.CLASS, Flags.NONE, false);
-        RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, UUID.randomUUID(), new ArrayList<Competitor>(), ++passId, Flags.CLASS, Flags.NONE, false);
+        RaceLogFlagEvent rcEvent1 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, author, author, UUID.randomUUID(), new ArrayList<Competitor>(), passId, Flags.CLASS, Flags.NONE, false);
+        RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, author, author, UUID.randomUUID(), new ArrayList<Competitor>(), ++passId, Flags.CLASS, Flags.NONE, false);
         
         raceLog.add(rcEvent1);
         raceLog.add(rcEvent2);
@@ -53,14 +53,14 @@ public class RaceLogTest {
         UUID client1Id = UUID.randomUUID();
         UUID client2Id = UUID.randomUUID();
         final MillisecondsTimePoint now = MillisecondsTimePoint.now();
-        RaceLogStartTimeEvent startTimeEvent1 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now, 1, now.plus(1));
+        RaceLogStartTimeEvent startTimeEvent1 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now, author, 1, now.plus(1));
         Iterable<RaceLogEvent> empty = raceLog.add(startTimeEvent1, client1Id);
         assertTrue(Util.isEmpty(empty));
-        RaceLogStartTimeEvent startTimeEvent2 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now.plus(2), 1, now.plus(3));
+        RaceLogStartTimeEvent startTimeEvent2 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now.plus(2), author, 1, now.plus(3));
         Iterable<RaceLogEvent> nonEmpty = raceLog.add(startTimeEvent2, client2Id);
         assertEquals(1, Util.size(nonEmpty));
         assertSame(startTimeEvent1, nonEmpty.iterator().next());
-        RaceLogStartTimeEvent startTimeEvent3 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now.plus(4), 1, now.plus(5));
+        RaceLogStartTimeEvent startTimeEvent3 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now.plus(4), author, 1, now.plus(5));
         Iterable<RaceLogEvent> nonEmpty2 = raceLog.add(startTimeEvent3, client1Id);
         assertEquals(1, Util.size(nonEmpty2));
         assertSame(startTimeEvent2, nonEmpty2.iterator().next());
@@ -73,8 +73,8 @@ public class RaceLogTest {
         TimePoint t1 = MillisecondsTimePoint.now();
         int passId = 0;
         boolean isDisplayed = true;
-        RaceLogFlagEvent rcEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, passId, Flags.CLASS, Flags.NONE,
-                isDisplayed);
+        RaceLogFlagEvent rcEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, author, passId, Flags.CLASS,
+                Flags.NONE, isDisplayed);
         rcEventTrack.add(rcEvent);
 
         rcEventTrack.lockForRead();
@@ -105,16 +105,16 @@ public class RaceLogTest {
         TimePoint tx = new MillisecondsTimePoint(t1.asMillis() - 7000);
 
         int passId = 0;
-        RaceLogFlagEvent rcEvent1 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, passId, Flags.CLASS, Flags.NONE,
-                false);
-        RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t2, passId, Flags.PAPA, Flags.NONE,
-                false);
-        RaceLogFlagEvent rcEvent3 = RaceLogEventFactory.INSTANCE.createFlagEvent(t3, passId, Flags.PAPA, Flags.NONE,
-                true);
-        RaceLogFlagEvent rcEvent4 = RaceLogEventFactory.INSTANCE.createFlagEvent(t4, passId, Flags.CLASS, Flags.NONE,
-                true);
-        RaceLogStartTimeEvent rcEvent5 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(t5, passId,
-                t1);
+        RaceLogFlagEvent rcEvent1 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, author, passId, Flags.CLASS,
+                Flags.NONE, false);
+        RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t2, author, passId, Flags.PAPA,
+                Flags.NONE, false);
+        RaceLogFlagEvent rcEvent3 = RaceLogEventFactory.INSTANCE.createFlagEvent(t3, author, passId, Flags.PAPA,
+                Flags.NONE, true);
+        RaceLogFlagEvent rcEvent4 = RaceLogEventFactory.INSTANCE.createFlagEvent(t4, author, passId, Flags.CLASS,
+                Flags.NONE, true);
+        RaceLogStartTimeEvent rcEvent5 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(t5, author,
+                passId, t1);
 
         rcEventTrack.add(rcEvent5);
         rcEventTrack.add(rcEvent3);

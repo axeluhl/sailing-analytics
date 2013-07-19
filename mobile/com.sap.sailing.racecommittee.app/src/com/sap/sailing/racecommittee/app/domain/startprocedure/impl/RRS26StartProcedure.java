@@ -112,9 +112,9 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
             raceStateChangedListener.onRaceStartphaseEntered(eventTime);
         }
 
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.CLASS, Flags.NONE, /* isDisplayed */
-                true);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author,
+                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                Flags.CLASS, Flags.NONE, true);
         raceLog.add(event);
 
         if (startPhaseEventListener != null) {
@@ -123,9 +123,9 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     }
 
     private void handleStartRuleUp(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), this.startModeFlag, Flags.NONE, /* isDisplayed */
-                true);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author,
+                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                this.startModeFlag, Flags.NONE, true);
         raceLog.add(event);
 
         if (startPhaseEventListener != null) {
@@ -135,9 +135,9 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
 
     private void handleStartRuleDown(TimePoint eventTime) {
 
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), this.startModeFlag, Flags.NONE, /* isDisplayed */
-                false);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author,
+                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                this.startModeFlag, Flags.NONE, false);
         raceLog.add(event);
 
         if (startPhaseEventListener != null) {
@@ -147,9 +147,9 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
 
     private void handleClassDown(TimePoint eventTime) {
 
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.CLASS, Flags.NONE, /* isDisplayed */
-                false);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author,
+                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                Flags.CLASS, Flags.NONE, false);
         raceLog.add(event);
 
         if (startPhaseEventListener != null) {
@@ -184,9 +184,9 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
 
     @Override
     public void setFinishing(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.BLUE, Flags.NONE, /* isDisplayed */
-                true);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author,
+                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                Flags.BLUE, Flags.NONE, true);
         raceLog.add(event);
 
         if (raceStateChangedListener != null) {
@@ -204,9 +204,9 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
 
     @Override
     public void setFinished(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.BLUE, Flags.NONE, /* isDisplayed */
-                false);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author,
+                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                Flags.BLUE, Flags.NONE, false);
         raceLog.add(event);
 
         if (raceStateChangedListener != null) {
@@ -228,9 +228,9 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     }
 
     private void handleAPUp(TimePoint eventTime, Flags lowerFlag) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.AP, lowerFlag, /* isDisplayed */
-                true);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author,
+                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                Flags.AP, lowerFlag, true);
         raceLog.add(event);
 
         if (raceStateChangedListener != null) {
@@ -252,9 +252,9 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     }
 
     private void handleNovemberUp(TimePoint eventTime, Flags lowerFlag) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.NOVEMBER, lowerFlag, /* isDisplayed */
-                true);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author,
+                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                Flags.NOVEMBER, lowerFlag, true);
         raceLog.add(event);
 
         if (raceStateChangedListener != null) {
@@ -264,9 +264,9 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
 
     @Override
     public void setGeneralRecall(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.FIRSTSUBSTITUTE, Flags.NONE, /* isDisplayed */
-                true);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author,
+                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                Flags.FIRSTSUBSTITUTE, Flags.NONE, true);
         raceLog.add(event);
 
         if (raceStateChangedListener != null) {
@@ -275,9 +275,9 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     }
 
     public void setIndividualRecall(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, /* isDisplayed */
-                true);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author,
+                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                Flags.XRAY, Flags.NONE, true);
         raceLog.add(event);
 
         TimePoint individualRecallRemovalFireTimePoint = eventTime.plus(individualRecallRemovalInterval);
@@ -294,9 +294,9 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
 
     public void setIndividualRecallRemoval(TimePoint eventTime) {
         if (isIndividualRecallDisplayed()) {
-            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
-                    Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, /* isDisplayed */
-                    false);
+            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author,
+                    author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                    Flags.XRAY, Flags.NONE, false);
             raceLog.add(event);
 
             if (runningRaceEventListener != null) {

@@ -23,7 +23,7 @@ public class RaceLogGateLineOpeningTimeEventDeserializer extends BaseRaceLogEven
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, TimePoint timePoint, int passId,
             List<Competitor> competitors) throws JsonDeserializationException {
         Long gateLineOpeningTime = (Long) object.get(RaceLogGateLineOpeningTimeEventSerializer.FIELD_GATE_LINE_OPENING_TIME);
-        return factory.createGateLineOpeningTimeEvent(timePoint, id, competitors, passId, gateLineOpeningTime);
+        return factory.createGateLineOpeningTimeEvent(timePoint, author, author, id, competitors, passId, gateLineOpeningTime);
     }
 
 }

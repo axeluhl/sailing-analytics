@@ -65,7 +65,7 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
                         factory), new GateDeserializer(factory, new MarkDeserializer(factory))))));
         now = MillisecondsTimePoint.now();
 
-        event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now, 0, createCourseData());
+        event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now, author, 0, createCourseData());
     }
 
     @Test

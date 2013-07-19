@@ -59,7 +59,7 @@ public class RaceLogInRaceColumnTest {
 
         TimePoint t1 = MillisecondsTimePoint.now();
         RaceLogEvent rlEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(
-                t1, 0, Flags.CLASS, Flags.NONE, true);
+                t1, author, 0, Flags.CLASS, Flags.NONE, true);
 
         Leaderboard leaderboard = racingEventServiceServer.getLeaderboardByName(LEADERBOARDNAME);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);

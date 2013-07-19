@@ -202,8 +202,8 @@ public class MasterDataImportTest {
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1,
-                logTimePoint);
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, author,
+                1, logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
 
@@ -366,7 +366,7 @@ public class MasterDataImportTest {
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1, logTimePoint);
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, author, 1, logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
 
@@ -507,8 +507,8 @@ public class MasterDataImportTest {
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1,
-                logTimePoint);
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, author,
+                1, logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
 
@@ -685,8 +685,8 @@ public class MasterDataImportTest {
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1,
-                logTimePoint);
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, author,
+                1, logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
 
@@ -856,8 +856,8 @@ public class MasterDataImportTest {
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1,
-                logTimePoint);
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, author,
+                1, logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
 
@@ -986,7 +986,7 @@ public class MasterDataImportTest {
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1, logTimePoint);
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, author, 1, logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
 

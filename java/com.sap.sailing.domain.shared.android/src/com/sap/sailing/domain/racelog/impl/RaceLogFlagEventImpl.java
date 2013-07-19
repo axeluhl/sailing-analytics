@@ -6,6 +6,7 @@ import java.util.List;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 
@@ -16,8 +17,8 @@ public class RaceLogFlagEventImpl extends RaceLogEventImpl implements RaceLogFla
     private final Flags lowerFlag;
     private final boolean isDisplayed;
 
-    public RaceLogFlagEventImpl(TimePoint createdAt, TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Flags pUpperFlag, Flags pLowerFlag, boolean pIsDisplayed) {
-        super(createdAt, pTimePoint, pId, pInvolvedBoats, pPassId);
+    public RaceLogFlagEventImpl(TimePoint createdAt, RaceLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Flags pUpperFlag, Flags pLowerFlag, boolean pIsDisplayed) {
+        super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
         this.upperFlag = pUpperFlag;
         this.lowerFlag = pLowerFlag;
         this.isDisplayed = pIsDisplayed;

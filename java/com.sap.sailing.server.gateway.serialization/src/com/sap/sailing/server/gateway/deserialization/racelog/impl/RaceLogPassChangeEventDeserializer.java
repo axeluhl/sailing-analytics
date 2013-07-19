@@ -19,7 +19,7 @@ public class RaceLogPassChangeEventDeserializer extends BaseRaceLogEventDeserial
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, TimePoint timePoint, int passId, List<Competitor> competitors) {
 
-        return factory.createPassChangeEvent(createdAt, timePoint, id, competitors, passId);
+        return factory.createPassChangeEvent(createdAt, author, timePoint, id, competitors, passId);
     }
 
 }

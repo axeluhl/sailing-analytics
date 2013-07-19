@@ -25,8 +25,8 @@ public class RaceLogCourseAreaChangedEventDeserializer extends BaseRaceLogEventD
 
         Serializable courseAreaId = (Serializable) object.get(RaceLogCourseAreaChangedEventSerializer.FIELD_COURSE_AREA_ID);
 
-        return factory.createCourseAreaChangedEvent(createdAt, timePoint, id, competitors, passId, 
-                Helpers.tryUuidConversion(courseAreaId));
+        return factory.createCourseAreaChangedEvent(createdAt, author, timePoint, id, competitors, 
+                passId, Helpers.tryUuidConversion(courseAreaId));
     }
 
 }
