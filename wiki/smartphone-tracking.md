@@ -193,10 +193,6 @@ Helper Class for accessing the App Preferences specified in settings_view.xml
 ## ToDo
 
 ### Server
-* ping Marks
- * how does smartphone gain knowledge of course layout? reuse course designer?
- * write in race log, or rather buffer on smartphone and transmit on creating race?
- * or is this just setting the course definition and then adding fixes for the mark, without necessarily mapping a device to the mark
 * deal with passes properly in racelog tracking events
 * UI for setting mark roundings
  * use RaceViewer
@@ -215,6 +211,7 @@ Helper Class for accessing the App Preferences specified in settings_view.xml
 * support other input channels (e.g. Igtimi)
 
 ### Android
+* reuse existing course design functionality to create RaceLogCourseDesignChangedEvent before sending RaceLogPreRacePhaseEndedEvent
 * abstract sending service, so that all POST / GET requests and not only RaceLogEvents can be sent using the semi-connectedness functionality --> just write JSONObjects/Strings directly into the file. The Servlet has to handle deserialization and the client doesn't have to know what type of object it is after having saved it (is this really the case?)
 * simplify settings
 * login/register Activity for registering the Team and Sailor the first time the App is started
