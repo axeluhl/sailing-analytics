@@ -22,44 +22,6 @@ Generic device identifiers, that are qualified through a device type, are used f
 The reason for using the OSGi service registry is that it enables decentralized implementation of different kinds of device adapters. E.g., implementing a new Igtimi adapter does not mean that you have to modify the object factory for device identifier objects in the persistence bundle, but simply register a new service from within your own bundle. This is more hindering than helpful in this stage of development, but - in future - means that other device adapters could be developed without having to touch the Sailing Analytics core code, so a vendor of tracking devices could recieve a current Sailing Analytics version as an SDK and implement additional bundles only.
 
 ## Servlets
-### `/sailingserver/devices/createFlexibleLeaderboard`
-`CreateFlexibleLeaderboardPostServlet`
-
-**Expects**
-* POST request body: LeaderboardDTO-JSON (see `LeaderboardDTOJsonSerializer`)
-```
-{"name": "test",
- "displayName": "test",
- "discardThresholds": [1,2],
- "scoringScheme": "LOW_POINT",
- "courseAreaId": "Kiel"}
-```
-
-**Returns**
-* `200` Leaderboard created, body: LeaderboardDTO as JSON
-
-**Throws**
-* `400` Invalid JSON in request
-* `409` Leaderboard with name %s already exists
-
-### `/sailingserver/devices/createRaceColumn?leaderboard=<leaderboardName>`
-`CreateFlexibleLeaderboardPostServlet`
-
-**Expects**
-* POST request body: RaceColumnDTO-JSON (see `RaceColumnDTODeserializer`)
-```
-{"name": "test",
- "isMedalRace": false}
-```
-
-**Returns**
-* `200` RaceColumn created, body: RaceColumn-DTO as JSON
-
-**Throws**
-* `400` Missing parameter / Invalid JSON in request
-* `404` Leaderboard not found
-* `409` RaceColumn with name %s already exists / Error adding RaceColumn
-
 ### `/sailingserver/devices/createPersistentCompetitor`
 `CreatePersistentCompetitorPostServlet`
 
@@ -105,28 +67,44 @@ The reason for using the OSGi service registry is that it enables decentralized 
 **Returns**
 * `200` body: JSON array of Competitor objects
 
-### `/sailingserver/devices/createRace?leaderboard=<leaderboardName>&raceColumn=<raceColumnName>&fleet=<fleetName>`
-`CreateRacePostServlet`
-
-**Precondition**
-* `RaceLogPreRacePhaseEndedEvent` recieved via RaceLog beforehand
-* `RaceLogCourseDesignChangedEvent` at least one course design recieved via RaceLog beforehand
+### `/sailingserver/racelogtracking/createRace`
+`CreateRaceLogTrackedRacePostServlet`
 
 **Expects**
-* POST request: no body
+* POST request body: JSON with Leaderboard-DTO, RaceColumn-DTO and BoatClass (see CreateRaceLogTrackedRaceJsonSerializer)
+```
+{"leaderboard": {
+  "name": "test",
+  "displayName": "test",
+  "discardThresholds": [1,2],
+  "scoringScheme": "LOW_POINT",
+  "courseAreaId": "Kiel"
+ },
+ "raceColumn": {
+  "name": "test",
+  "isMedalRace": false
+ },
+ "boatClass": {
+  "name": "49er",
+  "typicallyStartsUpwind": true
+ }
+}
+```
 
 **Returns**
-* `200` body: RaceDTO-JSON
+* `200` RaceLog and Race Tracker created
 
 **Throws**
-* `400` Missing parameter
-* `404` Leaderboard/RaceColumn/Fleet not found
-* `409` Race has already been created, pre-race phase has not been ended
+* `400` Invalid JSON in request
+* `409` RaceColumn and RaceLog already exist in Leaderboard
+
+**Comments**
+If a leaderboard with the supplied does not already exist, a FlexibleLeaderboard is created. Otherwise, the existing Leaderboard is used without raising an error. An existing RaceColumn will raise an error however, as this also means a RaceLog already exists.
 
 ### `/smartphone/recordFixes`
 `RecordFixesPostServlet`
 **Precondition**
-* `/smartphone/createRace` has been successfully called before
+* race has already been started by sending a `RaceLogPreRacePhaseEndedEvent`
 
 **Expects**
 * POST request body: DeviceIdentifierWithGPSFixMovingsDTO as JSON
@@ -155,12 +133,8 @@ The reason for using the OSGi service registry is that it enables decentralized 
 Includes a `Competitor` as well a `SmartphoneIdentifier`. On the one hand, every comptitor that is thus registered will be included in the `RaceDefinition` as soon as the race is created, on the other hand the mapping between smartphone identifier (e.g. IMEI for european phones) and competitor is later used for mapping the incoming fixes to the correct competitor.
 
 ### RaceLogPreRacePhaseEndedEvent
-This does not include any additional data, and merely indicates that the race can be transformed from its pre-race definition state (e.g. waiting for competitors to register, waiting for boat class, waiting for course definition) to an actual race, where no additional competitors can be added, the boat class is fixes, and tracking may begin. This existence of this event in the RaceLog is a precondition for the `createRace` servlet to be callable successfully.
+This does not include any additional data, and merely indicates that the race can be transformed from its pre-race definition state (e.g. waiting for competitors to register, waiting for boat class, waiting for course definition) to an actual race, where no additional competitors can be added, the boat class is fixes, and tracking may begin. This event is picked up by the `RaceLogRaceTracker`, which then creates the actual tracked race from the data in the RaceLog. For successful creation, at least one competitor has to be registered, and a course must have been set through a `RaceLogCourseDefinitionChangedEvent`.
 
-### Events that are still needed
-* Set boat class
-* Set course (reuse of existing events that Potsdam students already use)
-* Remove registered competitor (also use in RegisteredCompetitorFinder)
 
 ##Tracking App Architecture
 
@@ -193,6 +167,7 @@ Helper Class for accessing the App Preferences specified in settings_view.xml
 * begin pre race phase event
  * use for creating list of open "device tracking" races
 * ping Marks
+ * how does smartphone gain knowledge of course layout? reuse course designer?
  * write in race log, or rather buffer on smartphone and transmit on creating race?
  * or is this just setting the course definition and then adding fixes for the mark, without necessarily mapping a device to the mark
 * UI for setting mark roundings
