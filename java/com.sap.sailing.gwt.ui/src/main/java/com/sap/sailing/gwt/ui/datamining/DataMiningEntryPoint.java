@@ -59,6 +59,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         final Map<Integer, Long> startTimesMap = new HashMap<Integer, Long>();
         for (int i = 0; i < times; i++) {
             final int number = i + 1;
+            
             startTimesMap.put(number, System.currentTimeMillis());
             sailingService.runQueryAsBenchmark(selectorType, selectionIdentifiers,
                     new AsyncCallback<Pair<Double, Double>>() {
@@ -97,13 +98,21 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
             
             overallTimeSum += newResult.getOverallTime();
             serverTimeSum += newResult.getServerTime();
-            averageOverallTimeLabel.setText((overallTimeSum / (resultsDataProvider.getList().size())) + "s");
-            averageServerTimeLabel.setText((serverTimeSum / (resultsDataProvider.getList().size())) + "s");
+            averageOverallTimeLabel.setText(getAverageOverallTime() + "s");
+            averageServerTimeLabel.setText(getAverageServerTime() + "s");
         }
         
         if (!resultsPanel.isVisible()) {
             resultsPanel.setVisible(true);
         }
+    }
+
+    private double getAverageServerTime() {
+        return serverTimeSum / (resultsDataProvider.getList().size());
+    }
+
+    private double getAverageOverallTime() {
+        return overallTimeSum / (resultsDataProvider.getList().size());
     }
 
     private HorizontalPanel createFunctionsPanel() {
