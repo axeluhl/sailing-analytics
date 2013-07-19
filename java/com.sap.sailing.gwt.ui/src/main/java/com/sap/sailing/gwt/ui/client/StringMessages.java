@@ -743,4 +743,6 @@ public interface StringMessages extends Messages {
     String importSelectAtLeastOne();
     String deselectAll();
     String polarDiagramButton();
+    String timeSinceLastPositionFix();
+    String timeSinceLastPositionFixTooltip();
 }

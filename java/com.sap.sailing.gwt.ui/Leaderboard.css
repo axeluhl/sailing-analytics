@@ -135,3 +135,33 @@ body, table td, select, button {
 .bold {
 	font-family: "OpenSansCondensedBold", sans-serif;
 }
+
+.trackingQuality-circle {
+  width: 8px;
+  height: 8px;
+  -moz-border-radius-topleft: 50%;
+  -webkit-border-top-left-radius: 50%;
+  border-top-left-radius: 50%;
+  -moz-border-radius-topright: 50%;
+  -webkit-border-top-right-radius: 50%;
+  border-top-right-radius: 50%;
+  -moz-border-radius-bottomleft: 50%;
+  -webkit-border-bottom-left-radius: 50%;
+  border-bottom-left-radius: 50%;
+  -moz-border-radius-bottomright: 50%;
+  -webkit-border-bottom-right-radius: 50%;
+  border-bottom-right-radius: 50%;
+  float: left;
+}
+
+.circleYellow {
+  background: #fbba00;
+}
+
+.circleGreen {
+  background: #8ab54e;
+}
+
+.circleRed {
+  background: #f01010;
+}
