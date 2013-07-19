@@ -28,7 +28,7 @@ The servlets are listed in the chronological order that they can be called. Firs
 `CreatePersistentCompetitorPostServlet`
 
 **Expects**
-* POST request body: Competitor-JSON with a nested Boat-JSON and Team-JSON (see `CompetitorDeserializer`)
+* POST request body: Competitor-JSON with a nested Boat-JSON and Team-JSON (see `CompetitorJsonDeserializer`)
 ```
 {"id": "",
  "name": "Competitor Fredrik",
@@ -77,7 +77,7 @@ The servlets are listed in the chronological order that they can be called. Firs
 * GET request
 
 **Returns**
-* `200` body: JSON array of RaceLogIdentifiers
+* `200` body: JSON array of String Triples that act as RaceLog identifiers (leaderboard name, race column name, fleet name)
 
 ### `/sailingserver/racelogtracking/createRace`
 `CreateRaceLogTrackedRacePostServlet`
