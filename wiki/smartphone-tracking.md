@@ -5,6 +5,10 @@
 ## Introduction
 On this page the decisions, architecture and API's for using smartphones as an additional input channel for Sailing Analytics are documented. Meanwhile, the architecture of this solution is designed to be flexible enough to support other types of input devices in the future, e.g. [Igtimi](http://www.igtimi.com/) trackers.
 
+## Branches
+* `cmd-reuse-racelog-for-cmd-tracking`: server side development of using the RaceLog to create a tracking adapter for Commodity Mobile Devices (CMD) such as smartphones
+* `race-board-admin`: manual UI based entry of mark passings for the time being, while we do not have a detection algorithm
+
 ## Communication Channels
 The current plan is to use up to three channels for communicating:
 
@@ -20,6 +24,9 @@ On the server-side, the architecture of smartphone tracking is intended to be op
 Generic device identifiers, that are qualified through a device type, are used for mapping a device to a competitor in the race log. When the race is then created, the OSGi service registry is used to find services to which the appropriate device mappings in the race log are provided, e.g. a smartphone adapter registers a `RaceLogTrackingDeviceHandler` service for the device type `smartphoneImei`, and then recieves all smartphone device mappings from the race log once the race is created. The same OSGi service logic is used to find services that deal with persisting device identifiers, so that loading and persisting race log events can be used for all types of device identifiers.
 
 The reason for using the OSGi service registry is that it enables decentralized implementation of different kinds of device adapters. E.g., implementing a new Igtimi adapter does not mean that you have to modify the object factory for device identifier objects in the persistence bundle, but simply register a new service from within your own bundle. This is more hindering than helpful in this stage of development, but - in future - means that other device adapters could be developed without having to touch the Sailing Analytics core code, so a vendor of tracking devices could recieve a current Sailing Analytics version as an SDK and implement additional bundles only.
+
+## Mark Passings
+Without a tracking provider that implements a mark passing algorithm, we have to identify mark passings on our own in the context of smartphone tracking, for Sailing Analytics to be able to do any analytics at all. While the mid-term goal definitely is to implement such a detection algorithm, as a workaround a UI entry option has been provided, that can be found in the branch `race-board-admin`, in which the mark passings can be set by hand. Simply open a race in the RaceBoard, e.g. by clicking on the link in a leaderboard, and then change the URL before `.html` from `RaceBoard` to `RaceBoardAdmin`.
 
 ## Servlets
 The servlets are listed in the chronological order that they can be called. First, persistent competitors are needed, so that they can later on be registered for the race (`createPersistentCompetitor`). These can then be listed (`getPersistentCompetitors`). When this is completed, a race in its pre-race phase can be created (`createRace`), which is then also shown in `getRaceLogsInPreRacePhase`. By selecting one of these RaceLogs and sending `RaceLogPersistentCompetitorRegisteredEvent`s, `RaceLogCourseDefinitionChangedEvent`s, the race can then be moved from its pre race phase into the tracking phase by sending the `RaceLogPreRacePhaseEndedEvent` via the race log. From this moment on - given the fact that all necessary information was already included in the RaceLog, tracking data can be added to the race. On the one hand, marks can be pinged (`pingMark`, for which knowledge of the course layout is necessary, which can be accessed through `currentcourse`), on the other hand fixes of competitors can be recorded (`recordFixes`). Pinging the marks is of course only the first step, the plan is to allow the mapping of tracking devices such as smartphones to marks as well as competitors.
@@ -111,7 +118,7 @@ The servlets are listed in the chronological order that they can be called. Firs
 * `409` RaceColumn and RaceLog already exist in Leaderboard
 
 **Comments**
-If a leaderboard with the supplied does not already exist, a FlexibleLeaderboard is created. Otherwise, the existing Leaderboard is used without raising an error. An existing RaceColumn will raise an error however, as this also means a RaceLog already exists.
+* If a leaderboard with the supplied does not already exist, a FlexibleLeaderboard is created. Otherwise, the existing Leaderboard is used without raising an error. An existing RaceColumn will raise an error however, as this also means a RaceLog already exists.
 
 ### `/smartphone/recordFixes`
 `RecordFixesPostServlet`
@@ -168,6 +175,9 @@ If a leaderboard with the supplied does not already exist, a FlexibleLeaderboard
 **Returns**
 * `200` body: CourseBase JSON
 
+**Comments**
+* Does not use the latest `RaceLogCourseDefinitionChangedEvent`, but instead requires the presence of a `TrackedRace` for this racelog, from which the `RaceDefinition` is acquired to get the course. We could build our own servlet, but as we can only ping the marks after having created the race anyway, this isn't too much of a problem.
+
 
 ## RaceLog Events
 ### RaceLogPersistentCompetitorRegisteredEvent
@@ -206,9 +216,6 @@ Helper Class for accessing the App Preferences specified in settings_view.xml
 ### Server
 * set fleet when creating race
 * deal with passes properly in racelog tracking events
-* UI for setting mark roundings
- * use RaceViewer
- * select competitor -> checkbox for each waypoint, toggles markrounding (maybe add "addMarkRounding" to TrackedRace)
 * persist tracking data (GPSFixStore)
 * load stored tracked smartphone race (Panel in Admin Console, RaceLogConnector, only present such races with the necessary data in the racelog, and allow user to select whole leaderboard to restore)
 * mapping devices to marks
