@@ -95,8 +95,11 @@ public class AppPreferences {
     public static List<String> getManagedCourseAreaNames(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String value = sp.getString(PREFERENCE_MANAGED_COURSE_AREAS, "");
-        value = value.replaceAll("\\s","");
-        return Arrays.asList(value.split(","));
+        String[] managedCourseAreas = value.split(",");
+        for (int i = 0; i < managedCourseAreas.length; i++) {
+            managedCourseAreas[i] = managedCourseAreas[i].trim();
+        }
+        return Arrays.asList(managedCourseAreas);
     }
     
     public static double getWindBearing(Context context) {
