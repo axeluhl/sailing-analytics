@@ -104,7 +104,7 @@ The servlets are listed in the chronological order that they can be called. Firs
 ```
 
 **Returns**
-* `200` RaceLog and Race Tracker created
+* `200` RaceLog Identifier Triple JSON
 
 **Throws**
 * `400` Invalid JSON in request
