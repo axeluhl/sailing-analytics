@@ -31,6 +31,8 @@ Without a tracking provider that implements a mark passing algorithm, we have to
 ## Servlets
 The servlets are listed in the chronological order that they can be called. First, persistent competitors are needed, so that they can later on be registered for the race (`createPersistentCompetitor`). These can then be listed (`getPersistentCompetitors`). When this is completed, a race in its pre-race phase can be created (`createRace`), which is then also shown in `getRaceLogsInPreRacePhase`. By selecting one of these RaceLogs and sending `RaceLogPersistentCompetitorRegisteredEvent`s, `RaceLogCourseDefinitionChangedEvent`s, the race can then be moved from its pre race phase into the tracking phase by sending the `RaceLogPreRacePhaseEndedEvent` via the race log. From this moment on - given the fact that all necessary information was already included in the RaceLog, tracking data can be added to the race. On the one hand, marks can be pinged (`pingMark`, for which knowledge of the course layout is necessary, which can be accessed through `currentcourse`), on the other hand fixes of competitors can be recorded (`recordFixes`). Pinging the marks is of course only the first step, the plan is to allow the mapping of tracking devices such as smartphones to marks as well as competitors.
 
+To test the servlets manually, in addition to the unit tests, the chrome plugin [Postman](https://chrome.google.com/webstore/detail/postman-rest-client/fdmmgilgnpjigdojojpjoooidkmcomcm) in combination with this collection of [HTTP requests](http://www.getpostman.com/collections/d4eb46b5e4f566e6b7a3) for the servlets described below may come in handy.
+
 ### `/sailingserver/racelogtracking/createPersistentCompetitor`
 `CreatePersistentCompetitorPostServlet`
 
