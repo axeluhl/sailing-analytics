@@ -135,7 +135,7 @@ public class AppPreferences {
 
     public static boolean isSendingActive(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREFERENCE_SENDING_ACTIVE, true);
+        return sp.getBoolean(PREFERENCE_SENDING_ACTIVE, false);
     }
 
     public static void setSendingActive(Context context, boolean activate) {
