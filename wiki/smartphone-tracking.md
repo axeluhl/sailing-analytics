@@ -204,6 +204,7 @@ Helper Class for accessing the App Preferences specified in settings_view.xml
 ## ToDo
 
 ### Server
+* set fleet when creating race
 * deal with passes properly in racelog tracking events
 * UI for setting mark roundings
  * use RaceViewer
