@@ -10,9 +10,9 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class LoginDialog extends ActivityAttachedDialogFragment {
 
-    private static final LoginType DefaultLoginType = LoginType.OFFICER;
+    private static final LoginType DefaultLoginType = LoginType.INVALID;
     public enum LoginType {
-        OFFICER, VIEWER;
+        OFFICER, VIEWER, INVALID;
     }
 
     private CharSequence[] loginTypeDescriptions;
@@ -46,7 +46,7 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
         return builder
                 .setTitle("Login onto course area")
                 .setIcon(R.drawable.ic_menu_login)
-                .setSingleChoiceItems(loginTypeDescriptions, 0, new OnClickListener() {
+                .setSingleChoiceItems(loginTypeDescriptions, -1, new OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                         case 0:

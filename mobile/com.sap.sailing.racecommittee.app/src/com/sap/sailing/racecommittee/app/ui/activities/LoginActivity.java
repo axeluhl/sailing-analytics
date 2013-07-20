@@ -124,6 +124,9 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                     ExLog.i(TAG, "Communication with backend is inactive.");
                     AppPreferences.setSendingActive(LoginActivity.this, false);
                     break;
+                case INVALID:
+                    Toast.makeText(LoginActivity.this, "Please select a login type", Toast.LENGTH_LONG).show();
+                    return;
                 default:
                     Toast.makeText(LoginActivity.this, "Invalid login type. Ignoring.", Toast.LENGTH_SHORT).show();
                     return;
