@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import android.content.Context;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
@@ -30,6 +32,7 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
@@ -38,10 +41,11 @@ import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
 public class OfflineDataManager extends DataManager {
 
     private static boolean isInitialized = false;
+    private final Context context;
 
-    public OfflineDataManager(DataStore dataStore) {
+    public OfflineDataManager(Context context, DataStore dataStore) {
         super(dataStore);
-
+        this.context = context;
         if (!isInitialized) {
             isInitialized = true;
             fillDataStore(dataStore);
@@ -76,22 +80,22 @@ public class OfflineDataManager extends DataManager {
         RaceLog log = new RaceLogImpl(UUID.randomUUID());
         log.add(factory.createStartTimeEvent(
                 new MillisecondsTimePoint(new Date().getTime() - 2000), 
-                author,
+                AppPreferences.getAuthor(context),
                 1, new MillisecondsTimePoint(new Date().getTime() - 1000)));
 
         log.add(factory.createRaceStatusEvent(
                 new MillisecondsTimePoint(new Date().getTime()), 
-                author,
+                AppPreferences.getAuthor(context),
                 1, RaceLogRaceStatus.FINISHING));
 
         ManagedRace q1 = new ManagedRaceImpl(
-                new ManagedRaceIdentifierImpl(
-                        "Q1", 
-                        new FleetImpl("Default"), 
-                        qualifying, 
-                        raceGroup),
-                        StartProcedureType.ESS,
-                        log);
+                context,
+                        new ManagedRaceIdentifierImpl(
+                                "Q1", 
+                                new FleetImpl("Default"), 
+                                qualifying, 
+                                raceGroup),
+                        StartProcedureType.ESS, log);
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*log.add(factory.createStartTimeEvent(
@@ -102,13 +106,13 @@ public class OfflineDataManager extends DataManager {
          */
 
         ManagedRace q2 = new ManagedRaceImpl(
-                new ManagedRaceIdentifierImpl(
-                        "Q2", 
-                        new FleetImpl("Default"), 
-                        qualifying, 
-                        raceGroup), 
-                        StartProcedureType.ESS,
-                        log);
+                context, 
+                        new ManagedRaceIdentifierImpl(
+                                "Q2", 
+                                new FleetImpl("Default"), 
+                                qualifying, 
+                                raceGroup),
+                        StartProcedureType.ESS, log);
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*log.add(factory.createRaceStatusEvent(
@@ -116,13 +120,13 @@ public class OfflineDataManager extends DataManager {
 				5,
 				RaceLogRaceStatus.FINISHED));*/
         ManagedRace q3 = new ManagedRaceImpl(
-                new ManagedRaceIdentifierImpl(
-                        "Q3", 
-                        new FleetImpl("Default"), 
-                        qualifying, 
-                        raceGroup), 
-                        StartProcedureType.ESS,
-                        log);
+                context, 
+                        new ManagedRaceIdentifierImpl(
+                                "Q3", 
+                                new FleetImpl("Default"), 
+                                qualifying, 
+                                raceGroup),
+                        StartProcedureType.ESS, log);
         /*ManagedRace m1 = new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(
 						"M1", 

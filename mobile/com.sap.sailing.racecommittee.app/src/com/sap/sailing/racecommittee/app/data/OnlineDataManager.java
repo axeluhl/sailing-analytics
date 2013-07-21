@@ -142,7 +142,7 @@ public class OnlineDataManager extends DataManager {
         }
         SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
         JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
-        DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(new RaceGroupDeserializer(
+        DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(context, new RaceGroupDeserializer(
                 boatClassDeserializer, new SeriesWithRowsDeserializer(new RaceRowDeserializer(new FleetDeserializer(
                         new ColorDeserializer()), new RaceCellDeserializer(
                                 new RaceLogDeserializer(RaceLogEventDeserializer.create(domainFactory)))))));

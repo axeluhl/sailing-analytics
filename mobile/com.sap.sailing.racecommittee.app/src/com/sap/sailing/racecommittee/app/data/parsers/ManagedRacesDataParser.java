@@ -8,6 +8,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import android.content.Context;
+
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
@@ -27,8 +29,10 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
     // private static final String TAG = ManagedRacesDataParser.class.getName();
 
     private JsonDeserializer<RaceGroup> deserializer;
+    private final Context context;
 
-    public ManagedRacesDataParser(JsonDeserializer<RaceGroup> deserializer) {
+    public ManagedRacesDataParser(Context context, JsonDeserializer<RaceGroup> deserializer) {
+        this.context = context;
         this.deserializer = deserializer;
     }
 
@@ -61,8 +65,8 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 
     private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesBase series, Fleet fleet, String name,
             RaceLog raceLog) {
-        return new ManagedRaceImpl(new ManagedRaceIdentifierImpl(name,
-                new FleetIdentifierImpl(fleet, series, raceGroup)), StartProcedureType.RRS26, raceLog);
+        return new ManagedRaceImpl(context, new ManagedRaceIdentifierImpl(name,
+                        new FleetIdentifierImpl(fleet, series, raceGroup)), StartProcedureType.RRS26, raceLog);
 
     }
 

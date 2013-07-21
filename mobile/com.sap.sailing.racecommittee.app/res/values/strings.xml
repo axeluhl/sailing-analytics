@@ -50,7 +50,9 @@
     <string name="select_raceStartType">Select a race starting mode</string>
     <string name="time_until_start">Time to start (with time selected above)</string>
     <string name="label_race">Race: </string>
-    <string name="login_type_officer">Login as race officer on the selected course.</string>
+    <string name="login_type_officer_on_start_vessel">Login as race officer on the selected course\'s start vessel.</string>
+    <string name="login_type_officer_on_finish_vessel">Login as race officer on the selected course\'s finish vessel.</string>
+    <string name="login_type_shore_control">Login as shore control.</string>
     <string name="login_type_viewer">Login as view-only (demo mode) user.</string>
     <string name="racelist_unscheduled">Not yet scheduled</string>
     <string name="racelist_scheduled">Scheduled for %s</string>

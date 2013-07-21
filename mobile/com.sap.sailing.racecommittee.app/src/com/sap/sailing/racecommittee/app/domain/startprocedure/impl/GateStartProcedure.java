@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.RunningRaceEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartPhaseEventListener;
@@ -55,8 +56,10 @@ public class GateStartProcedure implements StartProcedure {
     private Long gateLineOpeningTime = startPhaseGolfDownStandardInterval;
     private boolean isPathFinderSet = false;
     private boolean isGateLineOpeningTimeChosen = false;
+    private final Context context;
 
-    public GateStartProcedure(RaceLog raceLog) {
+    public GateStartProcedure(Context context, RaceLog raceLog) {
+        this.context = context;
         this.raceLog = raceLog;
         startProcedureEventIntervals = new ArrayList<Long>();
         raceStateChangedListener = null;
@@ -107,7 +110,7 @@ public class GateStartProcedure implements StartProcedure {
         }
 
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(startPhaseTimePoint,
-                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                AppPreferences.getAuthor(context), UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
                 Flags.CLASS, Flags.GOLF, true);
         raceLog.add(event);
 
@@ -118,7 +121,7 @@ public class GateStartProcedure implements StartProcedure {
 
     private void handlePapaUp(TimePoint eventTime) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime,
-                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                AppPreferences.getAuthor(context), UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
                 Flags.PAPA, Flags.NONE, true);
         raceLog.add(event);
 
@@ -131,7 +134,7 @@ public class GateStartProcedure implements StartProcedure {
         TimePoint papaDownTimepoint = eventTime;
 
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(papaDownTimepoint,
-                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                AppPreferences.getAuthor(context), UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
                 Flags.PAPA, Flags.NONE, false);
         raceLog.add(event);
 
@@ -144,7 +147,7 @@ public class GateStartProcedure implements StartProcedure {
         TimePoint essOneDownTimePoint = eventTime;
 
         RaceLogEvent essOneDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(essOneDownTimePoint,
-                author, UUID.randomUUID(), Collections.<Competitor> emptyList(),
+                AppPreferences.getAuthor(context), UUID.randomUUID(), Collections.<Competitor> emptyList(),
                 raceLog.getCurrentPassId(), Flags.CLASS, Flags.NONE, /* isDisplayed */false);
         raceLog.add(essOneDownEvent);
 
@@ -188,7 +191,7 @@ public class GateStartProcedure implements StartProcedure {
     @Override
     public void setFinishing(TimePoint eventTime) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime,
-                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                AppPreferences.getAuthor(context), UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
                 Flags.BLUE, Flags.NONE, true);
         raceLog.add(event);
 
@@ -205,7 +208,7 @@ public class GateStartProcedure implements StartProcedure {
     @Override
     public void setFinished(TimePoint eventTime) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime,
-                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                AppPreferences.getAuthor(context), UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
                 Flags.BLUE, Flags.NONE, false);
         raceLog.add(event);
 
@@ -229,7 +232,7 @@ public class GateStartProcedure implements StartProcedure {
 
     private void handleAPUp(TimePoint eventTime, Flags lowerFlag) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime,
-                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                AppPreferences.getAuthor(context), UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
                 Flags.AP, lowerFlag, true);
         raceLog.add(event);
 
@@ -253,7 +256,7 @@ public class GateStartProcedure implements StartProcedure {
 
     private void handleNovemberUp(TimePoint eventTime, Flags lowerFlag) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime,
-                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                AppPreferences.getAuthor(context), UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
                 Flags.NOVEMBER, lowerFlag, true);
         raceLog.add(event);
 
@@ -265,7 +268,7 @@ public class GateStartProcedure implements StartProcedure {
     @Override
     public void setGeneralRecall(TimePoint eventTime) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime,
-                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                AppPreferences.getAuthor(context), UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
                 Flags.FIRSTSUBSTITUTE, Flags.NONE, true);
         raceLog.add(event);
 
@@ -320,7 +323,7 @@ public class GateStartProcedure implements StartProcedure {
 
     public void setGolfRemoval(TimePoint eventTime) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime,
-                author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                AppPreferences.getAuthor(context), UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
                 Flags.GOLF, Flags.NONE, false);
         raceLog.add(event);
 
@@ -331,7 +334,7 @@ public class GateStartProcedure implements StartProcedure {
 
     public void setGateLineOpeningTime(Long gateLineOpeningTimeInMiliseconds) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createGateLineOpeningTimeEvent(MillisecondsTimePoint.now(),
-                author, raceLog.getCurrentPassId(), gateLineOpeningTimeInMiliseconds);
+                AppPreferences.getAuthor(context), raceLog.getCurrentPassId(), gateLineOpeningTimeInMiliseconds);
         raceLog.add(event);
         this.gateLineOpeningTime = gateLineOpeningTimeInMiliseconds;
         this.isGateLineOpeningTimeChosen = true;
@@ -345,7 +348,7 @@ public class GateStartProcedure implements StartProcedure {
 
     public void setPathfinder(String sailingId) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createPathfinderEvent(MillisecondsTimePoint.now(),
-                author, raceLog.getCurrentPassId(), sailingId);
+                AppPreferences.getAuthor(context), raceLog.getCurrentPassId(), sailingId);
         raceLog.add(event);
 
         this.pathFinder = sailingId;
