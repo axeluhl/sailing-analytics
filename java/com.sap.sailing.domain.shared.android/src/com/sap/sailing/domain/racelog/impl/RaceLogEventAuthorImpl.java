@@ -16,4 +16,9 @@ public class RaceLogEventAuthorImpl extends NamedImpl implements RaceLogEventAut
     public int getPriority() {
         return priority;
     }
+    
+    @Override
+    public String toString() {
+        return super.toString()+" with priority "+getPriority();
+    }
 }

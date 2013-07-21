@@ -62,6 +62,7 @@ public abstract class RaceLogEventImpl implements RaceLogEvent {
     @Override
     public String toString() {
         return getClass().getName() + ": createdAt: " + getCreatedAt() + ", logicalTimePoint: " + getTimePoint()
-                + ", id: " + getId() + ", involvedBoats: " + getInvolvedBoats() + ", passId: " + getPassId();
+                + ", id: " + getId() + ", involvedBoats: " + getInvolvedBoats() + ", passId: " + getPassId() +
+                ", author: "+getAuthor();
     }
 }
