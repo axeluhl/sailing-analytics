@@ -44,7 +44,7 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
     @Override
     protected Builder createDialog(Builder builder) {
         return builder
-                .setTitle("Login onto course area")
+                .setTitle(R.string.title_login_onto_course_area)
                 .setIcon(R.drawable.ic_menu_login)
                 .setSingleChoiceItems(loginTypeDescriptions, 0, new OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {

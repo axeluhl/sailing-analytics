@@ -45,6 +45,7 @@
     <string name="flag_golf">Gate start</string>
     <string name="flag_foxtrott">Fixed line start</string>
     <string name="label_login_events">Select an event:</string>
+    <string name="title_login_onto_course_area">Login onto course area</string>
     <string name="label_login_course_area">Select a course area:</string>
     <string name="please_pick_a_time">Please schedule the start time to</string>
     <string name="select_raceStartType">Select a race starting mode</string>

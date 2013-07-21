@@ -130,7 +130,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
             onRaceAborted(MillisecondsTimePoint.now());
         }
         TimePoint eventTime = startProcedure.getLogicalStartTimeEventTime(newStartTime);
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(eventTime, author, 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(eventTime,
                 author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newStartTime);
         this.raceLog.add(event);
         fireStartTimeChange(newStartTime);
@@ -158,7 +158,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     @Override
     public void setCourseDesign(CourseBase newCourseData) {
         TimePoint eventTime = MillisecondsTimePoint.now();
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(eventTime, author,
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(eventTime,
                 author, UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newCourseData);
         this.raceLog.add(event);
         fireCourseDesignChanged();

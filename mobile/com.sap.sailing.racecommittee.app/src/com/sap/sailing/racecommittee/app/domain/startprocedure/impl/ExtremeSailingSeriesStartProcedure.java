@@ -113,7 +113,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
             raceStateChangedListener.onRaceStartphaseEntered(eventTime);
         }
 
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, author, 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, 
                 UUID.randomUUID(), Collections.<Competitor>emptyList(), raceLog.getCurrentPassId(), Flags.AP, Flags.NONE, /*isDisplayed*/false);
         raceLog.add(event);
         
@@ -123,7 +123,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     private void handleEssThreeUp(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, author, 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, 
                 UUID.randomUUID(), Collections.<Competitor>emptyList(), raceLog.getCurrentPassId(), Flags.ESSTHREE, Flags.NONE, /*isDisplayed*/true);
         raceLog.add(event);
         
@@ -134,11 +134,11 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
 
     private void handleEssTwoUpAndEssThreeDown(TimePoint eventTime) {
         
-        RaceLogEvent essThreeDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, author, 
+        RaceLogEvent essThreeDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, 
                 UUID.randomUUID(), Collections.<Competitor>emptyList(), raceLog.getCurrentPassId(), Flags.ESSTHREE, Flags.NONE, /*isDisplayed*/false);
         raceLog.add(essThreeDownEvent);
         
-        RaceLogEvent essTwoUpEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, author, 
+        RaceLogEvent essTwoUpEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, 
                 UUID.randomUUID(), Collections.<Competitor>emptyList(), raceLog.getCurrentPassId(), Flags.ESSTWO, Flags.NONE, /*isDisplayed*/true);
         raceLog.add(essTwoUpEvent);
         
@@ -149,11 +149,11 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
 
     private void handleEssOneUpAndEssTwoDown(TimePoint eventTime) {
         
-        RaceLogEvent essTwoDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, author, 
+        RaceLogEvent essTwoDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, 
                 UUID.randomUUID(), Collections.<Competitor>emptyList(), raceLog.getCurrentPassId(), Flags.ESSTWO, Flags.NONE, /*isDisplayed*/false);
         raceLog.add(essTwoDownEvent);
         
-        RaceLogEvent essOneUpEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, author, 
+        RaceLogEvent essOneUpEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, 
                 UUID.randomUUID(), Collections.<Competitor>emptyList(), raceLog.getCurrentPassId(), Flags.ESSONE, Flags.NONE, /*isDisplayed*/true);
         raceLog.add(essOneUpEvent);
         
@@ -163,7 +163,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     private void handleEssOneDown(TimePoint eventTime) {
-        RaceLogEvent essOneDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, author, 
+        RaceLogEvent essOneDownEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, 
                 UUID.randomUUID(), Collections.<Competitor>emptyList(), raceLog.getCurrentPassId(), Flags.ESSONE, Flags.NONE, /*isDisplayed*/false);
         raceLog.add(essOneDownEvent);
         
@@ -195,7 +195,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
 
     @Override
     public void setFinishing(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, author, 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, 
                 UUID.randomUUID(), Collections.<Competitor>emptyList(), raceLog.getCurrentPassId(), Flags.BLUE, Flags.NONE, /*isDisplayed*/true);
         raceLog.add(event);
         
@@ -219,7 +219,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
 
     @Override
     public void setFinished(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, author, 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, 
                 UUID.randomUUID(), Collections.<Competitor>emptyList(), raceLog.getCurrentPassId(), Flags.BLUE, Flags.NONE, /*isDisplayed*/false);
         raceLog.add(event);
         
@@ -242,7 +242,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     private void handleAPUp(TimePoint eventTime, Flags lowerFlag) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, author, 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, 
                 UUID.randomUUID(), Collections.<Competitor>emptyList(), raceLog.getCurrentPassId(), Flags.AP, lowerFlag, /*isDisplayed*/true);
         raceLog.add(event);
         
@@ -265,7 +265,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     private void handleNovemberUp(TimePoint eventTime, Flags lowerFlag) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, author, 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, 
                 UUID.randomUUID(), Collections.<Competitor>emptyList(), raceLog.getCurrentPassId(), Flags.NOVEMBER, lowerFlag, /*isDisplayed*/true);
         raceLog.add(event);
         
@@ -276,7 +276,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
 
     @Override
     public void setGeneralRecall(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, author, 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, 
                 UUID.randomUUID(), Collections.<Competitor>emptyList(), raceLog.getCurrentPassId(), Flags.FIRSTSUBSTITUTE, Flags.NONE, /*isDisplayed*/true);
         raceLog.add(event);
         
@@ -286,7 +286,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     public void setIndividualRecall(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, author, 
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, author, 
                 UUID.randomUUID(), Collections.<Competitor>emptyList(), raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, /*isDisplayed*/true);
         raceLog.add(event);
         
