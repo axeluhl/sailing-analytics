@@ -74,13 +74,14 @@
     <string name="updateIndicator">Update indicator</string>
     <string name="reset_race">Reset race</string>
     <string name="postpone_race">Postpone race</string>
+    <string name="postpone">Postpone</string>
     <string name="fixedLine">Fixed line start</string>
     <string name="gateStart_mode">Gate start</string>
     <string name="confirmation_blue_flag_remove">Are you sure to remove the blue flag?</string>
     <string name="confirmation_blue_flag_display">Are you sure to display the blue flag?</string>
     <string name="confirmation_first_substitute_display">Are you sure to display general recall?</string>
     <string name="finishing_limit_template">Race finishing limit is at %s</string>
-    <string name="race_running_since_template" formatted="false">%s since %s started</string>
+    <string name="race_running_since_template" formatted="false">%s runs since %s</string>
     <string name="race_reset_confirmation_header">You are about to reset the race</string>
     <string name="race_reset_confirmation_warning">Resetting the race removes all its saved data permanently. All information regarding the race state has to be entered again. Only the entered course information are kept. We strongly recommend to not reset the race.</string>
     <string name="race_reset_confirmation_title">Reset race</string>
@@ -202,7 +203,7 @@
     
     <string name="racing_course_area_missing">Course area could not be loaded. Please go back to the login page.</string>
     <string name="racing_load_success">Successfully loaded %d races.</string>
-    <string name="generic_load_failure">There was an error loading the requested data: %s\nDo you want to retry?</string>
+    <string name="generic_load_failure">There was an error loading the requested data:\n\"%s\"\nDo you want to retry?</string>
     <string name="set_course_layout">Set the course layout</string>
     
     <string-array name="course_routes">
@@ -222,5 +223,13 @@
 	<string name="login">Login</string>
 	<string name="login_onto_course_area">Login onto course area</string>
 	<string name="please_select_a_login_type">Please select a login type.</string>
+	
+	<string name="race_list_filter_show_all">Show all</string>
+	<string name="race_list_filter_show_active">Show active</string>
+	
+	<string name="race_reset_time_schedule_race">Schedule race</string>
+	<string name="race_reset_time_startmode_starttime">Select start mode and start time</string>
+	<string name="today">Today</string>
+	<string name="start">Start</string>
 	
 </resources>

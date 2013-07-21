@@ -65,7 +65,8 @@ public class FinishingRaceFragment extends RaceFragment {
 
     private void setStarttimeCountupLabel(long millisecondsSinceStart) {
         countUpTextView.setText(String.format(getActivity().getResources().getString(R.string.race_running_since_template),
-                prettyTimeString(millisecondsSinceStart), getRace().getName()));
+                getRace().getName(),
+                prettyTimeString(millisecondsSinceStart)));
     }
 
     protected CharSequence prettyTimeString(long time) {

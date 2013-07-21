@@ -159,7 +159,9 @@ public class RRS26RunningRaceFragment extends RaceFragment implements RRS26Runni
 
 
     private void setStarttimeCountupLabel(long millisecondsSinceStart) {
-        countUpTextView.setText(String.format(getString(R.string.race_running_since_template), prettyTimeString(millisecondsSinceStart), getRace().getName()));
+        countUpTextView.setText(String.format(getString(R.string.race_running_since_template), 
+                getRace().getName(),
+                prettyTimeString(millisecondsSinceStart)));
     }
 
     protected CharSequence prettyTimeString(long time) {
