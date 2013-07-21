@@ -98,6 +98,7 @@
     <string name="settings_time_frame_header">Race time frame after finish</string>
     <string name="settings_protest_time_header">Protest time</string>
     <string name="settings_time_frame_description">Set a time in minutes after which no finishing sailor is counted anymore</string>
+    <item type="integer" name="settings_time_frame_default">30</item>
     <string name="settings_protest_time_description">Set the protest time in minutes</string>
     <string name="race_startphase_flagdown">Flag is going down&#8230;</string>
     <string name="race_startphase_flagup">Flag is going up&#8230;</string>
@@ -165,6 +166,12 @@
     <string name="settings_advanced_mail_default">lukas.niemeier@sap.com</string>
     <string name="settings_advanced_mail_description">Mail recipient used for positiong list images.</string>
     <string name="settings_advanced_mail_header">Positioning mail recipient</string>
+    <item type="integer" name="settings_advanced_max_rounds_default">3</item>
+    <string name="settings_advanced_max_rounds_description">Select the maximum number of rounds per course</string>
+    <string name="settings_advanced_max_rounds_header">Maximum rounds per course</string>
+    <item type="integer" name="settings_advanced_min_rounds_default">2</item>
+    <string name="settings_advanced_min_rounds_description">Select the minimum number of rounds per course</string>
+    <string name="settings_advanced_min_rounds_header">Minimum rounds per course</string>
     <string name="options_menu_live">Connection Information</string>
     <string name="options_menu_wind">Enter Wind Data</string>
     <string name="options_menu_reload">Reload</string>
@@ -206,14 +213,15 @@
     <string name="set_course_layout">Set the course layout</string>
     
     <string-array name="course_routes">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
+        <item>0,Windward/Leeward</item>
+        <item>1,Windward/Leeward</item>
+        <item>2,Windward/Leeward</item>
+        <item>3,Windward/Leeward</item>
+        <item>4,Trapezoid</item>
+        <item>5,Trapezoid</item>
+        <item>6,Triangle</item>
+        <item>7,Triangle</item>
+        <item>8,Windward/Leeward</item>
     </string-array>
     
     <string name="loading_failure">Load failure</string>

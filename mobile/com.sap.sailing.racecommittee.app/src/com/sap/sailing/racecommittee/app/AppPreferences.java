@@ -27,6 +27,8 @@ public class AppPreferences {
     
     private final static String PREFERENCE_MAIL_RECIPIENT = "mailRecipientPreference";
     private final static String PREFERENCE_MANAGED_COURSE_AREAS = "courseAreasPref";
+    private final static String PREFERENCE_MIN_ROUNDS = "minRoundsPreference";
+    private final static String PREFERENCE_MAX_ROUNDS = "maxRoundsPreference";
     
     public static BoatClassType getBoatClass(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
@@ -148,4 +150,13 @@ public class AppPreferences {
         return sp.getString(PREFERENCE_MAIL_RECIPIENT, context.getString(R.string.settings_advanced_mail_default));
     }
     
+    public static int getMaxRounds(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getInt(PREFERENCE_MAX_ROUNDS, 3); 
+    }
+    
+    public static int getMinRounds(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getInt(PREFERENCE_MIN_ROUNDS, 2); 
+    }
 }
