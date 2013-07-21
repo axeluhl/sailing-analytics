@@ -6,14 +6,18 @@ import java.util.List;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.TrapezoidCourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.WindWardLeeWardCourseLayouts;
+import com.sap.sailing.racecommittee.app.services.sending.EventSenderTask;
 
 public class AppPreferences {
+    
+    private static String TAG = AppPreferences.class.getName();
 
     private final static String PREFERENCE_SERVICE_URL = "webserviceUrlPref";
     private final static String PREFERENCE_SENDING_ACTIVE = "sendingActivePref";
@@ -152,11 +156,25 @@ public class AppPreferences {
     
     public static int getMaxRounds(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getInt(PREFERENCE_MAX_ROUNDS, 3); 
+        String maxRoundsStr = sp.getString(PREFERENCE_MAX_ROUNDS, "3");
+        int maxRounds = 3;
+        try {
+             maxRounds = Integer.valueOf(maxRoundsStr);
+        } catch (NumberFormatException e){
+            Log.e(TAG, "Unable to parse maximum rounds setting to integer");
+        }
+        return maxRounds; 
     }
     
     public static int getMinRounds(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getInt(PREFERENCE_MIN_ROUNDS, 2); 
+        String minRoundsStr = sp.getString(PREFERENCE_MIN_ROUNDS, "2");
+        int minRounds = 2;
+        try {
+             minRounds = Integer.valueOf(minRoundsStr);
+        } catch (NumberFormatException e){
+            Log.e(TAG, "Unable to parse minimum rounds setting to integer");
+        }
+        return minRounds; 
     }
 }
