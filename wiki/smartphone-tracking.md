@@ -219,7 +219,7 @@ Helper Class for accessing the App Preferences specified in settings_view.xml
 
 ### Server
 * set fleet when creating race
-* deal with passes properly in racelog tracking events
+* editing course in the RaceBoardAdmin
 * persist tracking data (GPSFixStore)
 * load stored tracked smartphone race (Panel in Admin Console, RaceLogConnector, only present such races with the necessary data in the racelog, and allow user to select whole leaderboard to restore)
 * mapping devices to marks
