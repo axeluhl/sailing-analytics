@@ -24,17 +24,11 @@
             android:title="@string/override_default_start_procedure_type_select" />
 
         <EditTextPreference
-            android:defaultValue="30"
+            android:defaultValue="@integer/settings_time_frame_default"
             android:inputType="numberDecimal"
             android:key="edittextRaceTimeFrameAfterFinish"
             android:summary="@string/settings_time_frame_description"
             android:title="@string/settings_time_frame_header" />
-        <EditTextPreference
-            android:defaultValue="90"
-            android:inputType="numberDecimal"
-            android:key="edittextProtestTime"
-            android:summary="@string/settings_protest_time_description"
-            android:title="@string/settings_protest_time_header" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/settings_category_advanced" >
@@ -52,6 +46,21 @@
             android:key="mailRecipientPreference"
             android:summary="@string/settings_advanced_mail_description"
             android:title="@string/settings_advanced_mail_header" />
+        
+        <EditTextPreference
+            android:name="@string/settings_advanced_min_rounds_header"
+            android:defaultValue="@integer/settings_advanced_min_rounds_default"
+            android:inputType="numberDecimal"
+            android:key="minRoundsPreference"
+            android:summary="@string/settings_advanced_min_rounds_description"
+            android:title="@string/settings_advanced_min_rounds_header" />
+                        
+        <EditTextPreference
+            android:name="@string/settings_advanced_max_rounds_header"
+            android:defaultValue="@integer/settings_advanced_max_rounds_default"
+            android:inputType="numberDecimal"
+            android:key="maxRoundsPreference"
+            android:summary="@string/settings_advanced_max_rounds_description"
+            android:title="@string/settings_advanced_max_rounds_header" />
     </PreferenceCategory>
-
 </PreferenceScreen>

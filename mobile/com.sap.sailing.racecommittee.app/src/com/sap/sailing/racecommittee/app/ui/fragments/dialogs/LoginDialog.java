@@ -10,13 +10,13 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class LoginDialog extends ActivityAttachedDialogFragment {
 
-    private static final LoginType DefaultLoginType = LoginType.OFFICER;
+    private static final LoginType DefaultLoginType = LoginType.NONE;
     public enum LoginType {
-        OFFICER, VIEWER;
+        OFFICER, VIEWER, NONE;
     }
 
     private CharSequence[] loginTypeDescriptions;
-    private LoginType selectedLoginType = DefaultLoginType;
+    private LoginType selectedLoginType;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -25,6 +25,7 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
         loginTypeDescriptions = new CharSequence[2];
         loginTypeDescriptions[0] = getString(R.string.login_type_officer);
         loginTypeDescriptions[1] = getString(R.string.login_type_viewer);
+        selectedLoginType = DefaultLoginType;
     }
 
     public LoginType getSelectedLoginType() {
@@ -38,15 +39,15 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
 
     @Override
     protected CharSequence getPositiveButtonLabel() {
-        return "Login";
+        return getString(R.string.login);
     }
 
     @Override
     protected Builder createDialog(Builder builder) {
         return builder
-                .setTitle(R.string.title_login_onto_course_area)
+                .setTitle(getString(R.string.login_onto_course_area))
                 .setIcon(R.drawable.ic_menu_login)
-                .setSingleChoiceItems(loginTypeDescriptions, 0, new OnClickListener() {
+                .setSingleChoiceItems(loginTypeDescriptions, -1, new OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                         case 0:
@@ -56,7 +57,8 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
                             selectedLoginType = LoginType.VIEWER;
                             break;
                         default:
-                            throw new IllegalStateException("Unknown login type selected.");
+                            selectedLoginType = LoginType.NONE;
+                            break;
                         }
                     }
                 });

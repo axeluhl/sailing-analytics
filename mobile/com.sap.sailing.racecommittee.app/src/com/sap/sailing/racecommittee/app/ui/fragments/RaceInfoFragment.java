@@ -1,10 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,11 +18,15 @@ import android.widget.TextView;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
+import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
@@ -28,6 +34,8 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceF
 
 public class RaceInfoFragment extends RaceFragment implements RaceStateChangedListener, RaceInfoListener {
     private final static String TAG = RaceInfoFragment.class.getName();
+    
+    private static int WIND_ACTIVITY_REQUEST_CODE = 7331;
 
     private RaceInfoFragmentChooser infoFragmentChooser;
     private RaceFragment infoFragment;
@@ -35,6 +43,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     private TextView fleetInfoHeader;
     private TextView raceInfoHeader;
     private TextView courseInfoHeader;
+    private TextView windInfoHeader;
 
     private View resetRaceDialogView;
 
@@ -58,8 +67,10 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         this.fleetInfoHeader = (TextView) getView().findViewById(R.id.regattaGroupInfoHeader);
         this.raceInfoHeader = (TextView) getView().findViewById(R.id.raceInfoHeader);
         this.courseInfoHeader = (TextView) getView().findViewById(R.id.courseInfoHeader);
+        this.windInfoHeader = (TextView) getView().findViewById(R.id.windInfoHeader);
 
         courseInfoHeader.setText(getString(R.string.running_on_unknown));
+        windInfoHeader.setText(getString(R.string.wind_unknown));
         fleetInfoHeader.setText(String.format("%s - %s", getRace().getRaceGroup().getName(), getRace().getFleet()
                 .getName()));
         raceInfoHeader.setText(String.format("%s", getRace().getName()));
@@ -70,6 +81,17 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
             public void onClick(View v) {
                 showCourseDesignDialog();
             }
+        });
+        
+        windInfoHeader.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                Intent intent = new Intent(getActivity(), WindActivity.class);
+                startActivityForResult(intent, WIND_ACTIVITY_REQUEST_CODE);
+                getActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            }
+
         });
 
         Button resetButton = ((Button) getView().findViewById(R.id.btnResetRace));
@@ -83,6 +105,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         // Initial fragment selection...
         switchToInfoFragment();
         updateCourseDesignLabel();
+        updateWindLabel();
     }
 
     @Override
@@ -180,7 +203,14 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
 
             CourseBase courseDesign = getRace().getState().getCourseDesign();
             if (courseDesign.getName() != null) {
-                courseInfoHeader.setText(String.format(getString(R.string.running_on_course), courseDesign.getName()));
+                String courseName = courseDesign.getName();
+                if (courseName.contains("(")){
+                    //New course name in the format: [CourseType] Rounds:X ([Old CourseName])
+                    //e.g. Triangle Rounds:3 (7 3)
+                    String pattern = ".*\\((.+?)\\).*";
+                    courseName = courseName.replaceAll(pattern, "$1"); 
+                }
+                courseInfoHeader.setText(String.format(getString(R.string.running_on_course), courseName));
             } else if (Util.isEmpty(courseDesign.getWaypoints())) {
                 courseInfoHeader.setText(getString(R.string.running_on_unknown));
             } else {
@@ -191,7 +221,28 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
             courseInfoHeader.setText(getString(R.string.running_on_unknown));
         }
     }
-
+    
+    private void updateWindLabel() {
+        LastWindFixFinder windFinder = new LastWindFixFinder(getRace().getState().getRaceLog());
+        if (windFinder.analyze()!=null){
+            Wind wind = windFinder.analyze();
+            windInfoHeader.setText(String.format(getString(R.string.wind_info), wind.getKnots(), wind.getBearing().toString()));
+        }
+    }
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == WIND_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                if (data.getExtras().containsKey(AppConstants.EXTRAS_WIND_FIX)) {
+                    Wind windFix = (Wind) data.getSerializableExtra(AppConstants.EXTRAS_WIND_FIX);
+                    getRace().getState().setWindFix(windFix);
+                    updateWindLabel();
+                }
+            }
+        }
+    }
+    
     @Override
     public void onResetTime() {
         switchToInfoFragment(SetStartTimeRaceFragment.create(getRace()));
