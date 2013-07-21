@@ -13,7 +13,6 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.TrapezoidCourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.WindWardLeeWardCourseLayouts;
-import com.sap.sailing.racecommittee.app.services.sending.EventSenderTask;
 
 public class AppPreferences {
     
