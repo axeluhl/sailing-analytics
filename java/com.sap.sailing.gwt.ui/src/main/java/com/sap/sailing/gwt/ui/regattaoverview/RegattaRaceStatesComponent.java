@@ -327,6 +327,13 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return result;
             }
         };
+        raceNameColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(raceNameColumn, new Comparator<RegattaOverviewEntryDTO>() {
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                return new NaturalComparator().compare(left.raceInfo.raceName, right.raceInfo.raceName);
+            }
+        });
 
         TextColumn<RegattaOverviewEntryDTO> raceStartTimeColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
@@ -441,6 +448,13 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return lastUpdateTime;
             }
         };
+        lastUpdateColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(lastUpdateColumn, new Comparator<RegattaOverviewEntryDTO>() {
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                return left.raceInfo.lastUpdateTime.compareTo(right.raceInfo.lastUpdateTime);
+            }
+        });
         lastUpdateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         TextColumn<RegattaOverviewEntryDTO> raceAdditionalInformationColumn = new TextColumn<RegattaOverviewEntryDTO>() {
