@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.regattaoverview;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -45,6 +46,7 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.gwt.ui.client.AnchorCell;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -251,7 +253,16 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             }
             
         };
-
+        circleColumn.setSortable(true);
+        final List<RaceLogRaceStatus> raceLogStatusList = Arrays.asList(RaceLogRaceStatus.values());
+        regattaOverviewListHandler.setComparator(circleColumn, new Comparator<RegattaOverviewEntryDTO>() {
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                return raceLogStatusList.indexOf(left.raceInfo.lastStatus) -
+                        raceLogStatusList.indexOf(right.raceInfo.lastStatus);
+            }
+        });
+        
         TextColumn<RegattaOverviewEntryDTO> courseAreaColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
