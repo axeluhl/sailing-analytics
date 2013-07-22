@@ -745,4 +745,5 @@ public interface StringMessages extends Messages {
     String polarDiagramButton();
     String timeSinceLastPositionFix();
     String timeSinceLastPositionFixTooltip();
+    String trackingQuality();
 }
