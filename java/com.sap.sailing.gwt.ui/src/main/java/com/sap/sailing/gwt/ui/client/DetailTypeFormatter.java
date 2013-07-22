@@ -275,7 +275,7 @@ public class DetailTypeFormatter {
         case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
             return stringMessages.timeSinceLastPositionFixTooltip();
         case RACE_TRACKING_QUALITY:
-            return "Tracking Quality";
+            return stringMessages.trackingQuality();
         }
         
         return "";
