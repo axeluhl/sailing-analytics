@@ -1,14 +1,23 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.PlotLine;
+import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
+import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
+import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -19,61 +28,108 @@ public class QueryBenchmarkResultsChart extends SimplePanel implements RequiresR
     private Series serverTimeSeries;
     private double serverTimeSum = 0;
     private PlotLine averageServerTimePlotLine;
-//    private Series overallTimeSeries;
-//    private Series gpsFixAmountSeries;
+    
+    private Series overallTimeSeries;
+    private double overallTimeSum = 0;
+    private PlotLine averageOverallTimePlotLine;
+    
+    private List<QueryBenchmarkResult> results;
     
     public QueryBenchmarkResultsChart() {
+        results = new ArrayList<QueryBenchmarkResult>();
         chart = new Chart()
                       .setMarginLeft(100)
-                      .setMarginRight(100)
+                      .setMarginRight(45)
                       .setWidth100()
-                      .setHeight100()
                       .setCredits(new Credits().setEnabled(false))
                       .setChartTitle(new ChartTitle().setText("Query Benchmark Results"));
         
-        chart.getXAxis().setType(Axis.Type.LINEAR);
+        chart.getXAxis().setType(Axis.Type.LINEAR).setAllowDecimals(false);
 
-        chart.getYAxis(0).setAxisTitleText("Time").setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
+        chart.getYAxis().setAxisTitleText("Time").setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
             @Override
             public String format(AxisLabelsData axisLabelsData) {
-                return axisLabelsData.getValueAsDouble() + "s";
+                try {
+                    return axisLabelsData.getValueAsDouble() + "s";
+                } catch (Exception e) {
+                    return "";
+                }
             }
         }));
-        averageServerTimePlotLine = chart.getYAxis(0).createPlotLine().setWidth(1);
-//        chart.getYAxis(1).setAxisTitleText("Number of GPS-Fixes");
         
-        serverTimeSeries = chart.createSeries().setName("Server Time").setYAxis(0);
-//        overallTimeSeries = chart.createSeries().setName("Overall Time").setYAxis(0);
-//        gpsFixAmountSeries = chart.createSeries().setName("Number of GPS-Fixes").setYAxis(1);
+        chart.setToolTip(new ToolTip().setPointFormat("<span style=\"color:{series.color}\">{series.name}</span>: <b>{point.y}s</b><br/>"));
+        
+        serverTimeSeries = chart.createSeries().setName("Server Time").setPlotOptions(new LinePlotOptions().setColor("#000099").setMarker(new Marker().setEnabled(false)));
+        averageServerTimePlotLine = chart.getYAxis().createPlotLine().setColor("#000099").setWidth(2).setDashStyle(DashStyle.SOLID);
+        
+        overallTimeSeries = chart.createSeries().setName("Overall Time").setPlotOptions(new LinePlotOptions().setColor("#00bb00").setMarker(new Marker().setEnabled(false)));
+        averageOverallTimePlotLine = chart.getYAxis().createPlotLine().setColor("#00bb00").setWidth(2).setDashStyle(DashStyle.SOLID);
         
         this.setWidget(chart);
     }
     
-    public void updateResults(QueryBenchmarkResult newResult) {
-        serverTimeSeries.addPoint(newResult.getServerTime());
-        serverTimeSum += newResult.getServerTime();
+    public void addResult(QueryBenchmarkResult newResult) {
+        results.add(newResult);
+    }
+    
+    public void showResults() {
+        int i = 0;
+        Point[] serverTimePoints = new Point[results.size()];
+        Point[] overallTimePoints = new Point[results.size()];
+        for (QueryBenchmarkResult result : results) {
+            serverTimePoints[i] = new Point(i + 1, result.getServerTime()).setName(result.getIdentifier());
+            serverTimeSum += result.getServerTime();
+            overallTimePoints[i] = new Point(i + 1, result.getOverallTime()).setName(result.getIdentifier());
+            overallTimeSum += result.getOverallTime();
+            i++;
+        }
+        
+        //This method has to be called, before the points are added to the chart.
+        updateChartSubtitle();
+        serverTimeSeries.setPoints(serverTimePoints);
+        overallTimeSeries.setPoints(overallTimePoints);
         updatePlotLines();
-//        overallTimeSeries.addPoint(newResult.getOverallTime());
-//        gpsFixAmountSeries.addPoint(newResult.getNumberOfGPSFixes());
         
         if (!serverTimeSeries.isVisible()) {
             chart.addSeries(serverTimeSeries);
-//            chart.addSeries(overallTimeSeries);
-//            chart.addSeries(gpsFixAmountSeries);
+            chart.addSeries(overallTimeSeries);
         }
     }
     
+    private void updateChartSubtitle() {
+        StringBuilder subtitelBuilder = new StringBuilder();
+        subtitelBuilder.append("Number of GPS-Fixes: " + results.get(0).getNumberOfGPSFixes());
+        subtitelBuilder.append(" - \u2300 Server Time: " + getAverageServerTime() + "s");
+        subtitelBuilder.append(" - \u2300 Overall Time: " + getAverageOverallTime() + "s");
+        
+        chart.setChartSubtitle(new ChartSubtitle().setText(subtitelBuilder.toString()));
+        //This is needed, so that the subtitle is updated. Otherwise the text would stay empty
+        this.setWidget(null);
+        this.setWidget(chart);
+    }
+
     private void updatePlotLines() {
-        chart.getYAxis(0).removePlotLine(averageServerTimePlotLine);
-        averageServerTimePlotLine.setValue(serverTimeSum / serverTimeSeries.getPoints().length);
-        chart.getYAxis(0).addPlotLines(averageServerTimePlotLine);
+        chart.getYAxis().removePlotLine(averageServerTimePlotLine);
+        chart.getYAxis().removePlotLine(averageOverallTimePlotLine);
+        averageServerTimePlotLine.setValue(getAverageServerTime());
+        averageOverallTimePlotLine.setValue(getAverageOverallTime());
+        chart.getYAxis().addPlotLines(averageServerTimePlotLine, averageOverallTimePlotLine);
+    }
+
+    private double getAverageOverallTime() {
+        return overallTimeSum / results.size();
+    }
+
+    private double getAverageServerTime() {
+        return serverTimeSum / results.size();
     }
 
     public void reset() {
+        results.clear();
         serverTimeSum = 0;
-        for (Series series : chart.getSeries()) {
-            series.setPoints(new Number[0]);
-        }
+        overallTimeSum = 0;
+        serverTimeSeries.setPoints(new Point[0]);
+        overallTimeSeries.setPoints(new Point[0]);
     }
 
     @Override

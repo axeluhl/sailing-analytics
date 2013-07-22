@@ -31,6 +31,8 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
     private double overallTimeSum = 0;
     private double serverTimeSum = 0;
     
+    private QueryBenchmarkResultsChart resultsChart;
+    
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
@@ -45,11 +47,14 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         dataMiningElementsPanel.add(resultsPanel);
         resultsPanel.add(createOverallTimePanel());
         resultsPanel.add(createServerTimePanel());
+        resultsChart = new QueryBenchmarkResultsChart();
+        resultsPanel.add(resultsChart);
         resultsPanel.add(createResultsTable());
     }
 
     private void run() {
         benchmarkStatusLabel.setText(" | Running");
+        resultsChart.reset();
         resetResults();
         final int times = numberOfQueriesBox.getValue() == null ? 1 : numberOfQueriesBox.getValue();
         String[] selectionIdentifiers = new String[] {"KW 2013 International (STR)", "KW 2013 International (H-Boat)", "KW 2013 International (29ER)",
@@ -72,11 +77,14 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
                         public void onSuccess(Pair<Double, Double> result) {
                             long endTime = System.currentTimeMillis();
                             double overallTime = (endTime - startTimesMap.get(number)) / 1000.0;
-                            updateResults(new QueryBenchmarkResult("Run " + number, result.getB().intValue(), result.getA(), overallTime));
+                            QueryBenchmarkResult newResult = new QueryBenchmarkResult("Run " + number, result.getB().intValue(), result.getA(), overallTime);
+                            updateResults(newResult);
+                            resultsChart.addResult(newResult);
 
                             synchronized (resultsDataProvider) {
                                 if (resultsDataProvider.getList().size() == times) {
                                     benchmarkStatusLabel.setText(" | Done");
+                                    resultsChart.showResults();
                                 } else {
                                     benchmarkStatusLabel.setText(" | Running (last finished: " + number + ")");
                                 }
