@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -15,6 +14,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.datamining.shared.SelectorType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class DataMiningEntryPoint extends AbstractEntryPoint {
     
@@ -23,8 +23,6 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
 
     private FlowPanel resultsPanel;
     private QueryBenchmarkResultsChart resultsChart;
-    
-    private int executedBenchmarks;
     
     @Override
     protected void doOnModuleLoad() {
@@ -36,56 +34,51 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         dataMiningElementsPanel.add(createFunctionsPanel());
         
         resultsPanel = new FlowPanel();
-        resultsPanel.setVisible(false);
         dataMiningElementsPanel.add(resultsPanel);
         resultsChart = new QueryBenchmarkResultsChart();
         resultsPanel.add(resultsChart);
     }
 
-    private void run() {
+    private void runBenchmark() {
         benchmarkStatusLabel.setText(" | Running");
         resultsChart.reset();
-        resetResults();
-        final int times = numberOfQueriesBox.getValue() == null ? 1 : numberOfQueriesBox.getValue();
-        String[] selectionIdentifiers = new String[] {"KW 2013 International (STR)", "KW 2013 International (H-Boat)", "KW 2013 International (29ER)",
-                "KW 2013 International (505)", "KW 2013 International (F18)", "KW 2013 International (EUR)",
-                "KW 2013 International (Folkeboot)", "KW 2013 International (H16)", "KW 2013 International (L4.7)"};
-        SelectorType selectorType = SelectorType.Regattas;
-        final Map<Integer, Long> startTimesMap = new HashMap<Integer, Long>();
-        for (int i = 0; i < times; i++) {
-            final int number = i + 1;
-            
-            startTimesMap.put(number, System.currentTimeMillis());
-            sailingService.runQueryAsBenchmark(selectorType, selectionIdentifiers,
-                    new AsyncCallback<Pair<Double, Double>>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            DataMiningEntryPoint.this.reportError("Error running a query: " + caught.getMessage());
-                        }
-
-                        @Override
-                        public void onSuccess(Pair<Double, Double> result) {
-                            long endTime = System.currentTimeMillis();
-                            double overallTime = (endTime - startTimesMap.get(number)) / 1000.0;
-                            resultsChart.addResult(new QueryBenchmarkResult("Run " + number, result.getB().intValue(), result.getA(), overallTime));
-                            executedBenchmarks++;
-
-                            if (!resultsPanel.isVisible()) {
-                                resultsPanel.setVisible(true);
-                            }
-                            if (executedBenchmarks == times) {
-                                benchmarkStatusLabel.setText(" | Done");
-                                resultsChart.showResults();
-                            } else {
-                                benchmarkStatusLabel.setText(" | Running (last finished: " + number + ")");
-                            }
-                        }
-                    });
-        }
+        sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                DataMiningEntryPoint.this.reportError("Error fetching the regattas from the server: " + caught.getMessage());
+            }
+            @Override
+            public void onSuccess(List<RegattaDTO> regattas) {
+                final int times = numberOfQueriesBox.getValue() == null ? 1 : numberOfQueriesBox.getValue();
+                SelectorType selectorType = SelectorType.Regattas;
+                runQuery(new ClientQueryData(selectorType, regattasToSelectionIdentifiers(regattas), times, 1));
+            }
+        });
     }
 
-    private void resetResults() {
-        executedBenchmarks = 0;
+    private void runQuery(final ClientQueryData queryData) {
+        final long startTime = System.currentTimeMillis();
+        sailingService.runQueryAsBenchmark(queryData.getSelectorType(), queryData.getSelectionIdentifiers(), new AsyncCallback<Pair<Double,Double>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                DataMiningEntryPoint.this.reportError("Error running a query: " + caught.getMessage());
+            }
+            @Override
+            public void onSuccess(Pair<Double, Double> result) {
+                long endTime = System.currentTimeMillis();
+                double overallTime = (endTime - startTime) / 1000.0;
+                resultsChart.addResult(new QueryBenchmarkResult("Run " + queryData.getCurrentRun(), result.getB().intValue(), result.getA(), overallTime));
+                
+                if (queryData.isFinished()) {
+                    benchmarkStatusLabel.setText(" | Done");
+                    resultsChart.showResults();
+                } else {
+                    benchmarkStatusLabel.setText(" | Running (last finished: " + queryData.getCurrentRun() + ")");
+                    queryData.incrementCurrentRun();
+                    runQuery(queryData);
+                }
+            }
+        });
     }
 
     private HorizontalPanel createFunctionsPanel() {
@@ -96,7 +89,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         runQueryButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                run();
+                runBenchmark();
             }
         });
         functionsPanel.add(runQueryButton);
@@ -109,6 +102,16 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         benchmarkStatusLabel = new Label();
         functionsPanel.add(benchmarkStatusLabel);
         return functionsPanel;
+    }
+
+    private String[] regattasToSelectionIdentifiers(List<RegattaDTO> regattas) {
+        String[] selectionIdentifiers = new String[regattas.size()];
+        int i = 0;
+        for (RegattaDTO regatta : regattas) {
+            selectionIdentifiers[i] = regatta.getName();
+            i++;
+        }
+        return selectionIdentifiers;
     }
 
 }
