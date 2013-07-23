@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.ui.datamining;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
@@ -26,17 +29,19 @@ public class QueryBenchmarkResultsChart extends SimplePanel implements RequiresR
     
     private Chart chart;
     private Series serverTimeSeries;
-    private double serverTimeSum = 0;
+    private Series cleanedServerTimeSeries;
     private PlotLine averageServerTimePlotLine;
-    
+
     private Series overallTimeSeries;
-    private double overallTimeSum = 0;
+    private Series cleanedOverallTimeSeries;
     private PlotLine averageOverallTimePlotLine;
     
     private List<QueryBenchmarkResult> results;
+    private double thresholdFactor;
     
     public QueryBenchmarkResultsChart() {
         results = new ArrayList<QueryBenchmarkResult>();
+        thresholdFactor = 5;
         chart = new Chart()
                       .setMarginLeft(100)
                       .setMarginRight(45)
@@ -58,11 +63,13 @@ public class QueryBenchmarkResultsChart extends SimplePanel implements RequiresR
         }));
         
         chart.setToolTip(new ToolTip().setPointFormat("<span style=\"color:{series.color}\">{series.name}</span>: <b>{point.y}s</b><br/>"));
-        
-        serverTimeSeries = chart.createSeries().setName("Server Time").setPlotOptions(new LinePlotOptions().setColor("#000099").setMarker(new Marker().setEnabled(false)));
+
+        serverTimeSeries = chart.createSeries().setName("Server Time").setPlotOptions(new LinePlotOptions().setColor("#656565").setMarker(new Marker().setEnabled(false)));
+        cleanedServerTimeSeries = chart.createSeries().setName("Cleaned Server Time").setPlotOptions(new LinePlotOptions().setColor("#000099").setMarker(new Marker().setEnabled(false)));
         averageServerTimePlotLine = chart.getYAxis().createPlotLine().setColor("#000099").setWidth(2).setDashStyle(DashStyle.SOLID);
-        
-        overallTimeSeries = chart.createSeries().setName("Overall Time").setPlotOptions(new LinePlotOptions().setColor("#00bb00").setMarker(new Marker().setEnabled(false)));
+
+        overallTimeSeries = chart.createSeries().setName("Overall Time").setPlotOptions(new LinePlotOptions().setColor("#656565").setMarker(new Marker().setEnabled(false)));
+        cleanedOverallTimeSeries = chart.createSeries().setName("Cleaned Overall Time").setPlotOptions(new LinePlotOptions().setColor("#00bb00").setMarker(new Marker().setEnabled(false)));
         averageOverallTimePlotLine = chart.getYAxis().createPlotLine().setColor("#00bb00").setWidth(2).setDashStyle(DashStyle.SOLID);
         
         this.setWidget(chart);
@@ -73,34 +80,101 @@ public class QueryBenchmarkResultsChart extends SimplePanel implements RequiresR
     }
     
     public void showResults() {
-        int i = 0;
-        Point[] serverTimePoints = new Point[results.size()];
-        Point[] overallTimePoints = new Point[results.size()];
+        int x = 1;
+        List<Point> serverTimePoints = new ArrayList<Point>();
+        List<Point> overallTimePoints = new ArrayList<Point>();
         for (QueryBenchmarkResult result : results) {
-            serverTimePoints[i] = new Point(i + 1, result.getServerTime()).setName(result.getIdentifier());
-            serverTimeSum += result.getServerTime();
-            overallTimePoints[i] = new Point(i + 1, result.getOverallTime()).setName(result.getIdentifier());
-            overallTimeSum += result.getOverallTime();
-            i++;
+            serverTimePoints.add(new Point(x, result.getServerTime()).setName(result.getIdentifier()));
+            overallTimePoints.add(new Point(x, result.getOverallTime()).setName(result.getIdentifier()));
+            x++;
         }
+
+        Point[] cleanedServerTimePoints = cleanPoints(serverTimePoints);
+        Point[] cleanedOverallTimePoints = cleanPoints(overallTimePoints);
+        double averageServerTime = getAverage(cleanedServerTimePoints);
+        double averageOverallTime = getAverage(cleanedOverallTimePoints);
         
         //This method has to be called, before the points are added to the chart.
-        updateChartSubtitle();
-        serverTimeSeries.setPoints(serverTimePoints);
-        overallTimeSeries.setPoints(overallTimePoints);
-        updatePlotLines();
+        updateChartSubtitle(results.get(0).getNumberOfGPSFixes(), averageServerTime, averageOverallTime);
+        serverTimeSeries.setPoints(serverTimePoints.toArray(new Point[serverTimePoints.size()]));
+        cleanedServerTimeSeries.setPoints(cleanedServerTimePoints);
+        overallTimeSeries.setPoints(overallTimePoints.toArray(new Point[overallTimePoints.size()]));
+        cleanedOverallTimeSeries.setPoints(cleanedOverallTimePoints);
+        updatePlotLines(averageServerTime, averageOverallTime);
         
-        if (!serverTimeSeries.isVisible()) {
-            chart.addSeries(serverTimeSeries);
-            chart.addSeries(overallTimeSeries);
+        ensureChartContainsSeries();
+    }
+
+    private void ensureChartContainsSeries() {
+        Series[] allSeries = new Series[] {serverTimeSeries, cleanedServerTimeSeries, overallTimeSeries, cleanedOverallTimeSeries};
+        for (Series series : allSeries) {
+            boolean isContained = false;
+            for (Series containedSeries : chart.getSeries()) {
+                if (series.equals(containedSeries)) {
+                    isContained = true;
+                    break;
+                }
+            }
+            if (!isContained) {
+                chart.addSeries(series);
+            }
         }
     }
     
-    private void updateChartSubtitle() {
+    private double getAverage(Point[] points) {
+        double sum = 0;
+        for (Point point : points) {
+            sum += point.getY().doubleValue();
+        }
+        return sum / points.length;
+    }
+
+    private Point[] cleanPoints(List<Point> points) {
+        List<Point> sortedPoints = new ArrayList<Point>(points);
+        Collections.sort(sortedPoints, new Comparator<Point>() {
+            @Override
+            public int compare(Point p1, Point p2) {
+                return Double.compare(p1.getY().doubleValue(), p2.getY().doubleValue());
+            }
+        });
+        
+        double lowerQuartil = getQuantil(0.25, sortedPoints);
+        double median = getQuantil(0.5, sortedPoints);
+        double upperQuartil = getQuantil(0.75, sortedPoints);
+        double interquartilRange = upperQuartil - lowerQuartil;
+        double minThreshold = median - interquartilRange * thresholdFactor;
+        double maxThreshold = median + interquartilRange * thresholdFactor;
+
+        List<Point> pointsToOperateOn = new ArrayList<Point>(points);
+        Iterator<Point> pointsIterator = pointsToOperateOn.iterator();
+        while (pointsIterator.hasNext()) {
+            Point point = (Point) pointsIterator.next();
+            if (point.getY().doubleValue() < minThreshold || point.getY().doubleValue() > maxThreshold) {
+                pointsIterator.remove();
+            }
+        }
+        
+        return pointsToOperateOn.toArray(new Point[pointsToOperateOn.size()]);
+    }
+    
+    private double getQuantil(double p, List<Point> sortedList) {
+        double indexAsDouble = p * sortedList.size();
+        if (indexAsDouble - (int) indexAsDouble <= 0.000001) {
+            int index = (int) indexAsDouble;
+            Point p1 = sortedList.get(index);
+            Point p2 = sortedList.get(index + 1);
+            return (p1.getY().doubleValue() + p2.getY().doubleValue()) * 0.5;
+        } else {
+            int index = (int) Math.ceil(indexAsDouble);
+            return sortedList.get(index).getY().doubleValue();
+        }
+    }
+
+    private void updateChartSubtitle(int numberOfGPSFixes, double averageServerTime, double averageOverallTime) {
         StringBuilder subtitelBuilder = new StringBuilder();
-        subtitelBuilder.append("Number of GPS-Fixes: " + results.get(0).getNumberOfGPSFixes());
-        subtitelBuilder.append(" - \u2300 Server Time: " + getAverageServerTime() + "s");
-        subtitelBuilder.append(" - \u2300 Overall Time: " + getAverageOverallTime() + "s");
+        subtitelBuilder.append("Number of GPS-Fixes: " + numberOfGPSFixes);
+        subtitelBuilder.append(" - \u2300 Cleaned Server Time: " + averageServerTime + "s");
+        subtitelBuilder.append(" - \u2300 Cleaned Overall Time: " + averageOverallTime + "s");
         
         chart.setChartSubtitle(new ChartSubtitle().setText(subtitelBuilder.toString()));
         //This is needed, so that the subtitle is updated. Otherwise the text would stay empty
@@ -108,28 +182,19 @@ public class QueryBenchmarkResultsChart extends SimplePanel implements RequiresR
         this.setWidget(chart);
     }
 
-    private void updatePlotLines() {
+    private void updatePlotLines(double averageServerTime, double averageOverallTime) {
         chart.getYAxis().removePlotLine(averageServerTimePlotLine);
         chart.getYAxis().removePlotLine(averageOverallTimePlotLine);
-        averageServerTimePlotLine.setValue(getAverageServerTime());
-        averageOverallTimePlotLine.setValue(getAverageOverallTime());
+        averageServerTimePlotLine.setValue(averageServerTime);
+        averageOverallTimePlotLine.setValue(averageOverallTime);
         chart.getYAxis().addPlotLines(averageServerTimePlotLine, averageOverallTimePlotLine);
-    }
-
-    private double getAverageOverallTime() {
-        return overallTimeSum / results.size();
-    }
-
-    private double getAverageServerTime() {
-        return serverTimeSum / results.size();
     }
 
     public void reset() {
         results.clear();
-        serverTimeSum = 0;
-        overallTimeSum = 0;
-        serverTimeSeries.setPoints(new Point[0]);
-        overallTimeSeries.setPoints(new Point[0]);
+        for (Series series : chart.getSeries()) {
+            series.setPoints(new Point[0]);
+        }
     }
 
     @Override
