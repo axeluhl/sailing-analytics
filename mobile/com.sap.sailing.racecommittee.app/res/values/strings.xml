@@ -169,7 +169,7 @@
     
     <string name="results_mail_subject">[Race Committee] %s</string>
     <string name="results_mail_body">Results for race %s are attached.</string>
-    <string name="wind_direction_degrees">Wind direction (degrees)</string>
+    <string name="wind_direction_degrees">Wind direction from (degrees)</string>
     <string name="wind_speed_knots">Wind speed (knots)</string>
     <string name="enter_wind_direction">1. Enter the wind direction</string>
     <string name="enter_wind_speed">2. Enter the wind speed</string>
@@ -180,7 +180,7 @@
     <string name="longitude">Longitude</string>
     <string name="wind_speed_direction_not_a_valid_number">The wind speed or direction is not a valid number. Please correct the value.</string>
     <string name="wind_location_or_fields_not_valid">The entered location, wind speed or direction is empty. Please correct the values.</string>
-    <string name="your_position">Your position</string>
+    <string name="waiting_for_gps">Waiting for GPS Signal ...</string>
     <string name="store_wind_entry">4. Store wind entry</string>
     <string name="store_wind">Store wind</string>
     

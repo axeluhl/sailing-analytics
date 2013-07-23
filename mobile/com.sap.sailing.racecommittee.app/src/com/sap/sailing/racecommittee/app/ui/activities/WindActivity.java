@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -37,7 +38,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
-import com.sap.sailing.racecommittee.app.utils.GeoUtils;
 
 public class WindActivity extends SessionActivity implements CompassDirectionListener, LocationListener {
 
@@ -47,10 +47,9 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
     CompassView compassView;
     EditText windBearingEditText;
     EditText windSpeedEditText;
-    EditText latitudeEditText;
-    EditText longitudeEditText;
     SeekBar windSpeedSeekBar;
     Button sendButton;
+    TextView waitingForGpsTextView;
     
     LocationManager locationManager;
     Location currentLocation;
@@ -65,10 +64,9 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
         compassView = (CompassView) findViewById(R.id.compassView);
         windBearingEditText = (EditText) findViewById(R.id.editTextWindDirection);
         windSpeedEditText = (EditText) findViewById(R.id.editTextWindSpeed);
-        latitudeEditText = (EditText) findViewById(R.id.et_position_lat);
-        longitudeEditText = (EditText) findViewById(R.id.et_position_lon);
         windSpeedSeekBar = (SeekBar) findViewById(R.id.seekbar_wind_speed);
         sendButton = (Button) findViewById(R.id.btn_wind_send);
+        waitingForGpsTextView = (TextView) findViewById(R.id.textWaitingForGPS);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -195,8 +193,7 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
     @Override
     public void onLocationChanged(Location location) {
         currentLocation = location;
-        latitudeEditText.setText(String.valueOf(GeoUtils.getDegMinSecFormatForDecimalDegree(location.getLatitude())));
-        longitudeEditText.setText(String.valueOf(GeoUtils.getDegMinSecFormatForDecimalDegree(location.getLongitude())));
+        waitingForGpsTextView.setText("");
         sendButton.setEnabled(true);
     }
 
