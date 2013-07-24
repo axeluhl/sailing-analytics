@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -67,6 +68,11 @@ public class ClientParamsPHP {
      * keys for {@link #properties}.
      */
     private final Map<UUID, String> propertiesByID;
+
+    /**
+     * The URL the document object was created from
+     */
+    private final URL paramsUrl;
     
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
     
@@ -416,7 +422,8 @@ public class ClientParamsPHP {
         }
     }
     
-    public ClientParamsPHP(Reader r) throws IOException {
+    public ClientParamsPHP(URL paramsUrl, Reader r) throws IOException {
+        this.paramsUrl = paramsUrl;
         BufferedReader br = new BufferedReader(r);
         properties = new LinkedHashMap<>();
         propertiesByID = new HashMap<>();
@@ -440,6 +447,10 @@ public class ClientParamsPHP {
                 }
             }
         }
+    }
+    
+    public URL getParamsUrl() {
+        return paramsUrl;
     }
     
     public URI getLiveUri() throws URISyntaxException {

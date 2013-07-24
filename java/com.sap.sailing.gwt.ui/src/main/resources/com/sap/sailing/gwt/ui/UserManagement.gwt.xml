@@ -32,4 +32,5 @@
   <source path='usermanagement'/>
   <source path='shared'/>
   <source path='actions'/>
+  <source path='simulator'/>
 </module>
