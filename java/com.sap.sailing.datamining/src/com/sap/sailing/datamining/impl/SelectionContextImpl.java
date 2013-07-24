@@ -18,6 +18,26 @@ public class SelectionContextImpl implements SelectionContext {
     }
 
     @Override
+    public TrackedRegatta getTrackedRegatta() {
+        return trackedRegatta;
+    }
+
+    @Override
+    public TrackedRace getTrackedRace() {
+        return trackedRace;
+    }
+
+    @Override
+    public Competitor getCompetitor() {
+        return competitor;
+    }
+
+    @Override
+    public TrackedLeg getTrackedLeg() {
+        return trackedLeg;
+    }
+
+    @Override
     public void setTrackedRace(TrackedRace trackedRace) {
         this.trackedRace = trackedRace;
     }

@@ -3,13 +3,16 @@ package com.sap.sailing.datamining;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 
 public interface SelectionContext {
 
-    void setTrackedRace(TrackedRace trackedRace);
-
-    void setCompetitor(Competitor competitor);
-
-    void setTrackedLeg(TrackedLeg trackedLeg);
+    public void setTrackedRace(TrackedRace trackedRace);
+    public void setCompetitor(Competitor competitor);
+    public void setTrackedLeg(TrackedLeg trackedLeg);
+    public TrackedLeg getTrackedLeg();
+    public Competitor getCompetitor();
+    public TrackedRace getTrackedRace();
+    public TrackedRegatta getTrackedRegatta();
 
 }

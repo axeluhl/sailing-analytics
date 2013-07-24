@@ -29,34 +29,24 @@ public class SelectorImpl implements Selector {
             TrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
                 SelectionContext context = new SelectionContextImpl(trackedRegatta);
-                if (criteria.matches(context)) {
-                    data.addAll(criteria.getDataRetriever(context).retrieveData());
-                }
+                data.addAll(criteria.getDataIfMatches(context));
                 
                 for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
                     context.setTrackedRace(trackedRace);
-                    if (criteria.matches(context)) {
-                        data.addAll(criteria.getDataRetriever(context).retrieveData());
-                    }
+                    data.addAll(criteria.getDataIfMatches(context));
                     
                     for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
                         context.setTrackedLeg(trackedLeg);
-                        if (criteria.matches(context)) {
-                            data.addAll(criteria.getDataRetriever(context).retrieveData());
-                        }
+                        data.addAll(criteria.getDataIfMatches(context));
                     }
                     
                     for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                         context.setCompetitor(competitor);
-                        if (criteria.matches(context)) {
-                            data.addAll(criteria.getDataRetriever(context).retrieveData());
-                        }
+                        data.addAll(criteria.getDataIfMatches(context));
                         
                         for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
                             context.setTrackedLeg(trackedLeg);
-                            if (criteria.matches(context)) {
-                                data.addAll(criteria.getDataRetriever(context).retrieveData());
-                            }
+                            data.addAll(criteria.getDataIfMatches(context));
                         }
                     }
                 }
