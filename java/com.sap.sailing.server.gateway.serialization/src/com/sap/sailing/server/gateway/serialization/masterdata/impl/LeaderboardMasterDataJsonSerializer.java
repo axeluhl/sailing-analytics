@@ -137,11 +137,13 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
     private JSONArray createRaceLogEventsForFleet(RaceColumn raceColumn, Fleet fleet) {
         JSONArray array = new JSONArray();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        raceLog.lockForRead();
-        for (RaceLogEvent event : raceLog.getFixes()) {
-            array.add(raceLogEventSerializer.serialize(event));
+        if (raceLog != null) {
+            raceLog.lockForRead();
+            for (RaceLogEvent event : raceLog.getFixes()) {
+                array.add(raceLogEventSerializer.serialize(event));
+            }
+            raceLog.unlockAfterRead();
         }
-        raceLog.unlockAfterRead();
         return array;
     }
 
