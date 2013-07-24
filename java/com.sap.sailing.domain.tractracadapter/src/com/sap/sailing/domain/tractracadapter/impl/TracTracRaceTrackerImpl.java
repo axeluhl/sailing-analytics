@@ -313,9 +313,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             compareAndUpdateCourseIfNecessary(newCourseControlPointsWithPassingSide);
             updateStartStopTimesAndLiveDelay(clientParams, simulator);
             updateMarkPositionsIfNoPositionsReceivedYet(clientParams);
-        } catch (IOException e) {
-            logger.info("Exception " + e.getMessage() + " while trying to read clientparams.php for races "
-                    + getRaces());
+        } catch (Exception e) {
+            logger.info("Exception " + e.getMessage() + " while trying to read clientparams.php for races " + getRaces());
             logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", e);
         }
     }
