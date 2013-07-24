@@ -10,7 +10,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.server.RacingEventService;
 
-public class EventDataRetriever implements DataRetriever<Event> {
+public class EventDataRetriever implements DataRetriever {
 
     private Event event;
     private RacingEventService racingEventService;
@@ -20,14 +20,9 @@ public class EventDataRetriever implements DataRetriever<Event> {
     }
 
     @Override
-    public Event getTarget() {
-        return event;
-    }
-
-    @Override
     public List<GPSFixWithContext> retrieveData() {
         List<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
-        for (Regatta regatta : getTarget().getRegattas()) {
+        for (Regatta regatta : event.getRegattas()) {
             TrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
                 data.addAll(new TrackedRegattaDataRetriever(trackedRegatta).retrieveData());

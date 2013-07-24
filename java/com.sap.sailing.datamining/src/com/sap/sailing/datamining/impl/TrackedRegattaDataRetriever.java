@@ -8,7 +8,7 @@ import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 
-public class TrackedRegattaDataRetriever implements DataRetriever<TrackedRegatta> {
+public class TrackedRegattaDataRetriever implements DataRetriever {
 
     private TrackedRegatta regatta;
 
@@ -17,14 +17,9 @@ public class TrackedRegattaDataRetriever implements DataRetriever<TrackedRegatta
     }
 
     @Override
-    public TrackedRegatta getTarget() {
-        return regatta;
-    }
-
-    @Override
     public List<GPSFixWithContext> retrieveData() {
         List<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
-        for (TrackedRace trackedRace : getTarget().getTrackedRaces()) {
+        for (TrackedRace trackedRace : regatta.getTrackedRaces()) {
             data.addAll(new TrackedRaceDataRetriever(trackedRace).retrieveData());
         }
         return data;

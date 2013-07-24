@@ -11,7 +11,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class TrackedRaceDataRetriever implements DataRetriever<TrackedRace> {
+public class TrackedRaceDataRetriever implements DataRetriever {
 
     private TrackedRace trackedRace;
 
@@ -20,15 +20,10 @@ public class TrackedRaceDataRetriever implements DataRetriever<TrackedRace> {
     }
 
     @Override
-    public TrackedRace getTarget() {
-        return trackedRace;
-    }
-
-    @Override
     public List<GPSFixWithContext> retrieveData() {
         List<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
-        for (Competitor competitor : getTarget().getRace().getCompetitors()) {
-            GPSFixTrack<Competitor, GPSFixMoving> track = getTarget().getTrack(competitor);
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
             track.lockForRead();
             try {
                 for (GPSFixMoving gpsFix : track.getFixes()) {
