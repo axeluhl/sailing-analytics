@@ -479,17 +479,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                                     showCombinedWindOnMap(windSource, windTrackInfoDTO);
                                                     if (windTrackInfoDTO != null) {
                                                         lastCombinedWindTrackInfoDTO = windTrackInfoDTO; 
+                                                        showAdvantageLine(competitorsToShow, date);
                                                     }
                                                     break;
-                                        		default:
-                                        			//Which wind sources are requested is defined in a list above this action.
-                                        			//So we throw here an exception to notice a missing source.
-                                        			throw new UnsupportedOperationException("Theres currently no support for the enum value '" + windSource.getType() + "' in this method.");
+                                            default:
+                                                // Which wind sources are requested is defined in a list above this
+                                                // action. So we throw here an exception to notice a missing source.
+                                                throw new UnsupportedOperationException(
+                                                        "There is currently no support for the enum value '"
+                                                                + windSource.getType() + "' in this method.");
                                             }
                                         }
                                     }
                                     showWindSensorsOnMap(windSourcesToShow);
-                                    showAdvantageLine(competitorsToShow, date);
                                 }
                             });
                     
