@@ -2,16 +2,17 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.util.Date;
 
-import android.app.Activity;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.sap.sailing.racecommittee.app.R;
 
-public class SystemInformationActivity extends Activity {
+public class SystemInformationActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,6 +20,24 @@ public class SystemInformationActivity extends Activity {
         setContentView(R.layout.system_information_view);
         setupVersionView();
         setupInstalledView();
+    }
+
+    @Override
+    protected void updateSendingServiceInformation() {
+        TextView statusView = (TextView) findViewById(R.id.system_information_persistence_status);
+        ListView waitingView = (ListView) findViewById(R.id.system_information_persistence_waiting);
+        if (boundSendingService) {
+            Date lastSuccessfulSend = sendingService.getLastSuccessfulSend();
+            statusView.setText(String.format("Currently %d events waiting to be sent.\nLast successful sent was at: %s.", 
+                    sendingService.getDelayedIntentsCount(), lastSuccessfulSend == null ? "never" : lastSuccessfulSend));
+            
+            waitingView.setAdapter(new ArrayAdapter<String>(this, 
+                    android.R.layout.simple_list_item_1, 
+                    sendingService.getDelayedIntensContent()));
+        } else {
+            statusView.setText(getString(R.string.generic_error));
+        }
+        
     }
 
     private void setupVersionView() {

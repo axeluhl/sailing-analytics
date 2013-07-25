@@ -34,7 +34,7 @@ public abstract class BaseActivity extends Activity {
             sendingService = binder.getService();
             boundSendingService = true;
             sendingService.setEventSendingServiceLogger(this);
-            updateLiveIcon();
+            updateSendingServiceInformation();
         }
 
         @Override
@@ -44,12 +44,12 @@ public abstract class BaseActivity extends Activity {
 
         @Override
         public void onEventSentSuccessful() {
-            updateLiveIcon();
+            updateSendingServiceInformation();
         }
 
         @Override
         public void onEventSentFailed() {
-            updateLiveIcon();
+            updateSendingServiceInformation();
         }
     }
 
@@ -57,12 +57,11 @@ public abstract class BaseActivity extends Activity {
 
     protected MenuItem menuItemLive;
 
-    boolean boundSendingService = false;
+    protected boolean boundSendingService = false;
+    protected EventSendingService sendingService;
+    private EventSendingServiceConnection sendingServiceConnection;
     
-    EventSendingService sendingService;
-    EventSendingServiceConnection sendingServiceConnection;
-    
-    String sendingServiceStatus = "";
+    private String sendingServiceStatus = "";
     
     public BaseActivity() {
         this.sendingServiceConnection = new EventSendingServiceConnection();
@@ -107,7 +106,7 @@ public abstract class BaseActivity extends Activity {
     
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        updateLiveIcon();
+        updateSendingServiceInformation();
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -141,7 +140,7 @@ public abstract class BaseActivity extends Activity {
         }
     }
 
-    private void updateLiveIcon() {
+    protected void updateSendingServiceInformation() {
         if (menuItemLive == null)
             return;
         
