@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -11,7 +12,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.sap.sailing.datamining.shared.SelectorType;
+import com.sap.sailing.datamining.shared.SelectionType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -50,15 +51,15 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
             @Override
             public void onSuccess(List<RegattaDTO> regattas) {
                 final int times = numberOfQueriesBox.getValue() == null ? 1 : numberOfQueriesBox.getValue();
-                SelectorType selectorType = SelectorType.Regattas;
-                runQuery(new ClientQueryData(selectorType, regattasToSelectionIdentifiers(regattas), times, 1));
+                SelectionType selectionType = SelectionType.Regatta;
+                runQuery(new ClientQueryData(selectionType, regattasToSelectionIdentifiers(regattas), times, 1));
             }
         });
     }
 
     private void runQuery(final ClientQueryData queryData) {
         final long startTime = System.currentTimeMillis();
-        sailingService.runQueryAsBenchmark(queryData.getSelectorType(), queryData.getSelectionIdentifiers(), new AsyncCallback<Pair<Double,Double>>() {
+        sailingService.runQueryAsBenchmark(queryData.getSelectionType(), queryData.getSelection(), new AsyncCallback<Pair<Double,Double>>() {
             @Override
             public void onFailure(Throwable caught) {
                 DataMiningEntryPoint.this.reportError("Error running a query: " + caught.getMessage());
@@ -104,12 +105,10 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         return functionsPanel;
     }
 
-    private String[] regattasToSelectionIdentifiers(List<RegattaDTO> regattas) {
-        String[] selectionIdentifiers = new String[regattas.size()];
-        int i = 0;
+    private List<String> regattasToSelectionIdentifiers(List<RegattaDTO> regattas) {
+        List<String> selectionIdentifiers = new ArrayList<String>();
         for (RegattaDTO regatta : regattas) {
-            selectionIdentifiers[i] = regatta.getName();
-            i++;
+            selectionIdentifiers.add(regatta.getName());
         }
         return selectionIdentifiers;
     }

@@ -1,26 +1,29 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import com.sap.sailing.datamining.shared.SelectorType;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import com.sap.sailing.datamining.shared.SelectionType;
 
 public class ClientQueryData {
-    private SelectorType selectorType;
-    private String[] selectionIdentifiers;
+    private SelectionType selectionType;
+    private Collection<String> selection;
     private int times;
     private int currentRun;
 
-    public ClientQueryData(SelectorType selectorType, String[] selectionIdentifiers, int times, int currentRun) {
-        this.selectorType = selectorType;
-        this.selectionIdentifiers = selectionIdentifiers;
+    public ClientQueryData(SelectionType selectionType, Collection<String> selection, int times, int currentRun) {
+        this.selectionType = selectionType;
+        this.selection = new ArrayList<String>(selection);
         this.times = times;
         this.currentRun = currentRun;
     }
 
-    public SelectorType getSelectorType() {
-        return selectorType;
+    public SelectionType getSelectionType() {
+        return selectionType;
     }
 
-    public String[] getSelectionIdentifiers() {
-        return selectionIdentifiers;
+    public Collection<String> getSelection() {
+        return selection;
     }
 
     public int getTimes() {

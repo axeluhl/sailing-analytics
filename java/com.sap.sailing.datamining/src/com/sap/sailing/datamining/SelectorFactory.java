@@ -1,10 +1,18 @@
 package com.sap.sailing.datamining;
 
+import java.util.Collection;
+
 import com.sap.sailing.datamining.impl.EventSelector;
 import com.sap.sailing.datamining.impl.RegattaSelector;
+import com.sap.sailing.datamining.impl.SelectorImpl;
+import com.sap.sailing.datamining.shared.SelectionType;
 import com.sap.sailing.datamining.shared.SelectorType;
 
 public class SelectorFactory {
+    
+    public static <T> Selector createSelector(SelectionType type, Collection<T> selection) {
+        return new SelectorImpl(SelectionCriteriaFactory.createSelectionCriteria(type, selection));
+    }
     
     public static Selector createSelector(SelectorType selectorType, String... selectionIdentifiers) {
         switch (selectorType) {
