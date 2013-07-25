@@ -1110,7 +1110,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             if(confidence < minWindConfidence) {
                                 minWindConfidence = confidence;
                             }
-                            if(confidence > maxWindConfidence) {
+                            if (confidence > maxWindConfidence) {
                                 maxWindConfidence = confidence;
                             }
                         }

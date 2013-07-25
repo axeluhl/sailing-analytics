@@ -122,6 +122,25 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * Polyline for the advantage line (the leading line for the boats, orthogonal to the wind direction; touching the leading boat).
      */
     private Polyline advantageLine;
+
+    private class AdvantageLinePolylineMouseOverHandler implements PolylineMouseOverHandler {
+        private double trueWindAngle;
+        
+        public AdvantageLinePolylineMouseOverHandler(double trueWindAngle) {
+            this.trueWindAngle = trueWindAngle;
+        }
+        
+        public void setTrueWindBearing(double trueWindAngle) {
+            this.trueWindAngle = trueWindAngle;
+        }
+        
+        @Override
+        public void onMouseOver(PolylineMouseOverEvent event) {
+            map.setTitle(stringMessages.advantageLine()+" (from "+new DegreeBearingImpl(Math.round(trueWindAngle)).reverse().getDegrees()+"deg)");
+        }
+    };
+    
+    private AdvantageLinePolylineMouseOverHandler advantageLineMouseOverHandler;
     
     /**
      * Polyline for the course middle line.
@@ -438,19 +457,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                 @Override
                                 public void onSuccess(WindInfoForRaceDTO windInfo) {
                                     List<Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<Pair<WindSource, WindTrackInfoDTO>>();
-                                    if(windInfo != null) {
-                                        for(WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
+                                    if (windInfo != null) {
+                                        for (WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
                                             WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
                                             switch (windSource.getType()) {
                                                 case EXPEDITION:
                                                     // we filter out measured wind sources with a very little confidence
-                                                    if(windTrackInfoDTO.minWindConfidence > 0.01) {
+                                                    if (windTrackInfoDTO.minWindConfidence > 0.01) {
                                                         windSourcesToShow.add(new Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
                                                     }
                                                     break;
                                                 case COMBINED:
                                                     showCombinedWindOnMap(windSource, windTrackInfoDTO);
-                                                    if(windTrackInfoDTO != null) {
+                                                    if (windTrackInfoDTO != null) {
                                                         lastCombinedWindTrackInfoDTO = windTrackInfoDTO; 
                                                     }
                                                     break;
@@ -850,12 +869,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                                                               /* geodesic */true);
                         advantageLine = new Polyline(advantageLinePoints, /* color */"#000000", /* width */1, /* opacity */
                                 0.5, options);
-                        advantageLine.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
-                            @Override
-                            public void onMouseOver(PolylineMouseOverEvent event) {
-                                map.setTitle(stringMessages.advantageLine());
-                            }
-                        });
+                        advantageLineMouseOverHandler = new AdvantageLinePolylineMouseOverHandler(bearingOfCombinedWindInDeg);
+                        advantageLine.addPolylineMouseOverHandler(advantageLineMouseOverHandler);
                         advantageLine.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
                             @Override
                             public void onMouseOut(PolylineMouseOutEvent event) {
@@ -868,6 +883,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         advantageLine.deleteVertex(0);
                         advantageLine.insertVertex(0, advantageLinePoints[0]);
                         advantageLine.insertVertex(1, advantageLinePoints[1]);
+                        advantageLineMouseOverHandler.setTrueWindBearing(bearingOfCombinedWindInDeg);
                     }
                     drewAdvantageLine = true;
                 }
