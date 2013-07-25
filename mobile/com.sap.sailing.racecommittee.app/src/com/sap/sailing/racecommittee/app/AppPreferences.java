@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
@@ -32,6 +33,7 @@ public class AppPreferences {
     private final static String PREFERENCE_MANAGED_COURSE_AREAS = "courseAreasPref";
     private final static String PREFERENCE_MIN_ROUNDS = "minRoundsPreference";
     private final static String PREFERENCE_MAX_ROUNDS = "maxRoundsPreference";
+    private final static String PREFERENCE_DEFAULT_START_PROCEDURE_TYPE = "defaultStartProcedureType";
     
     public static BoatClassType getBoatClass(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
@@ -175,5 +177,12 @@ public class AppPreferences {
             Log.e(TAG, "Unable to parse minimum rounds setting to integer");
         }
         return minRounds; 
+    }
+    
+    public static StartProcedureType getDefaultStartProcedureType(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        String defaultStartProcedureType = sp.getString(PREFERENCE_DEFAULT_START_PROCEDURE_TYPE, "RRS26");
+        StartProcedureType type = StartProcedureType.valueOf(defaultStartProcedureType);
+        return type;
     }
 }

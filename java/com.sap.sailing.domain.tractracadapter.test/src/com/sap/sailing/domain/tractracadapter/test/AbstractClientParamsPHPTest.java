@@ -13,6 +13,6 @@ public abstract class AbstractClientParamsPHPTest {
     public void setUp(String resourceName) throws IOException {
         InputStream is = getClass().getResourceAsStream(resourceName);
         Reader r = new InputStreamReader(is);
-        clientParams = new ClientParamsPHP(r);
+        clientParams = new ClientParamsPHP(getClass().getResource(resourceName), r);
     }
 }

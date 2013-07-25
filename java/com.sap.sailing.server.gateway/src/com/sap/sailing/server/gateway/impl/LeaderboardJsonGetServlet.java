@@ -203,12 +203,13 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                     TimePoint resultTimePoint = calculateTimePointForResultState(leaderboard, resultState);
                     StringBuffer jsonLeaderboardAsString;
                     if (resultTimePoint != null) {
-                        Triple<TimePoint, ResultStates, Integer> resultStateAndTimePoint = new Triple<>(resultTimePoint, resultState, maxCompetitorsCount);
+                        Triple<TimePoint, ResultStates, Integer> resultStateAndTimePointAndMaxCompetitorsCount =
+                                new Triple<>(resultTimePoint, resultState, maxCompetitorsCount);
                         if (useCache) {
-                            jsonLeaderboardAsString = getLeaderboardJsonFromCacheOrCompute(leaderboard, resultStateAndTimePoint, requestTimePoint);
+                            jsonLeaderboardAsString = getLeaderboardJsonFromCacheOrCompute(leaderboard, resultStateAndTimePointAndMaxCompetitorsCount);
                         } else {
                             StringWriter sw = new StringWriter();
-                            computeLeaderboardJson(leaderboard, resultStateAndTimePoint).writeJSONString(sw);
+                            computeLeaderboardJson(leaderboard, resultStateAndTimePointAndMaxCompetitorsCount).writeJSONString(sw);
                             jsonLeaderboardAsString = sw.getBuffer();
                         }
                     } else {
@@ -236,22 +237,24 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     }
 
     private StringBuffer getLeaderboardJsonFromCacheOrCompute(Leaderboard leaderboard,
-            Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount, final TimePoint requestTimePoint) throws NoWindException {
+            Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount) throws NoWindException {
+        final StringBuffer result;
         Map<Triple<TimePoint, ResultStates, Integer>, StringBuffer> cacheEntry = cache.get(leaderboard, /* waitForLatest */ false);
         if (cacheEntry == null || !cacheEntry.containsKey(timePointAndResultStateAndMaxCompetitorsCount)) {
             cacheMisses++;
-            LinkedHashSet<Triple<TimePoint, ResultStates, Integer>> timePointsAndResultStates = new LinkedHashSet<>();
-            timePointsAndResultStates.add(timePointAndResultStateAndMaxCompetitorsCount);
-            cache.triggerUpdate(leaderboard, new LeaderboardJsonCacheUpdateInterval(timePointsAndResultStates));
+            LinkedHashSet<Triple<TimePoint, ResultStates, Integer>> timePointsAndResultStatesAndMaxCompetitorsCount = new LinkedHashSet<>();
+            timePointsAndResultStatesAndMaxCompetitorsCount.add(timePointAndResultStateAndMaxCompetitorsCount);
+            cache.triggerUpdate(leaderboard, new LeaderboardJsonCacheUpdateInterval(timePointsAndResultStatesAndMaxCompetitorsCount));
             // now wait for this entry to be computed
             cacheEntry = cache.get(leaderboard, /* waitForLatest */ true);
             StringBuffer jsonObjectAsString = cacheEntry.get(timePointAndResultStateAndMaxCompetitorsCount);
-            return jsonObjectAsString;
+            result = jsonObjectAsString;
         } else {
             cacheHits++;
+            result = cacheEntry.get(timePointAndResultStateAndMaxCompetitorsCount);
         }
         logger.finest(this+" cache hits/misses: "+cacheHits+"/"+cacheMisses);
-        return cacheEntry.get(timePointAndResultStateAndMaxCompetitorsCount);
+        return result;
     }
 
     private JSONObject computeLeaderboardJson(Leaderboard leaderboard,

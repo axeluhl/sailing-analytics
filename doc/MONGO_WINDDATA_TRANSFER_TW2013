@@ -1,0 +1,6 @@
+Kieler Woche 2012  
+
+Move wind data from test to prod
+  /opt/mongodb/bin/mongoexport --port 10201 -d winddb -c WIND_TRACKS -q "{ REGATTA_NAME: /TW 2013.*/}" > /tmp/windtracks-TW2013.json
+
+  /opt/mongodb/bin/mongoimport --upsert --port 10202 -d winddb -c WIND_TRACKS /tmp/windtracks-TW2013.json
