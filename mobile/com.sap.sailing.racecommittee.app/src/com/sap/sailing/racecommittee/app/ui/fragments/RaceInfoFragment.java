@@ -94,7 +94,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
 
         });
 
-        Button resetButton = ((Button) getView().findViewById(R.id.btnResetRace));
+        Button resetButton = (Button) getView().findViewById(R.id.btnResetRace);
         resetButton.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 ExLog.i(TAG, "Reset race button pressed");
@@ -202,7 +202,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         if (getRace().getState().getCourseDesign() != null) {
 
             CourseBase courseDesign = getRace().getState().getCourseDesign();
-            if (courseDesign.getName() != null) {
+            if (Util.isEmpty(courseDesign.getWaypoints())) {
                 String courseName = courseDesign.getName();
                 if (courseName.contains("(")){
                     //New course name in the format: [CourseType] Rounds:X ([Old CourseName])
@@ -211,8 +211,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
                     courseName = courseName.replaceAll(pattern, "$1"); 
                 }
                 courseInfoHeader.setText(String.format(getString(R.string.running_on_course), courseName));
-            } else if (Util.isEmpty(courseDesign.getWaypoints())) {
-                courseInfoHeader.setText(getString(R.string.running_on_unknown));
             } else {
                 courseInfoHeader.setText(String.format(getString(R.string.course_design_number_waypoints),
                         Util.size(courseDesign.getWaypoints())));

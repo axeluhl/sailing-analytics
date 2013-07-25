@@ -106,7 +106,7 @@ public class FinishingRaceFragment extends RaceFragment {
         fragment.show(fragmentManager, "dialogNovemberMode");
     }
 
-    private void showRemoveBlueFlagDialog() {
+    protected void showRemoveBlueFlagDialog() {
         FragmentManager fragmentManager = getFragmentManager();
 
         RaceDialogFragment fragment = new RaceFinishedTimeDialog();
