@@ -84,6 +84,7 @@
     <string name="race_reset_confirmation_header">Zurücksetzen des Rennens</string>
     <string name="race_reset_confirmation_warning">Beim Zurücksetzen des Rennens werden alle Daten gelöscht. Alle Informationen zum Rennen müssen erneut eingegeben werden. Nur der eingegeben Kurs bleibt erhalten. Ein Zurücksetzen wird nicht empfohlen.</string>
     <string name="race_reset_confirmation_title">Zurücksetzen</string>
+	<string name="race_reset_reset_button">Trotzdem zurücksetzen</string>
     <string name="race_finished_start_time">Rennstart um:</string>
     <string name="race_finished_end_time">Rennende um:</string>
     <string name="race_startphase_flagdown">Flagge wird eingeholt&#8230;</string>
