@@ -1428,7 +1428,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * @return The GPS fix for the given competitor from {@link #fixes} that is closest to <code>date</code>, or
      *         <code>null</code> if no fix is available
      */
-    protected GPSFixDTO getBoatFix(CompetitorDTO competitorDTO, Date date) {
+    private GPSFixDTO getBoatFix(CompetitorDTO competitorDTO, Date date) {
         GPSFixDTO result = null;
         List<GPSFixDTO> competitorFixes = fixes.get(competitorDTO);
         if (competitorFixes != null && !competitorFixes.isEmpty()) {
