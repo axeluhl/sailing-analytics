@@ -255,4 +255,7 @@
 	
 	<string name="generic_error">Error</string>
 	
+	<string name="nationality">Nationality</string>
+	<string name="number">Number</string>
+	
 </resources>

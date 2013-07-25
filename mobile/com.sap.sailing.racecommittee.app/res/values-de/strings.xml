@@ -227,4 +227,7 @@
 	<string name="today">Heute</string>
 	<string name="start">Start</string>
 	
+	<string name="nationality">Nationalität</string>
+	<string name="number">Nummer</string>
+	
 </resources>
