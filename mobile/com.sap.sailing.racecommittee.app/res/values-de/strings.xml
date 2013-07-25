@@ -211,17 +211,6 @@
     <string name="generic_load_failure">Beim Laden der Daten ist ein Fehler aufgetreten:\n\"%s\"\nErneut versuchen?</string>
     <string name="set_course_layout">Kurs setzen</string>
     
-    <string-array name="course_routes">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
-    </string-array>
-    
     <string name="loading_failure">Fehler beim Laden</string>
 	<string name="wind_unknown">(Wind setzen)</string>
 	<string name="wind_info" formatted="false">(%s kn, %s)</string>
