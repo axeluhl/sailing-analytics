@@ -69,13 +69,7 @@ public class RaceChooseCourseByLabelDialog extends RaceDialogFragment {
         Button selectedButton = (Button) v;
         String internalCourseName = (String) selectedButton.getText();
         
-        String[] courseLayoutsAndNames = getActivity().getResources().getStringArray(R.array.course_routes);
-        String[] courseNumberAndRounds = internalCourseName.split(" ");
-        
-        int courseId = Integer.parseInt(courseNumberAndRounds[0]);
-        String courseName = courseLayoutsAndNames[courseId].split(",")[1];
-        
-        CourseBase courseLayout = new CourseDataImpl(courseName+" Rounds:"+courseNumberAndRounds[1]+" ("+internalCourseName+")");
+        CourseBase courseLayout = new CourseDataImpl(internalCourseName);
         
         getRace().getState().setCourseDesign(courseLayout);
         dismiss();

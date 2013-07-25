@@ -204,12 +204,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
             CourseBase courseDesign = getRace().getState().getCourseDesign();
             if (courseDesign.getName() != null) {
                 String courseName = courseDesign.getName();
-                if (courseName.contains("(")){
-                    //New course name in the format: [CourseType] Rounds:X ([Old CourseName])
-                    //e.g. Triangle Rounds:3 (7 3)
-                    String pattern = ".*\\((.+?)\\).*";
-                    courseName = courseName.replaceAll(pattern, "$1"); 
-                }
                 courseInfoHeader.setText(String.format(getString(R.string.running_on_course), courseName));
             } else if (Util.isEmpty(courseDesign.getWaypoints())) {
                 courseInfoHeader.setText(getString(R.string.running_on_unknown));
