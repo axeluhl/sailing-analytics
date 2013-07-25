@@ -58,6 +58,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -90,6 +91,7 @@ import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.SidelineDTO;
+import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -740,9 +742,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
-    /*
-     * This algorithm is limited to distances such that dlon < pi/2, i.e those that extend around less than one quarter of the circumference 
-     * of the earth in longitude. A completely general, but more complicated algorithm is necessary if greater distances are allowed. 
+    /**
+     * This algorithm is limited to distances such that dlon < pi/2, i.e., those that extend around less than one
+     * quarter of the circumference of the earth in longitude. A completely general, but more complicated algorithm is
+     * necessary if greater distances are allowed.
      */
     public LatLng calculatePositionAlongRhumbline(LatLng position, double bearingDeg, double distanceInKm) {
         double distianceRad = distanceInKm / 6371.0;  // r = 6371 means earth's radius in km 
@@ -1432,7 +1435,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         GPSFixDTO result = null;
         List<GPSFixDTO> competitorFixes = fixes.get(competitorDTO);
         if (competitorFixes != null && !competitorFixes.isEmpty()) {
-            int i = Collections.binarySearch(competitorFixes, new GPSFixDTO(date, null, null, null, null, null, false), new Comparator<GPSFixDTO>() {
+            int i = Collections.binarySearch(competitorFixes, new GPSFixDTO(date, null, null, (WindDTO) null, null, null, false),
+                    new Comparator<GPSFixDTO>() {
                 @Override
                 public int compare(GPSFixDTO o1, GPSFixDTO o2) {
                     return o1.timepoint.compareTo(o2.timepoint);
@@ -1449,14 +1453,30 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 } else {
                     // competitorFixes must have at least two elements, and i points neither to the end nor the beginning;
                     // get the fix from i and i+1 whose timepoint is closer to date
-                    if (date.getTime() - competitorFixes.get(i-1).timepoint.getTime() < competitorFixes.get(i).timepoint.getTime() - date.getTime()) {
-                        result = competitorFixes.get(i-1);
+                    final GPSFixDTO fixBefore = competitorFixes.get(i-1);
+                    final GPSFixDTO fixAfter = competitorFixes.get(i);
+                    final GPSFixDTO closer;
+                    if (date.getTime() - fixBefore.timepoint.getTime() < fixAfter.timepoint.getTime() - date.getTime()) {
+                        closer = fixBefore;
                     } else {
-                        result = competitorFixes.get(i);
+                        closer = fixAfter;
                     }
+                    Date betweenDate = new Date((fixBefore.timepoint.getTime() + fixAfter.timepoint.getTime()) / 2);
+                    PositionDTO betweenPosition = new PositionDTO((fixBefore.position.latDeg + fixAfter.position.latDeg)/2,
+                            (fixBefore.position.lngDeg + fixAfter.position.lngDeg)/2);
+                    double betweenBearing = new DegreeBearingImpl(fixBefore.speedWithBearing.bearingInDegrees).middle(
+                            new DegreeBearingImpl(fixAfter.speedWithBearing.bearingInDegrees)).getDegrees();
+                    SpeedWithBearingDTO betweenSpeed = new SpeedWithBearingDTO(
+                            (fixBefore.speedWithBearing.speedInKnots + fixAfter.speedWithBearing.speedInKnots)/2,
+                            betweenBearing);
+                    // TODO move SpeedWithBearing and GPSFix with implementation classes to com.sap.sailing.domain.common and share in GWT bundle
+                    result = new GPSFixDTO(betweenDate, betweenPosition, betweenSpeed, closer.degreesBoatToTheWind,
+                            closer.tack, closer.legType, fixBefore.extrapolated || fixAfter.extrapolated);
                 }
             } else {
-                result = competitorFixes.get(i);
+                // perfect match
+                final GPSFixDTO fixAfter = competitorFixes.get(i);
+                result = fixAfter;
             }
         }
         return result;
