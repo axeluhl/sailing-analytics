@@ -85,7 +85,7 @@ public class OnlineDataManager extends DataManager {
         }
     }
 
-    protected void reloadEvents(LoadClient<Collection<EventBase>> client) {
+    protected DataLoader<Collection<EventBase>> reloadEvents(LoadClient<Collection<EventBase>> client) {
         SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
         DataParser<Collection<EventBase>> parser = new EventsDataParser(new EventBaseJsonDeserializer(
                 new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory))));
@@ -99,6 +99,7 @@ public class OnlineDataManager extends DataManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     public void loadCourseAreas(final Serializable parentEventId, final LoadClient<Collection<CourseArea>> client) {

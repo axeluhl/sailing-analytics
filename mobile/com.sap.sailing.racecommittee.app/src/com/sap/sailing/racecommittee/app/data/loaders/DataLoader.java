@@ -68,13 +68,13 @@ public class DataLoader<T> extends AsyncTaskLoader<T> {
         }
     }
 
-    @Override
+    /*@Override
     public void deliverResult(T data) {
         if (data == null) {
             dataHandler.onFailed(lastException);
         } else {
             dataHandler.onLoaded(data);
         }
-    }
+    }*/
 
 }
