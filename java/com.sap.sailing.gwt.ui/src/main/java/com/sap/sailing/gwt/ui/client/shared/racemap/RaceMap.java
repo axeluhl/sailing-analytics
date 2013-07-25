@@ -125,19 +125,27 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private class AdvantageLinePolylineMouseOverHandler implements PolylineMouseOverHandler {
         private double trueWindAngle;
+        private Date date;
         
-        public AdvantageLinePolylineMouseOverHandler(double trueWindAngle) {
+        public AdvantageLinePolylineMouseOverHandler(double trueWindAngle, Date date) {
             this.trueWindAngle = trueWindAngle;
+            this.date = date;
         }
         
         public void setTrueWindBearing(double trueWindAngle) {
             this.trueWindAngle = trueWindAngle;
         }
-        
+
+        public void setDate(Date date) {
+            this.date = date;
+        }
+
         @Override
         public void onMouseOver(PolylineMouseOverEvent event) {
-            map.setTitle(stringMessages.advantageLine()+" (from "+new DegreeBearingImpl(Math.round(trueWindAngle)).reverse().getDegrees()+"deg)");
+            map.setTitle(stringMessages.advantageLine()+" (from "+new DegreeBearingImpl(Math.round(trueWindAngle)).reverse().getDegrees()+"deg"+
+                    (date == null ? ")" : ", "+ date) + ")");
         }
+
     };
     
     private AdvantageLinePolylineMouseOverHandler advantageLineMouseOverHandler;
@@ -481,6 +489,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                         }
                                     }
                                     showWindSensorsOnMap(windSourcesToShow);
+                                    showAdvantageLine(competitorsToShow, date);
                                 }
                             });
                     
@@ -826,7 +835,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     LatLng boatPosition = LatLng.newInstance(lastBoatFix.position.latDeg, lastBoatFix.position.lngDeg);
                     LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition, bearingOfBoatInDeg,
                             distanceFromBoatPositionInKm);
-                    double bearingOfCombinedWindInDeg = lastCombinedWindTrackInfoDTO.windFixes.get(0).trueWindBearingDeg;
+                    final WindDTO windFix = lastCombinedWindTrackInfoDTO.windFixes.get(0);
+                    double bearingOfCombinedWindInDeg = windFix.trueWindBearingDeg;
                     double rotatedBearingDeg1 = 0.0;
                     double rotatedBearingDeg2 = 0.0;
                     switch (legInfoDTO.legType) {
@@ -869,7 +879,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                                                               /* geodesic */true);
                         advantageLine = new Polyline(advantageLinePoints, /* color */"#000000", /* width */1, /* opacity */
                                 0.5, options);
-                        advantageLineMouseOverHandler = new AdvantageLinePolylineMouseOverHandler(bearingOfCombinedWindInDeg);
+                        advantageLineMouseOverHandler = new AdvantageLinePolylineMouseOverHandler(bearingOfCombinedWindInDeg,
+                                new Date(windFix.measureTimepoint));
                         advantageLine.addPolylineMouseOverHandler(advantageLineMouseOverHandler);
                         advantageLine.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
                             @Override
@@ -884,6 +895,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         advantageLine.insertVertex(0, advantageLinePoints[0]);
                         advantageLine.insertVertex(1, advantageLinePoints[1]);
                         advantageLineMouseOverHandler.setTrueWindBearing(bearingOfCombinedWindInDeg);
+                        advantageLineMouseOverHandler.setDate(new Date(windFix.measureTimepoint));
                     }
                     drewAdvantageLine = true;
                 }
