@@ -25,7 +25,7 @@ public class Manage2SailEventResultsParser {
     public EventResultDescriptor getEventResult(InputStream is) throws IOException {
         EventResultDescriptor result = null;
         try {
-            JSONObject jsonRoot = (JSONObject) new JSONParser().parse(new InputStreamReader(is));
+            JSONObject jsonRoot = (JSONObject) new JSONParser().parse(new InputStreamReader(is, "UTF-8"));
             result = new EventResultDescriptor();
             result.setId((String) jsonRoot.get("Id"));
             result.setIsafId((String) jsonRoot.get("IsafId"));

@@ -20,8 +20,8 @@ public class CourseAreaArrayAdapter extends NamedArrayAdapter<CourseArea> {
             return true;
         } else if (AppPreferences.getManagedCourseAreaNames(getContext()).contains("*")) {
             return true;
-        } else
+        } else {
             return false;
+        }
     }
-
 }

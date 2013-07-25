@@ -93,6 +93,10 @@ public abstract class BaseActivity extends Activity {
             ExLog.i(TAG, "Clicked LIVE.");
             Toast.makeText(this, getLiveIconText(), Toast.LENGTH_LONG).show();
             return true;
+        case R.id.options_menu_info:
+            ExLog.i(TAG, "Clicked INFO.");
+            fadeActivity(SystemInformationActivity.class, false);
+            return true;
         case android.R.id.home:
             ExLog.i(TAG, "Clicked HOME.");
             return onHomeClicked();

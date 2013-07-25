@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -277,7 +276,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         logger.fine("Fetching paramURL "+paramURL+" to check for updates for race(s) "+getRaces());
         final ClientParamsPHP clientParams;
         try {
-            clientParams = new ClientParamsPHP(new InputStreamReader(paramURL.openStream()));
+            clientParams = new ClientParamsPHP(paramURL, new InputStreamReader(paramURL.openStream()));
             List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide = getControlPointsWithPassingSide(clientParams,
                     new ControlPointProducer<com.sap.sailing.domain.base.ControlPoint>() {
                         @Override
@@ -285,11 +284,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                             return domainFactory.getOrCreateControlPoint(ttControlPoint);
                         }
                     });
-            if (getRaces() != null && !getRaces().isEmpty()) {
-                compareAndUpdateCourseIfNecessary(newCourseControlPointsWithPassingSide);
-                updateStartStopTimesAndLiveDelay(clientParams, simulator);
-                updateMarkPositionsIfNoPositionsReceivedYet(clientParams);
-            } else {
+            if (getRaces() == null || getRaces().isEmpty()) {
                 // create race definition / tracked race and add to event
                 final String raceName = clientParams.getRace().getName();
                 logger.log(Level.INFO, "Found data for non-existing race "+raceName+" in "+paramURL+". Creating RaceDefinition.");
@@ -314,9 +309,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                     simulator.setTrackedRace(trackedRace);
                 }
             }
-        } catch (IOException e) {
-            logger.info("Exception " + e.getMessage() + " while trying to read clientparams.php for races "
-                    + getRaces());
+            compareAndUpdateCourseIfNecessary(newCourseControlPointsWithPassingSide);
+            updateStartStopTimesAndLiveDelay(clientParams, simulator);
+            updateMarkPositionsIfNoPositionsReceivedYet(clientParams);
+        } catch (Exception e) {
+            logger.info("Exception " + e.getMessage() + " while trying to read clientparams.php for races " + getRaces());
             logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", e);
         }
     }
@@ -361,9 +358,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                     if (trackedRace != null) {
                         DynamicGPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
                         if (markTrack.getFirstRawFix() == null) {
-                            final Position position = first ? controlPoint.getMark1Position() : controlPoint
-                                    .getMark2Position();
+                            final Position position = first ? controlPoint.getMark1Position() : controlPoint.getMark2Position();
                             if (position != null) {
+                                logger.info("Adding fix "+position+" from "+clientParams.getParamsUrl()+" for control point "+controlPoint.getName()+
+                                        " in race "+raceDefinition.getName());
                                 markTrack.addGPSFix(new GPSFixImpl(position, MillisecondsTimePoint.now()));
                             }
                         }

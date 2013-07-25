@@ -1128,7 +1128,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         if (windSource.getType() == WindSourceType.COMBINED) {
             if (combinedWindTrack == null) {
                 combinedWindTrack = new CombinedWindTrackImpl(this, WindSourceType.COMBINED.getBaseConfidence());
-                ;
             }
             result = combinedWindTrack;
         } else {
