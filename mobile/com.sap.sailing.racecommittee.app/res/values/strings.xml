@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="settings_advanced_service_default">http://192.168.56.1:8888</string>
     <string name="hello">Hello World, RaceCommitteeActivity!</string>
     <string name="running_on_course">(on course %s)</string>
     <string name="course_design_number_waypoints">Course has %s waypoints</string>
@@ -88,19 +87,6 @@
     <string name="race_settime_overlap">The given time overlaps with a previous aborted race. Please select a later time.</string>
     <string name="race_finished_start_time">Race started at:</string>
     <string name="race_finished_end_time">Race finished at:</string>
-    <string name="settings_category_advanced">Advanced Settings</string>
-    <string name="settings_category_general">General Settings</string>
-    <string name="settings_category_race">Race Settings</string>
-    <string name="settings_general_manageareas_header">Managed Course Areas</string>
-    <string name="settings_general_manageareas_description">Enter course area names managed by you (comma-separated)</string>
-    <string name="settings_general_manageareas_default">Alpha</string>
-    <string name="settings_advanced_service_header">Webservice URL</string>
-    <string name="settings_advanced_service_description">Select the JSON Webservice URL</string>
-    <string name="settings_time_frame_header">Race time frame after finish</string>
-    <string name="settings_protest_time_header">Protest time</string>
-    <string name="settings_time_frame_description">Set a time in minutes after which no finishing sailor is counted anymore</string>
-    <item type="integer" name="settings_time_frame_default">30</item>
-    <string name="settings_protest_time_description">Set the protest time in minutes</string>
     <string name="race_startphase_flagdown">Flag is going down&#8230;</string>
     <string name="race_startphase_flagup">Flag is going up&#8230;</string>
     <string name="race_startphase_countdown_mode_remove">%1$s until %2$s flag is removed</string>
@@ -164,15 +150,6 @@
     <string name="availableFinishingCompetitors">Competitors</string>
     <string name="choose_blue_flag_finishing">Finish race</string>
     <string name="drag_handle_description">Drag handle</string>
-    <string name="settings_advanced_mail_default">lukas.niemeier@sap.com</string>
-    <string name="settings_advanced_mail_description">Mail recipient used for positiong list images.</string>
-    <string name="settings_advanced_mail_header">Positioning mail recipient</string>
-    <item type="integer" name="settings_advanced_max_rounds_default">3</item>
-    <string name="settings_advanced_max_rounds_description">Select the maximum number of rounds per course</string>
-    <string name="settings_advanced_max_rounds_header">Maximum rounds per course</string>
-    <item type="integer" name="settings_advanced_min_rounds_default">2</item>
-    <string name="settings_advanced_min_rounds_description">Select the minimum number of rounds per course</string>
-    <string name="settings_advanced_min_rounds_header">Minimum rounds per course</string>
     <string name="options_menu_live">Connection Information</string>
     <string name="options_menu_info">Expert</string>
     <string name="options_menu_wind">Enter Wind Data</string>
@@ -203,8 +180,37 @@
     <string name="your_position">Your position</string>
     <string name="store_wind_entry">4. Store wind entry</string>
     <string name="store_wind">Store wind</string>
-    <string name="override_default_start_procedure_type">Override default start procedure type</string>
-    <string name="override_default_start_procedure_type_select">Default start procedure type when overriden</string>
+    
+	<!-- SETTINGS -->
+    <string name="settings_category_general">General Settings</string>    
+    <string name="settings_general_manageareas_header">Managed Course Areas</string>
+    <string name="settings_general_manageareas_description">Enter course area names managed by you (comma-separated)</string>
+    
+    <string name="settings_category_race">Race Settings</string>
+    <string name="override_default_start_procedure_type_header">Override default start procedure type</string>
+    <string name="override_default_start_procedure_type_description">Check the box if races should use the start procedure type defined below as a default.</string>
+    <string name="override_default_start_procedure_type_select_header">Default start procedure type when overriden</string>
+    <string name="override_default_start_procedure_type_select_description">Races will use selected start procedure type as a default. For this option to be active override checkbox has to be enabled.</string>
+    <string name="settings_time_frame_header">Race time frame after finish</string>
+    <string name="settings_time_frame_description">Time limit in minutes.</string>
+    
+    <string name="settings_category_advanced">Advanced Settings</string>
+    <string name="settings_advanced_service_header">Webservice URL</string>
+    <string name="settings_advanced_service_description">Select the JSON Webservice URL</string>
+    <string name="settings_advanced_mail_description">Mail recipient used for positiong list images.</string>
+    <string name="settings_advanced_mail_header">Positioning mail recipient</string>
+    <string name="settings_advanced_max_rounds_description">Select the maximum number of rounds per course</string>
+    <string name="settings_advanced_max_rounds_header">Maximum rounds per course</string>
+    <string name="settings_advanced_min_rounds_description">Select the minimum number of rounds per course</string>
+    <string name="settings_advanced_min_rounds_header">Minimum rounds per course</string>
+    
+    <string name="settings_general_manageareas_default">Alpha</string>
+    <string name="settings_advanced_mail_default">lukas.niemeier@sap.com</string>
+    <string name="settings_advanced_service_default">http://192.168.56.1:8888</string>
+    <item name="settings_time_frame_default" type="integer">30</item>
+    <item type="integer" name="settings_advanced_max_rounds_default">3</item>
+    <item type="integer" name="settings_advanced_min_rounds_default">2</item>
+    <!-- SETTINGS -->
     
     <string name="compass_view_compass">Compass</string>
     <string name="compass_view_needle">Needle</string>

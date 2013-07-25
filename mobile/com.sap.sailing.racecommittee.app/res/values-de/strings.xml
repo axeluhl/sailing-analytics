@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="settings_advanced_service_default">http://192.168.56.1:8888</string>
     <string name="hello">Hallo Welt, RaceCommitteeActivity!</string>
     <string name="running_on_course">(Kurs %s)</string>
     <string name="course_design_number_waypoints">Kurs hat %s Wegpunkte</string>
@@ -87,18 +86,6 @@
     <string name="race_reset_confirmation_title">Zurücksetzen</string>
     <string name="race_finished_start_time">Rennstart um:</string>
     <string name="race_finished_end_time">Rennende um:</string>
-    <string name="settings_category_advanced">Erweiterte Einstellungen</string>
-    <string name="settings_category_general">Allgemeine Einstellungen</string>
-    <string name="settings_category_race">Renneinstellungen</string>
-    <string name="settings_general_manageareas_header">Verwaltete Rennbahnen</string>
-    <string name="settings_general_manageareas_description">Verwaltete Rennbahnen einstellen (Komma-getrennt)</string>
-    <string name="settings_general_manageareas_default">Alpha</string>
-    <string name="settings_advanced_service_header">Webservice URL</string>
-    <string name="settings_advanced_service_description">Webservice URL einstellen</string>
-    <string name="settings_time_frame_header">Zeitlimitdauer nach Rennende</string>
-    <string name="settings_protest_time_header">Protestzeit</string>
-    <string name="settings_time_frame_description">Zeit in Minuten einstellen, welches Zeitlimit angibt</string>
-    <string name="settings_protest_time_description">Protestzeit in Minuten einstellen</string>
     <string name="race_startphase_flagdown">Flagge wird eingeholt&#8230;</string>
     <string name="race_startphase_flagup">Flagge wird angezeigt&#8230;</string>
     <string name="race_startphase_countdown_mode_remove">%1$s bis Flagge %2$s eingeholt wird</string>
@@ -162,9 +149,6 @@
     <string name="availableFinishingCompetitors">Segler</string>
     <string name="choose_blue_flag_finishing">Rennen beenden</string>
     <string name="drag_handle_description">Cursor</string>
-    <string name="settings_advanced_mail_default">lukas.niemeier@sap.com</string>
-    <string name="settings_advanced_mail_description">Empfänger für Bilder der Ergebnislisten.</string>
-    <string name="settings_advanced_mail_header">Ergebnislisten Empfänger</string>
     <string name="options_menu_live">Verbindungsinformationen</string>
     <string name="options_menu_wind">Wind eingeben</string>
     <string name="options_menu_reload">Neuladen</string>
@@ -194,8 +178,30 @@
     <string name="your_position">Aktuelle Position</string>
     <string name="store_wind_entry">4. Windeingaben speichern</string>
     <string name="store_wind">Windeingaben speichern</string>
-    <string name="override_default_start_procedure_type">Standard Startprozedur überschreiben</string>
-    <string name="override_default_start_procedure_type_select">Startprozedur bei Überschreiben</string>
+    
+    <!-- SETTINGS -->
+    <string name="settings_category_general">Allgemeine Einstellungen</string>
+    <string name="settings_general_manageareas_header">Verwaltete Rennbahnen</string>
+    <string name="settings_general_manageareas_description">Verwaltete Rennbahnen einstellen (Komma-getrennt)</string>
+    
+    <string name="settings_category_race">Renneinstellungen</string>
+    <string name="override_default_start_procedure_type_header">Standard Startprozedur überschreiben</string>
+    <string name="override_default_start_procedure_type_description">Aktivieren wenn Startprozedur der Rennen überschrieben werden soll.</string>
+    <string name="override_default_start_procedure_type_select_header">Standard Startprozedur (wenn überschrieben)</string>
+    <string name="override_default_start_procedure_type_select_description">Wenn Option "Standard Startprozedur überschreiben" aktiv ist, wird ausgewählte Startprozedur als Standard gewählt.</string>
+    <string name="settings_time_frame_header">Zeitlimitdauer nach Rennende</string>
+    <string name="settings_time_frame_description">Zeit in Minuten einstellen, welches Zeitlimit angibt</string>
+    
+    <string name="settings_category_advanced">Erweiterte Einstellungen</string>
+    <string name="settings_advanced_service_header">Wählen sie die Server URL aus.</string>
+    <string name="settings_advanced_service_description">Webservice URL einstellen.</string>
+    <string name="settings_advanced_mail_description">Empfänger für Bilder der Ergebnislisten.</string>
+    <string name="settings_advanced_mail_header">Empfänger Ergebnislisten</string>
+    <string name="settings_advanced_max_rounds_description">Wählen sie die maximale Rundenanzahl aus.</string>
+    <string name="settings_advanced_max_rounds_header">Maximale Rundenanzahl pro Kurs</string>
+    <string name="settings_advanced_min_rounds_description">Wählen sie die minimale Rundenanzahl aus.</string>
+    <string name="settings_advanced_min_rounds_header">Minimale Rundenanzahl pro Kurs</string>
+    <!-- SETTINGS -->
     
     <string name="compass_view_compass">Kompass</string>
     <string name="compass_view_needle">Nadel</string>
