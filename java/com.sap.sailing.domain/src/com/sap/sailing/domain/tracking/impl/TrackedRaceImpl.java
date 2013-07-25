@@ -1223,6 +1223,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
+        Set<WindSource> old = new HashSet<>(this.windSourcesToExclude);
         synchronized (this.windSourcesToExclude) {
             LockUtil.lockForRead(serializationLock);
             try {
@@ -1233,6 +1234,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             } finally {
                 LockUtil.unlockAfterRead(serializationLock);
             }
+        }
+        if (!old.equals(this.windSourcesToExclude)) {
+            clearAllCachesExceptManeuvers();
+            triggerManeuverCacheRecalculationForAllCompetitors();
         }
     }
 
