@@ -7,6 +7,7 @@ public enum SelectionType {
     Year,
     LegType,
     Competitor,
+    SailID,
     Nationality,
     WindStrength
 

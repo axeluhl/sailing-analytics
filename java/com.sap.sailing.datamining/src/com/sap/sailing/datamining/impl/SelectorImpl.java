@@ -10,7 +10,6 @@ import com.sap.sailing.datamining.SelectionCriteria;
 import com.sap.sailing.datamining.Selector;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.server.RacingEventService;
@@ -29,7 +28,7 @@ public class SelectorImpl implements Selector {
         for (Regatta regatta : racingEventService.getAllRegattas()) {
             TrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
-                SelectionContext context = new SelectionContextImpl(trackedRegatta, null, null, null);
+                SelectionContext context = new SelectionContextImpl(trackedRegatta, null, null);
                 if (criteria.matches(context)) {
                     data.addAll(criteria.getDataRetriever(context).retrieveData());
                     continue;
@@ -44,13 +43,11 @@ public class SelectorImpl implements Selector {
     private Collection<GPSFixWithContext> selectDataFromRacesOfRegatta(final TrackedRegatta trackedRegatta) {
         Collection<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
         for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-            SelectionContext context = new SelectionContextImpl(trackedRegatta, trackedRace, null, null);
+            SelectionContext context = new SelectionContextImpl(trackedRegatta, trackedRace, null);
             if (criteria.matches(context)) {
-                //TODO Create new data retriever and add the data to the result
+                data.addAll(criteria.getDataRetriever(context).retrieveData());
                 continue;
             }
-            
-            data.addAll(selectDataFromLegsOfRace(trackedRegatta, trackedRace));
             
             data.addAll(selectDataFromCompetitorsOfRace(trackedRegatta, trackedRace));
         }
@@ -60,29 +57,9 @@ public class SelectorImpl implements Selector {
     private Collection<GPSFixWithContext> selectDataFromCompetitorsOfRace(final TrackedRegatta trackedRegatta, final TrackedRace trackedRace) {
         Collection<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            SelectionContext context = new SelectionContextImpl(trackedRegatta, trackedRace, competitor, null);
+            SelectionContext context = new SelectionContextImpl(trackedRegatta, trackedRace, competitor);
             if (criteria.matches(context)) {
-                //TODO Create new data retriever and add the data to the result
-                continue;
-            }
-            
-            for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
-                context = new SelectionContextImpl(trackedRegatta, trackedRace, competitor, trackedLeg);
-                if (criteria.matches(context)) {
-                    //TODO Create new data retriever and add the data to the result
-                    continue;
-                }
-            }
-        }
-        return data;
-    }
-
-    private Collection<GPSFixWithContext> selectDataFromLegsOfRace(final TrackedRegatta trackedRegatta, final TrackedRace trackedRace) {
-        Collection<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
-        for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
-            SelectionContext context = new SelectionContextImpl(trackedRegatta, trackedRace, null, trackedLeg);
-            if (criteria.matches(context)) {
-                //TODO Create new data retriever and add the data to the result
+                data.addAll(criteria.getDataRetriever(context).retrieveData());
                 continue;
             }
         }

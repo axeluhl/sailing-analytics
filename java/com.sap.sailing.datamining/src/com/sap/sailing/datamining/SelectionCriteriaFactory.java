@@ -2,7 +2,7 @@ package com.sap.sailing.datamining;
 
 import java.util.Collection;
 
-import com.sap.sailing.datamining.impl.RegattaSelectionCriteria;
+import com.sap.sailing.datamining.impl.criterias.RegattaSelectionCriteria;
 import com.sap.sailing.datamining.shared.SelectionType;
 
 public class SelectionCriteriaFactory {

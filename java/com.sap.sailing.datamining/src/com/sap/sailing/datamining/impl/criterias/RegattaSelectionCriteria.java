@@ -1,9 +1,10 @@
-package com.sap.sailing.datamining.impl;
+package com.sap.sailing.datamining.impl.criterias;
 
 import java.util.Collection;
 
 import com.sap.sailing.datamining.DataRetriever;
 import com.sap.sailing.datamining.SelectionContext;
+import com.sap.sailing.datamining.impl.retrievers.TrackedRegattaDataRetriever;
 
 public class RegattaSelectionCriteria extends AbstractSelectionCriteria<String> {
 

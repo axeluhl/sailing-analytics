@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.datamining.Selector;
+import com.sap.sailing.datamining.impl.retrievers.EventDataRetriever;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.server.RacingEventService;
 

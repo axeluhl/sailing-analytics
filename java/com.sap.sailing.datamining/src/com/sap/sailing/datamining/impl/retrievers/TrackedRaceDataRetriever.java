@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl;
+package com.sap.sailing.datamining.impl.retrievers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,8 @@ import java.util.List;
 import com.sap.sailing.datamining.DataRetriever;
 import com.sap.sailing.datamining.GPSFixContext;
 import com.sap.sailing.datamining.GPSFixWithContext;
+import com.sap.sailing.datamining.impl.GPSFixContextImpl;
+import com.sap.sailing.datamining.impl.GPSFixWithContextImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
