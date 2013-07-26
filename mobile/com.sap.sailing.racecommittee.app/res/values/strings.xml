@@ -257,5 +257,8 @@
 	
 	<string name="nationality">Nationality</string>
 	<string name="number">Number</string>
+	<string name="set_positionings">Set positionings</string>
+	<string name="confirm_positionings">Confirm positionings</string>
+	<string name="snap">Snap</string>
 	
 </resources>

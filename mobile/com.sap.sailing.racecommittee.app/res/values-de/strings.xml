@@ -28,15 +28,15 @@
     <string name="abort_starting_phase">Abbruch Startphase</string>
     <string name="abort_running_race">Abbruch</string>
     <string name="choose_xray_flag_up">Einzelrückruf</string>
-    <string name="choose_golf_flag_down">Unset Golf Flag</string>
+    <string name="choose_golf_flag_down">Hole Golf Flagge ein</string>
     <string name="choose_xray_flag_down">Einzelrückruf abschließen</string>
-    <string name="choose_first_substitute_flag">Rückruf</string>
-    <string name="choose_blue_flag">Zielphase beginnen</string>
+    <string name="choose_first_substitute_flag">Gesamtrückruf</string>
+    <string name="choose_blue_flag">Zieleinlauf beginnen</string>
     <string name="flag_papa">Papa</string>
     <string name="flag_zulu">Zulu</string>
     <string name="flag_india">India</string>
     <string name="flag_black">Black</string>
-    <string name="flag_ap">AP Flag</string>
+    <string name="flag_ap">AP Flagge</string>
     <string name="flag_november">November</string>
     <string name="flag_Xray">Xray</string>
     <string name="flag_jury">Jury</string>
@@ -55,7 +55,7 @@
     <string name="racelist_scheduled">Geplant für %s</string>
     <string name="racelist_startphase">Start um %s läuft</string>
     <string name="racelist_running">Gestartet um %s</string>
-    <string name="racelist_finishing">Zielphase</string>
+    <string name="racelist_finishing">Zieleinlauf</string>
     <string name="racelist_finished">Beendet</string>
     <string name="racelist_unknown">Unknown</string>
     <string name="currentlyLoading">Lädt &#8230;</string>
@@ -78,7 +78,7 @@
     <string name="gateStart_mode">Gate-Start</string>
     <string name="confirmation_blue_flag_remove">Blaue Flagge wirklich einholen?</string>
     <string name="confirmation_blue_flag_display">Blaue Flagge wirklich anzeigen?</string>
-    <string name="confirmation_first_substitute_display">Rückruf wirklich anzeigen?</string>
+    <string name="confirmation_first_substitute_display">Gesamtrückruf wirklich anzeigen?</string>
     <string name="finishing_limit_template">Zeitlimit endet um %s</string>
     <string name="race_running_since_template" formatted="false">%s läuft seit %s</string>
     <string name="race_reset_confirmation_header">Zurücksetzen des Rennens</string>
@@ -92,12 +92,12 @@
     <string name="race_startphase_countdown_mode_remove">%1$s bis Flagge %2$s eingeholt wird</string>
     <string name="race_startphase_countdown_mode_display">%1$s bis Flagge %2$s angezeigt wird</string>
     <string name="race_startphase_ess_countdown_ap_flag_removed">%1$s bis Flagge AP eingeholt wird</string>
-    <string name="race_startphase_ess_countdown_one_flag_display">%1$s bis Flagge One eingeholt wird</string>
-    <string name="race_startphase_ess_countdown_two_flag_display">%1$s bis Flagge Two eingeholt wird</string>
-    <string name="race_startphase_ess_countdown_three_flag_display">%1$s bis Flagge Three eingeholt wird</string>
-    <string name="race_startphase_countdown_class_remove">%1$s bis Flagge %2$s eingeholt wird (Rennstart)</string>
-    <string name="race_startphase_ess_countdown_one_flag_remove">%1$s bis Flagge One eingeholt wird (Rennstart)</string>
-    <string name="race_startphase_countdown_class_display">%1$s bis Flagge %2$s angezeigt wird</string>
+    <string name="race_startphase_ess_countdown_one_flag_display">%1$s bis Flagge Eins eingeholt wird</string>
+    <string name="race_startphase_ess_countdown_two_flag_display">%1$s bis Flagge Zwei eingeholt wird</string>
+    <string name="race_startphase_ess_countdown_three_flag_display">%1$s bis Flagge Drei eingeholt wird</string>
+    <string name="race_startphase_countdown_class_remove">%1$s bis Klassenflagge %2$s eingeholt wird (Rennstart)</string>
+    <string name="race_startphase_ess_countdown_one_flag_remove">%1$s bis Flagge Eins eingeholt wird (Rennstart)</string>
+    <string name="race_startphase_countdown_class_display">%1$s bis Klassenflagge %2$s angezeigt wird</string>
     <string name="race_startphase_countdown_start">%1$s bis %2$s startet&quot;</string>
     <string name="race_startphase_gate_class_over_golf_display">%1$s bis die Klassenflagge über Golf angezeigt wird</string>
     <string name="race_startphase_gate_class_removed">%1$s bis die Klassenflagge eingeholt wird (Rennstart)</string>
@@ -125,11 +125,11 @@
     <string name="course_design_dialog_title">Kursdesign erstellen</string>
     <string name="pick_a_rounding_direction">Wenderichtung auswählen</string>
     <string name="change_course_element">Wegpunkt ändern</string>
-    <string name="select_penalty_reason">Penalty auswählen</string>
+    <string name="select_penalty_reason">Strafe auswählen</string>
 
     <string-array name="rounding_directions">
-        <item>Port</item>
-        <item>Starboard</item>
+        <item>Backbord</item>
+        <item>Steuerbord</item>
         <item>Gate</item>
     </string-array>
     <string-array name="course_element_changers">
@@ -147,6 +147,8 @@
     <string name="yes">Ja</string>
     <string name="no">Nein</string>
     <string name="positionings">Ergebnisliste</string>
+    <string name="set_positionings">Ergebnisliste füllen</string>
+    <string name="confirm_positionings">Ergebnisliste bestätigen</string>
     <string name="availableFinishingCompetitors">Segler</string>
     <string name="choose_blue_flag_finishing">Rennen beenden</string>
     <string name="drag_handle_description">Cursor</string>
@@ -174,8 +176,8 @@
     <string name="in_knots">in Knoten</string>
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
-    <string name="wind_speed_direction_not_a_valid_number">The wind speed or direction is not a valid number. Please correct the value.</string>
-    <string name="wind_location_or_fields_not_valid">The entered location, wind speed or direction is empty. Please correct the values.</string>
+    <string name="wind_speed_direction_not_a_valid_number">Die Windgeschwindigkeit oder -richtung ist keine valide Zahl. Bitte korrigieren Sie den Wert.</string>
+    <string name="wind_location_or_fields_not_valid">Die eingegebene Position, Windgeschwindigkeit oder -richtung ist leer. Bitte korrigieren Sie die Werte.</string>
     <string name="your_position">Aktuelle Position</string>
     <string name="store_wind_entry">4. Windeingaben speichern</string>
     <string name="store_wind">Windeingaben speichern</string>
@@ -198,9 +200,9 @@
     <string name="settings_advanced_service_description">Webservice URL einstellen.</string>
     <string name="settings_advanced_mail_description">Empfänger für Bilder der Ergebnislisten.</string>
     <string name="settings_advanced_mail_header">Empfänger Ergebnislisten</string>
-    <string name="settings_advanced_max_rounds_description">Wählen sie die maximale Rundenanzahl aus.</string>
+    <string name="settings_advanced_max_rounds_description">Wählen Sie die maximale Rundenanzahl aus.</string>
     <string name="settings_advanced_max_rounds_header">Maximale Rundenanzahl pro Kurs</string>
-    <string name="settings_advanced_min_rounds_description">Wählen sie die minimale Rundenanzahl aus.</string>
+    <string name="settings_advanced_min_rounds_description">Wählen Sie die minimale Rundenanzahl aus.</string>
     <string name="settings_advanced_min_rounds_header">Minimale Rundenanzahl pro Kurs</string>
     <!-- SETTINGS -->
     
@@ -229,5 +231,6 @@
 	
 	<string name="nationality">Nationalität</string>
 	<string name="number">Nummer</string>
+	<string name="snap">Fotos schießen</string>
 	
 </resources>
