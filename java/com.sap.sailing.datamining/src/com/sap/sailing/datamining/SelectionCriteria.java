@@ -2,6 +2,8 @@ package com.sap.sailing.datamining;
 
 public interface SelectionCriteria {
 
-    boolean matches(SelectionContext context);
+    public boolean matches(SelectionContext context);
+
+    public DataRetriever getDataRetriever(SelectionContext context);
 
 }

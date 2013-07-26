@@ -7,9 +7,6 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 
 public interface SelectionContext {
 
-    public void setTrackedRace(TrackedRace trackedRace);
-    public void setCompetitor(Competitor competitor);
-    public void setTrackedLeg(TrackedLeg trackedLeg);
     public TrackedLeg getTrackedLeg();
     public Competitor getCompetitor();
     public TrackedRace getTrackedRace();

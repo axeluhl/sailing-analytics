@@ -2,6 +2,7 @@ package com.sap.sailing.datamining.impl;
 
 import java.util.Collection;
 
+import com.sap.sailing.datamining.DataRetriever;
 import com.sap.sailing.datamining.SelectionContext;
 
 public class RegattaSelectionCriteria extends AbstractSelectionCriteria<String> {
@@ -22,6 +23,11 @@ public class RegattaSelectionCriteria extends AbstractSelectionCriteria<String> 
             }
         }
         return false;
+    }
+
+    @Override
+    public DataRetriever getDataRetriever(SelectionContext context) {
+        return new TrackedRegattaDataRetriever(context.getTrackedRegatta());
     }
 
 }

@@ -13,8 +13,11 @@ public class SelectionContextImpl implements SelectionContext {
     private Competitor competitor;
     private TrackedLeg trackedLeg;
 
-    public SelectionContextImpl(TrackedRegatta trackedRegatta) {
+    public SelectionContextImpl(TrackedRegatta trackedRegatta, TrackedRace trackedRace, Competitor competitor, TrackedLeg trackedLeg) {
         this.trackedRegatta = trackedRegatta;
+        this.trackedRace = trackedRace;
+        this.competitor = competitor;
+        this.trackedLeg = trackedLeg;
     }
 
     @Override
@@ -35,21 +38,6 @@ public class SelectionContextImpl implements SelectionContext {
     @Override
     public TrackedLeg getTrackedLeg() {
         return trackedLeg;
-    }
-
-    @Override
-    public void setTrackedRace(TrackedRace trackedRace) {
-        this.trackedRace = trackedRace;
-    }
-
-    @Override
-    public void setCompetitor(Competitor competitor) {
-        this.competitor = competitor;
-    }
-
-    @Override
-    public void setTrackedLeg(TrackedLeg trackedLeg) {
-        this.trackedLeg = trackedLeg;
     }
 
 }
