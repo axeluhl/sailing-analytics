@@ -58,7 +58,11 @@ public class CompactRaceMapDataDTO implements IsSerializable {
         result.coursePositions = coursePositions;
         result.boatPositions = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
         for (Map.Entry<String, List<GPSFixDTO>> e : boatPositionsByCompetitorIdAsString.entrySet()) {
-            result.boatPositions.put(competitorsByIdAsString.get(e.getKey()), e.getValue());
+            final CompetitorDTO competitor = competitorsByIdAsString.get(e.getKey());
+            if (competitor != null) {
+                // maybe null in case the competitor was added, e.g., by unsuppressing, while this call was underway
+                result.boatPositions.put(competitor, e.getValue());
+            }
         }
         return result;
     }
