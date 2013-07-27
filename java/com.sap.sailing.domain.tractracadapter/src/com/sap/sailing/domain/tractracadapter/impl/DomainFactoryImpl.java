@@ -176,6 +176,8 @@ public class DomainFactoryImpl implements DomainFactory {
                 final Iterable<MetadataParser.ControlPointMetaData> controlPointMetadata = getMetadataParser().parseControlPointMetadata(controlPoint);
                 List<Mark> marks = new ArrayList<Mark>();
                 for (ControlPointMetaData markMetadata : controlPointMetadata) {
+                    // XXX: This code is flawed because it creates a mark although not having the right metadata
+                    // This especially affects the name of the mark - this only holds for gates
                     Mark mark = baseDomainFactory.getOrCreateMark(markMetadata.getId(), markMetadata.getName(),
                             markMetadata.getType(), markMetadata.getColor(), markMetadata.getShape(),
                             markMetadata.getPattern());

@@ -67,4 +67,11 @@ public class ControlPointAdapter extends AbstractWithID implements TracTracContr
         return result;
     }
     
+    public int hashCode() {
+        return getId().hashCode();
+    }
+    
+    public boolean equals(ControlPointAdapter other) {
+        return other.getId().equals(getId());
+    }
 }

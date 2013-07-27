@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -55,6 +56,14 @@ public class PositionedMarkImpl extends MarkImpl implements PositionedMark {
                 * Math.sin(dLngR / 2);
         double dR = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return new MeterDistance(earthRadiusInMeters).scale(dR);
+    }
+    
+    public int hashCode() {
+        return getId().hashCode();
+    }
+    
+    public boolean equals(Mark other) {
+        return other.getId().equals(getId());
     }
 
 }
