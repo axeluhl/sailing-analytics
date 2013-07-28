@@ -277,12 +277,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         final ClientParamsPHP clientParams;
         try {
             clientParams = new ClientParamsPHP(paramURL, new InputStreamReader(paramURL.openStream()));
-            // make sure that all control points have been read into memory
-            // this is especially important to keep names in sync with these coming from tractrac
-            for (TracTracControlPoint controlPoint : clientParams.getEvent().getControlPointList()) {
-                domainFactory.getOrCreateControlPoint(controlPoint);
-            }
-            List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide = getRaceCourseControlPointsWithPassingSide(clientParams,
+            List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide = getControlPointsWithPassingSide(clientParams,
                     new ControlPointProducer<com.sap.sailing.domain.base.ControlPoint>() {
                         @Override
                         public com.sap.sailing.domain.base.ControlPoint produceControlPoint(TracTracControlPoint ttControlPoint) {
@@ -295,7 +290,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 logger.log(Level.INFO, "Found data for non-existing race "+raceName+" in "+paramURL+". Creating RaceDefinition.");
                 final Iterable<Competitor> competitors = getCompetitors(clientParams);
                 final Iterable<com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Competitor> competitorsInClientParams = clientParams.getCompetitors();
-                List<Pair<TracTracControlPoint, NauticalSide>> ttControlPointsAndPassingSide = getRaceCourseControlPointsWithPassingSide(clientParams,
+                List<Pair<TracTracControlPoint, NauticalSide>> ttControlPointsAndPassingSide = getControlPointsWithPassingSide(clientParams,
                         new ControlPointProducer<TracTracControlPoint>() {
                     @Override
                     public TracTracControlPoint produceControlPoint(TracTracControlPoint ttControlPoint) {
@@ -412,7 +407,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         T produceControlPoint(TracTracControlPoint ttControlPoint);
     }
     
-    private <T> List<Pair<T, NauticalSide>> getRaceCourseControlPointsWithPassingSide( final ClientParamsPHP clientParams, ControlPointProducer<T> controlPointProducer) {
+    private <T> List<Pair<T, NauticalSide>> getControlPointsWithPassingSide( final ClientParamsPHP clientParams, ControlPointProducer<T> controlPointProducer) {
         List<Pair<T, NauticalSide>> newCourseControlPointsWithPassingSide = new ArrayList<>();
         final List<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRace().getDefaultRoute().getControlPoints();
         Map<Integer, NauticalSide> passingSideData = domainFactory.getMetadataParser().parsePassingSideData(
