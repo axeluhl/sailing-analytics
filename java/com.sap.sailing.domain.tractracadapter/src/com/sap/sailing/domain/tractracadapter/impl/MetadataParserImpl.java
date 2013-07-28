@@ -147,11 +147,25 @@ public class MetadataParserImpl implements MetadataParser {
             String mark2UUID = controlPointMetadata.get("P2.UUID");
             String name1 = controlPointMetadata.get("P1.Name");
             if (name1 == null) {
-                name1 = controlPointName + " (1)";
+                // as this is a gate and TracTrac is providing a dashed name
+                // we can extract it here
+                String[] markNames = controlPointName.split("-");
+                if (markNames.length == 2) {
+                    name1 = markNames[0];
+                } else {
+                    name1 = controlPointName + " (1)";
+                }
             }
             String name2 = controlPointMetadata.get("P2.Name");
             if (name2 == null) {
-                name2 = controlPointName + " (2)";
+                // as this is a gate and TracTrac is providing a dashed name
+                // we can extract it here
+                String[] markNames = controlPointName.split("-");
+                if (markNames.length == 2) {
+                    name2 = markNames[1];
+                } else {
+                    name2 = controlPointName + " (2)";
+                }
             }
             final Serializable id1 = mark1UUID == null ? name1 : UUID.fromString(mark1UUID);
             ControlPointMetaData mark1Metadata = new ControlPointMetaDataImpl(name1, type1, color1, shape1, pattern1, id1);
