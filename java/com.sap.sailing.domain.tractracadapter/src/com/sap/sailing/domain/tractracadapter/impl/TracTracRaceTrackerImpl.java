@@ -215,8 +215,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         // in this case, create a default regatta based on the TracTrac event data
         this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(raceLogStore, tractracEvent, trackedRegattaRegistry) : effectiveRegatta;
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
-        // Read event data from configuration file - first synchronously then in a separate thread
-        pollAndParseClientParamsPHP(paramURL, simulator, courseDesignUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
+        // Read event data from configuration file
         controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, courseDesignUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
