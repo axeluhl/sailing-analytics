@@ -60,4 +60,12 @@ public class GateImpl implements Gate {
     public Serializable getId() {
         return id;
     }
+    
+    public int hashCode() {
+        return getId().hashCode();
+    }
+    
+    public boolean equals(Gate other) {
+        return other.getId().equals(getId());
+    }
 }

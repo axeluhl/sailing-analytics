@@ -73,6 +73,14 @@ public class MarkImpl extends NamedImpl implements Mark {
     }
     
     public String toString() {
-        return getId() + " " + getColor() + super.toString();
+        return super.toString() + " " + getId() + " " + getColor();
+    }
+    
+    public int hashCode() {
+        return getId().hashCode();
+    }
+    
+    public boolean equals(Mark other) {
+        return other.getId().equals(getId());
     }
 }

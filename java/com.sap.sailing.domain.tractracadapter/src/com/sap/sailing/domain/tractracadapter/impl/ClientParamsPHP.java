@@ -10,6 +10,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -201,6 +203,17 @@ public class ClientParamsPHP {
                     result.add(new ControlPoint(UUID.fromString(e.getValue())));
                 }
             }
+            // make sure that single control points are sorted first
+            // so that they are also created first
+            Collections.sort(result, new Comparator<ControlPoint>() {
+                @Override
+                public int compare(ControlPoint o1, ControlPoint o2) {
+                    if(o1.getHasTwoPoints()) {
+                        return 1;
+                    }
+                    return -1;
+                }
+            });
             return result;
         }
     }
@@ -420,6 +433,15 @@ public class ClientParamsPHP {
             }
             return result;
         }
+        
+        public String toString() {
+            return getName() + " " + getId().toString() + " " + getHasTwoPoints();
+        }
+        
+        public int hashCode() {
+            return this.getId().toString().hashCode();
+        }
+    
     }
     
     public ClientParamsPHP(URL paramsUrl, Reader r) throws IOException {
