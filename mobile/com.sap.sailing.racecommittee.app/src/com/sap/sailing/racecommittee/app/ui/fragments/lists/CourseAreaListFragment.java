@@ -2,15 +2,18 @@ package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import android.app.Activity;
+import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.os.Bundle;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.CourseAreaArrayAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
@@ -25,12 +28,6 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.parentEventId = getArguments().getSerializable(AppConstants.EventIdTag);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        loadItems();
     }
     
     @Override
@@ -55,8 +52,8 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     }
 
     @Override
-    protected void loadItems(ReadonlyDataManager manager) {
-        manager.loadCourseAreas(parentEventId, this);
+    protected LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createLoaderCallbacks(OnlineDataManager manager) {
+        return manager.getCourseAreasLoader(parentEventId, this);
     }
 
 }

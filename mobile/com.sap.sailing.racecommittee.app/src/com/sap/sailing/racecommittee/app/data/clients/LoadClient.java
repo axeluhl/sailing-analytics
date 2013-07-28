@@ -1,6 +1,31 @@
 package com.sap.sailing.racecommittee.app.data.clients;
 
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Loader;
+
+/**
+ * Interface to hide complexity of {@link LoaderCallbacks#onLoadFinished(Loader, Object)}. Keep in mind that all
+ * restrictions that apply on the LoaderCallback's method also apply to all methods of this interface.
+ * 
+ * @param <T>
+ *            loaded data type.
+ */
 public interface LoadClient<T> {
-	public void onLoadFailed(Exception reason);
-	public void onLoadSucceded(T data);
+
+    /**
+     * Called when a {@link Loader} returned a failure to its {@link LoaderCallbacks#onLoadFinished(Loader, Object)}.
+     * 
+     * @param reason
+     *            the loading has failed.
+     */
+    public void onLoadFailed(Exception reason);
+
+    /**
+     * Called when a {@link Loader} returned successfully to its {@link LoaderCallbacks#onLoadFinished(Loader, Object)}.
+     * 
+     * @param data
+     *            that was loaded.
+     */
+    public void onLoadSucceded(T data);
+
 }

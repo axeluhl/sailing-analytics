@@ -37,11 +37,17 @@ public class DataLoader<T> extends AsyncTaskLoader<T> {
         this.dataParser = dataParser;
         this.dataHandler = dataHandler;
     }
+    
+    @Override
+    protected void onStartLoading() {
+        forceLoad();
+    }
 
     @Override
     public T loadInBackground() {
         lastException = null;
         try {
+            Thread.sleep(2000);
             return loadDataInBackground();
         } catch (Exception e) {
             lastException = e;

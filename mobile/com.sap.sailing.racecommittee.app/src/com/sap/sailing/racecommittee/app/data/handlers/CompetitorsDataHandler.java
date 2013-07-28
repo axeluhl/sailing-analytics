@@ -12,13 +12,13 @@ public class CompetitorsDataHandler extends DataHandler<Collection<Competitor>> 
     private ManagedRace race;
 
     public CompetitorsDataHandler(OnlineDataManager manager, LoadClient<Collection<Competitor>> client, ManagedRace managedRace) {
-        super(manager, client);
+        super(manager);
         race = managedRace;
     }
 
     @Override
-    public void onLoaded(Collection<Competitor> data) {
-        super.onLoaded(data);
+    public void onResult(Collection<Competitor> data) {
+        //super.onSuccess(data);
         race.setCompetitors(data);
     }
 

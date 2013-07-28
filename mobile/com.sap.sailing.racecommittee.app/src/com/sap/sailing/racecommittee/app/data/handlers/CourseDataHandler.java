@@ -10,13 +10,13 @@ public class CourseDataHandler extends DataHandler<CourseBase> {
     private ManagedRace race;
 
     public CourseDataHandler(OnlineDataManager manager, LoadClient<CourseBase> client, ManagedRace managedRace) {
-        super(manager, client);
+        super(manager);
         race = managedRace;
     }
 
     @Override
-    public void onLoaded(CourseBase data) {
-        super.onLoaded(data);
+    public void onResult(CourseBase data) {
+        //super.onSuccess(data);
         race.setCourseOnServer(data);
     }
 

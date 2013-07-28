@@ -139,6 +139,13 @@ public abstract class BaseActivity extends Activity {
             boundSendingService = false;
         }
     }
+    
+    @Override
+    protected void onDestroy() {
+        ExLog.i(TAG, String.format("Destroying activity %s", this.getClass().getSimpleName()));
+        InMemoryDataStore.INSTANCE.reset();
+        super.onDestroy();
+    }
 
     protected void updateSendingServiceInformation() {
         if (menuItemLive == null)

@@ -9,12 +9,12 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>> {
 
     public ManagedRacesDataHandler(OnlineDataManager manager, LoadClient<Collection<ManagedRace>> client) {
-        super(manager, client);
+        super(manager);
     }
 
     @Override
-    public void onLoaded(Collection<ManagedRace> data) {
-        super.onLoaded(data);
+    public void onResult(Collection<ManagedRace> data) {
+        //super.onSuccess(data);
         manager.addRaces(data);
     }
 

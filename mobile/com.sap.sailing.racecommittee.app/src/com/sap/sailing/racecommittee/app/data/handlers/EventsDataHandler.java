@@ -4,18 +4,26 @@ import java.util.Collection;
 
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
-import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 
 public class EventsDataHandler extends DataHandler<Collection<EventBase>> {
 
-    public EventsDataHandler(OnlineDataManager manager, LoadClient<Collection<EventBase>> client) {
-        super(manager, client);
+    public EventsDataHandler(OnlineDataManager manager) {
+        super(manager);
     }
 
     @Override
-    public void onLoaded(Collection<EventBase> data) {
-        super.onLoaded(data);
+    public void onResult(Collection<EventBase> data) {
         manager.addEvents(data);
+    }
+    
+    @Override
+    public boolean hasCachedResults() {
+        return !manager.getDataStore().getEvents().isEmpty();
+    }
+    
+    @Override
+    public Collection<EventBase> getCachedResults() {
+        return manager.getDataStore().getEvents();
     }
 
 }

@@ -9,12 +9,12 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 public class MarksDataHandler extends DataHandler<Collection<Mark>> {
 
     public MarksDataHandler(OnlineDataManager manager, LoadClient<Collection<Mark>> client) {
-        super(manager, client);
+        super(manager);
     }
 
     @Override
-    public void onLoaded(Collection<Mark> data) {
-        super.onLoaded(data);
+    public void onResult(Collection<Mark> data) {
+        //super.onSuccess(data);
         manager.addMarks(data);
     }
 
