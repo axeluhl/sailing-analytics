@@ -49,6 +49,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
         // on first create add event list fragment
         if (savedInstanceState == null) {
+            ExLog.i(TAG, "Seems to be first start. Creating event fragment.");
             addEventListFragment();
         }
     }

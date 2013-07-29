@@ -39,7 +39,7 @@ import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 import com.sap.sailing.racecommittee.app.utils.GeoUtils;
 
-public class WindActivity extends BaseActivity implements CompassDirectionListener, LocationListener {
+public class WindActivity extends SessionActivity implements CompassDirectionListener, LocationListener {
 
     private final static int FIVE_SEC = 5000;
     private final static int EVERY_POSITION_CHANGE = 0;

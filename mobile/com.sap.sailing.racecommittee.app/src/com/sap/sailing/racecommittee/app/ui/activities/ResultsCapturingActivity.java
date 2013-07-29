@@ -29,7 +29,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.PhotoAdapter;
 import com.sap.sailing.racecommittee.app.ui.views.CameraView;
 import com.sap.sailing.racecommittee.app.utils.MailHelper;
 
-public class ResultsCapturingActivity extends BaseActivity {
+public class ResultsCapturingActivity extends SessionActivity {
     private static String ARGUMENTS_KEY_SUBJECT = "subject";
     private static String ARGUMENTS_KEY_TEXT = "text";
 
@@ -161,12 +161,6 @@ public class ResultsCapturingActivity extends BaseActivity {
         currentImageFile = createFinisherImageFile(currentImageIndex++);
     }
 
-    @Override
-    protected boolean onHomeClicked() {
-        fadeActivity(LoginActivity.class, true);
-        return true;
-    }
-
     private void setupListView() {
         TextView header = new TextView(this);
         header.setText(getString(R.string.results_capturing_view_list_header));
@@ -181,7 +175,6 @@ public class ResultsCapturingActivity extends BaseActivity {
 
     private void setupActionBar() {
         ActionBar actionBar = getActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(getString(R.string.results_capturing_title));
     }
 

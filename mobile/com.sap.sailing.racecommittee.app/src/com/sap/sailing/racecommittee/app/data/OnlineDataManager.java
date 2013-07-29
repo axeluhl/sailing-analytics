@@ -42,6 +42,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseDataDeserializer;
@@ -66,7 +67,7 @@ import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventD
  * Enables accessing of data.
  */
 public class OnlineDataManager extends DataManager {
-    // private static final String TAG = OnlineDataManager.class.getName();
+    private static final String TAG = OnlineDataManager.class.getName();
 
     private Context context;
 
@@ -79,6 +80,7 @@ public class OnlineDataManager extends DataManager {
         return context;
     }
 
+    @Override
     public void loadEvents(LoadClient<Collection<EventBase>> client) {
         if (dataStore.getEvents().isEmpty()) {
             reloadEvents(client);
@@ -93,6 +95,7 @@ public class OnlineDataManager extends DataManager {
         }
     }
 
+    //@Override
     public LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> getEventsLoader(
             LoadClient<Collection<EventBase>> callback) {
         return new DataLoaderCallbacks<Collection<EventBase>>(callback) {
@@ -104,6 +107,8 @@ public class OnlineDataManager extends DataManager {
                 DataParser<Collection<EventBase>> parser = new EventsDataParser(new EventBaseJsonDeserializer(
                         new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory))));
                 DataHandler<Collection<EventBase>> handler = new EventsDataHandler(OnlineDataManager.this);
+                
+                ExLog.i(TAG, "getEventsLoader created new loader...");
 
                 return new OnlineDataLoader<Collection<EventBase>>(context, URI.create(AppPreferences
                         .getServerBaseURL(context) + "/sailingserver/events"), parser, handler);
@@ -112,6 +117,7 @@ public class OnlineDataManager extends DataManager {
         };
     }
 
+    //@Override
     public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> getCourseAreasLoader(
             final Serializable parentEventId, LoadClient<Collection<CourseArea>> callback) {
         return new DataLoaderCallbacks<Collection<CourseArea>>(callback) {
@@ -152,6 +158,7 @@ public class OnlineDataManager extends DataManager {
         }
     }
 
+    @Override
     public void loadCourseAreas(final Serializable parentEventId, final LoadClient<Collection<CourseArea>> client) {
 
         if (dataStore.hasEvent(parentEventId)) {
@@ -185,6 +192,7 @@ public class OnlineDataManager extends DataManager {
         }
     }
 
+    @Override
     public void loadRaces(Serializable courseAreaId, LoadClient<Collection<ManagedRace>> client) {
         if (!dataStore.hasCourseArea(courseAreaId)) {
             client.onLoadFailed(new DataLoadingException(String.format("No course area found with id %s", courseAreaId)));
@@ -214,6 +222,7 @@ public class OnlineDataManager extends DataManager {
         }
     }
 
+    @Override
     public void loadMarks(ManagedRace managedRace, LoadClient<Collection<Mark>> client) {
         SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
         JsonDeserializer<Mark> markDeserializer = new MarkDeserializer(domainFactory);

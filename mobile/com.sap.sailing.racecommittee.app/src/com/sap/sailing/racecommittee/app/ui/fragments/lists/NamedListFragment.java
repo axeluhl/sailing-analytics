@@ -78,7 +78,7 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
 
     private void loadItems() {
         OnlineDataManager dataManager = (OnlineDataManager) OnlineDataManager.create(getActivity());
-        getLoaderManager().initLoader(0, null, createLoaderCallbacks(dataManager));
+        getLoaderManager().restartLoader(0, null, createLoaderCallbacks(dataManager));
     }
 
     @Override

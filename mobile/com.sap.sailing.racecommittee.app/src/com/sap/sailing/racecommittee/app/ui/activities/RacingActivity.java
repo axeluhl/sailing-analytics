@@ -32,7 +32,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragm
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment.FilterMode;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 
-public class RacingActivity extends BaseActivity implements RaceInfoListener {
+public class RacingActivity extends SessionActivity implements RaceInfoListener {
     // private final static String TAG = RacingActivity.class.getName();
     private final static String ListFragmentTag = RacingActivity.class.getName() + ".ManagedRaceListFragment";
     
@@ -81,12 +81,6 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
     private ReadonlyDataManager dataManager;
 
     @Override
-    protected boolean onHomeClicked() {
-        fadeActivity(LoginActivity.class, true);
-        return true;
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         // features must be requested before anything else
         getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
@@ -109,10 +103,13 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
             Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
         } else {
             setupActionBar(courseArea);
-            // unload and unregister from all races here!
-            unloadAllRaces();
             loadRaces(courseArea);
         }
+    }
+    
+    @Override
+    public void onBackPressed() {
+        logoutSession();
     }
 
     private ManagedRaceListFragment getOrCreateRaceListFragment() {
@@ -149,8 +146,6 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
 
     private void setupActionBar(CourseArea courseArea) {
         ActionBar actionBar = getActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-
         actionBar.setTitle(String.format(getString(R.string.racingview_header), courseArea.getName()));
 
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
@@ -158,12 +153,6 @@ public class RacingActivity extends BaseActivity implements RaceInfoListener {
                 this, R.layout.action_bar_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         new FilterModeSelectionBinder(raceListFragment, actionBar, adapter, ManagedRaceListFragment.FilterMode.values());
-    }
-
-    private void unloadAllRaces() {
-        ExLog.i(TAG, "Issuing intent action clear races");
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_CLEAR_RACES);
-        this.startService(intent);
     }
 
     private void loadRaces(final CourseArea courseArea) {

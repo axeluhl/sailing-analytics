@@ -77,7 +77,6 @@ public abstract class BaseActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
         switch (item.getItemId()) {
         case R.id.options_menu_settings:
             ExLog.i(TAG, "Clicked SETTINGS.");
@@ -86,8 +85,7 @@ public abstract class BaseActivity extends Activity {
         case R.id.options_menu_reload:
             ExLog.i(TAG, "Clicked RESET.");
             InMemoryDataStore.INSTANCE.reset();
-            fadeActivity(LoginActivity.class, true);
-            return true;
+            return onReset();
         case R.id.options_menu_live:
             ExLog.i(TAG, "Clicked LIVE.");
             Toast.makeText(this, getLiveIconText(), Toast.LENGTH_LONG).show();
@@ -109,9 +107,20 @@ public abstract class BaseActivity extends Activity {
         updateSendingServiceInformation();
         return super.onPrepareOptionsMenu(menu);
     }
+    
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        ExLog.i(TAG, String.format("Back pressed on activity %s", this.getClass().getSimpleName()));
+    }
 
     protected boolean onHomeClicked() {
         return false;
+    }
+
+    protected boolean onReset() {
+        fadeActivity(LoginActivity.class, true);
+        return true;
     }
     
     @Override
@@ -130,6 +139,20 @@ public abstract class BaseActivity extends Activity {
     }
     
     @Override
+    protected void onResume() {
+        super.onResume();
+        
+        ExLog.i(TAG, String.format("Resuming activity %s", this.getClass().getSimpleName()));
+    }
+    
+    @Override
+    protected void onPause() {
+        super.onPause();
+        
+        ExLog.i(TAG, String.format("Pausing activity %s", this.getClass().getSimpleName()));
+    }
+    
+    @Override
     protected void onStop() {
         super.onStop();
         
@@ -143,7 +166,6 @@ public abstract class BaseActivity extends Activity {
     @Override
     protected void onDestroy() {
         ExLog.i(TAG, String.format("Destroying activity %s", this.getClass().getSimpleName()));
-        InMemoryDataStore.INSTANCE.reset();
         super.onDestroy();
     }
 

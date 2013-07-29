@@ -43,6 +43,7 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
             ExLog.i(TAG, "Using cached results...");
             deliverResult(new DataLoaderResult<T>(dataHandler.getCachedResults()));
         } else {
+            ExLog.i(TAG, "No cached results. Forcing load now.");
             forceLoad();
         }
     }
