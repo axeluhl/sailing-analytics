@@ -7,7 +7,7 @@ import android.app.LoaderManager.LoaderCallbacks;
 
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
@@ -31,7 +31,7 @@ public class EventListFragment extends NamedListFragment<EventBase> {
     }
 
     @Override
-    protected LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> createLoaderCallbacks(OnlineDataManager manager) {
+    protected LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> createLoaderCallbacks(ReadonlyDataManager manager) {
         return manager.getEventsLoader(this);
     }
 

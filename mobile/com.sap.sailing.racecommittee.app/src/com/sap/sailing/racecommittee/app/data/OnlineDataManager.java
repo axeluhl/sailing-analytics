@@ -111,7 +111,7 @@ public class OnlineDataManager extends DataManager {
     @Override
     public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> getCourseAreasLoader(
             final Serializable parentEventId, LoadClient<Collection<CourseArea>> callback) {
-        return new ImmediateDataLoaderCallbacks<Collection<CourseArea>>(callback,
+        return new ImmediateDataLoaderCallbacks<Collection<CourseArea>>(context, callback,
                 new Callable<Collection<CourseArea>>() {
                     @Override
                     public Collection<CourseArea> call() throws Exception {

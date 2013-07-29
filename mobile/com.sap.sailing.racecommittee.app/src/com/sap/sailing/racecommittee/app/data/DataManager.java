@@ -17,6 +17,7 @@ public abstract class DataManager implements ReadonlyDataManager {
     protected DataStore dataStore;
 
     public DataManager(Context context, DataStore dataStore) {
+        this.context = context;
         this.dataStore = dataStore;
     }
 

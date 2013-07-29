@@ -12,7 +12,7 @@ import android.os.Bundle;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.CourseAreaArrayAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
@@ -52,7 +52,7 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     }
 
     @Override
-    protected LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createLoaderCallbacks(OnlineDataManager manager) {
+    protected LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createLoaderCallbacks(ReadonlyDataManager manager) {
         return manager.getCourseAreasLoader(parentEventId, this);
     }
 

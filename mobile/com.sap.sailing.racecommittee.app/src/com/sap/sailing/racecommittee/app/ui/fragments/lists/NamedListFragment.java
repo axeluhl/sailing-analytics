@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
@@ -58,7 +59,7 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
         this.listener = attachListener(activity);
     }
     
-    protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(OnlineDataManager manager);
+    protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(ReadonlyDataManager manager);
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -77,8 +78,7 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
     }
 
     private void loadItems() {
-        OnlineDataManager dataManager = (OnlineDataManager) OnlineDataManager.create(getActivity());
-        getLoaderManager().restartLoader(0, null, createLoaderCallbacks(dataManager));
+        getLoaderManager().restartLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())));
     }
 
     @Override

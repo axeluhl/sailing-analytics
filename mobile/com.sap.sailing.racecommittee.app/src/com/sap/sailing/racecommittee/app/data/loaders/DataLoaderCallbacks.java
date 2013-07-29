@@ -28,7 +28,7 @@ public class DataLoaderCallbacks<T> implements LoaderCallbacks<DataLoaderResult<
         try {
             return loaderCreator.create(id, args);
         } catch (Exception e) {
-            ExLog.e(TAG, String.format("Exception while trying to create loader:\n%s", e.toString()));
+            ExLog.ex(TAG, e);
         }
         return null;
     }

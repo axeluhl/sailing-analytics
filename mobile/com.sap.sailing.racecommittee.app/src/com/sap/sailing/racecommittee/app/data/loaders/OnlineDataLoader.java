@@ -3,9 +3,7 @@ package com.sap.sailing.racecommittee.app.data.loaders;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 
@@ -62,7 +60,7 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
             Thread.sleep(4000);
             return new DataLoaderResult<T>(loadDataInBackground());
         } catch (Exception e) {
-            logException(e);
+            ExLog.ex(TAG, e);
             return new DataLoaderResult<T>(e);
         }
     }
@@ -79,14 +77,6 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
             }
             httpRequest.disconnect();
         }
-    }
-
-    private void logException(Exception e) {
-        ExLog.e(TAG, String.format("Exception while loading data:\n%s", e.toString()));
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter stream = new PrintWriter(stringWriter);
-        e.printStackTrace(stream);
-        ExLog.e(TAG, stringWriter.toString());
     }
 
 }

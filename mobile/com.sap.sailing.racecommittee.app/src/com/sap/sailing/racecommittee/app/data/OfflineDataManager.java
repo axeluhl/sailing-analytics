@@ -55,7 +55,8 @@ public class OfflineDataManager extends DataManager {
     }
 
     private void fillDataStore(DataStore dataStore) {
-        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Cardiff)", "Cardiff", "", true, "DUMBUUIDA"));
+        dataStore
+                .addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Cardiff)", "Cardiff", "", true, "DUMBUUIDA"));
         dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Nice)", "Nice", "", true, "DUMBUUIDB"));
         dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Rio)", "Rio", "", true, "DUMBUUIDC"));
         EventBase newEvent = new EventBaseImpl("Extreme Sailing Series 2013 (Muscat)", "Muscat", "", true, "FIXUUID");
@@ -65,12 +66,9 @@ public class OfflineDataManager extends DataManager {
 
         SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, null);
         SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, null);
-        RaceGroup raceGroup = new RaceGroupImpl(
-                "ESS", 
-                new BoatClassImpl("X40", false), 
-                null,
-                Arrays.asList(qualifying, medal));
-        
+        RaceGroup raceGroup = new RaceGroupImpl("ESS", new BoatClassImpl("X40", false), null, Arrays.asList(qualifying,
+                medal));
+
         List<Competitor> competitors = new ArrayList<Competitor>();
         competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", null, null));
         competitors.add(new CompetitorImpl(UUID.randomUUID(), "The Wave Muscat", null, null));
@@ -80,113 +78,89 @@ public class OfflineDataManager extends DataManager {
 
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         RaceLog log = new RaceLogImpl(UUID.randomUUID());
-        log.add(factory.createStartTimeEvent(
-                new MillisecondsTimePoint(new Date().getTime() - 2000), 
-                1,
+        log.add(factory.createStartTimeEvent(new MillisecondsTimePoint(new Date().getTime() - 2000), 1,
                 new MillisecondsTimePoint(new Date().getTime() - 1000)));
 
-        log.add(factory.createRaceStatusEvent(
-                new MillisecondsTimePoint(new Date().getTime()), 
-                1,
+        log.add(factory.createRaceStatusEvent(new MillisecondsTimePoint(new Date().getTime()), 1,
                 RaceLogRaceStatus.FINISHING));
 
-        ManagedRace q1 = new ManagedRaceImpl(
-                new ManagedRaceIdentifierImpl(
-                        "Q1", 
-                        new FleetImpl("Default"), 
-                        qualifying, 
-                        raceGroup),
-                        StartProcedureType.ESS,
-                        log);
+        ManagedRace q1 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("Q1", new FleetImpl("Default"), qualifying,
+                raceGroup), StartProcedureType.ESS, log);
 
         log = new RaceLogImpl(UUID.randomUUID());
-        /*log.add(factory.createStartTimeEvent(
-				new MillisecondsTimePoint(new Date()), 
-				1,
-				RaceLogRaceStatus.SCHEDULED, 
-				new MillisecondsTimePoint(new Date().getTime() + 100000)));
+        /*
+         * log.add(factory.createStartTimeEvent( new MillisecondsTimePoint(new Date()), 1, RaceLogRaceStatus.SCHEDULED,
+         * new MillisecondsTimePoint(new Date().getTime() + 100000)));
          */
 
-        ManagedRace q2 = new ManagedRaceImpl(
-                new ManagedRaceIdentifierImpl(
-                        "Q2", 
-                        new FleetImpl("Default"), 
-                        qualifying, 
-                        raceGroup), 
-                        StartProcedureType.ESS,
-                        log);
+        ManagedRace q2 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("Q2", new FleetImpl("Default"), qualifying,
+                raceGroup), StartProcedureType.ESS, log);
 
         log = new RaceLogImpl(UUID.randomUUID());
-        /*log.add(factory.createRaceStatusEvent(
-				new MillisecondsTimePoint(new Date()), 
-				5,
-				RaceLogRaceStatus.FINISHED));*/
-        ManagedRace q3 = new ManagedRaceImpl(
-                new ManagedRaceIdentifierImpl(
-                        "Q3", 
-                        new FleetImpl("Default"), 
-                        qualifying, 
-                        raceGroup), 
-                        StartProcedureType.ESS,
-                        log);
-        /*ManagedRace m1 = new ManagedRaceImpl(
-				new ManagedRaceIdentifierImpl(
-						"M1", 
-						new FleetImpl("Default"), 
-						medal, 
-						raceGroup), 
-				null);*/
+        /*
+         * log.add(factory.createRaceStatusEvent( new MillisecondsTimePoint(new Date()), 5,
+         * RaceLogRaceStatus.FINISHED));
+         */
+        ManagedRace q3 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying,
+                raceGroup), StartProcedureType.ESS, log);
+        /*
+         * ManagedRace m1 = new ManagedRaceImpl( new ManagedRaceIdentifierImpl( "M1", new FleetImpl("Default"), medal,
+         * raceGroup), null);
+         */
         dataStore.addRace(q1);
         dataStore.addRace(q2);
         dataStore.addRace(q3);
-        //dataStore.addRace(m1);
-        
+        // dataStore.addRace(m1);
+
         Mark m1 = new MarkImpl("Red");
         Mark m2 = new MarkImpl("Green");
         Mark m3 = new MarkImpl("White");
-        
+
         dataStore.addMark(m1);
         dataStore.addMark(m2);
         dataStore.addMark(m3);
     }
-    
+
     @Override
     public LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> getEventsLoader(
             LoadClient<Collection<EventBase>> callback) {
-        return new ImmediateDataLoaderCallbacks<Collection<EventBase>>(callback, new Callable<Collection<EventBase>>() {
-            @Override
-            public Collection<EventBase> call() throws Exception {
-                return dataStore.getEvents();
-            }
-        });
+        return new ImmediateDataLoaderCallbacks<Collection<EventBase>>(context, callback,
+                new Callable<Collection<EventBase>>() {
+                    @Override
+                    public Collection<EventBase> call() throws Exception {
+                        return dataStore.getEvents();
+                    }
+                });
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> getCourseAreasLoader(final Serializable parentEventId,
-            LoadClient<Collection<CourseArea>> callback) {
-        return new ImmediateDataLoaderCallbacks<Collection<CourseArea>>(callback, new Callable<Collection<CourseArea>>() {
-            @Override
-            public Collection<CourseArea> call() throws Exception {
-                return dataStore.getCourseAreas(dataStore.getEvent(parentEventId));
-            }
-        });
+    public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> getCourseAreasLoader(
+            final Serializable parentEventId, LoadClient<Collection<CourseArea>> callback) {
+        return new ImmediateDataLoaderCallbacks<Collection<CourseArea>>(context, callback,
+                new Callable<Collection<CourseArea>>() {
+                    @Override
+                    public Collection<CourseArea> call() throws Exception {
+                        return dataStore.getCourseAreas(dataStore.getEvent(parentEventId));
+                    }
+                });
     }
 
     @Override
     public LoaderCallbacks<DataLoaderResult<Collection<ManagedRace>>> getRacesLoader(Serializable courseAreaId,
             LoadClient<Collection<ManagedRace>> callback) {
-        return new ImmediateDataLoaderCallbacks<Collection<ManagedRace>>(callback, new Callable<Collection<ManagedRace>>() {
-            @Override
-            public Collection<ManagedRace> call() throws Exception {
-                return dataStore.getRaces();
-            }
-        });
+        return new ImmediateDataLoaderCallbacks<Collection<ManagedRace>>(context, callback,
+                new Callable<Collection<ManagedRace>>() {
+                    @Override
+                    public Collection<ManagedRace> call() throws Exception {
+                        return dataStore.getRaces();
+                    }
+                });
     }
 
     @Override
     public LoaderCallbacks<DataLoaderResult<Collection<Mark>>> getMarksLoader(ManagedRace managedRace,
             LoadClient<Collection<Mark>> callback) {
-        return new ImmediateDataLoaderCallbacks<Collection<Mark>>(callback, new Callable<Collection<Mark>>() {
+        return new ImmediateDataLoaderCallbacks<Collection<Mark>>(context, callback, new Callable<Collection<Mark>>() {
             @Override
             public Collection<Mark> call() throws Exception {
                 return dataStore.getMarks();
@@ -197,7 +171,7 @@ public class OfflineDataManager extends DataManager {
     @Override
     public LoaderCallbacks<DataLoaderResult<CourseBase>> getCourseLoader(final ManagedRace managedRace,
             LoadClient<CourseBase> callback) {
-        return new ImmediateDataLoaderCallbacks<CourseBase>(callback, new Callable<CourseBase>() {
+        return new ImmediateDataLoaderCallbacks<CourseBase>(context, callback, new Callable<CourseBase>() {
             @Override
             public CourseBase call() throws Exception {
                 return managedRace.getCourseOnServer();
@@ -206,14 +180,15 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> getCompetitorsLoader(final ManagedRace managedRace,
-            LoadClient<Collection<Competitor>> callback) {
-        return new ImmediateDataLoaderCallbacks<Collection<Competitor>>(callback, new Callable<Collection<Competitor>>() {
-            @Override
-            public Collection<Competitor> call() throws Exception {
-                return managedRace.getCompetitors();
-            }
-        });
+    public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> getCompetitorsLoader(
+            final ManagedRace managedRace, LoadClient<Collection<Competitor>> callback) {
+        return new ImmediateDataLoaderCallbacks<Collection<Competitor>>(context, callback,
+                new Callable<Collection<Competitor>>() {
+                    @Override
+                    public Collection<Competitor> call() throws Exception {
+                        return managedRace.getCompetitors();
+                    }
+                });
     }
 
 }
