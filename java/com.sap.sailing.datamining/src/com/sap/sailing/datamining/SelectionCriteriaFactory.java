@@ -41,9 +41,8 @@ public class SelectionCriteriaFactory {
             return new WindStrengthSelectionCriteria((Collection<WindStrength>) selection);
         case Year:
             return new YearSelectionCriteria((Collection<Integer>) selection);
-        default:
-            throw new IllegalArgumentException("Not yet implemented for the given selection type.");
         }
+        throw new IllegalArgumentException("Not yet implemented for the given selection type.");
     }
 
 }
