@@ -35,7 +35,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 public class RacingActivity extends SessionActivity implements RaceInfoListener {
     // private final static String TAG = RacingActivity.class.getName();
     private final static String ListFragmentTag = RacingActivity.class.getName() + ".ManagedRaceListFragment";
-    
+
     private static final String TAG = RacingActivity.class.getName();
 
     private class FilterModeSelectionBinder implements OnNavigationListener {
@@ -106,7 +106,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
             loadRaces(courseArea);
         }
     }
-    
+
     @Override
     public void onBackPressed() {
         logoutSession();
@@ -159,15 +159,16 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
         setProgressBarIndeterminateVisibility(true);
 
         ExLog.i(TAG, "Issuing loading of managed races from data manager");
-        dataManager.loadRaces(courseArea.getId(), new LoadClient<Collection<ManagedRace>>() {
-            public void onLoadSucceded(Collection<ManagedRace> data) {
-                onLoadRacesSucceded(courseArea, data);
-            }
+        getLoaderManager().restartLoader(0, null,
+                dataManager.getRacesLoader(courseArea.getId(), new LoadClient<Collection<ManagedRace>>() {
+                    public void onLoadSucceded(Collection<ManagedRace> data) {
+                        onLoadRacesSucceded(courseArea, data);
+                    }
 
-            public void onLoadFailed(Exception reason) {
-                onLoadRacesFailed(courseArea, reason);
-            }
-        });
+                    public void onLoadFailed(Exception reason) {
+                        onLoadRacesFailed(courseArea, reason);
+                    }
+                }));
     }
 
     private void onLoadRacesSucceded(CourseArea courseArea, Collection<ManagedRace> data) {
@@ -198,9 +199,9 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
 
     private void showLoadFailedDialog(final CourseArea courseArea, String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(
-                String.format(getString(R.string.generic_load_failure), message))
-                .setTitle(getString(R.string.loading_failure)).setIcon(R.drawable.ic_dialog_alert_holo_light).setCancelable(true)
+        builder.setMessage(String.format(getString(R.string.generic_load_failure), message))
+                .setTitle(getString(R.string.loading_failure)).setIcon(R.drawable.ic_dialog_alert_holo_light)
+                .setCancelable(true)
                 .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         loadRaces(courseArea);

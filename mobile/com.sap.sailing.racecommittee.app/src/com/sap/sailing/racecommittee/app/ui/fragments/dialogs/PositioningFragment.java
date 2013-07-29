@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
@@ -167,20 +168,21 @@ public class PositioningFragment extends RaceDialogFragment {
     }
 
     private void loadCompetitors() {
+        ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
+        getLoaderManager().restartLoader(0, null,
+                dataManager.getCompetitorsLoader(getRace(), new LoadClient<Collection<Competitor>>() {
 
-        OnlineDataManager.create(getActivity()).loadCompetitors(getRace(), new LoadClient<Collection<Competitor>>() {
+                    @Override
+                    public void onLoadFailed(Exception reason) {
+                        onLoadCompetitorsSucceeded(getRace().getCompetitors());
+                    }
 
-            @Override
-            public void onLoadFailed(Exception reason) {
-                onLoadCompetitorsSucceeded(getRace().getCompetitors());
-            }
+                    @Override
+                    public void onLoadSucceded(Collection<Competitor> data) {
+                        onLoadCompetitorsSucceeded(data);
+                    }
 
-            @Override
-            public void onLoadSucceded(Collection<Competitor> data) {
-                onLoadCompetitorsSucceeded(data);
-            }
-
-        });
+                }));
     }
 
     protected void onLoadCompetitorsSucceeded(Collection<Competitor> data) {

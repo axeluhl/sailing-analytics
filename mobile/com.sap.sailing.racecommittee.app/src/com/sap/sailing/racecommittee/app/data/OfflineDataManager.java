@@ -7,6 +7,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -31,6 +35,8 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
+import com.sap.sailing.racecommittee.app.data.loaders.ImmediateDataLoaderCallbacks;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
@@ -39,8 +45,8 @@ public class OfflineDataManager extends DataManager {
 
     private static boolean isInitialized = false;
 
-    public OfflineDataManager(DataStore dataStore) {
-        super(dataStore);
+    public OfflineDataManager(Context context, DataStore dataStore) {
+        super(context, dataStore);
 
         if (!isInitialized) {
             isInitialized = true;
@@ -143,34 +149,71 @@ public class OfflineDataManager extends DataManager {
         dataStore.addMark(m2);
         dataStore.addMark(m3);
     }
-
-    public void loadEvents(LoadClient<Collection<EventBase>> client) {
-        client.onLoadSucceded(dataStore.getEvents());
-    }
-
-    public void loadCourseAreas(Serializable parentEventId,
-            LoadClient<Collection<CourseArea>> client) {
-        client.onLoadSucceded(dataStore.getCourseAreas(dataStore.getEvent(parentEventId)));
-    }
-
-    public void loadRaces(Serializable courseAreaId,
-            LoadClient<Collection<ManagedRace>> client) {
-        client.onLoadSucceded(dataStore.getRaces());
+    
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> getEventsLoader(
+            LoadClient<Collection<EventBase>> callback) {
+        return new ImmediateDataLoaderCallbacks<Collection<EventBase>>(callback, new Callable<Collection<EventBase>>() {
+            @Override
+            public Collection<EventBase> call() throws Exception {
+                return dataStore.getEvents();
+            }
+        });
     }
 
     @Override
-    public void loadMarks(ManagedRace managedRace, LoadClient<Collection<Mark>> client) {
-        client.onLoadSucceded(dataStore.getMarks());
+    public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> getCourseAreasLoader(final Serializable parentEventId,
+            LoadClient<Collection<CourseArea>> callback) {
+        return new ImmediateDataLoaderCallbacks<Collection<CourseArea>>(callback, new Callable<Collection<CourseArea>>() {
+            @Override
+            public Collection<CourseArea> call() throws Exception {
+                return dataStore.getCourseAreas(dataStore.getEvent(parentEventId));
+            }
+        });
     }
 
     @Override
-    public void loadCourse(ManagedRace managedRace, LoadClient<CourseBase> client) {
-        client.onLoadSucceded(managedRace.getCourseOnServer());
+    public LoaderCallbacks<DataLoaderResult<Collection<ManagedRace>>> getRacesLoader(Serializable courseAreaId,
+            LoadClient<Collection<ManagedRace>> callback) {
+        return new ImmediateDataLoaderCallbacks<Collection<ManagedRace>>(callback, new Callable<Collection<ManagedRace>>() {
+            @Override
+            public Collection<ManagedRace> call() throws Exception {
+                return dataStore.getRaces();
+            }
+        });
     }
 
     @Override
-    public void loadCompetitors(ManagedRace managedRace, LoadClient<Collection<Competitor>> client) {
-        client.onLoadSucceded((Collection<Competitor>) managedRace.getCompetitors());
+    public LoaderCallbacks<DataLoaderResult<Collection<Mark>>> getMarksLoader(ManagedRace managedRace,
+            LoadClient<Collection<Mark>> callback) {
+        return new ImmediateDataLoaderCallbacks<Collection<Mark>>(callback, new Callable<Collection<Mark>>() {
+            @Override
+            public Collection<Mark> call() throws Exception {
+                return dataStore.getMarks();
+            }
+        });
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<CourseBase>> getCourseLoader(final ManagedRace managedRace,
+            LoadClient<CourseBase> callback) {
+        return new ImmediateDataLoaderCallbacks<CourseBase>(callback, new Callable<CourseBase>() {
+            @Override
+            public CourseBase call() throws Exception {
+                return managedRace.getCourseOnServer();
+            }
+        });
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> getCompetitorsLoader(final ManagedRace managedRace,
+            LoadClient<Collection<Competitor>> callback) {
+        return new ImmediateDataLoaderCallbacks<Collection<Competitor>>(callback, new Callable<Collection<Competitor>>() {
+            @Override
+            public Collection<Competitor> call() throws Exception {
+                return managedRace.getCompetitors();
+            }
+        });
     }
 
 }

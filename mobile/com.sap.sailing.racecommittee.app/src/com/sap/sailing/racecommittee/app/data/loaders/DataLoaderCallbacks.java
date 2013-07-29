@@ -8,21 +8,25 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 
-public abstract class DataLoaderCallbacks<T> implements LoaderCallbacks<DataLoaderResult<T>> {
+public class DataLoaderCallbacks<T> implements LoaderCallbacks<DataLoaderResult<T>> {
     private static String TAG = DataLoaderCallbacks.class.getName();
     
-    private LoadClient<T> clientCallback;
-
-    public DataLoaderCallbacks(LoadClient<T> clientCallback) {
-        this.clientCallback = clientCallback;
+    public interface LoaderCreator<T> {
+        Loader<DataLoaderResult<T>> create(int id, Bundle args) throws Exception;
     }
     
-    protected abstract Loader<DataLoaderResult<T>> createLoader(int id, Bundle args) throws Exception;
+    private LoadClient<T> clientCallback;
+    private LoaderCreator<T> loaderCreator;
+
+    public DataLoaderCallbacks(LoadClient<T> clientCallback, LoaderCreator<T> loaderCreator) {
+        this.clientCallback = clientCallback;
+        this.loaderCreator = loaderCreator;
+    }
 
     @Override
     public Loader<DataLoaderResult<T>> onCreateLoader(int id, Bundle args) {
         try {
-            return createLoader(id, args);
+            return loaderCreator.create(id, args);
         } catch (Exception e) {
             ExLog.e(TAG, String.format("Exception while trying to create loader:\n%s", e.toString()));
         }
