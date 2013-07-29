@@ -21,6 +21,12 @@ public class SessionActivity extends BaseActivity {
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
     }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ExLog.i(TAG, String.format("Logging in from activity %s", this.getClass().getSimpleName()));
+    }
 
     @Override
     protected boolean onHomeClicked() {
@@ -33,11 +39,11 @@ public class SessionActivity extends BaseActivity {
     }
     
     protected boolean logoutSession() {
-        ExLog.i(TAG, String.format("Logging out of activity %s", this.getClass().getSimpleName()));
+        ExLog.i(TAG, String.format("Logging out from activity %s", this.getClass().getSimpleName()));
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle("Sure?").setPositiveButton("Logout", new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                logout();
+                doLogout();
             }
         }).setNegativeButton("Cancel", new OnClickListener() {
             @Override
@@ -49,7 +55,7 @@ public class SessionActivity extends BaseActivity {
         return true;
     }
 
-    private void logout() {
+    private void doLogout() {
         unloadAllRaces();
         fadeActivity(LoginActivity.class, true);
     }
