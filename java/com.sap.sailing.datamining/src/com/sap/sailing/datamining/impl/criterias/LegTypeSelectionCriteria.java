@@ -14,7 +14,9 @@ public class LegTypeSelectionCriteria extends AbstractSelectionCriteria<LegType>
 
     @Override
     public boolean matches(SelectionContext context) {
-        return context.getTrackedRace() != null;
+        //Returns always true, if there's any data. There are only 3 leg types and nearly every race contains at least two of them.
+        //It saves time, because the data retriever has to check each leg for it's type anyway, which would be done here.
+        return context.getTrackedRegatta() != null;
     }
 
     @Override

@@ -5,9 +5,9 @@ import java.util.Collection;
 import com.sap.sailing.datamining.DataRetriever;
 import com.sap.sailing.datamining.SelectionContext;
 
-public class LegSelectionCriteria extends AbstractSelectionCriteria<Integer> {
+public class LegNumberSelectionCriteria extends AbstractSelectionCriteria<Integer> {
 
-    public LegSelectionCriteria(Collection<Integer> selection) {
+    public LegNumberSelectionCriteria(Collection<Integer> selection) {
         super(selection);
     }
 
