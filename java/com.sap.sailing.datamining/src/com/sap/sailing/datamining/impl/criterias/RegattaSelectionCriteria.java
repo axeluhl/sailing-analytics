@@ -8,8 +8,8 @@ import com.sap.sailing.datamining.impl.retrievers.TrackedRegattaDataRetriever;
 
 public class RegattaSelectionCriteria extends AbstractSelectionCriteria<String> {
 
-    public RegattaSelectionCriteria(Collection<String> selection) {
-        super(selection);
+    public RegattaSelectionCriteria(Collection<String> regattaNames) {
+        super(regattaNames);
     }
 
     @Override

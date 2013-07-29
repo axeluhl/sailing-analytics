@@ -10,8 +10,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class YearSelectionCriteria extends AbstractSelectionCriteria<Integer> {
 
-    public YearSelectionCriteria(Collection<Integer> selection) {
-        super(selection);
+    public YearSelectionCriteria(Collection<Integer> years) {
+        super(years);
     }
 
     @Override

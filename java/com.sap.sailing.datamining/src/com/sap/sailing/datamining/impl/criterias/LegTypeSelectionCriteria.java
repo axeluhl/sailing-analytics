@@ -8,8 +8,8 @@ import com.sap.sailing.domain.common.LegType;
 
 public class LegTypeSelectionCriteria extends AbstractSelectionCriteria<LegType> {
 
-    public LegTypeSelectionCriteria(Collection<LegType> selection) {
-        super(selection);
+    public LegTypeSelectionCriteria(Collection<LegType> legTypes) {
+        super(legTypes);
     }
 
     @Override

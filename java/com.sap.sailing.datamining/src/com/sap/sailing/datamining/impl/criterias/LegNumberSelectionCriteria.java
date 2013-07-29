@@ -7,8 +7,8 @@ import com.sap.sailing.datamining.SelectionContext;
 
 public class LegNumberSelectionCriteria extends AbstractSelectionCriteria<Integer> {
 
-    public LegNumberSelectionCriteria(Collection<Integer> selection) {
-        super(selection);
+    public LegNumberSelectionCriteria(Collection<Integer> legNumbers) {
+        super(legNumbers);
     }
 
     @Override
@@ -16,9 +16,10 @@ public class LegNumberSelectionCriteria extends AbstractSelectionCriteria<Intege
         if (context.getTrackedRace() == null) {
             return false;
         }
-        
-        for (Integer selection : getSelection()) {
-            if (selection < context.getTrackedRace().getRace().getCourse().getLegs().size()) {
+
+        int legNumberOfRace = context.getTrackedRace().getRace().getCourse().getLegs().size();
+        for (Integer legNumber : getSelection()) {
+            if (legNumber < legNumberOfRace) {
                 return true;
             }
         }

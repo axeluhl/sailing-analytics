@@ -8,8 +8,8 @@ import com.sap.sailing.datamining.impl.retrievers.TrackedRaceDataRetriever;
 
 public class RaceSelectionCriteria extends AbstractSelectionCriteria<String> {
 
-    public RaceSelectionCriteria(Collection<String> selection) {
-        super(selection);
+    public RaceSelectionCriteria(Collection<String> raceNames) {
+        super(raceNames);
     }
 
     @Override
@@ -18,8 +18,8 @@ public class RaceSelectionCriteria extends AbstractSelectionCriteria<String> {
             return false;
         }
         
-        for (String selection : getSelection()) {
-            if (selection.equals(context.getTrackedRace().getRace().getName())) {
+        for (String raceName : getSelection()) {
+            if (raceName.equals(context.getTrackedRace().getRace().getName())) {
                 return true;
             }
         }
