@@ -443,20 +443,28 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                     // merely a hint for column compression within legDetailsUnchanged and doesn't need to be handled here
                     if (!allUnchangedLeaderboardEntriesAsCompetitorsAndColumnNames
                             .contains(new Pair<CompetitorDTO, String>(previousCompetitor, raceColumnName))) {
-                        LeaderboardEntryDTO leaderboardEntry = rows.get(previousCompetitor).fieldsByRaceColumnName.get(raceColumnName);
-                        final LeaderboardEntryDTO previousLeaderboardEntryDTO = previousVersion.rows.get(previousCompetitor).fieldsByRaceColumnName.get(raceColumnName);
-                        final List<LegEntryDTO> previousLegDetails = previousLeaderboardEntryDTO == null ? null : previousLeaderboardEntryDTO.legDetails;
-                        if (previousLegDetails == null) {
-                            // the leg index can only be null if the previous leg details are null
-                            leaderboardEntry.legDetails = null;
-                        } else {
-                            // here, the leg index cannot be null
-                            if (leaderboardEntry.legDetails == null) {
-                                leaderboardEntry.legDetails = new ArrayList<LegEntryDTO>();
+                        final LeaderboardRowDTO leaderboardRowDTO = rows.get(previousCompetitor);
+                        LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO == null ? null
+                                : leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
+                        if (leaderboardEntry != null) {
+                            final LeaderboardRowDTO previousLeaderboardRowDTO = previousVersion.rows
+                                    .get(previousCompetitor);
+                            final LeaderboardEntryDTO previousLeaderboardEntryDTO = previousLeaderboardRowDTO == null ? null
+                                    : previousLeaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
+                            final List<LegEntryDTO> previousLegDetails = previousLeaderboardEntryDTO == null ? null
+                                    : previousLeaderboardEntryDTO.legDetails;
+                            if (previousLegDetails == null) {
+                                // the leg index can only be null if the previous leg details are null
+                                leaderboardEntry.legDetails = null;
+                            } else {
+                                // here, the leg index cannot be null
+                                if (leaderboardEntry.legDetails == null) {
+                                    leaderboardEntry.legDetails = new ArrayList<LegEntryDTO>();
+                                }
+                                final Integer pos = competitorInPreviosAndColumnNameAndLegDetailsIndex.getB().getB();
+                                ensureSize(leaderboardEntry.legDetails, pos + 1);
+                                leaderboardEntry.legDetails.set(pos, previousLegDetails.get(pos));
                             }
-                            final Integer pos = competitorInPreviosAndColumnNameAndLegDetailsIndex.getB().getB();
-                            ensureSize(leaderboardEntry.legDetails, pos + 1);
-                            leaderboardEntry.legDetails.set(pos, previousLegDetails.get(pos));
                         }
                     }
                 }

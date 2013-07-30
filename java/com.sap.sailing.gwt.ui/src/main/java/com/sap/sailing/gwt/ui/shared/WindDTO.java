@@ -15,8 +15,8 @@ public class WindDTO implements IsSerializable {
     public PositionDTO position;
     
     /**
-     * The point in time when these wind values have been measured
-     * The value can be null in case the values are derived or calculated from other values
+     * The point in time when these wind values have been measured. The value can be null in case the values are derived
+     * or calculated from other values
      */
     public Long measureTimepoint;
     

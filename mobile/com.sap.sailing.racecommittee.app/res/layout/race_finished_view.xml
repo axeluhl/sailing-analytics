@@ -113,7 +113,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.2"
-            android:text="Confirm positionings"
+            android:text="@string/confirm_positionings"
             android:textSize="14pt"
             android:ems="10"
             android:visibility="gone" />
@@ -123,10 +123,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.8"
-            android:text="Snap"
+            android:text="@string/snap"
             android:src="@drawable/ic_menu_camera"
             android:textSize="14pt"
-            android:ems="10" />
+            android:ems="10"
+            android:contentDescription="@string/snap" />
     </LinearLayout>
 
 </LinearLayout>

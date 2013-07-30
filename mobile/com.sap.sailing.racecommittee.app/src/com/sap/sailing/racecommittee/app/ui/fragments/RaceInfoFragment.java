@@ -170,7 +170,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(resetRaceDialogView).setTitle(R.string.race_reset_confirmation_title)
                 .setIcon(R.drawable.ic_dialog_alert_holo_light).setCancelable(true)
-                .setPositiveButton("Reset anyway", new DialogInterface.OnClickListener() {
+                .setPositiveButton(getString(R.string.race_reset_reset_button), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         ExLog.i(ExLog.RACE_RESET_YES, getRace().getId().toString(), getActivity());
                         ExLog.w(TAG, String.format("Race %s is selected for reset.", getRace().getId()));

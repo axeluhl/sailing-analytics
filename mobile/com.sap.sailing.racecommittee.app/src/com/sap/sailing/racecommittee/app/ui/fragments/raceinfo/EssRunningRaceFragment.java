@@ -152,7 +152,7 @@ public class EssRunningRaceFragment extends RaceFragment implements EssRunningRa
 
 
     private void setStarttimeCountupLabel(long millisecondsSinceStart) {
-        countUpTextView.setText(String.format(getString(R.string.race_running_since_template), prettyTimeString(millisecondsSinceStart), getRace().getName()));
+        countUpTextView.setText(String.format(getRace().getName(), getString(R.string.race_running_since_template), prettyTimeString(millisecondsSinceStart)));
     }
 
     protected CharSequence prettyTimeString(long time) {

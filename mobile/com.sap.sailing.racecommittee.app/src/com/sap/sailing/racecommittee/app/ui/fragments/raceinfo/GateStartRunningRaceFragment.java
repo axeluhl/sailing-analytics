@@ -161,7 +161,8 @@ public class GateStartRunningRaceFragment extends RaceFragment implements GateSt
 
     private void setStarttimeCountupLabel(long millisecondsSinceStart) {
         countUpTextView.setText(String.format(getString(R.string.race_running_since_template),
-                prettyTimeString(millisecondsSinceStart), getRace().getName()));
+                getRace().getName(),
+                prettyTimeString(millisecondsSinceStart)));
     }
 
     protected CharSequence prettyTimeString(long time) {
