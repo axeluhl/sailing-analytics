@@ -259,7 +259,7 @@ public class RaceStateService extends Service {
             
             ExLog.i(TAG, "Race " + race.getId() + " registered.");
         } else {
-            ExLog.e(TAG, "Race " + race.getId() + " was already registered. Ignoring.");
+            ExLog.w(TAG, "Race " + race.getId() + " was already registered. Ignoring.");
         }
     }
 

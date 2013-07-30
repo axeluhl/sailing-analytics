@@ -1,7 +1,7 @@
 package com.sap.sailing.racecommittee.app.data;
 
 import java.io.Serializable;
-import java.net.URI;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.concurrent.Callable;
@@ -102,7 +102,7 @@ public class OnlineDataManager extends DataManager {
 
                 ExLog.i(TAG, "getEventsLoader created new loader...");
 
-                return new OnlineDataLoader<Collection<EventBase>>(context, URI.create(AppPreferences
+                return new OnlineDataLoader<Collection<EventBase>>(context, new URL(AppPreferences
                         .getServerBaseURL(context) + "/sailingserver/events"), parser, handler);
             }
         });
@@ -141,7 +141,7 @@ public class OnlineDataManager extends DataManager {
                                                 RaceLogEventDeserializer.create(domainFactory)))))));
                 DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(OnlineDataManager.this);
 
-                return new OnlineDataLoader<Collection<ManagedRace>>(context, URI.create(AppPreferences
+                return new OnlineDataLoader<Collection<ManagedRace>>(context, new URL(AppPreferences
                         .getServerBaseURL(context)
                         + "/sailingserver/rc/racegroups?courseArea="
                         + courseAreaId.toString()), parser, handler);
@@ -166,7 +166,7 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName());
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName());
 
-                return new OnlineDataLoader<Collection<Mark>>(context, URI.create(AppPreferences
+                return new OnlineDataLoader<Collection<Mark>>(context, new URL(AppPreferences
                         .getServerBaseURL(context)
                         + "/sailingserver/rc/marks?leaderboard="
                         + raceGroupName
@@ -194,7 +194,7 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName());
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName());
 
-                return new OnlineDataLoader<CourseBase>(context, URI.create(AppPreferences.getServerBaseURL(context)
+                return new OnlineDataLoader<CourseBase>(context, new URL(AppPreferences.getServerBaseURL(context)
                         + "/sailingserver/rc/currentcourse?leaderboard=" + raceGroupName + "&raceColumn="
                         + raceColumnName + "&fleet=" + fleetName), parser, handler);
             }
@@ -219,7 +219,7 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName());
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName());
 
-                return new OnlineDataLoader<Collection<Competitor>>(context, URI.create(AppPreferences
+                return new OnlineDataLoader<Collection<Competitor>>(context, new URL(AppPreferences
                         .getServerBaseURL(context)
                         + "/sailingserver/rc/competitors?leaderboard="
                         + raceGroupName

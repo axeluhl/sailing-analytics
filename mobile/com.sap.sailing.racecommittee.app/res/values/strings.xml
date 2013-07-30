@@ -7,7 +7,7 @@
     <string name="course_design_number_waypoints">Course has %s waypoints</string>
     <string name="choose_running_course">Choose running course</string>
     <string name="service_info">SAP Race Committee Service</string>
-    <string name="service_text_no_races">Currently there are no races monitored.</string>
+    <string name="service_text_no_races">Waiting for races to monitor...</string>
     <string name="service_text_num_races">Currently monitoring %d races.</string>
     
     <string name="app_name">SAP Race Committee Cockpit</string>

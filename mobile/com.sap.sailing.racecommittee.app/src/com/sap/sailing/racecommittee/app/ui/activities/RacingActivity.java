@@ -159,7 +159,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
         setProgressBarIndeterminateVisibility(true);
 
         ExLog.i(TAG, "Issuing loading of managed races from data manager");
-        getLoaderManager().restartLoader(0, null,
+        getLoaderManager().initLoader(0, null,
                 dataManager.getRacesLoader(courseArea.getId(), new LoadClient<Collection<ManagedRace>>() {
                     public void onLoadSucceded(Collection<ManagedRace> data) {
                         onLoadRacesSucceded(courseArea, data);

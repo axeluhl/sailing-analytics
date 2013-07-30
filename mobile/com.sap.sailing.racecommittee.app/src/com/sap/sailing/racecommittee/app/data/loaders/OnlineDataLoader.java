@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
-import java.net.URI;
+import java.net.URL;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
@@ -23,9 +23,9 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
     protected DataHandler<T> dataHandler;
     protected HttpRequest httpRequest;
 
-    public OnlineDataLoader(Context context, URI httpGetUri, DataParser<T> dataParser, DataHandler<T> dataHandler)
+    public OnlineDataLoader(Context context, URL requestUrl, DataParser<T> dataParser, DataHandler<T> dataHandler)
             throws MalformedURLException, IOException {
-        this(context, new HttpGetRequest(httpGetUri), dataParser, dataHandler);
+        this(context, new HttpGetRequest(requestUrl), dataParser, dataHandler);
     }
 
     public OnlineDataLoader(Context context, HttpRequest request, DataParser<T> dataParser, DataHandler<T> dataHandler) {
@@ -64,6 +64,11 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
             return new DataLoaderResult<T>(e);
         }
     }
+    
+    public static String convertStreamToString(java.io.InputStream is) {
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
+    }
 
     private T loadDataInBackground() throws Exception {
         Reader reader = null;
@@ -75,7 +80,6 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
             if (reader != null) {
                 reader.close();
             }
-            httpRequest.disconnect();
         }
     }
 
