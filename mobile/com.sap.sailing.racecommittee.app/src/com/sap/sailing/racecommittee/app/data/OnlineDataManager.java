@@ -21,7 +21,7 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
-import com.sap.sailing.racecommittee.app.data.handlers.CourseDataHandler;
+import com.sap.sailing.racecommittee.app.data.handlers.CourseBaseHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.ManagedRacesDataHandler;
@@ -186,7 +186,7 @@ public class OnlineDataManager extends DataManager {
                         new WaypointDeserializer(new ControlPointDeserializer(new MarkDeserializer(domainFactory),
                                 new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))));
                 DataParser<CourseBase> parser = new CourseBaseParser(courseBaseDeserializer);
-                DataHandler<CourseBase> handler = new CourseDataHandler(OnlineDataManager.this, managedRace);
+                DataHandler<CourseBase> handler = new CourseBaseHandler(OnlineDataManager.this, managedRace);
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
 

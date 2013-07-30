@@ -57,7 +57,6 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
     @Override
     public DataLoaderResult<T> loadInBackground() {
         try {
-            Thread.sleep(4000);
             return new DataLoaderResult<T>(loadDataInBackground());
         } catch (Exception e) {
             ExLog.ex(TAG, e);

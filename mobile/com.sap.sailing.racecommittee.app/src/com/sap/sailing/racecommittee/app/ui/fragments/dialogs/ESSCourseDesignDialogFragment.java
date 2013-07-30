@@ -7,6 +7,7 @@ import java.util.List;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Loader;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,6 +49,8 @@ import com.sap.sailing.racecommittee.app.utils.ESSMarkImageHelper;
 
 public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
     // private final static String TAG = ESSCourseDesignDialogFragment.class.getName();
+    
+    private static int MarksLoaderId = 0;
 
     private List<Mark> aMarkList;
     private MarkGridAdapter gridAdapter;
@@ -95,7 +98,7 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
                 ESSMarkImageHelper.getInstance());
 
         loadMarks();
-        loadCourseOnServer();
+        fillPreviousCourseElementsWithLastPublishedCourseDesign();
 
         GridView gridView = (GridView) getView().findViewById(R.id.gridViewAssets);
         gridView.setAdapter(gridAdapter);
@@ -200,19 +203,16 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
 
         unpublishButton = (Button) getView().findViewById(R.id.unpublishCourseDesignButton);
         unpublishButton.setOnClickListener(new OnClickListener() {
-
             @Override
             public void onClick(View arg0) {
                 CourseBase emptyCourse = new CourseDataImpl("Unpublished course design");
                 sendCourseDataAndDismiss(emptyCourse);
             }
-
         });
-
     }
 
     /**
-     * Creates a DragSortController and thereby defines the behaviour of the drag sort list
+     * Creates a DragSortController and thereby defines the behavior of the drag sort list
      */
     public DragSortController buildDragSortController(DragSortListView dragSortListView) {
         DragSortController controller = new DragSortController(dragSortListView);
@@ -226,33 +226,6 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
         return controller;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        onLoadMarksSucceeded(dataManager.getDataStore().getMarks());
-    }
-
-    private void loadCourseOnServer() {
-        getLoaderManager().restartLoader(0, null, dataManager.getCourseLoader(getRace(), new LoadClient<CourseBase>() {
-
-            @Override
-            public void onLoadFailed(Exception reason) {
-                fillPreviousCourseElementsWithLastPublishedCourseDesign();
-            }
-
-            @Override
-            public void onLoadSucceded(CourseBase data) {
-                /*
-                 * if (Util.size(data.getWaypoints()) > 0) { fillPreviousCourseElementsInList(data); } else
-                 */{
-                    fillPreviousCourseElementsWithLastPublishedCourseDesign();
-                }
-
-            }
-
-        }));
-    }
-
     private void fillPreviousCourseElementsWithLastPublishedCourseDesign() {
         CourseBase lastPublishedCourseDesign = InMemoryDataStore.INSTANCE.getLastPublishedCourseDesign();
         if (lastPublishedCourseDesign != null) {
@@ -261,19 +234,21 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     private void loadMarks() {
-        getLoaderManager().restartLoader(1, null,
+        Loader<?> marksLoader = getLoaderManager().restartLoader(MarksLoaderId, null,
                 dataManager.getMarksLoader(getRace(), new LoadClient<Collection<Mark>>() {
-
                     @Override
                     public void onLoadFailed(Exception reason) {
+                        Toast.makeText(getActivity(), reason.toString(), Toast.LENGTH_LONG).show();
                     }
 
                     @Override
                     public void onLoadSucceded(Collection<Mark> data) {
                         onLoadMarksSucceeded(data);
                     }
-
                 }));
+        // ignore any cached results and force a remote load of the marks,
+        // because we always need the most current.
+        marksLoader.forceLoad();
     }
 
     protected void onLoadMarksSucceeded(Collection<Mark> data) {
@@ -460,15 +435,16 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
             directions.add(direction.name());
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.pick_a_rounding_direction)
-        .setItems(R.array.rounding_directions, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int position) {
-                // for i18n we expect following order in array: 1. Port, 2. Starboard, 3. Gate
-                //String[] directions = getActivity().getResources().getStringArray(R.array.rounding_directions);
-                RoundingDirection pickedDirection = RoundingDirection.relevantValues()[position];
-                onRoundingDirectionPicked(courseElement, pickedDirection);
-            }
-        });
+        builder.setTitle(R.string.pick_a_rounding_direction).setItems(R.array.rounding_directions,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int position) {
+                        // for i18n we expect following order in array: 1. Port, 2. Starboard, 3. Gate
+                        // String[] directions =
+                        // getActivity().getResources().getStringArray(R.array.rounding_directions);
+                        RoundingDirection pickedDirection = RoundingDirection.relevantValues()[position];
+                        onRoundingDirectionPicked(courseElement, pickedDirection);
+                    }
+                });
         builder.create();
         builder.show();
     }
