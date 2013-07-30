@@ -31,6 +31,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment.FilterMode;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
+import com.sap.sailing.racecommittee.app.utils.CollectionUtils;
 
 public class RacingActivity extends SessionActivity implements RaceInfoListener {
     // private final static String TAG = RacingActivity.class.getName();
@@ -171,8 +172,17 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
                 }));
     }
 
+    Collection<ManagedRace> lastSeenRaces = null;
+
     private void onLoadRacesSucceded(CourseArea courseArea, Collection<ManagedRace> data) {
         setProgressBarIndeterminateVisibility(false);
+
+        // Let's do the setup stuff only when the data is changed (or its the first time)
+        if (lastSeenRaces != null && CollectionUtils.isEqualCollection(data, lastSeenRaces)) {
+            ExLog.i(TAG, "Same races are already loaded...");
+            return;
+        }
+        lastSeenRaces = data;
 
         registerOnService(data);
         raceListFragment.setupOn(data);

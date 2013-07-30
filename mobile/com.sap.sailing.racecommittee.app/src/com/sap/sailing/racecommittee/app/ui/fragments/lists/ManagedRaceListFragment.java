@@ -51,6 +51,8 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         }
     }
 
+    private static final String TAG = ManagedRaceListFragment.class.getName();
+
     private FilterMode filterMode;
     private ManagedRaceListAdapter adapter;
     private ManagedRace selectedRace;
@@ -110,6 +112,8 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     }
 
     public void setupOn(Collection<ManagedRace> races) {
+        ExLog.i(TAG, String.format("Setting up %s with %d races.", this.getClass().getSimpleName(), races.size()));
+        
         unregisterOnAllRaces();
         managedRacesById.clear();
 
@@ -139,8 +143,11 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     private void initializeViewElements() {
         // 1. Group races by <boat class, series, fleet>
         initializeRacesByGroup();
+        
+        // 2. Remove previous view items
+        viewItems.clear();
 
-        // 2. Create view elements from tree
+        // 3. Create view elements from tree
         for (BoatClassSeriesFleet key : racesByGroup.navigableKeySet()) {
             // ... add the header view...
             viewItems.add(new RaceListDataTypeHeader(key));
