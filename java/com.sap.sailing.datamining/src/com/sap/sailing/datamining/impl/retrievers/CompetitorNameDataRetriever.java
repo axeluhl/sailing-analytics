@@ -8,7 +8,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class CompetitorNameDataRetriever extends CompetitorDetailDataRetriever {
 
-    private HashSet<String> competitorNames;
+    private Collection<String> competitorNames;
 
     public CompetitorNameDataRetriever(TrackedRace trackedRace, Collection<String> competitorNames) {
         super(trackedRace);

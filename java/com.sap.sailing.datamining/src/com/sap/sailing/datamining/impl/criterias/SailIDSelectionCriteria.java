@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.sap.sailing.datamining.DataRetriever;
 import com.sap.sailing.datamining.SelectionContext;
+import com.sap.sailing.datamining.impl.retrievers.CompetitorSailIDDataRetriever;
 import com.sap.sailing.domain.base.Competitor;
 
 public class SailIDSelectionCriteria extends AbstractSelectionCriteria<String> {
@@ -30,8 +31,7 @@ public class SailIDSelectionCriteria extends AbstractSelectionCriteria<String> {
 
     @Override
     public DataRetriever getDataRetriever(SelectionContext context) {
-        // TODO Auto-generated method stub
-        return null;
+        return new CompetitorSailIDDataRetriever(context.getTrackedRace(), getSelection());
     }
 
 }
