@@ -41,6 +41,13 @@ public class GPSFixDTO implements IsSerializable {
 
     public GPSFixDTO(Date timepoint, PositionDTO position, SpeedWithBearingDTO speedWithBearing, WindDTO wind,
             Tack tack, LegType legType, boolean extrapolated) {
+        this(timepoint, position, speedWithBearing, (speedWithBearing != null && wind != null) ?
+                new DegreeBearingImpl(speedWithBearing.bearingInDegrees).getDifferenceTo(
+                        new DegreeBearingImpl(wind.dampenedTrueWindFromDeg)).getDegrees() : null, tack, legType, extrapolated);
+    }
+
+    public GPSFixDTO(Date timepoint, PositionDTO position, SpeedWithBearingDTO speedWithBearing, Double degreesBoatToTheWind,
+            Tack tack, LegType legType, boolean extrapolated) {
         super();
         this.timepoint = timepoint;
         this.position = position;
@@ -48,9 +55,6 @@ public class GPSFixDTO implements IsSerializable {
         this.tack = tack;
         this.legType = legType;
         this.extrapolated = extrapolated;
-        if (speedWithBearing != null && wind != null) {
-            this.degreesBoatToTheWind = new DegreeBearingImpl(speedWithBearing.bearingInDegrees).getDifferenceTo(
-                    new DegreeBearingImpl(wind.dampenedTrueWindFromDeg)).getDegrees();
-        }
+        this.degreesBoatToTheWind = degreesBoatToTheWind;
     }
 }

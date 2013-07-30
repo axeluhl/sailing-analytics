@@ -17,14 +17,14 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel"
-	        android:text="Schedule race" />
+	        android:text="@string/race_reset_time_schedule_race" />
 	
 	    <TextView
 	        android:id="@+id/race_reset_time_text_subheader"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"
-	        android:text="Select start mode and start time" />
+	        android:text="@string/race_reset_time_startmode_starttime" />
 	
 	    <ImageView
 	        android:layout_width="500dp"
@@ -75,7 +75,7 @@
 			        android:layout_width="wrap_content"
 			        android:layout_height="wrap_content"
 			        android:layout_gravity="center_vertical"
-			        android:text="Today" />
+			        android:text="@string/today" />
 		        
 			    <TimePicker
 			        android:id="@+id/race_reset_time_picker_time"
@@ -103,7 +103,7 @@
 		        android:layout_gravity="center_vertical"
 		        android:layout_marginTop="18dp"
 		        android:drawableLeft="@drawable/ic_menu_recent_history"
-		        android:text="Start" />
+		        android:text="@string/start" />
 	        
 	        <Button
 	            android:id="@+id/race_reset_time_btn_postpone"
@@ -111,7 +111,7 @@
 				android:layout_height="0dp"
 				android:layout_weight="0.2"
 				android:drawableLeft="@drawable/ic_menu_block"
-				android:text="Postpone" />
+				android:text="@string/postpone" />
         
         </LinearLayout>
     

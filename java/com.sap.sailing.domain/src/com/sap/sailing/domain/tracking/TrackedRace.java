@@ -253,7 +253,8 @@ public interface TrackedRace extends Serializable {
     Iterable<WindSource> getWindSources(WindSourceType type);
 
     /**
-     * Retrieves all wind sources used by this race. Callers can freely iterate because a copied collection is returned.
+     * Retrieves all wind sources known to this race, including those {@link #getWindSourcesToExclude() to exclude}.
+     * Callers can freely iterate because a copied collection is returned.
      */
     Iterable<WindSource> getWindSources();
 

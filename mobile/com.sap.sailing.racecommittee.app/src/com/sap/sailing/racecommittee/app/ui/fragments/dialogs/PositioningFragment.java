@@ -62,7 +62,7 @@ public class PositioningFragment extends RaceDialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (isDialog()) {
-            getDialog().setTitle("Set positionings");
+            getDialog().setTitle(R.string.set_positionings);
         }
         return inflater.inflate(R.layout.race_positioning_view, container, false);
     }
