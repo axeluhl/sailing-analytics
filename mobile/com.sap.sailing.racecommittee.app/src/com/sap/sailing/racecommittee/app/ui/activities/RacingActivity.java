@@ -39,6 +39,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
 
     private static final String TAG = RacingActivity.class.getName();
 
+    private static final int RacesLoaderId = 0;
+
     private class FilterModeSelectionBinder implements OnNavigationListener {
 
         private ManagedRaceListFragment targetList;
@@ -68,6 +70,59 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
             return true;
         }
     }
+
+    private class RaceLoadClient implements LoadClient<Collection<ManagedRace>> {
+
+        private Collection<ManagedRace> lastSeenRaces = null;
+        private CourseArea courseArea;
+
+        public RaceLoadClient(CourseArea courseArea) {
+            this.courseArea = courseArea;
+        }
+
+        @Override
+        public void onLoadSucceded(Collection<ManagedRace> data) {
+            setProgressBarIndeterminateVisibility(false);
+
+            // Let's do the setup stuff only when the data is changed (or its the first time)
+            if (lastSeenRaces != null && CollectionUtils.isEqualCollection(data, lastSeenRaces)) {
+                ExLog.i(TAG, "Same races are already loaded...");
+            } else {
+                lastSeenRaces = data;
+
+                registerOnService(data);
+                raceListFragment.setupOn(data);
+
+                Toast.makeText(RacingActivity.this,
+                        String.format(getString(R.string.racing_load_success), data.size()), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onLoadFailed(Exception reason) {
+            setProgressBarIndeterminateVisibility(false);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this);
+            builder.setMessage(String.format(getString(R.string.generic_load_failure), reason.getMessage()))
+                    .setTitle(getString(R.string.loading_failure)).setIcon(R.drawable.ic_dialog_alert_holo_light)
+                    .setCancelable(true)
+                    .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            setProgressBarIndeterminateVisibility(true);
+
+                            ExLog.i(TAG, "Issuing a reload of managed races");
+                            getLoaderManager().restartLoader(RacesLoaderId, null,
+                                    dataManager.getRacesLoader(courseArea.getId(), RaceLoadClient.this));
+                            dialog.cancel();
+                        }
+                    }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            builder.create().show();
+        }
+    };
 
     /**
      * Selection list of all races
@@ -160,40 +215,8 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
         setProgressBarIndeterminateVisibility(true);
 
         ExLog.i(TAG, "Issuing loading of managed races from data manager");
-        getLoaderManager().initLoader(0, null,
-                dataManager.getRacesLoader(courseArea.getId(), new LoadClient<Collection<ManagedRace>>() {
-                    public void onLoadSucceded(Collection<ManagedRace> data) {
-                        onLoadRacesSucceded(courseArea, data);
-                    }
-
-                    public void onLoadFailed(Exception reason) {
-                        onLoadRacesFailed(courseArea, reason);
-                    }
-                }));
-    }
-
-    Collection<ManagedRace> lastSeenRaces = null;
-
-    private void onLoadRacesSucceded(CourseArea courseArea, Collection<ManagedRace> data) {
-        setProgressBarIndeterminateVisibility(false);
-
-        // Let's do the setup stuff only when the data is changed (or its the first time)
-        if (lastSeenRaces != null && CollectionUtils.isEqualCollection(data, lastSeenRaces)) {
-            ExLog.i(TAG, "Same races are already loaded...");
-            return;
-        }
-        lastSeenRaces = data;
-
-        registerOnService(data);
-        raceListFragment.setupOn(data);
-
-        Toast.makeText(RacingActivity.this, String.format(getString(R.string.racing_load_success), data.size()),
-                Toast.LENGTH_SHORT).show();
-    }
-
-    private void onLoadRacesFailed(final CourseArea courseArea, Exception reason) {
-        setProgressBarIndeterminateVisibility(false);
-        showLoadFailedDialog(courseArea, reason.getMessage());
+        getLoaderManager().initLoader(RacesLoaderId, null,
+                dataManager.getRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
     }
 
     private void registerOnService(Collection<ManagedRace> races) {
@@ -204,26 +227,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
             Intent registerIntent = new Intent(AppConstants.INTENT_ACTION_REGISTER_RACE);
             registerIntent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
             this.startService(registerIntent);
-        }
-    }
-
-    private void showLoadFailedDialog(final CourseArea courseArea, String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(String.format(getString(R.string.generic_load_failure), message))
-                .setTitle(getString(R.string.loading_failure)).setIcon(R.drawable.ic_dialog_alert_holo_light)
-                .setCancelable(true)
-                .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        loadRaces(courseArea);
-                    }
-                }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-        if (!isFinishing()) {
-            AlertDialog alert = builder.create();
-            alert.show();
         }
     }
 

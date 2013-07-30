@@ -32,7 +32,7 @@ import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.data.loaders.ImmediateDataLoaderCallbacks;
 import com.sap.sailing.racecommittee.app.data.loaders.OnlineDataLoader;
 import com.sap.sailing.racecommittee.app.data.parsers.CompetitorsDataParser;
-import com.sap.sailing.racecommittee.app.data.parsers.CourseDataParser;
+import com.sap.sailing.racecommittee.app.data.parsers.CourseBaseParser;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
@@ -43,7 +43,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
-import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseDataDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
@@ -182,10 +182,10 @@ public class OnlineDataManager extends DataManager {
             @Override
             public Loader<DataLoaderResult<CourseBase>> create(int id, Bundle args) throws Exception {
                 SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
-                JsonDeserializer<CourseBase> courseBaseDeserializer = new CourseDataDeserializer(
+                JsonDeserializer<CourseBase> courseBaseDeserializer = new CourseBaseDeserializer(
                         new WaypointDeserializer(new ControlPointDeserializer(new MarkDeserializer(domainFactory),
                                 new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))));
-                DataParser<CourseBase> parser = new CourseDataParser(courseBaseDeserializer);
+                DataParser<CourseBase> parser = new CourseBaseParser(courseBaseDeserializer);
                 DataHandler<CourseBase> handler = new CourseDataHandler(OnlineDataManager.this, managedRace);
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
