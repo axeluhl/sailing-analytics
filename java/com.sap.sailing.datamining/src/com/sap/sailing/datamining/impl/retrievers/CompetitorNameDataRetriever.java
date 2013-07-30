@@ -6,7 +6,7 @@ import com.google.gwt.dev.util.collect.HashSet;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class CompetitorNameDataRetriever extends AbstractTrackedRaceDataRetriever {
+public class CompetitorNameDataRetriever extends CompetitorDetailDataRetriever {
 
     private HashSet<String> competitorNames;
 

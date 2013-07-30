@@ -21,30 +21,22 @@ public abstract class AbstractTrackedRaceDataRetriever implements DataRetriever 
         this.trackedRace = trackedRace;
     }
 
-    @Override
-    public List<GPSFixWithContext> retrieveData() {
-        List<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
-        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            if (retrieveDataFor(competitor)) {
-                GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                track.lockForRead();
-                try {
-                    for (GPSFixMoving gpsFix : track.getFixes()) {
-                        GPSFixContext context = new GPSFixContextImpl(trackedRace, competitor);
-                        data.add(new GPSFixWithContextImpl(gpsFix, context));
-                    }
-                } finally {
-                    track.unlockAfterRead();
-                }
-            }
-        }
-        return data;
-    }
-
     protected TrackedRace getTrackedRace() {
         return trackedRace;
     }
     
-    protected abstract boolean retrieveDataFor(Competitor competitor);
+    protected List<GPSFixWithContext> trackToGPSFixesWithContext(GPSFixTrack<Competitor, GPSFixMoving> track) {
+        List<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
+        track.lockForRead();
+        try {
+            for (GPSFixMoving gpsFix : track.getFixes()) {
+                GPSFixContext context = new GPSFixContextImpl(getTrackedRace(), track.getTrackedItem());
+                data.add(new GPSFixWithContextImpl(gpsFix, context));
+            }
+        } finally {
+            track.unlockAfterRead();
+        }
+        return data;
+    }
 
 }

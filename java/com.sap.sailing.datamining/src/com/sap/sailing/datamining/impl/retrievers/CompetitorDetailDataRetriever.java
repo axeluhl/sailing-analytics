@@ -7,9 +7,9 @@ import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class TrackedRaceDataRetriever extends AbstractTrackedRaceDataRetriever {
+public abstract class CompetitorDetailDataRetriever extends AbstractTrackedRaceDataRetriever {
 
-    public TrackedRaceDataRetriever(TrackedRace trackedRace) {
+    public CompetitorDetailDataRetriever(TrackedRace trackedRace) {
         super(trackedRace);
     }
 
@@ -17,9 +17,13 @@ public class TrackedRaceDataRetriever extends AbstractTrackedRaceDataRetriever {
     public List<GPSFixWithContext> retrieveData() {
         List<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
         for (Competitor competitor : getTrackedRace().getRace().getCompetitors()) {
-            data.addAll(trackToGPSFixesWithContext(getTrackedRace().getTrack(competitor)));
+            if (retrieveDataFor(competitor)) {
+                data.addAll(trackToGPSFixesWithContext(getTrackedRace().getTrack(competitor)));
+            }
         }
         return data;
     }
+
+    protected abstract boolean retrieveDataFor(Competitor competitor);
 
 }
