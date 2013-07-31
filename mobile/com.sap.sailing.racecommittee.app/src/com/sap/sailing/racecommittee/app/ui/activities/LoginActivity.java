@@ -88,7 +88,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     }
 
     private void showCourseAreaListFragment(Serializable eventId) {
-        Toast.makeText(LoginActivity.this, eventId.toString(), Toast.LENGTH_LONG).show();
         addCourseAreaListFragment(eventId);
     }
 
@@ -137,7 +136,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                     return;
                 }
 
-                Toast.makeText(LoginActivity.this, selectedCourseArea.getId().toString(), Toast.LENGTH_LONG).show();
                 Intent message = new Intent(LoginActivity.this, RacingActivity.class);
                 message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, selectedCourseArea.getId());
                 fadeActivity(message);

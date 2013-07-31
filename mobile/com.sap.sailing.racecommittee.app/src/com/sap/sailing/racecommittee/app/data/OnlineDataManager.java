@@ -207,6 +207,7 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<Collection<Competitor>>(callback, new LoaderCreator<Collection<Competitor>>() {
             @Override
             public Loader<DataLoaderResult<Collection<Competitor>>> create(int id, Bundle args) throws Exception {
+                ExLog.i(TAG, String.format("Creating Competitor-OnlineDataLoader %d", id));
                 SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
                 JsonDeserializer<Competitor> competitorDeserializer = new CompetitorDeserializer(domainFactory);
                 DataParser<Collection<Competitor>> parser = new CompetitorsDataParser(competitorDeserializer);

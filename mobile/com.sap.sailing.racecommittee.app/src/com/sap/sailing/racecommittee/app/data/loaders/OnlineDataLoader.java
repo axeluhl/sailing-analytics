@@ -33,17 +33,25 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
         this.httpRequest = request;
         this.dataParser = dataParser;
         this.dataHandler = dataHandler;
+        
+        ExLog.i(TAG, String.format("Loader created: %d", this.hashCode()));
     }
     
     @Override
     protected void onStartLoading() {
         if (dataHandler.hasCachedResults()) {
-            ExLog.i(TAG, "Using cached results...");
+            ExLog.i(TAG, String.format("Using cached results... (%d)", this.hashCode()));
             deliverResult(new DataLoaderResult<T>(dataHandler.getCachedResults()));
         } else {
-            ExLog.i(TAG, "No cached results. Forcing load now.");
+            ExLog.i(TAG, String.format("No cached results. Forcing load now (%d)", this.hashCode()));
             forceLoad();
         }
+    }
+    
+    @Override
+    protected void onForceLoad() {
+        ExLog.i(TAG, String.format("Forcing load (%d)", this.hashCode()));
+        super.onForceLoad();
     }
     
     @Override

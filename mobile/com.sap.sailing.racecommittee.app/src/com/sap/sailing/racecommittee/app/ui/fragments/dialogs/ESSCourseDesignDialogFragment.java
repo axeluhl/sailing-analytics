@@ -238,7 +238,7 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
                 dataManager.getMarksLoader(getRace(), new LoadClient<Collection<Mark>>() {
                     @Override
                     public void onLoadFailed(Exception reason) {
-                        Toast.makeText(getActivity(), reason.toString(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), String.format("Marks: %s",reason.toString()), Toast.LENGTH_LONG).show();
                     }
 
                     @Override
@@ -438,9 +438,6 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
         builder.setTitle(R.string.pick_a_rounding_direction).setItems(R.array.rounding_directions,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int position) {
-                        // for i18n we expect following order in array: 1. Port, 2. Starboard, 3. Gate
-                        // String[] directions =
-                        // getActivity().getResources().getStringArray(R.array.rounding_directions);
                         RoundingDirection pickedDirection = RoundingDirection.relevantValues()[position];
                         onRoundingDirectionPicked(courseElement, pickedDirection);
                     }

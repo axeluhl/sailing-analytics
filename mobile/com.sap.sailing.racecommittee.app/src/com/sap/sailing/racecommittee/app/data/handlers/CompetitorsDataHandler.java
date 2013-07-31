@@ -14,6 +14,16 @@ public class CompetitorsDataHandler extends DataHandler<Collection<Competitor>> 
         super(manager);
         race = managedRace;
     }
+    
+    @Override
+    public boolean hasCachedResults() {
+        return race.getCompetitors() != null;
+    }
+    
+    @Override
+    public Collection<Competitor> getCachedResults() {
+        return race.getCompetitors();
+    }
 
     @Override
     public void onResult(Collection<Competitor> data) {
