@@ -24,7 +24,7 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.BaseDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
@@ -143,12 +143,12 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
         return new DialogResultListener() {
             
             @Override
-            public void onDialogPositiveButton(BaseDialogFragment dialog) {
+            public void onDialogPositiveButton(AttachedDialogFragment dialog) {
                 loadItems();
             }
             
             @Override
-            public void onDialogNegativeButton(BaseDialogFragment dialog) {
+            public void onDialogNegativeButton(AttachedDialogFragment dialog) {
                 
             }
         };

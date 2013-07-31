@@ -1,7 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
 
-public abstract class ActivityAttachedDialogFragment extends BaseDialogFragment {
+public abstract class ActivityAttachedDialogFragment extends AttachedDialogFragment {
 
     protected DialogListenerHost hostActivity;
 

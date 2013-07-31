@@ -40,7 +40,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorsAdapte
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 
 public class PositioningFragment extends RaceDialogFragment {
-
+    
     private DragSortListView positioningListView;
     private ListView competitorListView;
     private DragSortController dragSortController;
@@ -57,11 +57,6 @@ public class PositioningFragment extends RaceDialogFragment {
     private int removeMode = DragSortController.FLING_REMOVE;
     private boolean sortEnabled = true;
     private boolean dragEnabled = true;
-    
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
 
     private boolean isDialog() {
         return getDialog() != null;

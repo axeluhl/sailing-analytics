@@ -15,7 +15,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.BaseDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.CourseAreaListFragment;
@@ -114,7 +114,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         return new DialogResultListener() {
             
             @Override
-            public void onDialogPositiveButton(BaseDialogFragment dialog) {
+            public void onDialogPositiveButton(AttachedDialogFragment dialog) {
                 switch (loginDialog.getSelectedLoginType()) {
                 case OFFICER:
                     ExLog.i(TAG, "Communication with backend is active.");
@@ -142,7 +142,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             }
             
             @Override
-            public void onDialogNegativeButton(BaseDialogFragment dialog) {
+            public void onDialogNegativeButton(AttachedDialogFragment dialog) {
                 /* nothing here... */
             }
         };

@@ -28,7 +28,7 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 
-public class ProtestTimeDialogFragment extends BaseDialogFragment {
+public class ProtestTimeDialogFragment extends AttachedDialogFragment {
 
     private static String ARGS_RACE_IDS = ProtestTimeDialogFragment.class.getSimpleName() + ".raceids";
 
@@ -84,12 +84,12 @@ public class ProtestTimeDialogFragment extends BaseDialogFragment {
             public DialogResultListener getListener() {
                 return new DialogResultListener() {
                     @Override
-                    public void onDialogNegativeButton(BaseDialogFragment dialog) {
+                    public void onDialogNegativeButton(AttachedDialogFragment dialog) {
                         // no operation
                     }
 
                     @Override
-                    public void onDialogPositiveButton(BaseDialogFragment dialog) {
+                    public void onDialogPositiveButton(AttachedDialogFragment dialog) {
                         setAndAnnounceProtestTime();
                     }
                 };
