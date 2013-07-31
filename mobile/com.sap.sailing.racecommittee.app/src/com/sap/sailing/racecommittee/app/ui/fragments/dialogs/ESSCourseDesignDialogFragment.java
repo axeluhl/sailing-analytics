@@ -235,7 +235,7 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
 
     private void loadMarks() {
         Loader<?> marksLoader = getLoaderManager().restartLoader(MarksLoaderId, null,
-                dataManager.getMarksLoader(getRace(), new LoadClient<Collection<Mark>>() {
+                dataManager.createMarksLoader(getRace(), new LoadClient<Collection<Mark>>() {
                     @Override
                     public void onLoadFailed(Exception reason) {
                         Toast.makeText(getActivity(), String.format("Marks: %s",reason.toString()), Toast.LENGTH_LONG).show();

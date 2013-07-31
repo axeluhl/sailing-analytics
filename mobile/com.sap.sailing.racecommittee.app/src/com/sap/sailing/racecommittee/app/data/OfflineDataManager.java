@@ -122,7 +122,7 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> getEventsLoader(
+    public LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> createEventsLoader(
             LoadClient<Collection<EventBase>> callback) {
         return new ImmediateDataLoaderCallbacks<Collection<EventBase>>(context, callback,
                 new Callable<Collection<EventBase>>() {
@@ -134,7 +134,7 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> getCourseAreasLoader(
+    public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(
             final Serializable parentEventId, LoadClient<Collection<CourseArea>> callback) {
         return new ImmediateDataLoaderCallbacks<Collection<CourseArea>>(context, callback,
                 new Callable<Collection<CourseArea>>() {
@@ -146,7 +146,7 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<Collection<ManagedRace>>> getRacesLoader(Serializable courseAreaId,
+    public LoaderCallbacks<DataLoaderResult<Collection<ManagedRace>>> createRacesLoader(Serializable courseAreaId,
             LoadClient<Collection<ManagedRace>> callback) {
         return new ImmediateDataLoaderCallbacks<Collection<ManagedRace>>(context, callback,
                 new Callable<Collection<ManagedRace>>() {
@@ -158,7 +158,7 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<Collection<Mark>>> getMarksLoader(ManagedRace managedRace,
+    public LoaderCallbacks<DataLoaderResult<Collection<Mark>>> createMarksLoader(ManagedRace managedRace,
             LoadClient<Collection<Mark>> callback) {
         return new ImmediateDataLoaderCallbacks<Collection<Mark>>(context, callback, new Callable<Collection<Mark>>() {
             @Override
@@ -169,7 +169,7 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<CourseBase>> getCourseLoader(final ManagedRace managedRace,
+    public LoaderCallbacks<DataLoaderResult<CourseBase>> createCourseLoader(final ManagedRace managedRace,
             LoadClient<CourseBase> callback) {
         return new ImmediateDataLoaderCallbacks<CourseBase>(context, callback, new Callable<CourseBase>() {
             @Override
@@ -180,7 +180,7 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> getCompetitorsLoader(
+    public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createCompetitorsLoader(
             final ManagedRace managedRace, LoadClient<Collection<Competitor>> callback) {
         return new ImmediateDataLoaderCallbacks<Collection<Competitor>>(context, callback,
                 new Callable<Collection<Competitor>>() {

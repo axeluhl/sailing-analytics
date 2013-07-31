@@ -169,7 +169,7 @@ public class PositioningFragment extends RaceDialogFragment {
         getActivity().setProgressBarIndeterminateVisibility(true);
         ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
         Loader<?> competitorLoaders = getLoaderManager().initLoader(0, null,
-                dataManager.getCompetitorsLoader(getRace(), new LoadClient<Collection<Competitor>>() {
+                dataManager.createCompetitorsLoader(getRace(), new LoadClient<Collection<Competitor>>() {
 
                     @Override
                     public void onLoadFailed(Exception reason) {

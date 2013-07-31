@@ -112,7 +112,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
 
                             ExLog.i(TAG, "Issuing a reload of managed races");
                             getLoaderManager().restartLoader(RacesLoaderId, null,
-                                    dataManager.getRacesLoader(courseArea.getId(), RaceLoadClient.this));
+                                    dataManager.createRacesLoader(courseArea.getId(), RaceLoadClient.this));
                             dialog.cancel();
                         }
                     }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -216,7 +216,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
 
         ExLog.i(TAG, "Issuing loading of managed races from data manager");
         getLoaderManager().initLoader(RacesLoaderId, null,
-                dataManager.getRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
+                dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
     }
 
     private void registerOnService(Collection<ManagedRace> races) {
