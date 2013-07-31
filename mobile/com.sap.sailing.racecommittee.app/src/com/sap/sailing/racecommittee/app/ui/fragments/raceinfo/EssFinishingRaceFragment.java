@@ -20,7 +20,7 @@ public class EssFinishingRaceFragment extends FinishingRaceFragment {
 
         positioningFragment = new PositioningFragment();
         positioningFragment.setArguments(PositioningFragment.createArguments(getRace()));
-        getFragmentManager().beginTransaction().add(R.id.innerFragmentHolder, positioningFragment, null).commit();
+        getFragmentManager().beginTransaction().replace(R.id.innerFragmentHolder, positioningFragment, null).commit();
     }
 
     private TimePoint getTimeLimit() {
