@@ -4,6 +4,9 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 
 import android.content.Context;
 
+/**
+ * Base class for all data managers. Use {@link DataManager#create(Context)} for creating your {@link DataManager}.
+ */
 public abstract class DataManager implements ReadonlyDataManager {
 
     public static ReadonlyDataManager create(Context context) {
@@ -24,7 +27,7 @@ public abstract class DataManager implements ReadonlyDataManager {
     public DataStore getDataStore() {
         return dataStore;
     }
-    
+
     public Context getContext() {
         return context;
     }

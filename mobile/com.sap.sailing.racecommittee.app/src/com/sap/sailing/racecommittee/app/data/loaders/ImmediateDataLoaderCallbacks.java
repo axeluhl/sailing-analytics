@@ -8,6 +8,10 @@ import android.os.Bundle;
 
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 
+/**
+ * Simple wrapper for a {@link DataLoaderCallbacks} creating an {@link ImmediateDataLoader}.
+ * @param <T> the result type.
+ */
 public class ImmediateDataLoaderCallbacks<T> extends DataLoaderCallbacks<T> {
     public ImmediateDataLoaderCallbacks(final Context context, LoadClient<T> clientCallback,
             final Callable<T> loadingFunc) {

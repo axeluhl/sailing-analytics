@@ -7,14 +7,31 @@ import android.os.Bundle;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
-
+/**
+ * <p>
+ * {@link LoaderCallbacks} wrapper to be used with {@link LoadClient}s.
+ * </p>
+ * 
+ * <p>
+ * On result {@link DataLoaderResult#isSuccessful()} is checked. If true
+ * {@link LoadClient#onLoadSucceded(Object, boolean)} is called; other {@link LoadClient#onLoadFailed(Exception)} is
+ * called.
+ * </p>
+ * 
+ * <p>
+ * There is currently no handling of a {@link Loader}'s reset.
+ * </p>
+ * 
+ * @param <T>
+ *            result type.
+ */
 public class DataLoaderCallbacks<T> implements LoaderCallbacks<DataLoaderResult<T>> {
     private static String TAG = DataLoaderCallbacks.class.getName();
-    
+
     public interface LoaderCreator<T> {
         Loader<DataLoaderResult<T>> create(int id, Bundle args) throws Exception;
     }
-    
+
     private LoadClient<T> clientCallback;
     private LoaderCreator<T> loaderCreator;
 
@@ -30,7 +47,7 @@ public class DataLoaderCallbacks<T> implements LoaderCallbacks<DataLoaderResult<
         } catch (Exception e) {
             ExLog.ex(TAG, e);
         }
-        return null;
+        throw new IllegalStateException("Exception while creating a loader.");
     }
 
     @Override
@@ -46,6 +63,5 @@ public class DataLoaderCallbacks<T> implements LoaderCallbacks<DataLoaderResult<
     public void onLoaderReset(Loader<DataLoaderResult<T>> loader) {
         // currently we ignore loader resets...
     }
-
 
 }
