@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.sap.sailing.datamining.DataRetriever;
 import com.sap.sailing.datamining.SelectionContext;
+import com.sap.sailing.datamining.impl.retrievers.LegTypeDataRetriever;
 import com.sap.sailing.domain.common.LegType;
 
 public class LegTypeSelectionCriteria extends AbstractSelectionCriteria<LegType> {
@@ -21,8 +22,7 @@ public class LegTypeSelectionCriteria extends AbstractSelectionCriteria<LegType>
 
     @Override
     public DataRetriever getDataRetriever(SelectionContext context) {
-        // TODO Auto-generated method stub
-        return null;
+        return new LegTypeDataRetriever(context.getTrackedRace(), getSelection());
     }
 
 }

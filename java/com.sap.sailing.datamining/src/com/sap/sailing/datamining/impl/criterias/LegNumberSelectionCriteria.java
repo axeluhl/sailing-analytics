@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.sap.sailing.datamining.DataRetriever;
 import com.sap.sailing.datamining.SelectionContext;
+import com.sap.sailing.datamining.impl.retrievers.LegNumberDataRetriever;
 
 public class LegNumberSelectionCriteria extends AbstractSelectionCriteria<Integer> {
 
@@ -28,8 +29,7 @@ public class LegNumberSelectionCriteria extends AbstractSelectionCriteria<Intege
 
     @Override
     public DataRetriever getDataRetriever(SelectionContext context) {
-        // TODO Implement data retriever
-        return null;
+        return new LegNumberDataRetriever(context.getTrackedRace(), getSelection());
     }
 
 }

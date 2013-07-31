@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
+import java.util.Collection;
+
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.Distance;

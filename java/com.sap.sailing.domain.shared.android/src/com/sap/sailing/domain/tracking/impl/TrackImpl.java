@@ -127,6 +127,16 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         assertReadLock();
         return new UnmodifiableNavigableSet<FixType>(getInternalFixes());
     }
+    
+    @Override
+    public Iterable<FixType> getFixes(TimePoint from, boolean fromInclusive, TimePoint to, boolean toInclusive) {
+        lockForRead();
+        try {
+            return getFixes().subSet(getDummyFix(from), fromInclusive, getDummyFix(to), toInclusive);
+        } finally {
+            unlockAfterRead();
+        }
+    }
 
     /**
      * Iterates over the raw sequence of fixes, all potential outliers included
