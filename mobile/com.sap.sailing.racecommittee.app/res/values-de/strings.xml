@@ -6,7 +6,9 @@
     <string name="course_design_number_waypoints">Kurs hat %s Wegpunkte</string>
     <string name="choose_running_course">Wähle Kurs aus</string>
     <string name="service_info">SAP Race Committee Service</string>
-    <string name="service_title">Verwaltet alle Rennen auf gewählter Rennbahn.</string>
+    <string name="service_text_no_races">Warte auf Rennen...</string>
+    <string name="service_text_num_races">Aktuell %d Rennen verwaltet.</string>
+    
     <string name="app_name">SAP Race Committee Cockpit</string>
     <string name="set_time">Start</string>
     <string name="reset_time">Startzeit ändern</string>
@@ -232,5 +234,9 @@
 	<string name="nationality">Nationalität</string>
 	<string name="number">Nummer</string>
 	<string name="snap">Fotos schießen</string>
+	
+	<string name="logout_dialog_title">Möchten Sie sich abmelden?</string>
+	<string name="logout_dialog_message">Wenn Sie sich abmelden wird kein Rennen mehr verwaltet.</string>
+	<string name="logout">Abmelden</string>
 	
 </resources>

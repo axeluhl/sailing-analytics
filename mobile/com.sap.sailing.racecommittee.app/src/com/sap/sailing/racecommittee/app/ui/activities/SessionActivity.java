@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 import android.app.ActionBar;
@@ -40,17 +41,22 @@ public class SessionActivity extends BaseActivity {
     
     protected boolean logoutSession() {
         ExLog.i(TAG, String.format("Logging out from activity %s", this.getClass().getSimpleName()));
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle("Sure?").setPositiveButton("Logout", new OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                doLogout();
-            }
-        }).setNegativeButton("Cancel", new OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                
-            }
-        }).create();
+        AlertDialog dialog = new AlertDialog.Builder(this)
+            .setTitle(getString(R.string.logout_dialog_title))
+            .setMessage(getString(R.string.logout_dialog_message))
+            .setPositiveButton(getString(R.string.logout), new OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    doLogout();
+                }
+            })
+            .setNegativeButton(getString(R.string.cancel), new OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    /* nothing here */
+                }
+            })
+            .create();
         dialog.show();
         return true;
     }
