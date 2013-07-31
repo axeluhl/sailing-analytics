@@ -16,7 +16,7 @@ public class SessionActivity extends BaseActivity {
     private static final String TAG = BaseActivity.class.getName();
     
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         ActionBar actionBar = getActionBar();
@@ -24,7 +24,7 @@ public class SessionActivity extends BaseActivity {
     }
     
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         ExLog.i(TAG, String.format("Logging in from activity %s", this.getClass().getSimpleName()));
     }

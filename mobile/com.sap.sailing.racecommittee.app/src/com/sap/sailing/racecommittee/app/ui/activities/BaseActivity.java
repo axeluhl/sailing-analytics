@@ -2,12 +2,10 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.util.Date;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,7 +23,7 @@ import com.sap.sailing.racecommittee.app.services.sending.EventSendingService.Ev
 /**
  * Base activity for all race committee cockpit activities enabling basic menu functionality.
  */
-public abstract class BaseActivity extends Activity {
+public abstract class BaseActivity extends LoggableActivity {
     
     private class EventSendingServiceConnection implements ServiceConnection, EventSendingServiceLogger {
         @Override
@@ -122,51 +120,23 @@ public abstract class BaseActivity extends Activity {
         fadeActivity(LoginActivity.class, true);
         return true;
     }
-    
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ExLog.i(TAG, String.format("Creating activity %s", this.getClass().getSimpleName()));
-    }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
         
-        ExLog.i(TAG, String.format("Starting activity %s", this.getClass().getSimpleName()));
         Intent intent = new Intent(this, EventSendingService.class);
         bindService(intent, sendingServiceConnection, Context.BIND_AUTO_CREATE);
     }
     
     @Override
-    protected void onResume() {
-        super.onResume();
-        
-        ExLog.i(TAG, String.format("Resuming activity %s", this.getClass().getSimpleName()));
-    }
-    
-    @Override
-    protected void onPause() {
-        super.onPause();
-        
-        ExLog.i(TAG, String.format("Pausing activity %s", this.getClass().getSimpleName()));
-    }
-    
-    @Override
-    protected void onStop() {
+    public void onStop() {
         super.onStop();
         
-        ExLog.i(TAG, String.format("Stopping activity %s", this.getClass().getSimpleName()));
         if (boundSendingService) {
             unbindService(sendingServiceConnection);
             boundSendingService = false;
         }
-    }
-    
-    @Override
-    protected void onDestroy() {
-        ExLog.i(TAG, String.format("Destroying activity %s", this.getClass().getSimpleName()));
-        super.onDestroy();
     }
 
     protected void updateSendingServiceInformation() {

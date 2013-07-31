@@ -1,16 +1,15 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import com.sap.sailing.racecommittee.app.logging.ExLog;
-
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 
-public abstract class AttachedDialogFragment extends DialogFragment {
+import com.sap.sailing.racecommittee.app.logging.ExLog;
+
+public abstract class AttachedDialogFragment extends LoggableDialogFragment {
     private final static String TAG = AttachedDialogFragment.class.getName();
 
     protected abstract CharSequence getNegativeButtonLabel();

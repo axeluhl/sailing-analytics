@@ -6,7 +6,6 @@ import java.util.Collections;
 
 import android.app.Activity;
 import android.app.FragmentManager;
-import android.app.ListFragment;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.os.Bundle;
@@ -30,7 +29,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDi
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
-public abstract class NamedListFragment<T extends Named> extends ListFragment implements LoadClient<Collection<T>>,
+public abstract class NamedListFragment<T extends Named> extends LoggableListFragment implements LoadClient<Collection<T>>,
         DialogListenerHost {
     
     //private static String TAG = NamedListFragment.class.getName();

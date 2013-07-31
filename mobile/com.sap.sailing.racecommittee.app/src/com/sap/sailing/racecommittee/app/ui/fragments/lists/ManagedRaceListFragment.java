@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 
-import android.app.ListFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,7 +33,7 @@ import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesDataFleet
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 
-public class ManagedRaceListFragment extends ListFragment implements JuryFlagClickedListener, RaceStateChangedListener {
+public class ManagedRaceListFragment extends LoggableListFragment implements JuryFlagClickedListener, RaceStateChangedListener {
 
     public enum FilterMode {
         ALL(R.string.race_list_filter_show_all), ACTIVE(R.string.race_list_filter_show_active);

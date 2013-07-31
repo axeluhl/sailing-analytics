@@ -6,6 +6,7 @@ import java.util.Date;
 
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.logging.FileLoggingTask;
+import com.sap.sailing.racecommittee.app.logging.LifecycleLogger;
 
 import android.app.Application;
 import android.content.Context;
@@ -27,12 +28,12 @@ public class RaceApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
         ExLog.i(TAG, "Application is starting");
-
+        
         Thread.setDefaultUncaughtExceptionHandler(new LoggingExceptionHandler(Thread
                 .getDefaultUncaughtExceptionHandler()));
         
+        LifecycleLogger.enableLifecycleLogging(AppConstants.ENABLE_LIFECYCLE_LOGGING);
         stringContext = new StringContext(new WeakReference<Context>(getApplicationContext()));
     }
 

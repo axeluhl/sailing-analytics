@@ -58,7 +58,7 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
     DecimalFormat bearingFormat;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.wind_view);
 
@@ -174,7 +174,7 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
     }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
 
         compassView.setDirectionListener(this);
@@ -187,7 +187,7 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         locationManager.removeUpdates(this);
         super.onPause();
     }

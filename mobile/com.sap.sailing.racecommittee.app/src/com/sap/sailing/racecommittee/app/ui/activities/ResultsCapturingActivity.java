@@ -54,7 +54,7 @@ public class ResultsCapturingActivity extends SessionActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
 
@@ -111,13 +111,13 @@ public class ResultsCapturingActivity extends SessionActivity {
     }
     
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         setupCamera();
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         releaseCamera();
     }
