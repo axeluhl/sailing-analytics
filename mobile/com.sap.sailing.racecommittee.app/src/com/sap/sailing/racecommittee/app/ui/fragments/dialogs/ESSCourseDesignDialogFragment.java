@@ -242,7 +242,7 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
                     }
 
                     @Override
-                    public void onLoadSucceded(Collection<Mark> data) {
+                    public void onLoadSucceded(Collection<Mark> data, boolean isCached) {
                         onLoadMarksSucceeded(data);
                     }
                 }));

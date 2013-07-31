@@ -40,17 +40,17 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
     @Override
     protected void onStartLoading() {
         if (dataHandler.hasCachedResults()) {
-            ExLog.i(TAG, String.format("Using cached results... (%d)", this.hashCode()));
-            deliverResult(new DataLoaderResult<T>(dataHandler.getCachedResults()));
+            ExLog.i(TAG, String.format("Using cached results... %d", this.hashCode()));
+            deliverResult(new DataLoaderResult<T>(dataHandler.getCachedResults(), true));
         } else {
-            ExLog.i(TAG, String.format("No cached results. Forcing load now (%d)", this.hashCode()));
+            ExLog.i(TAG, String.format("No cached results. Forcing load now %d", this.hashCode()));
             forceLoad();
         }
     }
     
     @Override
     protected void onForceLoad() {
-        ExLog.i(TAG, String.format("Forcing load (%d)", this.hashCode()));
+        ExLog.i(TAG, String.format("Forcing load %d", this.hashCode()));
         super.onForceLoad();
     }
     
@@ -65,16 +65,11 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
     @Override
     public DataLoaderResult<T> loadInBackground() {
         try {
-            return new DataLoaderResult<T>(loadDataInBackground());
+            return new DataLoaderResult<T>(loadDataInBackground(), false);
         } catch (Exception e) {
             ExLog.ex(TAG, e);
             return new DataLoaderResult<T>(e);
         }
-    }
-    
-    public static String convertStreamToString(java.io.InputStream is) {
-        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-        return s.hasNext() ? s.next() : "";
     }
 
     private T loadDataInBackground() throws Exception {

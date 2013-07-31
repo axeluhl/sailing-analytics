@@ -99,7 +99,7 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
         textText.setText(getHeaderText());
     }
 
-    public void onLoadSucceded(Collection<T> data) {
+    public void onLoadSucceded(Collection<T> data, boolean isCached) {
         namedList.clear();
         namedList.addAll(data);
         Collections.sort(namedList, new NaturalNamedComparator());

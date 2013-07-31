@@ -5,10 +5,12 @@ public class DataLoaderResult<T> {
     //private static final String TAG = DataLoaderResult.class.getName();
 
     private Exception exception;
+    private boolean cached;
     private T result;
     
-    public DataLoaderResult(T result) {
+    public DataLoaderResult(T result, boolean isCached) {
         this.result = result;
+        this.cached = isCached;
     }
     
     public DataLoaderResult(Exception exception) {
@@ -25,6 +27,13 @@ public class DataLoaderResult<T> {
  
     public T getResult() {
         return result;
+    }
+
+    public boolean isResultCached() {
+        if (!isSuccessful()) {
+            throw new IllegalStateException("Failures cannot be cached!");
+        }
+        return cached;
     }
 
 }

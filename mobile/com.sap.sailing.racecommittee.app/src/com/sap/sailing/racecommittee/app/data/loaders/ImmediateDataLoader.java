@@ -27,7 +27,8 @@ public class ImmediateDataLoader<T> extends Loader<DataLoaderResult<T>> {
 
     private void publishResult() {
         try {
-            deliverResult(new DataLoaderResult<T>(resultCallable.call()));
+            // We act as a never caching DataLoader to ensure that it looks like remote access!
+            deliverResult(new DataLoaderResult<T>(resultCallable.call(), false));
         } catch (Exception e) {
             deliverResult(new DataLoaderResult<T>(e));
         }

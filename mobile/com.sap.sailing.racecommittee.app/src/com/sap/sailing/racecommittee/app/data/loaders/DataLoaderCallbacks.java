@@ -36,7 +36,7 @@ public class DataLoaderCallbacks<T> implements LoaderCallbacks<DataLoaderResult<
     @Override
     public void onLoadFinished(Loader<DataLoaderResult<T>> loader, DataLoaderResult<T> result) {
         if (result.isSuccessful()) {
-            clientCallback.onLoadSucceded(result.getResult());
+            clientCallback.onLoadSucceded(result.getResult(), result.isResultCached());
         } else {
             clientCallback.onLoadFailed(result.getException());
         }

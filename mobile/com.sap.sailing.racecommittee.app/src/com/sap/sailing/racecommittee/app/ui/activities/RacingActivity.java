@@ -81,7 +81,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener 
         }
 
         @Override
-        public void onLoadSucceded(Collection<ManagedRace> data) {
+        public void onLoadSucceded(Collection<ManagedRace> data, boolean isCached) {
             setProgressBarIndeterminateVisibility(false);
 
             // Let's do the setup stuff only when the data is changed (or its the first time)

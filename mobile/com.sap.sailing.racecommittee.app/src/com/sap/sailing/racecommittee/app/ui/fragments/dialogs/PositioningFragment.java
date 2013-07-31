@@ -184,8 +184,10 @@ public class PositioningFragment extends RaceDialogFragment {
                     }
 
                     @Override
-                    public void onLoadSucceded(Collection<Competitor> data) {
-                        getActivity().setProgressBarIndeterminateVisibility(false);
+                    public void onLoadSucceded(Collection<Competitor> data, boolean isCached) {
+                        if (!isCached) {
+                            getActivity().setProgressBarIndeterminateVisibility(false);
+                        }
                         onLoadCompetitorsSucceeded(data);
                     }
 
