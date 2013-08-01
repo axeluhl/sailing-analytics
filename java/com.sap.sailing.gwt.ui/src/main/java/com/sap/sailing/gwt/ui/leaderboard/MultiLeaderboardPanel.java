@@ -75,7 +75,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     public Widget createWidget() {
         mainPanel = new VerticalPanel();
         
-        actLeaderboardsLabel = new Label("Act Leaderboards");
+        actLeaderboardsLabel = new Label(stringMessages.actLeaderboards());
         actLeaderboardsLabel.setVisible(false);
         mainPanel.add(actLeaderboardsLabel);
 

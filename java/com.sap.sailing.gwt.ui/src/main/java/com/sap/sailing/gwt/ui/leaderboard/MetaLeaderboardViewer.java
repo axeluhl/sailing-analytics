@@ -96,9 +96,9 @@ public class MetaLeaderboardViewer extends SimplePanel {
         mainPanel.add(multiCompetitorChart);
         mainPanel.add(multiLeaderboardPanel);
 
-        addComponentToNavigationMenu(metaLeaderboardPanel, false, "Series Leaderboard");
+        addComponentToNavigationMenu(metaLeaderboardPanel, false, stringMessages.seriesLeaderboard());
         addComponentToNavigationMenu(multiCompetitorChart, true, null);
-        addComponentToNavigationMenu(multiLeaderboardPanel, true, "Act Leaderboards");
+        addComponentToNavigationMenu(multiLeaderboardPanel, true, stringMessages.actLeaderboards());
             
         updateLeaderboardsOfMetaleaderboard();
     }
