@@ -54,4 +54,5 @@
   <source path='shared'/>
   <source path='test'/>
   <source path='actions'/>
+  <source path='simulator'/>
 </module>

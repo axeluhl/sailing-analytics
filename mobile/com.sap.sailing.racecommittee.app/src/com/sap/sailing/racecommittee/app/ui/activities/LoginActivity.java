@@ -29,11 +29,11 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private final static String TAG = LoginActivity.class.getName();
 
     private LoginDialog loginDialog;
-    private CourseArea selectedCourse;
+    private CourseArea selectedCourseArea;
 
     public LoginActivity() {
         this.loginDialog = new LoginDialog();
-        this.selectedCourse = null;
+        this.selectedCourseArea = null;
     }
 
     /** Called when the activity is first created. */
@@ -105,7 +105,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     }
 
     private void selectCourseArea(CourseArea courseArea) {
-        selectedCourse = courseArea;
+        selectedCourseArea = courseArea;
         loginDialog.show(getFragmentManager(), "LoginDialog");
     }
 
@@ -125,19 +125,20 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                     AppPreferences.setSendingActive(LoginActivity.this, false);
                     break;
                 default:
-                    Toast.makeText(LoginActivity.this, "Invalid login type. Ignoring.", Toast.LENGTH_SHORT).show();
+                    ExLog.i(TAG, "An invalid log type, e.g. NONE, was selected");
+                    Toast.makeText(LoginActivity.this, getString(R.string.please_select_a_login_type), Toast.LENGTH_LONG).show();
                     return;
                 }
 
-                if (selectedCourse == null) {
-                    Toast.makeText(LoginActivity.this, "The selected course was lost.", Toast.LENGTH_LONG).show();
-                    ExLog.e(TAG, "Course reference was not set - cannot start racing activity.");
+                if (selectedCourseArea == null) {
+                    Toast.makeText(LoginActivity.this, "The selected course area was lost.", Toast.LENGTH_LONG).show();
+                    ExLog.e(TAG, "Course area reference was not set - cannot start racing activity.");
                     return;
                 }
 
-                Toast.makeText(LoginActivity.this, selectedCourse.getId().toString(), Toast.LENGTH_LONG).show();
+                Toast.makeText(LoginActivity.this, selectedCourseArea.getId().toString(), Toast.LENGTH_LONG).show();
                 Intent message = new Intent(LoginActivity.this, RacingActivity.class);
-                message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, selectedCourse.getId());
+                message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, selectedCourseArea.getId());
                 fadeActivity(message);
             }
             

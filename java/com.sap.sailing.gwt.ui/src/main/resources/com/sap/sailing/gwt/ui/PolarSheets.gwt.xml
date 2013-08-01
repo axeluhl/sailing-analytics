@@ -17,6 +17,7 @@
 	<source path='common' />
 	<source path='actions' />
 	<source path='masterdataimport'/>
+  	<source path='simulator'/>
 	<entry-point class="com.sap.sailing.gwt.ui.polarsheets.PolarSheetsEntryPoint">
 	</entry-point>
 

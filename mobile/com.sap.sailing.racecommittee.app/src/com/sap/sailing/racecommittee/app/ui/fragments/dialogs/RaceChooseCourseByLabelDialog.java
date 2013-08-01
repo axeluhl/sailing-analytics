@@ -52,7 +52,7 @@ public class RaceChooseCourseByLabelDialog extends RaceDialogFragment {
         String[] courseLayouts = getActivity().getResources().getStringArray(R.array.course_routes);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_spinner_dropdown_item, courseLayouts);
+                R.layout.spinner_layout, courseLayouts);
         courseLayoutSpinner.setAdapter(adapter);
         
         

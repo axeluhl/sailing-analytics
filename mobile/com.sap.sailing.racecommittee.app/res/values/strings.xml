@@ -96,7 +96,9 @@
     <string name="settings_advanced_service_header">Webservice URL</string>
     <string name="settings_advanced_service_description">Select the JSON Webservice URL</string>
     <string name="settings_time_frame_header">Race time frame after finish</string>
+    <string name="settings_protest_time_header">Protest time</string>
     <string name="settings_time_frame_description">Set a time in minutes after which no finishing sailor is counted anymore</string>
+    <string name="settings_protest_time_description">Set the protest time in minutes</string>
     <string name="race_startphase_flagdown">Flag is going down&#8230;</string>
     <string name="race_startphase_flagup">Flag is going up&#8230;</string>
     <string name="race_startphase_countdown_mode_remove">%1$s until %2$s flag is removed</string>
@@ -204,14 +206,21 @@
     <string name="set_course_layout">Set the course layout</string>
     
     <string-array name="course_routes">
-        <item>I</item>
-        <item>O</item>
+        <item>1</item>
         <item>2</item>
         <item>3</item>
         <item>4</item>
         <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
     </string-array>
     
     <string name="loading_failure">Load failure</string>
-
+	<string name="wind_unknown">(click to set wind)</string>
+	<string name="wind_info" formatted="false">(%s kn, %s)</string>
+	<string name="login">Login</string>
+	<string name="login_onto_course_area">Login onto course area</string>
+	<string name="please_select_a_login_type">Please select a login type.</string>
+	
 </resources>

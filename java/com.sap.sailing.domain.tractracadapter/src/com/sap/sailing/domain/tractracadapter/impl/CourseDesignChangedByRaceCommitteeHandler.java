@@ -73,6 +73,8 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
         JSONObject serializedCourseDesign = courseSerializer.serialize(newCourseDesign);
         String payload = serializedCourseDesign.toJSONString();
         URL currentCourseDesignURL = buildCourseUpdateURL();
+        logger.info("Using " + currentCourseDesignURL.toString() + " for the course update!");
+        logger.info("Payload is " + payload);
         HttpURLConnection connection = (HttpURLConnection) currentCourseDesignURL.openConnection();
         try {
             setConnectionProperties(connection, payload);
