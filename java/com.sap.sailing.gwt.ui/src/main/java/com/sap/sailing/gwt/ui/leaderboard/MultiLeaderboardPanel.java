@@ -76,7 +76,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
             public void onChange(ChangeEvent event) {
                 int selIndex = leaderboardSelectionListBox.getSelectedIndex();
                 if(selIndex >= 0) {
-                    updateSelectedLeaderboard(leaderboardSelectionListBox.getItemText(selIndex));
+                    updateSelectedLeaderboard(leaderboardSelectionListBox.getValue(selIndex));
                 }
             }
         });
@@ -141,7 +141,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
             
             selectedLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                     selectedLeaderboardSettings, /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
-                    "leaderboardGroupName", selectedLeaderboardName, errorReporter, stringMessages, userAgent,
+                    null, selectedLeaderboardName, errorReporter, stringMessages, userAgent,
                     showRaceDetails, /* raceTimesInfoProvider */null, false,  /* adjustTimerDelay */ true);
             mainPanel.add(selectedLeaderboardPanel);
         } else {
