@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.simulator;
 
 import java.util.logging.Logger;
 
+import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.InfoWindowContent;
 import com.google.gwt.maps.client.MapWidget;
@@ -14,7 +15,7 @@ import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.Overlay;
 import com.sap.sailing.domain.common.Mile;
-import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
+import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 
 /**
  * This class implements the layer to display the race course on the map. Currently the course only consists of the
@@ -27,6 +28,8 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
     public String racecourseColor = "White";
     public double racecourseBuoySize = 5;
+    public char rcDirection; 
+
 
     public LatLng startPoint;
     public LatLng endPoint;
@@ -94,6 +97,8 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
     }
 
     private void setStartEndPoint(LatLng startPoint, LatLng endPoint) {
+    	int zoomLevel = map.getZoomLevel();
+    	racecourseBuoySize = 1.0 + (5.0 - 1.0)*(zoomLevel - 10.0)/(14.0 - 10.0);
         setStartPoint(startPoint);
         setEndPoint(endPoint);
     }
@@ -227,8 +232,11 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
         if (startPoint != null) {
             Point s = map.convertLatLngToDivPixel(startPoint);
             Point e = map.convertLatLngToDivPixel(currentPoint);
+            Context2d context2d = canvas.getContext2d();
+            context2d.setGlobalAlpha(0.4f);
             drawLine(s.getX() - getWidgetPosLeft(), s.getY() - getWidgetPosTop(), e.getX() - getWidgetPosLeft(),
                     e.getY() - getWidgetPosTop(), 2.0, color);
+            context2d.setGlobalAlpha(1.0f);
             double distanceInNmi = startPoint.distanceFrom(currentPoint) / Mile.METERS_PER_NAUTICAL_MILE;
             canvas.setTitle("Distance (nmi)  " + NumberFormat.getFormat("0.00").format(distanceInNmi));
         }

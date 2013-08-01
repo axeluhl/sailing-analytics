@@ -47,16 +47,11 @@ public interface RaceLogEvent extends Timed, WithID {
     TimePoint getCreatedAt();
 
     /**
-     * Gets the {@link TimePoint} denoting the logical event time.
-     */
-    @Override
-    TimePoint getTimePoint();
-
-    /**
      * Gets the event's pass identifier.
      * 
      * Each {@link RaceLogEvent} is associated to a certain pass. A pass is every attempt to start and run a race. A new
-     * pass is initiated when a new start time is proposed (e.g. after the race was aborted).
+     * pass is initiated when a new start time is proposed (e.g. after the race was aborted). There might be certain
+     * event type that are not strictly bound to its pass.
      * 
      */
     int getPassId();

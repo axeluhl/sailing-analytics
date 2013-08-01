@@ -49,11 +49,11 @@ public class GetRaceMapDataAction extends DefaultAsyncAction<RaceMapDataDTO> {
         };
         Map<String, Date> fromByCompetitorIdAsString = new HashMap<String, Date>();
         for (Map.Entry<CompetitorDTO, Date> fromEntry : from.entrySet()) {
-            fromByCompetitorIdAsString.put(fromEntry.getKey().idAsString, fromEntry.getValue());
+            fromByCompetitorIdAsString.put(fromEntry.getKey().getIdAsString(), fromEntry.getValue());
         }
         Map<String, Date> toByCompetitorIdAsString = new HashMap<String, Date>();
         for (Map.Entry<CompetitorDTO, Date> toEntry : to.entrySet()) {
-            toByCompetitorIdAsString.put(toEntry.getKey().idAsString, toEntry.getValue());
+            toByCompetitorIdAsString.put(toEntry.getKey().getIdAsString(), toEntry.getValue());
         }
         sailingService.getRaceMapData(raceIdentifier, date, fromByCompetitorIdAsString, toByCompetitorIdAsString,
                 extrapolate, uncompactingCallback);

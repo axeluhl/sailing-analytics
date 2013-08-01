@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -42,7 +41,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
 
 public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkScoreCorrectionDTO> {
-    private static final RegExp p = RegExp.compile("^([A-Z][A-Z][A-Z])\\s*[^0-9]*([0-9]*)$");
+    private static final RegExp sailIdPattern = RegExp.compile("^([A-Z][A-Z][A-Z])\\s*[^0-9]*([0-9]*)$");
     
     private final LeaderboardDTO leaderboard;
     private final Map<CompetitorDTO, String> defaultOfficialSailIDsForCompetitors;
@@ -209,11 +208,14 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
      */
     private String canonicalizeSailID(String sailID, String defaultNationality) {
         String result = null;
-        MatchResult m = p.exec(sailID.trim());
-        if (p.test(sailID.trim())) {
+        MatchResult m = sailIdPattern.exec(sailID.trim());
+        if (sailIdPattern.test(sailID.trim())) {
             String iocCode = m.getGroup(1);
+            if (iocCode != null) {
+                iocCode = iocCode.toUpperCase();
+            }
             if (defaultNationality != null && (iocCode == null || iocCode.trim().length() == 0)) {
-                iocCode = defaultNationality;
+                iocCode = defaultNationality.toUpperCase();
             }
             if (iocCode != null && iocCode.trim().length() > 0) {
                 String number = m.getGroup(2);
@@ -229,7 +231,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     private Map<String, CompetitorDTO> canonicalizeLeaderboardSailIDs(LeaderboardDTO leaderboard) {
         Map<String, CompetitorDTO> result = new HashMap<String, CompetitorDTO>();
         for (CompetitorDTO competitor : leaderboard.competitors) {
-            String canonicalizedSailID = canonicalizeSailID(competitor.sailID.trim(), competitor.threeLetterIocCountryCode.trim());
+            String canonicalizedSailID = canonicalizeSailID(competitor.getSailID().trim(), competitor.getThreeLetterIocCountryCode().trim());
             if (canonicalizedSailID != null) {
                 result.put(canonicalizedSailID, competitor);
             }
@@ -286,7 +288,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
         int c = 1;
         for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
             VerticalPanel vp = new VerticalPanel();
-            vp.add(new Label(raceColumn.name));
+            vp.add(new Label(raceColumn.getName()));
             vp.add(raceNameOrNumberChoosers.get(raceColumn));
             vp.add(raceColumnCheckboxes.get(raceColumn));
             grid.setWidget(0, c, vp);
@@ -297,13 +299,13 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
             String officialSailID = getSelectedString(officialSailIDChoosers, competitor);
             int column = 0;
             VerticalPanel vp = new VerticalPanel();
-            vp.add(new Label(competitor.sailID+" "+competitor.name));
+            vp.add(new Label(competitor.getSailID()+" "+competitor.getName()));
             vp.add(this.officialSailIDChoosers.get(competitor));
             vp.add(competitorCheckboxes.get(competitor));
             grid.setWidget(row, column++, vp);
             LeaderboardRowDTO leaderboardRow = leaderboard.rows.get(competitor);
             for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-                LeaderboardEntryDTO entry = leaderboardRow.fieldsByRaceColumnName.get(raceColumn.name);
+                LeaderboardEntryDTO entry = leaderboardRow.fieldsByRaceColumnName.get(raceColumn.getName());
                 String raceNameOrNumber = getSelectedString(raceNameOrNumberChoosers, raceColumn);
                 VerticalPanel cell = new VerticalPanel();
                 cell.add(new Label(entry.netPoints+"/"+entry.totalPoints+"/"+entry.reasonForMaxPoints+
@@ -419,7 +421,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                 @Override
                 public void onSuccess(Void result) {
                     Window.setStatus(stringMessages.successfullyUpdatedScores());
-                    leaderboardPanel.timeChanged(new Date()); // reload leaderboard contents to reflect changes
+                    leaderboardPanel.timeChanged(/* time point is ignored */ null); // reload leaderboard contents to reflect changes
                     // leaderboard panel sets busy indicator to non-busy after done with updating
                 }
             });

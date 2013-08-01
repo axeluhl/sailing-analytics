@@ -12,10 +12,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
-
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
@@ -32,8 +33,11 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -218,12 +222,22 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Iterable<Triple<Regatta, RaceDefinition, String>> getWindTrackedRaces();
 
     /**
-     * For the JSON URL of an account / event, lists the paramURLs that can be used for {@link #addTracTracRace(URL, URI, URI, WindStore, long)}
-     * calls to individually start tracking races of this event, rather than tracking <em>all</em> races in the event which
-     * is hardly ever useful. The returned pair's first component is the event name.
+     * For the JSON URL of an account / event, lists the paramURLs that can be used for
+     * {@link #addTracTracRace(URL, URI, URI, WindStore, long)} calls to individually start tracking races of this
+     * event, rather than tracking <em>all</em> races in the event which is hardly ever useful. The returned pair's
+     * first component is the event name.
+     * 
+     * @param loadClientParams
+     *            shall the properties from the clientparams.php file such as liveURI and storedURI already be loaded?
+     *            Generally, this is not necessary as the
+     *            {@link #addTracTracRace(RegattaIdentifier, URL, URI, URI, URI, TimePoint, TimePoint, RaceLogStore, WindStore, long, boolean, String, String)}
+     *            and {@link #addTracTracRace(URL, URI, URI, URI, RaceLogStore, WindStore, long, String, String)} will
+     *            fetch the JSON and clientparams.php documents to work with up-to-date data.
      */
-    Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL) throws IOException, ParseException,
+    Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException,
     org.json.simple.parser.ParseException, URISyntaxException;
+    
+    RaceRecord getSingleTracTracRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws Exception;
 
     List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port, boolean canSendRequests)
             throws InterruptedException, UnknownHostException, IOException, ParseException;
@@ -297,6 +311,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
+    /**
+     * Removes the regatta as well as all regatta leaderboards for that regatta
+     */
     void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
     TrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
@@ -378,6 +395,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param series the series must not have any {@link RaceColumn}s yet
      */
     Regatta createRegatta(String regattaBaseName, String boatClassName, Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId);
+    
+    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}
@@ -498,5 +517,49 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory();
 
     CourseArea getCourseArea(Serializable courseAreaId);
+
+    void mediaTrackAdded(MediaTrack mediaTrack);
+
+    void mediaTracksAdded(Collection<MediaTrack> mediaTracks);
+    
+    void mediaTrackTitleChanged(MediaTrack mediaTrack);
+
+    void mediaTrackUrlChanged(MediaTrack mediaTrack);
+
+    void mediaTrackStartTimeChanged(MediaTrack mediaTrack);
+
+    void mediaTrackDurationChanged(MediaTrack mediaTrack);
+
+    void mediaTrackDeleted(MediaTrack mediaTrack);
+
+    Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+
+    Collection<MediaTrack> getAllMediaTracks();
+
+    void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
+
+    /**
+     * @return a pair with the found or created regatta, and a boolean that tells whether the regatta was created during
+     *         the call
+     */
+    Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String baseRegattaName, String boatClassName, Serializable id,
+            Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
+            Serializable defaultCourseAreaId);
+
+    void createEventWithoutReplication(Event result);
+
+    Event addCourseAreaWithoutReplication(Serializable eventId, CourseArea courseArea);
+
+    /**
+     * @return map where keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to
+     * {@link #setRegattaForRace(Regatta, RaceDefinition)}. It helps remember the connection between races and regattas.
+     */
+    ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs();
+
+    /**
+     * 
+     * @param override If set to true, the mthod will override any existing connection
+     */
+    void setPersistentRegattaForRaceIDs(Regatta regatta, Iterable<String> raceIdStrings, boolean override);
 
 }

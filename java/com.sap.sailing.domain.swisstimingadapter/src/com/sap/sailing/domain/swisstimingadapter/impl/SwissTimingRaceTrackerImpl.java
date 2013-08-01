@@ -13,11 +13,11 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
@@ -232,8 +232,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                         trackedRace.recordFix(mark, gpsFix);
                         break;
                     case COMPETITOR:
-                        Competitor competitor = domainFactory.getCompetitorByBoatIDAndBoatClass(
-                                fix.getBoatID(), domainFactory.getOrCreateBoatClassFromRaceID(raceID));
+                        Competitor competitor = domainFactory.getCompetitorByBoatIDAndRaceID(
+                                fix.getBoatID(), raceID);
                         DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
                         competitorTrack.addGPSFix(gpsFix);
                         break;
@@ -258,9 +258,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
         assert this.raceID.equals(raceID);
         if (isTrackedRaceStillReachable()) {
-            final BoatClass boatClass = domainFactory.getOrCreateBoatClassFromRaceID(raceID);
-            Competitor competitor = domainFactory.getCompetitorByBoatIDAndBoatClass(boatID,
-                    boatClass);
+            Competitor competitor = domainFactory.getCompetitorByBoatIDAndRaceID(boatID,
+                    raceID);
             // the list of mark indices and time stamps is partial and usually only shows the last mark passing;
             // we need to use this to *update* the competitor's mark passings list, not *replace* it
             TreeMap<Integer, MarkPassing> markPassingsByMarkIndex = new TreeMap<Integer, MarkPassing>();
@@ -288,7 +287,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                     MillisecondsTimePoint timePoint = new MillisecondsTimePoint(
                             startTime.asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
                     MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
-                            domainFactory.getCompetitorByBoatIDAndBoatClass(boatID, boatClass));
+                            domainFactory.getCompetitorByBoatIDAndRaceID(boatID, raceID));
                     markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
                 } else {
                     // 
@@ -349,7 +348,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         // now we can create the RaceDefinition and most other things
         Race swissTimingRace = messageLoader.getRace(raceID);
         race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
-        trackedRace = getTrackedRegatta().createTrackedRace(race, windStore, delayToLiveInMillis,
+        trackedRace = getTrackedRegatta().createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, delayToLiveInMillis,
                 WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 /* time over which to average speed */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 new DynamicRaceDefinitionSet() {

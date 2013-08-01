@@ -10,6 +10,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 public class RaceLogSerializer implements JsonSerializer<RaceLog> {
 
     public static final String FIELD_EVENTS = "events";
+    public static final String FIELD_RACELOG_IDENTIFIER = "racelog_id";
     
     private final JsonSerializer<RaceLogEvent> itemSerializer;
     
@@ -23,10 +24,11 @@ public class RaceLogSerializer implements JsonSerializer<RaceLog> {
         object.lockForRead();
         try {
             JSONArray events = new JSONArray();
-            for (RaceLogEvent event : object.getFixes()) {
+            for (RaceLogEvent event : object.getRawFixes()) {
                 events.add(itemSerializer.serialize(event));
             }
             result.put(FIELD_EVENTS, events);
+            result.put(FIELD_RACELOG_IDENTIFIER, object.getId());
         } finally {
             object.unlockAfterRead();
         }

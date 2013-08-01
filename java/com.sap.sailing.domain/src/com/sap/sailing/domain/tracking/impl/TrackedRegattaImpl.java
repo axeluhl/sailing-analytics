@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -167,11 +168,11 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     }
 
     @Override
-    public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore, long delayToLiveInMillis,
+    public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
         logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition " + raceDefinition.getName());
-        DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(this, raceDefinition,
+        DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(this, raceDefinition, sidelines,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
         // adding the raceDefinition to the raceDefinitionSetToUpdate BEFORE calling addTrackedRace helps those who
         // are called back by RaceListener.raceAdded(TrackedRace) and who then expect the update to have happened

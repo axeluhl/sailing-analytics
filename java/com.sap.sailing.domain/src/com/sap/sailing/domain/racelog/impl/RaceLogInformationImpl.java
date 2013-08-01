@@ -29,7 +29,7 @@ public class RaceLogInformationImpl implements RaceLogInformation {
 
     @Override
     public RaceLog getRaceLog(RaceColumn raceColumn, Fleet fleet) {
-        return store.getRaceLog(identifierTemplate.compileRaceLogIdentifier(fleet));
+        return store.getRaceLog(identifierTemplate.compileRaceLogIdentifier(fleet), false);
     }
 
 }

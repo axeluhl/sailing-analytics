@@ -41,6 +41,7 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -54,9 +55,11 @@ import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
+import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -237,8 +240,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject dbScoreCorrections = new BasicDBObject();
         storeScoreCorrections(leaderboard, dbScoreCorrections);
         dbLeaderboard.put(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name(), dbScoreCorrections);
-        final ThresholdBasedResultDiscardingRule resultDiscardingRule = leaderboard.getResultDiscardingRule();
-        storeResultDiscardingRule(dbLeaderboard, resultDiscardingRule);
+        final ResultDiscardingRule resultDiscardingRule = leaderboard.getResultDiscardingRule();
+        storeResultDiscardingRule(dbLeaderboard, resultDiscardingRule, FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS);
         BasicDBList competitorDisplayNames = new BasicDBList();
         for (Competitor competitor : leaderboard.getCompetitors()) {
             String displayNameForCompetitor = leaderboard.getDisplayName(competitor);
@@ -252,13 +255,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbLeaderboard.put(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name(), competitorDisplayNames);
     }
 
-    private void storeResultDiscardingRule(BasicDBObject dbLeaderboard,
-            final ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        BasicDBList dbResultDiscardingThresholds = new BasicDBList();
-        for (int threshold : resultDiscardingRule.getDiscardIndexResultsStartingWithHowManyRaces()) {
-            dbResultDiscardingThresholds.add(threshold);
+    /**
+     * Stores the result discarding rule to <code>dbObject</code>'s field identified by <code>field</code> if the result discarding
+     * rule is not <code>null</code> and is of type {@link ThresholdBasedResultDiscardingRule}. Otherwise, it is assumed that the
+     * result discarding rule is otherwise implicitly obtained, e.g., from a definition of a regatta with its series, stored elsewhere.
+     */
+    private void storeResultDiscardingRule(DBObject dbObject,
+            final ResultDiscardingRule resultDiscardingRule, FieldNames field) {
+        if (resultDiscardingRule != null && resultDiscardingRule instanceof ThresholdBasedResultDiscardingRule) {
+            BasicDBList dbResultDiscardingThresholds = new BasicDBList();
+            for (int threshold : ((ThresholdBasedResultDiscardingRule) resultDiscardingRule).getDiscardIndexResultsStartingWithHowManyRaces()) {
+                dbResultDiscardingThresholds.add(threshold);
+            }
+            dbObject.put(field.name(), dbResultDiscardingThresholds);
         }
-        dbLeaderboard.put(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name(), dbResultDiscardingThresholds);
     }
 
     private BasicDBObject storeRaceColumn(RaceColumn raceColumn) {
@@ -468,6 +478,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject dbSeries = new BasicDBObject();
         dbSeries.put(FieldNames.SERIES_NAME.name(), s.getName());
         dbSeries.put(FieldNames.SERIES_IS_MEDAL.name(), s.isMedal());
+        dbSeries.put(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name(), s.isStartsWithZeroScore());
+        dbSeries.put(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name(), s.isFirstColumnIsNonDiscardableCarryForward());
         BasicDBList dbFleets = new BasicDBList();
         for (Fleet fleet : s.getFleets()) {
             dbFleets.add(storeFleet(fleet));
@@ -478,6 +490,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbRaceColumns.add(storeRaceColumn(raceColumn));
         }
         dbSeries.put(FieldNames.SERIES_RACE_COLUMNS.name(), dbRaceColumns);
+        if (s.getResultDiscardingRule() != null) {
+            storeResultDiscardingRule(dbSeries, s.getResultDiscardingRule(), FieldNames.SERIES_DISCARDING_THRESHOLDS);
+        }
         return dbSeries;
     }
 
@@ -592,8 +607,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogGateLineOpeningTimeEvent(gateLineOpeningTimeEvent));
         return result;
     }
-    
-
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogStartProcedureChangedEvent event) {
         DBObject result = new BasicDBObject();
@@ -601,7 +614,39 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogStartProcedureChangedEvent(event));
         return result;
     }
+
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogProtestStartTimeEvent event) {
+        DBObject result = new BasicDBObject();
+        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogProtestStartTimeEvent(event));
+        return result;
+    }
     
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogWindFixEvent event) {
+        DBObject result = new BasicDBObject();
+        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogWindFix(event));
+        return result;
+    }
+    
+    private Object storeRaceLogWindFix(RaceLogWindFixEvent event) {
+        DBObject result = new BasicDBObject();
+        storeRaceLogEventProperties(event, result);
+
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogWindFixEvent.class.getSimpleName());
+        result.put(FieldNames.WIND.name(), storeWind(event.getWindFix()));
+        return result;
+    }
+
+    private Object storeRaceLogProtestStartTimeEvent(RaceLogProtestStartTimeEvent event) {
+        DBObject result = new BasicDBObject();
+        storeRaceLogEventProperties(event, result);
+
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogProtestStartTimeEvent.class.getSimpleName());
+        storeTimePoint(event.getProtestStartTime(), result, FieldNames.RACE_LOG_PROTEST_START_TIME);
+        return result;
+    }
+
     private Object storeRaceLogStartProcedureChangedEvent(RaceLogStartProcedureChangedEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
@@ -643,7 +688,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT_FLAG_DISPLAYED.name(), String.valueOf(flagEvent.isDisplayed()));
         return result;
     }
-
+    
     private void storeRaceLogEventProperties(RaceLogEvent event, DBObject result) {
         storeTimed(event, result);
         storeTimePoint(event.getCreatedAt(), result, FieldNames.RACE_LOG_EVENT_CREATED_AT);
@@ -694,7 +739,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(courseDesignChangedEvent, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogCourseDesignChangedEvent.class.getSimpleName());
-
+        
+        result.put(FieldNames.RACE_LOG_COURSE_DESIGN_NAME.name(), courseDesignChangedEvent.getCourseDesign().getName());
         result.put(FieldNames.RACE_LOG_COURSE_DESIGN.name(), storeCourseBase(courseDesignChangedEvent.getCourseDesign()));
         return result;
     }
@@ -715,6 +761,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(finishPositioningConfirmedEvent, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningConfirmedEvent.class.getSimpleName());
+        
+        result.put(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name(), storePositionedCompetitors(finishPositioningConfirmedEvent.getPositionedCompetitors()));
 
         return result;
     }
@@ -732,10 +780,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private BasicDBList storePositionedCompetitors(List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
         BasicDBList dbList = new BasicDBList();
         
-        for (Triple<Serializable, String, MaxPointsReason> competitorPair : positionedCompetitors) {
-            dbList.add(storePositionedCompetitor(competitorPair));
+        if (positionedCompetitors != null) {
+            for (Triple<Serializable, String, MaxPointsReason> competitorPair : positionedCompetitors) {
+                dbList.add(storePositionedCompetitor(competitorPair));
+            }
         }
-        
+
         return dbList;
     }
     
@@ -804,4 +854,5 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         return passing;
     }
+
 }

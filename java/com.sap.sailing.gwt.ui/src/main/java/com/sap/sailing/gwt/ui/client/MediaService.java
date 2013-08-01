@@ -5,7 +5,7 @@ import java.util.Collection;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.ui.client.shared.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrack;
 
 @RemoteServiceRelativePath("media")
 public interface MediaService extends RemoteService {
@@ -14,7 +14,7 @@ public interface MediaService extends RemoteService {
 
     Collection<MediaTrack> getAllMediaTracks();
 
-    void addMediaTrack(MediaTrack mediaTrack);
+    String addMediaTrack(MediaTrack mediaTrack);
 
     void deleteMediaTrack(MediaTrack mediaTrack);
 

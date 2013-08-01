@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
-import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
+import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
 
 public interface SimulatorServiceAsync {
 
@@ -27,7 +27,7 @@ public interface SimulatorServiceAsync {
 
     void getWindField(WindFieldGenParamsDTO params, WindPatternDisplay display, AsyncCallback<WindFieldDTO> callback);
 
-    void getWindPatterns(AsyncCallback<List<WindPatternDTO>> callback);
+    void getWindPatterns(char mode, AsyncCallback<List<WindPatternDTO>> callback);
 
     void getWindPatternDisplay(WindPatternDTO pattern, AsyncCallback<WindPatternDisplay> callback);
 
@@ -43,7 +43,7 @@ public interface SimulatorServiceAsync {
 
     void getRacesNames(AsyncCallback<List<String>> asyncCallback);
 
-    void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField, SimulatorUISelectionDTO selection,
+    void getSimulatorResults(char mode, char rcDirection, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField, SimulatorUISelectionDTO selection,
             AsyncCallback<SimulatorResultsDTO> callback);
 
     void getCompetitorsNames(int selectedRaceIndex, AsyncCallback<List<String>> asyncCallback);

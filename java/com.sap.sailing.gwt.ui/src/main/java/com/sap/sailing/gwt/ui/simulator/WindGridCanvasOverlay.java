@@ -24,7 +24,8 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
-import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
+import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
+import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.WindGridColorPalette;
 
 /**
@@ -43,6 +44,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     protected SortedMap<Long, List<SimulatorWindDTO>> timePointWindDTOMap;
 
     protected final Timer timer;
+    protected WindFieldGenParamsDTO windParams = null;
 
     private int xRes;
     private int yRes;
@@ -96,9 +98,10 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     }
 
-    public WindGridCanvasOverlay(final Timer timer, final int xRes, final int yRes) {
+    public WindGridCanvasOverlay(final Timer timer, WindFieldGenParamsDTO windParams, final int xRes, final int yRes) {
         super();
         this.timer = timer;
+        this.windParams = windParams;
         this.xRes = xRes;
         this.yRes = yRes;
         init();
@@ -198,7 +201,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     @Override
     protected Overlay copy() {
-        return new WindFieldCanvasOverlay(this.timer);
+        return new WindFieldCanvasOverlay(this.timer, windParams);
     }
 
     @Override

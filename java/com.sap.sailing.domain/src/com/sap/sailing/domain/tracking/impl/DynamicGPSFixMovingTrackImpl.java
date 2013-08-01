@@ -95,11 +95,12 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
     }
     
     /**
-     * In addition to the base class implementation, we additionally have the speed and bearing as
-     * measured by the device. We use the device-measured speed and compare it with the speed computed
-     * based on the timestamp and distance between previous and next fix. If the latter speed exceeds the
-     * measured speed by more than a factor of {@link #MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING},
-     * the fix is considered invalid.
+     * In addition to the base class implementation, we additionally have the speed and bearing as measured by the
+     * device. If the adjacent fixes are within the averaging interval defined by
+     * {@link GPSFixTrackImpl#getMillisecondsOverWhichToAverageSpeed()}, we use the device-measured speed and compare it
+     * with the speed computed based on the timestamp and distance between previous and next fix. If the latter speed
+     * exceeds the measured speed by more than a factor of
+     * {@link #MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING}, the fix is considered invalid.
      */
     @Override
     protected boolean isValid(NavigableSet<GPSFixMoving> rawFixes, GPSFixMoving e) {
@@ -108,24 +109,25 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         if (e.isValidityCached()) {
             result = e.isValid();
         } else {
+            boolean fixHasValidSogAndCog = (e.getSpeed().getMetersPerSecond() != 0.0 && e.getSpeed().getBearing().getDegrees() != 0.0);
             GPSFixMoving previous = rawFixes.lower(e);
             GPSFixMoving next = rawFixes.higher(e);
-            Speed speedToPrevious = Speed.NULL;
-            if (previous != null) {
+            Speed speedToPrevious = null;
+            if (previous != null && Math.abs(previous.getTimePoint().asMillis() - e.getTimePoint().asMillis()) <= getMillisecondsOverWhichToAverageSpeed()) {
                 speedToPrevious = previous.getPosition().getDistance(e.getPosition())
                         .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
             }
-            Speed speedToNext = Speed.NULL;
-            if (next != null) {
+            Speed speedToNext = null;
+            if (next != null && Math.abs(next.getTimePoint().asMillis() - e.getTimePoint().asMillis()) <= getMillisecondsOverWhichToAverageSpeed()) {
                 speedToNext = e.getPosition().getDistance(next.getPosition())
                         .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
             }
-            result = (previous == null || speedToPrevious.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
+            result = (!fixHasValidSogAndCog || ((speedToPrevious == null || speedToPrevious.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
                     * e.getSpeed().getMetersPerSecond())
-                    && (next == null || speedToNext.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
-                            * e.getSpeed().getMetersPerSecond())
+                    && (speedToNext == null || speedToNext.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
+                            * e.getSpeed().getMetersPerSecond())))
                     && (maxSpeedForSmoothing == null
-                            || (previous == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0) || (next == null || speedToNext
+                            || (speedToPrevious == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0) || (speedToNext == null || speedToNext
                             .compareTo(maxSpeedForSmoothing) <= 0));
             e.cacheValidity(result);
         }

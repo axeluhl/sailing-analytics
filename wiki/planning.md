@@ -4,6 +4,8 @@
 
 [[Trim Database|wiki/planning/TrimDatabase]]
 
+[[Smartphone Tracking|wiki/smartphone-tracking]]
+
 [[ORC|wiki/planning/ORC]]
 
 [[ISAF-Internal Projects|wiki/planning/ISAFInternalProjects]]
@@ -15,5 +17,7 @@
 [[AirMAX vs. MikroTik|/wiki/planning/AirMAXvsMikroTik]]
 
 [[User Management|wiki/planning/usermanagement]]
+
+[[Usability of the Administration Interface|wiki/planning/usability-of-the-administration-interface]]
 
 [[Scaling by Server Replication|wiki/planning/scalebyreplication]]

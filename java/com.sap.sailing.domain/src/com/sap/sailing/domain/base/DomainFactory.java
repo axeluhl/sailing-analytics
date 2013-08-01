@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -93,14 +94,22 @@ public interface DomainFactory extends SharedDomainFactory {
 
     CompetitorDTO convertToCompetitorDTO(Competitor c);
 
-    FleetDTO convertToFleetDTO(Series series, Fleet fleet);
+    FleetDTO convertToFleetDTO(Fleet fleet);
 
-    FleetDTO convertToFleetDTO(RaceColumn raceColumn, Fleet fleet);
-
-    RaceDTO createRaceDTO(TrackedRegattaRegistry trackedRegattaRegistry, boolean b, RegattaAndRaceIdentifier raceIdentifier, TrackedRace trackedRace);
+    /**
+     * @param trackedRace must not be <code>null</code>
+     */
+    RaceDTO createRaceDTO(TrackedRegattaRegistry trackedRegattaRegistry, boolean withGeoLocationData, RegattaAndRaceIdentifier raceIdentifier, TrackedRace trackedRace);
 
     PlacemarkDTO convertToPlacemarkDTO(Placemark placemark);
 
     List<CompetitorDTO> getCompetitorDTOList(List<Competitor> competitors);
+
+    TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace);
+
+    /**
+     * @param trackedRace must not be <code>null</code>
+     */
+    void updateRaceDTOWithTrackedRaceData(TrackedRace trackedRace, RaceDTO raceDTO);
 
 }

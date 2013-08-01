@@ -28,7 +28,6 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChart;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.LazyComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 
 public class MetaLeaderboardViewer extends SimplePanel {    
@@ -51,7 +50,7 @@ public class MetaLeaderboardViewer extends SimplePanel {
     private final static String STYLE_VIEWER_TOOLBAR_INNERELEMENT = "viewerToolbar-innerElement";
     private final static String STYLE_VIEWER_TOOLBAR_SETTINGS_BUTTON = "viewerToolbar-settingsButton";
 
-    public MetaLeaderboardViewer(long delayToLiveMillis, SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
+    public MetaLeaderboardViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
             LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RaceIdentifier preselectedRace, String leaderboardGroupName,
             String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn, boolean showRankChart) {
@@ -76,12 +75,11 @@ public class MetaLeaderboardViewer extends SimplePanel {
         mainPanel.add(componentsNavigationPanel);
 
         timer = new Timer(PlayModes.Replay, /*delayBetweenAutoAdvancesInMilliseconds*/ 3000l);
-        timer.setLivePlayDelayInMillis(delayToLiveMillis);
-
+ 
         metaLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                 leaderboardSettings, preselectedRace, competitorSelectionProvider, timer,
                 leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages, userAgent,
-                showRaceDetails, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn);
+                showRaceDetails, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn,  /* adjustTimerDelay */ true);
 
         multiCompetitorChart = new MultiCompetitorLeaderboardChart(sailingService, asyncActionsExecutor, metaLeaderboardName, DetailType.REGATTA_RANK, competitorSelectionProvider, timer,
                 stringMessages, errorReporter);

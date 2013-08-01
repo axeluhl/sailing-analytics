@@ -159,16 +159,18 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         // and are interpreted as Long
         // Casting a Long to a Double raises a ClassCastException
         Double latDeg = null;
-        try {
-            latDeg = (Double) json.get("lat");
-        } catch (ClassCastException e) {
-            latDeg = ((Long) json.get("lat")).doubleValue();
+        Object jsonLat = json.get("lat");
+        if (jsonLat instanceof String) {
+            latDeg = Double.valueOf((String) jsonLat);
+        } else if (jsonLat instanceof Number) {
+            latDeg = ((Number) jsonLat).doubleValue();
         }
         Double lngDeg = null;
-        try {
-            lngDeg = (Double) json.get("lng");
-        } catch (ClassCastException e) {
-            lngDeg = ((Long) json.get("lng")).doubleValue();
+        Object jsonLng = json.get("lng");
+        if (jsonLng instanceof String) {
+            lngDeg = Double.valueOf((String) jsonLng);
+        } else if (jsonLng instanceof Number) {
+            lngDeg = ((Number) jsonLng).doubleValue();
         }
         SerializablePosition position = new SerializablePositionImpl(latDeg, lngDeg);
 

@@ -4,7 +4,6 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.filter.AbstractNumberFilter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardFetcher;
 
 /**
  * A filter filtering competitors by their total rank
@@ -29,7 +28,7 @@ public class CompetitorTotalRankFilter extends AbstractNumberFilter<CompetitorDT
         boolean result = false;
         
         if (value > 0 && operator != null && getLeaderboard() != null) {
-            int totalRank = getLeaderboard().getRank(competitorDTO);
+            int totalRank = getLeaderboard().getTotalRank(competitorDTO);
             result = operator.matchValues(value, totalRank);
         }
         

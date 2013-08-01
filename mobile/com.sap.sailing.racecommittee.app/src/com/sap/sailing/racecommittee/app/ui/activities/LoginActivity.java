@@ -6,16 +6,17 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogFragmentButtonListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.BaseDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.CourseAreaListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
@@ -23,24 +24,26 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseArea
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
-public class LoginActivity extends TwoPaneActivity implements EventSelectedListenerHost,
-        CourseAreaSelectedListenerHost, DialogFragmentButtonListener {
+public class LoginActivity extends BaseActivity implements EventSelectedListenerHost,
+        CourseAreaSelectedListenerHost, DialogListenerHost {
     private final static String TAG = LoginActivity.class.getName();
 
     private LoginDialog loginDialog;
-    private CourseArea selectedCourse;
+    private CourseArea selectedCourseArea;
 
     public LoginActivity() {
         this.loginDialog = new LoginDialog();
-        this.selectedCourse = null;
+        this.selectedCourseArea = null;
     }
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+        // features must be requested before anything else
         getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        
+        super.onCreate(savedInstanceState);
+        
         setContentView(R.layout.login_view);
         setProgressBarIndeterminateVisibility(false);
 
@@ -50,11 +53,9 @@ public class LoginActivity extends TwoPaneActivity implements EventSelectedListe
         }
     }
 
-    // Login -> startRaceActivity(selectedCourse);
-
     private void addEventListFragment() {
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.add(R.id.leftContainer, new EventListFragment());
+        transaction.add(R.id.login_view_left_container, new EventListFragment());
         transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
         transaction.commit();
     }
@@ -67,7 +68,7 @@ public class LoginActivity extends TwoPaneActivity implements EventSelectedListe
         fragment.setArguments(args);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
-        transaction.replace(R.id.rightContainer, fragment);
+        transaction.replace(R.id.login_view_right_container, fragment);
         transaction.commit();
         ExLog.i("LoginActivity", "CourseFragment created.");
     }
@@ -87,7 +88,6 @@ public class LoginActivity extends TwoPaneActivity implements EventSelectedListe
 
     private void showCourseAreaListFragment(Serializable eventId) {
         Toast.makeText(LoginActivity.this, eventId.toString(), Toast.LENGTH_LONG).show();
-        getRightLayout().setVisibility(View.VISIBLE);
         addCourseAreaListFragment(eventId);
     }
 
@@ -105,38 +105,48 @@ public class LoginActivity extends TwoPaneActivity implements EventSelectedListe
     }
 
     private void selectCourseArea(CourseArea courseArea) {
-        selectedCourse = courseArea;
+        selectedCourseArea = courseArea;
         loginDialog.show(getFragmentManager(), "LoginDialog");
     }
 
-    public void onDialogNegativeButton() { /* nothing here... */
-    }
+    @Override
+    public DialogResultListener getListener() {
+        return new DialogResultListener() {
+            
+            @Override
+            public void onDialogPositiveButton(BaseDialogFragment dialog) {
+                switch (loginDialog.getSelectedLoginType()) {
+                case OFFICER:
+                    ExLog.i(TAG, "Communication with backend is active.");
+                    AppPreferences.setSendingActive(LoginActivity.this, true);
+                    break;
+                case VIEWER:
+                    ExLog.i(TAG, "Communication with backend is inactive.");
+                    AppPreferences.setSendingActive(LoginActivity.this, false);
+                    break;
+                default:
+                    ExLog.i(TAG, "An invalid log type, e.g. NONE, was selected");
+                    Toast.makeText(LoginActivity.this, getString(R.string.please_select_a_login_type), Toast.LENGTH_LONG).show();
+                    return;
+                }
 
-    public void onDialogPositiveButton() {
-        switch (loginDialog.getSelectedLoginType()) {
-        case OFFICER:
-            ExLog.i(TAG, "Communication with backend is active.");
-            AppConstants.setSendingActive(this, true);
-            break;
-        case VIEWER:
-            ExLog.i(TAG, "Communication with backend is inactive.");
-            AppConstants.setSendingActive(this, false);
-            break;
-        default:
-            Toast.makeText(this, "Invalid login type. Ignoring.", Toast.LENGTH_SHORT).show();
-            return;
-        }
+                if (selectedCourseArea == null) {
+                    Toast.makeText(LoginActivity.this, "The selected course area was lost.", Toast.LENGTH_LONG).show();
+                    ExLog.e(TAG, "Course area reference was not set - cannot start racing activity.");
+                    return;
+                }
 
-        if (selectedCourse == null) {
-            Toast.makeText(this, "The selected course was lost.", Toast.LENGTH_LONG).show();
-            ExLog.e(TAG, "Course reference was not set - cannot start racing activity.");
-            return;
-        }
-
-        Toast.makeText(this, selectedCourse.getId().toString(), Toast.LENGTH_LONG).show();
-        Intent message = new Intent(this, RacingActivity.class);
-        message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, selectedCourse.getId());
-        fadeActivity(message);
+                Toast.makeText(LoginActivity.this, selectedCourseArea.getId().toString(), Toast.LENGTH_LONG).show();
+                Intent message = new Intent(LoginActivity.this, RacingActivity.class);
+                message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, selectedCourseArea.getId());
+                fadeActivity(message);
+            }
+            
+            @Override
+            public void onDialogNegativeButton(BaseDialogFragment dialog) {
+                /* nothing here... */
+            }
+        };
     }
 
 }

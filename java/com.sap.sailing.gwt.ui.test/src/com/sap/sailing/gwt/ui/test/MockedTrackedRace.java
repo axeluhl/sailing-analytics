@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
@@ -400,6 +401,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                         // TODO Auto-generated method stub
                         return null;
                     }
+
+                    @Override
+                    public void setDefaultCourseArea(CourseArea newCourseArea) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public boolean definesSeriesDiscardThresholds() {
+                        // TODO Auto-generated method stub
+                        return false;
+                    }
                 };
             }
 
@@ -458,7 +471,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
+            public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
                     long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
                     DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
                 // TODO Auto-generated method stub
@@ -736,7 +749,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void detachRaceLog() {
+    public void detachRaceLog(Serializable identifier) {
         // TODO Auto-generated method stub
 
     }
@@ -748,7 +761,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }   
 
     @Override
-    public RaceLog getRaceLog() {
+    public RaceLog getRaceLog(Serializable identifier) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -760,7 +773,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void setCourseDesignChangedListener(CourseDesignChangedListener listener) {
+    public void addCourseDesignChangedListener(CourseDesignChangedListener listener) {
         // TODO Auto-generated method stub
         
     }
@@ -773,6 +786,36 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void detachAllRaceLogs() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void invalidateStartTime() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void invalidateEndTime() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public boolean isLive(TimePoint at) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Iterable<Sideline> getCourseSidelines() {
         // TODO Auto-generated method stub
         return null;
     }

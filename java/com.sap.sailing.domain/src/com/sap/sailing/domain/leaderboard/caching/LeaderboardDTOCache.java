@@ -28,6 +28,8 @@ import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
+import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
 
 /**
  * Caches the expensive to compute {@link LeaderboardDTO} results of a
@@ -52,6 +54,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
      * all clients asking the same wait for the single result. Results are cached in this LRU-based evicting cache.
      */
     private final Map<Util.Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>> leaderboardCache;
+    private final NamedReentrantReadWriteLock leaderboardCacheLock;
     private int leaderboardByNameCacheHitCount;
     private int leaderboardByNameCacheMissCount;
     
@@ -70,7 +73,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
     private static final Executor computeLeadearboardByNameExecutor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
             /* maximumPoolSize */ THREAD_POOL_SIZE,
             /* keepAliveTime */ 60, TimeUnit.SECONDS,
-            /* workQueue */ new LinkedBlockingQueue<Runnable>());
+            /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1));
 
     private final LeaderboardCacheManager leaderboardCacheManager;
     
@@ -80,21 +83,24 @@ public class LeaderboardDTOCache implements LeaderboardCache {
         this.leaderboard = leaderboard;
         this.waitForLatestAnalyses = waitForLatestAnalyses;
         // if the leaderboard becomes weakly referenced and eventually GCed, then so can the cached results for it
-        this.leaderboardCache = new LinkedHashMap<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>() {
+        this.leaderboardCache = new LinkedHashMap<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>(16, 0.75f, /* access-based eviction */ true) {
             private static final long serialVersionUID = 7287916997229815039L;
             @Override
             protected boolean removeEldestEntry(Map.Entry<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>> e) {
                 return size() > 10; // remember 10 LeaderboardDTOs per leaderborad
             }
         };
+        leaderboardCacheLock = new NamedReentrantReadWriteLock("leaderboardCacheLock for "+leaderboard.getName(), /* fair */ false);
         this.leaderboardCacheManager = new LeaderboardCacheManager(this);
-        this.leaderboardCacheManager.add(leaderboard);
     }
     
     @Override
     public void invalidate(Leaderboard leaderboard) {
-        synchronized (leaderboardCache) {
+        LockUtil.lockForWrite(leaderboardCacheLock);
+        try {
             leaderboardCache.clear();
+        } finally {
+            LockUtil.unlockAfterWrite(leaderboardCacheLock);
         }
     }
     
@@ -139,7 +145,12 @@ public class LeaderboardDTOCache implements LeaderboardCache {
          * LeaderboardDTOCache. Therefore, it's okay to re-use the LeaderboardDTOCache match even if the latest analysis
          * results are requested.
          */
-        future = leaderboardCache.get(key);
+        LockUtil.lockForRead(leaderboardCacheLock);
+        try {
+            future = leaderboardCache.get(key);
+        } finally {
+            LockUtil.unlockAfterRead(leaderboardCacheLock);
+        }
         if (future == null) {
             final Thread callerThread = Thread.currentThread();
             future = new FutureTask<LeaderboardDTO>(new Callable<LeaderboardDTO>() {
@@ -159,7 +170,14 @@ public class LeaderboardDTOCache implements LeaderboardCache {
                 }
             });
             computeLeadearboardByNameExecutor.execute(future);
-            leaderboardCache.put(key, future);
+            // The add(Leaderboard) method that the cache manager calls back on this class does nothing, so no synchronization required
+            this.leaderboardCacheManager.add(leaderboard); // ensure the leaderboard is tracked for changes to invalidate
+            LockUtil.lockForWrite(leaderboardCacheLock);
+            try {
+                leaderboardCache.put(key, future);
+            } finally {
+                LockUtil.unlockAfterWrite(leaderboardCacheLock);
+            }
         } else {
             cacheHit = true;
         }

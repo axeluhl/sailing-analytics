@@ -11,7 +11,7 @@ public class FlagImageResolver {
     
     private Map<Flags, ImageResource> flagImageMap;
     
-    private static RegattaOverviewResources resources = GWT.create(RegattaOverviewResources.class);
+    private static RegattaRaceStatesFlagsResources resources = GWT.create(RegattaRaceStatesFlagsResources.class);
     
     public FlagImageResolver() {
         this.flagImageMap = new HashMap<Flags, ImageResource>();

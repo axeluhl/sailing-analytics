@@ -22,27 +22,29 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 public class CompactRaceMapDataDTO implements IsSerializable {
     private Map<String, List<GPSFixDTO>> boatPositionsByCompetitorIdAsString;
     private CoursePositionsDTO coursePositions;
+    private List<SidelineDTO> courseSidelines;
     private List<CompactQuickRankDTO> quickRanks;
     
     CompactRaceMapDataDTO() {}
 
     public CompactRaceMapDataDTO(Map<CompetitorDTO, List<GPSFixDTO>> boatPositions, CoursePositionsDTO coursePositions,
-            List<QuickRankDTO> quickRanks) {
+           List<SidelineDTO> courseSidelines, List<QuickRankDTO> quickRanks) {
         this.boatPositionsByCompetitorIdAsString = new HashMap<String, List<GPSFixDTO>>();
         for (Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : boatPositions.entrySet()) {
-            this.boatPositionsByCompetitorIdAsString.put(e.getKey().idAsString, e.getValue());
+            this.boatPositionsByCompetitorIdAsString.put(e.getKey().getIdAsString(), e.getValue());
         }
         this.quickRanks = new ArrayList<CompactQuickRankDTO>(quickRanks.size());
         for (QuickRankDTO quickRank : quickRanks) {
-            this.quickRanks.add(new CompactQuickRankDTO(quickRank.competitor.idAsString, quickRank.rank, quickRank.legNumber));
+            this.quickRanks.add(new CompactQuickRankDTO(quickRank.competitor.getIdAsString(), quickRank.rank, quickRank.legNumber));
         }
+        this.courseSidelines = courseSidelines;
         this.coursePositions = coursePositions;
     }
     
     public RaceMapDataDTO getRaceMapDataDTO(Iterable<CompetitorDTO> competitors) {
         Map<String, CompetitorDTO> competitorsByIdAsString = new HashMap<String, CompetitorDTO>();
         for (CompetitorDTO competitor : competitors) {
-            competitorsByIdAsString.put(competitor.idAsString, competitor);
+            competitorsByIdAsString.put(competitor.getIdAsString(), competitor);
         }
         RaceMapDataDTO result = new RaceMapDataDTO();
         result.quickRanks = new ArrayList<QuickRankDTO>(this.quickRanks.size());
@@ -52,10 +54,15 @@ public class CompactRaceMapDataDTO implements IsSerializable {
                 result.quickRanks.add(new QuickRankDTO(competitorDTO, compactQuickRank.getRank(), compactQuickRank.getLegNumber()));
             }
         }
+        result.courseSidelines = courseSidelines;
         result.coursePositions = coursePositions;
         result.boatPositions = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
         for (Map.Entry<String, List<GPSFixDTO>> e : boatPositionsByCompetitorIdAsString.entrySet()) {
-            result.boatPositions.put(competitorsByIdAsString.get(e.getKey()), e.getValue());
+            final CompetitorDTO competitor = competitorsByIdAsString.get(e.getKey());
+            if (competitor != null) {
+                // maybe null in case the competitor was added, e.g., by unsuppressing, while this call was underway
+                result.boatPositions.put(competitor, e.getValue());
+            }
         }
         return result;
     }

@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -12,10 +13,12 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.impl.RaceLogIdentifierImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implements RaceColumn {
@@ -25,12 +28,14 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     private final Map<Fleet, RaceIdentifier> raceIdentifiers;
 
     private final Map<Fleet, RaceLog> raceLogs;
+    
     /**
-     * holds the race log identifer template needed to create the appropriate RaceLogIdentifer that is constructed from the 
+     * holds the race log identifier template needed to create the appropriate RaceLogIdentifer that is constructed from the 
      * parent object name, name of this raceColumn and the name of a fleet of this raceColumn to access the RaceLog in the 
      * RaceLogStore for persistence purposes.
      */
-    private RaceLogIdentifierTemplate raceLogsIdentifierTemplate;
+    private transient RaceLogInformation raceLogInformation;
+    private RaceLogIdentifierTemplate raceLogIdentifierTemplate;
 
     public AbstractRaceColumn() {
         this.trackedRaces = new HashMap<Fleet, TrackedRace>();
@@ -40,20 +45,21 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public synchronized void setRaceLogInformation(final RaceLogInformation information) {
-        raceLogs.clear();
-        raceLogsIdentifierTemplate = information.getIdentifierTemplate();
-        RaceLogStore store = information.getStore();
         for (final Fleet fleet : getFleets()) {
-            RaceLogIdentifier identifier = raceLogsIdentifierTemplate.compileRaceLogIdentifier(fleet);
-            RaceLog raceLog = store.getRaceLog(identifier);
-            raceLog.addListener(new RaceColumnRaceLogReplicator(this, identifier));
-            raceLogs.put(fleet, raceLog);
+            setOrReloadRaceLogInformation(information, fleet);
         }
     }
 
     @Override
     public RaceLog getRaceLog(Fleet fleet) {
-        return raceLogs.get(fleet);
+        synchronized (raceLogs) {
+            return raceLogs.get(fleet);
+        }
+    }
+    
+    @Override
+    public RaceLogIdentifier getRaceLogIdentifier(Fleet fleet) {
+        return new RaceLogIdentifierImpl(raceLogInformation.getIdentifierTemplate(), getName(), fleet);
     }
 
     @Override
@@ -65,18 +71,12 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     public void setTrackedRace(Fleet fleet, TrackedRace trackedRace) {
         TrackedRace previouslyLinkedRace = this.trackedRaces.get(fleet);
         if (trackedRace != previouslyLinkedRace) {
+            releaseTrackedRace(fleet);
             synchronized (this) {
-                if (trackedRace == null) {
-                    setRaceIdentifier(fleet, null);
-                    this.trackedRaces.remove(fleet);
-                } else {
+                if (trackedRace != null) {
                     this.trackedRaces.put(fleet, trackedRace);
                     this.setRaceIdentifier(fleet, trackedRace.getRaceIdentifier());
                 }
-            }
-            if (previouslyLinkedRace != null) {
-                previouslyLinkedRace.detachRaceLog();
-                getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(this, fleet, previouslyLinkedRace);
             }
             if (trackedRace != null) {
                 trackedRace.attachRaceLog(getRaceLog(fleet));
@@ -92,18 +92,28 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public void setRaceIdentifier(Fleet fleet, RaceIdentifier raceIdentifier) {
-        if (raceIdentifier == null) {
-            this.raceIdentifiers.remove(fleet);
-        } else {
+        if (raceIdentifier != null) {
             this.raceIdentifiers.put(fleet, raceIdentifier);
         }
     }
 
     @Override
     public synchronized void releaseTrackedRace(Fleet fleet) {
-        trackedRaces.remove(fleet);
+        TrackedRace previouslyLinkedRace = this.trackedRaces.get(fleet);
+        this.trackedRaces.remove(fleet);
+        if (previouslyLinkedRace != null) {
+            RaceLogIdentifierImpl identifier = new RaceLogIdentifierImpl(raceLogInformation.getIdentifierTemplate(), getName(), fleet);
+            previouslyLinkedRace.detachRaceLog(identifier.getIdentifier());
+            getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(this, fleet, previouslyLinkedRace);
+        }
     }
-
+    
+    @Override
+    public void removeRaceIdentifier(Fleet fleet) {
+        releaseTrackedRace(fleet);
+        this.raceIdentifiers.remove(fleet);
+    }
+    
     @Override
     public Fleet getFleetOfCompetitor(Competitor competitor) {
         for (Map.Entry<Fleet, TrackedRace> e : trackedRaces.entrySet()) {
@@ -138,10 +148,42 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         }
         return null;
     }
-
+    
     @Override
     public String toString() {
         return getName();
+    }
+
+    @Override
+    public RaceLogInformation getRaceLogInformation() {
+        return raceLogInformation;
+    }
+
+    @Override
+    public void setOrReloadRaceLogInformation(RaceLogInformation information, Fleet fleetImpl) {
+        synchronized(raceLogs) {
+            raceLogInformation = information;
+            RaceLogStore store = information.getStore();
+            HashSet<RaceLogEventVisitor> listeners = new HashSet<RaceLogEventVisitor>();
+            RaceLog raceLogAvailable = raceLogs.get(fleetImpl);
+            if (raceLogAvailable != null) {
+                store.removeListenersAddedByStoreFrom(raceLogAvailable);
+                listeners = raceLogAvailable.removeAllListeners();
+                raceLogs.remove(fleetImpl);
+            }
+            
+            raceLogIdentifierTemplate = raceLogInformation.getIdentifierTemplate();
+            RaceLogIdentifier identifier = raceLogIdentifierTemplate.compileRaceLogIdentifier(fleetImpl);
+            RaceLog raceLog = store.getRaceLog(identifier, /*ignoreCache*/ true);
+            
+            if (listeners.isEmpty()) {
+                RaceColumnRaceLogReplicator listener = new RaceColumnRaceLogReplicator(this, identifier);
+                raceLog.addListener(listener);
+            } else {
+                raceLog.addAllListeners(listeners);
+            }
+            raceLogs.put(fleetImpl, raceLog);
+        }
     }
 
     /**
@@ -149,11 +191,10 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-
         for (Entry<Fleet, RaceLog> entry : raceLogs.entrySet()) {
             Fleet fleet = entry.getKey();
             RaceLog raceLog = entry.getValue();
-            raceLog.addListener(new RaceColumnRaceLogReplicator(this, raceLogsIdentifierTemplate.compileRaceLogIdentifier(fleet)));
+            raceLog.addListener(new RaceColumnRaceLogReplicator(this, raceLogIdentifierTemplate.compileRaceLogIdentifier(fleet)));
         }
     }
 }

@@ -75,4 +75,24 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     public Double getExplicitFactor() {
         return explicitFactor;
     }
+
+    /**
+     * Returns <code>false</code>, meaning that by default when aggregating total scores across a leaderboard, this race column's score
+     * is added to the aggregate of previous scores.
+     */
+    @Override
+    public boolean isStartsWithZeroScore() {
+        return false;
+    }
+
+    @Override
+    public boolean isDiscardable() {
+        return !isMedalRace();
+    }
+
+    @Override
+    public boolean isCarryForward() {
+        return false;
+    }
+
 }

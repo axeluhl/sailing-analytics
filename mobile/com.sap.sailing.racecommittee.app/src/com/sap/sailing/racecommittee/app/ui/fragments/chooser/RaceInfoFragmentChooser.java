@@ -4,8 +4,6 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.ErrorRaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishedRaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishingRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 
 public class RaceInfoFragmentChooser {
@@ -21,9 +19,9 @@ public class RaceInfoFragmentChooser {
         case RUNNING:
             return createInfoFragment(managedRace.getState().getStartProcedure().getRunningRaceFragment(), managedRace);
         case FINISHING:
-            return createInfoFragment(FinishingRaceFragment.class, managedRace);
+            return createInfoFragment(managedRace.getState().getStartProcedure().getFinishingRaceFragment(), managedRace);
         case FINISHED:
-            return createInfoFragment(FinishedRaceFragment.class, managedRace);
+            return createInfoFragment(managedRace.getState().getStartProcedure().getFinishedRaceFragment(), managedRace);
         default:
             return createInfoFragment(ErrorRaceFragment.class, managedRace);
         }
@@ -33,7 +31,7 @@ public class RaceInfoFragmentChooser {
         try {
             RaceFragment fragment = fragmentClass.newInstance();
             fragment.setArguments(RaceFragment.createArguments(managedRace));
-            ExLog.w(TAG, String.format("Fragment %s is selected", fragmentClass.getName()));
+            ExLog.i(TAG, String.format("Fragment %s may be choosen", fragmentClass.getName()));
             return fragment;
         } catch (Exception e) {
             ExLog.e(TAG, String.format("Exception while instantiating race info fragment:\n%s", e.toString()));

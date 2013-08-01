@@ -30,7 +30,7 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
-import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
 
@@ -101,11 +101,11 @@ public class SimulatorUtils {
         boolean result = true;
 
         for (String name : PATH_NAMES) {
-            filePath = pathPrefix + "\\src\\resources\\" + name + ".dat";
+            filePath = pathPrefix + "\\resources\\" + name + ".dat";
             result &= saveToFile(paths.get(name), filePath);
         }
 
-        filePath = pathPrefix + "\\src\\resources\\" + RACECOURSE_DAT;
+        filePath = pathPrefix + "\\resources\\" + RACECOURSE_DAT;
         result &= saveToFile(raceCourse, filePath);
 
         return result;
@@ -133,13 +133,13 @@ public class SimulatorUtils {
 
             fileName = SimulatorUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex,
                     name);
-            filePath = pathPrefix + "\\src\\resources\\" + fileName;
+            filePath = pathPrefix + "\\resources\\" + fileName;
             result &= saveToFile(paths.get(name), filePath);
         }
 
         fileName = SimulatorUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex,
                 "racecourse");
-        filePath = pathPrefix + "\\src\\resources\\" + fileName;
+        filePath = pathPrefix + "\\resources\\" + fileName;
         result &= saveToFile(raceCourse, filePath);
 
         return result;
@@ -179,7 +179,7 @@ public class SimulatorUtils {
 
             fileName = SimulatorUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex,
                     pathName);
-            filePath = "resources/" + fileName;
+            filePath = fileName;
 
             path = (Path) readObjectFromResources(filePath);
             if (path == null) {
@@ -295,7 +295,7 @@ public class SimulatorUtils {
             pathPrefix = getPathPrefix();
         }
 
-        String filePath = pathPrefix + "\\src\\resources\\" + fileName;
+        String filePath = pathPrefix + "\\resources\\" + fileName;
 
         boolean result = true;
 
@@ -357,7 +357,7 @@ public class SimulatorUtils {
         WindFieldGenerator wf = parameters.getWindField();
         // int[] gridRes = wf.getGridResolution();
         Position[] gridArea = wf.getGridAreaGps();
-        if (parameters.getMode() == SailingSimulatorUtil.measured) {
+        if (parameters.getMode() == SailingSimulatorConstants.ModeMeasured) {
             ((WindFieldGeneratorMeasured) wf).setGPSWind(gpsPath);
             gridArea = new Position[2];
             gridArea[0] = raceCourse.getPathPoints().get(0).getPosition();

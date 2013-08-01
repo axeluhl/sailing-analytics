@@ -18,6 +18,7 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
@@ -175,6 +176,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 return dateFormatHoursMinutes.format(new Date(axisLabelsData.getValueAsLong()));
             }
         }));
+        timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1.5).setDashStyle(DashStyle.SOLID);
 
         if (compactChart) {
             chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
@@ -191,18 +193,17 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      * Loads the needed data (data which isn't in the {@link #chartData cache}) for the
      * {@link #getSelectedCompetitors() visible competitors} via
      * {@link SailingServiceAsync#getCompetitorsRaceData(RaceIdentifier, List, long, DetailType, AsyncCallback)}. After
-     * loading is the method {@link #drawChartData()} called.<br />
-     * If no data needs to be {@link #needsDataLoading() loaded}, the no competitors selected label is displayed.
+     * loading, the method {@link #drawChartData()} is called.
+     * <p>
+     * If no data needs to be {@link #needsDataLoading() loaded}, the "no competitors selected" label is displayed.
      */
     private void updateChart(Date from, Date to, boolean append) {
         if (hasSelectedCompetitors()) {
             setWidget(chart);
-            
             ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
             for (CompetitorDTO competitorDTO : getSelectedCompetitors()) {
                 competitorsToLoad.add(competitorDTO);
             }
-
             loadData(from, to, competitorsToLoad, append);
         } else {
             setWidget(noCompetitorsSelectedLabel);
@@ -222,9 +223,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                     @Override
                     public void onSuccess(final CompetitorsRaceDataDTO result) {
                         hideLoading();
-
                         if (result != null) {
-                            if (result.isEmpty()) {
+                            if (result.isEmpty() && chartContainsNoData()) {
                                 setWidget(noDataFoundLabel);
                             } else {
                                 updateChartSeries(result, append);
@@ -245,6 +245,15 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 });
         asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
 
+    }
+    
+    private boolean chartContainsNoData() {
+        for (Series competitorSeries : dataSeriesByCompetitor.values()) {
+            if (competitorSeries.getPoints().length != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -285,15 +294,13 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private synchronized void updateChartSeries(CompetitorsRaceDataDTO chartData, boolean append) {
         // Make sure the busy indicator is removed at this point, or plotting the data results in an exception
         setWidget(chart);
-
         List<Series> chartSeries = Arrays.asList(chart.getSeries());
         for (CompetitorDTO competitor : chartData.getCompetitors()) {
             Series competitorDataSeries = getOrCreateCompetitorDataSeries(competitor);
             Series markPassingSeries = getOrCreateCompetitorMarkPassingSeries(competitor);
             CompetitorRaceDataDTO competitorData = chartData.getCompetitorData(competitor);
             if (competitorData != null) {
-                Date toDate = new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis());
-                
+                Date toDate = timer.getLiveTimePointAsDate();
                 List<Triple<String, Date, Double>> markPassingsData = competitorData.getMarkPassingsData();
                 List<Point> markPassingPoints = new ArrayList<Point>();
                 for (Triple<String, Date, Double> markPassingData : markPassingsData) {
@@ -366,7 +373,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private Series getOrCreateCompetitorDataSeries(final CompetitorDTO competitor) {
         Series result = dataSeriesByCompetitor.get(competitor);
         if (result == null) {
-            result = chart.createSeries().setType(Series.Type.LINE).setName(competitor.name);
+            result = chart.createSeries().setType(Series.Type.LINE).setName(competitor.getName());
             result.setPlotOptions(new LinePlotOptions()
                     .setLineWidth(LINE_WIDTH)
                     .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
@@ -387,7 +394,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         Series result = markPassingSeriesByCompetitor.get(competitor);
         if (result == null) {
             result = chart.createSeries().setType(Series.Type.SCATTER)
-                    .setName(stringMessages.markPassing() + " " + competitor.name);
+                    .setName(stringMessages.markPassing() + " " + competitor.getName());
             result.setPlotOptions(new ScatterPlotOptions().setColor(competitorSelectionProvider.getColor(competitor))
                     .setSelected(true));
             markPassingSeriesByCompetitor.put(competitor, result);
@@ -591,6 +598,10 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             return;
         }
 
+        if (allowTimeAdjust) {
+            updateTimePlotLine(date);
+        }
+        
         switch (timer.getPlayMode()) {
         case Live: {
             // is date before first cache entry or is cache empty?
@@ -617,6 +628,12 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             break;
         }
         }
+    }
+
+    private void updateTimePlotLine(Date date) {
+        chart.getXAxis().removePlotLine(timePlotLine);
+        timePlotLine.setValue(date.getTime());
+        chart.getXAxis().addPlotLines(timePlotLine);
     }
 
     @Override

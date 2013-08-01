@@ -12,7 +12,9 @@ Like businesses, sailors need the latest information to make strategic decisions
 * [[General Project Information|wiki/general-information]]
 * Production Environment
   * [[PIRONET (Hosting Provider, Emergency Procedures)|wiki/prionet-related-information]]
+  * [[Amazon EC2|wiki/amazon-ec2]]
   * [[Production Environment|wiki/production-environment]]
+  * [[TracTrac Lifecycle for Event Managers|wiki/tractrac-lifecycle]]
 * Information for Developers
   * [[Cook Book|wiki/cook-book]]
   * [[OnBoarding Information|wiki/onboarding]]
@@ -23,6 +25,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
   * [[Inventar|wiki/inventar-liste]]
+  * [[Smartphone Tracking|wiki/smartphone-tracking]]
 * Planning and Event Information
   * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]

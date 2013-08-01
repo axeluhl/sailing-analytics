@@ -2,7 +2,7 @@ package com.sap.sailing.domain.base;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -14,6 +14,10 @@ public interface RaceColumnListener extends Serializable {
     
     void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace);
     
+    void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore);
+    
+    void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward);
+
     boolean canAddRaceColumnToContainer(RaceColumn raceColumn);
     
     void raceColumnAddedToContainer(RaceColumn raceColumn);
@@ -26,7 +30,7 @@ public interface RaceColumnListener extends Serializable {
 
     void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName);
 
-    void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule, ThresholdBasedResultDiscardingRule newDiscardingRule);
+    void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule);
 
     void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event);
 
@@ -41,4 +45,5 @@ public interface RaceColumnListener extends Serializable {
      * exclude listeners from the serialization that return <code>true</code> from this method.
      */
     boolean isTransient();
+
 }

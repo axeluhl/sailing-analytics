@@ -56,11 +56,19 @@ public class RaceGroupFactory {
         Map<Series, List<RaceColumn>> seriesToRaceColumns = getSeriesToRaceColumns(leaderboard);
 
         Collection<SeriesWithRows> seriesWithRows = new ArrayList<>();
-        for (Series series : seriesToRaceColumns.keySet()) {
+        for (Series series : getSeriesIterable(leaderboard, seriesToRaceColumns)) {
             seriesWithRows.add(new SeriesWithRowsImpl(series.getName(), series.isMedal(), getRows(series,
                     seriesToRaceColumns.get(series))));
         }
         return seriesWithRows;
+    }
+
+    private Iterable<? extends Series> getSeriesIterable(Leaderboard leaderboard, Map<Series, List<RaceColumn>> seriesToRaceColumns) {
+        // for RegattaLeaderboards we want to preserve the order of series
+        if (leaderboard instanceof RegattaLeaderboard) {
+            return ((RegattaLeaderboard) leaderboard).getRegatta().getSeries();
+        }
+        return seriesToRaceColumns.keySet();
     }
 
     private Collection<RaceRow> getRows(Series series, List<RaceColumn> raceColumns) {
@@ -68,16 +76,27 @@ public class RaceGroupFactory {
         for (Fleet fleet : series.getFleets()) {
             // We are taking the fleet name because there might be several "default fleet"
             // objects when TrackedRaces are linked onto this Leaderboard
-            rows.add(new RaceRowImpl(fleet, getCells(fleet.getName(), raceColumns)));
+                rows.add(new RaceRowImpl(fleet, getCells(fleet.getName(), raceColumns, isFirstRaceColumnVirtual(series))));
         }
         return rows;
     }
+    
+    private boolean isFirstRaceColumnVirtual(Series series){
+        return series.isFirstColumnIsNonDiscardableCarryForward();
+    }
 
-    private Collection<RaceCell> getCells(String fleetName, List<RaceColumn> raceColumns) {
+    private Collection<RaceCell> getCells(String fleetName, List<RaceColumn> raceColumns, boolean isFirstRaceColumnVirtual) {
+        boolean skippedFirst = false;
         Collection<RaceCell> cells = new ArrayList<>();
-        for (RaceColumn raceColumn : raceColumns) {
-            Fleet fleet = raceColumn.getFleetByName(fleetName);
-            cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet)));
+        if (raceColumns != null) {
+            for (RaceColumn raceColumn : raceColumns) {
+                if (isFirstRaceColumnVirtual && !skippedFirst) {
+                    skippedFirst = true;
+                } else {
+                    Fleet fleet = raceColumn.getFleetByName(fleetName);
+                    cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet)));
+                }
+            }
         }
         return cells;
     }

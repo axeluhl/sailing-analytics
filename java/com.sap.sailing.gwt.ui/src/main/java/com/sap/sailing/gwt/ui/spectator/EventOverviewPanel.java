@@ -45,7 +45,9 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
@@ -90,6 +92,7 @@ public class EventOverviewPanel extends FormPanel {
     
     private List<EventDTO> availableEvents;
     private final boolean showRaceDetails;
+    private final Timer timerForClientServerOffset;
 
     private final LeaderboardGroupOverviewTableResources tableResources = GWT.create(LeaderboardGroupOverviewTableResources.class);
 
@@ -99,6 +102,7 @@ public class EventOverviewPanel extends FormPanel {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+        this.timerForClientServerOffset = new Timer(PlayModes.Replay);
         availableEvents = new ArrayList<EventDTO>();
         
         FlowPanel mainPanel = new FlowPanel();
@@ -214,10 +218,10 @@ public class EventOverviewPanel extends FormPanel {
                 if (event.publicationUrl != null && !event.publicationUrl.isEmpty() && event.isPublic) {
                     String link = URLEncoder.encode(event.publicationUrl
                             + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : ""));
-                    return ANCHORTEMPLATE.anchor(link, event.name);
+                    return ANCHORTEMPLATE.anchor(link, event.getName());
                 } else {
                     SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                    builder.appendHtmlConstant(event.name);
+                    builder.appendHtmlConstant(event.getName());
                     return builder.toSafeHtml();
                 }
             }
@@ -227,7 +231,7 @@ public class EventOverviewPanel extends FormPanel {
         TextColumn<EventDTO> eventVenueColumn = new TextColumn<EventDTO>() {
             @Override
             public String getValue(EventDTO event) {
-                return event.venue.name;
+                return event.venue.getName();
             }
         };
         eventVenueColumn.setSortable(true);
@@ -291,13 +295,13 @@ public class EventOverviewPanel extends FormPanel {
         eventsListHandler.setComparator(eventNameColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
-                return e1.name.compareTo(e2.name);
+                return e1.getName().compareTo(e2.getName());
             }
         });
         eventsListHandler.setComparator(eventVenueColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
-                return e1.venue.name.compareTo(e2.venue.name);
+                return e1.venue.getName().compareTo(e2.venue.getName());
             }
         });
         eventsListHandler.setComparator(eventStartDateColumn, new Comparator<EventDTO>() {
@@ -360,7 +364,7 @@ public class EventOverviewPanel extends FormPanel {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
-                        + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
+                        + "&leaderboardGroupName=" + selectedGroup.getName() + "&root=overview"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.anchor(link, leaderboard.name);
             }
@@ -453,7 +457,7 @@ public class EventOverviewPanel extends FormPanel {
                         String debugParam = Window.Location.getParameter("gwt.codesvr");
                         String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName="
                                 + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName() + "&regattaName="
-                                + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.name
+                                + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.getName()
                                 + "&root=overview"
                                 + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                         name = ANCHORTEMPLATE.anchor(link, raceDisplayName);
@@ -501,9 +505,15 @@ public class EventOverviewPanel extends FormPanel {
     }
 
     private void loadEvents() {
+        final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
         sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
             @Override
             public void onSuccess(List<EventDTO> result) {
+                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
+                if (result != null && !result.isEmpty()) {
+                    timerForClientServerOffset.adjustClientServerOffset(clientTimeWhenRequestWasSent,
+                            result.get(result.size() - 1).getCurrentServerTime(), clientTimeWhenResponseWasReceived);
+                }
                 availableEvents = new ArrayList<EventDTO>(result);
                 eventsDataProvider.getList().clear();
                 eventsDataProvider.getList().addAll(availableEvents);
@@ -608,10 +618,10 @@ public class EventOverviewPanel extends FormPanel {
                     location.split("\\s"));
         }
         if (result && name != null && name.length() > 0) {
-            result = textContainsStringsToCheck(event.name, name.split("\\s"));
+            result = textContainsStringsToCheck(event.getName(), name.split("\\s"));
         }
         if (result && onlyLiveCheckBox.getValue()) {
-            result = event.leaderboardGroup.hasLiveRace();
+            result = event.leaderboardGroup.hasLiveRace(timerForClientServerOffset.getLiveTimePointInMillis());
         }else if (result) {
             Date startDate = event.leaderboardGroup.getGroupStartDate();
             if (startDate != null) {

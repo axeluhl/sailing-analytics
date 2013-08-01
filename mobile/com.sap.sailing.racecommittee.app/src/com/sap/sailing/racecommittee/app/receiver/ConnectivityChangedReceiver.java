@@ -11,7 +11,7 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class ConnectivityChangedReceiver extends BroadcastReceiver {
@@ -26,7 +26,7 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
         NetworkInfo networkInfo = (NetworkInfo)intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
         if (!networkInfo.isConnected())
             return;
-        Intent sendSavedIntent = new Intent(context.getResources().getString(R.string.intentActionSendSavedIntents));
+        Intent sendSavedIntent = new Intent(AppConstants.INTENT_ACTION_SEND_SAVED_INTENTS);
         context.startService(sendSavedIntent);
 
         disable(context);

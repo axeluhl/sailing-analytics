@@ -5,37 +5,22 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 
-public class RaceStatusAnalyzer extends RaceLogAnalyzer {
+public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
 
     public RaceStatusAnalyzer(RaceLog raceLog) {
         super(raceLog);
     }
 
-    public RaceLogRaceStatus getStatus() {
-
-        RaceLogRaceStatus newStatus = RaceLogRaceStatus.UNSCHEDULED;
-        
-        this.raceLog.lockForRead();
-        try {
-            newStatus = searchForRaceStatus();
-        } finally {
-            this.raceLog.unlockAfterRead();
-        }
-        
-        return newStatus;
-    }
-
-    private RaceLogRaceStatus searchForRaceStatus() {
-        RaceLogRaceStatus newStatus = RaceLogRaceStatus.UNSCHEDULED;
-        
-        for (RaceLogEvent event : getPassEvents()) {
+    @Override
+    protected RaceLogRaceStatus performAnalyzation() {
+        for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogRaceStatusEvent) {
                 RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
-                newStatus = statusEvent.getNextStatus();
+                return statusEvent.getNextStatus();
             }
         }
         
-        return newStatus;
+        return RaceLogRaceStatus.UNSCHEDULED;
     }
 
 }

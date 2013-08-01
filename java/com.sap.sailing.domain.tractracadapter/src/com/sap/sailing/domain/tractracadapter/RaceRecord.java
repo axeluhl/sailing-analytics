@@ -38,10 +38,11 @@ public class RaceRecord {
     private final URI storedURI;
     private final List<String> boatClassNames;
     private final String raceStatus;
+    private final URL jsonUrl;
     
-    public RaceRecord(URL jsonURL, String regattaName, String name, String replayURL, String ID,
-            String trackingstarttime, String trackingendtime, String racestarttime, String commaSeparatedBoatClassNames,
-            String status)
+    public RaceRecord(URL jsonURL, String regattaName, String name, String replayURL, String paramURLAsString,
+            String ID, String trackingstarttime, String trackingendtime, String racestarttime,
+            String commaSeparatedBoatClassNames, String status, boolean loadLiveAndStoredURI)
             throws URISyntaxException, IOException {
         super();
         this.regattaName = regattaName;
@@ -49,6 +50,7 @@ public class RaceRecord {
         this.replayURL = replayURL;
         this.raceStatus = status;
         this.ID = ID;
+        this.jsonUrl = jsonURL;
         this.boatClassNames = new ArrayList<String>();
         if (commaSeparatedBoatClassNames != null) {
             for (String boatClassName : commaSeparatedBoatClassNames.split(",")) {
@@ -87,18 +89,36 @@ public class RaceRecord {
         int indexOfLastSlash = jsonURLAsString.lastIndexOf('/');
         int indexOfLastButOneSlash = jsonURLAsString.lastIndexOf('/', indexOfLastSlash-1);
         String technicalEventName = jsonURLAsString.substring(indexOfLastButOneSlash+1, indexOfLastSlash);
-        paramURL = new URL(jsonURLAsString.substring(0, indexOfLastSlash)+"/clientparams.php?event="+
-                technicalEventName+"&race="+ID);
+        final String baseURL = jsonURLAsString.substring(0, indexOfLastSlash);
+        
         try {
-            Map<String, String> paramURLContents = parseParams(paramURL);
-            String liveURIAsString = paramURLContents.get(LIVE_URI_PROPERTY);
-            liveURI = liveURIAsString == null ? null : new URI(liveURIAsString);
-            String storedURIAsString = paramURLContents.get(STORED_URI_PROPERTY);
-            storedURI = storedURIAsString == null ? null : new URI(storedURIAsString);
+            if (paramURLAsString == null || paramURLAsString.isEmpty()) {
+                // for backward compatibility (the param_url field was not always in the JSON document) and perhaps for live mode
+                paramURL = new URL(baseURL + "/clientparams.php?event="
+                        + technicalEventName + "&race=" + ID);
+            } else {
+                paramURL = new URL(paramURLAsString);
+            }
         } catch (Exception e) {
-            logger.info("Couldn't parse TracTrac paramURL " + paramURL + " for race record " + getName());
+            logger.info("Couldn't parse TracTrac paramURL " + paramURLAsString + " for race record " + getName());
             logger.log(Level.INFO, "The exception was:", e);
             throw e;
+        }
+        if (loadLiveAndStoredURI) {
+                Map<String, String> paramURLContents = parseParams(paramURL);
+                String liveURIAsString = paramURLContents.get(LIVE_URI_PROPERTY);
+                liveURI = liveURIAsString == null ? null : new URI(liveURIAsString);
+                String storedURIAsString = paramURLContents.get(STORED_URI_PROPERTY);
+                if (storedURIAsString == null || storedURIAsString.startsWith("tcp:") || storedURIAsString.startsWith("http:") ||
+                        storedURIAsString.startsWith("https:")) {
+                    storedURI = storedURIAsString == null ? null : new URI(storedURIAsString);
+                } else {
+                    storedURI = new URI(baseURL+"/"+storedURIAsString);
+                }
+        } else {
+            paramURLAsString = null;
+            liveURI = null;
+            storedURI = null;
         }
     }
 
@@ -114,6 +134,10 @@ public class RaceRecord {
             }
         }
         return result;
+    }
+    
+    public boolean hasLiveAndStoredURI() {
+        return liveURI != null;
     }
 
     public String getName() {
@@ -162,6 +186,10 @@ public class RaceRecord {
     
     public String getRaceStatus() {
         return raceStatus;
+    }
+    
+    public URL getJsonURL() {
+        return jsonUrl;
     }
     
 }

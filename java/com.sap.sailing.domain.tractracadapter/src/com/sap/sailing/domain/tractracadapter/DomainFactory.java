@@ -11,7 +11,6 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.UUID;
 
-
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Course;
@@ -20,6 +19,7 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -43,7 +43,6 @@ import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sailing.domain.tractracadapter.impl.Simulator;
 import com.tractrac.clientmodule.Competitor;
-import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
@@ -63,7 +62,12 @@ public interface DomainFactory {
 
     Course createCourse(String name, Iterable<Pair<TracTracControlPoint, NauticalSide>> controlPoints);
 
+    Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints);
+
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(Competitor competitor);
+
+    com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(UUID competitorId, String competitorClassName,
+            String nationalityAsString, String name, String shortName);
 
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
@@ -85,8 +89,9 @@ public interface DomainFactory {
      * Fetch a race definition previously created by a call to {@link #getOrCreateRaceDefinitionAndTrackedRace}. If no such
      * race definition was created so far, the call blocks until such a definition is provided by a call to
      * {@link #getOrCreateRaceDefinitionAndTrackedRace}.
+     * @param raceId TODO
      */
-    RaceDefinition getAndWaitForRaceDefinition(Race race);
+    RaceDefinition getAndWaitForRaceDefinition(UUID raceId);
 
     /**
      * Creates an {@link com.sap.sailing.domain.base.Regatta event} from a
@@ -141,7 +146,7 @@ public interface DomainFactory {
             WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
 
-    BoatClass getOrCreateBoatClass(CompetitorClass competitorClass);
+    BoatClass getOrCreateBoatClass(String competitorClassName);
 
     /**
      * For each race listed by the <code>tractracEvent</code>, produces {@link TypeController listeners} that, when
@@ -176,21 +181,23 @@ public interface DomainFactory {
      * resulting {@link RaceDefinition} is added to the {@link com.sap.sailing.domain.base.Regatta} to which
      * <code>trackedRegatta</code> belongs (see {@link TrackedRegatta#getRegatta()}). It is added to the internal race cache.
      * The corresponding {@link TrackedRace} object is also created, and the notification of threads waiting on the race
-     * cache such as a blocking {@link #getAndWaitForRaceDefinition(Race)} happens only <em>after</em> the tracked race
+     * cache such as a blocking {@link #getAndWaitForRaceDefinition(UUID)} happens only <em>after</em> the tracked race
      * has been created and the {@link RaceDefinition} was
      * {@link com.sap.sailing.domain.base.Regatta#addRace(RaceDefinition) added} to the domain event. This ensures that
      * waiters for the {@link RaceDefinition} are guaranteed to obtain a valid, non- <code>null</code> tracked race
      * already immediately after the notification was sent, and that the {@link RaceDefinition} is already
      * {@link com.sap.sailing.domain.base.Regatta#getAllRaces() known} by its containing
      * {@link com.sap.sailing.domain.base.Regatta}.
-     * 
+     * @param raceName TODO
+     * @param competitors TODO
+     * @param boatClass TODO
      * @param raceDefinitionSetToUpdate
      *            if not <code>null</code>, after creating the {@link TrackedRace}, the {@link RaceDefinition} is
      *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace) added} to that object.
      */
-    DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta, Race race,
-            Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword);
+    DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta, UUID raceId,
+            String raceName, Iterable<com.sap.sailing.domain.base.Competitor> competitors, BoatClass boatClass, Course course, Iterable<Sideline> sidelines,
+            WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword);
 
     /**
      * The record may be for a single mark or a gate. If for a gate, the
@@ -208,12 +215,12 @@ public interface DomainFactory {
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, ReceiverType... types);
 
-    JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
+    JSONService parseJSONURLWithRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
     /**
      * Returns a {@link RaceDefinition} for the race if it already exists, <code>null</code> otherwise.
      */
-    RaceDefinition getExistingRaceDefinitionForRace(Race race);
+    RaceDefinition getExistingRaceDefinitionForRace(UUID raceId);
 
     /**
      * When a course is changed dynamically, we receive an updated list of control points that now define
@@ -231,14 +238,14 @@ public interface DomainFactory {
      * <code>timeoutInMilliseconds</code> milliseconds have passed and the race definition is found not to have shown up
      * until then, <code>null</code> is returned. The unblocking may be deferred even beyond
      * <code>timeoutInMilliseconds</code> in case no modifications happen on the set of races cached by this factory.
-     * 
+     * @param raceId TODO
      * @param timeoutInMilliseconds
      *            passing -1 means an infinite timeout; 0 means return immediately with <code>null</code> as result if no
      *            race definition is found for <code>race</code>.
      */
-    RaceDefinition getAndWaitForRaceDefinition(Race race, long timeoutInMilliseconds);
+    RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds);
 
-    Pair<List<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race);
+    Pair<Iterable<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race);
     
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore,
@@ -258,5 +265,13 @@ public interface DomainFactory {
      * Computes an ID to use for a {@link RaceDefinition} based on the TracTrac race.
      */
     Serializable getRaceID(Race tractracRace);
+
+    JSONService parseJSONURLForOneRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
+
+    MetadataParser getMetadataParser();
+
+    BoatClass getDominantBoatClass(List<String> competitorClassNames);
+
+    List<Sideline> createSidelines(String raceMetadataString, Iterable<? extends TracTracControlPoint> allEventControlPoints);
 
 }

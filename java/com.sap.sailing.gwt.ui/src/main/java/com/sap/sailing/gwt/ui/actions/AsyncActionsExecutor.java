@@ -6,10 +6,11 @@ import java.util.Map;
 import com.google.gwt.core.client.GWT;
 
 /**
+ * A executor class making the actual remote call for an {@link AsyncAction}. The class is managing the number of
+ * executed actions in order to prevent a server overload. If the amount of actions to be executed exceeds a defined
+ * threshold the execution of those actions will be dropped.
+ * 
  * @author c5163874
- * A executor class making the actual remote call for an AsyncAction.
- * The class is managing the number of executed actions in order to prevent a server overload.
- * If the amount of actions to be executed exceeds a defined threshold the execution of those actions will be dropped.
  */
 public class AsyncActionsExecutor {
     private Map<String, AsyncAction<?>> lastRequestedActions;

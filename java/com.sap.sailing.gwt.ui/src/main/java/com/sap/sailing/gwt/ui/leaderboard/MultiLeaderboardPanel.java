@@ -142,7 +142,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
             selectedLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                     selectedLeaderboardSettings, /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
                     "leaderboardGroupName", selectedLeaderboardName, errorReporter, stringMessages, userAgent,
-                    showRaceDetails, /* raceTimesInfoProvider */null, false);
+                    showRaceDetails, /* raceTimesInfoProvider */null, false,  /* adjustTimerDelay */ true);
             mainPanel.add(selectedLeaderboardPanel);
         } else {
             if(selectedLeaderboardPanel != null) {

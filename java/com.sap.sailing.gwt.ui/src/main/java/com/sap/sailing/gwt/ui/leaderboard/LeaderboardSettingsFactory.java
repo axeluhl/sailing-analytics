@@ -68,9 +68,8 @@ public class LeaderboardSettingsFactory {
                         namesOfRaceColumnsToShow,
                         namesOfRacesToShow, raceColumnSelection.getNumberOfLastRaceColumnsToShow(),
                         /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null,
-                        /* refresh interval */ null, /* delay to live */ null,
-                        /* name of race to sort */ nameOfRaceToSort, /* ascending */ true, /* updateUponPlayStateChange */ true,
-                        raceColumnSelection.getType());
+                        /* refresh interval */ null, /* name of race to sort */ nameOfRaceToSort,
+                        /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType());
                 break;
             case Replay:
             settings = createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, /* autoExpandFirstRace */
@@ -131,8 +130,7 @@ public class LeaderboardSettingsFactory {
         return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
                 namesOfRaceColumnsToShow,
                 namesOfRacesToShow, numberOfLastRacesToShow,
-                autoExpandPreSelectedRace, refreshIntervalMillis, /* delay to live */ null,
-                /* sort by column */ nameOfRaceToSort, /* ascending */ true, /* updateUponPlayStateChange */ true,
-                raceColumnSelectionStrategy);
+                autoExpandPreSelectedRace, refreshIntervalMillis, /* sort by column */ nameOfRaceToSort,
+                /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelectionStrategy);
     }
 }

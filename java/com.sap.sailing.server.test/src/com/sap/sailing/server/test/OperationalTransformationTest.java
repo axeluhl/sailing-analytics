@@ -64,7 +64,7 @@ public class OperationalTransformationTest {
     }
 
     @Test
-    public void testAddColumnToLeaderboardOnClientAndRemoveLeaderboardOnServer() throws InterruptedException {
+    public void testAddColumnToLeaderboardOnServerAndRemoveLeaderboardOnClient() throws InterruptedException {
         RacingEventServiceOperation<RaceColumn> addLeaderboardColumn = new AddColumnToLeaderboard(
                 "newColumn", LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true);
         server.apply(addLeaderboardColumn);

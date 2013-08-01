@@ -41,7 +41,7 @@ public class LeaderboardViewer extends SimplePanel {
     private final static String STYLE_VIEWER_TOOLBAR_INNERELEMENT = "viewerToolbar-innerElement";
     private final static String STYLE_VIEWER_TOOLBAR_SETTINGS_BUTTON = "viewerToolbar-settingsButton";
     
-    public LeaderboardViewer(long delayToLiveMillis, SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    public LeaderboardViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings leaderboardSettings, RaceIdentifier preselectedRace, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn, boolean showRankChart) {
@@ -63,8 +63,7 @@ public class LeaderboardViewer extends SimplePanel {
 
         
         timer = new Timer(PlayModes.Replay, /*delayBetweenAutoAdvancesInMilliseconds*/ 3000l);
-        timer.setLivePlayDelayInMillis(delayToLiveMillis);
-        leaderboardPanel = createLeaderboardPanel(delayToLiveMillis, sailingService, leaderboardSettings, preselectedRace,
+        leaderboardPanel = createLeaderboardPanel(sailingService, leaderboardSettings, preselectedRace,
                 leaderboardGroupName, leaderboardName, errorReporter, stringMessages, userAgent,
                 showRaceDetails, autoExpandLastRaceColumn);
 
@@ -85,7 +84,7 @@ public class LeaderboardViewer extends SimplePanel {
         }
     }
 
-    private LeaderboardPanel createLeaderboardPanel(long delayToLiveMillis, SailingServiceAsync sailingService,
+    private LeaderboardPanel createLeaderboardPanel(SailingServiceAsync sailingService,
             LeaderboardSettings leaderboardSettings, RaceIdentifier preselectedRace, String leaderboardGroupName,
             String leaderboardName, ErrorReporter leaderboardEntryPoint, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
@@ -93,7 +92,7 @@ public class LeaderboardViewer extends SimplePanel {
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                 leaderboardSettings, preselectedRace, competitorSelectionProvider, timer,
                 leaderboardGroupName, leaderboardName, leaderboardEntryPoint, stringMessages, userAgent,
-                showRaceDetails, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn);
+                showRaceDetails, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn,  /* adjustTimerDelay */ true);
  
         return leaderboardPanel;
     }

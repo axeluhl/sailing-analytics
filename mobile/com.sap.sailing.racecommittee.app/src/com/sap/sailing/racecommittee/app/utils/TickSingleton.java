@@ -36,6 +36,6 @@ public enum TickSingleton implements Runnable {
             }
         }
         handler.removeCallbacks(this);
-        handler.postDelayed(this, 1000);
+        handler.postDelayed(this, 200);
     }
 }

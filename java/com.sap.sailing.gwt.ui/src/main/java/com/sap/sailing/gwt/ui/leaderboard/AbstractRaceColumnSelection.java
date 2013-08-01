@@ -17,7 +17,7 @@ public abstract class AbstractRaceColumnSelection implements RaceColumnSelection
     public Iterable<String> getSelectedRaceColumnNames() {
         List<String> names = new ArrayList<String>();
         for (RaceColumnDTO column : getSelectedRaceColumns()) {
-            names.add(column.name);
+            names.add(column.getName());
         }
         return names;
     }
@@ -26,11 +26,11 @@ public abstract class AbstractRaceColumnSelection implements RaceColumnSelection
     public Iterable<RaceColumnDTO> getSelectedRaceColumnsOrderedAsInLeaderboard(LeaderboardDTO leaderboard) {
         List<String> namesOfSelectedRaceColumns = new ArrayList<String>();
         for (RaceColumnDTO selectedColumn : getSelectedRaceColumns()) {
-            namesOfSelectedRaceColumns.add(selectedColumn.name);
+            namesOfSelectedRaceColumns.add(selectedColumn.getName());
         }
         List<RaceColumnDTO> result = new ArrayList<RaceColumnDTO>();
         for (RaceColumnDTO column : leaderboard.getRaceList()) {
-            if (Util.contains(namesOfSelectedRaceColumns, column.name)) {
+            if (Util.contains(namesOfSelectedRaceColumns, column.getName())) {
                 result.add(column);
             }
         }

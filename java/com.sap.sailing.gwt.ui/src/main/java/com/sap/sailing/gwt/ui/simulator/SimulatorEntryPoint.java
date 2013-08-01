@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
 public class SimulatorEntryPoint extends AbstractEntryPoint {
 
@@ -21,7 +22,8 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private int xRes = 40;
     private int yRes = 20;
     private boolean autoUpdate = false;
-    private char mode = 'f';
+    private char mode = SailingSimulatorConstants.ModeEvent;  // default mode: 'e'vent
+    private char event = SailingSimulatorConstants.EventKielerWoche; // default event: 'k'ieler woche
 
     private boolean showArrows = false; // show the wind arrows in wind display and replay modes.    
     private boolean showGrid = true;   // show the "heat map" in the wind display and replay modes.
@@ -61,12 +63,18 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
             logger.config("Using default mode " + mode);
         } else {
             mode = modeStr.charAt(0);
-            if (mode == 'm') {
+            if (mode == SailingSimulatorConstants.ModeMeasured) {
                 showArrows = true; // show the wind arrows in wind display and replay modes.    
                 showGrid = false;   // show the "heat map" in the wind display and replay modes.
                 showLines = false;  // show the wind lines in the wind display and replay modes.
                 showStreamlets = false; // show the wind streamlets in the wind display and replay modes.
             }
+        }
+        String eventStr = Window.Location.getParameter("event");
+        if (eventStr == null || eventStr.isEmpty()) {
+            logger.config("Using default event: " + event);
+        } else {
+            event = eventStr.charAt(0);
         }
         String windDisplayStr = Window.Location.getParameter("windDisplay");
         if (windDisplayStr == null || windDisplayStr.isEmpty()) {
@@ -100,7 +108,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
             }
         }
         SimulatorMainPanel mainPanel = new SimulatorMainPanel(simulatorSvc, stringMessages, this, xRes, yRes,
-                autoUpdate, mode, showGrid, showLines, seedLines, showArrows, showStreamlets);
+                autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showStreamlets);
         createRaceBoardInOneScreenMode(mainPanel);
     }
 

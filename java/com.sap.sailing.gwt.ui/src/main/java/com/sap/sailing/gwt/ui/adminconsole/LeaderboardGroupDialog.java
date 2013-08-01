@@ -10,10 +10,8 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
@@ -32,7 +30,7 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
     protected CheckBox displayLeaderboardsInReverseOrderCheckBox;
     protected CheckBox useOverallLeaderboardCheckBox;
     private Panel overallLeaderboardConfigPanel;
-    private LongBox[] overallLeaderboardDiscardThresholdFields;
+    private DiscardThresholdBoxes overallLeaderboardDiscardThresholdBoxes;
     private ListBox overallLeaderboardScoringSchemeListBox;
     
     public static class LeaderboardGroupDescriptor {
@@ -91,7 +89,7 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
             
             boolean unique = true;
             for (LeaderboardGroupDTO group : existingGroups) {
-                if (group.name.equals(groupToValidate.getName())) {
+                if (group.getName().equals(groupToValidate.getName())) {
                     unique = false;
                     break;
                 }
@@ -120,10 +118,6 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
         return overallLeaderboardScoringSchemeListBox;
     }
 
-    protected LongBox[] getOverallLeaderboardDiscardThresholdFields() {
-        return overallLeaderboardDiscardThresholdFields;
-    }
-
     public LeaderboardGroupDialog(LeaderboardGroupDTO group, StringMessages stringMessages,
             DialogCallback<LeaderboardGroupDescriptor> callback, Collection<LeaderboardGroupDTO> existingLeaderboardGroups) {
         super(stringMessages.leaderboardGroup(), null, stringMessages.ok(), stringMessages.cancel(),
@@ -140,20 +134,12 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
                     group.getOverallLeaderboardScoringSchemeType()));
         }
         formGrid.setWidget(0, 1, overallLeaderboardScoringSchemeListBox);
-        formGrid.setWidget(1, 0, new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
-        HorizontalPanel hp = new HorizontalPanel();
-        hp.setSpacing(3);
         if (group.hasOverallLeaderboard()) {
-            overallLeaderboardDiscardThresholdFields = AbstractLeaderboardDialog.initPrefilledDiscardThresholdBoxes(
-                    group.getOverallLeaderboardDiscardThresholds(), this);
+            overallLeaderboardDiscardThresholdBoxes = new DiscardThresholdBoxes(this, group.getOverallLeaderboardDiscardThresholds(), stringMessages);
         } else {
-            overallLeaderboardDiscardThresholdFields = AbstractLeaderboardDialog.initEmptyDiscardThresholdBoxes(this);
+            overallLeaderboardDiscardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);
         }
-        for (int i = 0; i < overallLeaderboardDiscardThresholdFields.length; i++) {
-            hp.add(new Label("" + (i + 1) + "."));
-            hp.add(overallLeaderboardDiscardThresholdFields[i]);
-        }
-        formGrid.setWidget(1, 1, hp);
+        formGrid.setWidget(1, 1, overallLeaderboardDiscardThresholdBoxes.getWidget());
         overallLeaderboardConfigPanel = formGrid;
     }
 
@@ -162,8 +148,7 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
         return new LeaderboardGroupDescriptor(nameEntryField.getText(), descriptionEntryField.getText(),
                 displayLeaderboardsInReverseOrderCheckBox.getValue(),
                 useOverallLeaderboardCheckBox.getValue(),
-                useOverallLeaderboardCheckBox.getValue() ? AbstractLeaderboardDialog
-                        .getDiscardThresholds(getOverallLeaderboardDiscardThresholdFields()) : null,
+                useOverallLeaderboardCheckBox.getValue() ? overallLeaderboardDiscardThresholdBoxes.getDiscardThresholds() : null,
                         useOverallLeaderboardCheckBox.getValue() ? AbstractLeaderboardDialog.getSelectedScoringSchemeType(
                                 overallLeaderboardScoringSchemeListBox, stringMessages) : null);
     }

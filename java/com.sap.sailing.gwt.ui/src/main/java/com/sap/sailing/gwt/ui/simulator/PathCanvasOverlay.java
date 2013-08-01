@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.i18n.client.TimeZone;
@@ -41,8 +40,6 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
     private LatLng endPoint;
     private boolean totalTimeIsGiven = false;
     private long totalTimeMilliseconds = 0;
-    private double curSpeed;
-    private double curBearing;
 
 
     protected String name;
@@ -61,8 +58,8 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         this.name = name;
     }
 
-    public PathCanvasOverlay(String name, Timer timer) {
-        super(timer);
+    public PathCanvasOverlay(String name, Timer timer, WindFieldGenParamsDTO windParams) {
+        super(timer, windParams);
         this.name = name;
     }
 
@@ -81,15 +78,15 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         this.pathColor = color;
     }
 
-    public PathCanvasOverlay(String name, Timer timer, long totalTimeMilliseconds) {
-        super(timer);
+    public PathCanvasOverlay(String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds) {
+        super(timer, windParams);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;
     }
 
-    public PathCanvasOverlay(String name, Timer timer, long totalTimeMilliseconds, String color) {
-        super(timer);
+    public PathCanvasOverlay(String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds, String color) {
+        super(timer, windParams);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;
@@ -110,11 +107,6 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         this.endPoint = endPoint;
     }
 
-    public void setCurrent(double curSpeed, double curBearing) {
-        this.curSpeed = curSpeed;
-        this.curBearing = curBearing;
-    }
-
     /*
     @Override
     protected void drawWindField() {
@@ -123,38 +115,9 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         drawWindField(windDTOList);
     }
      */
+    
     @Override
     protected void drawWindField(List<SimulatorWindDTO> windDTOList) {
-
-        //
-        // TODO: draw current arrow
-        //
-        DegreeBearingImpl curBear = new DegreeBearingImpl(this.curBearing);
-
-        Context2d context2d = canvas.getContext2d();
-
-        if (this.curSpeed >= 0.0) {
-            //drawScaledArrow(windDTO, dbi.getRadians(), index, true);
-            double cFactor = 12.0;
-            double cWidth = Math.max(1., 1. + (cFactor * PathPolyline.knotsToMetersPerSecond(this.curSpeed) / 3.0));
-            double cLength = Math.max(10., 10. + (cFactor * 2. * PathPolyline.knotsToMetersPerSecond(this.curSpeed)));
-            int cX = 100;
-            int cY = 150;
-            if (this.curSpeed > 0.0) {
-                drawArrowPx(cX, cY, curBear.getRadians(), cLength, cWidth, true, "Green");
-            }
-
-            context2d.setFont(textFont);
-            context2d.setFillStyle(textColor);
-
-            TextMetrics txtmet;
-            String cText = "Current: " + SimulatorMainPanel.formatSliderValue(curSpeed) + "kn";
-            txtmet = context2d.measureText(cText);
-            double timewidth = txtmet.getWidth();
-            context2d.fillText(cText, cX-(timewidth/2.0), cY-25);
-        }
-
-        WindFieldGenParamsDTO windParams = new WindFieldGenParamsDTO();
 
         int numPoints = windDTOList.size();
         if (numPoints < 1) {
@@ -181,7 +144,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
 
         if (windDTOList != null && windDTOList.size() > 0) {
 
-            // Context2d context2d = canvas.getContext2d();
+            Context2d context2d = canvas.getContext2d();
             context2d.setGlobalAlpha(0.8);
 
             Iterator<SimulatorWindDTO> windDTOIter = windDTOList.iterator();

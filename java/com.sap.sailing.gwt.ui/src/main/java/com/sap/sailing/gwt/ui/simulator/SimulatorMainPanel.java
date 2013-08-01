@@ -21,6 +21,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -38,6 +39,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -57,18 +59,28 @@ import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
-import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
-import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
-import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
+import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternSetting;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
 public class SimulatorMainPanel extends SimplePanel {
 
+	private class resizableFlowPanel extends FlowPanel implements RequiresResize {
+
+		@Override
+		public void onResize() {
+	        simulatorMap.getMap().checkResizeAndCenter();
+		}
+		
+	}
+	
     private DockLayoutPanel mainPanel;
     private FlowPanel leftPanel;
-    private FlowPanel rightPanel;
+    private resizableFlowPanel rightPanel;
     private VerticalPanel windPanel;
 
     private Button updateButton;
+    private Button polarDiagramButton;
     private Button courseInputButton;
 
     private RadioButton summaryButton;
@@ -100,10 +112,9 @@ public class SimulatorMainPanel extends SimplePanel {
     private StringMessages stringMessages;
     private SimulatorServiceAsync simulatorSvc;
     private ErrorReporter errorReporter;
-    private int xRes;
-    private int yRes;
     private boolean autoUpdate;
     private char mode;
+    private char event;
 
     private TimePanel<TimePanelSettings> timePanel;
     private FlowPanel fullTimePanel;
@@ -135,6 +146,18 @@ public class SimulatorMainPanel extends SimplePanel {
             sliderBar.setTitle(SimulatorMainPanel.formatSliderValue(sliderBar.getCurrentValue()));
             logger.info("Slider value : " + arg0.getValue());
             setting.setValue(arg0.getValue());
+            if (setting.getDisplayName().equals("Base Bearing (Degrees)")) {
+            	simulatorMap.clearOverlays();
+            	//System.out.println("Wind Base Bearing: "+setting.getValue());
+            	simulatorMap.regattaAreaCanvasOverlay.updateRaceCourse(1, (Double) setting.getValue());
+	            simulatorMap.raceCourseCanvasOverlay.redraw(true);
+            }
+            if (setting.getDisplayName().equals("Race Course Diff (Degrees)")) {
+            	simulatorMap.clearOverlays();
+            	//System.out.println("Wind Base Bearing: "+setting.getValue());
+            	simulatorMap.regattaAreaCanvasOverlay.updateRaceCourse(2, (Double) setting.getValue());
+	            simulatorMap.raceCourseCanvasOverlay.redraw(true);
+            }
             if (autoUpdate) {
                 update();
             }
@@ -202,22 +225,35 @@ public class SimulatorMainPanel extends SimplePanel {
     }
 
     public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, boolean autoUpdate,
-            char mode, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showStreamlets) {
+            char mode, char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showStreamlets) {
 
         super();
 
         this.simulatorSvc = svc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        this.xRes = xRes;
-        this.yRes = yRes;
         this.autoUpdate = autoUpdate;
         this.mode = mode;
+        this.event = event;
         this.isOmniscient = new CheckBox(this.stringMessages.omniscient(), true);
         this.isOmniscient.setValue(true);
+        this.isOmniscient.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent evnet) {
+            	boolean selectedValue = isOmniscient.getValue();
+            	simulatorMap.windParams.showOmniscient = selectedValue;
+            }
+        });
 
         this.isOpportunistic = new CheckBox(this.stringMessages.opportunistic(), true);
         this.isOpportunistic.setValue(true);
+        this.isOpportunistic.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent evnet) {
+            	boolean selectedValue = isOpportunistic.getValue();
+            	simulatorMap.windParams.showOpportunist = selectedValue;
+            }
+        });
 
         this.isPathPolylineFreeMode = new CheckBox(this.stringMessages.freemode(), true);
         this.isPathPolylineFreeMode.setValue(true);
@@ -225,7 +261,7 @@ public class SimulatorMainPanel extends SimplePanel {
         this.setSize("100%", "100%");
         
         leftPanel = new FlowPanel();
-        rightPanel = new FlowPanel();
+        rightPanel = new resizableFlowPanel();
         patternSelector = new ListBox();
         patternSelectorHandler = new PatternSelectorHandler();
         patternSelector.addChangeHandler(patternSelectorHandler);
@@ -250,6 +286,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
         directionSelector = new ListBox();
         directionSelector.getElement().getStyle().setProperty("width", "215px");
+        
         windParams = new WindFieldGenParamsDTO();
         windParams.setMode(mode);
         windParams.setShowArrows(showArrows);
@@ -257,9 +294,9 @@ public class SimulatorMainPanel extends SimplePanel {
         windParams.setShowLines(showLines);
         windParams.setSeedLines(seedLines);
         windParams.setShowStreamlets(showStreamlets);
+        this.setDefaultTimeSettings();
 
         timer = new Timer(PlayModes.Replay, 1000l);
-
         TimeRangeWithZoomProvider timeRangeProvider = new TimeRangeWithZoomModel();
         initTimer();
         timer.setTime(windParams.getStartTime().getTime());
@@ -275,16 +312,26 @@ public class SimulatorMainPanel extends SimplePanel {
         // logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         // this.addNorth(logoAndTitlePanel, 68);
 
+        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
+                windParams, busyIndicator, mode, this);
+        simulatorMap.setSize("100%", "100%");
+
+        this.rightPanel.add(this.simulatorMap);
+
         createOptionsPanelTop();
         createOptionsPanel();
-        createMapOptionsPanel();
 
         fullTimePanel = this.createTimePanel();
 
         mainPanel = new DockLayoutPanel(Unit.PX);
+        
         mainPanel.setSize("100%", "100%");        
         mainPanel.addWest(leftPanel, 470);
         mainPanel.addSouth(fullTimePanel, 90);
+        mainPanel.setWidgetHidden(fullTimePanel, true);
+        
+        createMapOptionsPanel(); // add map-options to mainPanel-North
+
         mainPanel.add(rightPanel);
         this.setWidget(mainPanel);        
 
@@ -292,30 +339,23 @@ public class SimulatorMainPanel extends SimplePanel {
 
     }
 
-    private void showTimePanel(boolean visible) {
-        
-        boolean isContained = mainPanel.getWidgetIndex(fullTimePanel) >= 0;
-        
-        if (visible) {
-            
-            if (!isContained) {
-                fullTimePanel.setVisible(true);
-                mainPanel.insertSouth(fullTimePanel, 90, null);
-            }
-            
-        } else {
-            
-            if (isContained) {
-                mainPanel.remove(fullTimePanel);
-                fullTimePanel.setVisible(false);
-            }
-            
-        }
-        
-        mainPanel.forceLayout();
-        
+    public void setDefaultTimeSettings() {
+        Date defaultNow = new Date();
+    	DateTimeFormat fmt = DateTimeFormat.getFormat("Z"); 
+        NumberFormat df = NumberFormat.getDecimalFormat();
+        int utcOffSet = (int) df.parse(fmt.format(defaultNow))/100; // default time zone offset versus UTC
+        long epochTime = (defaultNow.getTime()/86400000)*86400000 - utcOffSet*3600000; // today, midnight in default time zone
+
+        Date startTime = new Date(epochTime);
+        Date timeStep = new Date(15 * 1000);
+        Date endTime = new Date(startTime.getTime() + 10 * 60 * 1000);
+        windParams.setDefaultTimeSettings(startTime, timeStep, endTime);
     }
-    
+
+    public void showTimePanel(boolean visible) {
+        mainPanel.setWidgetHidden(fullTimePanel, !visible);
+        mainPanel.forceLayout(); // trigger onResize() on child panels, relevant for map resize & center
+    }
     
     private void createOptionsPanelTop() {
         HorizontalPanel optionsPanel = new HorizontalPanel();
@@ -328,10 +368,17 @@ public class SimulatorMainPanel extends SimplePanel {
         optionsPanel.setSize("100%", "45px");
         optionsPanel.add(options);
         optionsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        initUpdateButton();
-        // updateButton.getElement().getStyle().setFloat(Style.Float.RIGHT);
-        optionsPanel.add(updateButton);
 
+        HorizontalPanel buttonPanel = new HorizontalPanel();
+        buttonPanel.setWidth("0px");
+        
+        initPolarDiagramButton();
+        buttonPanel.add(polarDiagramButton);        
+
+        initUpdateButton();
+        buttonPanel.add(updateButton);
+        
+        optionsPanel.add(buttonPanel);        
         leftPanel.add(optionsPanel);
     }
 
@@ -364,7 +411,7 @@ public class SimulatorMainPanel extends SimplePanel {
         Label pattern = new Label(stringMessages.pattern());
         hp.add(pattern);
 
-        simulatorSvc.getWindPatterns(new AsyncCallback<List<WindPatternDTO>>() {
+        simulatorSvc.getWindPatterns(mode, new AsyncCallback<List<WindPatternDTO>>() {
 
             @Override
             public void onFailure(Throwable message) {
@@ -374,13 +421,16 @@ public class SimulatorMainPanel extends SimplePanel {
             @Override
             public void onSuccess(List<WindPatternDTO> patterns) {
                 for (WindPatternDTO p : patterns) {
-                    if ((mode != SailingSimulatorUtil.freestyle)||(!p.name.equals("MEASURED"))) {
+                    if ((mode != SailingSimulatorConstants.ModeFreestyle)||(!p.getName().equals("MEASURED"))) {
                         patternSelector.addItem(p.getDisplayName());
                         patternNameDTOMap.put(p.getDisplayName(), p);
                     }
                 }
-                if (mode == SailingSimulatorUtil.measured) {
+                if (mode == SailingSimulatorConstants.ModeMeasured) {
                     patternSelector.setItemSelected(patternSelector.getItemCount()-1, true);
+                    patternSelectorHandler.onChange(null);
+                } else {
+                    patternSelector.setItemSelected(0, true);
                     patternSelectorHandler.onChange(null);
                 }
             }
@@ -483,21 +533,22 @@ public class SimulatorMainPanel extends SimplePanel {
 
         mapOptions.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
-        initCourseInputButton();
-
-        if (mode != SailingSimulatorUtil.measured) {
+        if ((mode != SailingSimulatorConstants.ModeMeasured)&&(mode != SailingSimulatorConstants.ModeEvent)) {
+        	initCourseInputButton();
             mapOptions.add(courseInputButton);
         }
+        
         mapOptions.add(busyIndicator);
-        rightPanel.add(mapOptions);
+        //rightPanel.add(mapOptions);
+        mainPanel.addNorth(mapOptions, 45);
 
         initDisplayOptions(mapOptions);
+        if (mode == SailingSimulatorConstants.ModeEvent) {
+        	summaryButton.setValue(true);
+        	replayButton.setValue(false);
+        	windDisplayButton.setValue(false);
+        }
 
-        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
-                windParams, busyIndicator, mode, this);
-        simulatorMap.setSize("100%", "100%");
-
-        this.rightPanel.add(this.simulatorMap);
     }
 
     // initialize timer with a default time span based on windParams
@@ -537,6 +588,15 @@ public class SimulatorMainPanel extends SimplePanel {
         if (directionSelector != null) {
             directionSelector.addItem(stringMessages.upWind());
             directionSelector.addItem(stringMessages.downWind());
+            
+            this.directionSelector.addChangeHandler(new ChangeHandler() {
+                @Override
+                public void onChange(ChangeEvent evnet) {
+                    int selectedIndex = directionSelector.getSelectedIndex();
+                    setRaceCourseDirection(selectedIndex);
+                }
+            });
+            
             hp.add(directionSelector);
         }
         return hp;
@@ -600,51 +660,6 @@ public class SimulatorMainPanel extends SimplePanel {
         return fullTimePanel;
     }
 
-    private Panel createPolarSelector() {
-
-        HorizontalPanel polarDiagramPanel = new HorizontalPanel();
-        polarDiagramPanel.getElement().setClassName("boatClassPanel");
-        polarDiagramPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-
-        Label polarShowLabel = new Label(stringMessages.showHideComponent(""));
-        polarShowLabel.getElement().setClassName("boatClassLabel");
-        polarDiagramPanel.add(polarShowLabel);
-
-        final CheckBox cb = new CheckBox("");
-        cb.setValue(false);
-        cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                boolean checked = ((CheckBox) event.getSource()).getValue();
-
-                polarDiv.setVisible(checked);
-
-                if(checked) {
-
-                    //TODO: change the hardcoded values bellow...
-
-                    polarDiagramDialogBox.setPopupPositionAndShow(new PositionCallback() {
-                        @Override
-                        public void setPosition(int offsetWidth, int offsetHeight) {
-
-                            int width = Window.getClientWidth() - 550;
-                            int height = Window.getClientHeight() - 525;
-
-                            polarDiagramDialogBox.setPopupPosition(width, height);
-                        }
-                    });
-
-                    polarDiagramDialogCloseButton.setFocus(true);
-                    cb.setValue(false);
-                }
-            }
-        });
-
-        polarDiagramPanel.add(cb);
-
-        return polarDiagramPanel;
-    }
-
     private void createSailingSetup(Panel controlPanel) {
 
         VerticalPanel sailingPanel = new VerticalPanel();
@@ -658,7 +673,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
         sailingPanel.add(this.getBoatClassesSelector());
 
-        if (this.mode == SailingSimulatorUtil.measured) {
+        if (this.mode == SailingSimulatorConstants.ModeMeasured) {
 
             sailingPanel.add(this.getRacesSelector());
             sailingPanel.add(this.getCompetitorsSelector());
@@ -671,29 +686,43 @@ public class SimulatorMainPanel extends SimplePanel {
         Panel strategySelector = createStrategySelector();
         sailingPanel.add(strategySelector);
 
-        if (this.mode == SailingSimulatorUtil.measured) {
+        if (this.mode == SailingSimulatorConstants.ModeMeasured) {
             Panel pathPolylineModeSelector = this.createPathPolylineModeSelector();
             sailingPanel.add(pathPolylineModeSelector);
         }
 
-        String polarString = stringMessages.simulatorPolarHeader();
-        Label polarSetup = new Label(polarString);
-        polarSetup.getElement().setClassName("innerHeadline");
-        sailingPanel.add(polarSetup);
-
-        Panel polarShow = createPolarSelector();
-        sailingPanel.add(polarShow);
-
         this.polarDiagramDialogCloseButton = new Button("Close");
         this.polarDiagramDialogCloseButton.getElement().setId("closeButton");
+        this.polarDiagramDialogCloseButton.getElement().getStyle().setProperty("marginTop", "10px");
 
         this.polarDiv = new VerticalPanel();
+        this.polarDiv.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        this.polarDiv.getElement().getStyle().setProperty("border", "0px");
         this.polarDiv.getElement().setClassName("polarDiv");
         this.polarDiv.setVisible(false);
 
         sailingPanel.add(this.polarDiv);
     }
 
+    private void setRaceCourseDirection(final int selectedDirection) {
+    
+    	switch(selectedDirection) {
+    		    	
+    	case 0:
+    		simulatorMap.setRaceCourseDirection(SailingSimulatorConstants.LegTypeUpwind);
+    		break;
+
+    	case 1:
+    		simulatorMap.setRaceCourseDirection(SailingSimulatorConstants.LegTypeDownwind);
+    		break;
+    	
+    	default:
+    		simulatorMap.setRaceCourseDirection(SailingSimulatorConstants.LegTypeUpwind);
+
+    	}
+    
+    }    
+    
     private void loadPolarDiagramData(final int selectedBoatClass) {
 
         this.simulatorSvc.getBoatClasses(new AsyncCallback<BoatClassDTOsAndNotificationMessage>() {
@@ -710,7 +739,7 @@ public class SimulatorMainPanel extends SimplePanel {
                 }
 
                 boatClasses = boatClassesAndMsg.getBoatClassDTOs();
-                chart.setChartTitleText(boatClasses[selectedBoatClass].name);
+                chart.setChartTitleText(boatClasses[selectedBoatClass].getName());
             }
         });
 
@@ -722,7 +751,7 @@ public class SimulatorMainPanel extends SimplePanel {
         .setType(Series.Type.LINE)
         .setChartTitleText("Polar diagram test")
         .setWidth(450)
-        .setHeight(300)
+        .setHeight(500)
         .setOption("/chart/polar", true)
         .setOption("pane/startAngle", 0)
         .setOption("pane/endAngle", 360)
@@ -781,7 +810,11 @@ public class SimulatorMainPanel extends SimplePanel {
 
     private void initUpdateButton() {
 
-        this.updateButton = new Button(stringMessages.update());
+        this.updateButton = new Button(stringMessages.simulateButton());
+        this.updateButton.getElement().getStyle().setProperty("marginLeft", "30px");
+        if (mode == SailingSimulatorConstants.ModeEvent) {
+        	this.updateButton.setEnabled(true);
+        }
         this.updateButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
@@ -790,6 +823,10 @@ public class SimulatorMainPanel extends SimplePanel {
         });
     }
 
+    public void setUpdateButtonEnabled(boolean enabled) {
+    	this.updateButton.setEnabled(enabled);
+    }
+    
     private void update() {
 
         // int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
@@ -805,12 +842,13 @@ public class SimulatorMainPanel extends SimplePanel {
             this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, selection, true);
         } else if (this.summaryButton.getValue()) {
             this.showTimePanel(false);
+        	this.simulatorMap.regattaAreaCanvasOverlay.redraw(true);
             this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selection, true);
         } else if (this.replayButton.getValue()) {
             this.showTimePanel(true);
             this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, selection, true);
         } else {
-            if (this.mode == SailingSimulatorUtil.measured) {
+            if (this.mode == SailingSimulatorConstants.ModeMeasured) {
 
                 if (selectedLegIndex % 2 != 0) {
                     errorReporter.reportError("Downwind legs are NOT supported yet. Sorry about that :)");
@@ -823,9 +861,44 @@ public class SimulatorMainPanel extends SimplePanel {
         }
     }
 
+    private void initPolarDiagramButton() {
+
+    	this.polarDiagramButton =  new Button(stringMessages.polarDiagramButton());
+    	this.polarDiagramButton.addClickHandler(new ClickHandler() {
+    		@Override
+    		public void onClick(ClickEvent arg0) {
+
+    			boolean checked = polarDiv.isVisible(); //((CheckBox) event.getSource()).getValue();
+
+    			if (!checked) {
+
+    				polarDiv.setVisible(true);
+
+    				//TODO: change the hardcoded values bellow...
+
+    				polarDiagramDialogBox.setPopupPositionAndShow(new PositionCallback() {
+    					@Override
+    					public void setPosition(int offsetWidth, int offsetHeight) {
+
+    						int width = (Window.getClientWidth() - 492)/2;
+    						int height = (Window.getClientHeight() - 608)/2;
+
+    						polarDiagramDialogBox.setPopupPosition(width, height);
+    					}
+    				});
+
+    				polarDiagramDialogCloseButton.setFocus(true);
+    				//cb.setValue(false);
+
+    			}
+    		}
+    	});
+
+    }	
+
     private void initDisplayOptions(Panel mapOptions) {
 
-        this.summaryButton = new RadioButton("Map Display Options", stringMessages.summary());
+    	this.summaryButton = new RadioButton("Map Display Options", stringMessages.summary());
         this.summaryButton.getElement().setClassName("MapDisplayOptions");
         this.summaryButton.addClickHandler(new ClickHandler() {
             @Override
@@ -874,8 +947,8 @@ public class SimulatorMainPanel extends SimplePanel {
     private DialogBox createPolarDiagramDialogBox() {
 
         final DialogBox dialogBox = new DialogBox();
+        dialogBox.getElement().getStyle().setZIndex(10); // put polardiagram on-top of sapsailing header and parameter sliders
         dialogBox.setText("Polar Diagram");
-
         dialogBox.setAnimationEnabled(true);
         dialogBox.setAutoHideEnabled(false);
         dialogBox.setModal(false);
@@ -886,6 +959,7 @@ public class SimulatorMainPanel extends SimplePanel {
         this.polarDiagramDialogCloseButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+            	polarDiv.setVisible(false);
                 dialogBox.hide();
             }
         });
@@ -893,6 +967,11 @@ public class SimulatorMainPanel extends SimplePanel {
         return dialogBox;
     }
 
+    public char getEvent() {
+    	return this.event;
+    }
+    
+    
     public int getSelectedBoatClassIndex() {
         return this.boatClassSelector.getSelectedIndex();
     }
@@ -1046,7 +1125,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
                 boatClasses = response.getBoatClassDTOs();
                 for (int i = 0; i < boatClasses.length; ++i) {
-                    boatClassSelector.addItem(boatClasses[i].name);
+                    boatClassSelector.addItem(boatClasses[i].getName());
                 }
                 boatClassSelector.setItemSelected(3, true); // polar diagram 49er STG
                 loadPolarDiagramData(3);

@@ -180,7 +180,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
     protected Series getOrCreateSeries(CompetitorDTO competitor) {
         Series result = competitorSeries.get(competitor);
         if (result == null) {
-            result = chart.createSeries().setType(Series.Type.LINE).setName(competitor.name);
+            result = chart.createSeries().setType(Series.Type.LINE).setName(competitor.getName());
             result.setPlotOptions(new LinePlotOptions()
             .setLineWidth(LINE_WIDTH)
             .setMarker(new Marker().setEnabled(true).setRadius(4).setSymbol(Symbol.DIAMOND))

@@ -47,8 +47,8 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_AUTO_EXPAND_LAST_RACE_COLUMN = "autoExpandLastRaceColumn";
     private static final String PARAM_REGATTA_NAME = "regattaName";
     private static final String PARAM_REFRESH_INTERVAL_MILLIS = "refreshIntervalMillis";
-    private static final String PARAM_DELAY_TO_LIVE_MILLIS = "delayToLiveMillis";
     private static final String PARAM_SHOW_RANK_CHART = "showRankChart";
+
     
     /**
      * Parameter to support scaling the complete page by a given factor. This works by either using the
@@ -76,8 +76,6 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 && Window.Location.getParameter(PARAM_SHOW_RACE_DETAILS).equalsIgnoreCase("true");
         final boolean embedded = Window.Location.getParameter(PARAM_EMBEDDED) != null
                 && Window.Location.getParameter(PARAM_EMBEDDED).equalsIgnoreCase("true");
-        final long delayToLiveMillis = Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS) != null ?
-                Long.valueOf(Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS)) : 5000l; // default 5s
 
         leaderboardName = Window.Location.getParameter("name");
         leaderboardGroupName = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
@@ -88,9 +86,14 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 public void onSuccess(Pair<String, LeaderboardType> leaderboardNameAndType) {
                     if (leaderboardNameAndType != null && leaderboardName.equals(leaderboardNameAndType.getA())) {
                         leaderboardType = leaderboardNameAndType.getB();
-                        createUI(showRaceDetails, embedded, delayToLiveMillis);
+                        createUI(showRaceDetails, embedded);
                     } else {
                         RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
+                    }
+                    
+                    final String zoomTo = Window.Location.getParameter(PARAM_ZOOM_TO);
+                    if (zoomTo != null) {
+                        RootPanel.getBodyElement().setAttribute("style", "zoom: "+zoomTo+";-moz-transform: scale("+zoomTo+");-moz-transform-origin: 0 0;-o-transform: scale("+zoomTo+");-o-transform-origin: 0 0;-webkit-transform: scale("+zoomTo+");-webkit-transform-origin: 0 0;");
                     }
                 }
 
@@ -108,7 +111,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         }
     }
     
-    private void createUI(boolean showRaceDetails, boolean embedded, long delayToLiveMillis) {
+    private void createUI(boolean showRaceDetails, boolean embedded) {
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(mainPanel);
         LogoAndTitlePanel logoAndTitlePanel = null;
@@ -140,12 +143,10 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         long delayBetweenAutoAdvancesInMilliseconds = 3000l;
         final RaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
         Timer timer = new Timer(PlayModes.Replay, delayBetweenAutoAdvancesInMilliseconds);
-        timer.setLivePlayDelayInMillis(delayToLiveMillis);
         final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
         if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
             timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, always goes "live"
         }
-        
         boolean autoExpandLastRaceColumn = Window.Location.getParameterMap().containsKey(
                 PARAM_AUTO_EXPAND_LAST_RACE_COLUMN) ? Boolean.valueOf(Window.Location.getParameterMap()
                 .get(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN).get(0)) : false;
@@ -155,19 +156,19 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 
         Widget leaderboardViewer;
         if(leaderboardType.isMetaLeaderboard()) {
-            leaderboardViewer = new MetaLeaderboardViewer(delayToLiveMillis, sailingService, new AsyncActionsExecutor(),
+            leaderboardViewer = new MetaLeaderboardViewer(sailingService, new AsyncActionsExecutor(),
                     leaderboardSettings, null, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages, userAgent,
                     showRaceDetails, autoExpandLastRaceColumn, showRankChart);
         } else {
-            leaderboardViewer = new LeaderboardViewer(delayToLiveMillis, sailingService, new AsyncActionsExecutor(),
+            leaderboardViewer = new LeaderboardViewer(sailingService, new AsyncActionsExecutor(),
                     leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages, userAgent,
                     showRaceDetails, autoExpandLastRaceColumn, showRankChart);
         }
         
          contentScrollPanel.setWidget(leaderboardViewer);
          mainPanel.add(contentScrollPanel);
-}
-    
+    }
+   
     private RaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
         RaceIdentifier result;
         if (parameterMap.containsKey(PARAM_RACE_NAME) && parameterMap.get(PARAM_RACE_NAME).size() == 1 &&
@@ -212,11 +213,11 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             result = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
                     /* namesOfRaceColumnsToShow */ null,
                     namesOfRacesToShow, numberOfLastRacesToShow,
-                    autoExpandPreSelectedRace, refreshIntervalMillis, /* delay to live */ null,
-                            /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
-                                            namesOfRacesToShow.get(0) : null, /* ascending */ true,
-                                    /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
+                    autoExpandPreSelectedRace, refreshIntervalMillis, /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
+                                    namesOfRacesToShow.get(0) : null,
+                            /* ascending */ true, /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
                                     raceColumnSelectionStrategy);
+
         } else {
             final List<DetailType> overallDetails = Collections.emptyList();
             result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null,
@@ -340,9 +341,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 + (settings.isShowRaceDetails() ? "&"+PARAM_SHOW_RACE_DETAILS+"=true" : "")
                 + (leaderboardDisplayName != null ? "&displayName="+leaderboardDisplayName : "")
                 + (settings.isEmbedded() ? "&"+PARAM_EMBEDDED+"=true" : "")
-                + (settings.getLeaderboardSettings().getDelayInMilliseconds() == null &&
-                   settings.getLeaderboardSettings().getDelayInMilliseconds() != 0 ? "" :
-                    "&"+PARAM_DELAY_TO_LIVE_MILLIS+"="+settings.getLeaderboardSettings().getDelayInMilliseconds())
+
                 + (!settings.isAutoRefresh() || (settings.getLeaderboardSettings().getDelayBetweenAutoAdvancesInMilliseconds() == null &&
                    settings.getLeaderboardSettings().getDelayBetweenAutoAdvancesInMilliseconds() != 0) ? "" :
                     "&"+PARAM_REFRESH_INTERVAL_MILLIS+"="+settings.getLeaderboardSettings().getDelayBetweenAutoAdvancesInMilliseconds())

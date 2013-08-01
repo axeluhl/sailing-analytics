@@ -13,9 +13,11 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.racelog.PassAwareRaceLog;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallDisplayedFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallRemovedFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.racecommittee.app.R;
@@ -23,8 +25,13 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.RunningRaceEventL
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartPhaseEventListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureListener;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.UserRequiredActionPerformedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RunningRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ESSCourseDesignDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.EssFinishedRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.EssFinishingRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.EssRunningRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.EssStartPhaseFragment;
 
 public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
@@ -39,22 +46,33 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     
     private final static double essAutomaticRaceFinishMultiplyer = 0.75;
     
+    //list of start procedure specific event id's
+    private static final Integer INDIVIDUAL_RECALL_REMOVAL_EVENT_ID = 1;
+    
     private List<Long> startProcedureEventIntervals;
-    private PassAwareRaceLog raceLog;
+    private RaceLog raceLog;
     private StartProcedureListener raceStateChangedListener;
     private EssStartPhaseEventListener startPhaseEventListener;
+    private EssRunningRaceEventListener runningRaceEventListener;
     
-    public ExtremeSailingSeriesStartProcedure(PassAwareRaceLog raceLog) {
+    private IndividualRecallDisplayedFinder individualRecallDisplayedFinder;
+    private IndividualRecallRemovedFinder individualRecallRemovedFinder;
+    
+    public ExtremeSailingSeriesStartProcedure(RaceLog raceLog) {
         this.raceLog = raceLog;
         startProcedureEventIntervals = new ArrayList<Long>();
         raceStateChangedListener = null;
         startPhaseEventListener = null;
+        runningRaceEventListener = null;
         
         startProcedureEventIntervals.add(startPhaseAPDownInterval);
         startProcedureEventIntervals.add(startPhaseESSThreeUpInterval);
         startProcedureEventIntervals.add(startPhaseESSTwoUpInterval);
         startProcedureEventIntervals.add(startPhaseESSOneUpInterval);
         startProcedureEventIntervals.add(startPhaseESSOneDownInterval);
+
+        individualRecallDisplayedFinder = new IndividualRecallDisplayedFinder(raceLog);
+        individualRecallRemovedFinder = new IndividualRecallRemovedFinder(raceLog);
     }
 
     @Override
@@ -155,7 +173,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
     
     @Override
-    public void setChangeListener(StartProcedureListener raceStateChangedListener) {
+    public void setStartProcedureListener(StartProcedureListener raceStateChangedListener) {
         this.raceStateChangedListener = raceStateChangedListener;
     }
 
@@ -182,7 +200,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         raceLog.add(event);
         
         StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
-        long raceDuration = eventTime.asMillis()-startTimeFinder.getStartTime().asMillis();
+        long raceDuration = eventTime.asMillis()-startTimeFinder.analyze().asMillis();
         
         TimePoint automaticRaceEnd = eventTime.plus((long) (raceDuration*essAutomaticRaceFinishMultiplyer));
         
@@ -194,7 +212,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     @Override
     public void dispatchAutomaticRaceEndEvent(TimePoint automaticRaceEnd) {
         RaceStatusAnalyzer analyzer = new RaceStatusAnalyzer(raceLog);
-        if(analyzer.getStatus().equals(RaceLogRaceStatus.FINISHING)) {
+        if(analyzer.analyze().equals(RaceLogRaceStatus.FINISHING)) {
             //setFinished(automaticRaceEnd);
         }
     }
@@ -267,7 +285,6 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         }
     }
 
-    @Override
     public void setIndividualRecall(TimePoint eventTime) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, /*isDisplayed*/true);
@@ -275,31 +292,50 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         
         TimePoint individualRecallRemovalFireTimePoint = eventTime.plus(individualRecallRemovalInterval);
         
+        
+        if (runningRaceEventListener != null) {
+            runningRaceEventListener.onIndividualRecall();
+        }
+        
         if (raceStateChangedListener != null) {
-            raceStateChangedListener.onIndividualRecall(individualRecallRemovalFireTimePoint);
+            raceStateChangedListener.onStartProcedureSpecificEvent(individualRecallRemovalFireTimePoint, INDIVIDUAL_RECALL_REMOVAL_EVENT_ID);
         }
     }
 
-    @Override
-    public void dispatchFiredIndividualRecallRemovalEvent(TimePoint individualRecallDisplayedTime, TimePoint eventTime) {
-        if (individualRecallDisplayedTime != null) {
-            long interval = eventTime.asMillis() - individualRecallDisplayedTime.asMillis();
-            
-            if (interval == individualRecallRemovalInterval) {
-                setIndividualRecallRemoval(eventTime);
+    public void setIndividualRecallRemoval(TimePoint eventTime) {
+        if (this.isIndividualRecallDisplayed()) {
+            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(),
+                    Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, /* isDisplayed */
+                    false);
+            raceLog.add(event);
+
+            if (runningRaceEventListener != null) {
+                runningRaceEventListener.onIndividualRecallRemoval();
             }
         }
     }
-
-    @Override
-    public void setIndividualRecallRemoval(TimePoint eventTime) {
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
-                raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, /*isDisplayed*/false);
-        raceLog.add(event);
-        
-        if (raceStateChangedListener != null) {
-            raceStateChangedListener.onIndividualRecallRemoval();
+    
+    public boolean isIndividualRecallDisplayed() {
+        if(this.individualRecallDisplayedFinder.analyze() != null){
+            if(this.individualRecallRemovedFinder.analyze() != null){
+                if(this.individualRecallRemovedFinder.analyze().after(this.individualRecallDisplayedFinder.analyze())){
+                    return false;
+                }
+            }
+            return true;
         }
+        return false;
+    }
+    
+    public boolean isIndividualRecallRemoved() {
+        if(this.individualRecallDisplayedFinder.analyze()!=null){
+            if(this.individualRecallRemovedFinder.analyze()!=null){
+                if(this.individualRecallRemovedFinder.analyze().after(this.individualRecallDisplayedFinder.analyze())){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -309,7 +345,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     
     @Override
     public Class<? extends RaceFragment> getRunningRaceFragment() {
-        return RunningRaceFragment.class;
+        return EssRunningRaceFragment.class;
     }
 
     @Override
@@ -318,32 +354,59 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     @Override
-    public Pair<String, Long> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart) {
-        Pair<String, Long> result;
+    public Pair<String, List<Object>> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart) {
+        Pair<String, List<Object>> result;
+        List<Object> milisecondsList = new ArrayList<Object>();
         if (millisecondsTillStart < startPhaseESSOneUpInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_one_flag_remove), millisecondsTillStart);
+            milisecondsList.add(millisecondsTillStart);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_ess_countdown_one_flag_remove), milisecondsList );
         } else if (millisecondsTillStart < startPhaseESSTwoUpInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_one_flag_display), millisecondsTillStart - startPhaseESSOneUpInterval);
+            milisecondsList.add(millisecondsTillStart - startPhaseESSOneUpInterval);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_ess_countdown_one_flag_display), milisecondsList);
         } else if (millisecondsTillStart < startPhaseESSThreeUpInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_two_flag_display), millisecondsTillStart - startPhaseESSTwoUpInterval);
+            milisecondsList.add(millisecondsTillStart - startPhaseESSTwoUpInterval);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_ess_countdown_two_flag_display), milisecondsList);
         } else if (millisecondsTillStart < startPhaseAPDownInterval) {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_three_flag_display), millisecondsTillStart - startPhaseESSThreeUpInterval);
+            milisecondsList.add(millisecondsTillStart - startPhaseESSThreeUpInterval);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_ess_countdown_three_flag_display), milisecondsList);
         } else {
-            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_ap_flag_removed), millisecondsTillStart - startPhaseAPDownInterval);
+            milisecondsList.add(millisecondsTillStart - startPhaseAPDownInterval);
+            result = new Pair<String, List<Object>>(context.getResources().getString(R.string.race_startphase_ess_countdown_ap_flag_removed), milisecondsList);
         }
         return result;
     }
 
     @Override
-    public void dispatchAutomaticGateClose(TimePoint eventTime) {
-        // TODO Auto-generated method stub
+    public void setRunningRaceEventListener(RunningRaceEventListener listener) {
+        this.runningRaceEventListener = (EssRunningRaceEventListener) listener;
         
     }
 
     @Override
-    public void setRunningRaceEventListener(RunningRaceEventListener listener) {
-        // TODO Auto-generated method stub
+    public void handleStartProcedureSpecificEvent(TimePoint eventTime, Integer eventId) {
+        if(eventId.equals(INDIVIDUAL_RECALL_REMOVAL_EVENT_ID)){
+            setIndividualRecallRemoval(eventTime);
+        }
         
     }
 
+    @Override
+    public Class<? extends RaceFragment> getFinishingRaceFragment() {
+        return EssFinishingRaceFragment.class;
+    }
+
+    @Override
+    public Class<? extends RaceFragment> getFinishedRaceFragment() {
+        return EssFinishedRaceFragment.class;
+    }
+
+    @Override
+    public Class<? extends RaceDialogFragment> checkForUserActionRequiredActions(MillisecondsTimePoint newStartTime, UserRequiredActionPerformedListener listener) {
+        return null;
+    }
+
+    @Override
+    public Class<? extends RaceDialogFragment> getCourseDesignDialog() {
+        return ESSCourseDesignDialogFragment.class;
+    }
 }

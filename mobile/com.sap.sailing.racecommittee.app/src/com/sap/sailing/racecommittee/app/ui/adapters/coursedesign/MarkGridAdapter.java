@@ -16,8 +16,11 @@ import com.sap.sailing.racecommittee.app.utils.MarkImageHelper;
 
 public class MarkGridAdapter extends ArrayAdapter<Mark> {
 
-    public MarkGridAdapter(Context context, int textViewResourceId, List<Mark> marks) {
-        super(context, textViewResourceId, marks);
+    private final MarkImageHelper markImageHelper;
+
+    public MarkGridAdapter(Context context, List<Mark> marks, MarkImageHelper imageHelper) {
+        super(context, 0, marks);
+        markImageHelper = imageHelper;
     }
 
     @Override
@@ -32,7 +35,7 @@ public class MarkGridAdapter extends ArrayAdapter<Mark> {
 
         ImageView image = (ImageView) view.findViewById(R.id.Welter_Grid_Mark_Cell_imgImage);
 
-        int drawable = MarkImageHelper.INSTANCE.resolveMarkImage(mark);
+        int drawable = markImageHelper.resolveMarkImage(mark);
         image.setImageResource(drawable);
         image.setVisibility(View.VISIBLE);
 

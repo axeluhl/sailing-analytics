@@ -14,30 +14,30 @@ public abstract class BaseDialogFragment extends DialogFragment {
     private final static String TAG = BaseDialogFragment.class.getName();
 
     protected abstract CharSequence getNegativeButtonLabel();
+
     protected abstract CharSequence getPositiveButtonLabel();
+
     protected abstract Builder createDialog(AlertDialog.Builder builder);
 
-    protected abstract DialogFragmentButtonListener getHost();
+    protected abstract DialogListenerHost getHost();
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return createDialog(new Builder(getActivity())
-        .setNegativeButton(getNegativeButtonLabel(), new OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                onNegativeButton();
-            }
-        })
-        .setPositiveButton(getPositiveButtonLabel(), new OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                onPositiveButton();
-            }
-        })
-                ).create();
+        return createDialog(
+                new Builder(getActivity()).setNegativeButton(getNegativeButtonLabel(), new OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        onNegativeButton();
+                    }
+                }).setPositiveButton(getPositiveButtonLabel(), new OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        onPositiveButton();
+                    }
+                })).create();
     }
 
     protected void onNegativeButton() {
         if (getHost() != null) {
-            getHost().onDialogNegativeButton();
+            getHost().getListener().onDialogNegativeButton(this);
         } else {
             ExLog.w(TAG, "Dialog host was null.");
         }
@@ -45,7 +45,7 @@ public abstract class BaseDialogFragment extends DialogFragment {
 
     protected void onPositiveButton() {
         if (getHost() != null) {
-            getHost().onDialogPositiveButton();
+            getHost().getListener().onDialogPositiveButton(this);
         } else {
             ExLog.w(TAG, "Dialog host was null.");
         }

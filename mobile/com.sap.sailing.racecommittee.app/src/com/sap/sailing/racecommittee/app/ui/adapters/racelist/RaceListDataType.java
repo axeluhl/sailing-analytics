@@ -6,7 +6,7 @@ package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
  * 
  * Data Type for displaying the Race list in the left part of the second activity
  */
-public abstract class RaceListDataType {
+public interface RaceListDataType {
 
 
 }

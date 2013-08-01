@@ -69,6 +69,7 @@ public class StartphaseRaceFragment extends RaceFragment {
         });
     }
 
+    @Override
     public void notifyTick() {
         TimePoint startTime = getRace().getState().getStartTime();
         if (startTime != null) {

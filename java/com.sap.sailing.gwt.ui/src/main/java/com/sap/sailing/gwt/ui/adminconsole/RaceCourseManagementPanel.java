@@ -135,14 +135,14 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 MarkDTO left;
                 MarkDTO right;
                 String gateName;
-                if (first.name.matches("^.*"+REGEX_FOR_LEFT+".*$")) {
+                if (first.getName().matches("^.*"+REGEX_FOR_LEFT+".*$")) {
                     left = first;
                     right = second;
                 } else {
                     left = second;
                     right = first;
                 }
-                gateName = left.name.replaceFirst(REGEX_FOR_LEFT, "");
+                gateName = left.getName().replaceFirst(REGEX_FOR_LEFT, "");
                 result = new GateDTO(/* generate UUID on the server */ null, gateName, left, right);
             }
             return result;
@@ -222,7 +222,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         TextColumn<ControlPointAndOldAndNewMark> nameColumn = new TextColumn<ControlPointAndOldAndNewMark>() {
             @Override
             public String getValue(ControlPointAndOldAndNewMark cpaoanb) {
-                return cpaoanb.getControlPoint().name;
+                return cpaoanb.getControlPoint().getName();
             }
         };
         controlPointsTable.addColumn(nameColumn, stringMessages.controlPoint());
@@ -240,14 +240,14 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         TextColumn<ControlPointAndOldAndNewMark> oldMarkColumn = new TextColumn<ControlPointAndOldAndNewMark>() {
             @Override
             public String getValue(ControlPointAndOldAndNewMark cpaoanb) {
-                return "" + cpaoanb.getOldMark().name;
+                return "" + cpaoanb.getOldMark().getName();
             }
         }; 
         controlPointsTable.addColumn(oldMarkColumn, stringMessages.mark());
         TextColumn<ControlPointAndOldAndNewMark> newMarkColumn = new TextColumn<ControlPointAndOldAndNewMark>() {
             @Override
             public String getValue(ControlPointAndOldAndNewMark cpaoanb) {
-                return "" + cpaoanb.getNewMark().name;
+                return "" + cpaoanb.getNewMark().getName();
             }
         }; 
         controlPointsTable.addColumn(newMarkColumn, stringMessages.newMark());
@@ -333,7 +333,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 MarkDTO newMark = controlPointsSelectionModel.getSelectedSet().iterator().next().getNewMark();
                 if (newMark != null) {
                     for (MarkDTO markDTO : markDataProvider.getList()) {
-                        if (markDTO.name.equals(newMark.name)) {
+                        if (markDTO.getName().equals(newMark.getName())) {
                             markSelectionModel.setSelected(markDTO, true);
                         }
                     }
@@ -387,7 +387,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         for (ControlPointAndOldAndNewMark cpaoanb : controlPointDataProvider.getList()) {
             if (cpaoanb.getControlPoint() == oldGate) {
                 MarkDTO newMark = cpaoanb.getNewMark();
-                if (newRight != null || newMark.name.matches("^.*"+REGEX_FOR_LEFT+".*$")) {
+                if (newRight != null || newMark.getName().matches("^.*"+REGEX_FOR_LEFT+".*$")) {
                     newLeft = newMark;
                 } else {
                     newRight = newMark;
@@ -396,7 +396,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         }
         assert newLeft != null && newRight != null;
         // if old gate had null ID, the new gate will have a null ID too, causing the server to generate one
-        return new GateDTO(oldGate.getIdAsString(), oldGate.name, newLeft, newRight);
+        return new GateDTO(oldGate.getIdAsString(), oldGate.getName(), newLeft, newRight);
     }
 
     private CellTable<MarkDTO> createAvailableMarksTable(final StringMessages stringMessages, AdminConsoleTableResources tableRes,
@@ -406,7 +406,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         TextColumn<MarkDTO> markNameColumn = new TextColumn<MarkDTO>() {
             @Override
             public String getValue(MarkDTO markDTO) {
-                return markDTO.name;
+                return markDTO.getName();
             }
         };
         result.addColumn(markNameColumn, stringMessages.mark());
@@ -449,6 +449,14 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         };
         result.addColumn(markPatternColumn, stringMessages.pattern());
 
+        TextColumn<MarkDTO> markUUIDColumn = new TextColumn<MarkDTO>() {
+            @Override
+            public String getValue(MarkDTO markDTO) {
+                return markDTO.getIdAsString();
+            }
+        };
+        result.addColumn(markUUIDColumn, "UUID");
+        
         return result;
     }
 
@@ -460,7 +468,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 } else {
                     w.setNewMark(selectedNewMark);
                 }
-                if (w.getOldMark().name.equals(w.getNewMark().name)) {
+                if (w.getOldMark().getName().equals(w.getNewMark().getName())) {
                     checkIfAllMarksOfControlPointAreUnchangedAndIfSoRememberThis(w.getControlPoint());
                 } else {
                     controlPointsNeedingReplacement.add(w.getControlPoint());
@@ -477,7 +485,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         boolean allMarksUnchanged = true;
         for (ControlPointAndOldAndNewMark cpaoanb : controlPointDataProvider.getList()) {
             if (cpaoanb.getControlPoint() == controlPoint) {
-                if (!cpaoanb.getOldMark().name.equals(cpaoanb.getNewMark().name)) {
+                if (!cpaoanb.getOldMark().getName().equals(cpaoanb.getNewMark().getName())) {
                     allMarksUnchanged = false;
                     break;
                 }
@@ -514,6 +522,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
     void refreshSelectedRaceData() {
         if (singleSelectedRace != null && selectedRaceDTO != null) {
             courseActionsPanel.setVisible(true);
+            // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"; this one is not so urgent as it is reached only in the AdminConsole and we expect administrators to have proper client-side time settings
             sailingService.getRaceCourse(singleSelectedRace, new Date(),  new AsyncCallback<RaceCourseDTO>() {
                 @Override
                 public void onSuccess(RaceCourseDTO raceCourseDTO) {
@@ -549,7 +558,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         Collections.sort(markDataProvider.getList(), new Comparator<MarkDTO>() {
             @Override
             public int compare(MarkDTO o1, MarkDTO o2) {
-                return o1.name.compareTo(o2.name);
+                return o1.getName().compareTo(o2.getName());
             }
         });
         for (ControlPointAndOldAndNewMark w : controlPointsSelectionModel.getSelectedSet()) {

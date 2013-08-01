@@ -101,6 +101,10 @@ public class DetailTypeFormatter {
             return stringMessages.averageTackLossInMeters();
         case AVERAGE_JIBE_LOSS_IN_METERS:
             return stringMessages.averageJibeLossInMeters();
+        case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
+            return stringMessages.timeSinceLastPositionFix();
+        case RACE_TRACKING_QUALITY:
+            return "TQ";
         }
         return null;
     }
@@ -145,6 +149,7 @@ public class DetailTypeFormatter {
         case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
         case RACE_GAP_TO_LEADER_IN_SECONDS:
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
+        case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
         case TIME_TRAVELED:
             return stringMessages.secondsUnit();
 
@@ -169,12 +174,13 @@ public class DetailTypeFormatter {
         case NUMBER_OF_MANEUVERS:
         case DISPLAY_LEGS:
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
+        case RACE_TRACKING_QUALITY:
             return "";
 
         default:
-            // Throwing an exception to get notificated if an implementation of
-            // an detail type is missing.
-            throw new UnsupportedOperationException("Theres currently no support for the enum value '" + detailType
+            // Throwing an exception to get notified if an implementation of
+            // a detail type is missing.
+            throw new UnsupportedOperationException("There is currently no support for the enum value '" + detailType
                     + "' in this method.");
         }
     }
@@ -276,6 +282,10 @@ public class DetailTypeFormatter {
             return stringMessages.totalAverageSpeedOverGroundTooltip();
         case WINDWARD_DISTANCE_TO_GO_IN_METERS:
             return stringMessages.windwardDistanceToGoInMetersTooltip();
+        case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
+            return stringMessages.timeSinceLastPositionFixTooltip();
+        case RACE_TRACKING_QUALITY:
+            return stringMessages.trackingQuality();
         }
         
         return "";

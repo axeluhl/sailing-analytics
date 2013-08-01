@@ -89,7 +89,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             List<RaceColumnDTO> raceList = leaderboard.getRaceList();
             List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
             for (RaceColumnDTO raceColumn : raceList) {
-                namesOfRaceColumnsToShow.add(raceColumn.name);
+                namesOfRaceColumnsToShow.add(raceColumn.getName());
             }
             LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                     namesOfRaceColumnsToShow, /* namesOfRacesToShow */null, /* nameOfRaceToSort */null, /* autoExpandPreSelectedRace */
@@ -99,7 +99,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
                 settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), overallDetailsToShow, raceList, 
                 /* select all races by default */ raceList, new ExplicitRaceColumnSelection(),
                 /* autoExpandPreSelectedRace */ false,
-                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, /* delayInMilliseconds */ 3000l, stringMessages);
+                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, stringMessages);
         }
 
         private void updateURL(LeaderboardUrlSettings settings, String leaderboardName, String leaderboardDisplayName) {

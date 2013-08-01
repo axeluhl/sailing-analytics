@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 import java.util.Date;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.PlotLine;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.XAxis;
@@ -28,6 +29,7 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 public abstract class AbstractRaceChart extends SimplePanel implements RaceSelectionChangeListener,
     TimeListener, TimeZoomChangeListener, TimeRangeChangeListener {
     protected Chart chart;
+    protected PlotLine timePlotLine;
 
     protected final Timer timer;
     protected final TimeRangeWithZoomProvider timeRangeWithZoomProvider; 

@@ -34,4 +34,8 @@ public class CompetitorImpl implements Competitor {
         return name+"/"+boatID;
     }
 
+    public String getID() {
+        return null;
+    }
+
 }

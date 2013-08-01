@@ -78,6 +78,8 @@
 		<module>com.sap.sailing.velum.resultimport.test</module>
 		<module>com.sap.sailing.sailwave.resultimport</module>
 		<module>com.sap.sailing.sailwave.resultimport.test</module>
+		<module>com.sap.sailing.manage2sail.resultimport</module>
+		<module>com.sap.sailing.manage2sail.resultimport.test</module>
 		<module>com.sap.sailing.selenium.test</module>
 		<module>org.openqa.selenium.osgi</module>
 		<module>com.sap.sailing.monitoring</module>
@@ -86,9 +88,9 @@
 		<module>net.sf.marineapi</module>
 		<module>net.sf.marineapi.test</module>
 		<module>com.sap.sailing.simulator</module>
-<!-- While simulator tests fail massively, this remains commented out
 		<module>com.sap.sailing.simulator.test</module>
--->
+		<module>com.sap.sailing.server.trackfiles</module>
+		<module>com.sap.sailing.server.trackfiles.test</module>
 	</modules>
 	
 	<properties>
@@ -293,7 +295,7 @@
 
 		<repository>
 			<id>sailing-server-maven</id>
-			<url>http://sapcoe-app01.pironet-ndh.com/maven</url>
+			<url>http://maven.sapsailing.com/maven</url>
 		</repository>
 	</repositories>
 </project>

@@ -93,6 +93,9 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                                 " after not having received an event during "+timeoutInMilliseconds+"ms");
                     stopAfterProcessingQueuedEvents();
                 } else {
+                    logger.info("Rescheduling the stopping of receiver "+AbstractReceiverWithQueue.this+
+                            " for another "+timeoutInMilliseconds+"ms");
+                    receivedEventDuringTimeout = false;
                     TracTracRaceTrackerImpl.scheduler.schedule(this, timeoutInMilliseconds, TimeUnit.MILLISECONDS);
                 }
             }
@@ -153,7 +156,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
      */
     protected DynamicTrackedRace getTrackedRace(Race race) {
         DynamicTrackedRace result = null;
-        RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race,
+        RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race.getId(),
                 RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         if (raceDefinition != null) {
             com.sap.sailing.domain.base.Regatta domainRegatta = trackedRegatta.getRegatta();

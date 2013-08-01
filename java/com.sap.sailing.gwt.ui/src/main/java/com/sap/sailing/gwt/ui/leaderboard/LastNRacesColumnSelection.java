@@ -41,11 +41,12 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
         this.numberOfLastRacesToShow = numberOfLastRacesToShow;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
-        raceTimesInfosReceived(raceTimesInfoProvider.getRaceTimesInfos());
+        Date now = new Date();
+        raceTimesInfosReceived(raceTimesInfoProvider.getRaceTimesInfos(), /* clientTimeWhenRequestWasSent */ now.getTime(), /* server time is guessed here */ now, now.getTime());
     }
 
     @Override
-    public void requestRaceColumnSelection(String raceColumnName, RaceColumnDTO column) {
+    public void requestRaceColumnSelection(RaceColumnDTO column) {
         // no-op
     }
 
@@ -86,7 +87,7 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
     }
 
     @Override
-    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo, long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
         this.raceTimesInfo = raceTimesInfo;
     }
 
@@ -111,7 +112,7 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
 
     private boolean hasScoreCorrections(LeaderboardDTO leaderboard, RaceColumnDTO column) {
         for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : leaderboard.rows.entrySet()) {
-            LeaderboardEntryDTO entry = e.getValue().fieldsByRaceColumnName.get(column.name);
+            LeaderboardEntryDTO entry = e.getValue().fieldsByRaceColumnName.get(column.getName());
             if (entry != null && entry.hasScoreCorrection()) {
                 return true;
             }

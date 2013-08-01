@@ -99,22 +99,43 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         double o2ScoreSum = getLeaderboard().getCarriedPoints(o2);
         Double o1MedalRaceScore = 0.0;
         Double o2MedalRaceScore = 0.0;
+        // When a column has isStartsWithZeroScore, the competitor's score only need to be reset to zero if from there on
+        // the competitor scored in this or any subsequent columns
+        boolean needToResetO1ScoreUponNextValidResult = false;
+        boolean needToResetO2ScoreUponNextValidResult = false;
         for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
+            needToResetO1ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
+            needToResetO2ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
             if (getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, timePoint)) {
                 int preemptiveColumnResult = 0;
                 final Double o1Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o1, raceColumn));
                 if (o1Score != null) {
                     o1Scores.add(new Pair<RaceColumn, Double>(raceColumn, o1Score));
+                    if (needToResetO1ScoreUponNextValidResult) {
+                        o1ScoreSum = 0;
+                        needToResetO1ScoreUponNextValidResult = false;
+                    }
                     o1ScoreSum += o1Score;
                 }
                 final Double o2Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o2, raceColumn));
                 if (o2Score != null) {
                     o2Scores.add(new Pair<RaceColumn, Double>(raceColumn, o2Score));
+                    if (needToResetO2ScoreUponNextValidResult) {
+                        o2ScoreSum = 0;
+                        needToResetO2ScoreUponNextValidResult = false;
+                    }
                     o2ScoreSum += o2Score;
                 }
                 if (raceColumn.isMedalRace()) {
-                    o1MedalRaceScore = o1Score;
-                    o2MedalRaceScore = o2Score;
+                    // only count the score for the medal race score if it wasn't a carry-forward column
+                    if (!raceColumn.isCarryForward()) {
+                        if (o1Score != null) {
+                            o1MedalRaceScore += o1Score;
+                        }
+                        if (o2Score != null) {
+                            o2MedalRaceScore += o2Score;
+                        }
+                    }
                     // similar to compareByFleet, however, tracking is not required; having medal race column points
                     // (tracked or manual) is sufficient
                     preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
@@ -128,10 +149,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             }
         }
         // now count the races in which they scored; if they scored in a different number of races, prefer the
-        // competitor
-        // who scored more often; otherwise, prefer the competitor who has a better score sum; if score sums are equal,
-        // break
-        // tie by sorting scores and looking for the first score difference.
+        // competitor who scored more often; otherwise, prefer the competitor who has a better score sum; if score sums are equal,
+        // break tie by sorting scores and looking for the first score difference.
         int result = compareByNumberOfRacesScored(o1Scores.size(), o2Scores.size());
         if (result == 0) {
             result = compareByScoreSum(o1ScoreSum, o2ScoreSum);

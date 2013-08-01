@@ -22,15 +22,13 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
-import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.RaceColumnInSeries;
-import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.CountryCode;
@@ -45,17 +43,20 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.RaceStatusDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10LastBreaksTie;
+import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets1LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
@@ -88,6 +89,8 @@ public class DomainFactoryImpl implements DomainFactory {
     private final Map<String, BoatClass> boatClassCache;
     
     private final Map<Serializable, Competitor> competitorCache;
+    
+    private final Map<Serializable, CourseArea> courseAreaCache;
     
     /**
      * Weakly references the waypoints. If a waypoint is no longer strongly referenced, the corresponding reference contained
@@ -135,6 +138,7 @@ public class DomainFactoryImpl implements DomainFactory {
         competitorCache = new HashMap<Serializable, Competitor>();
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
         mayStartWithNoUpwindLeg = new HashSet<String>(Arrays.asList(new String[] { "extreme40", "ess", "ess40" }));
+        courseAreaCache = new HashMap<>();
     }
     
     @Override
@@ -304,8 +308,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public ObjectInputStreamResolvingAgainstDomainFactory createObjectInputStreamResolvingAgainstThisFactory(
-            InputStream inputStream) throws IOException {
+    public ObjectInputStreamResolvingAgainstDomainFactory createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException {
         return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this);
     }
 
@@ -320,6 +323,8 @@ public class DomainFactoryImpl implements DomainFactory {
             return new HighPointExtremeSailingSeriesOverall();
         case HIGH_POINT_LAST_BREAKS_TIE:
             return new HighPointLastBreaksTie();
+        case HIGH_POINT_FIRST_GETS_ONE:
+            return new HighPointFirstGets1LastBreaksTie();
         case HIGH_POINT_FIRST_GETS_TEN:
             return new HighPointFirstGets10LastBreaksTie();
         case LOW_POINT_WINNER_GETS_ZERO:
@@ -332,8 +337,9 @@ public class DomainFactoryImpl implements DomainFactory {
     public CompetitorDTO convertToCompetitorDTO(Competitor c) {
         CompetitorDTO competitorDTO = weakCompetitorDTOCache.get(c);
         if (competitorDTO == null) {
-            CountryCode countryCode = c.getTeam().getNationality().getCountryCode();
-            competitorDTO = new CompetitorDTO(c.getName(), countryCode == null ? ""
+            final Nationality nationality = c.getTeam().getNationality();
+            CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
+            competitorDTO = new CompetitorDTOImpl(c.getName(), countryCode == null ? ""
                     : countryCode.getTwoLetterISOCode(),
                     countryCode == null ? "" : countryCode.getThreeLetterIOCCode(), countryCode == null ? ""
                             : countryCode.getName(), c.getBoat().getSailID(), c.getId().toString(),
@@ -345,32 +351,42 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public FleetDTO convertToFleetDTO(Series series, Fleet fleet) {
-        return new FleetDTO(fleet.getName(), series.getName(), fleet.getOrdering(), fleet.getColor());
-    }
-
-    @Override
-    public FleetDTO convertToFleetDTO(RaceColumn raceColumn, Fleet fleet) {
-        String seriesNameOfFleet = null;
-        if (raceColumn instanceof RaceColumnInSeries) {
-            seriesNameOfFleet = ((RaceColumnInSeries) raceColumn).getSeries().getName();
-        }            
-        return new FleetDTO(fleet.getName(), seriesNameOfFleet, fleet.getOrdering(), fleet.getColor());
+    public FleetDTO convertToFleetDTO(Fleet fleet) {
+        return new FleetDTO(fleet.getName(), fleet.getOrdering(), fleet.getColor());
     }
 
     @Override
     public RaceDTO createRaceDTO(TrackedRegattaRegistry trackedRegattaRegistry, boolean withGeoLocationData, RegattaAndRaceIdentifier raceIdentifier, TrackedRace trackedRace) {
+        assert trackedRace != null;
         // Optional: Getting the places of the race
         PlacemarkOrderDTO racePlaces = withGeoLocationData ? getRacePlaces(trackedRace) : null;
-        TrackedRaceDTO trackedRaceDTO = new TrackedRaceDTO();
-        trackedRaceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
-        trackedRaceDTO.hasWindData = trackedRace.hasWindData();
-        trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
+        TrackedRaceDTO trackedRaceDTO = createTrackedRaceDTO(trackedRace); 
         RaceDTO raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO, trackedRegattaRegistry.isRaceBeingTracked(trackedRace.getRace()));
         raceDTO.places = racePlaces;
+        updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
+        return raceDTO;
+    }
+
+    @Override
+    public void updateRaceDTOWithTrackedRaceData(TrackedRace trackedRace, RaceDTO raceDTO) {
+        assert trackedRace != null;
         raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
         raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
-        return raceDTO;
+        raceDTO.status = new RaceStatusDTO();
+        raceDTO.status.status = trackedRace.getStatus() == null ? null : trackedRace.getStatus().getStatus();
+        raceDTO.status.loadingProgress = trackedRace.getStatus() == null ? 0.0 : trackedRace.getStatus().getLoadingProgress();
+    }
+
+    @Override
+    public TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace) {
+        TrackedRaceDTO trackedRaceDTO = new TrackedRaceDTO();
+        trackedRaceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
+        trackedRaceDTO.endOfTracking = trackedRace.getEndOfTracking() == null ? null : trackedRace.getEndOfTracking().asDate();
+        trackedRaceDTO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
+        trackedRaceDTO.hasWindData = trackedRace.hasWindData();
+        trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
+        trackedRaceDTO.delayToLiveInMs = trackedRace.getDelayToLiveInMillis();
+        return trackedRaceDTO;
     }
 
     private PlacemarkOrderDTO getRacePlaces(TrackedRace trackedRace) {
@@ -458,6 +474,21 @@ public class DomainFactoryImpl implements DomainFactory {
             result.add(convertToCompetitorDTO(competitor));
         }
         return result;
+    }
+
+    @Override
+    public CourseArea getOrCreateCourseArea(Serializable courseAreaId, String name) {
+        CourseArea result = getExistingCourseAreaById(courseAreaId);
+        if (result == null) {
+            result = new CourseAreaImpl(name, courseAreaId);
+            courseAreaCache.put(courseAreaId, result);
+        }
+        return result;
+    }
+
+    @Override
+    public CourseArea getExistingCourseAreaById(Serializable courseAreaId) {
+        return courseAreaCache.get(courseAreaId);
     }
 
 }

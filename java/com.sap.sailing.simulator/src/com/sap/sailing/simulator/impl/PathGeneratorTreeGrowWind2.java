@@ -217,7 +217,7 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
         String pathStr = path.path + nextDirection;
         char nextBaseDirection = this.getBaseDirection(nextDirection);
 
-        return (new PathCandidate(pathPos, vrtDist, hrzDist, turnCount, pathStr, nextBaseDirection));
+        return (new PathCandidate(pathPos, vrtDist, hrzDist, turnCount, pathStr, nextBaseDirection, posWind));
     }
 
 
@@ -400,7 +400,7 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
         }
 
         // calculate initial position according to initPathStr
-        PathCandidate initPath = new PathCandidate(new TimedPositionImpl(currentTime, currentPosition), 0.0, 0.0, 0, "0", '0');
+        PathCandidate initPath = new PathCandidate(new TimedPositionImpl(currentTime, currentPosition), 0.0, 0.0, 0, "0", '0', wndStart);
         if (initPathStr.length()>1) {
             char nextDirection = '0';
             for(int idx=1; idx<initPathStr.length(); idx++) {

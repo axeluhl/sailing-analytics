@@ -1,21 +1,21 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -96,92 +96,64 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     @Override
     protected void handleEvent(Triple<Route, RouteData, Race> event) {
         System.out.print("R");
-        
-        Map<Integer, NauticalSide> courseWaypointPassingSides = parseAdditionalCourseDataFromMetadata(event.getA(), event.getB().getPoints());
-     
+        final Route route = event.getA();
+        final String routeMetadataString = route.getMetadata() != null ? route.getMetadata().getText() : null;
+        final LinkedHashMap<com.tractrac.clientmodule.ControlPoint, TracTracControlPoint> ttControlPointsForAllOriginalEventControlPoints = new LinkedHashMap<>();
+        for (com.tractrac.clientmodule.ControlPoint cp : event.getC().getEvent().getControlPointList()) {
+            ttControlPointsForAllOriginalEventControlPoints.put(cp, new ControlPointAdapter(cp));
+        }
+        final List<TracTracControlPoint> routeControlPoints = new ArrayList<>();
+        for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
+            routeControlPoints.add(ttControlPointsForAllOriginalEventControlPoints.get(cp));
+        }
+        Map<Integer, NauticalSide> courseWaypointPassingSides = getDomainFactory().getMetadataParser().parsePassingSideData(routeMetadataString, routeControlPoints);
         List<Util.Pair<TracTracControlPoint, NauticalSide>> ttControlPoints = new ArrayList<>();
         int i = 1;
         for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
             NauticalSide nauticalSide = courseWaypointPassingSides.containsKey(i) ? courseWaypointPassingSides.get(i) : null;
-            ttControlPoints.add(new Pair<TracTracControlPoint, NauticalSide>(new ControlPointAdapter(cp), nauticalSide));
+            ttControlPoints.add(new Pair<TracTracControlPoint, NauticalSide>(ttControlPointsForAllOriginalEventControlPoints.get(cp), nauticalSide));
             i++;
         }
-        Course course = getDomainFactory().createCourse(event.getA().getName(), ttControlPoints);
-        
-        RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(event.getC());
+
+        Course course = getDomainFactory().createCourse(route.getName(), ttControlPoints);
+        Race race = event.getC();
+        List<Sideline> sidelines = getDomainFactory().createSidelines(
+                race.getMetadata() != null ? race.getMetadata().getText() : null,
+                ttControlPointsForAllOriginalEventControlPoints.values());
+
+        RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(race.getId());
         if (existingRaceDefinitionForRace != null) {
-            logger.log(Level.INFO, "Received course update for existing race "+event.getC().getName()+": "+
+            logger.log(Level.INFO, "Received course update for existing race "+race.getName()+": "+
                     event.getB().getPoints());
             // Race already exists; this means that we obviously found a course change.
-            // Therefore, don't create TrackedRace again because it already exists.
+            // Create TrackedRace only if it doesn't exist (which is unlikely because it is usually created
+            // in the else block below together with the RaceDefinition).
             try {
                 getDomainFactory().updateCourseWaypoints(existingRaceDefinitionForRace.getCourse(), ttControlPoints);
                 if (getTrackedRegatta().getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
-                    createTrackedRace(existingRaceDefinitionForRace);
+                    createTrackedRace(existingRaceDefinitionForRace, sidelines);
                 }
             } catch (PatchFailedException e) {
                 logger.log(Level.SEVERE, "Internal error updating race course "+course+": "+e.getMessage());
                 logger.log(Level.SEVERE, "handleEvent", e);
             }
         } else {
-            logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");
+            logger.log(Level.INFO, "Received course for non-existing race "+race.getName()+". Creating RaceDefinition.");
             // create race definition and add to event
+            Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = getDomainFactory().getCompetitorsAndDominantBoatClass(race);
             DynamicTrackedRace trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
-                    getTrackedRegatta(), event.getC(), course, windStore, delayToLiveInMillis,
-                    millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, courseDesignUpdateURI, 
+                    getTrackedRegatta(), race.getId(), race.getName(), competitorsAndDominantBoatClass.getA(),
+                    competitorsAndDominantBoatClass.getB(), course, sidelines, windStore, delayToLiveInMillis,
+                    millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, courseDesignUpdateURI,
                     getTracTracEvent().getId(), tracTracUsername, tracTracPassword);
-            
             if (getSimulator() != null) {
                 getSimulator().setTrackedRace(trackedRace);
             }
         }
     }
-    
-    /**
-     * Parses the route metadata for additional course information
-     * The 'passing side' for each course waypoint is encoded like this...
-     * Seq.1=GATE
-     * Seq.2=PORT
-     * Seq.3=GATE
-     * Seq.4=STARBOARD
-     */
-    private Map<Integer, NauticalSide> parseAdditionalCourseDataFromMetadata(Route route, 
-            List<com.tractrac.clientmodule.ControlPoint> controlPoints) {
-        Map<Integer, NauticalSide> result = new HashMap<Integer, NauticalSide>();;
-        int controlPointsCount = controlPoints.size();
-        String routeMetadataString = route.getMetadata() != null ? route.getMetadata().getText() : null;
-        if(routeMetadataString != null) {
-            Map<String, String> routeMetadata = parseRouteMetadata(routeMetadataString);
-            for(int i = 1; i <= controlPointsCount; i++) {
-                String seqValue = routeMetadata.get("Seq." + i);
-                com.tractrac.clientmodule.ControlPoint controlPoint = controlPoints.get(i-1);
-                if(!controlPoint.getHasTwoPoints() && seqValue != null) {
-                    if("PORT".equalsIgnoreCase(seqValue)) {
-                        result.put(i, NauticalSide.PORT);
-                    } else if("STARBOARD".equalsIgnoreCase(seqValue)) {
-                        result.put(i, NauticalSide.STARBOARD);
-                    }
-                }
-            }
-        }
-        return result;
-    }
-    
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Map<String, String> parseRouteMetadata(String routeMetadata) {
-        Map<String, String> metadataMap = new HashMap<String, String>();
-        try {
-            Properties p = new Properties();
-            p.load(new StringReader(routeMetadata));
-            metadataMap = new HashMap<String, String>((Map) p);
-        } catch (IOException e) {
-            // do nothing
-        }
-        return metadataMap;
-    }
-    
-    private void createTrackedRace(RaceDefinition race) {
-        DynamicTrackedRace trackedRace = getTrackedRegatta().createTrackedRace(race,
+
+    private void createTrackedRace(RaceDefinition race, Iterable<Sideline> sidelines) {
+        DynamicTrackedRace trackedRace = getTrackedRegatta().createTrackedRace(race, sidelines,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);
@@ -189,7 +161,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler(courseDesignUpdateURI, 
                 tracTracUsername, tracTracPassword,
                 getTracTracEvent().getId(), race.getId());
-        trackedRace.setCourseDesignChangedListener(courseDesignHandler);
+        trackedRace.addCourseDesignChangedListener(courseDesignHandler);
     }
 
 }

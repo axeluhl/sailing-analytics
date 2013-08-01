@@ -2,8 +2,6 @@ package com.sap.sailing.domain.swisstimingadapter;
 
 import java.util.List;
 
-
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -31,17 +29,19 @@ public interface DomainFactory {
 
     Nationality getOrCreateNationality(String threeLetterIOCCode);
 
-    Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass);
+    Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, RaceType raceType);
     
-    Competitor getOrCreateCompetitor(String boatID, String threeLetterIOCCode, String name, BoatClass boatClass);
+    Competitor getOrCreateCompetitor(String boatID, String threeLetterIOCCode, String name, RaceType raceType);
 
+    Competitor getCompetitorByBoatIDAndRaceType(String boatID, RaceType raceType);
+    
+    Competitor getCompetitorByBoatIDAndRaceID(String boatID, String raceID);
+    
     RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course);
 
     com.sap.sailing.domain.base.Mark getOrCreateMark(String trackerID);
     
     GPSFixMoving createGPSFix(TimePoint timePointOfTransmission, Fix fix);
-
-    Competitor getCompetitorByBoatIDAndBoatClass(String boatID, BoatClass boatClass);
 
     void updateCourseWaypoints(Course courseToUpdate, Iterable<Mark> marks) throws PatchFailedException;
     
@@ -54,10 +54,11 @@ public interface DomainFactory {
             SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore, WindStore windStore,
             RaceSpecificMessageLoader messageLoader);
 
-    BoatClass getOrCreateBoatClassFromRaceID(String raceID);
+    RaceType getRaceTypeFromRaceID(String raceID);
 
     ControlPoint getOrCreateControlPoint(Iterable<String> devices);
 
     RaceDefinition createRaceDefinition(Regatta regatta, String raceID, Iterable<Competitor> competitors,
             List<ControlPoint> courseDefinition);
+
 }
