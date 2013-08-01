@@ -394,7 +394,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         // pathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
         this.replayPathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
         // timeListeners.add(replayPathCanvasOverlay);
-        this.legendCanvasOverlay = new PathLegendCanvasOverlay();
+        this.legendCanvasOverlay = new PathLegendCanvasOverlay(this.mode);
 
 		Window.addResizeHandler(new ResizeHandler() {
 
