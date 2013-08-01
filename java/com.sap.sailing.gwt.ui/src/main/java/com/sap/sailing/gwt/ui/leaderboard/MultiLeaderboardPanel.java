@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -29,6 +31,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSettings> implements TimeListener {
 
     private LeaderboardPanel selectedActLeaderboardPanel;
+    private FlowPanel selectedActLeaderboardFlowPanel;
 
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -43,9 +46,11 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
 
     private VerticalPanel mainPanel;
     private final List<Pair<String, String>> actLeaderboardNamesAndDisplayNames;
-    private ListBox leaderboardSelectionListBox;
 
     private LeaderboardSettings selectedActLeaderboardSettings; 
+    
+    private TabPanel actLeaderboardsTabPanel;
+    private Label actLeaderboardsLabel;
     
     public MultiLeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, Timer timer,
             LeaderboardSettings leaderboardSettings, String preselectedActLeaderboardName, RaceIdentifier preselectedRace, 
@@ -60,6 +65,8 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         this.timer = timer;
         this.selectedActLeaderboardName = preselectedActLeaderboardName;
         
+        selectedActLeaderboardFlowPanel = null;
+        selectedActLeaderboardPanel = null;
         actLeaderboardNamesAndDisplayNames = new ArrayList<Pair<String, String>>();
         selectedActLeaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, false);
     }
@@ -67,20 +74,26 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     @Override
     public Widget createWidget() {
         mainPanel = new VerticalPanel();
+        
+        actLeaderboardsLabel = new Label("Act Leaderboards");
+        actLeaderboardsLabel.setVisible(false);
+        mainPanel.add(actLeaderboardsLabel);
 
-        leaderboardSelectionListBox = new ListBox();
-
-        leaderboardSelectionListBox.addChangeHandler(new ChangeHandler() {
+        actLeaderboardsTabPanel = new TabPanel();
+        actLeaderboardsTabPanel.setVisible(false);
+        actLeaderboardsTabPanel.setAnimationEnabled(false);
+        actLeaderboardsTabPanel.setWidth("100%");
+        actLeaderboardsTabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
-            public void onChange(ChangeEvent event) {
-                int selIndex = leaderboardSelectionListBox.getSelectedIndex();
-                if(selIndex >= 0) {
-                    updateSelectedLeaderboard(leaderboardSelectionListBox.getValue(selIndex));
+            public void onSelection(SelectionEvent<Integer> event) {
+                Integer tabIndex = event.getSelectedItem();
+                if(tabIndex >= 0) {
+                    updateSelectedLeaderboard(actLeaderboardNamesAndDisplayNames.get(tabIndex).getA(), tabIndex);
                 }
             }
         });
-        leaderboardSelectionListBox.setVisible(false);
-        mainPanel.add(leaderboardSelectionListBox);
+        
+        mainPanel.add(actLeaderboardsTabPanel);
         
         updateActLeaderboardSelection();
 
@@ -115,39 +128,43 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     }
 
     private void updateActLeaderboardSelection() {
-        if(leaderboardSelectionListBox != null) {
-            leaderboardSelectionListBox.clear();
+        if(actLeaderboardsTabPanel != null) {
+            actLeaderboardsTabPanel.clear();
             
             int index = 0;
             for (Pair<String, String> leaderboardNameAndDisplayName : actLeaderboardNamesAndDisplayNames) {
-                leaderboardSelectionListBox.addItem(leaderboardNameAndDisplayName.getB(), leaderboardNameAndDisplayName.getA());
+                FlowPanel tabFlowPanel = new FlowPanel();
+                actLeaderboardsTabPanel.add(tabFlowPanel, leaderboardNameAndDisplayName.getB(), false);
 
                 if(selectedActLeaderboardName != null && selectedActLeaderboardName.equals(leaderboardNameAndDisplayName.getA())) {
-                    leaderboardSelectionListBox.setSelectedIndex(index);
+                    actLeaderboardsTabPanel.selectTab(index);
                 }
                 index++;
             }
-            
-            leaderboardSelectionListBox.setVisible(actLeaderboardNamesAndDisplayNames.size() > 0);
+            actLeaderboardsTabPanel.setVisible(actLeaderboardNamesAndDisplayNames.size() > 0);
+            actLeaderboardsLabel.setVisible(actLeaderboardNamesAndDisplayNames.size() > 0);
         }
     }
 
-    private void updateSelectedLeaderboard(String selectedLeaderboardName) {
+    private void updateSelectedLeaderboard(String selectedLeaderboardName, int newTabIndex) {
         if(selectedLeaderboardName != null) {
-            if(selectedActLeaderboardPanel != null) {
-                mainPanel.remove(selectedActLeaderboardPanel);
+            if(selectedActLeaderboardPanel != null && selectedActLeaderboardFlowPanel != null) {
+                selectedActLeaderboardFlowPanel.remove(selectedActLeaderboardPanel);
                 selectedActLeaderboardPanel = null;
+                selectedActLeaderboardFlowPanel = null;
             }
             
+            selectedActLeaderboardFlowPanel = (FlowPanel) actLeaderboardsTabPanel.getWidget(newTabIndex);
             selectedActLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                     selectedActLeaderboardSettings, /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
                     null, selectedLeaderboardName, errorReporter, stringMessages, userAgent,
                     showRaceDetails, /* raceTimesInfoProvider */null, false,  /* adjustTimerDelay */ true);
-            mainPanel.add(selectedActLeaderboardPanel);
+            selectedActLeaderboardFlowPanel.add(selectedActLeaderboardPanel);
         } else {
-            if(selectedActLeaderboardPanel != null) {
-                mainPanel.remove(selectedActLeaderboardPanel);
+            if(selectedActLeaderboardPanel != null && selectedActLeaderboardFlowPanel != null) {
+                selectedActLeaderboardFlowPanel.remove(selectedActLeaderboardPanel);
                 selectedActLeaderboardPanel = null;
+                selectedActLeaderboardFlowPanel = null;
             }
         }
     }
