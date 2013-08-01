@@ -28,14 +28,13 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
  */
 public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSettings> implements TimeListener {
 
-    private LeaderboardPanel selectedLeaderboardPanel;
+    private LeaderboardPanel selectedActLeaderboardPanel;
 
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final SailingServiceAsync sailingService;
 
-    private final String preselectedLeaderboardName;
-    private String selectedLeaderboardName;
+    private String selectedActLeaderboardName;
     
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final UserAgentDetails userAgent;
@@ -43,13 +42,13 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     private final Timer timer;
 
     private VerticalPanel mainPanel;
-    private final List<Pair<String, String>> leaderboardNamesAndDisplayNames;
+    private final List<Pair<String, String>> actLeaderboardNamesAndDisplayNames;
     private ListBox leaderboardSelectionListBox;
 
-    private LeaderboardSettings selectedLeaderboardSettings; 
+    private LeaderboardSettings selectedActLeaderboardSettings; 
     
     public MultiLeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, Timer timer,
-            LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RaceIdentifier preselectedRace, 
+            LeaderboardSettings leaderboardSettings, String preselectedActLeaderboardName, RaceIdentifier preselectedRace, 
             ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
         this.stringMessages = stringMessages;
@@ -59,10 +58,10 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         this.userAgent = userAgent;
         this.showRaceDetails = showRaceDetails;
         this.timer = timer;
-        this.preselectedLeaderboardName = preselectedLeaderboardName;
+        this.selectedActLeaderboardName = preselectedActLeaderboardName;
         
-        leaderboardNamesAndDisplayNames = new ArrayList<Pair<String, String>>();
-        selectedLeaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, false);
+        actLeaderboardNamesAndDisplayNames = new ArrayList<Pair<String, String>>();
+        selectedActLeaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, false);
     }
 
     @Override
@@ -83,14 +82,14 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         leaderboardSelectionListBox.setVisible(false);
         mainPanel.add(leaderboardSelectionListBox);
         
-        updateLeaderboardSelection();
+        updateActLeaderboardSelection();
 
         return mainPanel;
     }
 
     @Override
     public String getLocalizedShortName() {
-        return "Leaderboards";
+        return stringMessages.leaderboards();
     }
 
     @Override
@@ -100,62 +99,63 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
 
     @Override
     public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
-        return selectedLeaderboardPanel.getSettingsDialogComponent();
+        return selectedActLeaderboardPanel.getSettingsDialogComponent();
     }
 
     @Override
     public void updateSettings(LeaderboardSettings newSettings) {
-        selectedLeaderboardPanel.updateSettings(newSettings);
+        selectedActLeaderboardPanel.updateSettings(newSettings);
     }
 
-    public void setLeaderboardNames(List<Pair<String, String>> newLeaderboardNamesAndDisplayNames) {
-        leaderboardNamesAndDisplayNames.clear();
-        leaderboardNamesAndDisplayNames.addAll(newLeaderboardNamesAndDisplayNames);
+    public void setActLeaderboardNames(List<Pair<String, String>> newLeaderboardNamesAndDisplayNames) {
+        actLeaderboardNamesAndDisplayNames.clear();
+        actLeaderboardNamesAndDisplayNames.addAll(newLeaderboardNamesAndDisplayNames);
         
-        updateLeaderboardSelection();
+        updateActLeaderboardSelection();
     }
 
-    private void updateLeaderboardSelection() {
+    private void updateActLeaderboardSelection() {
         if(leaderboardSelectionListBox != null) {
             leaderboardSelectionListBox.clear();
             
             int index = 0;
-            for (Pair<String, String> leaderboardNameAndDisplayName : leaderboardNamesAndDisplayNames) {
+            for (Pair<String, String> leaderboardNameAndDisplayName : actLeaderboardNamesAndDisplayNames) {
                 leaderboardSelectionListBox.addItem(leaderboardNameAndDisplayName.getB(), leaderboardNameAndDisplayName.getA());
-                if(selectedLeaderboardName != null && selectedLeaderboardName.equals(leaderboardNameAndDisplayName.getA())) {
+
+                if(selectedActLeaderboardName != null && selectedActLeaderboardName.equals(leaderboardNameAndDisplayName.getA())) {
                     leaderboardSelectionListBox.setSelectedIndex(index);
                 }
                 index++;
             }
             
-            leaderboardSelectionListBox.setVisible(leaderboardNamesAndDisplayNames.size() > 0);
+            leaderboardSelectionListBox.setVisible(actLeaderboardNamesAndDisplayNames.size() > 0);
         }
     }
 
     private void updateSelectedLeaderboard(String selectedLeaderboardName) {
         if(selectedLeaderboardName != null) {
-            if(selectedLeaderboardPanel != null) {
-                mainPanel.remove(selectedLeaderboardPanel);
-                selectedLeaderboardPanel = null;
+            if(selectedActLeaderboardPanel != null) {
+                mainPanel.remove(selectedActLeaderboardPanel);
+                selectedActLeaderboardPanel = null;
             }
             
-            selectedLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                    selectedLeaderboardSettings, /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
+            selectedActLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
+                    selectedActLeaderboardSettings, /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
                     null, selectedLeaderboardName, errorReporter, stringMessages, userAgent,
                     showRaceDetails, /* raceTimesInfoProvider */null, false,  /* adjustTimerDelay */ true);
-            mainPanel.add(selectedLeaderboardPanel);
+            mainPanel.add(selectedActLeaderboardPanel);
         } else {
-            if(selectedLeaderboardPanel != null) {
-                mainPanel.remove(selectedLeaderboardPanel);
-                selectedLeaderboardPanel = null;
+            if(selectedActLeaderboardPanel != null) {
+                mainPanel.remove(selectedActLeaderboardPanel);
+                selectedActLeaderboardPanel = null;
             }
         }
     }
 
     @Override
     public void timeChanged(Date date) {
-        if(selectedLeaderboardPanel != null) {
-            selectedLeaderboardPanel.timeChanged(date);
+        if(selectedActLeaderboardPanel != null) {
+            selectedActLeaderboardPanel.timeChanged(date);
         }
     }
 

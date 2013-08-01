@@ -108,7 +108,7 @@ public class MetaLeaderboardViewer extends SimplePanel {
             
             @Override
             public void onSuccess(List<Pair<String, String>> leaderboardNamesAndDisplayNames) {
-                multiLeaderboardPanel.setLeaderboardNames(leaderboardNamesAndDisplayNames);
+                multiLeaderboardPanel.setActLeaderboardNames(leaderboardNamesAndDisplayNames);
             }
             
             @Override
