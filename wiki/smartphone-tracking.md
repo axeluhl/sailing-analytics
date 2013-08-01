@@ -214,6 +214,12 @@ Async task that handles the execution of get requests.
 ### `AppPreferences`
 Helper Class for accessing the App Preferences specified in settings_view.xml
 
+### `DataStore`
+Interface for the DataStore which stores all data that is relevant for the App (managed Races, Competitors, ...)
+Implementation: InMemoryDataStore
+
+### `DataLoader`
+AsyncDataLoader which does an HTTP GET to a given URL, parses the data (with a DataParser) and sends the data to a DataHandler.
 
 ## ToDo
 
@@ -223,7 +229,7 @@ Helper Class for accessing the App Preferences specified in settings_view.xml
 * persist tracking data (GPSFixStore)
 * load stored tracked smartphone race (Panel in Admin Console, RaceLogConnector, only present such races with the necessary data in the racelog, and allow user to select whole leaderboard to restore)
 * mapping devices to marks
-* generic method for registering listener for NMEA sentence types (e.g. to then process wind) -> move servlet for recieving NMEA out of smartphoneadapter
+* generic method for registering listener for NMEA sentence types (e.g. to then process wind) -> move servlet for receiving NMEA out of smartphoneadapter
 * accepting / removing competitors
  * for this we first need racelog replication back to all clients
  * also, not everybody should be able to do this -> see user management
@@ -232,6 +238,7 @@ Helper Class for accessing the App Preferences specified in settings_view.xml
 * security (not everybody can start race, goes hand in hand with user management)
 * support dynamic mapping of smartphone to competitor -> so that it can change during the race
 * support other input channels (e.g. Igtimi)
+* Servlet for getting Competitors for a certain race: Have a look how this is implemented in the serverside-counterpart of the racecommittee-app: /sailingserver/rc/competitors?leaderboard="+raceGroupName+"&raceColumn"+raceColumnName+ "&fleet="+fleetName
 
 ### Android
 * reuse existing course design functionality to create RaceLogCourseDesignChangedEvent before sending RaceLogPreRacePhaseEndedEvent
