@@ -8,6 +8,7 @@ import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
@@ -53,14 +54,16 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     
     private TabPanel actLeaderboardsTabPanel;
     private Label actLeaderboardsLabel;
+    private final String metaLeaderboardName;
     
-    public MultiLeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, Timer timer,
+    public MultiLeaderboardPanel(SailingServiceAsync sailingService, String metaLeaderboardName, AsyncActionsExecutor asyncActionsExecutor, Timer timer,
             LeaderboardSettings leaderboardSettings, String preselectedActLeaderboardName, RaceIdentifier preselectedRace, 
             ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.sailingService = sailingService;
+        this.metaLeaderboardName = metaLeaderboardName;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.userAgent = userAgent;
         this.showRaceDetails = showRaceDetails;
@@ -131,6 +134,20 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         updateActLeaderboardSelection();
     }
 
+    private void readAndUpdateLeaderboardsOfMetaleaderboard() {
+        sailingService.getLeaderboardsNamesOfMetaleaderboard(metaLeaderboardName, new AsyncCallback<List<Pair<String, String>>>() {
+            
+            @Override
+            public void onSuccess(List<Pair<String, String>> leaderboardNamesAndDisplayNames) {
+                setActLeaderboardNames(leaderboardNamesAndDisplayNames);
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+        });
+    }
+    
     private void updateActLeaderboardSelection() {
         if(actLeaderboardsTabPanel != null) {
             actLeaderboardsTabPanel.clear();
@@ -176,6 +193,17 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
                 selectedActLeaderboardPanel = null;
                 selectedActLeaderboardFlowPanel = null;
             }
+        }
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        
+        if(visible) {
+            readAndUpdateLeaderboardsOfMetaleaderboard();
+        } else {
+            updateSelectedLeaderboard(null, -1);
         }
     }
 

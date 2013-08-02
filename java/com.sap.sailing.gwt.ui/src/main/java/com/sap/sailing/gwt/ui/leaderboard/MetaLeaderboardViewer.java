@@ -1,14 +1,11 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.List;
-
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -16,7 +13,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -32,7 +28,6 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 
 public class MetaLeaderboardViewer extends SimplePanel {    
     private final StringMessages stringMessages;
-    private final SailingServiceAsync sailingService;
     private final CompetitorSelectionModel competitorSelectionProvider;
 
     private FlowPanel componentsNavigationPanel;
@@ -41,7 +36,6 @@ public class MetaLeaderboardViewer extends SimplePanel {
     private final MultiLeaderboardPanel multiLeaderboardPanel;
     private final MultiCompetitorLeaderboardChart multiCompetitorChart;
 
-    private final String metaLeaderboardName;
     private final Timer timer;
     
     private final FlowPanel mainPanel;
@@ -55,8 +49,6 @@ public class MetaLeaderboardViewer extends SimplePanel {
             String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn, boolean showRankChart) {
         this.stringMessages = stringMessages;
-        this.sailingService = sailingService;
-        this.metaLeaderboardName = metaLeaderboardName;
 
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */true);
 
@@ -87,7 +79,7 @@ public class MetaLeaderboardViewer extends SimplePanel {
         multiCompetitorChart.getElement().getStyle().setMarginTop(10, Unit.PX);
         multiCompetitorChart.getElement().getStyle().setMarginBottom(10, Unit.PX);
         
-        multiLeaderboardPanel = new MultiLeaderboardPanel(sailingService, asyncActionsExecutor, timer,
+        multiLeaderboardPanel = new MultiLeaderboardPanel(sailingService, metaLeaderboardName, asyncActionsExecutor, timer,
                 leaderboardSettings, preselectedLeaderboardName, preselectedRace, errorReporter, stringMessages,
                 userAgent, showRaceDetails, autoExpandLastRaceColumn);
         multiLeaderboardPanel.setVisible(false);
@@ -99,22 +91,6 @@ public class MetaLeaderboardViewer extends SimplePanel {
         addComponentToNavigationMenu(metaLeaderboardPanel, false, stringMessages.seriesLeaderboard());
         addComponentToNavigationMenu(multiCompetitorChart, true, null);
         addComponentToNavigationMenu(multiLeaderboardPanel, true, stringMessages.actLeaderboards());
-            
-        updateLeaderboardsOfMetaleaderboard();
-    }
-
-    private void updateLeaderboardsOfMetaleaderboard() {
-        sailingService.getLeaderboardsNamesOfMetaleaderboard(metaLeaderboardName, new AsyncCallback<List<Pair<String, String>>>() {
-            
-            @Override
-            public void onSuccess(List<Pair<String, String>> leaderboardNamesAndDisplayNames) {
-                multiLeaderboardPanel.setActLeaderboardNames(leaderboardNamesAndDisplayNames);
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-        });
     }
     
     private <SettingsType> void addComponentToNavigationMenu(final Component<SettingsType> component, boolean isCheckboxEnabled, 
