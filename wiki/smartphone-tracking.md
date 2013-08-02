@@ -193,7 +193,7 @@ This does not include any additional data, and merely indicates that the race ca
 
 ##Tracking App Architecture
 
-![Activities and Fragments of the tracking app](http://imagebin.org/index.php?mode=image&id=266290)
+![Activities and Fragments of the tracking app](http://i.imagebanana.com/img/20r2qf7g/overview_Fragments_and_Activities.JPG)
 
 ### `LocationChangedReceiver`
 This class gets notified of location changes via intents. Depending on whether the App is in local or remote broadcast mode the corresponding service is started by using intents.
