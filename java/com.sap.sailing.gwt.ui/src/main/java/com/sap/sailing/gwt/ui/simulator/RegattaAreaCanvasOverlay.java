@@ -6,6 +6,7 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.Context2d.TextAlign;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapPaneType;
+import com.google.gwt.maps.client.MapType;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.event.MapMoveEndHandler;
 import com.google.gwt.maps.client.event.PolygonClickHandler;
@@ -213,7 +214,7 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 		clear();
 		
         windRoseBackground.drawTransformedImage(0.0, 1.0);
-        windRoseNeedle.drawTransformedImage(raceBearing, 1.0);
+        windRoseNeedle.drawTransformedImage(raceBearing+180.0, 1.0);
         
 		LatLng cPos = LatLng.newInstance(54.4344,10.19659167);
 		Point centerPoint = getMap().convertLatLngToDivPixel(cPos);
@@ -224,10 +225,13 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 		context2d.setLineWidth(3);
 		context2d.setStrokeStyle("Black");
 		
-		for(RegattaArea regArea : regAreas) {
-			centerPoint = getMap().convertLatLngToDivPixel(regArea.centerPos);
-			borderPoint = getMap().convertLatLngToDivPixel(regArea.edgePos);
-			drawRegattaAreaBackground(context2d, centerPoint, borderPoint, regArea.color, pxStroke);
+		MapType normalMap = MapType.getNormalMap();
+		if (this.getMap().getCurrentMapType() == normalMap) {
+			for(RegattaArea regArea : regAreas) {
+				centerPoint = getMap().convertLatLngToDivPixel(regArea.centerPos);
+				borderPoint = getMap().convertLatLngToDivPixel(regArea.edgePos);
+				drawRegattaAreaBackground(context2d, centerPoint, borderPoint, regArea.color, pxStroke);
+			}
 		}
 
 		for(RegattaArea regArea : regAreas) {
@@ -310,7 +314,7 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 		
 		if (type == 1) {
 			raceBearing = bearing;
-	        windRoseNeedle.drawTransformedImage(raceBearing, 1.0);
+	        windRoseNeedle.drawTransformedImage(raceBearing+180.0, 1.0);
 		} else if (type == 2) {
 			diffBearing = bearing;			
 		}
