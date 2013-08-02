@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -77,6 +79,8 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         
         actLeaderboardsLabel = new Label(stringMessages.actLeaderboards());
         actLeaderboardsLabel.setVisible(false);
+        actLeaderboardsLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        actLeaderboardsLabel.getElement().getStyle().setMargin(5, Unit.PX);
         mainPanel.add(actLeaderboardsLabel);
 
         actLeaderboardsTabPanel = new TabPanel();
@@ -132,6 +136,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
             actLeaderboardsTabPanel.clear();
             
             int index = 0;
+            int leaderboardCount = actLeaderboardNamesAndDisplayNames.size();
             for (Pair<String, String> leaderboardNameAndDisplayName : actLeaderboardNamesAndDisplayNames) {
                 FlowPanel tabFlowPanel = new FlowPanel();
                 actLeaderboardsTabPanel.add(tabFlowPanel, leaderboardNameAndDisplayName.getB(), false);
@@ -141,8 +146,13 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
                 }
                 index++;
             }
-            actLeaderboardsTabPanel.setVisible(actLeaderboardNamesAndDisplayNames.size() > 0);
-            actLeaderboardsLabel.setVisible(actLeaderboardNamesAndDisplayNames.size() > 0);
+            // show the last leaderboard when no leaderboard is selected yet 
+            if(selectedActLeaderboardName == null && leaderboardCount > 0) {
+                actLeaderboardsTabPanel.selectTab(leaderboardCount-1);
+            }
+            
+            actLeaderboardsTabPanel.setVisible(leaderboardCount > 0);
+            actLeaderboardsLabel.setVisible(leaderboardCount > 0);
         }
     }
 
