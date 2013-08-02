@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -37,7 +39,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
     private FlowPanel resultsPanel;
     private QueryBenchmarkResultsChart resultsChart;
 
-    private ListDataProvider<RegattaDTO> regattaDataProvider;
+    private ListDataProvider<RegattaDTO> regattaNameDataProvider;
     private ListDataProvider<BoatClassDTO> boatClassDataProvider;
     private ListDataProvider<RaceDTO> raceNameDataProvider;
     private ListDataProvider<Integer> legNumberDataProvider;
@@ -45,6 +47,15 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
     private ListDataProvider<CompetitorDTO> competitorNameDataProvider;
     private ListDataProvider<CompetitorDTO> competitorSailIDDataProvider;
     private ListDataProvider<String> nationalityDataProvider;
+    
+    private MultiSelectionModel<RegattaDTO> regattaNameSelectionModel;
+    private MultiSelectionModel<BoatClassDTO> boatClassSelectionModel;
+    private MultiSelectionModel<RaceDTO> raceNameSelectionModel;
+    private MultiSelectionModel<Integer> legNumberSelectionModel;
+    private MultiSelectionModel<LegType> legTypeSelectionModel;
+    private MultiSelectionModel<CompetitorDTO> competitorNameSelectionModel;
+    private MultiSelectionModel<CompetitorDTO> competitorSailIDSelectionModel;
+    private MultiSelectionModel<String> nationalitySelectionModel;
     
     @Override
     protected void doOnModuleLoad() {
@@ -76,15 +87,14 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
             @Override
             public void onSuccess(List<RegattaDTO> regattas) {
                 final int times = numberOfQueriesBox.getValue() == null ? 1 : numberOfQueriesBox.getValue();
-                SelectionType selectionType = SelectionType.Regatta;
-                runQuery(new ClientQueryData(selectionType, regattasToSelectionIdentifiers(regattas), times, 1));
+                runQuery(new ClientQueryData(getSelection(), times, 1));
             }
         });
     }
 
     private void runQuery(final ClientQueryData queryData) {
         final long startTime = System.currentTimeMillis();
-        sailingService.runQueryAsBenchmark(queryData.getSelectionType(), queryData.getSelection(), new AsyncCallback<Pair<Double,Double>>() {
+        sailingService.runQueryAsBenchmark(queryData.getSelection(), new AsyncCallback<Pair<Double,Double>>() {
             @Override
             public void onFailure(Throwable caught) {
                 DataMiningEntryPoint.this.reportError("Error running a query: " + caught.getMessage());
@@ -129,13 +139,66 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         functionsPanel.add(benchmarkStatusLabel);
         return functionsPanel;
     }
-
-    private List<String> regattasToSelectionIdentifiers(List<RegattaDTO> regattas) {
-        List<String> selectionIdentifiers = new ArrayList<String>();
-        for (RegattaDTO regatta : regattas) {
-            selectionIdentifiers.add(regatta.getName());
+    
+    private Map<SelectionType, Collection<?>> getSelection() {
+        Map<SelectionType, Collection<?>> selection = new HashMap<SelectionType, Collection<?>>();
+        
+        if (!raceNameSelectionModel.getSelectedSet().isEmpty()) {
+            Collection<String> regattaNames = new HashSet<String>();
+            for (RegattaDTO regatta : regattaNameSelectionModel.getSelectedSet()) {
+                regattaNames.add(regatta.getName());
+            }
+            selection.put(SelectionType.RegattaName, regattaNames);
         }
-        return selectionIdentifiers;
+        
+        if (!boatClassSelectionModel.getSelectedSet().isEmpty()) {
+            Collection<String> boatClassNames = new HashSet<String>();
+            for (BoatClassDTO boatClass : boatClassSelectionModel.getSelectedSet()) {
+                boatClassNames.add(boatClass.getName());
+            }
+            selection.put(SelectionType.BoatClass, boatClassNames);
+        }
+        
+        if (!raceNameSelectionModel.getSelectedSet().isEmpty()) {
+            Collection<String> raceNames = new HashSet<String>();
+            for (RaceDTO race : raceNameSelectionModel.getSelectedSet()) {
+                raceNames.add(race.getName());
+            }
+            selection.put(SelectionType.RaceName, raceNames);
+        }
+        
+        if (!legNumberSelectionModel.getSelectedSet().isEmpty()) {
+            Collection<Integer> raceNames = new HashSet<Integer>(legNumberSelectionModel.getSelectedSet());
+            selection.put(SelectionType.LegNumber, raceNames);
+        }
+        
+        if (!legTypeSelectionModel.getSelectedSet().isEmpty()) {
+            Collection<LegType> legTypes = new HashSet<LegType>(legTypeSelectionModel.getSelectedSet());
+            selection.put(SelectionType.LegType, legTypes);
+        }
+        
+        if (!competitorNameSelectionModel.getSelectedSet().isEmpty()) {
+            Collection<String> competitorNames = new HashSet<String>();
+            for (CompetitorDTO competitor : competitorNameSelectionModel.getSelectedSet()) {
+                competitorNames.add(competitor.getName());
+            }
+            selection.put(SelectionType.CompetitorName, competitorNames);
+        }
+        
+        if (!competitorSailIDSelectionModel.getSelectedSet().isEmpty()) {
+            Collection<String> sailIDs = new HashSet<String>();
+            for (CompetitorDTO competitor : competitorSailIDSelectionModel.getSelectedSet()) {
+                sailIDs.add(competitor.getSailID());
+            }
+            selection.put(SelectionType.SailID, sailIDs);
+        }
+        
+        if (!nationalitySelectionModel.getSelectedSet().isEmpty()) {
+            Collection<String> nationalities = new HashSet<String>(nationalitySelectionModel.getSelectedSet());
+            selection.put(SelectionType.LegNumber, nationalities);
+        }
+        
+        return selection;
     }
 
     private void fillSelectionPanel() {
@@ -146,8 +209,8 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
             }
             @Override
             public void onSuccess(List<RegattaDTO> regattas) {
-                regattaDataProvider.getList().clear();
-                regattaDataProvider.getList().addAll(regattas);
+                regattaNameDataProvider.getList().clear();
+                regattaNameDataProvider.getList().addAll(regattas);
 
                 Set<BoatClassDTO> boatClasses = new HashSet<BoatClassDTO>();
                 Set<RaceDTO> races = new HashSet<RaceDTO>();
@@ -198,18 +261,18 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         HorizontalPanel selectionPanel = new HorizontalPanel();
         selectionPanel.setSpacing(5);
         
-        CellTable<RegattaDTO> regattaTable = new CellTable<RegattaDTO>();
-        regattaTable.addColumn(new TextColumn<RegattaDTO>() {
+        CellTable<RegattaDTO> regattaNameTable = new CellTable<RegattaDTO>();
+        regattaNameTable.addColumn(new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
                 return regatta.getName();
             }
         }, "Regatta");
-        MultiSelectionModel<RegattaDTO> regattaSelectionModel = new MultiSelectionModel<RegattaDTO>();
-        regattaTable.setSelectionModel(regattaSelectionModel);
-        regattaDataProvider = new ListDataProvider<RegattaDTO>();
-        regattaDataProvider.addDataDisplay(regattaTable);
-        selectionPanel.add(regattaTable);
+        regattaNameSelectionModel = new MultiSelectionModel<RegattaDTO>();
+        regattaNameTable.setSelectionModel(regattaNameSelectionModel);
+        regattaNameDataProvider = new ListDataProvider<RegattaDTO>();
+        regattaNameDataProvider.addDataDisplay(regattaNameTable);
+        selectionPanel.add(regattaNameTable);
         
         CellTable<BoatClassDTO> boatClassTable = new CellTable<BoatClassDTO>();
         boatClassTable.addColumn(new TextColumn<BoatClassDTO>() {
@@ -218,24 +281,24 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
                 return boatClass.getName();
             }
         }, "Boat Class");
-        MultiSelectionModel<BoatClassDTO> boatClassSelectionModel = new MultiSelectionModel<BoatClassDTO>();
+        boatClassSelectionModel = new MultiSelectionModel<BoatClassDTO>();
         boatClassTable.setSelectionModel(boatClassSelectionModel);
         boatClassDataProvider = new ListDataProvider<BoatClassDTO>();
         boatClassDataProvider.addDataDisplay(boatClassTable);
         selectionPanel.add(boatClassTable);
         
-        CellTable<RaceDTO> raceTable = new CellTable<RaceDTO>();
-        raceTable.addColumn(new TextColumn<RaceDTO>() {
+        CellTable<RaceDTO> raceNameTable = new CellTable<RaceDTO>();
+        raceNameTable.addColumn(new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO race) {
                 return race.getName();
             }
         }, "Race Name");
-        MultiSelectionModel<RaceDTO> raceSelectionModel = new MultiSelectionModel<RaceDTO>();
-        raceTable.setSelectionModel(raceSelectionModel);
+        raceNameSelectionModel = new MultiSelectionModel<RaceDTO>();
+        raceNameTable.setSelectionModel(raceNameSelectionModel);
         raceNameDataProvider = new ListDataProvider<RaceDTO>();
-        raceNameDataProvider.addDataDisplay(raceTable);
-        selectionPanel.add(raceTable);
+        raceNameDataProvider.addDataDisplay(raceNameTable);
+        selectionPanel.add(raceNameTable);
         
         CellTable<Integer> legNumberTable = new CellTable<Integer>();
         legNumberTable.addColumn(new TextColumn<Integer>() {
@@ -244,7 +307,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
                 return legNumber + "";
             }
         }, "Leg Number");
-        MultiSelectionModel<Integer> legNumberSelectionModel = new MultiSelectionModel<Integer>();
+        legNumberSelectionModel = new MultiSelectionModel<Integer>();
         legNumberTable.setSelectionModel(legNumberSelectionModel);
         legNumberDataProvider = new ListDataProvider<Integer>();
         legNumberDataProvider.addDataDisplay(legNumberTable);
@@ -257,7 +320,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
                 return legType.name();
             }
         }, "Leg Type");
-        MultiSelectionModel<LegType> legTypeSelectionModel = new MultiSelectionModel<LegType>();
+        legTypeSelectionModel = new MultiSelectionModel<LegType>();
         legTypeTable.setSelectionModel(legTypeSelectionModel);
         legTypeDataProvider = new ListDataProvider<LegType>();
         legTypeDataProvider.addDataDisplay(legTypeTable);
@@ -270,7 +333,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
                 return competitor.getName();
             }
         }, "Competitor Name");
-        MultiSelectionModel<CompetitorDTO> competitorNameSelectionModel = new MultiSelectionModel<CompetitorDTO>();
+        competitorNameSelectionModel = new MultiSelectionModel<CompetitorDTO>();
         competitorNameTable.setSelectionModel(competitorNameSelectionModel);
         competitorNameDataProvider = new ListDataProvider<CompetitorDTO>();
         competitorNameDataProvider.addDataDisplay(competitorNameTable);
@@ -283,7 +346,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
                 return competitor.getSailID();
             }
         }, "Competitor Sail ID");
-        MultiSelectionModel<CompetitorDTO> competitorSailIDSelectionModel = new MultiSelectionModel<CompetitorDTO>();
+        competitorSailIDSelectionModel = new MultiSelectionModel<CompetitorDTO>();
         competitorSailIDTable.setSelectionModel(competitorSailIDSelectionModel);
         competitorSailIDDataProvider = new ListDataProvider<CompetitorDTO>();
         competitorSailIDDataProvider.addDataDisplay(competitorSailIDTable);
@@ -296,7 +359,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
                 return nationality;
             }
         }, "Nationality");
-        MultiSelectionModel<String> nationalitySelectionModel = new MultiSelectionModel<String>();
+        nationalitySelectionModel = new MultiSelectionModel<String>();
         nationalityTable.setSelectionModel(nationalitySelectionModel);
         nationalityDataProvider = new ListDataProvider<String>();
         nationalityDataProvider.addDataDisplay(nationalityTable);
