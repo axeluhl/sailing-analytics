@@ -8,6 +8,7 @@ On this page the decisions, architecture and API's for using smartphones as an a
 ## Branches
 * `cmd-reuse-racelog-for-cmd-tracking`: server side development of using the RaceLog to create a tracking adapter for Commodity Mobile Devices (CMD) such as smartphones
 * `race-board-admin`: manual UI based entry of mark passings for the time being, while we do not have a detection algorithm
+* `cmd-android-tracking`: client side development branch for the tracking application, which enhances the existent race committee app
 
 ## Communication Channels
 The current plan is to use up to three channels for communicating:
