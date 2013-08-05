@@ -1,6 +1,6 @@
 # Mobile Development
 
-See [[OnBoarding|wiki/onboarding]] how to set up your build environment for mobile development.
+See [[On Boarding|wiki/onboarding]] how to set up your build environment for mobile development.
 
 The native Android projects are in the mobile/ folder in git which is next to the java/ folder. To build them successfully, you need to install the Android SDK which is available [here](http://developer.android.com/sdk/index.html). Also, you need to use the Eclipse update site https://dl-ssl.google.com/android/eclipse and install the Eclipse ADT plugins.
 
