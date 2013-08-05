@@ -92,6 +92,7 @@ To ensure that all components of the Analysis Suite are working, you should also
   - Android projects can be found in the /mobile subdirectory
 
 To deploy an Android project (for example com.sap.sailing.racecommittee.app) to a device
+
 1. Plug-in the device
   - Development mode must be enabled on the device
   - For certain device/OS combinations additional device drivers are needed
