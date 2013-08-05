@@ -2,9 +2,7 @@ package com.sap.sailing.datamining.impl.criterias;
 
 import java.util.Collection;
 
-import com.sap.sailing.datamining.DataRetriever;
 import com.sap.sailing.datamining.SelectionContext;
-import com.sap.sailing.datamining.impl.retrievers.TrackedRaceDataRetriever;
 
 public class RaceSelectionCriteria extends AbstractSelectionCriteria<String> {
 
@@ -24,11 +22,6 @@ public class RaceSelectionCriteria extends AbstractSelectionCriteria<String> {
             }
         }
         return false;
-    }
-
-    @Override
-    public DataRetriever getDataRetriever(SelectionContext context) {
-        return new TrackedRaceDataRetriever(context.getTrackedRace());
     }
 
 }

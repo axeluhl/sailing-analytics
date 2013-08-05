@@ -2,9 +2,11 @@ package com.sap.sailing.datamining;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sap.sailing.datamining.impl.criterias.BoatClassSelectionCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompetitorNameSelectionCriteria;
+import com.sap.sailing.datamining.impl.criterias.CompoundSelectionCriteria;
 import com.sap.sailing.datamining.impl.criterias.LegNumberSelectionCriteria;
 import com.sap.sailing.datamining.impl.criterias.LegTypeSelectionCriteria;
 import com.sap.sailing.datamining.impl.criterias.NationalitySelectionCriteria;
@@ -24,7 +26,14 @@ public class SelectionCriteriaFactory {
         if (selection.isEmpty()) {
             return new WildcardSelectionCriteria();
         }
-        return createSelectionCriteria(SelectionType.RegattaName, selection.get(SelectionType.RegattaName));
+        
+        CompoundSelectionCriteria criteria = new CompoundSelectionCriteria();
+        for (Entry<SelectionType, Collection<?>> selectionEntry : selection.entrySet()) {
+            if (selectionEntry.getValue() != null && !selectionEntry.getValue().isEmpty()) {
+                criteria.addCriteria(criteria);
+            }
+        }
+        return criteria;
     }
     
     @SuppressWarnings("unchecked")

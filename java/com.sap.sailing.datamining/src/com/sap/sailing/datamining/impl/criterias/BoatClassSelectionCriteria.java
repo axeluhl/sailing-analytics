@@ -2,9 +2,7 @@ package com.sap.sailing.datamining.impl.criterias;
 
 import java.util.Collection;
 
-import com.sap.sailing.datamining.DataRetriever;
 import com.sap.sailing.datamining.SelectionContext;
-import com.sap.sailing.datamining.impl.retrievers.TrackedRegattaDataRetriever;
 
 public class BoatClassSelectionCriteria extends AbstractSelectionCriteria<String> {
 
@@ -18,17 +16,13 @@ public class BoatClassSelectionCriteria extends AbstractSelectionCriteria<String
             return false;
         }
         
-        for (String boatClassName : getSelection()) {
-            if (boatClassName.equals(context.getTrackedRegatta().getRegatta().getBoatClass().getName())) {
+        String boatClassName = context.getTrackedRegatta().getRegatta().getBoatClass().getName();
+        for (String boatClassNameToCheck : getSelection()) {
+            if (boatClassNameToCheck.equals(boatClassName)) {
                 return true;
             }
         }
         return false;
-    }
-
-    @Override
-    public DataRetriever getDataRetriever(SelectionContext context) {
-        return new TrackedRegattaDataRetriever(context.getTrackedRegatta());
     }
 
 }

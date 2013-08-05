@@ -3,7 +3,6 @@ package com.sap.sailing.datamining.impl.criterias;
 import java.util.Calendar;
 import java.util.Collection;
 
-import com.sap.sailing.datamining.DataRetriever;
 import com.sap.sailing.datamining.SelectionContext;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -26,12 +25,6 @@ public class YearSelectionCriteria extends AbstractSelectionCriteria<Integer> {
             }
         }
         return false;
-    }
-
-    @Override
-    public DataRetriever getDataRetriever(SelectionContext context) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     private boolean raceIsInYear(TrackedRace trackedRace, Integer year) {

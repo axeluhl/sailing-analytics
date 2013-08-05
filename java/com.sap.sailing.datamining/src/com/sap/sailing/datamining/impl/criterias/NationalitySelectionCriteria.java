@@ -2,10 +2,7 @@ package com.sap.sailing.datamining.impl.criterias;
 
 import java.util.Collection;
 
-import com.sap.sailing.datamining.DataRetriever;
 import com.sap.sailing.datamining.SelectionContext;
-import com.sap.sailing.datamining.impl.retrievers.CompetitorNationalityDataRetriever;
-import com.sap.sailing.domain.base.Competitor;
 
 public class NationalitySelectionCriteria extends AbstractSelectionCriteria<String> {
 
@@ -15,23 +12,16 @@ public class NationalitySelectionCriteria extends AbstractSelectionCriteria<Stri
 
     @Override
     public boolean matches(SelectionContext context) {
-        if (context.getTrackedRace() == null) {
+        if (context.getCompetitor() == null) {
             return false;
         }
         
-        for (Competitor competitor : context.getTrackedRace().getRace().getCompetitors()) {
-            for (String nationality : getSelection()) {
-                if (nationality.equals(competitor.getTeam().getNationality().getThreeLetterIOCAcronym())) {
-                    return true;
-                }
+        for (String nationality : getSelection()) {
+            if (nationality.equals(context.getCompetitor().getTeam().getNationality().getThreeLetterIOCAcronym())) {
+                return true;
             }
         }
         return false;
-    }
-
-    @Override
-    public DataRetriever getDataRetriever(SelectionContext context) {
-        return new CompetitorNationalityDataRetriever(context.getTrackedRace(), getSelection());
     }
 
 }

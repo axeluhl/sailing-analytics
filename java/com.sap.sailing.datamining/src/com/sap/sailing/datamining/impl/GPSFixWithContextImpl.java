@@ -1,62 +1,72 @@
 package com.sap.sailing.datamining.impl;
 
-import com.sap.sailing.datamining.GPSFixContext;
 import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
 public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWithContext {
-    private static final long serialVersionUID = -7871244536135981633L;
+    private static final long serialVersionUID = -5551381302809417831L;
     
-    private GPSFixContext context;
+    private TrackedRace trackedRace;
+    private int legNumber;
+    private LegType legType;
+    private Competitor competitor;
+    private Wind wind;
 
-    public GPSFixWithContextImpl(GPSFixMoving gpsFix, GPSFixContext context) {
-        this(gpsFix.getPosition(), gpsFix.getTimePoint(), gpsFix.getSpeed(), context);
+    public GPSFixWithContextImpl(GPSFixMoving gpsFix, TrackedRace trackedRace, Leg leg, int legNumber, Competitor competitor) {
+        super(gpsFix.getPosition(), gpsFix.getTimePoint(), gpsFix.getSpeed());
+        this.trackedRace = trackedRace;
+        this.legNumber = legNumber;
+        this.competitor = competitor;
+        this.wind = getTrackedRace().getWind(getPosition(), getTimePoint());
+        setLegType(leg);
     }
 
-    public GPSFixWithContextImpl(Position position, TimePoint timePoint, SpeedWithBearing speed, GPSFixContext context) {
-        super(position, timePoint, speed);
-        this.context = context;
-    }
-
-    @Override
-    public Competitor getCompetitor() {
-        return context.getCompetitor();
-    }
-
-    @Override
-    public LegType getLegType() {
-        TrackedLegOfCompetitor currentLeg = getRace().getCurrentLeg(getCompetitor(), getTimePoint());
+    private void setLegType(Leg leg) {
+        TrackedLeg trackedLeg = getTrackedRace().getTrackedLeg(leg);
         try {
-            return currentLeg == null ? null : currentLeg.getTrackedLeg().getLegType(getTimePoint());
+            legType = trackedLeg == null ? null : trackedLeg.getLegType(getTimePoint());
         } catch (NoWindException e) {
-            return null;
+            legType = null;
         }
     }
 
     @Override
-    public TrackedRace getRace() {
-        return context.getTrackedRace();
+    public Competitor getCompetitor() {
+        return competitor;
+    }
+
+    @Override
+    public LegType getLegType() {
+        return legType;
+    }
+
+    @Override
+    public TrackedRace getTrackedRace() {
+        return trackedRace;
     }
 
     @Override
     public Regatta getRegatta() {
-        return getRace().getTrackedRegatta().getRegatta();
+        return getTrackedRace().getTrackedRegatta().getRegatta();
     }
-    
+
     @Override
-    public CourseArea getCourseArea() {
-        return getRegatta().getDefaultCourseArea();
+    public int getLegNumber() {
+        return legNumber;
+    }
+
+    @Override
+    public Wind getWind() {
+        return wind;
     }
 
 }
