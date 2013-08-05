@@ -6,7 +6,7 @@ import java.util.HashSet;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class CompetitorSailIDDataRetriever extends CompetitorDetailDataRetriever {
+public class CompetitorSailIDDataRetriever extends TrackedRaceDataRetriever {
 
     private Collection<String> sailIDs;
 

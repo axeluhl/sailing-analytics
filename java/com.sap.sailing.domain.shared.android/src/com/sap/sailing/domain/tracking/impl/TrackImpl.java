@@ -130,12 +130,7 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     
     @Override
     public Iterable<FixType> getFixes(TimePoint from, boolean fromInclusive, TimePoint to, boolean toInclusive) {
-        lockForRead();
-        try {
-            return getFixes().subSet(getDummyFix(from), fromInclusive, getDummyFix(to), toInclusive);
-        } finally {
-            unlockAfterRead();
-        }
+        return getFixes().subSet(getDummyFix(from), fromInclusive, getDummyFix(to), toInclusive);
     }
 
     /**
