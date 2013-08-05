@@ -101,4 +101,4 @@ To deploy an Android project (for example com.sap.sailing.racecommittee.app) to 
 3. Select your attached device in the device selection screen
 4. The app should be started after deployment
 
-See [Mobile Development](wiki/mobile-development) for further options to run the applications using emulators.
+See [Mobile Development](mobile-development) for further options to run the applications including emulators.
