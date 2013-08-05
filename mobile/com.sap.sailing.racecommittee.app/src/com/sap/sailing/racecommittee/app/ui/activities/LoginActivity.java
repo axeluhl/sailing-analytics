@@ -27,6 +27,8 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelect
 public class LoginActivity extends BaseActivity implements EventSelectedListenerHost,
         CourseAreaSelectedListenerHost, DialogListenerHost {
     private final static String TAG = LoginActivity.class.getName();
+    
+    private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
 
     private LoginDialog loginDialog;
     private CourseArea selectedCourseArea;
@@ -34,6 +36,16 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     public LoginActivity() {
         this.loginDialog = new LoginDialog();
         this.selectedCourseArea = null;
+    }
+    
+    @Override
+    protected boolean onReset() {
+        Fragment courseAreaFragment = getFragmentManager().findFragmentByTag(CourseAreaListFragmentTag);
+        if (courseAreaFragment != null) {
+            getFragmentManager().beginTransaction().remove(courseAreaFragment).commit();
+        }
+        recreate();
+        return true;
     }
 
     /** Called when the activity is first created. */
@@ -56,7 +68,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private void addEventListFragment() {
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.add(R.id.login_view_left_container, new EventListFragment());
+        transaction.replace(R.id.login_view_left_container, new EventListFragment());
         transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
         transaction.commit();
     }
@@ -69,7 +81,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         fragment.setArguments(args);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
-        transaction.replace(R.id.login_view_right_container, fragment);
+        transaction.replace(R.id.login_view_right_container, fragment, CourseAreaListFragmentTag);
         transaction.commit();
         ExLog.i("LoginActivity", "CourseFragment created.");
     }
