@@ -31,7 +31,7 @@ This document describes the onboarding process for a new team member (developer)
 
 2. Bugzilla
 - Ask the Bugzilla administrator (Frank Mittag, Axel Uhl) to create a bugzilla account for you.
-- Bugzilla url: http://sapcoe-app01.pironet-ndh.com/bugzilla/
+- Bugzilla url: http://sapsailing.com/bugzilla/
 
 3. Race Analysis user
 - Add yourself as an user to the Race Analysis suite by adding a Jetty user in the file
