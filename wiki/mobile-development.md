@@ -2,10 +2,17 @@
 
 See [[On Boarding|wiki/onboarding]] how to set up your build environment for mobile development.
 
-The native Android projects are in the mobile/ folder in git which is next to the java/ folder. To build them successfully, you need to install the Android SDK which is available [here](http://developer.android.com/sdk/index.html). Also, you need to use the Eclipse update site https://dl-ssl.google.com/android/eclipse and install the Eclipse ADT plugins.
+Besides running the application on a plugged-in device there are multiple options for using an emulator:
 
-Currently (2013-07-18), the Race Committee App uses the Google APIs Version 13 (Android 3.2) which you need to install through the Android SDK Manager (see Eclipse toolbar after installing the Eclipse ADT plugin). In the Android Virtual Device manager which can also be found in the Eclipse toolbar you can configure an emulated device. One successful approach was using a 10.1" WXGA (Tablet) device in the emulator configuration and choose "Google APIs (Google Inc.) - API Level 13" as the target.
-
-After that it should be possible to choose "Debug as --> Android application" in the com.sap.sailing.racecommittee.app project's context menu, then pick the emulator you're previously created.
-
-If you want to run the app against your locally-running server, go into the Settings and choose http://10.0.2.2:8888 as the JSON URL. See also [here](http://developer.android.com/tools/devices/emulator.html#emulatornetworking) for more details on the emulator's network behavior.
+* Android Virtual Device (AVD)
+ * Default Android emulator
+ * Comes with the ADT and is well integrated into Eclipse
+ * In the AVD manager which can be found in the Eclipse toolbar you can configure an emulated device. Create a 10.1" WXGA (Tablet) device in the emulator configuration and choose "Google APIs (Google Inc.) - API Level 13" as the target.
+ * Use virtual device as described in [[On Boarding|wiki/onboarding]]
+ * If you want to run the app against your locally-running server, go into the Settings and choose http://10.0.2.2:8888 as the JSON URL. See also [here](http://developer.android.com/tools/devices/emulator.html#emulatornetworking) for more details on the emulator's network behavior.
+* Genymotion (AndroVM)
+ * VirtualBox-based Android emulator
+ * Currently in free beta phase; way faster than AVD; better support for Google Apps (e.g. Maps) and easy access to sensor features (e.g. setting GPS info)
+ * Register at http://www.genymotion.com/, download and install virtual device "WXGA 10.1 Tablet - 4.1.1 - with Google Apps - API 16 - 1280x800" with 160dpi
+ * If you want to run the app against your locally-running server, check the IP address of your host machine for the VirtualBox network interface. Use this IP when you are configuring the app.
+ * Use virtual device as described in [[On Boarding|wiki/onboarding]]
