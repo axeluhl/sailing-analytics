@@ -1,8 +1,8 @@
 package com.sap.sailing.datamining.impl.criterias;
 
 import java.util.Collection;
+import java.util.HashSet;
 
-import com.google.gwt.dev.util.collect.HashSet;
 import com.sap.sailing.datamining.SelectionContext;
 import com.sap.sailing.datamining.SelectionCriteria;
 

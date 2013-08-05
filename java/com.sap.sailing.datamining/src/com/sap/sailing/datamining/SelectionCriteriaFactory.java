@@ -30,7 +30,7 @@ public class SelectionCriteriaFactory {
         CompoundSelectionCriteria criteria = new CompoundSelectionCriteria();
         for (Entry<SelectionType, Collection<?>> selectionEntry : selection.entrySet()) {
             if (selectionEntry.getValue() != null && !selectionEntry.getValue().isEmpty()) {
-                criteria.addCriteria(criteria);
+                criteria.addCriteria(createSelectionCriteria(selectionEntry.getKey(), selectionEntry.getValue()));
             }
         }
         return criteria;

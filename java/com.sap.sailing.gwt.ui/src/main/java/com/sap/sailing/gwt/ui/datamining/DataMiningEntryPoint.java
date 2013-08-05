@@ -195,7 +195,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         
         if (!nationalitySelectionModel.getSelectedSet().isEmpty()) {
             Collection<String> nationalities = new HashSet<String>(nationalitySelectionModel.getSelectedSet());
-            selection.put(SelectionType.LegNumber, nationalities);
+            selection.put(SelectionType.Nationality, nationalities);
         }
         
         return selection;
