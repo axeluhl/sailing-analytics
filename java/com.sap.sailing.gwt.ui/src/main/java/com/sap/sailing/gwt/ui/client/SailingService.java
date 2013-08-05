@@ -9,7 +9,7 @@ import java.util.Set;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.sap.sailing.datamining.shared.SelectionType;
+import com.sap.sailing.datamining.shared.Dimension;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -330,5 +330,5 @@ public interface SailingService extends RemoteService {
 
     MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override);
 
-    Pair<Double, Double> runQueryAsBenchmark(Map<SelectionType, Collection<?>> selection);
+    Pair<Double, Double> runQueryAsBenchmark(Map<Dimension, Collection<?>> selection);
 }

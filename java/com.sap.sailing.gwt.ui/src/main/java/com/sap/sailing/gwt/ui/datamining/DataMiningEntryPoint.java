@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
-import com.sap.sailing.datamining.shared.SelectionType;
+import com.sap.sailing.datamining.shared.Dimension;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -140,15 +140,15 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         return functionsPanel;
     }
     
-    private Map<SelectionType, Collection<?>> getSelection() {
-        Map<SelectionType, Collection<?>> selection = new HashMap<SelectionType, Collection<?>>();
+    private Map<Dimension, Collection<?>> getSelection() {
+        Map<Dimension, Collection<?>> selection = new HashMap<Dimension, Collection<?>>();
         
         if (!raceNameSelectionModel.getSelectedSet().isEmpty()) {
             Collection<String> regattaNames = new HashSet<String>();
             for (RegattaDTO regatta : regattaNameSelectionModel.getSelectedSet()) {
                 regattaNames.add(regatta.getName());
             }
-            selection.put(SelectionType.RegattaName, regattaNames);
+            selection.put(Dimension.RegattaName, regattaNames);
         }
         
         if (!boatClassSelectionModel.getSelectedSet().isEmpty()) {
@@ -156,7 +156,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
             for (BoatClassDTO boatClass : boatClassSelectionModel.getSelectedSet()) {
                 boatClassNames.add(boatClass.getName());
             }
-            selection.put(SelectionType.BoatClass, boatClassNames);
+            selection.put(Dimension.BoatClass, boatClassNames);
         }
         
         if (!raceNameSelectionModel.getSelectedSet().isEmpty()) {
@@ -164,17 +164,17 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
             for (RaceDTO race : raceNameSelectionModel.getSelectedSet()) {
                 raceNames.add(race.getName());
             }
-            selection.put(SelectionType.RaceName, raceNames);
+            selection.put(Dimension.RaceName, raceNames);
         }
         
         if (!legNumberSelectionModel.getSelectedSet().isEmpty()) {
             Collection<Integer> raceNames = new HashSet<Integer>(legNumberSelectionModel.getSelectedSet());
-            selection.put(SelectionType.LegNumber, raceNames);
+            selection.put(Dimension.LegNumber, raceNames);
         }
         
         if (!legTypeSelectionModel.getSelectedSet().isEmpty()) {
             Collection<LegType> legTypes = new HashSet<LegType>(legTypeSelectionModel.getSelectedSet());
-            selection.put(SelectionType.LegType, legTypes);
+            selection.put(Dimension.LegType, legTypes);
         }
         
         if (!competitorNameSelectionModel.getSelectedSet().isEmpty()) {
@@ -182,7 +182,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
             for (CompetitorDTO competitor : competitorNameSelectionModel.getSelectedSet()) {
                 competitorNames.add(competitor.getName());
             }
-            selection.put(SelectionType.CompetitorName, competitorNames);
+            selection.put(Dimension.CompetitorName, competitorNames);
         }
         
         if (!competitorSailIDSelectionModel.getSelectedSet().isEmpty()) {
@@ -190,12 +190,12 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
             for (CompetitorDTO competitor : competitorSailIDSelectionModel.getSelectedSet()) {
                 sailIDs.add(competitor.getSailID());
             }
-            selection.put(SelectionType.SailID, sailIDs);
+            selection.put(Dimension.SailID, sailIDs);
         }
         
         if (!nationalitySelectionModel.getSelectedSet().isEmpty()) {
             Collection<String> nationalities = new HashSet<String>(nationalitySelectionModel.getSelectedSet());
-            selection.put(SelectionType.Nationality, nationalities);
+            selection.put(Dimension.Nationality, nationalities);
         }
         
         return selection;

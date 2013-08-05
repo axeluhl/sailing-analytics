@@ -16,19 +16,19 @@ import com.sap.sailing.datamining.impl.criterias.SailIDSelectionCriteria;
 import com.sap.sailing.datamining.impl.criterias.WildcardSelectionCriteria;
 import com.sap.sailing.datamining.impl.criterias.WindStrengthSelectionCriteria;
 import com.sap.sailing.datamining.impl.criterias.YearSelectionCriteria;
-import com.sap.sailing.datamining.shared.SelectionType;
+import com.sap.sailing.datamining.shared.Dimension;
 import com.sap.sailing.datamining.shared.WindStrength;
 import com.sap.sailing.domain.common.LegType;
 
 public class SelectionCriteriaFactory {
 
-    public static SelectionCriteria createSelectionCriteria(Map<SelectionType, Collection<?>> selection) {
+    public static SelectionCriteria createSelectionCriteria(Map<Dimension, Collection<?>> selection) {
         if (selection.isEmpty()) {
             return new WildcardSelectionCriteria();
         }
         
         CompoundSelectionCriteria criteria = new CompoundSelectionCriteria();
-        for (Entry<SelectionType, Collection<?>> selectionEntry : selection.entrySet()) {
+        for (Entry<Dimension, Collection<?>> selectionEntry : selection.entrySet()) {
             if (selectionEntry.getValue() != null && !selectionEntry.getValue().isEmpty()) {
                 criteria.addCriteria(createSelectionCriteria(selectionEntry.getKey(), selectionEntry.getValue()));
             }
@@ -37,8 +37,8 @@ public class SelectionCriteriaFactory {
     }
     
     @SuppressWarnings("unchecked")
-    public static <T> SelectionCriteria createSelectionCriteria(SelectionType type, Collection<T> selection) {
-        switch (type) {
+    public static <T> SelectionCriteria createSelectionCriteria(Dimension dimension, Collection<T> selection) {
+        switch (dimension) {
         case RegattaName:
             return new RegattaSelectionCriteria((Collection<String>) selection);
         case BoatClass:

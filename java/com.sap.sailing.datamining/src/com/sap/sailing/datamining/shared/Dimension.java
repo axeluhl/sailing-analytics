@@ -1,6 +1,6 @@
 package com.sap.sailing.datamining.shared;
 
-public enum SelectionType {
+public enum Dimension {
     
     RegattaName, RaceName, LegNumber,
     BoatClass,

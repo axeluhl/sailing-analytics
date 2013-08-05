@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.datamining.shared.SelectionType;
+import com.sap.sailing.datamining.shared.Dimension;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -455,7 +455,7 @@ public interface SailingServiceAsync {
     /**
      * Creates and runs a data mining query with the specified properties.
      */
-    void runQueryAsBenchmark(Map<SelectionType, Collection<?>> selection, AsyncCallback<Pair<Double, Double>> asyncCallback);
+    void runQueryAsBenchmark(Map<Dimension, Collection<?>> selection, AsyncCallback<Pair<Double, Double>> asyncCallback);
     
 }
 
