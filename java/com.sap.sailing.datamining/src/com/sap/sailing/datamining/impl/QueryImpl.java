@@ -6,6 +6,7 @@ import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.datamining.Query;
 import com.sap.sailing.datamining.Selector;
 import com.sap.sailing.datamining.shared.QueryResult;
+import com.sap.sailing.datamining.shared.QueryResultImpl;
 import com.sap.sailing.server.RacingEventService;
 
 public class QueryImpl implements Query {
