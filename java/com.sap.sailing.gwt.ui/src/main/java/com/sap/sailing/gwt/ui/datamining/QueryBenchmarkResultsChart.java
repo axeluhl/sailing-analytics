@@ -24,10 +24,15 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class QueryBenchmarkResultsChart extends SimplePanel implements RequiresResize {
-    
+
+    private StringMessages stringMessages;
+    private List<QueryBenchmarkResult> results;
+    private double thresholdFactor;
     private Chart chart;
+    
     private Series serverTimeSeries;
     private Series cleanedServerTimeSeries;
     private PlotLine averageServerTimePlotLine;
@@ -36,42 +41,13 @@ public class QueryBenchmarkResultsChart extends SimplePanel implements RequiresR
     private Series cleanedOverallTimeSeries;
     private PlotLine averageOverallTimePlotLine;
     
-    private List<QueryBenchmarkResult> results;
-    private double thresholdFactor;
-    
-    public QueryBenchmarkResultsChart() {
+    public QueryBenchmarkResultsChart(StringMessages stringMessages) {
+        this.stringMessages = stringMessages;
+        
         results = new ArrayList<QueryBenchmarkResult>();
         thresholdFactor = 5;
-        chart = new Chart()
-                      .setMarginLeft(100)
-                      .setMarginRight(45)
-                      .setWidth100()
-                      .setCredits(new Credits().setEnabled(false))
-                      .setChartTitle(new ChartTitle().setText("Query Benchmark Results"));
         
-        chart.getXAxis().setType(Axis.Type.LINEAR).setAllowDecimals(false);
-
-        chart.getYAxis().setAxisTitleText("Time").setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
-            @Override
-            public String format(AxisLabelsData axisLabelsData) {
-                try {
-                    return axisLabelsData.getValueAsDouble() + "s";
-                } catch (Exception e) {
-                    return "";
-                }
-            }
-        }));
-        
-        chart.setToolTip(new ToolTip().setPointFormat("<span style=\"color:{series.color}\">{series.name}</span>: <b>{point.y}s</b><br/>"));
-
-        serverTimeSeries = chart.createSeries().setName("Server Time").setPlotOptions(new LinePlotOptions().setColor("#656565").setMarker(new Marker().setEnabled(false)));
-        cleanedServerTimeSeries = chart.createSeries().setName("Cleaned Server Time").setPlotOptions(new LinePlotOptions().setColor("#000099").setMarker(new Marker().setEnabled(false)));
-        averageServerTimePlotLine = chart.getYAxis().createPlotLine().setColor("#000099").setWidth(2).setDashStyle(DashStyle.SOLID);
-
-        overallTimeSeries = chart.createSeries().setName("Overall Time").setPlotOptions(new LinePlotOptions().setColor("#656565").setMarker(new Marker().setEnabled(false)));
-        cleanedOverallTimeSeries = chart.createSeries().setName("Cleaned Overall Time").setPlotOptions(new LinePlotOptions().setColor("#00bb00").setMarker(new Marker().setEnabled(false)));
-        averageOverallTimePlotLine = chart.getYAxis().createPlotLine().setColor("#00bb00").setWidth(2).setDashStyle(DashStyle.SOLID);
-        
+        createChart();
         this.setWidget(chart);
     }
     
@@ -172,9 +148,9 @@ public class QueryBenchmarkResultsChart extends SimplePanel implements RequiresR
 
     private void updateChartSubtitle(int numberOfGPSFixes, double averageServerTime, double averageOverallTime) {
         StringBuilder subtitelBuilder = new StringBuilder();
-        subtitelBuilder.append("Number of GPS-Fixes: " + numberOfGPSFixes);
-        subtitelBuilder.append(" - \u2300 Cleaned Server Time: " + averageServerTime + "s");
-        subtitelBuilder.append(" - \u2300 Cleaned Overall Time: " + averageOverallTime + "s");
+        subtitelBuilder.append(stringMessages.numberOfGPSFixes() + ": " + numberOfGPSFixes);
+        subtitelBuilder.append(" - " + stringMessages.averageCleanedServerTime() + ": " + averageServerTime + "s");
+        subtitelBuilder.append(" - " + stringMessages.averageCleanedOverallTime() + ": " + averageOverallTime + "s");
         
         chart.setChartSubtitle(new ChartSubtitle().setText(subtitelBuilder.toString()));
         //This is needed, so that the subtitle is updated. Otherwise the text would stay empty
@@ -197,11 +173,41 @@ public class QueryBenchmarkResultsChart extends SimplePanel implements RequiresR
         }
     }
 
+    private void createChart() {
+        chart = new Chart()
+                      .setMarginLeft(100)
+                      .setMarginRight(45)
+                      .setWidth100()
+                      .setCredits(new Credits().setEnabled(false))
+                      .setChartTitle(new ChartTitle().setText(stringMessages.dataMiningBenchmarkResults()));
+        
+        chart.getXAxis().setType(Axis.Type.LINEAR).setAllowDecimals(false);
+
+        chart.getYAxis().setAxisTitleText(stringMessages.time()).setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
+            @Override
+            public String format(AxisLabelsData axisLabelsData) {
+                try {
+                    return axisLabelsData.getValueAsDouble() + "s";
+                } catch (Exception e) {
+                    return "";
+                }
+            }
+        }));
+        
+        chart.setToolTip(new ToolTip().setPointFormat("<span style=\"color:{series.color}\">{series.name}</span>: <b>{point.y}s</b><br/>"));
+
+        serverTimeSeries = chart.createSeries().setName(stringMessages.serverTime()).setPlotOptions(new LinePlotOptions().setColor("#656565").setMarker(new Marker().setEnabled(false)));
+        cleanedServerTimeSeries = chart.createSeries().setName(stringMessages.cleanedServerTime()).setPlotOptions(new LinePlotOptions().setColor("#000099").setMarker(new Marker().setEnabled(false)));
+        averageServerTimePlotLine = chart.getYAxis().createPlotLine().setColor("#000099").setWidth(2).setDashStyle(DashStyle.SOLID);
+
+        overallTimeSeries = chart.createSeries().setName(stringMessages.overallTime()).setPlotOptions(new LinePlotOptions().setColor("#656565").setMarker(new Marker().setEnabled(false)));
+        cleanedOverallTimeSeries = chart.createSeries().setName(stringMessages.cleanedOverallTime()).setPlotOptions(new LinePlotOptions().setColor("#00bb00").setMarker(new Marker().setEnabled(false)));
+        averageOverallTimePlotLine = chart.getYAxis().createPlotLine().setColor("#00bb00").setWidth(2).setDashStyle(DashStyle.SOLID);
+    }
+
     @Override
     public void onResize() {
         chart.setSizeToMatchContainer();
-        // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox positions (nativeAdjustCheckboxPosition)
-        // in the BaseChart class would not be called 
         chart.redraw();
     }
 

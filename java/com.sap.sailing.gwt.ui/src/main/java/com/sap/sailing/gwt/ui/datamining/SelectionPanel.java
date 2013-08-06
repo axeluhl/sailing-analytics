@@ -25,7 +25,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class SelectionPanel extends FlowPanel {
+public class SelectionPanel extends FlowPanel implements QuerySelectionProvider {
     
     private StringMessages stringMessages;
     private SailingServiceAsync sailingService;
@@ -61,6 +61,7 @@ public class SelectionPanel extends FlowPanel {
         fillSelectionTables();
     }
 
+    @Override
     public Map<Dimension, Collection<?>> getSelection() {
         Map<Dimension, Collection<?>> selection = new HashMap<Dimension, Collection<?>>();
         for (SelectionTable<?, ?> table : tablesMappedByDimension.values()) {

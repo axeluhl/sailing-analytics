@@ -749,4 +749,18 @@ public interface StringMessages extends Messages {
     String legType();
     String sailID();
     String clearSelection();
+    String running();
+    String runAsSubstantive();
+    String done();
+    String lastFinished();
+    String run();
+    String times();
+    String numberOfGPSFixes();
+    String averageCleanedServerTime();
+    String averageCleanedOverallTime();
+    String dataMiningBenchmarkResults();
+    String serverTime();
+    String cleanedServerTime();
+    String overallTime();
+    String cleanedOverallTime();
 }
