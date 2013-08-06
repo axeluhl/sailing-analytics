@@ -4,6 +4,6 @@ import java.util.Collection;
 
 public interface Aggregator {
     
-    public double aggregate(Collection<GPSFixWithContext> data);
+    public double aggregate(Collection<Double> data);
 
 }

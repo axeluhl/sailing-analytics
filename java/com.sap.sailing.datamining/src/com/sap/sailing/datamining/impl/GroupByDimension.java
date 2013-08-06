@@ -13,7 +13,7 @@ public class GroupByDimension implements Grouper {
     
     private Dimension dimension;
 
-    private GroupByDimension(Dimension dimension) {
+    public GroupByDimension(Dimension dimension) {
         this.dimension = dimension;
     }
 
