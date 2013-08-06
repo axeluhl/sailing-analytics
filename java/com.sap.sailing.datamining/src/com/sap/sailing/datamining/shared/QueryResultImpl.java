@@ -1,8 +1,7 @@
 package com.sap.sailing.datamining.shared;
 
+import java.util.HashMap;
 import java.util.Map;
-
-
 
 public class QueryResultImpl implements QueryResult {
     private static final long serialVersionUID = 351213515082955565L;
@@ -18,6 +17,7 @@ public class QueryResultImpl implements QueryResult {
     
     public QueryResultImpl(int gpsFixAmount) {
         this.gpsFixAmount = gpsFixAmount;
+        results = new HashMap<String, Double>();
     }
 
     @Override
