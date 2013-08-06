@@ -54,6 +54,7 @@ import com.sap.sailing.datamining.QueryFactory;
 import com.sap.sailing.datamining.Selector;
 import com.sap.sailing.datamining.SelectorFactory;
 import com.sap.sailing.datamining.shared.Dimension;
+import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -3319,12 +3320,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Pair<Double, Integer> runQueryAsBenchmark(Map<Dimension, Collection<?>> selection) {
         final long startTime = System.nanoTime();
-        Selector selector = SelectorFactory.createSelector(selection);
-        Query query = QueryFactory.createQuery(selector);
-        Integer gpsFixAmount = query.run(getService()).getGPSFixAmount();
+        Integer gpsFixAmount = runQuery(selection).getGPSFixAmount();
         long endTime = System.nanoTime();
         double serverTime = (endTime - startTime) / 1000000000.0;
         return new Pair<Double, Integer>(serverTime, gpsFixAmount);
+    }
+    
+    @Override
+    public QueryResult runQuery(Map<Dimension, Collection<?>> selection) {
+        Selector selector = SelectorFactory.createSelector(selection);
+        Query query = QueryFactory.createQuery(selector);
+        return query.run(getService());
     }
 
 }

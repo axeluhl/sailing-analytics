@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.impl;
 
 import java.util.Map;
 
-import com.sap.sailing.datamining.QueryResult;
+import com.sap.sailing.datamining.shared.QueryResult;
 
 public class QueryResultImpl implements QueryResult {
     

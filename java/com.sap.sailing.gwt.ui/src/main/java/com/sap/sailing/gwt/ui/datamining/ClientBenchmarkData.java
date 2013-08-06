@@ -5,13 +5,13 @@ import java.util.Map;
 
 import com.sap.sailing.datamining.shared.Dimension;
 
-public class ClientQueryData {
+public class ClientBenchmarkData {
     
     private Map<Dimension, Collection<?>> selection;
     private int times;
     private int currentRun;
 
-    public ClientQueryData(Map<Dimension, Collection<?>> selection, int times, int currentRun) {
+    public ClientBenchmarkData(Map<Dimension, Collection<?>> selection, int times, int currentRun) {
         this.selection = selection;
         this.times = times;
         this.currentRun = currentRun;

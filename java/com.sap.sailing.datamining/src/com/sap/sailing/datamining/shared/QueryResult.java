@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining;
+package com.sap.sailing.datamining.shared;
 
 import java.util.Map;
 

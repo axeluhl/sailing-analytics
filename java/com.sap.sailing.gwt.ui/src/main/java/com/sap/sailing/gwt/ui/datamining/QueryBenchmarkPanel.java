@@ -29,13 +29,14 @@ public class QueryBenchmarkPanel extends FlowPanel {
 
     public QueryBenchmarkPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
             ErrorReporter errorReporter, QuerySelectionProvider selectionProvider) {
+        super();
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.selectionProvider = selectionProvider;
         
         add(createFunctionsPanel());
-        resultsChart = new QueryBenchmarkResultsChart(stringMessages);
+        resultsChart = new QueryBenchmarkResultsChart(this.stringMessages);
         add(resultsChart);
     }
 
@@ -50,14 +51,14 @@ public class QueryBenchmarkPanel extends FlowPanel {
             @Override
             public void onSuccess(List<RegattaDTO> regattas) {
                 final int times = numberOfQueriesBox.getValue() == null ? 1 : numberOfQueriesBox.getValue();
-                runQuery(new ClientQueryData(selectionProvider.getSelection(), times, 1));
+                runQuery(new ClientBenchmarkData(selectionProvider.getSelection(), times, 1));
             }
         });
     }
 
-    private void runQuery(final ClientQueryData queryData) {
+    private void runQuery(final ClientBenchmarkData benchmarkData) {
         final long startTime = System.currentTimeMillis();
-        sailingService.runQueryAsBenchmark(queryData.getSelection(), new AsyncCallback<Pair<Double, Integer>>() {
+        sailingService.runQueryAsBenchmark(benchmarkData.getSelection(), new AsyncCallback<Pair<Double, Integer>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running a query: " + caught.getMessage());
@@ -66,15 +67,15 @@ public class QueryBenchmarkPanel extends FlowPanel {
             public void onSuccess(Pair<Double, Integer> result) {
                 long endTime = System.currentTimeMillis();
                 double overallTime = (endTime - startTime) / 1000.0;
-                resultsChart.addResult(new QueryBenchmarkResult(stringMessages.runAsSubstantive() + " " + queryData.getCurrentRun(), result.getB().intValue(), result.getA(), overallTime));
+                resultsChart.addResult(new QueryBenchmarkResult(stringMessages.runAsSubstantive() + " " + benchmarkData.getCurrentRun(), result.getB().intValue(), result.getA(), overallTime));
                 
-                if (queryData.isFinished()) {
+                if (benchmarkData.isFinished()) {
                     benchmarkStatusLabel.setText(" | " + stringMessages.done());
                     resultsChart.showResults();
                 } else {
-                    benchmarkStatusLabel.setText(" | " + stringMessages.running() + " (" + stringMessages.lastFinished() + ": " + queryData.getCurrentRun() + ")");
-                    queryData.incrementCurrentRun();
-                    runQuery(queryData);
+                    benchmarkStatusLabel.setText(" | " + stringMessages.running() + " (" + stringMessages.lastFinished() + ": " + benchmarkData.getCurrentRun() + ")");
+                    benchmarkData.incrementCurrentRun();
+                    runQuery(benchmarkData);
                 }
             }
         });

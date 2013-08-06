@@ -48,7 +48,7 @@ public class QueryBenchmarkResultsChart extends SimplePanel implements RequiresR
         thresholdFactor = 5;
         
         createChart();
-        this.setWidget(chart);
+        setWidget(chart);
     }
     
     public void addResult(QueryBenchmarkResult newResult) {
