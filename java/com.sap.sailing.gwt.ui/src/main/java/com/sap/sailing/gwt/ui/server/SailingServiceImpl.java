@@ -3317,14 +3317,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Pair<Double, Double> runQueryAsBenchmark(Map<Dimension, Collection<?>> selection) {
+    public Pair<Double, Integer> runQueryAsBenchmark(Map<Dimension, Collection<?>> selection) {
         final long startTime = System.nanoTime();
         Selector selector = SelectorFactory.createSelector(selection);
         Query query = QueryFactory.createQuery(selector);
-        Double gpsFixAmount = query.run(getService()).get(0).getB();
+        Integer gpsFixAmount = query.run(getService()).getGPSFixAmount();
         long endTime = System.nanoTime();
         double serverTime = (endTime - startTime) / 1000000000.0;
-        return new Pair<Double, Double>(serverTime, gpsFixAmount);
+        return new Pair<Double, Integer>(serverTime, gpsFixAmount);
     }
 
 }

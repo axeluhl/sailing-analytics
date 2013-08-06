@@ -455,7 +455,7 @@ public interface SailingServiceAsync {
     /**
      * Creates and runs a data mining query with the specified properties.
      */
-    void runQueryAsBenchmark(Map<Dimension, Collection<?>> selection, AsyncCallback<Pair<Double, Double>> asyncCallback);
+    void runQueryAsBenchmark(Map<Dimension, Collection<?>> selection, AsyncCallback<Pair<Double, Integer>> asyncCallback);
     
 }
 

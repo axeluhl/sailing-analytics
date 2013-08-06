@@ -94,13 +94,13 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
 
     private void runQuery(final ClientQueryData queryData) {
         final long startTime = System.currentTimeMillis();
-        sailingService.runQueryAsBenchmark(queryData.getSelection(), new AsyncCallback<Pair<Double,Double>>() {
+        sailingService.runQueryAsBenchmark(queryData.getSelection(), new AsyncCallback<Pair<Double, Integer>>() {
             @Override
             public void onFailure(Throwable caught) {
                 DataMiningEntryPoint.this.reportError("Error running a query: " + caught.getMessage());
             }
             @Override
-            public void onSuccess(Pair<Double, Double> result) {
+            public void onSuccess(Pair<Double, Integer> result) {
                 long endTime = System.currentTimeMillis();
                 double overallTime = (endTime - startTime) / 1000.0;
                 resultsChart.addResult(new QueryBenchmarkResult("Run " + queryData.getCurrentRun(), result.getB().intValue(), result.getA(), overallTime));
