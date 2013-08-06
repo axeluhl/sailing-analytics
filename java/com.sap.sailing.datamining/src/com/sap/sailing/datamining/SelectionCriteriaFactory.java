@@ -41,7 +41,7 @@ public class SelectionCriteriaFactory {
         switch (dimension) {
         case RegattaName:
             return new RegattaSelectionCriteria((Collection<String>) selection);
-        case BoatClass:
+        case BoatClassName:
             return new BoatClassSelectionCriteria((Collection<String>) selection);
         case CompetitorName:
             return new CompetitorNameSelectionCriteria((Collection<String>) selection);

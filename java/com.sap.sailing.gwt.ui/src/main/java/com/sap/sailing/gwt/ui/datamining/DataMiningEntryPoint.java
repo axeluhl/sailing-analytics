@@ -156,7 +156,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
             for (BoatClassDTO boatClass : boatClassSelectionModel.getSelectedSet()) {
                 boatClassNames.add(boatClass.getName());
             }
-            selection.put(Dimension.BoatClass, boatClassNames);
+            selection.put(Dimension.BoatClassName, boatClassNames);
         }
         
         if (!raceNameSelectionModel.getSelectedSet().isEmpty()) {

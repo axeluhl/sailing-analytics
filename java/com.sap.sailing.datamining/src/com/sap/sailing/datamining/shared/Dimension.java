@@ -3,7 +3,7 @@ package com.sap.sailing.datamining.shared;
 public enum Dimension {
     
     RegattaName, RaceName, LegNumber,
-    BoatClass,
+    BoatClassName,
     Year,
     LegType,
     CompetitorName,

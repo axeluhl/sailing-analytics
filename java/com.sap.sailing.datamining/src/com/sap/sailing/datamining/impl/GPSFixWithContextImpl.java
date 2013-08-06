@@ -1,11 +1,19 @@
 package com.sap.sailing.datamining.impl;
 
+import java.util.Calendar;
+
 import com.sap.sailing.datamining.GPSFixWithContext;
+import com.sap.sailing.datamining.shared.Dimension;
+import com.sap.sailing.datamining.shared.WindStrength;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -26,12 +34,12 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
         this.trackedRace = trackedRace;
         this.legNumber = legNumber;
         this.competitor = competitor;
-        this.wind = getTrackedRace().getWind(getPosition(), getTimePoint());
+        this.wind = this.trackedRace.getWind(getPosition(), getTimePoint());
         setLegType(leg);
     }
 
     private void setLegType(Leg leg) {
-        TrackedLeg trackedLeg = getTrackedRace().getTrackedLeg(leg);
+        TrackedLeg trackedLeg = trackedRace.getTrackedLeg(leg);
         try {
             legType = trackedLeg == null ? null : trackedLeg.getLegType(getTimePoint());
         } catch (NoWindException e) {
@@ -50,13 +58,13 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
     }
 
     @Override
-    public TrackedRace getTrackedRace() {
-        return trackedRace;
+    public RaceDefinition getRace() {
+        return trackedRace.getRace();
     }
 
     @Override
     public Regatta getRegatta() {
-        return getTrackedRace().getTrackedRegatta().getRegatta();
+        return trackedRace.getTrackedRegatta().getRegatta();
     }
 
     @Override
@@ -65,8 +73,63 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
     }
 
     @Override
-    public Wind getWind() {
-        return wind;
+    public BoatClass getBoatClass() {
+        return getCompetitor().getBoat().getBoatClass();
+    }
+
+    @Override
+    public Nationality getNationality() {
+        return getCompetitor().getTeam().getNationality();
+    }
+
+    @Override
+    public WindStrength getWindStrength() {
+        if (wind == null) {
+            return null;
+        }
+        
+        return WindStrength.valueOf(wind.getBeaufort());
+    }
+
+    @Override
+    public Integer getYear() {
+        TimePoint time = trackedRace.getStartOfRace() != null ? trackedRace.getStartOfRace() : trackedRace.getStartOfTracking();
+        if (time == null) {
+            return null;
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(time.asDate());
+        return calendar.get(Calendar.YEAR);
+    }
+
+    @Override
+    public String getStringRepresentation(Dimension dimension) {
+        switch (dimension) {
+        case BoatClassName:
+            return getBoatClass().getName();
+        case CompetitorName:
+            return getCompetitor().getName();
+        case LegNumber:
+            return getLegNumber() + "";
+        case LegType:
+            LegType legType = getLegType();
+            return legType != null ? legType.toString() : null;
+        case Nationality:
+            return getNationality().getThreeLetterIOCAcronym();
+        case RaceName:
+            return getRace().getName();
+        case RegattaName:
+            return getRegatta().getName();
+        case SailID:
+            return getCompetitor().getBoat().getSailID();
+        case WindStrength:
+            WindStrength windStrength = getWindStrength();
+            return windStrength != null ? windStrength.toString() : null;
+        case Year:
+            Integer year = getYear();
+            return year != null ? year.toString() : null;
+        }
+        return null;
     }
 
 }
