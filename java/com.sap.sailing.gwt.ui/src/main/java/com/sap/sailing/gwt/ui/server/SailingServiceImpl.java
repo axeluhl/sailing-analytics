@@ -49,10 +49,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.regexp.shared.RegExp;
+import com.sap.sailing.datamining.DataMiningFactory;
 import com.sap.sailing.datamining.Query;
-import com.sap.sailing.datamining.QueryFactory;
-import com.sap.sailing.datamining.Selector;
-import com.sap.sailing.datamining.SelectorFactory;
 import com.sap.sailing.datamining.shared.Dimension;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.base.BoatClass;
@@ -3328,8 +3326,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public QueryResult runQuery(Map<Dimension, Collection<?>> selection) {
-        Selector selector = SelectorFactory.createSelector(selection);
-        Query query = QueryFactory.createQuery(selector);
+        Query query = DataMiningFactory.createQuery(selection);
         return query.run(getService());
     }
 

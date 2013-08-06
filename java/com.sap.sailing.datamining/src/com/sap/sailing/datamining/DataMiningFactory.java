@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.sap.sailing.datamining.impl.QueryImpl;
+import com.sap.sailing.datamining.impl.SelectorImpl;
 import com.sap.sailing.datamining.impl.criterias.BoatClassSelectionCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompetitorNameSelectionCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundSelectionCriteria;
@@ -20,9 +22,17 @@ import com.sap.sailing.datamining.shared.Dimension;
 import com.sap.sailing.datamining.shared.WindStrength;
 import com.sap.sailing.domain.common.LegType;
 
-public class SelectionCriteriaFactory {
+public class DataMiningFactory {
+    
+    public static Query createQuery(Map<Dimension, Collection<?>> selection) {
+        return new QueryImpl(createSelector(selection));
+    }
 
-    public static SelectionCriteria createSelectionCriteria(Map<Dimension, Collection<?>> selection) {
+    protected static Selector createSelector(Map<Dimension, Collection<?>> selection) {
+        return new SelectorImpl(createSelectionCriteria(selection));
+    }
+
+    protected static SelectionCriteria createSelectionCriteria(Map<Dimension, Collection<?>> selection) {
         if (selection.isEmpty()) {
             return new WildcardSelectionCriteria();
         }
@@ -37,7 +47,7 @@ public class SelectionCriteriaFactory {
     }
     
     @SuppressWarnings("unchecked")
-    public static <T> SelectionCriteria createSelectionCriteria(Dimension dimension, Collection<T> selection) {
+    protected static <T> SelectionCriteria createSelectionCriteria(Dimension dimension, Collection<T> selection) {
         switch (dimension) {
         case RegattaName:
             return new RegattaSelectionCriteria((Collection<String>) selection);
@@ -62,5 +72,4 @@ public class SelectionCriteriaFactory {
         }
         throw new IllegalArgumentException("Not yet implemented for the given selection type.");
     }
-
 }
