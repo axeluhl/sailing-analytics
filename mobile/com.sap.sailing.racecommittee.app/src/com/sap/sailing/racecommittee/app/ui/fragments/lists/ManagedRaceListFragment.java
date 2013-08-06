@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
@@ -36,12 +37,12 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogF
 public class ManagedRaceListFragment extends ListFragment implements JuryFlagClickedListener, RaceStateChangedListener {
 
     public enum FilterMode {
-        ALL("Show all"), ACTIVE("Show active");
+        ALL(R.string.race_list_filter_show_all), ACTIVE(R.string.race_list_filter_show_active);
 
         private String displayName;
 
-        private FilterMode(String displayName) {
-            this.displayName = displayName;
+        private FilterMode(int resId) {
+            this.displayName = RaceApplication.getStringContext().getString(resId);
         }
 
         @Override

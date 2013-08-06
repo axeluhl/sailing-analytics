@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hallo Welt, RaceCommitteeActivity!</string>
+    <string name="running_on_course">(Kurs %s)</string>
+    <string name="course_design_number_waypoints">Kurs hat %s Wegpunkte</string>
+    <string name="choose_running_course">Wähle Kurs aus</string>
+    <string name="service_info">SAP Race Committee Service</string>
+    <string name="service_title">Verwaltet alle Rennen auf gewählter Rennbahn.</string>
+    <string name="app_name">SAP Race Committee Cockpit</string>
+    <string name="set_time">Start</string>
+    <string name="reset_time">Startzeit ändern</string>
+    <string name="choose">Setzen</string>
+    <string name="current_time">Zeit</string>
+    <string name="race_finished_template">%s ist beendet</string>
+    <string name="race_first_boat_finished">Erstes Boot im Ziel:</string>
+    <string name="race_first_finisher" formatted="false">Erstes Boot im Ziel um %s</string>
+    <string name="race_first_finisher_and_time_limit" formatted="false">Erstes Boot im Ziel um %s, Zeitlimit endet %s</string>
+    <string name="race_time_limit">Zeitlimit endet %s</string>
+    <string name="choose_startmode">Wähle Startmodus</string>
+    <string name="choose_abort_mode">Wähle anzuzeigende Flaggen</string>
+    <string name="choose_abort_flag_mode">Wähle Abbruchflagge</string>
+    <string name="choose_flag">Wähle Flaggenaktion</string>
+    <string name="flags_up">OBEN</string>
+    <string name="flags_down">UNTEN</string>
+    <string name="ap_or_november">Wähle Abbruchflagge</string>
+    <string name="choose_start_mode_flag">Wähle Startmodusflagge</string>
+    <string name="abort_starting_phase">Abbruch Startphase</string>
+    <string name="abort_running_race">Abbruch</string>
+    <string name="choose_xray_flag_up">Einzelrückruf</string>
+    <string name="choose_golf_flag_down">Hole Golf Flagge ein</string>
+    <string name="choose_xray_flag_down">Einzelrückruf abschließen</string>
+    <string name="choose_first_substitute_flag">Gesamtrückruf</string>
+    <string name="choose_blue_flag">Zieleinlauf beginnen</string>
+    <string name="flag_papa">Papa</string>
+    <string name="flag_zulu">Zulu</string>
+    <string name="flag_india">India</string>
+    <string name="flag_black">Black</string>
+    <string name="flag_ap">AP Flagge</string>
+    <string name="flag_november">November</string>
+    <string name="flag_Xray">Xray</string>
+    <string name="flag_jury">Jury</string>
+    <string name="flag_blue">Rennende</string>
+    <string name="flag_golf">Gate-Start</string>
+    <string name="flag_foxtrott">RSS26-Start</string>
+    <string name="label_login_events">Event auswählen:</string>
+    <string name="label_login_course_area">Rennbahn auswählen:</string>
+    <string name="please_pick_a_time">Startzeit setzen auf</string>
+    <string name="select_raceStartType">Startmodus auswählen</string>
+    <string name="time_until_start">Zeit bis Start (mit Startzeit oben)</string>
+    <string name="label_race">Rennen: </string>
+    <string name="login_type_officer">Als Wettfahrtleiter auf Rennbahn anmelden</string>
+    <string name="login_type_viewer">Im Demo-Modus anmelden</string>
+    <string name="racelist_unscheduled">Noch nicht geplant</string>
+    <string name="racelist_scheduled">Geplant für %s</string>
+    <string name="racelist_startphase">Start um %s läuft</string>
+    <string name="racelist_running">Gestartet um %s</string>
+    <string name="racelist_finishing">Zieleinlauf</string>
+    <string name="racelist_finished">Beendet</string>
+    <string name="racelist_unknown">Unknown</string>
+    <string name="currentlyLoading">Lädt &#8230;</string>
+    <string name="racingview_header">Rennbahn %s Rennen</string>
+    <string name="running_on_unknown">(Kurs setzen)</string>
+    <string name="empty"></string>
+    <string name="check_pending_events">Prüfe wartende Events</string>
+    <string name="unknown">Unbekannt</string>
+    <string name="last_sent">Zuletzt gesendet: </string>
+    <string name="pending_events">Wartende Events:</string>
+    <string name="reload_data">Daten neuladen</string>
+    <string name="race_information">Renninformationen</string>
+    <string name="start_mode_flag">Startmodusflagge</string>
+    <string name="class_flag">Klassenflagge</string>
+    <string name="updateIndicator">Update Icon</string>
+    <string name="reset_race">Rennen zurücksetzen</string>
+    <string name="postpone_race">Rennen verschieben</string>
+    <string name="postpone">Verschieben</string>
+    <string name="fixedLine">RSS26-Start</string>
+    <string name="gateStart_mode">Gate-Start</string>
+    <string name="confirmation_blue_flag_remove">Blaue Flagge wirklich einholen?</string>
+    <string name="confirmation_blue_flag_display">Blaue Flagge wirklich anzeigen?</string>
+    <string name="confirmation_first_substitute_display">Gesamtrückruf wirklich anzeigen?</string>
+    <string name="finishing_limit_template">Zeitlimit endet um %s</string>
+    <string name="race_running_since_template" formatted="false">%s läuft seit %s</string>
+    <string name="race_reset_confirmation_header">Zurücksetzen des Rennens</string>
+    <string name="race_reset_confirmation_warning">Beim Zurücksetzen des Rennens werden alle Daten gelöscht. Alle Informationen zum Rennen müssen erneut eingegeben werden. Nur der eingegeben Kurs bleibt erhalten. Ein Zurücksetzen wird nicht empfohlen.</string>
+    <string name="race_reset_confirmation_title">Zurücksetzen</string>
+	<string name="race_reset_reset_button">Trotzdem zurücksetzen</string>
+    <string name="race_finished_start_time">Rennstart um:</string>
+    <string name="race_finished_end_time">Rennende um:</string>
+    <string name="race_startphase_flagdown">Flagge wird eingeholt&#8230;</string>
+    <string name="race_startphase_flagup">Flagge wird angezeigt&#8230;</string>
+    <string name="race_startphase_countdown_mode_remove">%1$s bis Flagge %2$s eingeholt wird</string>
+    <string name="race_startphase_countdown_mode_display">%1$s bis Flagge %2$s angezeigt wird</string>
+    <string name="race_startphase_ess_countdown_ap_flag_removed">%1$s bis Flagge AP eingeholt wird</string>
+    <string name="race_startphase_ess_countdown_one_flag_display">%1$s bis Flagge Eins eingeholt wird</string>
+    <string name="race_startphase_ess_countdown_two_flag_display">%1$s bis Flagge Zwei eingeholt wird</string>
+    <string name="race_startphase_ess_countdown_three_flag_display">%1$s bis Flagge Drei eingeholt wird</string>
+    <string name="race_startphase_countdown_class_remove">%1$s bis Klassenflagge %2$s eingeholt wird (Rennstart)</string>
+    <string name="race_startphase_ess_countdown_one_flag_remove">%1$s bis Flagge Eins eingeholt wird (Rennstart)</string>
+    <string name="race_startphase_countdown_class_display">%1$s bis Klassenflagge %2$s angezeigt wird</string>
+    <string name="race_startphase_countdown_start">%1$s bis %2$s startet&quot;</string>
+    <string name="race_startphase_gate_class_over_golf_display">%1$s bis die Klassenflagge über Golf angezeigt wird</string>
+    <string name="race_startphase_gate_class_removed">%1$s bis die Klassenflagge eingeholt wird (Rennstart)</string>
+    <string name="race_startphase_gate_papa_display">%1$s bis Flagge Papa angezeigt wird</string>
+    <string name="race_startphase_gate_papa_removed">%1$s bis Flagge Papa eingeholt wird</string>
+    <string name="set_pathfinder">Pathfinder setzen</string>
+    <string name="set_pathfinder_title">Pathfinder setzen</string>
+    <string name="protest_dialog_title">Beginn der Protestzeit setzen</string>
+    <string name="finishing_dialog_title">Erstes Boot im Ziel setzen</string>
+    <string name="finished_dialog_title">Rennende setzen</string>
+    <string name="protest_start_time">Protestzeit beginnt: %s</string>
+    <string name="protest_flag_set">Protestflagge wird angezeigt für %s.</string>
+    <string name="choose_running_course_lr">Bitte Kurs auswählen</string>
+    <string name="running_course_selection">Kursauswahl</string>
+    <string name="lr_course_1">Kurs 1</string>
+    <string name="lr_course_2">Kurs 2</string>
+    <string name="no_pathfinder_selected">Kein Pathfinder gesetzt</string>
+    <string name="set_line_opening_time">Gate-Zeit setzen</string>
+    <string name="no_line_opening_time_selected">keine Zeit gesetzt</string>
+    <string name="set_gate_line_opening_time_title">Gate-Zeit setzen</string>
+    <string name="choose_line_open_min">min</string>
+    <string name="previous_course">Vorherigen Kurs</string>
+    <string name="make_new_course">Kurs erstellen</string>
+    <string name="course_design_assets">Kurselemente</string>
+    <string name="course_design_dialog_title">Kursdesign erstellen</string>
+    <string name="pick_a_rounding_direction">Wenderichtung auswählen</string>
+    <string name="change_course_element">Wegpunkt ändern</string>
+    <string name="select_penalty_reason">Strafe auswählen</string>
+
+    <string-array name="rounding_directions">
+        <item>Backbord</item>
+        <item>Steuerbord</item>
+        <item>Gate</item>
+    </string-array>
+    <string-array name="course_element_changers">
+        <item>Nach oben</item>
+        <item>Nach unten</item>
+        <item>Entfernen</item>
+    </string-array>
+
+    <string name="publish">Veröffentlichen</string>
+    <string name="unpublish">Zurücknehmen</string>
+    <string name="take_previous">Vorherigen Kurs übernehmen</string>
+    <string name="markImage">Mark image</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="retry">Wiederholen</string>
+    <string name="yes">Ja</string>
+    <string name="no">Nein</string>
+    <string name="positionings">Ergebnisliste</string>
+    <string name="set_positionings">Ergebnisliste füllen</string>
+    <string name="confirm_positionings">Ergebnisliste bestätigen</string>
+    <string name="availableFinishingCompetitors">Segler</string>
+    <string name="choose_blue_flag_finishing">Rennen beenden</string>
+    <string name="drag_handle_description">Cursor</string>
+    <string name="options_menu_live">Verbindungsinformationen</string>
+    <string name="options_menu_wind">Wind eingeben</string>
+    <string name="options_menu_reload">Neuladen</string>
+    <string name="options_menu_settings">Einstellungen</string>
+    <string name="results_capturing_title">Ergebnislisten</string>
+    <string name="results_capturing_view_subject">Mail Betreff</string>
+    <string name="results_capturing_view_body">Mail Text</string>
+    <string name="results_capturing_view_send">Absenden</string>
+    <string name="results_capturing_view_add_photo">Foto hinzufügen</string>
+    <string name="results_capturing_view_list_header">Angehängte Fotos</string>
+    <string name="results_capturing_view_list_empty">Bisher keine Fotos</string>
+    <string name="remove">Entfernen</string>
+    
+    <string name="results_mail_subject">[Race Committee] %s</string>
+    <string name="results_mail_body">Ergebnislisten für Rennen %s sind angehängt.</string>
+    <string name="wind_direction_degrees">Windrichtung (Grad)</string>
+    <string name="wind_speed_knots">Windgeschwindigkeit (Knoten)</string>
+    <string name="enter_wind_direction">1. Windrichtung eingeben</string>
+    <string name="enter_wind_speed">2. Windgeschwindigkeit eingeben</string>
+    <string name="check_all_data">3. Eingaben prüfen</string>
+    <string name="in_degrees">in Grad</string>
+    <string name="in_knots">in Knoten</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="wind_speed_direction_not_a_valid_number">Die Windgeschwindigkeit oder -richtung ist keine valide Zahl. Bitte korrigieren Sie den Wert.</string>
+    <string name="wind_location_or_fields_not_valid">Die eingegebene Position, Windgeschwindigkeit oder -richtung ist leer. Bitte korrigieren Sie die Werte.</string>
+    <string name="your_position">Aktuelle Position</string>
+    <string name="store_wind_entry">4. Windeingaben speichern</string>
+    <string name="store_wind">Windeingaben speichern</string>
+    
+    <!-- SETTINGS -->
+    <string name="settings_category_general">Allgemeine Einstellungen</string>
+    <string name="settings_general_manageareas_header">Verwaltete Rennbahnen</string>
+    <string name="settings_general_manageareas_description">Verwaltete Rennbahnen einstellen (Komma-getrennt)</string>
+    
+    <string name="settings_category_race">Renneinstellungen</string>
+    <string name="override_default_start_procedure_type_header">Standard Startprozedur überschreiben</string>
+    <string name="override_default_start_procedure_type_description">Aktivieren wenn Startprozedur der Rennen überschrieben werden soll.</string>
+    <string name="override_default_start_procedure_type_select_header">Standard Startprozedur (wenn überschrieben)</string>
+    <string name="override_default_start_procedure_type_select_description">Wenn Option "Standard Startprozedur überschreiben" aktiv ist, wird ausgewählte Startprozedur als Standard gewählt.</string>
+    <string name="settings_time_frame_header">Zeitlimitdauer nach Rennende</string>
+    <string name="settings_time_frame_description">Zeit in Minuten einstellen, welches Zeitlimit angibt</string>
+    
+    <string name="settings_category_advanced">Erweiterte Einstellungen</string>
+    <string name="settings_advanced_service_header">Wählen sie die Server URL aus.</string>
+    <string name="settings_advanced_service_description">Webservice URL einstellen.</string>
+    <string name="settings_advanced_mail_description">Empfänger für Bilder der Ergebnislisten.</string>
+    <string name="settings_advanced_mail_header">Empfänger Ergebnislisten</string>
+    <string name="settings_advanced_max_rounds_description">Wählen Sie die maximale Rundenanzahl aus.</string>
+    <string name="settings_advanced_max_rounds_header">Maximale Rundenanzahl pro Kurs</string>
+    <string name="settings_advanced_min_rounds_description">Wählen Sie die minimale Rundenanzahl aus.</string>
+    <string name="settings_advanced_min_rounds_header">Minimale Rundenanzahl pro Kurs</string>
+    <!-- SETTINGS -->
+    
+    <string name="compass_view_compass">Kompass</string>
+    <string name="compass_view_needle">Nadel</string>
+    
+    <string name="racing_course_area_missing">Rennbahn konnte nicht geladen werden. Bitte neu anmelden.</string>
+    <string name="racing_load_success">%d Rennen erfolgreich geladen.</string>
+    <string name="generic_load_failure">Beim Laden der Daten ist ein Fehler aufgetreten:\n\"%s\"\nErneut versuchen?</string>
+    <string name="set_course_layout">Kurs setzen</string>
+    
+    <string name="loading_failure">Fehler beim Laden</string>
+	<string name="wind_unknown">(Wind setzen)</string>
+	<string name="wind_info" formatted="false">(%s kn, %s)</string>
+	<string name="login">Anmelden</string>
+	<string name="login_onto_course_area">Auf Rennbahn anmelden</string>
+	<string name="please_select_a_login_type">Bitte Login-Typ angeben.</string>
+	
+	<string name="race_list_filter_show_all">Alle Rennen</string>
+	<string name="race_list_filter_show_active">Aktive Rennen</string>
+	
+	<string name="race_reset_time_schedule_race">Rennen planen</string>
+	<string name="race_reset_time_startmode_starttime">Startmodus und Startzeit setzen</string>
+	<string name="today">Heute</string>
+	<string name="start">Start</string>
+	
+	<string name="nationality">Nationalität</string>
+	<string name="number">Nummer</string>
+	<string name="snap">Fotos schießen</string>
+	
+</resources>

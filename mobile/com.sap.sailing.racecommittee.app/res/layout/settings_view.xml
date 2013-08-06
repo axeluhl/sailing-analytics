@@ -15,16 +15,16 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="overrideDefaultStartProcedureType"
-            android:summary="Check the box if races should use the start procedure type defined below as a default"
-            android:title="@string/override_default_start_procedure_type" />
+            android:summary="@string/override_default_start_procedure_type_description"
+            android:title="@string/override_default_start_procedure_type_header" />
 
         <ListPreference
             android:key="defaultStartProcedureType"
-            android:summary="Races will use selected start procedure type as a default. For this option to be active override checkbox has to be enabled."
-            android:title="@string/override_default_start_procedure_type_select" />
+            android:summary="@string/override_default_start_procedure_type_select_description"
+            android:title="@string/override_default_start_procedure_type_select_header" />
 
         <EditTextPreference
-            android:defaultValue="30"
+            android:defaultValue="@integer/settings_time_frame_default"
             android:inputType="numberDecimal"
             android:key="edittextRaceTimeFrameAfterFinish"
             android:summary="@string/settings_time_frame_description"
@@ -46,6 +46,21 @@
             android:key="mailRecipientPreference"
             android:summary="@string/settings_advanced_mail_description"
             android:title="@string/settings_advanced_mail_header" />
+        
+        <EditTextPreference
+            android:name="@string/settings_advanced_min_rounds_header"
+            android:defaultValue="@integer/settings_advanced_min_rounds_default"
+            android:inputType="numberDecimal"
+            android:key="minRoundsPreference"
+            android:summary="@string/settings_advanced_min_rounds_description"
+            android:title="@string/settings_advanced_min_rounds_header" />
+                        
+        <EditTextPreference
+            android:name="@string/settings_advanced_max_rounds_header"
+            android:defaultValue="@integer/settings_advanced_max_rounds_default"
+            android:inputType="numberDecimal"
+            android:key="maxRoundsPreference"
+            android:summary="@string/settings_advanced_max_rounds_description"
+            android:title="@string/settings_advanced_max_rounds_header" />
     </PreferenceCategory>
-
 </PreferenceScreen>

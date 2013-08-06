@@ -69,12 +69,12 @@ public class ProtestTimeDialogFragment extends BaseDialogFragment {
 
     @Override
     protected CharSequence getNegativeButtonLabel() {
-        return "Cancel";
+        return getString(R.string.cancel);
     }
 
     @Override
     protected CharSequence getPositiveButtonLabel() {
-        return "Set";
+        return getString(R.string.choose);
     }
 
     @Override
