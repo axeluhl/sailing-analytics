@@ -51,8 +51,10 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.google.gwt.regexp.shared.RegExp;
 import com.sap.sailing.datamining.DataMiningFactory;
 import com.sap.sailing.datamining.Query;
+import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.Dimension;
 import com.sap.sailing.datamining.shared.QueryResult;
+import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -3316,17 +3318,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Pair<Double, Integer> runQueryAsBenchmark(Map<Dimension, Collection<?>> selection) {
+    public Pair<Double, Integer> runQueryAsBenchmark(Map<Dimension, Collection<?>> selection, Dimension groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
         final long startTime = System.nanoTime();
-        Integer gpsFixAmount = runQuery(selection).getGPSFixAmount();
+        Integer gpsFixAmount = runQuery(selection, groupByDimension, statisticToCalculate, aggregatedAs).getGPSFixAmount();
         long endTime = System.nanoTime();
         double serverTime = (endTime - startTime) / 1000000000.0;
         return new Pair<Double, Integer>(serverTime, gpsFixAmount);
     }
     
     @Override
-    public QueryResult runQuery(Map<Dimension, Collection<?>> selection) {
-        Query query = DataMiningFactory.createQuery(selection);
+    public QueryResult runQuery(Map<Dimension, Collection<?>> selection, Dimension groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
+        Query query = DataMiningFactory.createQuery(selection, groupByDimension, statisticToCalculate, aggregatedAs);
         return query.run(getService());
     }
 

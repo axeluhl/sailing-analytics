@@ -21,19 +21,19 @@ public class QueryBenchmarkPanel extends FlowPanel {
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
     private StringMessages stringMessages;
-    private QuerySelectionProvider selectionProvider;
+    private QueryComponentsProvider queryComponentsProvider;
 
     private IntegerBox numberOfQueriesBox;
     private Label benchmarkStatusLabel;
     private QueryBenchmarkResultsChart resultsChart;
 
     public QueryBenchmarkPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, QuerySelectionProvider selectionProvider) {
+            ErrorReporter errorReporter, QueryComponentsProvider queryComponentsProvider) {
         super();
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        this.selectionProvider = selectionProvider;
+        this.queryComponentsProvider = queryComponentsProvider;
         
         add(createFunctionsPanel());
         resultsChart = new QueryBenchmarkResultsChart(this.stringMessages);
@@ -51,14 +51,16 @@ public class QueryBenchmarkPanel extends FlowPanel {
             @Override
             public void onSuccess(List<RegattaDTO> regattas) {
                 final int times = numberOfQueriesBox.getValue() == null ? 1 : numberOfQueriesBox.getValue();
-                runQuery(new ClientBenchmarkData(selectionProvider.getSelection(), times, 1));
+                runQuery(new ClientBenchmarkData(queryComponentsProvider.getSelection(), times, 1));
             }
         });
     }
 
     private void runQuery(final ClientBenchmarkData benchmarkData) {
         final long startTime = System.currentTimeMillis();
-        sailingService.runQueryAsBenchmark(benchmarkData.getSelection(), new AsyncCallback<Pair<Double, Integer>>() {
+        sailingService.runQueryAsBenchmark(benchmarkData.getSelection(), queryComponentsProvider.getDimensionToGroupBy(),
+                                           queryComponentsProvider.getStatisticToCalculate(), queryComponentsProvider.getAggregationType(),
+                                           new AsyncCallback<Pair<Double, Integer>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running a query: " + caught.getMessage());

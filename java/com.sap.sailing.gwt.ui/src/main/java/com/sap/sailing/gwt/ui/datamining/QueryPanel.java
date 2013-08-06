@@ -16,17 +16,17 @@ public class QueryPanel extends FlowPanel {
     private StringMessages stringMessages;
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
-    private QuerySelectionProvider selectionProvider;
+    private QueryComponentsProvider queryComponentsProvider;
     
     private QueryResultsChart resultChart;
 
     public QueryPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, QuerySelectionProvider selectionProvider) {
+            ErrorReporter errorReporter, QueryComponentsProvider queryComponentsProvider) {
         super();
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        this.selectionProvider = selectionProvider;
+        this.queryComponentsProvider = queryComponentsProvider;
         
         add(createFunctionsPanel());
         resultChart = new QueryResultsChart(this.stringMessages);
@@ -34,7 +34,9 @@ public class QueryPanel extends FlowPanel {
     }
 
     private void runQuery() {
-        sailingService.runQuery(selectionProvider.getSelection(), new AsyncCallback<QueryResult>() {
+        sailingService.runQuery(queryComponentsProvider.getSelection(), queryComponentsProvider.getDimensionToGroupBy(),
+                                queryComponentsProvider.getStatisticToCalculate(), queryComponentsProvider.getAggregationType(),
+                                new AsyncCallback<QueryResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running the query: " + caught.getMessage());

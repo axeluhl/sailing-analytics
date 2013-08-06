@@ -30,8 +30,8 @@ import com.sap.sailing.domain.common.LegType;
 
 public class DataMiningFactory {
     
-    public static Query createQuery(Map<Dimension, Collection<?>> selection) {
-        return new QueryImpl(createSelector(selection), null, null, null);
+    public static Query createQuery(Map<Dimension, Collection<?>> selection, Dimension groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
+        return new QueryImpl(createSelector(selection), createGrouper(groupByDimension), createExtractor(statisticToCalculate), createAggregator(aggregatedAs));
     }
     
     protected static Grouper createGrouper(Dimension dimension) {

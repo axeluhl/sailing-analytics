@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,11 +11,16 @@ import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ValueListBox;
+import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.Dimension;
+import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -25,11 +31,14 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class SelectionPanel extends FlowPanel implements QuerySelectionProvider {
+public class SelectionPanel extends FlowPanel implements QueryComponentsProvider {
     
     private StringMessages stringMessages;
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
+
+    private ValueListBox<Dimension> groupByListBox;
+    private ValueListBox<StatisticAndAggregatorType> statisticsListBox;
     
     private Map<Dimension, SelectionTable<?, ?>> tablesMappedByDimension;
     private SelectionTable<RegattaDTO, String> regattaNameTable;
@@ -48,16 +57,10 @@ public class SelectionPanel extends FlowPanel implements QuerySelectionProvider 
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         
-        Button clearSelectionButton = new Button(this.stringMessages.clearSelection());
-        clearSelectionButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                clearSelection();
-            }
-        });
-        add(clearSelectionButton);
-        
         add(createSelectionTables());
+        
+        add(createFunctionsPanel());
+        
         fillSelectionTables();
     }
 
@@ -77,6 +80,21 @@ public class SelectionPanel extends FlowPanel implements QuerySelectionProvider 
         for (SelectionTable<?, ?> table : tablesMappedByDimension.values()) {
             table.clearSelection();
         }
+    }
+
+    @Override
+    public Dimension getDimensionToGroupBy() {
+        return groupByListBox.getValue();
+    }
+
+    @Override
+    public StatisticType getStatisticToCalculate() {
+        return statisticsListBox.getValue().getStatisticType();
+    }
+
+    @Override
+    public AggregatorType getAggregationType() {
+        return statisticsListBox.getValue().getAggregatorType();
     }
 
     private void fillSelectionTables() {
@@ -118,6 +136,56 @@ public class SelectionPanel extends FlowPanel implements QuerySelectionProvider 
                 nationalityTable.setContent(nationalities);
             }
         });
+    }
+
+    private HorizontalPanel createFunctionsPanel() {
+        HorizontalPanel functionsPanel = new HorizontalPanel();
+        functionsPanel.setSpacing(5);
+        
+        Button clearSelectionButton = new Button(this.stringMessages.clearSelection());
+        clearSelectionButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                clearSelection();
+            }
+        });
+        functionsPanel.add(clearSelectionButton);
+        
+        functionsPanel.add(new Label(stringMessages.groupBy() + ": "));
+        groupByListBox = new ValueListBox<Dimension>(new Renderer<Dimension>() {
+            @Override
+            public String render(Dimension dimension) {
+                if (dimension == null) {
+                  return "";
+                }
+                return dimension.toString();
+            }
+            @Override
+            public void render(Dimension dimension, Appendable appendable) throws IOException {
+                appendable.append(render(dimension));
+            }
+        });
+        groupByListBox.setAcceptableValues(Arrays.asList(Dimension.values()));
+        functionsPanel.add(groupByListBox);
+        
+        functionsPanel.add(new Label(stringMessages.statisticToCalculate() + ": "));
+        statisticsListBox = new ValueListBox<StatisticAndAggregatorType>(new Renderer<StatisticAndAggregatorType>() {
+            @Override
+            public String render(StatisticAndAggregatorType statisticAndAggregatorType) {
+                if (statisticAndAggregatorType == null) {
+                  return "";
+                }
+                return statisticAndAggregatorType.toString();
+            }
+            @Override
+            public void render(StatisticAndAggregatorType statisticAndAggregatorType, Appendable appendable) throws IOException {
+                appendable.append(render(statisticAndAggregatorType));
+            }
+        });
+        statisticsListBox.setAcceptableValues(Arrays.asList(new StatisticAndAggregatorType(StatisticType.FixAmount, AggregatorType.Average)));
+        functionsPanel.add(statisticsListBox);
+        
+        return functionsPanel;
     }
 
     private HorizontalPanel createSelectionTables() {

@@ -764,4 +764,6 @@ public interface StringMessages extends Messages {
     String overallTime();
     String cleanedOverallTime();
     String dataMiningResult();
+    String groupBy();
+    String statisticToCalculate();
 }
