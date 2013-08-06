@@ -56,7 +56,7 @@ public class QueryResultsChart extends SimplePanel {
     }
 
     private void createChart() {
-        chart = new Chart().setType(Series.Type.BAR)
+        chart = new Chart().setType(Series.Type.COLUMN)
                 .setMarginLeft(100)
                 .setMarginRight(45)
                 .setWidth100()
@@ -67,7 +67,7 @@ public class QueryResultsChart extends SimplePanel {
                 .setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
                     @Override
                     public String format(AxisLabelsData axisLabelsData) {
-                        return axisLabelsData.getValueAsString();
+                        return "X";
                     }
                 }));
 
