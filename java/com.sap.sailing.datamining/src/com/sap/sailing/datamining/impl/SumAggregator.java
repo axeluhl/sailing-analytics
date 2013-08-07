@@ -1,16 +1,23 @@
 package com.sap.sailing.datamining.impl;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import com.sap.sailing.datamining.Aggregator;
+import com.sap.sailing.domain.confidence.ScalableValue;
 
-public class SumAggregator implements Aggregator {
+public class SumAggregator<ValueType, AveragesTo> implements Aggregator<ValueType, AveragesTo> {
 
     @Override
-    public double aggregate(Collection<Double> data) {
-        double sum = 0;
-        for (Double dataEntry : data) {
-            sum += dataEntry;
+    public ScalableValue<ValueType, AveragesTo> aggregate(Collection<ScalableValue<ValueType, AveragesTo>> data) {
+        Iterator<ScalableValue<ValueType, AveragesTo>> dataIterator = data.iterator();
+        ScalableValue<ValueType, AveragesTo> sum = null;
+        
+        if (dataIterator.hasNext()) {
+            sum = dataIterator.next();
+            while (dataIterator.hasNext()) {
+                sum.add(dataIterator.next());
+            }
         }
         return sum;
     }

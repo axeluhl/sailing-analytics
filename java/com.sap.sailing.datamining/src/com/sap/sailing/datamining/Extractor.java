@@ -4,8 +4,8 @@ import java.util.Collection;
 
 import com.sap.sailing.domain.confidence.ScalableValue;
 
-public interface Extractor<DataType, ExtractedType, AveragesTo> {
+public interface Extractor<DataType, ValueType, AveragesTo> {
 
-    public Collection<ScalableValue<ExtractedType, AveragesTo>> extract(Collection<DataType> data);
+    public Collection<ScalableValue<ValueType, AveragesTo>> extract(Collection<DataType> data);
 
 }
