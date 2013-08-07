@@ -181,6 +181,7 @@
     <string name="wind_speed_direction_not_a_valid_number">Die Windgeschwindigkeit oder -richtung ist keine valide Zahl. Bitte korrigieren Sie den Wert.</string>
     <string name="wind_location_or_fields_not_valid">Die eingegebene Position, Windgeschwindigkeit oder -richtung ist leer. Bitte korrigieren Sie die Werte.</string>
     <string name="your_position">Aktuelle Position</string>
+    <string name="waiting_for_gps">Warte auf GPS Signal ...</string>
     <string name="store_wind_entry">4. Windeingaben speichern</string>
     <string name="store_wind">Windeingaben speichern</string>
     

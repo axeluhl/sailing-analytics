@@ -56,8 +56,6 @@ public class RaceChooseCourseByLabelDialog extends RaceDialogFragment {
         return holder;
     }
 
-
-
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -73,11 +71,6 @@ public class RaceChooseCourseByLabelDialog extends RaceDialogFragment {
         
         getRace().getState().setCourseDesign(courseLayout);
         dismiss();
-    }
-
-    @Override
-    public void notifyTick() {
-
     }
 
 }
