@@ -191,6 +191,8 @@ Includes a `Competitor` as well a `SmartphoneIdentifier`. On the one hand, every
 ### RaceLogPreRacePhaseEndedEvent
 This does not include any additional data, and merely indicates that the race can be transformed from its pre-race definition state (e.g. waiting for competitors to register, waiting for boat class, waiting for course definition) to an actual race, where no additional competitors can be added, the boat class is fixes, and tracking may begin. This event is picked up by the `RaceLogRaceTracker`, which then creates the actual tracked race from the data in the RaceLog. For successful creation, at least one competitor has to be registered, and a course must have been set through a `RaceLogCourseDefinitionChangedEvent`.
 
+##Tracking App Use Cases
+![Use Cases](http://i.imagebanana.com/img/bda86luu/Use_Cases.jpg)
 
 ##Tracking App Architecture
 
