@@ -25,6 +25,11 @@ public class SettingsActivity extends PreferenceActivity {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.layout.settings_view);
         
+        setupStartProcedurePreferences();
+        setupLanguageButton();
+    }
+
+    private void setupStartProcedurePreferences() {
         final ListPreference startProcedurePreference = (ListPreference) findPreference("defaultStartProcedureType");
         
         List<CharSequence> entries = new ArrayList<CharSequence>();
@@ -48,7 +53,9 @@ public class SettingsActivity extends PreferenceActivity {
                 return true;
             }
         });
-        
+    }
+
+    private void setupLanguageButton() {
         Preference button = (Preference)findPreference("languagePref");
         button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -59,8 +66,6 @@ public class SettingsActivity extends PreferenceActivity {
                 return true;
             }
         });
-        
-        
     }
     
 }
