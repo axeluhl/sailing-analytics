@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sap.sailing.datamining.impl.AverageAggregator;
-import com.sap.sailing.datamining.impl.AbstractGrouper;
+import com.sap.sailing.datamining.impl.FilterByCriteriaImpl;
+import com.sap.sailing.datamining.impl.GPSFixRetrieverImpl;
 import com.sap.sailing.datamining.impl.QueryImpl;
-import com.sap.sailing.datamining.impl.SelectorImpl;
 import com.sap.sailing.datamining.impl.SumAggregator;
 import com.sap.sailing.datamining.impl.criterias.BoatClassSelectionCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompetitorNameSelectionCriteria;
@@ -29,19 +29,30 @@ import com.sap.sailing.datamining.shared.WindStrength;
 import com.sap.sailing.domain.common.LegType;
 
 public class DataMiningFactory {
-    
-    public static Query createQuery(Map<Dimension, Collection<?>> selection, Dimension groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
-        return new QueryImpl(createSelector(selection), createGrouper(groupByDimension), createExtractor(statisticToCalculate), createAggregator(aggregatedAs));
+
+    public static <DataType, ValueType, AveragesTo> Query<DataType, ValueType, AveragesTo> createQuery(
+            DataRetriever<DataType> retriever, Filter<DataType> filter, Grouper<DataType> grouper,
+            Extractor<DataType, ValueType, AveragesTo> extractor, Aggregator<ValueType, AveragesTo> aggregator) {
+        return new QueryImpl<DataType, ValueType, AveragesTo>(retriever, filter, grouper, extractor, aggregator);
     }
-    
-    protected static Grouper createGrouper(Dimension dimension) {
-        return new AbstractGrouper(dimension);
+
+    public static DataRetriever<GPSFixWithContext> createGPSFixRetriever() {
+        return new GPSFixRetrieverImpl();
     }
-    
+
+    public static <DataType> Filter<DataType> createCriteriaFilter(FilterCriteria<DataType> criteria) {
+        return new FilterByCriteriaImpl<DataType>(criteria);
+    }
+
+    public static <DataType> Grouper<DataType> createGrouper() {
+        // TODO
+        return null;
+    }
+
     protected static Extractor createExtractor(StatisticType statisticType) {
         switch (statisticType) {
         case FixAmount:
-            //TODO: This will be removed after some development.
+            // TODO: This will be removed after some development.
             return new Extractor() {
                 @Override
                 public Collection<Double> extract(Collection<GPSFixWithContext> data) {
@@ -51,25 +62,28 @@ public class DataMiningFactory {
                 }
             };
         }
-        throw new IllegalArgumentException("Not yet implemented for the given statistic type: " + statisticType.toString());
+        throw new IllegalArgumentException("Not yet implemented for the given statistic type: "
+                + statisticType.toString());
     }
-    
-    protected static Aggregator createAggregator(AggregatorType aggregatorType) {
+
+    protected static <ValueType, AveragesTo> Aggregator<ValueType, AveragesTo> createAggregator(
+            AggregatorType aggregatorType) {
         switch (aggregatorType) {
         case Average:
-            return new AverageAggregator();
+            return new AverageAggregator<ValueType, AveragesTo>();
         case Sum:
-            return new SumAggregator();
-            
+            return new SumAggregator<ValueType, AveragesTo>();
+
         }
-        throw new IllegalArgumentException("Not yet implemented for the given aggregator type: " + aggregatorType.toString());
+        throw new IllegalArgumentException("Not yet implemented for the given aggregator type: "
+                + aggregatorType.toString());
     }
 
     protected static SelectionCriteria createSelectionCriteria(Map<Dimension, Collection<?>> selection) {
         if (selection.isEmpty()) {
             return new WildcardSelectionCriteria();
         }
-        
+
         CompoundSelectionCriteria criteria = new CompoundSelectionCriteria();
         for (Entry<Dimension, Collection<?>> selectionEntry : selection.entrySet()) {
             if (selectionEntry.getValue() != null && !selectionEntry.getValue().isEmpty()) {
@@ -78,7 +92,7 @@ public class DataMiningFactory {
         }
         return criteria;
     }
-    
+
     @SuppressWarnings("unchecked")
     protected static <T> SelectionCriteria createSelectionCriteria(Dimension dimension, Collection<T> selection) {
         switch (dimension) {
