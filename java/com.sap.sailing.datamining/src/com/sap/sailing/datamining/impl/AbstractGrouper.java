@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sailing.datamining.GroupKey;
 import com.sap.sailing.datamining.Grouper;
+import com.sap.sailing.datamining.shared.GroupKey;
 
 public abstract class AbstractGrouper<DataType> implements Grouper<DataType> {
     

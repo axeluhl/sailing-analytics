@@ -3320,7 +3320,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Pair<Double, Integer> runQueryAsBenchmark(Map<Dimension, Collection<?>> selection, Dimension groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
         final long startTime = System.nanoTime();
-        Integer gpsFixAmount = runQuery(selection, groupByDimension, statisticToCalculate, aggregatedAs).getGPSFixAmount();
+        Integer gpsFixAmount = runQuery(selection, groupByDimension, statisticToCalculate, aggregatedAs).getDataSize();
         long endTime = System.nanoTime();
         double serverTime = (endTime - startTime) / 1000000000.0;
         return new Pair<Double, Integer>(serverTime, gpsFixAmount);

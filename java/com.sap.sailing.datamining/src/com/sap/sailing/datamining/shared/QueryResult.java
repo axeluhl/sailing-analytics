@@ -3,9 +3,12 @@ package com.sap.sailing.datamining.shared;
 import java.io.Serializable;
 import java.util.Map;
 
-public interface QueryResult extends Serializable {
+import com.sap.sailing.domain.confidence.ScalableValue;
+
+
+public interface QueryResult<ValueType, AveragesTo> extends Serializable {
     
-    public int getGPSFixAmount();
-    public Map<String, Double> getResults();
+    public int getDataSize();
+    public Map<GroupKey, ScalableValue<ValueType, AveragesTo>> getResults();
 
 }
