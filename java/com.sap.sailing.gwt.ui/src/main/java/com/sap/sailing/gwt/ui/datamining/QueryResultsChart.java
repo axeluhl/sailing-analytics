@@ -1,8 +1,10 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
 
-import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Credits;
@@ -10,7 +12,6 @@ import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
-import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -34,10 +35,16 @@ public class QueryResultsChart extends SimplePanel {
 
     public void showResult(QueryResult result) {
         reset();
+        
+        List<String> keys = new ArrayList<String>(result.getResults().keySet());
+        Collections.sort(keys);
+        chart.getXAxis().setCategories((String[]) keys.toArray(new String[keys.size()]));
+        
         for (Entry<String, Double> resultEntry : result.getResults().entrySet()) {
             Point point = new Point(resultEntry.getKey(), resultEntry.getValue());
             resultSeries.addPoint(point);
         }
+        
         ensureChartContainsSeries();
     }
     
@@ -62,14 +69,6 @@ public class QueryResultsChart extends SimplePanel {
                 .setWidth100()
                 .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText(stringMessages.dataMiningResult()));
-
-        chart.getXAxis().setType(Axis.Type.LINEAR).setAllowDecimals(false)
-                .setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
-                    @Override
-                    public String format(AxisLabelsData axisLabelsData) {
-                        return "X";
-                    }
-                }));
 
         chart.getYAxis().setAxisTitleText("Result") //TODO
                 .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
