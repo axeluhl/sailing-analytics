@@ -2,10 +2,15 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <PreferenceCategory android:title="@string/settings_category_general" >
+        
+	    <Preference 
+            android:key="languagePref"
+		    android:title="@string/settings_general_language_header"
+            android:summary="@string/settings_general_language_description"/>
         <EditTextPreference
+            android:key="courseAreasPref"
             android:name="@string/settings_general_manageareas_header"
             android:defaultValue="@string/settings_general_manageareas_default"
-            android:key="courseAreasPref"
             android:summary="@string/settings_general_manageareas_description"
             android:title="@string/settings_general_manageareas_header" />
     </PreferenceCategory>

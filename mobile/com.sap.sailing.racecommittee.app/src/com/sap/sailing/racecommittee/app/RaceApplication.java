@@ -4,13 +4,13 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.ref.WeakReference;
 import java.util.Date;
 
-import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sailing.racecommittee.app.logging.FileLoggingTask;
-import com.sap.sailing.racecommittee.app.logging.LifecycleLogger;
-
 import android.app.Application;
 import android.content.Context;
 import android.util.Log;
+
+import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.logging.FileLoggingTask;
+import com.sap.sailing.racecommittee.app.logging.LifecycleLogger;
 
 /**
  * Register a additional exception handler for uncaught exception to have some crash logging.

@@ -6,7 +6,7 @@
     <string name="course_design_number_waypoints">Kurs hat %s Wegpunkte</string>
     <string name="choose_running_course">Wähle Kurs aus</string>
     <string name="service_info">SAP Race Committee Service</string>
-    <string name="service_text_no_races">Warte auf Rennen...</string>
+    <string name="service_text_no_races">Warte auf Rennen&#8230;</string>
     <string name="service_text_num_races">Aktuell %d Rennen verwaltet.</string>
     
     <string name="app_name">SAP Race Committee Cockpit</string>
@@ -181,7 +181,7 @@
     <string name="wind_speed_direction_not_a_valid_number">Die Windgeschwindigkeit oder -richtung ist keine valide Zahl. Bitte korrigieren Sie den Wert.</string>
     <string name="wind_location_or_fields_not_valid">Die eingegebene Position, Windgeschwindigkeit oder -richtung ist leer. Bitte korrigieren Sie die Werte.</string>
     <string name="your_position">Aktuelle Position</string>
-    <string name="waiting_for_gps">Warte auf GPS Signal ...</string>
+    <string name="waiting_for_gps">Warte auf GPS Signal&#8230;</string>
     <string name="store_wind_entry">4. Windeingaben speichern</string>
     <string name="store_wind">Windeingaben speichern</string>
     
@@ -189,6 +189,8 @@
     <string name="settings_category_general">Allgemeine Einstellungen</string>
     <string name="settings_general_manageareas_header">Verwaltete Rennbahnen</string>
     <string name="settings_general_manageareas_description">Verwaltete Rennbahnen einstellen (Komma-getrennt)</string>
+    <string name="settings_general_language_header">Sprache auswählen</string>
+    <string name="settings_general_language_description">Sprache auswählen. Eventuell muss die App neugestartet werden.</string>
     
     <string name="settings_category_race">Renneinstellungen</string>
     <string name="override_default_start_procedure_type_header">Standard Startprozedur überschreiben</string>
@@ -199,7 +201,7 @@
     <string name="settings_time_frame_description">Zeit in Minuten einstellen, welches Zeitlimit angibt</string>
     
     <string name="settings_category_advanced">Erweiterte Einstellungen</string>
-    <string name="settings_advanced_service_header">Wählen sie die Server URL aus.</string>
+    <string name="settings_advanced_service_header">Wählen sie die Server URL aus. Nach Änderung muss die Option \'Neuladen\' gewählt werden.</string>
     <string name="settings_advanced_service_description">Webservice URL einstellen.</string>
     <string name="settings_advanced_mail_description">Empfänger für Bilder der Ergebnislisten.</string>
     <string name="settings_advanced_mail_header">Empfänger Ergebnislisten</string>

@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
@@ -44,6 +45,17 @@ public class SettingsActivity extends PreferenceActivity {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 Boolean isChecked = (Boolean) newValue;
                 startProcedurePreference.setEnabled(isChecked.booleanValue());
+                return true;
+            }
+        });
+        
+        Preference button = (Preference)findPreference("languagePref");
+        button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference arg0) { 
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                intent.setClassName("com.android.settings", "com.android.settings.LanguageSettings");            
+                startActivity(intent);
                 return true;
             }
         });
