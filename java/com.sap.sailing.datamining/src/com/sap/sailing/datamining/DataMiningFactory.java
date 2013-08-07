@@ -65,10 +65,6 @@ public class DataMiningFactory {
         throw new IllegalArgumentException("Not yet implemented for the given aggregator type: " + aggregatorType.toString());
     }
 
-    protected static Selector createSelector(Map<Dimension, Collection<?>> selection) {
-        return new SelectorImpl(createSelectionCriteria(selection));
-    }
-
     protected static SelectionCriteria createSelectionCriteria(Map<Dimension, Collection<?>> selection) {
         if (selection.isEmpty()) {
             return new WildcardSelectionCriteria();
