@@ -8,9 +8,9 @@ import com.sap.sailing.datamining.shared.Dimension;
 import com.sap.sailing.datamining.shared.WindStrength;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -19,7 +19,11 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
@@ -41,16 +45,34 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
         windHasBeenInitialized= false;
     }
 
-    private static SpeedWithBearing copySpeed(GPSFixMoving gpsFix) {
-        return new KnotSpeedWithBearingImpl(gpsFix.getSpeed().getKnots(), gpsFix.getSpeed().getBearing());
+    @Override
+    public LeaderboardGroup getLeaderboardGroup() {
+        return context.getLeaderboardGroup();
     }
 
-    private static TimePoint copyTimePoint(GPSFixMoving gpsFix) {
-        return new MillisecondsTimePoint(gpsFix.getTimePoint().asMillis());
+    @Override
+    public Leaderboard getLeaderboard() {
+        return context.getLeaderboard();
     }
 
-    private static Position copyPosition(GPSFixMoving gpsFix) {
-        return new DegreePosition(gpsFix.getPosition().getLatDeg(), gpsFix.getPosition().getLngDeg());
+    @Override
+    public CourseArea getCourseArea() {
+        return context.getCourseArea();
+    }
+
+    @Override
+    public Fleet getFleet() {
+        return context.getFleet();
+    }
+
+    @Override
+    public TrackedRace getTrackedRace() {
+        return context.getTrackedRace();
+    }
+
+    @Override
+    public TrackedLeg getTrackedLeg() {
+        return context.getTrackedLeg();
     }
 
     @Override
@@ -65,16 +87,6 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
         }
         
         return legType;
-    }
-
-    @Override
-    public RaceDefinition getRace() {
-        return context.getTrackedRace().getRace();
-    }
-
-    @Override
-    public Regatta getRegatta() {
-        return context.getTrackedRace().getTrackedRegatta().getRegatta();
     }
 
     @Override
@@ -103,7 +115,7 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
 
     @Override
     public Integer getYear() {
-        TimePoint time = context.getTrackedRace().getStartOfRace() != null ? context.getTrackedRace().getStartOfRace() : context.getTrackedRace().getStartOfTracking();
+        TimePoint time = getTrackedRace().getStartOfRace() != null ? getTrackedRace().getStartOfRace() : getTrackedRace().getStartOfTracking();
         if (time == null) {
             return null;
         }
@@ -127,9 +139,9 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
         case Nationality:
             return getNationality().getThreeLetterIOCAcronym();
         case RaceName:
-            return getRace().getName();
+            return getTrackedRace().getRace().getName();
         case RegattaName:
-            return getRegatta().getName();
+            return getTrackedRace().getTrackedRegatta().getRegatta().getName();
         case SailID:
             return getCompetitor().getBoat().getSailID();
         case WindStrength:
@@ -144,7 +156,7 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
 
     private Wind getWind() {
         if (!windHasBeenInitialized) {
-            wind = this.context.getTrackedRace().getWind(getPosition(), getTimePoint());
+            wind = getTrackedRace().getWind(getPosition(), getTimePoint());
             windHasBeenInitialized = true;
         }
         
@@ -153,11 +165,23 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
 
     private void initializeLegType() {
         try {
-            legType = context.getTrackedLeg() == null ? null : context.getTrackedLeg().getLegType(getTimePoint());
+            legType = getTrackedLeg() == null ? null : getTrackedLeg().getLegType(getTimePoint());
         } catch (NoWindException e) {
             legType = null;
         }
         legTypeHasBeenInitialized = true;
+    }
+
+    private static SpeedWithBearing copySpeed(GPSFixMoving gpsFix) {
+        return new KnotSpeedWithBearingImpl(gpsFix.getSpeed().getKnots(), gpsFix.getSpeed().getBearing());
+    }
+
+    private static TimePoint copyTimePoint(GPSFixMoving gpsFix) {
+        return new MillisecondsTimePoint(gpsFix.getTimePoint().asMillis());
+    }
+
+    private static Position copyPosition(GPSFixMoving gpsFix) {
+        return new DegreePosition(gpsFix.getPosition().getLatDeg(), gpsFix.getPosition().getLngDeg());
     }
 
 }

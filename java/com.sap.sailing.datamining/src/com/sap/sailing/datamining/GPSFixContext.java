@@ -11,19 +11,12 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public interface GPSFixContext {
 
     public LeaderboardGroup getLeaderboardGroup();
-
     public Leaderboard getLeaderboard();
-
     public CourseArea getCourseArea();
-
     public Fleet getFleet();
-
     public TrackedRace getTrackedRace();
-
     public TrackedLeg getTrackedLeg();
-
     public int getLegNumber();
-
     public Competitor getCompetitor();
 
 }

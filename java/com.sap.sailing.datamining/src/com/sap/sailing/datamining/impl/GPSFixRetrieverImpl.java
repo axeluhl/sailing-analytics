@@ -53,28 +53,6 @@ public class GPSFixRetrieverImpl implements GPSFixRetriever {
         return data;
     }
 
-//    @Override
-//    public Collection<GPSFixWithContext> retrieveData(RacingEventService racingEventService) {
-//        Collection<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
-//        for (Regatta regatta : racingEventService.getAllRegattas()) {
-//            TrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
-//            if (trackedRegatta != null) {
-//                for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-//                    if (trackedRace != null) {
-//                        int legNumber = 1;
-//                        for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
-//                            for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-//                                data.addAll(retrieveDataFor(trackedRace, leg, legNumber, competitor));
-//                            }
-//                            legNumber++;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        return data;
-//    }
-
     private Collection<GPSFixWithContext> retrieveDataFor(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard, CourseArea courseArea, Fleet fleet, TrackedRace trackedRace, TrackedLeg trackedLeg, int legNumber, Competitor competitor) {
         List<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
         TrackedLegOfCompetitor trackedLegOfCompetitor = trackedLeg.getTrackedLeg(competitor);
