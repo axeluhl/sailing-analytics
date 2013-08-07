@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.datamining;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
@@ -40,8 +39,8 @@ public class QueryResultsChart extends SimplePanel {
         Collections.sort(keys);
         chart.getXAxis().setCategories((String[]) keys.toArray(new String[keys.size()]));
         
-        for (Entry<String, Double> resultEntry : result.getResults().entrySet()) {
-            Point point = new Point(resultEntry.getKey(), resultEntry.getValue());
+        for (String key : keys) {
+            Point point = new Point(key, result.getResults().get(key));
             resultSeries.addPoint(point);
         }
         

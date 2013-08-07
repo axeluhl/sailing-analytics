@@ -24,27 +24,24 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
     private static final long serialVersionUID = -5551381302809417831L;
     
     private TrackedRace trackedRace;
+    private Leg leg;
     private int legNumber;
     private LegType legType;
     private Competitor competitor;
     private Wind wind;
+
+    private boolean legTypeHasBeenInitialized;
+    private boolean windHasBeenInitialized;
 
     public GPSFixWithContextImpl(GPSFixMoving gpsFix, TrackedRace trackedRace, Leg leg, int legNumber, Competitor competitor) {
         super(gpsFix.getPosition(), gpsFix.getTimePoint(), gpsFix.getSpeed());
         this.trackedRace = trackedRace;
         this.legNumber = legNumber;
         this.competitor = competitor;
-        this.wind = this.trackedRace.getWind(getPosition(), getTimePoint());
-        setLegType(leg);
-    }
-
-    private void setLegType(Leg leg) {
-        TrackedLeg trackedLeg = trackedRace.getTrackedLeg(leg);
-        try {
-            legType = trackedLeg == null ? null : trackedLeg.getLegType(getTimePoint());
-        } catch (NoWindException e) {
-            legType = null;
-        }
+        this.leg = leg;
+        
+        legTypeHasBeenInitialized = false;
+        windHasBeenInitialized= false;
     }
 
     @Override
@@ -54,6 +51,10 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
 
     @Override
     public LegType getLegType() {
+        if (!legTypeHasBeenInitialized) {
+            initializeLegType();
+        }
+        
         return legType;
     }
 
@@ -84,11 +85,20 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
 
     @Override
     public WindStrength getWindStrength() {
-        if (wind == null) {
+        if (getWind() == null) {
             return null;
         }
         
-        return WindStrength.valueOf(wind.getBeaufort());
+        return WindStrength.valueOf(getWind().getBeaufort());
+    }
+
+    private Wind getWind() {
+        if (!windHasBeenInitialized) {
+            wind = this.trackedRace.getWind(getPosition(), getTimePoint());
+            windHasBeenInitialized = true;
+        }
+        
+        return wind;
     }
 
     @Override
@@ -130,6 +140,16 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
             return year != null ? year.toString() : null;
         }
         return null;
+    }
+
+    private void initializeLegType() {
+        TrackedLeg trackedLeg = trackedRace.getTrackedLeg(leg);
+        try {
+            legType = trackedLeg == null ? null : trackedLeg.getLegType(getTimePoint());
+        } catch (NoWindException e) {
+            legType = null;
+        }
+        legTypeHasBeenInitialized = true;
     }
 
 }
