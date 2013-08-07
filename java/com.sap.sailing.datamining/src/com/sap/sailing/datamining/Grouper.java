@@ -3,8 +3,8 @@ package com.sap.sailing.datamining;
 import java.util.Collection;
 import java.util.Map;
 
-public interface Grouper {
+public interface Grouper<DataType> {
 
-    public Map<String, Collection<GPSFixWithContext>> group(Collection<GPSFixWithContext> data);
+    public Map<GroupKey, Collection<DataType>> group(Collection<DataType> data);
     
 }

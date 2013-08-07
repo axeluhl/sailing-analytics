@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sap.sailing.datamining.impl.AverageAggregator;
-import com.sap.sailing.datamining.impl.GroupByDimension;
+import com.sap.sailing.datamining.impl.AbstractGrouper;
 import com.sap.sailing.datamining.impl.QueryImpl;
 import com.sap.sailing.datamining.impl.SelectorImpl;
 import com.sap.sailing.datamining.impl.SumAggregator;
@@ -35,7 +35,7 @@ public class DataMiningFactory {
     }
     
     protected static Grouper createGrouper(Dimension dimension) {
-        return new GroupByDimension(dimension);
+        return new AbstractGrouper(dimension);
     }
     
     protected static Extractor createExtractor(StatisticType statisticType) {

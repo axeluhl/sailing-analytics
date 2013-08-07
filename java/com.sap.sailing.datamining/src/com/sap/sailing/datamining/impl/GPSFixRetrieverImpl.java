@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.sap.sailing.datamining.DataRetriever;
 import com.sap.sailing.datamining.GPSFixContext;
-import com.sap.sailing.datamining.GPSFixRetriever;
 import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -21,7 +21,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
-public class GPSFixRetrieverImpl implements GPSFixRetriever {
+public class GPSFixRetrieverImpl implements DataRetriever<GPSFixWithContext> {
     
     
     @Override

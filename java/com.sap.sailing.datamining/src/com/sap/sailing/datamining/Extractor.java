@@ -2,8 +2,10 @@ package com.sap.sailing.datamining;
 
 import java.util.Collection;
 
-public interface Extractor {
+import com.sap.sailing.domain.confidence.ScalableValue;
 
-    public Collection<Double> extract(Collection<GPSFixWithContext> data);
+public interface Extractor<DataType, ExtractedType, AveragesTo> {
+
+    public Collection<ScalableValue<ExtractedType, AveragesTo>> extract(Collection<DataType> data);
 
 }
