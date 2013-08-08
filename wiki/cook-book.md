@@ -10,9 +10,6 @@ To export data from MongoDB you simply have to use the monogexport command. It w
 
 `/opt/mongodb/bin/mongoexport --port 10202 -d winddb -c WIND_TRACKS -q "{'REGATTA_NAME': 'ESS 2013 Muscat (Extreme40)'}" > /tmp/ess2013-muscat-wind.json`
 
-#### Score Corrections
-
-`/opt/mongodb/bin/mongoexport --port 10202 -d winddb -c LEADERBOARDS -q "{LEADERBOARD_NAME: 'ESS 2013 Singapore (Extreme40)'}" > /tmp/singapore.json`
 
 ### Import to MongoDB
 
@@ -22,9 +19,22 @@ Importing requires data to be in JSON format (as exported by mongoexport). To ma
 
 `/opt/mongodb/bin/mongoimport --port 10202 -d winddb -c WIND_TRACKS --upsert /tmp/ess2013-muscat-wind.json`
 
-#### Score Corrections
+### Migrate Master Data along with Score Corrections, etc, without touching the mongodb console
 
-`/opt/mongodb/bin/mongoimport --port 10202 -d winddb -c LEADERBOARDS --upsert /tmp/singapore.json`
+In the Admin Panel you can now find a tab called "Master Data Import". Here you can import all data corresponding to a leaderboard group from a remote server, excluding wind and the actual TrackedRaces.
+
+#### Listing the available leaderboard groups
+
+At first you need to enter the remote host. This could for example be "http://live2.sapsailing.com/" if you are on an archive server and you want to import the information of a recent live event that is still hosted on a live server. If you hit Enter or click the Button "Fetch Leaderboard Group List", all available leaderboard groups from the remote host will be displayed, if the connection was successful.
+
+#### Importing all data for selected leaderboard groups
+
+You can now select the leaderboard groups you want to import. Multi-selection is allowed. If you have already added objects like events or leaderboards where names collide with those that are to be imported, the "override" option becomes relevant. It should be checked if you want to have the same ID's, race-columns, race-log-events, score corrections as on the remote server, but it can overwrite some of the data you entered before. 
+Now click "Import selected Leaderboard Groups" to start the actual import process. If successful, a pop-up will show you how many events, regattas, leaderboards and leaderboard groups where imported.
+
+#### Media
+
+For now, all media links are imported (even if they are not in the same time-frame as the leaderboard-grouped races). The process also looks for the override flag to decide whether it should overwrite the existing row, when there is an id-conflict.
 
 ### Hot Deploy Java Packages to a running Server
 
