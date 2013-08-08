@@ -35,6 +35,7 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.PropertyOracle;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.linker.EmittedArtifact.Visibility;
 import com.google.gwt.core.ext.linker.GeneratedResource;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JField;
@@ -42,7 +43,6 @@ import com.google.gwt.core.ext.typeinfo.JPackage;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.dev.javac.TypeOracleMediator;
 import com.google.gwt.dev.util.Util;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.linker.rpc.RpcPolicyFileArtifact;
@@ -182,8 +182,7 @@ public class GWTSerializerGenerator extends Generator {
 					.build(serializerLogger);
 
 			if (pathInfo != null) {
-				context.commitResource(serializerLogger, pathInfo).setPrivate(
-						true);
+				context.commitResource(serializerLogger, pathInfo).setVisibility(Visibility.Private);
 			}
 		} finally {
 			if (writer != null) {
@@ -199,8 +198,7 @@ public class GWTSerializerGenerator extends Generator {
 				serializerLogger, context, typesSentFromBrowser,
 				typesSentToBrowser, typeStrings, serializerInterface);
 
-		String serializerInterfaceName = TypeOracleMediator
-				.computeBinaryClassName(serializerInterface);
+		String serializerInterfaceName = serializerInterface.getQualifiedBinaryName();
 		generateFields(sourceWriter, typesSentFromBrowser,
 				serializationPolicyStrongName, serializerInterfaceName,
 				serializerInterface);
@@ -260,8 +258,7 @@ public class GWTSerializerGenerator extends Generator {
 
 			for (int i = 0; i < serializableTypes.length; ++i) {
 				JType type = serializableTypes[i];
-				String binaryTypeName = TypeOracleMediator
-						.computeBinaryClassName(type);
+				String binaryTypeName = type.getQualifiedBinaryName();
 				pw.print(binaryTypeName);
 				pw.print(", "
 						+ Boolean.toString(deserializationSto

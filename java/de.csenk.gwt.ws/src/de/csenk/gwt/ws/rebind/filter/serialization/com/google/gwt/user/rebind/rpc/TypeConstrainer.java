@@ -15,6 +15,12 @@
  */
 package de.csenk.gwt.ws.rebind.filter.serialization.com.google.gwt.user.rebind.rpc;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 import com.google.gwt.core.ext.typeinfo.JArrayType;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JGenericType;
@@ -22,15 +28,9 @@ import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 import com.google.gwt.core.ext.typeinfo.JRawType;
 import com.google.gwt.core.ext.typeinfo.JRealClassType;
 import com.google.gwt.core.ext.typeinfo.JType;
-import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 import com.google.gwt.core.ext.typeinfo.JWildcardType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import com.google.gwt.dev.javac.typemodel.JTypeParameter;
 
 /**
  * This class defines the method
@@ -84,7 +84,7 @@ public class TypeConstrainer {
     return false;
   }
 
-  private static JClassType[] makeArray(JClassType... classTypes) {
+  private static com.google.gwt.dev.javac.typemodel.JClassType[] makeArray(com.google.gwt.dev.javac.typemodel.JClassType... classTypes) {
     return classTypes;
   }
 
@@ -96,7 +96,7 @@ public class TypeConstrainer {
       boolean foundIt = false;
 
       @Override
-      public void endVisit(JTypeParameter seenParam) {
+      public void endVisit(com.google.gwt.core.ext.typeinfo.JTypeParameter seenParam) {
         if (seenParam == param) {
           foundIt = true;
         }
@@ -241,14 +241,14 @@ public class TypeConstrainer {
       return true;
     }
 
-    JTypeParameter type1Param = type1.isTypeParameter();
+    com.google.gwt.core.ext.typeinfo.JTypeParameter type1Param = type1.isTypeParameter();
     if (type1Param != null) {
       // It would be nice to check that type1Param's bound is a match
       // for type2, but that can introduce infinite recursions.
       return true;
     }
 
-    JTypeParameter type2Param = type2.isTypeParameter();
+    com.google.gwt.core.ext.typeinfo.JTypeParameter type2Param = type2.isTypeParameter();
     if (type2Param != null) {
       // It would be nice to check that type1Param's bound is a match
       // for type2, but that can introduce infinite recursions.
@@ -332,7 +332,7 @@ public class TypeConstrainer {
       public void endVisit(JWildcardType wildcardType) {
         JTypeParameter newParam = new JTypeParameter("TP$"
             + freshTypeVariableCounter++, -1);
-        newParam.setBounds(makeArray(typeOracle.getJavaLangObject()));
+        newParam.setBounds(makeArray((com.google.gwt.dev.javac.typemodel.JClassType) typeOracle.getJavaLangObject()));
         constraints.put(newParam, wildcardType.getUpperBound());
         replacement = newParam;
       }
@@ -351,7 +351,7 @@ public class TypeConstrainer {
       final Map<JTypeParameter, JClassType> constraints) {
     JModTypeVisitor substituter = new JModTypeVisitor() {
       @Override
-      public void endVisit(JTypeParameter param) {
+      public void endVisit(com.google.gwt.core.ext.typeinfo.JTypeParameter param) {
         JClassType constr = constraints.get(param);
         if (constr != null) {
           replacement = constr;

@@ -15,6 +15,8 @@
  */
 package de.csenk.gwt.ws.rebind.filter.serialization.com.google.gwt.user.rebind.rpc;
 
+import java.io.PrintWriter;
+
 import com.google.gwt.core.client.UnsafeNativeLong;
 import com.google.gwt.core.client.impl.WeakMapping;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -26,15 +28,12 @@ import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.JPrimitiveType;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.dev.javac.TypeOracleMediator;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.google.gwt.user.client.rpc.core.java.lang.Object_Array_CustomFieldSerializer;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
-
-import java.io.PrintWriter;
 
 /**
  * Creates a field serializer for a class that implements
@@ -437,7 +436,7 @@ public class FieldSerializerCreator {
     sourceWriter.indent();
 
     sourceWriter.print("return instance.@");
-    sourceWriter.print(TypeOracleMediator.computeBinaryClassName(serializableClass));
+    sourceWriter.print(serializableClass.getQualifiedBinaryName());
     sourceWriter.print("::");
     sourceWriter.print(fieldName);
     sourceWriter.println(";");
@@ -468,7 +467,7 @@ public class FieldSerializerCreator {
     sourceWriter.indent();
 
     sourceWriter.print("instance.@");
-    sourceWriter.print(TypeOracleMediator.computeBinaryClassName(serializableClass));
+    sourceWriter.print(serializableClass.getQualifiedBinaryName());
     sourceWriter.print("::");
     sourceWriter.print(fieldName);
     sourceWriter.println(" = value;");

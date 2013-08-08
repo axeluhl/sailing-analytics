@@ -16,6 +16,16 @@
 
 package de.csenk.gwt.ws.rebind.filter.serialization.com.google.gwt.user.rebind.rpc;
 
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.core.ext.BadPropertyValueException;
@@ -28,7 +38,6 @@ import com.google.gwt.core.ext.typeinfo.JMethod;
 import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.dev.javac.TypeOracleMediator;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
@@ -36,16 +45,6 @@ import com.google.gwt.user.client.rpc.impl.Serializer;
 import com.google.gwt.user.client.rpc.impl.SerializerBase;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
-
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * This class generates a class with name 'typeSerializerClassName' that is able
@@ -287,7 +286,7 @@ public class TypeSerializerCreator {
    * @return
    */
   private String getTypeString(JType type) {
-    String typeString = TypeOracleMediator.computeBinaryClassName(type) + "/"
+    String typeString = type.getQualifiedBinaryName() + "/"
         + SerializationUtils.getSerializationSignature(typeOracle, type);
     return typeString;
   }
@@ -447,7 +446,7 @@ public class TypeSerializerCreator {
       }
 
       String jsniTypeRef;
-      jsniTypeRef = TypeOracleMediator.computeBinaryClassName(type.getLeafType());
+      jsniTypeRef = type.getLeafType().getQualifiedBinaryName();
       while (type.isArray() != null) {
         jsniTypeRef += "[]";
         type = type.isArray().getComponentType();

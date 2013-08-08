@@ -15,6 +15,18 @@
  */
 package de.csenk.gwt.ws.rebind.filter.serialization.com.google.gwt.user.rebind.rpc;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.impl.Impl;
 import com.google.gwt.core.ext.BadPropertyValueException;
@@ -23,6 +35,7 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.PropertyOracle;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.linker.EmittedArtifact.Visibility;
 import com.google.gwt.core.ext.linker.GeneratedResource;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JField;
@@ -35,7 +48,6 @@ import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.dev.generator.NameFactory;
-import com.google.gwt.dev.javac.TypeOracleMediator;
 import com.google.gwt.dev.util.Util;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -53,18 +65,6 @@ import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.server.rpc.SerializationPolicyLoader;
 import com.google.gwt.user.server.rpc.impl.TypeNameObfuscator;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Creates a client-side proxy for a
@@ -290,7 +290,7 @@ public class ProxyCreator {
       typesSentToBrowser = typesSentToBrowserBuilder.build(logger);
 
       if (pathInfo != null) {
-        context.commitResource(logger, pathInfo).setPrivate(true);
+        context.commitResource(logger, pathInfo).setVisibility(Visibility.Private);
       }
     } finally {
       if (writer != null) {
@@ -306,7 +306,7 @@ public class ProxyCreator {
 
     String remoteServiceInterfaceName = elideTypeNames
         ? TypeNameObfuscator.SERVICE_INTERFACE_ID
-        : TypeOracleMediator.computeBinaryClassName(serviceIntf);
+        : serviceIntf.getQualifiedBinaryName();
     generateProxyFields(srcWriter, typesSentFromBrowser,
         serializationPolicyStrongName, remoteServiceInterfaceName);
 
@@ -346,7 +346,7 @@ public class ProxyCreator {
     if (typeStrings.containsKey(paramType)) {
       typeName = typeStrings.get(paramType);
     } else {
-      typeName = TypeOracleMediator.computeBinaryClassName(paramType);
+      typeName = paramType.getQualifiedBinaryName();
     }
     return typeName == null ? null : ('"' + typeName + '"');
   }
@@ -638,7 +638,7 @@ public class ProxyCreator {
 
       for (int i = 0; i < serializableTypes.length; ++i) {
         JType type = serializableTypes[i];
-        String binaryTypeName = TypeOracleMediator.computeBinaryClassName(type);
+        String binaryTypeName = type.getQualifiedBinaryName();
         pw.print(binaryTypeName);
         pw.print(", "
             + Boolean.toString(deserializationSto.isSerializable(type)));

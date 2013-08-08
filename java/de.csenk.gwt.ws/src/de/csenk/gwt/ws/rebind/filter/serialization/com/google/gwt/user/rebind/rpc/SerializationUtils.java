@@ -31,7 +31,6 @@ import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.dev.javac.TypeOracleMediator;
 import com.google.gwt.dev.util.Util;
 
 /**
@@ -206,7 +205,7 @@ public class SerializationUtils {
       return;
     }
 
-    String serializedTypeName = TypeOracleMediator.computeBinaryClassName(type);
+    String serializedTypeName = type.getQualifiedBinaryName();
     crc.update(serializedTypeName.getBytes(Util.DEFAULT_ENCODING));
 
     if (excludeImplementationFromSerializationSignature(type)) {
@@ -228,7 +227,7 @@ public class SerializationUtils {
         assert (field != null);
 
         crc.update(field.getName().getBytes(Util.DEFAULT_ENCODING));
-        crc.update(TypeOracleMediator.computeBinaryClassName(field.getType()).getBytes(
+        crc.update(field.getType().getQualifiedBinaryName().getBytes(
             Util.DEFAULT_ENCODING));
       }
 
