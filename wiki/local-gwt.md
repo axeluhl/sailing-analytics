@@ -18,4 +18,4 @@ One of the great strengths of GWT is the use of Eclipse as a Java source-level d
 
 You can set breakpoints in your GWT Java code and inspect values for suspended threads as usual for any Java development.
 
-Note the reduced performance which is largely due to the way the Java VM and the browser plug-in communicate. In particular, many fine-grained changes to the DOM can be quite costly. Therefore, if you're only interested in server-side debugging, consider [compiling](Local-GWT-Compile) the GWT code for better performance.
+Note the reduced performance which is largely due to the way the Java VM and the browser plug-in communicate. In particular, many fine-grained changes to the DOM can be quite costly. Therefore, if you're only interested in server-side debugging, consider [compiling](#Local-GWT-Compile) the GWT code for better performance.
