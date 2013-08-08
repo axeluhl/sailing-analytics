@@ -225,7 +225,7 @@ public class SimulatorMainPanel extends SimplePanel {
     }
 
     public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, boolean autoUpdate,
-            char mode, char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showStreamlets) {
+            char mode, char event, String raceCourseStr, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showStreamlets) {
 
         super();
 
@@ -234,7 +234,11 @@ public class SimulatorMainPanel extends SimplePanel {
         this.errorReporter = errorReporter;
         this.autoUpdate = autoUpdate;
         this.mode = mode;
-        this.event = event;
+        if (raceCourseStr == null) {
+        	this.event = event;        
+        } else {
+        	this.event = SailingSimulatorConstants.EventDummy;
+        }
         this.isOmniscient = new CheckBox(this.stringMessages.omniscient(), true);
         this.isOmniscient.setValue(true);
         this.isOmniscient.addClickHandler(new ClickHandler() {
@@ -313,7 +317,7 @@ public class SimulatorMainPanel extends SimplePanel {
         // this.addNorth(logoAndTitlePanel, 68);
 
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
-                windParams, busyIndicator, mode, this);
+                windParams, busyIndicator, mode, raceCourseStr, this);
         simulatorMap.setSize("100%", "100%");
 
         this.rightPanel.add(this.simulatorMap);

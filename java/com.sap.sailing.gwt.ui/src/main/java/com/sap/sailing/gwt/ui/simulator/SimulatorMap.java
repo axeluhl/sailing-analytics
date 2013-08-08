@@ -76,7 +76,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private static Logger LOGGER = Logger.getLogger(SimulatorMap.class.getName());
     private static boolean SHOW_ONLY_PATH_POLYLINE = false;
     private char rcDirection; 
-
+    public String raceCourseStr;
 
     public enum ViewName {
         SUMMARY, REPLAY, WINDDISPLAY
@@ -250,35 +250,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, Timer timer,
-            WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode,
-            SimulatorMainPanel parent) {
-        this.simulatorSvc = simulatorSvc;
-        this.stringMessages = stringMessages;
-        this.errorReporter = errorReporter;
-        this.xRes = xRes;
-        this.yRes = yRes;
-        this.timer = timer;
-        this.timePanel = null;
-        timer.addTimeListener(this);
-        this.windParams = windParams;
-        this.busyIndicator = busyIndicator;
-        this.mode = mode;
-        this.colorPalette = new ColorPaletteGenerator();
-        this.dataInitialized = false;
-        this.overlaysInitialized = false;
-        this.windFieldCanvasOverlay = null;
-        this.windStreamletsCanvasOverlay = null;
-        this.windGridCanvasOverlay = null;
-        this.windLineCanvasOverlay = null;
-        this.replayPathCanvasOverlays = null;
-        this.raceCourseCanvasOverlay = null;
-        this.timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
-        this.initializeData();
-        this.parent = parent;    
-    }
-
-    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, Timer timer,
-            TimePanel<TimePanelSettings> timePanel, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode, SimulatorMainPanel parent) {
+            TimePanel<TimePanelSettings> timePanel, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode, String raceCourseStr, SimulatorMainPanel parent) {
         this.simulatorSvc = simulatorSvc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -302,6 +274,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
         this.initializeData();
         this.parent = parent;
+        this.raceCourseStr = raceCourseStr;
     }
 
     private void loadMapsAPI() {

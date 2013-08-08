@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.Context2d.TextAlign;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapPaneType;
 import com.google.gwt.maps.client.MapType;
 import com.google.gwt.maps.client.MapWidget;
@@ -178,6 +179,58 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 
 			// Center of Gravity
 			cPos = LatLng.newInstance(54.01583,10.92583);
+			map.panTo(cPos);
+
+			break;
+
+			
+		case SailingSimulatorConstants.EventX40Cardiff:
+
+			// TV
+			cPos = LatLng.newInstance(51.444058,-3.126984);
+			//currentRegArea = new RegattaArea("", cPos, 1.0, "#FFFFFF", "silver");
+			currentRegArea = new RegattaArea("", cPos, 1.0, "#8DA2BD", "silver");
+			regAreas.add(currentRegArea);
+
+			
+			setVisible(true);
+
+			regIdx = 0;
+			for(RegattaArea regArea : regAreas) {
+				this.drawCircleFromRadius(regIdx, regArea, 10);
+				regIdx++;
+			}
+
+			// Center of Gravity
+			cPos = LatLng.newInstance(51.444058,-3.125984);
+			map.panTo(cPos);
+
+			break;
+
+
+		case SailingSimulatorConstants.EventDummy:
+
+        	String raceCourseStr = this.simulatorMap.raceCourseStr.replaceAll("\"", "");
+        	String[] raceCourseComponents = raceCourseStr.split(",");
+        	double lat = NumberFormat.getDecimalFormat().parse(raceCourseComponents[0]);
+        	double lng = NumberFormat.getDecimalFormat().parse(raceCourseComponents[1]);
+        	LatLng raceCourseCenter = LatLng.newInstance(lat,lng);
+        	double raceCourseRadius = NumberFormat.getDecimalFormat().parse(raceCourseComponents[2]) / 2.0;
+
+			// TV
+			currentRegArea = new RegattaArea("", raceCourseCenter, raceCourseRadius, "#8DA2BD", "silver");
+			regAreas.add(currentRegArea);
+			
+			setVisible(true);
+
+			regIdx = 0;
+			for(RegattaArea regArea : regAreas) {
+				this.drawCircleFromRadius(regIdx, regArea, 10);
+				regIdx++;
+			}
+
+			// Center of Gravity
+			cPos = LatLng.newInstance(raceCourseCenter.getLatitude(),raceCourseCenter.getLongitude()-0.001);
 			map.panTo(cPos);
 
 			break;

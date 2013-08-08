@@ -30,7 +30,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private boolean showLines = false;  // show the wind lines in the wind display and replay modes.
     private char seedLines = 'b';  // seed lines at: 'b'ack, 'f'ront
     private boolean showStreamlets = true; // show the wind streamlets in the wind display and replay modes.
-   
+    
     private static Logger logger = Logger.getLogger(SimulatorEntryPoint.class.getName());
 
     @Override
@@ -52,6 +52,9 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         } else {
             yRes = Integer.parseInt(verticalRes);
         }
+        String raceCourseStr = Window.Location.getParameter("raceCourse");
+      	// parsing of raceCourseStr is done in SimulatorMainPanel
+
         String autoUpdateStr = Window.Location.getParameter("autoUpdate");
         if (autoUpdateStr == null || autoUpdateStr.isEmpty()) {
             logger.config("Using default auto update " + autoUpdate);
@@ -108,7 +111,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
             }
         }
         SimulatorMainPanel mainPanel = new SimulatorMainPanel(simulatorSvc, stringMessages, this, xRes, yRes,
-                autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showStreamlets);
+                autoUpdate, mode, event, raceCourseStr, showGrid, showLines, seedLines, showArrows, showStreamlets);
         createRaceBoardInOneScreenMode(mainPanel);
     }
 
