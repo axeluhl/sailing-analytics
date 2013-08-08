@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -20,12 +21,18 @@ import com.sap.sailing.gwt.ui.client.shared.panels.UserStatusPanel;
 import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
+import de.csenk.gwt.ws.client.WebSocket;
+import de.csenk.gwt.ws.client.WebSocketCallback;
+import de.csenk.gwt.ws.client.js.JavaScriptWebSocketFactory;
+
 public class AdminConsoleEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
     private Set<RegattaDisplayer> regattaDisplayers;
     
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
+        // TODO a test only for web sockets
+        testWebSockets();
         RootPanel rootPanel = RootPanel.get();
         VerticalPanel verticalPanel = new VerticalPanel();
         rootPanel.add(verticalPanel);
@@ -140,6 +147,37 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(sailingService, this);
         sysinfoPanel.ensureDebugId("SystemInformation");
         verticalPanel.add(sysinfoPanel);
+    }
+
+    // TODO remove again when testing is done
+    private void testWebSockets() {
+        WebSocket webSocket = new JavaScriptWebSocketFactory().createWebSocket(GWT.getModuleBaseURL().replace("http", "ws") + "webSocket", new WebSocketCallback() {
+            
+            @Override
+            public void onOpen(WebSocket webSocket) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void onMessage(WebSocket webSocket, String message) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void onError(WebSocket webSocket) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void onClose(WebSocket webSocket) {
+                // TODO Auto-generated method stub
+                
+            }
+        });
+        webSocket.send("Hallo");
     }
 
     @Override

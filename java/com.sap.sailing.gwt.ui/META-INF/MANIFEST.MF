@@ -26,7 +26,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.freg.resultimport,
  com.sap.sailing.domain.swisstimingreplayadapter,
  com.sap.sailing.simulator;bundle-version="1.0.0",
- com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0"
+ com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0",
+ de.csenk.gwt.ws
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.jms;version="1.1.0",

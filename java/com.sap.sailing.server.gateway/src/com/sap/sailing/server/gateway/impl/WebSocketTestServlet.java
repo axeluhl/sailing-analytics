@@ -1,5 +1,7 @@
 package com.sap.sailing.server.gateway.impl;
 
+import java.io.IOException;
+
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -19,6 +21,11 @@ public class WebSocketTestServlet extends WebSocketServlet {
         @Override
         public void onWebSocketText(String s) {
             System.out.println(s);
+            try {
+                getSession().getRemote().sendString("This is my response to "+s);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @Override
