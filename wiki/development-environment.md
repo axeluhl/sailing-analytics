@@ -36,13 +36,19 @@ Test plugins automatically have their tests executed during a Maven build unless
 
 The Maven plug-in for the GWT compilation doesn't reliably perform a dependency check. It is therefore recommended to remove all contents of the java/com.sap.sailing.gwt.ui/com.sap.sailing.* folders (basically, all GWT compiler output) before launching the Maven build. A good command line for the Maven build from the java/ subdirectory in your local environment when outside the SAP VPN is this:
 
+    buildAndUpdateProduct.sh build
+
+which basically does something like
+
     `rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*; mvn -fae -P debug.without-proxy clean install 2>&1 | tee log`
 
 Inside the SAP VPN you may want to use a different profile which accounts for the proxies that have to be used:
 
-    `rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*; mvn -fae -P debug.with-proxy clean install 2>&1 | tee log`
+    buildAndUpdateProduct.sh -p build
 
-When building on sapsailing.com you have to explicitly specify the settings.xml file from the git workspace. You also have to make sure the DISPLAY environment variable is set to ":2.0" to send test browsers to a VNC display. Should the GWT build fail because it cannot open enough files, ensure the "ulimit -n" output is at least 4096 to enable the GWT compiler to assemble the resource sets which consist of many files that all need to be opened concurrently. Currently, the maximum value for "ulimit -n" is configured in /etc/security/limits.conf and is set to 16384. This specified the maximum amount to which a user's shell can set this value. The ~trac/.bash_profile contains a "ulimit -n 4096" command, but when running "screen" the shells usually are no login shells. You need to make sure you run ~trac/.bash_profile in the build shell to set the limit of open files to at least 4096. Then issue `rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*; mvn -fae -s /home/trac/git/settings.xml -P debug.without-proxy clean install 2>&1 | tee log`
+The buildAndUpdateProduct.sh script can be found in the top-level configuration/ directory in git. It has been used successfully in Linux and Cygwin environments.
+
+When building on sapsailing.com you should stick with the buildAndUpdateProduct.sh script. It makes a lot of settings that are necessary, such as specifying the settings.xml file to use for the Maven build. For the Selenium tests to succeed you have to make sure the DISPLAY environment variable is set to ":2.0" to send test browsers to a VNC display. Should the GWT build fail because it cannot open enough files, ensure the "ulimit -n" output is at least 4096 to enable the GWT compiler to assemble the resource sets which consist of many files that all need to be opened concurrently. Currently, the maximum value for "ulimit -n" is configured in /etc/security/limits.conf and is set to 16384. This specified the maximum amount to which a user's shell can set this value. The ~trac/.bash_profile contains a "ulimit -n 4096" command, but when running "screen" the shells usually are no login shells. You need to make sure you run ~trac/.bash_profile in the build shell to set the limit of open files to at least 4096. Then issue the respective buildAndUpdateProduct.sh command line.
 
 All these build lines also creates a log file with all error messages, just in case the screen buffer is not sufficient to hold all scrolling error messages.
 
