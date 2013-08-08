@@ -49,7 +49,15 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.regexp.shared.RegExp;
+import com.sap.sailing.datamining.Aggregator;
 import com.sap.sailing.datamining.DataMiningFactory;
+import com.sap.sailing.datamining.DataRetriever;
+import com.sap.sailing.datamining.Dimensions;
+import com.sap.sailing.datamining.Extractor;
+import com.sap.sailing.datamining.Filter;
+import com.sap.sailing.datamining.FilterCriteria;
+import com.sap.sailing.datamining.GPSFixWithContext;
+import com.sap.sailing.datamining.Grouper;
 import com.sap.sailing.datamining.Query;
 import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.Dimension;
@@ -3327,8 +3335,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public QueryResult runQuery(Map<Dimension, Collection<?>> selection, Dimension groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
-        Query query = DataMiningFactory.createQuery(selection, groupByDimension, statisticToCalculate, aggregatedAs);
+    public QueryResult<Integer, Integer> runQuery(Map<Dimension, Collection<?>> selection, Dimension groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
+        DataRetriever<GPSFixWithContext> retriever = DataMiningFactory.createGPSFixRetriever();
+        FilterCriteria<GPSFixWithContext> filterCriteria = DataMiningFactory.createWildcardFilterCriteria();
+        Filter<GPSFixWithContext> filter = DataMiningFactory.createCriteriaFilter(filterCriteria);
+        Grouper<GPSFixWithContext> grouper = DataMiningFactory.createGPSFixByDimensionGrouper(Dimensions.GPSFix.LegType);
+        Extractor<GPSFixWithContext, Integer, Integer> extractor = DataMiningFactory.createDataSizeExtractor();
+        Aggregator<Integer, Integer> aggregator = DataMiningFactory.createAggregator(AggregatorType.Sum);
+        Query<GPSFixWithContext, Integer, Integer> query = DataMiningFactory.createQuery(retriever, filter, grouper, extractor, aggregator);
         return query.run(getService());
     }
 

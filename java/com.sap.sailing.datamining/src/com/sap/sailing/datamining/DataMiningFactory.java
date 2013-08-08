@@ -11,6 +11,8 @@ import com.sap.sailing.datamining.impl.gpsfix.GroupGPSFixesByDimension;
 import com.sap.sailing.datamining.shared.AggregatorType;
 
 public class DataMiningFactory {
+    
+    private DataMiningFactory() { }
 
     public static <DataType, ValueType, AveragesTo> Query<DataType, ValueType, AveragesTo> createQuery(
             DataRetriever<DataType> retriever, Filter<DataType> filter, Grouper<DataType> grouper,
@@ -34,11 +36,11 @@ public class DataMiningFactory {
         return new GroupGPSFixesByDimension(dimensions);
     }
 
-    protected static <DataType> Extractor<DataType, Integer, Integer> createDataSizeExtractor() {
+    public static <DataType> Extractor<DataType, Integer, Integer> createDataSizeExtractor() {
         return new DataSizeExtractor<DataType>();
     }
 
-    protected static <ValueType, AveragesTo> Aggregator<ValueType, AveragesTo> createAggregator(
+    public static <ValueType, AveragesTo> Aggregator<ValueType, AveragesTo> createAggregator(
             AggregatorType aggregatorType) {
         switch (aggregatorType) {
         case Average:
