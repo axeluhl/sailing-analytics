@@ -159,9 +159,13 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 **Expects**
 * POST request body: PingMark as JSON
 ```
-{"unixtime": 2394820480284,
- "nmea"    :  "$GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A"
- }
+{
+    "markStringId": "Leeward Mark"
+    "gpsFix": {
+        "unixtime": 1375951388465,
+        "nmea": "$GPRMC,084308,A,41.771311,N,86.933174,E,0.0,0.0,080813,0,W*4D"
+    },
+}
 ```
 
 **Returns**
