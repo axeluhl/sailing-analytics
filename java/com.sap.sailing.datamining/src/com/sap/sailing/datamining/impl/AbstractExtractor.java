@@ -19,7 +19,5 @@ public abstract class AbstractExtractor<DataType, ValueType, AveragesTo> impleme
         }
         return extractedData;
     }
-    
-    protected abstract ScalableValue<ValueType, AveragesTo> extract(DataType dataEntry);
 
 }

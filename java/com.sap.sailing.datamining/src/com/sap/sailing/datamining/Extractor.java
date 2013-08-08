@@ -8,4 +8,6 @@ public interface Extractor<DataType, ValueType, AveragesTo> {
 
     public Collection<ScalableValue<ValueType, AveragesTo>> extract(Collection<DataType> data);
 
+    public ScalableValue<ValueType, AveragesTo> extract(DataType dataEntry);
+
 }
