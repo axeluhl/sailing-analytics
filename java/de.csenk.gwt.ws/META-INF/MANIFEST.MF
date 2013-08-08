@@ -4,3 +4,4 @@ Bundle-Name: GWT Web Sockets
 Bundle-SymbolicName: de.csenk.gwt.ws
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.eclipse.jetty.websocket.api;bundle-version="9.0.4"

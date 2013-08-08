@@ -15,7 +15,10 @@
 
 package de.csenk.gwt.ws.server.jetty;
 
-import org.eclipse.jetty.websocket.WebSocket;
+import java.io.IOException;
+
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
 import de.csenk.gwt.ws.shared.Connection;
 import de.csenk.gwt.ws.shared.FilterChain;
@@ -27,96 +30,99 @@ import de.csenk.gwt.ws.shared.filter.DefaultFilterChain;
  * @author senk.christian@googlemail.com
  * @date 25.08.2010
  * @time 13:56:30
- *
+ * 
  */
-public class JettyWebSocketConnection implements WebSocket, Connection {
+public class JettyWebSocketConnection extends WebSocketAdapter implements Connection {
 
-	private final Handler handler;
-	
-	private Outbound outbound;
-	private Sender sender;
-	
-	private final FilterChain filterChain;
-	
-	/**
-	 * @param handler
-	 */
-	public JettyWebSocketConnection(final Handler handler) {
-		this.handler = handler;
-		this.filterChain = new DefaultFilterChain(this);
-	}
+    private final Handler handler;
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jetty.websocket.WebSocket#onConnect(org.eclipse.jetty.websocket.WebSocket.Outbound)
-	 */
-	@Override
-	public void onConnect(Outbound arg0) {
-		sender = new OutboundSender(arg0);
-		filterChain.fireConnectionOpened();
-	}
+    private Session session;
+    private Sender sender;
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jetty.websocket.WebSocket#onDisconnect()
-	 */
-	@Override
-	public void onDisconnect() {
-		filterChain.fireConnectionClosed();
-	}
+    private final FilterChain filterChain;
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jetty.websocket.WebSocket#onMessage(byte, java.lang.String)
-	 */
-	@Override
-	public void onMessage(byte arg0, String arg1) {
-		filterChain.fireMessageReceived(arg1);
-	}
+    /**
+     * @param handler
+     */
+    public JettyWebSocketConnection(final Handler handler) {
+        this.handler = handler;
+        this.filterChain = new DefaultFilterChain(this);
+    }
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jetty.websocket.WebSocket#onMessage(byte, byte[], int, int)
-	 */
-	@Override
-	public void onMessage(byte arg0, byte[] arg1, int arg2, int arg3) {
-		filterChain.fireMessageReceived(new String(arg1, arg2, arg3));
-	}
+    @Override
+    public void onWebSocketBinary(byte[] payload, int offset, int len) {
+        filterChain.fireMessageReceived(new String(payload, offset, len));
+    }
 
-	/* (non-Javadoc)
-	 * @see de.csenk.gwt.ws.shared.Connection#close()
-	 */
-	@Override
-	public void close() {
-		outbound.disconnect();
-	}
+    @Override
+    public void onWebSocketClose(int statusCode, String reason) {
+        filterChain.fireConnectionClosed();
+    }
 
-	/* (non-Javadoc)
-	 * @see de.csenk.gwt.ws.shared.Connection#getFilterChain()
-	 */
-	@Override
-	public FilterChain getFilterChain() {
-		return filterChain;
-	}
+    @Override
+    public void onWebSocketConnect(Session session) {
+        this.session = session;
+        sender = new OutboundSender(session);
+        filterChain.fireConnectionOpened();
+    }
 
-	/* (non-Javadoc)
-	 * @see de.csenk.gwt.ws.shared.Connection#getHandler()
-	 */
-	@Override
-	public Handler getHandler() {
-		return handler;
-	}
+    @Override
+    public void onWebSocketText(String message) {
+        filterChain.fireMessageReceived(message);
+    }
 
-	/* (non-Javadoc)
-	 * @see de.csenk.gwt.ws.shared.Connection#getSender()
-	 */
-	@Override
-	public Sender getSender() {
-		return sender;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.csenk.gwt.ws.shared.Connection#close()
+     */
+    @Override
+    public void close() {
+        try {
+            session.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	/* (non-Javadoc)
-	 * @see de.csenk.gwt.ws.shared.Connection#send(java.lang.Object)
-	 */
-	@Override
-	public void send(Object message) {
-		filterChain.fireSend(message);
-	}
-		
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.csenk.gwt.ws.shared.Connection#getFilterChain()
+     */
+    @Override
+    public FilterChain getFilterChain() {
+        return filterChain;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.csenk.gwt.ws.shared.Connection#getHandler()
+     */
+    @Override
+    public Handler getHandler() {
+        return handler;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.csenk.gwt.ws.shared.Connection#getSender()
+     */
+    @Override
+    public Sender getSender() {
+        return sender;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.csenk.gwt.ws.shared.Connection#send(java.lang.Object)
+     */
+    @Override
+    public void send(Object message) {
+        filterChain.fireSend(message);
+    }
+
 }

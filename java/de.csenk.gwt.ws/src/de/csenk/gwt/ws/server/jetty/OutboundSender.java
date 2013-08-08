@@ -17,7 +17,8 @@ package de.csenk.gwt.ws.server.jetty;
 
 import java.io.IOException;
 
-import org.eclipse.jetty.websocket.WebSocket.Outbound;
+import org.eclipse.jetty.websocket.api.RemoteEndpoint;
+import org.eclipse.jetty.websocket.api.Session;
 
 import de.csenk.gwt.ws.shared.Sender;
 
@@ -25,22 +26,23 @@ import de.csenk.gwt.ws.shared.Sender;
  * @author senk.christian@googlemail.com
  * @date 30.08.2010
  * @time 15:46:16
- *
+ * 
  */
 public class OutboundSender implements Sender {
 
-	private final Outbound outbound;
-	
-	public OutboundSender(Outbound outbound) {
-		this.outbound = outbound;
-	}
-	
-	/* (non-Javadoc)
-	 * @see de.csenk.gwt.ws.shared.Sender#send(java.lang.String)
-	 */
-	@Override
-	public void send(String message) throws IOException {
-		outbound.sendMessage(message);
-	}
-	
+    private final RemoteEndpoint outbound;
+
+    public OutboundSender(Session session) {
+        this.outbound = session.getRemote();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.csenk.gwt.ws.shared.Sender#send(java.lang.String)
+     */
+    @Override
+    public void send(String message) throws IOException {
+        outbound.sendString(message);
+    }
 }

@@ -15,7 +15,7 @@
 
 package de.csenk.gwt.ws.client.filter;
 
-import com.allen_sauer.gwt.log.client.Log;
+import java.util.logging.Logger;
 
 import de.csenk.gwt.ws.shared.Connection;
 import de.csenk.gwt.ws.shared.filter.DefaultFilter;
@@ -24,30 +24,33 @@ import de.csenk.gwt.ws.shared.filter.DefaultFilter;
  * @author senk.christian@googlemail.com
  * @date 01.09.2010
  * @time 14:33:31
- *
+ * 
  */
 public class ClientLoggingFilter extends DefaultFilter {
+    private static final Logger logger = Logger.getLogger(ClientLoggingFilter.class.getName());
 
-	/* (non-Javadoc)
-	 * @see de.csenk.gwt.ws.shared.filter.FilterImpl#onMessageReceived(de.csenk.gwt.ws.shared.Filter.NextFilter, de.csenk.gwt.ws.shared.Connection, java.lang.Object)
-	 */
-	@Override
-	public void onMessageReceived(NextFilter nextFilter, Connection connection,
-			Object message) throws Throwable {
-		Log.info(message.toString());
-		
-		super.onMessageReceived(nextFilter, connection, message);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.csenk.gwt.ws.shared.filter.FilterImpl#onMessageReceived(de.csenk.gwt.ws.shared.Filter.NextFilter,
+     * de.csenk.gwt.ws.shared.Connection, java.lang.Object)
+     */
+    @Override
+    public void onMessageReceived(NextFilter nextFilter, Connection connection, Object message) throws Throwable {
+        logger.info(message.toString());
+        super.onMessageReceived(nextFilter, connection, message);
+    }
 
-	/* (non-Javadoc)
-	 * @see de.csenk.gwt.ws.shared.filter.FilterImpl#onSend(de.csenk.gwt.ws.shared.Filter.NextFilter, de.csenk.gwt.ws.shared.Connection, java.lang.Object)
-	 */
-	@Override
-	public void onSend(NextFilter nextFilter, Connection connection,
-			Object message) throws Throwable {
-		Log.info(message.toString());
-		
-		super.onSend(nextFilter, connection, message);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.csenk.gwt.ws.shared.filter.FilterImpl#onSend(de.csenk.gwt.ws.shared.Filter.NextFilter,
+     * de.csenk.gwt.ws.shared.Connection, java.lang.Object)
+     */
+    @Override
+    public void onSend(NextFilter nextFilter, Connection connection, Object message) throws Throwable {
+        logger.info(message.toString());
+        super.onSend(nextFilter, connection, message);
+    }
 
 }
