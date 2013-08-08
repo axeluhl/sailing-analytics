@@ -30,6 +30,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
   * [[Inventory|wiki/inventar-liste]]
   * [[Smartphone Tracking|wiki/smartphone-tracking]]
+  * [[Racecommittee App|wiki/racecommittee-app]]
 * Planning and Event Information
   * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]
