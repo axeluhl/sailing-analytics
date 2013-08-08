@@ -25,7 +25,7 @@ After the Eclipse installation and importing all projects under java/ from Git, 
 
 Major parts of our target platform are hosted on sapsailing.com as a p2 repository which makes it possible to have only one central target platform configuration used by everyone. The target platform can be re-built, e.g., after adding another bundle to it, using the script in com.sap.sailing.targetplatform/scripts. 
 
-It then needs to be installed again (by using a tool like scp for instance) to the /home/trac/p2-repositories directory from where it is exposed as http://sapcoe-app01.pironet-ndh.com/p2/sailing/ by the Apache web server. After such a change, all developers need to reload the target platform into their Eclipse environment.
+It then needs to be installed again (by using a tool like scp for instance) to the /home/trac/p2-repositories directory from where it is exposed as http://p2.sapsailing.com/p2/sailing/ by the Apache web server. After such a change, all developers need to reload the target platform into their Eclipse environment.
 
 ## Maven Build and Tests
 We use Maven to build our software and run our JUnit tests. The global setting.xml file to install in everyone's ~/.m2 directory is checked into the top-level Git folder. The checked-in copy assumes the developer is using Maven inside the SAP corporate network. If not, uncomment the <proxy> tag in the settings.xml file. See also section Git and Our Branches for details on which branch is configured to work in which network setup.
@@ -52,10 +52,12 @@ When building on sapsailing.com you should stick with the buildAndUpdateProduct.
 
 All these build lines also creates a log file with all error messages, just in case the screen buffer is not sufficient to hold all scrolling error messages.
 
-## Product and Features
-The result of the build process is a p2 repository with a product consisting of a number of features. The product configuration is provided by the file raceanalysis.product in the com.sap.sailing.feature.p2build project. In its dependencies it defines the features of which it is built, which currently are com.sap.sailing.feature and com.sap.sailing.feature.runtime, each described in an equal-named bundle.
+## Product, Features and Target Platform
+The result of the build process is a p2 repository with a product consisting of a number of features. The product configuration is provided by the file raceanalysis.product in the com.sap.sailing.feature.p2build project. In its dependencies it defines the features of which it is built, which currently are com.sap.sailing.feature and com.sap.sailing.feature.runtime, each described in an equal-named bundle. The feature specified by com.sap.sailing.feature lists the bundles we develop ourselves as part of the project. The com.sap.sailing.feature.runtime feature lists those 3rd-party bundles from the target platform which are required by the product.
 
-The feature specified by com.sap.sailing.feature lists the bundles we develop ourselves as part of the project. The com.sap.sailing.feature.runtime feature lists those 3rd-party bundles from the target platform which are required by the product.
+The [target platform](#Target Platform) is defined in the various flavors for local and central environments in com.sap.sailing.targetplatform/definitions/*.target. It mainly uses Eclipse p2 repositories and our own p2 repository at http://p2.sapsailing.com/p2/sailing/ where we store those bundles required by our runtime which cannot be found as OSGi bundles in any other public p2 repository of which we are aware.
+
+This p2 repository at sapsailing.com can be re-built and correspondingly extended by the process explained [here](wiki/typical-development-scenarios#Adding-a-Bundle-to-the-Target-Platform).
 
 ## External Libraries
 
