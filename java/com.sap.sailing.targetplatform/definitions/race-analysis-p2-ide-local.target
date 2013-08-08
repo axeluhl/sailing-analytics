@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Race Analysis Target (IDE)" sequenceNumber="50">
+<?pde version="3.8"?><target name="Race Analysis Target (IDE)" sequenceNumber="51">
 <locations>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.0.4"/>
-<repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-9.x/9.0.4.v20130625/"/>
-</location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
@@ -31,6 +27,10 @@
 <unit id="javax.el" version="2.2.0.v201303151357"/>
 <unit id="javax.el.source" version="2.2.0.v201303151357"/>
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20130517111416/repository/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.0.4"/>
+<repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-9.x/9.0.4.v20130625/"/>
 </location>
 </locations>
 </target>

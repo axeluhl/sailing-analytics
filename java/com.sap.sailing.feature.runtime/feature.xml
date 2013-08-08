@@ -33,6 +33,11 @@
       <import plugin="org.apache.jasper.glassfish"/>
       <import plugin="org.apache.taglibs.standard.glassfish"/>
       <import plugin="org.eclipse.jetty.osgi.boot"/>
+      <import plugin="org.eclipse.jetty.websocket.api"/>
+      <import plugin="org.eclipse.jetty.websocket.client"/>
+      <import plugin="org.eclipse.jetty.websocket.common"/>
+      <import plugin="org.eclipse.jetty.websocket.server"/>
+      <import plugin="org.eclipse.jetty.websocket.servlet"/>
    </requires>
 
    <plugin
