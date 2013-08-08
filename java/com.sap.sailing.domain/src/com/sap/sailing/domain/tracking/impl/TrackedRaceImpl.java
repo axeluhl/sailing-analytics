@@ -1128,7 +1128,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         if (windSource.getType() == WindSourceType.COMBINED) {
             if (combinedWindTrack == null) {
                 combinedWindTrack = new CombinedWindTrackImpl(this, WindSourceType.COMBINED.getBaseConfidence());
-                ;
             }
             result = combinedWindTrack;
         } else {
@@ -1224,6 +1223,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
+        Set<WindSource> old = new HashSet<>(this.windSourcesToExclude);
         synchronized (this.windSourcesToExclude) {
             LockUtil.lockForRead(serializationLock);
             try {
@@ -1234,6 +1234,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             } finally {
                 LockUtil.unlockAfterRead(serializationLock);
             }
+        }
+        if (!old.equals(this.windSourcesToExclude)) {
+            clearAllCachesExceptManeuvers();
+            triggerManeuverCacheRecalculationForAllCompetitors();
         }
     }
 
@@ -2345,6 +2349,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     protected void setStatus(TrackedRaceStatus newStatus) {
+        assert newStatus != null;
         final TrackedRaceStatusEnum oldStatus;
         synchronized (getStatusNotifier()) {
             oldStatus = getStatus().getStatus();

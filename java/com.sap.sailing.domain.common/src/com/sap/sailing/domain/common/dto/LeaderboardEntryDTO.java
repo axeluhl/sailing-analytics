@@ -57,11 +57,12 @@ public class LeaderboardEntryDTO implements Serializable {
     
     /**
      * If we have GPS data for the competitor for whom this is a leaderboard entry, tells the time point of the last
-     * non-extrapolated GPS fix that was really received from the tracking device. The user interface may---particularly
-     * in live mode---choose to visualize the time that passed between the last fix and the query time point for which
-     * this entry was created.
+     * non-extrapolated GPS fix that was really received from the tracking device at or before the time point for which
+     * the leaderboard was queried. The user interface may---particularly in live mode---choose to visualize the time
+     * that passed between the last fix and the query time point for which this entry was created.
      */
-    public Date timePointOfLastPositionFix;
+    public Date timePointOfLastPositionFixAtOrBeforeQueryTimePoint;
+    public Double timeSinceLastPositionFixInSeconds;
 
     /**
      * If <code>null</code>, no leg details are known yet, the race is not being tracked or the details
@@ -111,7 +112,8 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result
                 + ((speedOverGroundAtStartOfRaceInKnots == null) ? 0 : speedOverGroundAtStartOfRaceInKnots.hashCode());
         result = prime * result + ((startTack == null) ? 0 : startTack.hashCode());
-        result = prime * result + ((timePointOfLastPositionFix == null) ? 0 : timePointOfLastPositionFix.hashCode());
+        result = prime * result + ((timePointOfLastPositionFixAtOrBeforeQueryTimePoint == null) ? 0 : timePointOfLastPositionFixAtOrBeforeQueryTimePoint.hashCode());
+        result = prime * result + ((timeSinceLastPositionFixInSeconds == null) ? 0 : timeSinceLastPositionFixInSeconds.hashCode());
         result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
         result = prime
                 * result
@@ -183,10 +185,15 @@ public class LeaderboardEntryDTO implements Serializable {
             return false;
         if (startTack != other.startTack)
             return false;
-        if (timePointOfLastPositionFix == null) {
-            if (other.timePointOfLastPositionFix != null)
+        if (timePointOfLastPositionFixAtOrBeforeQueryTimePoint == null) {
+            if (other.timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null)
                 return false;
-        } else if (!timePointOfLastPositionFix.equals(other.timePointOfLastPositionFix))
+        } else if (!timePointOfLastPositionFixAtOrBeforeQueryTimePoint.equals(other.timePointOfLastPositionFixAtOrBeforeQueryTimePoint))
+            return false;
+        if (timeSinceLastPositionFixInSeconds == null) {
+            if (other.timeSinceLastPositionFixInSeconds != null)
+                return false;
+        } else if (!timeSinceLastPositionFixInSeconds.equals(other.timeSinceLastPositionFixInSeconds))
             return false;
         if (totalPoints == null) {
             if (other.totalPoints != null)

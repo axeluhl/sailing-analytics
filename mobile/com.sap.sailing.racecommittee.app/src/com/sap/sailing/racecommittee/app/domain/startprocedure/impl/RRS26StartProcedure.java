@@ -27,7 +27,7 @@ import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureListener;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.UserRequiredActionPerformedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ClassicCourseDesignDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseCourseByLabelDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseStartModeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishedRaceFragment;
@@ -323,27 +323,27 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     @Override
     public Pair<String, List<Object>> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart) {
         Pair<String, List<Object>> result;
-        List<Object> milisecondsList = new ArrayList<Object>();
+        List<Object> millisecondsList = new ArrayList<Object>();
         if (millisecondsTillStart < startPhaseStartModeDownInterval) {
-            milisecondsList.add(millisecondsTillStart);
-            milisecondsList.add(this.boatClassName);
+            millisecondsList.add(millisecondsTillStart);
+            millisecondsList.add(this.boatClassName);
             result = new Pair<String, List<Object>>(context.getResources().getString(
-                    R.string.race_startphase_countdown_class_remove), milisecondsList);
+                    R.string.race_startphase_countdown_class_remove), millisecondsList);
         } else if (millisecondsTillStart < startPhaseStartModeUpInterval) {
-            milisecondsList.add(millisecondsTillStart - startPhaseStartModeDownInterval);
-            milisecondsList.add(this.startModeFlag.toString());
+            millisecondsList.add(millisecondsTillStart - startPhaseStartModeDownInterval);
+            millisecondsList.add(this.startModeFlag.toString());
             result = new Pair<String, List<Object>>(context.getResources().getString(
-                    R.string.race_startphase_countdown_mode_remove), milisecondsList);
+                    R.string.race_startphase_countdown_mode_remove), millisecondsList);
         } else if (millisecondsTillStart < startPhaseClassUpInterval) {
-            milisecondsList.add(millisecondsTillStart - startPhaseStartModeUpInterval);
-            milisecondsList.add(this.startModeFlag.toString());
+            millisecondsList.add(millisecondsTillStart - startPhaseStartModeUpInterval);
+            millisecondsList.add(this.startModeFlag.toString());
             result = new Pair<String, List<Object>>(context.getResources().getString(
-                    R.string.race_startphase_countdown_mode_display), milisecondsList);
+                    R.string.race_startphase_countdown_mode_display), millisecondsList);
         } else {
-            milisecondsList.add(millisecondsTillStart - startPhaseClassUpInterval);
-            milisecondsList.add(this.boatClassName);
+            millisecondsList.add(millisecondsTillStart - startPhaseClassUpInterval);
+            millisecondsList.add(this.boatClassName);
             result = new Pair<String, List<Object>>(context.getResources().getString(
-                    R.string.race_startphase_countdown_class_display), milisecondsList);
+                    R.string.race_startphase_countdown_class_display), millisecondsList);
         }
         return result;
     }
@@ -415,6 +415,6 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
 
     @Override
     public Class<? extends RaceDialogFragment> getCourseDesignDialog() {
-        return ClassicCourseDesignDialogFragment.class;
+        return RaceChooseCourseByLabelDialog.class;
     }
 }

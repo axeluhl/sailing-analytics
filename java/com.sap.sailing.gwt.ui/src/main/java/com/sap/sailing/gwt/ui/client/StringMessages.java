@@ -585,7 +585,7 @@ public interface StringMessages extends Messages {
     String enableRaceFilter();
     String raceStatusColumn();
     String loading();
-    String showHiddenRaces();
+    String racesWithHiddenState();
     String selectedCompetitors();
     String mediaDateFormatError(String expectedTimeFormat);
     String filterNothing();
@@ -743,4 +743,7 @@ public interface StringMessages extends Messages {
     String importSelectAtLeastOne();
     String deselectAll();
     String polarDiagramButton();
+    String timeSinceLastPositionFix();
+    String timeSinceLastPositionFixTooltip();
+    String trackingQuality();
 }

@@ -65,7 +65,8 @@ public class FinishingRaceFragment extends RaceFragment {
 
     private void setStarttimeCountupLabel(long millisecondsSinceStart) {
         countUpTextView.setText(String.format(getActivity().getResources().getString(R.string.race_running_since_template),
-                prettyTimeString(millisecondsSinceStart), getRace().getName()));
+                getRace().getName(),
+                prettyTimeString(millisecondsSinceStart)));
     }
 
     protected CharSequence prettyTimeString(long time) {
@@ -106,7 +107,7 @@ public class FinishingRaceFragment extends RaceFragment {
         fragment.show(fragmentManager, "dialogNovemberMode");
     }
 
-    private void showRemoveBlueFlagDialog() {
+    protected void showRemoveBlueFlagDialog() {
         FragmentManager fragmentManager = getFragmentManager();
 
         RaceDialogFragment fragment = new RaceFinishedTimeDialog();

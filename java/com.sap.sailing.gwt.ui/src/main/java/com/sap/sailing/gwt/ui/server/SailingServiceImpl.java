@@ -806,14 +806,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             // reload JSON and load clientparams.php
             RaceRecord record = getService().getSingleTracTracRaceRecord(new URL(rr.jsonURL), rr.id, /*loadClientParams*/true);
             logger.info("Loaded race " + record.getName() + " in " + record.getEventName() + " start:" + record.getRaceStartTime() + " trackingStart:" + record.getTrackingStartTime() + " trackingEnd:" + record.getTrackingEndTime());
+            // note that the live URI may be null for races that were put into replay mode
+            final String effectiveLiveURI;
             if (liveURI == null || liveURI.trim().length() == 0) {
-                liveURI = record.getLiveURI().toString();
+                effectiveLiveURI = record.getLiveURI() == null ? null : record.getLiveURI().toString();
+            } else {
+                effectiveLiveURI = liveURI;
             }
+            final String effectiveStoredURI;
             if (storedURI == null || storedURI.trim().length() == 0) {
-                storedURI = record.getStoredURI().toString();
+                effectiveStoredURI = record.getStoredURI().toString();
+            } else {
+                effectiveStoredURI = storedURI;
             }
             final RacesHandle raceHandle = getService().addTracTracRace(regattaToAddTo, record.getParamURL(),
-                    new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI), new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
+                    effectiveLiveURI == null ? null : new URI(effectiveLiveURI), new URI(effectiveStoredURI),
+                    new URI(courseDesignUpdateURI), new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
                     new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                     MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
@@ -1102,7 +1110,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             if(confidence < minWindConfidence) {
                                 minWindConfidence = confidence;
                             }
-                            if(confidence > maxWindConfidence) {
+                            if (confidence > maxWindConfidence) {
                                 maxWindConfidence = confidence;
                             }
                         }

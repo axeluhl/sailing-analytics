@@ -7,8 +7,6 @@ public class AppConstants {
 
     public static final boolean IS_DATA_OFFLINE = false;
 
-    public final static String ApplicationVersion = "2.0 Beta 1 - Jumbotron";
-
     // Intent extra fields
     public final static String COURSE_AREA_UUID_KEY = "courseUuid";
     public final static String RACE_ID_KEY = "raceUuid";

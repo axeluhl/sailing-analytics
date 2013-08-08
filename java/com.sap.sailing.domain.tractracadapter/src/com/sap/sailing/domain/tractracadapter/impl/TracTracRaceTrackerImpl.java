@@ -1,21 +1,17 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -25,12 +21,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -187,15 +186,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         } else {
             simulator = null;
         }
-        // Read event data from configuration file
-        controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator);
         // can happen that TracTrac event is null (occurs when there is no Internet connection)
         // so lets raise some meaningful exception
         if (tractracEvent == null) {
             throw new RuntimeException("Connection failed. Could not connect to " + paramURL);
         }
         
-        logger.info("Starting race tracker: " + tractracEvent.getName() + " " + paramURL + " " + liveURI
+        logger.info("Starting race tracker: " + tractracEvent.getName() + " " + paramURL + " " + liveURI + " "
                 + storedURI + " startOfTracking:" + (startOfTracking != null ? startOfTracking.asMillis() : "n/a") + " endOfTracking:" + (endOfTracking != null ? endOfTracking.asMillis() : "n/a"));
         
         // Initialize data controller using live and stored data sources
@@ -218,6 +215,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         // in this case, create a default regatta based on the TracTrac event data
         this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(raceLogStore, tractracEvent, trackedRegattaRegistry) : effectiveRegatta;
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
+        // Read event data from configuration file
+        controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, courseDesignUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent, startOfTracking,
@@ -253,123 +252,180 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      *            clientparams document
      * @return the task to cancel in case the tracker wants to terminate the poller
      */
-    private ScheduledFuture<?> scheduleClientParamsPHPPoller(final URL paramURL, final Simulator simulator) {
-        ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(new Runnable() {
+    private ScheduledFuture<?> scheduleClientParamsPHPPoller(final URL paramURL, final Simulator simulator,
+            final URI courseDesignUpdateURI, final long delayToLiveInMillis, final String tracTracUsername, final String tracTracPassword) {
+        final Runnable command = new Runnable() {
             @Override public void run() {
-                pollAndParseClientParamsPHP(paramURL, simulator);
+                pollAndParseClientParamsPHP(paramURL, simulator, courseDesignUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
             }
-        }, /* initialDelay */ 30000, /* delay */ 15000, /* unit */ TimeUnit.MILLISECONDS);
+        };
+        // now run the command once immediately and synchronously; see also bug 1345
+        command.run();
+        // then schedule for periodic execution in background
+        ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(command, /* initialDelay */ 30000, /* delay */ 15000, /* unit */ TimeUnit.MILLISECONDS);
         return task;
     }
 
 
-    private void pollAndParseClientParamsPHP(final URL paramURL, final Simulator simulator) {
-        Set<RaceDefinition> raceDefinitions = getRaces();
-        if (raceDefinitions != null && !raceDefinitions.isEmpty()) {
-            logger.fine("Fetching paramURL "+paramURL+" to check for updates for race(s) "+getRaces());
-            final ClientParamsPHP clientParams;
-            try {
-                clientParams = new ClientParamsPHP(new InputStreamReader(paramURL.openStream()));
-                List<com.sap.sailing.domain.base.ControlPoint> newCourseControlPoints = new ArrayList<>();
-                List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide = new ArrayList<>();
-                final List<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRaceDefaultRoute().getControlPoints();
-                Map<Integer, NauticalSide> passingSideData = parsePassingSideData(clientParams.getRaceDefaultRoute(), newTracTracControlPoints);
-                int i = 1;
-                for (TracTracControlPoint newTracTracControlPoint : newTracTracControlPoints) {
-                    NauticalSide nauticalSide = passingSideData.containsKey(i) ? passingSideData.get(i) : null;
-                    final com.sap.sailing.domain.base.ControlPoint newControlPoint = domainFactory.getOrCreateControlPoint(newTracTracControlPoint);
-                    newCourseControlPoints.add(newControlPoint);
-                    newCourseControlPointsWithPassingSide.add(new Pair<com.sap.sailing.domain.base.ControlPoint, 
-                            NauticalSide>(newControlPoint, nauticalSide));
-                    i++;
-                }
-                List<com.sap.sailing.domain.base.ControlPoint> currentCourseControlPoints = new ArrayList<>();
-                final Course course = getRaces().iterator().next().getCourse();
-                for (Waypoint waypoint : course.getWaypoints()) {
-                    currentCourseControlPoints.add(waypoint.getControlPoint());
-                }
-                if (!newCourseControlPoints.equals(currentCourseControlPoints)) {
-                    logger.info("Detected course change based on clientparams.php contents for races "+getRaces());
-                    try {
-                        course.update(newCourseControlPointsWithPassingSide, domainFactory.getBaseDomainFactory());
-                    } catch (PatchFailedException pfe) {
-                        logger.severe("Failed to apply course update "+newTracTracControlPoints+" to course "+course);
-                        logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", pfe);
+    private void pollAndParseClientParamsPHP(final URL paramURL, final Simulator simulator,
+            final URI courseDesignUpdateURI, long delayToLiveInMillis, final String tracTracUsername,
+            final String tracTracPassword) {
+        // If no race is found, extract all information necessary to create it, in particular the competitor list, course information,
+        // data about side lines from the race's metadata as well as the dominant boat class for the race. Otherwise, look for changes
+        // and update accordingly where possible.
+        logger.fine("Fetching paramURL "+paramURL+" to check for updates for race(s) "+getRaces());
+        final ClientParamsPHP clientParams;
+        try {
+            clientParams = new ClientParamsPHP(paramURL, new InputStreamReader(paramURL.openStream()));
+            List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide = getControlPointsWithPassingSide(clientParams,
+                    new ControlPointProducer<com.sap.sailing.domain.base.ControlPoint>() {
+                        @Override
+                        public com.sap.sailing.domain.base.ControlPoint produceControlPoint(TracTracControlPoint ttControlPoint) {
+                            return domainFactory.getOrCreateControlPoint(ttControlPoint);
+                        }
+                    });
+            if (getRaces() == null || getRaces().isEmpty()) {
+                // create race definition / tracked race and add to event
+                final String raceName = clientParams.getRace().getName();
+                logger.log(Level.INFO, "Found data for non-existing race "+raceName+" in "+paramURL+". Creating RaceDefinition.");
+                final Iterable<Competitor> competitors = getCompetitors(clientParams);
+                final Iterable<com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Competitor> competitorsInClientParams = clientParams.getCompetitors();
+                List<Pair<TracTracControlPoint, NauticalSide>> ttControlPointsAndPassingSide = getControlPointsWithPassingSide(clientParams,
+                        new ControlPointProducer<TracTracControlPoint>() {
+                    @Override
+                    public TracTracControlPoint produceControlPoint(TracTracControlPoint ttControlPoint) {
+                        return ttControlPoint;
                     }
+                });
+                Course course = domainFactory.createCourse(clientParams.getRace().getDefaultRoute().getDescription(), ttControlPointsAndPassingSide);
+                List<Sideline> sidelines = domainFactory.createSidelines(
+                        clientParams.getRace().getMetadata(), clientParams.getEvent().getControlPointList());
+                DynamicTrackedRace trackedRace = domainFactory.getOrCreateRaceDefinitionAndTrackedRace(
+                        getTrackedRegatta(), clientParams.getRace().getId(), raceName, competitors,
+                        getDominantBoatClass(competitorsInClientParams), course, sidelines, windStore, delayToLiveInMillis,
+                        WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, /* raceDefinitionSetToUpdate */ this, courseDesignUpdateURI,
+                        tractracEvent.getId(), tracTracUsername, tracTracPassword);
+                if (simulator != null) {
+                    simulator.setTrackedRace(trackedRace);
                 }
-                updateStartStopTimesAndLiveDelay(clientParams, simulator);
-                for (TracTracControlPoint controlPoint : clientParams.getControlPointList()) {
-                    com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getOrCreateControlPoint(controlPoint);
-                    boolean first = true;
-                    for (Mark mark : domainControlPoint.getMarks()) {
-                        for (RaceDefinition raceDefinition : raceDefinitions) {
-                            DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(raceDefinition);
-                            if (trackedRace != null) {
-                                DynamicGPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
-                                if (markTrack.getFirstRawFix() == null) {
-                                    final Position position = first ? controlPoint.getMark1Position() : controlPoint.getMark2Position();
-                                    if (position != null) {
-                                        markTrack.addGPSFix(new GPSFixImpl(position, MillisecondsTimePoint.now()));
-                                    }
-                                }
+            }
+            compareAndUpdateCourseIfNecessary(newCourseControlPointsWithPassingSide);
+            updateStartStopTimesAndLiveDelay(clientParams, simulator);
+            updateMarkPositionsIfNoPositionsReceivedYet(clientParams);
+        } catch (Exception e) {
+            logger.info("Exception " + e.getMessage() + " while trying to read clientparams.php for races " + getRaces());
+            logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", e);
+        }
+    }
+
+    private Iterable<Competitor> getCompetitors(ClientParamsPHP clientParams) {
+        List<Competitor> result = new ArrayList<>();
+        for (ClientParamsPHP.Competitor cpc : clientParams.getCompetitors()) {
+            result.add(getCompetitor(cpc));
+        }
+        return result;
+    }
+
+    private Competitor getCompetitor(com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Competitor competitor) {
+        final com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.BoatClass boatClass = competitor.getBoatClass();
+        return domainFactory.getOrCreateCompetitor(
+                competitor.getId(), boatClass==null?null:boatClass.getName(), competitor.getNationality(), competitor.getName(),
+                competitor.getShortName());
+    }
+
+    private BoatClass getDominantBoatClass(
+            Iterable<com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Competitor> competitorsInClientParams) {
+        List<String> competitorClassNames = new ArrayList<>();
+        for (com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Competitor competitor : competitorsInClientParams) {
+            final com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.BoatClass boatClass = competitor.getBoatClass();
+            if (boatClass != null) {
+                competitorClassNames.add(boatClass.getName());
+            }
+        }
+        return domainFactory.getDominantBoatClass(competitorClassNames);
+    }
+
+    /**
+     * set mark positions from static positions specified in document in case there is nothing loaded through TTCM yet
+     */
+    private void updateMarkPositionsIfNoPositionsReceivedYet(final ClientParamsPHP clientParams) {
+        for (TracTracControlPoint controlPoint : clientParams.getEvent().getControlPointList()) {
+            com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getOrCreateControlPoint(controlPoint);
+            boolean first = true;
+            for (Mark mark : domainControlPoint.getMarks()) {
+                for (RaceDefinition raceDefinition : getRaces()) {
+                    DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(raceDefinition);
+                    if (trackedRace != null) {
+                        DynamicGPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
+                        if (markTrack.getFirstRawFix() == null) {
+                            final Position position = first ? controlPoint.getMark1Position() : controlPoint.getMark2Position();
+                            if (position != null) {
+                                logger.info("Adding fix "+position+" from "+clientParams.getParamsUrl()+" for control point "+controlPoint.getName()+
+                                        " in race "+raceDefinition.getName());
+                                markTrack.addGPSFix(new GPSFixImpl(position, MillisecondsTimePoint.now()));
                             }
                         }
-                        first = false;
                     }
                 }
-            } catch (IOException e) {
-                logger.info("Exception "+e.getMessage()+" while trying to read clientparams.php for races "+getRaces());
-                logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", e);
+                first = false;
             }
         }
     }
 
     /**
-     * Parses the route metadata for additional course information
-     * The 'passing side' for each course waypoint is encoded like this...
-     * Seq.1=GATE
-     * Seq.2=PORT
-     * Seq.3=GATE
-     * Seq.4=STARBOARD
+     * For all races tracked, the course is compared to the course described in <code>newCourseControlPointsWithPassingSide</code>.
+     * If they differ, a {@link Course#update(Iterable, com.sap.sailing.domain.base.DomainFactory) course update} is triggered.
      */
-    private Map<Integer, NauticalSide> parsePassingSideData(ClientParamsPHP.Route route, List<? extends TracTracControlPoint> controlPoints) {
-        Map<Integer, NauticalSide> result = new HashMap<Integer, NauticalSide>();
-        int controlPointsCount = controlPoints.size();
-        String routeMetadataString = route.getMetadata();
-        if(routeMetadataString != null) {
-            Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
-            for(int i = 1; i <= controlPointsCount; i++) {
-                String seqValue = routeMetadata.get("Seq." + i);
-                TracTracControlPoint controlPoint = controlPoints.get(i-1);
-                if(!controlPoint.getHasTwoPoints() && seqValue != null) {
-                    if("PORT".equalsIgnoreCase(seqValue)) {
-                        result.put(i, NauticalSide.PORT);
-                    } else if("STARBOARD".equalsIgnoreCase(seqValue)) {
-                        result.put(i, NauticalSide.STARBOARD);
-                    }
+    private void compareAndUpdateCourseIfNecessary(
+            List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide) {
+        assert getRaces() != null;
+        // to check if a course update is required, compare to the existing course's control points:
+        List<com.sap.sailing.domain.base.ControlPoint> newCourseControlPoints = new ArrayList<>();
+        for (Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide> controlPointAndPassingSide : newCourseControlPointsWithPassingSide) {
+            newCourseControlPoints.add(controlPointAndPassingSide.getA());
+        }
+        List<com.sap.sailing.domain.base.ControlPoint> currentCourseControlPoints = new ArrayList<>();
+        for (RaceDefinition race : getRaces()) {
+            final Course course = race.getCourse();
+            for (Waypoint waypoint : course.getWaypoints()) {
+                currentCourseControlPoints.add(waypoint.getControlPoint());
+            }
+            if (!newCourseControlPoints.equals(currentCourseControlPoints)) {
+                logger.info("Detected course change based on clientparams.php contents for races " + getRaces());
+                try {
+                    course.update(newCourseControlPointsWithPassingSide, domainFactory.getBaseDomainFactory());
+                } catch (PatchFailedException pfe) {
+                    logger.severe("Failed to apply course update " + newCourseControlPointsWithPassingSide
+                            + " to course " + course);
+                    logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", pfe);
                 }
             }
         }
-        return result;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Map<String, String> parseMetadata(String metadata) {
-        Map<String, String> metadataMap = new HashMap<String, String>();
-        try {
-            Properties p = new Properties();
-            p.load(new StringReader(metadata));
-            metadataMap = new HashMap<String, String>((Map) p);
-        } catch (IOException e) {
-            // do nothing
+    private interface ControlPointProducer<T> {
+        T produceControlPoint(TracTracControlPoint ttControlPoint);
+    }
+    
+    private <T> List<Pair<T, NauticalSide>> getControlPointsWithPassingSide( final ClientParamsPHP clientParams, ControlPointProducer<T> controlPointProducer) {
+        List<Pair<T, NauticalSide>> newCourseControlPointsWithPassingSide = new ArrayList<>();
+        final List<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRace().getDefaultRoute().getControlPoints();
+        Map<Integer, NauticalSide> passingSideData = domainFactory.getMetadataParser().parsePassingSideData(
+                clientParams.getRace().getDefaultRoute().getMetadata(), newTracTracControlPoints);
+        int i = 1;
+        for (TracTracControlPoint newTracTracControlPoint : newTracTracControlPoints) {
+            NauticalSide nauticalSide = passingSideData.containsKey(i) ? passingSideData.get(i) : null;
+            final T newControlPoint = controlPointProducer.produceControlPoint(newTracTracControlPoint);
+            newCourseControlPointsWithPassingSide.add(new Pair<T, NauticalSide>(newControlPoint, nauticalSide));
+            i++;
         }
-        return metadataMap;
+        return newCourseControlPointsWithPassingSide;
     }
 
     private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) {
         RaceDefinition currentRace = null;
         long delayInMillis = clientParams.getLiveDelayInMillis();
-        RaceDefinition race = getRegatta().getRaceByName(clientParams.getRaceName());
+        RaceDefinition race = getRegatta().getRaceByName(clientParams.getRace().getName());
         if (race != null) {
             currentRace = race;
             final DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(currentRace);
@@ -380,12 +436,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         if (currentRace != null) {
             final DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(currentRace);
             if (trackedRace != null) {
-                TimePoint startOfTracking = clientParams.getRaceTrackingStartTime();
+                TimePoint startOfTracking = clientParams.getRace().getTrackingStartTime();
                 if (startOfTracking != null) {
                     trackedRace.setStartOfTrackingReceived(simulator == null ? startOfTracking : simulator
                             .advance(startOfTracking));
                 }
-                TimePoint endOfTracking = clientParams.getRaceTrackingEndTime();
+                TimePoint endOfTracking = clientParams.getRace().getTrackingEndTime();
                 if (endOfTracking != null) {
                     trackedRace.setEndOfTrackingReceived(simulator == null ? endOfTracking : simulator
                             .advance(endOfTracking));
@@ -440,13 +496,21 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         ioThread.start();
     }
     
-    @SuppressWarnings("deprecation") // explicitly calling Thread.stop in case IO thread didn't join in three seconds time
     @Override
-    public void stop() throws MalformedURLException, IOException, InterruptedException {
+    public void stop() throws InterruptedException {
+        stop(/* stop receivers preemtively */ true);
+    }
+
+    @SuppressWarnings("deprecation") // explicitly calling Thread.stop in case IO thread didn't join in three seconds time
+    private void stop(boolean stopReceiversPreemtively) throws InterruptedException {
         controlPointPositionPoller.cancel(/* mayInterruptIfRunning */ false);
         controller.stop(/* abortStored */ true);
         for (Receiver receiver : receivers) {
-            receiver.stopAfterProcessingQueuedEvents();
+            if (stopReceiversPreemtively) {
+                receiver.stopPreemptively();
+            } else {
+                receiver.stopAfterProcessingQueuedEvents();
+            }
         }
         ioThread.join(3000); // wait no more than three seconds
         if (ioThread.isAlive()) {
@@ -476,6 +540,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         logger.info("stopped TracTrac tracking for "+getRaces());
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
         updateStatusOfTrackedRaces();
+        try {
+            stop(/* stop receivers preemptively */ false);
+        } catch (InterruptedException e) {
+            logger.log(Level.SEVERE, "Exception trying to stop tracker for "+getRaces(), e);
+        } 
     }
 
     private void updateStatusOfTrackedRaces() {
@@ -488,7 +557,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     private void updateStatusOfTrackedRace(DynamicTrackedRace trackedRace) {
-        trackedRace.setStatus(lastStatus);
+        if (lastStatus != null) {
+            trackedRace.setStatus(lastStatus);
+        }
     }
 
     @Override

@@ -24,7 +24,7 @@ public class ClientParamsPHPLahaina3Test extends AbstractClientParamsPHPTest {
     
     @Test
     public void testRead() throws IOException {
-        assertEquals("event_20110505_SailingTea", clientParams.getEventDB());
+        assertEquals("event_20110505_SailingTea", clientParams.getEvent().getDB());
     }
 
     @Test
@@ -35,17 +35,17 @@ public class ClientParamsPHPLahaina3Test extends AbstractClientParamsPHPTest {
     
     @Test
     public void testRaceDefaultRoute() {
-        assertEquals("Lahaina-test3", clientParams.getRaceDefaultRoute().getDescription());
+        assertEquals("Lahaina-test3", clientParams.getRace().getDefaultRoute().getDescription());
     }
     
     @Test
     public void testRaceDefaultRouteLength() {
-        assertEquals(3, Util.size(clientParams.getRaceDefaultRoute().getControlPoints()));
+        assertEquals(3, Util.size(clientParams.getRace().getDefaultRoute().getControlPoints()));
     }
     
     @Test
     public void testRouteControlPointMarkPositions() {
-        Route route = clientParams.getRaceDefaultRoute();
+        Route route = clientParams.getRace().getDefaultRoute();
         Iterator<ControlPoint> controlPointIter = route.getControlPoints().iterator();
         ControlPoint cp1 = controlPointIter.next();
         ControlPoint cp2 = controlPointIter.next();

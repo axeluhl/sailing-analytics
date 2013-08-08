@@ -451,8 +451,9 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
         builder.setTitle(R.string.pick_a_rounding_direction)
         .setItems(R.array.rounding_directions, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int position) {
-                String[] directions = getActivity().getResources().getStringArray(R.array.rounding_directions);
-                RoundingDirection pickedDirection = RoundingDirection.valueOf(directions[position]);
+                // for i18n we expect following order in array: 1. Port, 2. Starboard, 3. Gate
+                //String[] directions = getActivity().getResources().getStringArray(R.array.rounding_directions);
+                RoundingDirection pickedDirection = RoundingDirection.relevantValues()[position];
                 onRoundingDirectionPicked(courseElement, pickedDirection);
             }
         });

@@ -28,7 +28,7 @@ public class ClientParamsPHPArenalTest extends AbstractClientParamsPHPTest {
     
     @Test
     public void testRouteControlPointMarkPositions() {
-        Route route = clientParams.getRaceDefaultRoute();
+        Route route = clientParams.getRace().getDefaultRoute();
         Iterator<ControlPoint> controlPointIter = route.getControlPoints().iterator();
         ControlPoint cp1 = controlPointIter.next();
         assertNotNull(cp1);
@@ -49,8 +49,8 @@ public class ClientParamsPHPArenalTest extends AbstractClientParamsPHPTest {
     @Test
     public void compareReadWithTracTracKeyValueWithLocalClientParamsPHP() throws MalformedURLException, IOException {
         Event event = KeyValue.setup(getClass().getResource("/clientparamsArenalEmptyCourse.php"));
-        assertEquals(3, Util.size(clientParams.getRaceDefaultRoute().getControlPoints()));
-        for (TracTracControlPoint ttcp : clientParams.getRaceDefaultRoute().getControlPoints()) {
+        assertEquals(3, Util.size(clientParams.getRace().getDefaultRoute().getControlPoints()));
+        for (TracTracControlPoint ttcp : clientParams.getRace().getDefaultRoute().getControlPoints()) {
             ControlPointAdapter eventControlPoint = new ControlPointAdapter(event.getControlPointById(ttcp.getId()));
             assertEquals(ttcp, eventControlPoint); // assert that comparison by UUID matches
             assertEquals(eventControlPoint.getName(), ttcp.getName());

@@ -57,7 +57,7 @@ public class LeaderboardGroupJsonGetServlet extends AbstractJsonHttpServlet {
                     jsonLeaderboardEntries.add(jsonLeaderboard);
 
                     SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
-                    if(scoreCorrection != null) {
+                    if (scoreCorrection != null) {
                         jsonLeaderboard.put("scoringComment", scoreCorrection.getComment());
                         TimePoint lastUpdateTimepoint = scoreCorrection.getTimePointOfLastCorrectionsValidity();
                         jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.asDate().toString(): null);
@@ -66,16 +66,14 @@ public class LeaderboardGroupJsonGetServlet extends AbstractJsonHttpServlet {
                         jsonLeaderboard.put("lastScoringUpdate", null);
                     }
 
-                    if(isRegattaLeaderboard) {
+                    if (isRegattaLeaderboard) {
                         RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
                         Regatta regatta = regattaLeaderboard.getRegatta();
-
                         jsonLeaderboard.put("scoringScheme", leaderboard.getScoringScheme().getType());
                         jsonLeaderboard.put("regattaName", regatta.getName());
                     } else {
                         jsonLeaderboard.put("scoringScheme", leaderboard.getScoringScheme().getType());
                         jsonLeaderboard.put("regattaName", null);
-
                         JSONArray jsonSeriesEntries = new JSONArray();
                         jsonLeaderboard.put("series", jsonSeriesEntries);
 
@@ -84,32 +82,32 @@ public class LeaderboardGroupJsonGetServlet extends AbstractJsonHttpServlet {
                         jsonSeriesEntries.add(jsonSeries);
                         jsonSeries.put("name", LeaderboardNameConstants.DEFAULT_SERIES_NAME);
                         jsonSeries.put("isMedalSeries", null);
-                        
                         JSONArray jsonFleetsEntries = new JSONArray();
                         jsonSeries.put("fleets", jsonFleetsEntries);
-                        
                         Fleet fleet = leaderboard.getFleet(LeaderboardNameConstants.DEFAULT_FLEET_NAME);
-                        if(fleet != null) {
+                        if (fleet != null) {
                             JSONObject jsonFleet = new JSONObject();
                             jsonFleet.put("name", fleet.getName());
                             jsonFleet.put("color", fleet.getColor() != null ? fleet.getColor().getAsHtml() : null);
                             jsonFleet.put("ordering", fleet.getOrdering());
                             jsonFleetsEntries.add(jsonFleet);
-                            
                             JSONArray jsonRacesEntries = new JSONArray();
                             jsonFleet.put("races", jsonRacesEntries);
-                            for(RaceColumn raceColumn: leaderboard.getRaceColumns()) {
+                            for (RaceColumn raceColumn: leaderboard.getRaceColumns()) {
                                 JSONObject jsonRaceColumn = new JSONObject();
                                 jsonRaceColumn.put("name", raceColumn.getName());
                                 jsonRaceColumn.put("isMedalRace" , raceColumn.isMedalRace());
-
                                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                                if(trackedRace != null) {
+                                if (trackedRace != null) {
                                     jsonRaceColumn.put("isTracked", true);
                                     jsonRaceColumn.put("trackedRaceName", trackedRace.getRace().getName());
+                                    jsonRaceColumn.put("hasGpsData", trackedRace.hasGPSData());
+                                    jsonRaceColumn.put("hasWindData", trackedRace.hasWindData());
                                 } else {
                                     jsonRaceColumn.put("isTracked", false);
                                     jsonRaceColumn.put("trackedRaceName", null);
+                                    jsonRaceColumn.put("hasGpsData", false);
+                                    jsonRaceColumn.put("hasWindData", false);
                                 }
                                 jsonRacesEntries.add(jsonRaceColumn);
                             }

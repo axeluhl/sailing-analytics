@@ -1196,7 +1196,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
         entryDTO.discarded = entry.isDiscarded();
         if (trackedRace != null) {
-            entryDTO.timePointOfLastPositionFix = getTimePointOfLastFix(competitor, trackedRace);
+            entryDTO.timePointOfLastPositionFixAtOrBeforeQueryTimePoint = getTimePointOfLastFixAtOrBefore(competitor, trackedRace, timePoint);
+            if(entryDTO.timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null) {
+                long timeDifferenceInMs = timePoint.asMillis() - entryDTO.timePointOfLastPositionFixAtOrBeforeQueryTimePoint.getTime();
+                entryDTO.timeSinceLastPositionFixInSeconds = timeDifferenceInMs == 0 ? 0.0 : timeDifferenceInMs / 1000.0;  
+            } else {
+                entryDTO.timeSinceLastPositionFixInSeconds = null;  
+            }
         }
         if (addLegDetails && trackedRace != null) {
             try {
@@ -1253,17 +1259,17 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     /**
      * Determines the time point of the last raw fix (with outliers not removed) for <code>competitor</code> in
      * <code>trackedRace</code>. If the competitor's track is <code>null</code> or empty, <code>null</code> is returned.
-     * 
      * @param trackedRace must not be <code>null</code>
+     * @param atOrBefore find the last fix at or before the time point specified
      */
-    private Date getTimePointOfLastFix(Competitor competitor, TrackedRace trackedRace) {
+    private Date getTimePointOfLastFixAtOrBefore(Competitor competitor, TrackedRace trackedRace, TimePoint atOrBefore) {
         assert trackedRace != null;
         final Date timePointOfLastPositionFix;
         GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
         if (track == null) {
             timePointOfLastPositionFix = null;
         } else {
-            GPSFixMoving lastFix = track.getLastRawFix();
+            GPSFixMoving lastFix = track.getLastFixAtOrBefore(atOrBefore);
             if (lastFix == null) {
                 timePointOfLastPositionFix = null;
             } else {
