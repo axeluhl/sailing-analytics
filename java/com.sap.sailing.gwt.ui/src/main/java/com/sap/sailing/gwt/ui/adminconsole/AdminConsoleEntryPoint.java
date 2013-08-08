@@ -151,12 +151,13 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
     // TODO remove again when testing is done
     private void testWebSockets() {
-        WebSocket webSocket = new JavaScriptWebSocketFactory().createWebSocket(GWT.getModuleBaseURL().replace("http", "ws") + "webSocket", new WebSocketCallback() {
-            
+        final String baseUrl = GWT.getModuleBaseURL().replace("http", "ws");
+        int indexOfGwt = baseUrl.indexOf("/gwt/");
+        String url = baseUrl.substring(0, indexOfGwt)+"/sailingserver/websockettest";
+        new JavaScriptWebSocketFactory().createWebSocket(url, new WebSocketCallback() {
             @Override
             public void onOpen(WebSocket webSocket) {
-                // TODO Auto-generated method stub
-                
+                webSocket.send("Hallo");
             }
             
             @Override
@@ -177,7 +178,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
                 
             }
         });
-        webSocket.send("Hallo");
     }
 
     @Override
