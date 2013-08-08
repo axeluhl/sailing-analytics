@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 
 import com.sap.sailing.datamining.impl.AverageAggregator;
 import com.sap.sailing.datamining.impl.FilterByCriteriaImpl;
-import com.sap.sailing.datamining.impl.GPSFixRetrieverImpl;
 import com.sap.sailing.datamining.impl.QueryImpl;
 import com.sap.sailing.datamining.impl.SumAggregator;
 import com.sap.sailing.datamining.impl.criterias.BoatClassSelectionCriteria;
@@ -22,8 +21,10 @@ import com.sap.sailing.datamining.impl.criterias.SailIDSelectionCriteria;
 import com.sap.sailing.datamining.impl.criterias.WildcardSelectionCriteria;
 import com.sap.sailing.datamining.impl.criterias.WindStrengthSelectionCriteria;
 import com.sap.sailing.datamining.impl.criterias.YearSelectionCriteria;
+import com.sap.sailing.datamining.impl.gpsfix.GPSFixRetrieverImpl;
+import com.sap.sailing.datamining.impl.gpsfix.GroupGPSFixesByDimension;
 import com.sap.sailing.datamining.shared.AggregatorType;
-import com.sap.sailing.datamining.shared.Dimension;
+//import com.sap.sailing.datamining.shared.Dimension;
 import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.datamining.shared.WindStrength;
 import com.sap.sailing.domain.common.LegType;
@@ -44,9 +45,8 @@ public class DataMiningFactory {
         return new FilterByCriteriaImpl<DataType>(criteria);
     }
 
-    public static <DataType> Grouper<DataType> createGrouper() {
-        // TODO
-        return null;
+    public static Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(Dimension<GPSFixWithContext> dimensions) {
+        return new GroupGPSFixesByDimension(dimensions);
     }
 
     protected static Extractor createExtractor(StatisticType statisticType) {

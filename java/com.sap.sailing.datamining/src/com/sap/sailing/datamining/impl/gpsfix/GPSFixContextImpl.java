@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl;
+package com.sap.sailing.datamining.impl.gpsfix;
 
 import com.sap.sailing.datamining.GPSFixContext;
 import com.sap.sailing.domain.base.Competitor;

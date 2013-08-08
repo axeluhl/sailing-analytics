@@ -12,3 +12,18 @@ public enum Dimension {
     WindStrength
 
 }
+
+//public enum Type {
+//  
+//  RegattaName, RaceName, LegNumber,
+//  CourseArea,
+//  Fleet,
+//  BoatClassName,
+//  Year,
+//  LegType,
+//  CompetitorName,
+//  SailID,
+//  Nationality,
+//  WindStrength
+//
+//}

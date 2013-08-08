@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.impl;
 
 import com.sap.sailing.datamining.shared.GroupKey;
 
-public class CompoundGroupKey extends AbstractGroupKey implements GroupKey {
+public class CompoundGroupKey extends AbstractGroupKey {
 
     private GroupKey mainKey;
     private GroupKey subKey;
@@ -18,7 +18,7 @@ public class CompoundGroupKey extends AbstractGroupKey implements GroupKey {
 
     @Override
     public String asString() {
-        return mainKey.asString() + " " + subKey.asString();
+        return mainKey.asString() + " (" + subKey.asString() + ")";
     }
 
     @Override
