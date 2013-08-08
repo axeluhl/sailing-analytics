@@ -35,3 +35,6 @@ There is a lot of flexibility in how the page objects may be designed, but there
 To make the development of page objects as simple and easy as possible, we also support a factory for this pattern which helps to remove some boiler-plate code from the page objects by using annotations. We provide the annotations _FindBy_ and _FindBys_ for fields on a page object to specify a mechanism for locating an element or a list of elements. The factory uses the annotations to lazily locate and wait for the element or the element list to appear, by polling the UI on a regular basis, and initializes the field with the element or the list of elements.
 
 Since we use GWT to build the UI, we also provide a specific mechanism to locate elements by the value of the GWT debug identifier. By convention we use the attribute selenium-id for the debug identifier which is implemented by the class _AbstractEntryPoint_. The class _BySeleniumId_ defines the corresponding mechanism and locates an element or a list of elements by the value of the selenium-id attribute.
+
+## Writing and Execution of Tests
+
