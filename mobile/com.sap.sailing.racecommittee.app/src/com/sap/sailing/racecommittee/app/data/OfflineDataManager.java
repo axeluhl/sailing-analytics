@@ -84,7 +84,7 @@ public class OfflineDataManager extends DataManager {
         log.add(factory.createRaceStatusEvent(new MillisecondsTimePoint(new Date().getTime()), 1,
                 RaceLogRaceStatus.FINISHING));
 
-        ManagedRace q1 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("Q1", new FleetImpl("Default"), qualifying,
+        ManagedRace q1 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying,
                 raceGroup), StartProcedureType.ESS, log);
 
         log = new RaceLogImpl(UUID.randomUUID());
@@ -93,7 +93,7 @@ public class OfflineDataManager extends DataManager {
          * new MillisecondsTimePoint(new Date().getTime() + 100000)));
          */
 
-        ManagedRace q2 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("Q2", new FleetImpl("Default"), qualifying,
+        ManagedRace q2 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying,
                 raceGroup), StartProcedureType.ESS, log);
 
         log = new RaceLogImpl(UUID.randomUUID());
