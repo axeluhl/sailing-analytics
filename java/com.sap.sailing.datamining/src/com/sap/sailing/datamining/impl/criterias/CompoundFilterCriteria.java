@@ -10,7 +10,7 @@ public abstract class CompoundFilterCriteria<DataType> implements FilterCriteria
     private Collection<FilterCriteria<DataType>> criterias;
 
     public CompoundFilterCriteria() {
-        this.criterias = new HashSet<FilterCriteria<DataType>>(criterias);
+        this.criterias = new HashSet<FilterCriteria<DataType>>();
     }
     
     public void addCriteria(FilterCriteria<DataType> criteria) {

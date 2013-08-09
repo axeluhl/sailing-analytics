@@ -8,6 +8,9 @@ import org.junit.Test;
 import com.sap.sailing.datamining.ClusterOfComparable;
 import com.sap.sailing.datamining.FilterCriteria;
 import com.sap.sailing.datamining.impl.ClusterOfComparableImpl;
+import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
+import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
+import com.sap.sailing.datamining.impl.criterias.OrCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.RegexFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.SimpleRangeFilterCriteria;
 
@@ -45,6 +48,27 @@ public class TestFilterCriterias {
 
         assertFalse(rangeFilterCriteria.matches(0));
         assertFalse(rangeFilterCriteria.matches(4));
+    }
+    
+    @Test
+    public void testCompoundFilterCriterias() {
+        StringRegexFilterCriteria startsWithBar = new StringRegexFilterCriteria("Bar.*");
+        StringRegexFilterCriteria endWithFoo = new StringRegexFilterCriteria(".*Foo");
+        
+        CompoundFilterCriteria<String> compoundCriteria = new AndCompoundFilterCriteria<String>();
+        compoundCriteria.addCriteria(startsWithBar);
+        compoundCriteria.addCriteria(endWithFoo);
+        
+        assertTrue(compoundCriteria.matches("BarAndFoo"));
+        assertFalse(compoundCriteria.matches("BarFo"));
+        
+        compoundCriteria = new OrCompoundFilterCriteria<String>();
+        compoundCriteria.addCriteria(startsWithBar);
+        compoundCriteria.addCriteria(endWithFoo);
+
+        assertTrue(compoundCriteria.matches("BarF"));
+        assertTrue(compoundCriteria.matches("BraFoo"));
+        assertFalse(compoundCriteria.matches("Nothing"));
     }
 
     private class StringRegexFilterCriteria extends RegexFilterCriteria<String> {

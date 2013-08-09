@@ -15,11 +15,11 @@ public class Clusters {
     
     public static class WindStrength {
         
-        public static WindStrengthCluster VeryLight = new WindStrengthClusterImpl("Very Light", 2.5, 0.0);
-        public static WindStrengthCluster Light = new WindStrengthClusterImpl("Very Light", 5.0, 2.5);
-        public static WindStrengthCluster Medium = new WindStrengthClusterImpl("Very Light", 7.5, 5.0);
-        public static WindStrengthCluster Strong = new WindStrengthClusterImpl("Very Light", 10.0, 7.5);
-        public static WindStrengthCluster VeryStrong = new WindStrengthClusterImpl("Very Light", 12.0, 10.0);
+        public static WindStrengthCluster VeryLight = new WindStrengthClusterImpl("Very Light", 0.0, 2.5);
+        public static WindStrengthCluster Light = new WindStrengthClusterImpl("Very Light", 2.5, 5.0);
+        public static WindStrengthCluster Medium = new WindStrengthClusterImpl("Very Light", 5.0, 7.5);
+        public static WindStrengthCluster Strong = new WindStrengthClusterImpl("Very Light", 7.5, 10.0);
+        public static WindStrengthCluster VeryStrong = new WindStrengthClusterImpl("Very Light", 10.0, 12.0);
         public static Collection<WindStrengthCluster> StandardClusters = Arrays.asList(VeryLight, Light, Medium, Strong, VeryStrong);
 
         private WindStrength() { }

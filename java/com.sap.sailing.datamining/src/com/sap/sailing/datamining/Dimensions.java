@@ -1,6 +1,7 @@
 package com.sap.sailing.datamining;
 
 import com.sap.sailing.datamining.impl.AbstractDimension;
+import com.sap.sailing.domain.common.LegType;
 
 public class Dimensions {
 
@@ -59,10 +60,10 @@ public class Dimensions {
             }
         };
 
-        public static Dimension<GPSFixWithContext, String> LegType = new AbstractDimension<GPSFixWithContext, String>("Leg Type") {
+        public static Dimension<GPSFixWithContext, LegType> LegType = new AbstractDimension<GPSFixWithContext, LegType>("Leg Type") {
             @Override
-            public String getDimensionValueFrom(GPSFixWithContext data) {
-                return data.getLegType().toString();
+            public LegType getDimensionValueFrom(GPSFixWithContext data) {
+                return data.getLegType();
             }
         };
 
