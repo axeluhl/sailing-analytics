@@ -1,10 +1,10 @@
 package com.sap.sailing.datamining;
 
 
-public interface Dimension<DataType> {
+public interface Dimension<DataType, ValueType> {
     
     public String getName();
 
-    public String getDimensionValueFrom(DataType data);
+    public ValueType getDimensionValueFrom(DataType data);
 
 }

@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.impl;
 
 import com.sap.sailing.datamining.Dimension;
 
-public abstract class AbstractDimension<DataType> implements Dimension<DataType> {
+public abstract class AbstractDimension<DataType, ValueType> implements Dimension<DataType, ValueType> {
 
     private String name;
     
@@ -36,7 +36,7 @@ public abstract class AbstractDimension<DataType> implements Dimension<DataType>
             return false;
         if (getClass() != obj.getClass())
             return false;
-        AbstractDimension<?> other = (AbstractDimension<?>) obj;
+        AbstractDimension<?, ?> other = (AbstractDimension<?, ?>) obj;
         if (name == null) {
             if (other.name != null)
                 return false;

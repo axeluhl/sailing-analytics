@@ -10,84 +10,84 @@ public class Dimensions {
 
         private GPSFix() { }
 
-        public static Dimension<GPSFixWithContext> RegattaName = new AbstractDimension<GPSFixWithContext>("Regatta") {
+        public static Dimension<GPSFixWithContext, String> RegattaName = new AbstractDimension<GPSFixWithContext, String>("Regatta") {
             @Override
             public String getDimensionValueFrom(GPSFixWithContext data) {
                 return data.getRegattaName();
             }
         };
 
-        public static Dimension<GPSFixWithContext> RaceName = new AbstractDimension<GPSFixWithContext>("Race") {
+        public static Dimension<GPSFixWithContext, String> RaceName = new AbstractDimension<GPSFixWithContext, String>("Race") {
             @Override
             public String getDimensionValueFrom(GPSFixWithContext data) {
                 return data.getRaceName();
             }
         };
 
-        public static Dimension<GPSFixWithContext> LegNumber = new AbstractDimension<GPSFixWithContext>("Leg Number") {
+        public static Dimension<GPSFixWithContext, String> LegNumber = new AbstractDimension<GPSFixWithContext, String>("Leg Number") {
             @Override
             public String getDimensionValueFrom(GPSFixWithContext data) {
                 return data.getLegNumber() + "";
             }
         };
 
-        public static Dimension<GPSFixWithContext> CourseArea = new AbstractDimension<GPSFixWithContext>("Course Area") {
+        public static Dimension<GPSFixWithContext, String> CourseArea = new AbstractDimension<GPSFixWithContext, String>("Course Area") {
             @Override
             public String getDimensionValueFrom(GPSFixWithContext data) {
                 return data.getCourseAreaName();
             }
         };
 
-        public static Dimension<GPSFixWithContext> Fleet = new AbstractDimension<GPSFixWithContext>("Fleet") {
+        public static Dimension<GPSFixWithContext, String> Fleet = new AbstractDimension<GPSFixWithContext, String>("Fleet") {
             @Override
             public String getDimensionValueFrom(GPSFixWithContext data) {
                 return data.getFleetName();
             }
         };
 
-        public static Dimension<GPSFixWithContext> BoatClassName = new AbstractDimension<GPSFixWithContext>("Boat Class") {
+        public static Dimension<GPSFixWithContext, String> BoatClassName = new AbstractDimension<GPSFixWithContext, String>("Boat Class") {
             @Override
             public String getDimensionValueFrom(GPSFixWithContext data) {
                 return data.getBoatClassName();
             }
         };
 
-        public static Dimension<GPSFixWithContext> Year = new AbstractDimension<GPSFixWithContext>("Year") {
+        public static Dimension<GPSFixWithContext, String> Year = new AbstractDimension<GPSFixWithContext, String>("Year") {
             @Override
             public String getDimensionValueFrom(GPSFixWithContext data) {
                 return data.getYear() + "";
             }
         };
 
-        public static Dimension<GPSFixWithContext> LegType = new AbstractDimension<GPSFixWithContext>("Leg Type") {
+        public static Dimension<GPSFixWithContext, String> LegType = new AbstractDimension<GPSFixWithContext, String>("Leg Type") {
             @Override
             public String getDimensionValueFrom(GPSFixWithContext data) {
                 return data.getLegType().toString();
             }
         };
 
-        public static Dimension<GPSFixWithContext> CompetitorName = new AbstractDimension<GPSFixWithContext>("Competitor") {
+        public static Dimension<GPSFixWithContext, String> CompetitorName = new AbstractDimension<GPSFixWithContext, String>("Competitor") {
             @Override
             public String getDimensionValueFrom(GPSFixWithContext data) {
                 return data.getCompetitorName();
             }
         };
 
-        public static Dimension<GPSFixWithContext> SailID = new AbstractDimension<GPSFixWithContext>("Sail ID") {
+        public static Dimension<GPSFixWithContext, String> SailID = new AbstractDimension<GPSFixWithContext, String>("Sail ID") {
             @Override
             public String getDimensionValueFrom(GPSFixWithContext data) {
                 return data.getCompetitorSailID();
             }
         };
 
-        public static Dimension<GPSFixWithContext> Nationality = new AbstractDimension<GPSFixWithContext>("Nationality") {
+        public static Dimension<GPSFixWithContext, String> Nationality = new AbstractDimension<GPSFixWithContext, String>("Nationality") {
             @Override
             public String getDimensionValueFrom(GPSFixWithContext data) {
                 return data.getCompetitorNationality();
             }
         };
 
-        public static Dimension<GPSFixWithContext> WindStrength = new AbstractDimension<GPSFixWithContext>("Wind Strength") {
+        public static Dimension<GPSFixWithContext, String> WindStrength = new AbstractDimension<GPSFixWithContext, String>("Wind Strength") {
             @Override
             public String getDimensionValueFrom(GPSFixWithContext data) {
                 return data.getWindStrength().getName();

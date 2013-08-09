@@ -8,12 +8,12 @@ import java.util.LinkedHashSet;
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.shared.GroupKey;
 
-public abstract class GroupByDimension<DataType> extends AbstractGrouper<DataType> {
+public abstract class GroupByDimension<DataType, ValueType> extends AbstractGrouper<DataType> {
     
-    private Collection<Dimension<DataType>> dimensions;
+    private Collection<Dimension<DataType, ValueType>> dimensions;
 
-    public GroupByDimension(Dimension<DataType>... dimensions) {
-        this.dimensions = new LinkedHashSet<Dimension<DataType>>(Arrays.asList(dimensions));
+    public GroupByDimension(Dimension<DataType, ValueType>... dimensions) {
+        this.dimensions = new LinkedHashSet<Dimension<DataType, ValueType>>(Arrays.asList(dimensions));
     }
 
     @Override
@@ -21,8 +21,8 @@ public abstract class GroupByDimension<DataType> extends AbstractGrouper<DataTyp
         return createCompoundGroupKey(dataEntry, dimensions.iterator());
     }
 
-    private GroupKey createCompoundGroupKey(DataType dataEntry, Iterator<Dimension<DataType>> iterator) {
-        Dimension<DataType> mainDimension = iterator.next();
+    private GroupKey createCompoundGroupKey(DataType dataEntry, Iterator<Dimension<DataType, ValueType>> iterator) {
+        Dimension<DataType, ValueType> mainDimension = iterator.next();
         if (iterator.hasNext()) {
             return new CompoundGroupKey(createGroupKeyFor(dataEntry, mainDimension), createCompoundGroupKey(dataEntry, iterator));
         } else {
@@ -30,6 +30,6 @@ public abstract class GroupByDimension<DataType> extends AbstractGrouper<DataTyp
         }
     }
 
-    protected abstract GroupKey createGroupKeyFor(DataType dataEntry, Dimension<DataType> dimension);
+    protected abstract GroupKey createGroupKeyFor(DataType dataEntry, Dimension<DataType, ValueType> dimension);
 
 }

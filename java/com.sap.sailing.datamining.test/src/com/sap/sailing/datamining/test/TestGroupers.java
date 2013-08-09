@@ -26,7 +26,7 @@ public class TestGroupers {
     public void testGroupByDimension() {
         Collection<Integer> data = Arrays.asList(11, 2, 13, 4, 22, 3, 21, 111);
         
-        Dimension<Integer> crossSum = createCrossSumDimension();
+        Dimension<Integer, String> crossSum = createCrossSumDimension();
         @SuppressWarnings("unchecked")
         Grouper<Integer> groupByDimension = createGrouper(crossSum);
         
@@ -51,19 +51,19 @@ public class TestGroupers {
     
     @Test
     public void testGroupKeyGeneration() {
-        Dimension<Integer> first = new AbstractDimension<Integer>("First") {
+        Dimension<Integer, String> first = new AbstractDimension<Integer, String>("First") {
             @Override
             public String getDimensionValueFrom(Integer data) {
                 return "First";
             }
         };
-        Dimension<Integer> second = new AbstractDimension<Integer>("Second") {
+        Dimension<Integer, String> second = new AbstractDimension<Integer, String>("Second") {
             @Override
             public String getDimensionValueFrom(Integer data) {
                 return "Second";
             }
         };
-        Dimension<Integer> third = new AbstractDimension<Integer>("Third") {
+        Dimension<Integer, String> third = new AbstractDimension<Integer, String>("Third") {
             @Override
             public String getDimensionValueFrom(Integer data) {
                 return "Third";
@@ -80,8 +80,8 @@ public class TestGroupers {
     public void testGroupByMultipleDimensions() {
         Collection<Integer> data = Arrays.asList(13, -4, 22, -3, 21, -111);
         
-        Dimension<Integer> crossSum = createCrossSumDimension();
-        Dimension<Integer> signum = createSignumDimension();
+        Dimension<Integer, String> crossSum = createCrossSumDimension();
+        Dimension<Integer, String> signum = createSignumDimension();
         @SuppressWarnings("unchecked")
         Grouper<Integer> groupByDimensions = createGrouper(crossSum, signum);
 
@@ -109,8 +109,8 @@ public class TestGroupers {
         }
     }
 
-    private Dimension<Integer> createCrossSumDimension() {
-        return new AbstractDimension<Integer>("Cross Sum") {
+    private Dimension<Integer, String> createCrossSumDimension() {
+        return new AbstractDimension<Integer, String>("Cross Sum") {
             @Override
             public String getDimensionValueFrom(Integer data) {
                 int crossSum = 0;
@@ -124,8 +124,8 @@ public class TestGroupers {
         };
     }
 
-    private AbstractDimension<Integer> createSignumDimension() {
-        return new AbstractDimension<Integer>("Signum") {
+    private AbstractDimension<Integer, String> createSignumDimension() {
+        return new AbstractDimension<Integer, String>("Signum") {
             @Override
             public String getDimensionValueFrom(Integer data) {
                 return ((int) Math.signum(data)) + "";
@@ -133,18 +133,18 @@ public class TestGroupers {
         };
     }
 
-    private GroupByDimension<Integer> createGrouper(Dimension<Integer>... dimensions) {
+    private GroupByDimension<Integer, String> createGrouper(Dimension<Integer, String>... dimensions) {
         return new OpenGrouper<Integer>(dimensions);
     }
     
-    private class OpenGrouper<DataType> extends GroupByDimension<DataType> {
+    private class OpenGrouper<DataType> extends GroupByDimension<DataType, String> {
 
-        public OpenGrouper(Dimension<DataType>... dimensions) {
+        public OpenGrouper(Dimension<DataType, String>... dimensions) {
             super(dimensions);
         }
 
         @Override
-        protected GroupKey createGroupKeyFor(DataType dataEntry, Dimension<DataType> dimension) {
+        protected GroupKey createGroupKeyFor(DataType dataEntry, Dimension<DataType, String> dimension) {
             return new StringGroupKey(dimension.getDimensionValueFrom(dataEntry));
         }
         

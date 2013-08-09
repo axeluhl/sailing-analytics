@@ -32,7 +32,7 @@ public class DataMiningFactory {
         return new FilterByCriteriaImpl<DataType>(criteria);
     }
 
-    public static Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(Dimension<GPSFixWithContext> dimensions) {
+    public static Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(Dimension<GPSFixWithContext, String> dimensions) {
         return new GroupGPSFixesByDimension(dimensions);
     }
 
