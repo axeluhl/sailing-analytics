@@ -91,6 +91,7 @@
 		<module>com.sap.sailing.simulator.test</module>
 		<module>com.sap.sailing.server.trackfiles</module>
 		<module>com.sap.sailing.server.trackfiles.test</module>
+		<module>de.csenk.gwt.ws</module>
 	</modules>
 	
 	<properties>
