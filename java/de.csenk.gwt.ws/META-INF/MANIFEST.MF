@@ -4,7 +4,8 @@ Bundle-Name: GWT Web Sockets
 Bundle-SymbolicName: de.csenk.gwt.ws
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: org.eclipse.jetty.websocket.api;bundle-version="9.0.4"
+Require-Bundle: com.google.gwt.osgi;bundle-version="2.5.1",
+ org.eclipse.jetty.websocket.api;bundle-version="9.0.4"
 Export-Package: de.csenk.gwt.ws.client,
  de.csenk.gwt.ws.client.filter,
  de.csenk.gwt.ws.client.filter.serialization,
