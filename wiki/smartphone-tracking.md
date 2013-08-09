@@ -237,7 +237,7 @@ Used for example in the `Select*Fragments`.
 ## ToDo
 
 ### Server
-* use ManagedRaceIdentifier or RaceLogIdenifier instead String-Triple as response type for the 
+* use ManagedRaceIdentifier or RaceLogIdenifier instead String-Triple as response type for the GetRaceLogsInPreRacePhaseServlet and the CreateRaceServlet
 * set fleet when creating race
 * editing course in the RaceBoardAdmin
 * persist tracking data (GPSFixStore)
@@ -255,6 +255,7 @@ Used for example in the `Select*Fragments`.
 * Servlet for getting Competitors for a certain race: Have a look how this is implemented in the serverside-counterpart of the racecommittee-app: /sailingserver/rc/competitors?leaderboard="+raceGroupName+"&raceColumn"+raceColumnName+ "&fleet="+fleetName
 
 ### Android
+* think about how to use the CompetitorJsonDeserializer in the App as DomainFactory-Class is in the com.sap.sailing.domain.base package and therefore causes a ClassNotFoundException
 * reuse existing course design functionality to create RaceLogCourseDesignChangedEvent before sending RaceLogPreRacePhaseEndedEvent
 * abstract sending service, so that all POST / GET requests and not only RaceLogEvents can be sent using the semi-connectedness functionality --> just write JSONObjects/Strings directly into the file. The Servlet has to handle deserialization and the client doesn't have to know what type of object it is after having saved it (is this really the case?)
 * simplify settings
