@@ -214,21 +214,25 @@ Sends the location information to a web service.
 ### `SAP Sailor Tracker Service`
 Background process for starting, pausing and stopping tracking. Registers all receivers on a pending intent, which is send periodically.
 
-### `doPostTask`
-Async task that handles the execution of post requests.
+### `AsyncJsonPostTask`
+Async task that handles the execution of post requests with Json content.
 
-### `doGetTask`
-Async task that handles the execution of get requests.
+### `OnlineDataManager`
+Enables accessing of data from the DataStore. Loads data from Servlets using GET-Requests via a DataLoader. Usage for example in SelectRaceFragment, which loads the RaceLogsInPreRacePhase so that the user can select the race he wants to take part in.
+
+### `DataStore`
+Interface for the DataStore which stores all data that is relevant for the App (managed Races, Competitors, ...)
+Implementation: `InMemoryDataStore`
+
+### `DataLoader`
+AsyncDataLoader which does an HTTP GET to a given URL, parses the data (with a DataParser) and sends the data to a DataHandler.
 
 ### `AppPreferences`
 Helper Class for accessing the App Preferences specified in settings_view.xml
 
-### `DataStore`
-Interface for the DataStore which stores all data that is relevant for the App (managed Races, Competitors, ...)
-Implementation: InMemoryDataStore
-
-### `DataLoader`
-AsyncDataLoader which does an HTTP GET to a given URL, parses the data (with a DataParser) and sends the data to a DataHandler.
+### `ListFragmentWithDataManager`
+Base Class, which provides easy access to the data manager for a Fragment, which wants to display the data in a List.
+Used for example in the Select*Fragments.
 
 ## ToDo
 
