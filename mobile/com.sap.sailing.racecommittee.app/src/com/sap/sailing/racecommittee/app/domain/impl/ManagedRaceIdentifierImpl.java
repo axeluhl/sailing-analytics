@@ -10,28 +10,24 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 
 public class ManagedRaceIdentifierImpl extends FleetIdentifierImpl implements ManagedRaceIdentifier {
 
-	private String raceName;
-	
-	public ManagedRaceIdentifierImpl(
-			String raceName,
-			Fleet fleetWithRaceNames, 
-			SeriesBase series,
-			RaceGroup raceGroup) {
-		super(fleetWithRaceNames, series, raceGroup);
-		this.raceName = raceName;
-	}
-	
-	public ManagedRaceIdentifierImpl(String raceName, FleetIdentifier identifier) {
-		this(raceName, identifier.getFleet(), identifier.getSeries(), identifier.getRaceGroup());
-	}
+    private String raceName;
 
-	public String getRaceName() {
-		return raceName;
-	}
+    public ManagedRaceIdentifierImpl(String raceName, Fleet fleetWithRaceNames, SeriesBase series, RaceGroup raceGroup) {
+        super(fleetWithRaceNames, series, raceGroup);
+        this.raceName = raceName;
+    }
 
-	@Override
-	public Serializable getId() {
-		return String.format("%s.%s", super.getId(), getRaceName());
-	}
+    public ManagedRaceIdentifierImpl(String raceName, FleetIdentifier identifier) {
+        this(raceName, identifier.getFleet(), identifier.getSeries(), identifier.getRaceGroup());
+    }
+
+    public String getRaceName() {
+        return raceName;
+    }
+
+    @Override
+    public Serializable getId() {
+        return String.format("%s.%s", super.getId(), getRaceName());
+    }
 
 }
