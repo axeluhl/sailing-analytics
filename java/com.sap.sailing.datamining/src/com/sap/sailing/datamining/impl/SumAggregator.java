@@ -4,22 +4,21 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import com.sap.sailing.datamining.Aggregator;
-import com.sap.sailing.domain.confidence.ScalableValue;
 
-public class SumAggregator<ValueType, AveragesTo> implements Aggregator<ValueType, AveragesTo> {
+public abstract class SumAggregator<ExtractedType> implements Aggregator<ExtractedType, Number> {
 
     @Override
-    public ScalableValue<ValueType, AveragesTo> aggregate(Collection<ScalableValue<ValueType, AveragesTo>> data) {
-        Iterator<ScalableValue<ValueType, AveragesTo>> dataIterator = data.iterator();
-        ScalableValue<ValueType, AveragesTo> sum = null;
-        
-        if (dataIterator.hasNext()) {
-            sum = dataIterator.next();
-            while (dataIterator.hasNext()) {
-                sum.add(dataIterator.next());
-            }
+    public Number aggregate(Collection<ExtractedType> data) {
+        Iterator<ExtractedType> dataIterator = data.iterator();
+        Number sum = 0;
+
+        while (dataIterator.hasNext()) {
+            sum = add(sum, getNumericValue(dataIterator.next()));
         }
         return sum;
     }
+
+    protected abstract Number add(Number number1, Number number2);
+    protected abstract Number getNumericValue(ExtractedType value);
 
 }

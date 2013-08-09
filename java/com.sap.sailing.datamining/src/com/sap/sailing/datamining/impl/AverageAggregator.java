@@ -3,15 +3,25 @@ package com.sap.sailing.datamining.impl;
 import java.util.Collection;
 
 import com.sap.sailing.datamining.Aggregator;
-import com.sap.sailing.domain.confidence.AbstractScalarValue;
-import com.sap.sailing.domain.confidence.ScalableValue;
 
-public class AverageAggregator<ValueType, AveragesTo> implements Aggregator<ValueType, AveragesTo>  {
+public abstract class AverageAggregator<ExtractedType> implements Aggregator<ExtractedType, Double>  {
 
     @Override
-    public ScalableValue<ValueType, AveragesTo> aggregate(Collection<ScalableValue<ValueType, AveragesTo>> data) {
-        AveragesTo average = new SumAggregator<ValueType, AveragesTo>().aggregate(data).divide(data.size());
-        return average;
+    public Double aggregate(Collection<ExtractedType> data) {
+        SumAggregator<ExtractedType> sumAggregator = new SumAggregator<ExtractedType>() {
+            @Override
+            protected Number add(Number number1, Number number2) {
+                return AverageAggregator.this.add(number1, number2);
+            }
+            @Override
+            protected Number getNumericValue(ExtractedType value) {
+                return AverageAggregator.this.getNumericValue(value);
+            }
+        };
+        return sumAggregator.aggregate(data).doubleValue() / data.size();
     }
+
+    protected abstract Number add(Number number1, Number number2);
+    protected abstract Number getNumericValue(ExtractedType value);
 
 }
