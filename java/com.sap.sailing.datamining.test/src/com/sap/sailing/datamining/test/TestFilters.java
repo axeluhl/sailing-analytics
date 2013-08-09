@@ -13,7 +13,7 @@ import com.sap.sailing.datamining.Filter;
 import com.sap.sailing.datamining.FilterCriteria;
 import com.sap.sailing.datamining.impl.ClusterOfComparableImpl;
 import com.sap.sailing.datamining.impl.FilterByCriteriaImpl;
-import com.sap.sailing.datamining.impl.SimpleRangeFilterCriteria;
+import com.sap.sailing.datamining.impl.criterias.SimpleRangeFilterCriteria;
 
 public class TestFilters {
 

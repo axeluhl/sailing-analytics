@@ -8,8 +8,8 @@ import org.junit.Test;
 import com.sap.sailing.datamining.ClusterOfComparable;
 import com.sap.sailing.datamining.FilterCriteria;
 import com.sap.sailing.datamining.impl.ClusterOfComparableImpl;
-import com.sap.sailing.datamining.impl.SimpleRangeFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.RegexFilterCriteria;
+import com.sap.sailing.datamining.impl.criterias.SimpleRangeFilterCriteria;
 
 public class TestFilterCriterias {
 

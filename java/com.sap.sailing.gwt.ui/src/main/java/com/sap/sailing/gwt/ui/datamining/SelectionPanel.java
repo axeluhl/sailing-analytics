@@ -182,7 +182,7 @@ public class SelectionPanel extends FlowPanel implements QueryComponentsProvider
                 appendable.append(render(statisticAndAggregatorType));
             }
         });
-        statisticsListBox.setAcceptableValues(Arrays.asList(new StatisticAndAggregatorType(StatisticType.FixAmount, AggregatorType.Average)));
+        statisticsListBox.setAcceptableValues(Arrays.asList(new StatisticAndAggregatorType(StatisticType.DataAmount, AggregatorType.Average)));
         functionsPanel.add(statisticsListBox);
         
         return functionsPanel;

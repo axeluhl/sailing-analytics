@@ -1,7 +1,6 @@
-package com.sap.sailing.datamining.impl;
+package com.sap.sailing.datamining.impl.criterias;
 
 import com.sap.sailing.datamining.ClusterOfComparable;
-import com.sap.sailing.datamining.impl.criterias.RangeFilterCriteria;
 
 public class SimpleRangeFilterCriteria<DataType extends Comparable<DataType>> extends RangeFilterCriteria<DataType, DataType> {
 

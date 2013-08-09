@@ -7,7 +7,7 @@ import com.sap.sailing.datamining.Extractor;
 import com.sap.sailing.domain.base.ScalableInteger;
 import com.sap.sailing.domain.confidence.ScalableValue;
 
-public class DataSizeExtractor<DataType> implements Extractor<DataType, Integer, Integer> {
+public class DataAmountExtractor<DataType> implements Extractor<DataType, Integer, Integer> {
 
     @Override
     public Collection<ScalableValue<Integer, Integer>> extract(Collection<DataType> data) {
