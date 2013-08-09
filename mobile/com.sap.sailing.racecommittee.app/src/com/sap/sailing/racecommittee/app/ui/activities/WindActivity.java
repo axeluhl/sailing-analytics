@@ -142,9 +142,9 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
         double enteredWindSpeed = AppPreferences.getWindSpeed(this);
         windSpeedSeekBar.setProgress(Double.valueOf(enteredWindSpeed).intValue() * 10);
         windSpeedEditText.setText(speedFormat.format(enteredWindSpeed));
-        double enteredWindBearing = AppPreferences.getWindBearing(this);
-        compassView.setDirection((float)enteredWindBearing);
-        windBearingEditText.setText(bearingFormat.format(enteredWindBearing));
+        double enteredWindBearingFrom = AppPreferences.getWindBearingFromDirection(this);
+        compassView.setDirection((float)enteredWindBearingFrom);
+        windBearingEditText.setText(bearingFormat.format(enteredWindBearingFrom));
     }
 
     private void buildAlertMessageNoGps() {
@@ -167,7 +167,9 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
 
 
     protected void saveEntriesInPreferences(Wind wind) {
-        AppPreferences.setWindBearing(getBaseContext(), wind.getBearing().getDegrees());
+        // Wind.getBearing() returns a value that assumes that the wind flows in that direction
+        // But for this app we need to display the direction the wind is coming from
+        AppPreferences.setWindBearingFromDirection(getBaseContext(), wind.getBearing().reverse().getDegrees());
         AppPreferences.setWindSpeed(getBaseContext(), wind.getKnots());
     }
 
@@ -224,9 +226,10 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
         Position currentPosition = new DegreePosition(currentLocation.getLatitude(), currentLocation.getLongitude());
         double windSpeed = Double.valueOf(windSpeedEditText.getText().toString().replace(",", "."));
         double windBearing = Double.valueOf(windBearingEditText.getText().toString());
-        Bearing bearing = new DegreeBearingImpl(windBearing);
-        SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(windSpeed, bearing);
-
+        Bearing bearing_from = new DegreeBearingImpl(windBearing);
+        // this is not a standard bearing but the direction where the wind comes from, needs to be converted
+        // to match the assumption that a bearing is always the direction the wind flows to
+        SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(windSpeed, bearing_from.reverse());
         return new WindImpl(currentPosition, MillisecondsTimePoint.now(), speedBearing);
     }
 

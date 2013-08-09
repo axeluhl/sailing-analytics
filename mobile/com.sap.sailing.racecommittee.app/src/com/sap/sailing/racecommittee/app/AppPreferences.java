@@ -109,13 +109,13 @@ public class AppPreferences {
         return Arrays.asList(managedCourseAreas);
     }
     
-    public static double getWindBearing(Context context) {
+    public static double getWindBearingFromDirection(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         long windBearingAsLong = sp.getLong(PREFERENCE_WIND_BEARING, 0);
         return Double.longBitsToDouble(windBearingAsLong);
     }
     
-    public static void setWindBearing(Context context, double enteredWindBearing) {
+    public static void setWindBearingFromDirection(Context context, double enteredWindBearing) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         long windBearingAsLong = Double.doubleToLongBits(enteredWindBearing);
         sp.edit().putLong(PREFERENCE_WIND_BEARING, windBearingAsLong).apply();

@@ -27,7 +27,7 @@ public class WindJsonDeserializer implements JsonDeserializer<Wind> {
         Position position = positionDeserializer.deserialize(positionJsonObject);
         
         Number timeStamp = (Number) object.get(WindJsonSerializer.FIELD_TIMEPOINT);
-        Number direction = (Number) object.get(WindJsonSerializer.FIELD_DIRECTION);
+        Number direction = (Number) object.get(WindJsonSerializer.FIELD_BEARING);
         Number speedInKnots = (Number) object.get(WindJsonSerializer.FIELD_SPEED_IN_KNOTS);
         Bearing degreeBearing = new DegreeBearingImpl(direction.doubleValue());
         SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(speedInKnots.doubleValue(), degreeBearing);
