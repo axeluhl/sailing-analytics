@@ -2,10 +2,10 @@ package com.sap.sailing.datamining.impl.gpsfix;
 
 import java.util.Calendar;
 
+import com.sap.sailing.datamining.Clusters.WindStrength;
 import com.sap.sailing.datamining.GPSFixContext;
 import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.datamining.WindStrengthCluster;
-import com.sap.sailing.datamining.impl.WindStrengthClusterImpl;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -107,7 +107,7 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
             return null;
         }
 
-        return WindStrengthClusterImpl.getClusterFor(getWind().getBeaufort(), WindStrengthClusterImpl.StandardClusters);
+        return WindStrength.getClusterFor(getWind().getBeaufort(), WindStrength.StandardClusters);
     }
 
     private Wind getWind() {

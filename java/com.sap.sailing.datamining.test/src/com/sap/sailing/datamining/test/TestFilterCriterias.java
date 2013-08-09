@@ -20,11 +20,13 @@ public class TestFilterCriterias {
         for (String stringToMatch : stringsToMatch) {
             assertTrue("Failed to match " + stringToMatch, regexFilterCriteria.matches(stringToMatch));
         }
+        assertFalse("'Fourth Regatta' shouldn't be matched", regexFilterCriteria.matches("Fourth Regatta"));
         
         regexFilterCriteria = new StringRegexFilterCriteria(".*Regatta");
         for (String stringToMatch : stringsToMatch) {
             assertTrue("Failed to match " + stringToMatch, regexFilterCriteria.matches(stringToMatch));
         }
+        assertFalse("'Regatta (29ER)' shouldn't be matched", regexFilterCriteria.matches("Regatta (29ER)"));
     }
 
     private class StringRegexFilterCriteria extends RegexFilterCriteria<String> {
