@@ -2,10 +2,8 @@ package com.sap.sailing.datamining;
 
 import java.util.Collection;
 
-import com.sap.sailing.domain.confidence.ScalableValue;
-
-public interface Aggregator<ValueType, AveragesTo> {
+public interface Aggregator<ExtractedType, AggregatedType> {
     
-    public ScalableValue<ValueType, AveragesTo> aggregate(Collection<ScalableValue<ValueType, AveragesTo>> data);
+    public AggregatedType aggregate(Collection<ExtractedType> data);
 
 }

@@ -3,12 +3,10 @@ package com.sap.sailing.datamining.shared;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sailing.domain.confidence.ScalableValue;
-
-public class QueryResultImpl<ValueType, AveragesTo> implements QueryResult<ValueType, AveragesTo> {
+public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedType> {
     private static final long serialVersionUID = 351213515082955565L;
     
-    private Map<GroupKey, ScalableValue<ValueType, AveragesTo>> results;
+    private Map<GroupKey, AggregatedType> results;
     private int gpsFixAmount;
 
     @Deprecated
@@ -19,7 +17,7 @@ public class QueryResultImpl<ValueType, AveragesTo> implements QueryResult<Value
     
     public QueryResultImpl(int gpsFixAmount) {
         this.gpsFixAmount = gpsFixAmount;
-        results = new HashMap<GroupKey, ScalableValue<ValueType, AveragesTo>>();
+        results = new HashMap<GroupKey, AggregatedType>();
     }
 
     @Override
@@ -28,11 +26,11 @@ public class QueryResultImpl<ValueType, AveragesTo> implements QueryResult<Value
     }
 
     @Override
-    public Map<GroupKey, ScalableValue<ValueType, AveragesTo>> getResults() {
+    public Map<GroupKey, AggregatedType> getResults() {
         return results;
     }
     
-    public void addResult(GroupKey key, ScalableValue<ValueType, AveragesTo> value) {
+    public void addResult(GroupKey key, AggregatedType value) {
         results.put(key, value);
     }
 

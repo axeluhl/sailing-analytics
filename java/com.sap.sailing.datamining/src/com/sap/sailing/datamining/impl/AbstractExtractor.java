@@ -4,15 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import com.sap.sailing.datamining.Extractor;
-import com.sap.sailing.domain.confidence.ScalableValue;
 
-public abstract class AbstractExtractor<DataType, ValueType, AveragesTo> implements Extractor<DataType, ValueType, AveragesTo> {
+public abstract class AbstractExtractor<DataType, ExtractedType> implements Extractor<DataType, ExtractedType> {
 
     @Override
-    public Collection<ScalableValue<ValueType, AveragesTo>> extract(Collection<DataType> data) {
-        Collection<ScalableValue<ValueType, AveragesTo>> extractedData = new ArrayList<ScalableValue<ValueType,AveragesTo>>();
+    public Collection<ExtractedType> extract(Collection<DataType> data) {
+        Collection<ExtractedType> extractedData = new ArrayList<ExtractedType>();
         for (DataType dataEntry : data) {
-            ScalableValue<ValueType, AveragesTo> extractedDataEntry = extract(dataEntry);
+            ExtractedType extractedDataEntry = extract(dataEntry);
             if (extractedDataEntry != null) {
                 extractedData.add(extractedDataEntry);
             }

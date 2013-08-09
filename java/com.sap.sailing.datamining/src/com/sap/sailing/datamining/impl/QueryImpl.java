@@ -13,19 +13,18 @@ import com.sap.sailing.datamining.Query;
 import com.sap.sailing.datamining.shared.GroupKey;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.datamining.shared.QueryResultImpl;
-import com.sap.sailing.domain.confidence.ScalableValue;
 import com.sap.sailing.server.RacingEventService;
 
-public class QueryImpl<DataType, ValueType, AveragesTo> implements Query<DataType, ValueType, AveragesTo> {
+public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query<DataType, AggregatedType> {
 
     private DataRetriever<DataType> retriever;
     private Filter<DataType> filter;
     private Grouper<DataType> grouper;
 
-    private Extractor<DataType, ValueType, AveragesTo> extractor;
-    private Aggregator<ValueType, AveragesTo> aggregator;
+    private Extractor<DataType, ExtractedType> extractor;
+    private Aggregator<ExtractedType, AggregatedType> aggregator;
     
-    public QueryImpl(DataRetriever<DataType> retriever, Filter<DataType> filter, Grouper<DataType> grouper, Extractor<DataType, ValueType, AveragesTo> extractor, Aggregator<ValueType, AveragesTo> aggregator) {
+    public QueryImpl(DataRetriever<DataType> retriever, Filter<DataType> filter, Grouper<DataType> grouper, Extractor<DataType, ExtractedType> extractor, Aggregator<ExtractedType, AggregatedType> aggregator) {
         this.retriever = retriever;
         this.filter = filter;
         this.grouper = grouper;
@@ -34,13 +33,13 @@ public class QueryImpl<DataType, ValueType, AveragesTo> implements Query<DataTyp
     }
 
     @Override
-    public QueryResult<ValueType, AveragesTo> run(RacingEventService racingEventService) {
+    public QueryResult<AggregatedType> run(RacingEventService racingEventService) {
         Collection<DataType> filteredData = filter.filter(retriever.retrieveData(racingEventService));
-        QueryResultImpl<ValueType, AveragesTo> result = new QueryResultImpl<ValueType, AveragesTo>(filteredData.size());
+        QueryResultImpl<AggregatedType> result = new QueryResultImpl<AggregatedType>(filteredData.size());
         Map<GroupKey, Collection<DataType>> groupedFixes = grouper.group(filteredData);
         for (Entry<GroupKey, Collection<DataType>> groupEntry : groupedFixes.entrySet()) {
-            Collection<ScalableValue<ValueType,AveragesTo>> extractedData = extractor.extract(groupEntry.getValue());
-            ScalableValue<ValueType, AveragesTo> aggregatedData = aggregator.aggregate(extractedData);
+            Collection<ExtractedType> extractedData = extractor.extract(groupEntry.getValue());
+            AggregatedType aggregatedData = aggregator.aggregate(extractedData);
             result.addResult(groupEntry.getKey(), aggregatedData);
         }
         return result;

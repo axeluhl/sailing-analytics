@@ -4,20 +4,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import com.sap.sailing.datamining.Extractor;
-import com.sap.sailing.domain.base.ScalableInteger;
-import com.sap.sailing.domain.confidence.ScalableValue;
 
-public class DataAmountExtractor<DataType> implements Extractor<DataType, Integer, Integer> {
+public class DataAmountExtractor<DataType> implements Extractor<DataType, Integer> {
 
     @Override
-    public Collection<ScalableValue<Integer, Integer>> extract(Collection<DataType> data) {
-        Collection<ScalableValue<Integer, Integer>> extractedData = new ArrayList<ScalableValue<Integer, Integer>>();
-        extractedData.add(new ScalableInteger(data.size()));
+    public Collection<Integer> extract(Collection<DataType> data) {
+        Collection<Integer> extractedData = new ArrayList<Integer>();
+        extractedData.add(data.size());
         return extractedData;
     }
 
-    public ScalableValue<Integer, Integer> extract(DataType dataEntry) {
-        return new ScalableInteger(1);
+    public Integer extract(DataType dataEntry) {
+        return 1;
     }
 
 }
