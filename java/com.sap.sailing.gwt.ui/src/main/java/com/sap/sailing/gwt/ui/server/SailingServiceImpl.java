@@ -3337,8 +3337,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public QueryResult<Integer, Integer> runQuery(Map<Dimension, Collection<?>> selection, Dimension groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
         DataRetriever<GPSFixWithContext> retriever = DataMiningFactory.createGPSFixRetriever();
-        FilterCriteria<GPSFixWithContext> filterCriteria = DataMiningFactory.createWildcardFilterCriteria();
-        Filter<GPSFixWithContext> filter = DataMiningFactory.createCriteriaFilter(filterCriteria);
+        Filter<GPSFixWithContext> filter = DataMiningFactory.createNoFilter();
         Grouper<GPSFixWithContext> grouper = DataMiningFactory.createGPSFixByDimensionGrouper(Dimensions.GPSFix.LegType);
         Extractor<GPSFixWithContext, Integer, Integer> extractor = DataMiningFactory.createDataSizeExtractor();
         Aggregator<Integer, Integer> aggregator = DataMiningFactory.createAggregator(AggregatorType.Sum);
