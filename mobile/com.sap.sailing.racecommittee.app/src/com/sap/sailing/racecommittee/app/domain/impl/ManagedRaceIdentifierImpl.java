@@ -27,7 +27,7 @@ public class ManagedRaceIdentifierImpl extends FleetIdentifierImpl implements Ma
 
     @Override
     public Serializable getId() {
-        return String.format("%s.%s", super.getId(), getRaceName());
+        return String.format("%s.%s", super.getId(), escapeIdentifierFragment(getRaceName()));
     }
 
 }
