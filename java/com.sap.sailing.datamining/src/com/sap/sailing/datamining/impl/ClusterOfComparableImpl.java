@@ -11,7 +11,7 @@ public class ClusterOfComparableImpl<ValueType extends Comparable<ValueType>> ex
 
     @Override
     public boolean isInRange(ValueType value) {
-        return value.compareTo(getLowerRange()) >= 0 && value.compareTo(getUpperRange()) <= 0;
+        return value != null && value.compareTo(getLowerRange()) >= 0 && value.compareTo(getUpperRange()) <= 0;
     }
 
 }

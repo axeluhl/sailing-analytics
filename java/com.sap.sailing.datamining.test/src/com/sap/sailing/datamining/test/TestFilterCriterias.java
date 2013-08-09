@@ -17,6 +17,7 @@ public class TestFilterCriterias {
     public void testRegexFilterCriteria() {
         FilterCriteria<String> regexFilterCriteria = new StringRegexFilterCriteria(".*");
         assertTrue(regexFilterCriteria.matches("some Random stuff"));
+        assertFalse(regexFilterCriteria.matches(null));
         
         String[] stringsToMatch = new String[] {"Regatta", "Other Regatta", "Third Regatta"};
         

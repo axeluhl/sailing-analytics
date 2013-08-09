@@ -12,7 +12,8 @@ public abstract class RegexFilterCriteria<DataType> implements FilterCriteria<Da
 
     @Override
     public boolean matches(DataType data) {
-        return getValueToMatch(data).matches(regex);
+        String valueToMatch = getValueToMatch(data);
+        return valueToMatch != null && valueToMatch.matches(regex);
     }
     
     protected abstract String getValueToMatch(DataType data);

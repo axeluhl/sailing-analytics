@@ -18,6 +18,7 @@ public class TestClusters {
         assertTrue(cluster.isInRange(2)); 
         assertTrue(cluster.isInRange(3));
 
+        assertFalse(cluster.isInRange(null));
         assertFalse(cluster.isInRange(0));
         assertFalse(cluster.isInRange(4));
     }
