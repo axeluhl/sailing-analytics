@@ -1,13 +1,14 @@
 package com.sap.sailing.datamining.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import com.sap.sailing.datamining.ClusterOfComparable;
 import com.sap.sailing.datamining.FilterCriteria;
 import com.sap.sailing.datamining.impl.ClusterOfComparableImpl;
-import com.sap.sailing.datamining.impl.criterias.RangeFilterCriteria;
+import com.sap.sailing.datamining.impl.SimpleRangeFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.RegexFilterCriteria;
 
 public class TestFilterCriterias {
@@ -35,12 +36,7 @@ public class TestFilterCriterias {
     @Test
     public void testRangeFilterCriteria() {
         ClusterOfComparable<Integer> cluster = new ClusterOfComparableImpl<Integer>("Test", 3, 1);
-        FilterCriteria<Integer> rangeFilterCriteria = new RangeFilterCriteria<Integer, Integer>(cluster) {
-            @Override
-            public Integer getValue(Integer data) {
-                return data;
-            }
-        };
+        FilterCriteria<Integer> rangeFilterCriteria = new SimpleRangeFilterCriteria<Integer>(cluster);
 
         assertTrue(rangeFilterCriteria.matches(1));
         assertTrue(rangeFilterCriteria.matches(2));
