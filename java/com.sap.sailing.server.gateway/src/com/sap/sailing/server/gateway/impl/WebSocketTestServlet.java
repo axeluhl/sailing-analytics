@@ -8,6 +8,36 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
+/**
+ * A test servlet for web socket connectivity. To use from within GWT, use something like this:
+ * 
+ * <pre>
+ *     private void testWebSockets() {
+        final String baseUrl = GWT.getModuleBaseURL().replace("http", "ws");
+        int indexOfGwt = baseUrl.indexOf("/gwt/");
+        String url = baseUrl.substring(0, indexOfGwt)+"/sailingserver/websockettest";
+        new JavaScriptWebSocketFactory().createWebSocket(url, new WebSocketCallback() {
+            public void onOpen(WebSocket webSocket) {
+                webSocket.send("Hello");
+            }
+            
+            public void onMessage(WebSocket webSocket, String message) {
+                ...
+            }
+            
+            public void onError(WebSocket webSocket) {
+                ...
+            }
+            
+            public void onClose(WebSocket webSocket) {
+                ...
+            }
+        });
+    }
+ * </pre>
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class WebSocketTestServlet extends WebSocketServlet {
     private static final long serialVersionUID = -5160225187387804019L;
 
