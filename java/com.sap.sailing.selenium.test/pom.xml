@@ -41,7 +41,7 @@
                             <goal>test</goal>
                         </goals>
                         <configuration>
-                            <skip>false</skip>
+                            <skip>${skipTests}</skip>
                             <excludes>  
                                <exclude>**/core/**</exclude>  
                             </excludes>
