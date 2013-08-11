@@ -13,6 +13,10 @@ public abstract class SumAggregator<ExtractedType, AggregatedType> implements Ag
         AggregatedType sum = null;
 
         while (dataIterator.hasNext()) {
+            if (sum == null) {
+                sum = getValueFor(dataIterator.next());
+            }
+            
             sum = add(sum, getValueFor(dataIterator.next()));
         }
         return sum;
