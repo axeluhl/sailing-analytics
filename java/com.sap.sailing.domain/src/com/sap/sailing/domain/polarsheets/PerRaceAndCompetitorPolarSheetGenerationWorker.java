@@ -6,11 +6,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 
 /**
  * Iterates through the fixes of one competitor in one tracked race and fills the {@link PolarSheetGenerationWorker}
@@ -34,8 +37,12 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable{
     private TimePoint endTime;
 
     private final Competitor competitor;
+    
+    private boolean noConfidence = false;
 
     private boolean done = false;
+    
+    private int finishedEarlyAtWaypoint = -1;
 
     public PerRaceAndCompetitorPolarSheetGenerationWorker(TrackedRace race,
             PolarSheetGenerationWorker polarSheetGenerationWorker, TimePoint startTime, TimePoint endTime,
@@ -49,6 +56,17 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable{
         this.oddFixClassifier = new AngleSpeedOddClassifier();
         optimizeStartTime();
         optimizeEndTime();
+        checkIfRaceAborted();
+    }
+
+    private void checkIfRaceAborted() {
+        NavigableSet<MarkPassing> markPassings = race.getMarkPassings(competitor);
+        if (markPassings == null || markPassings.size() < 1) {
+            return;
+        }
+        if (markPassings.size() < race.getRace().getCourse().getLegs().size() + 1) {
+            finishedEarlyAtWaypoint = markPassings.size() - 1;
+        }
     }
 
     private void optimizeEndTime() {
@@ -66,6 +84,7 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable{
     private void optimizeStartTime() {
         NavigableSet<MarkPassing> markPassings = race.getMarkPassings(competitor);
         if (markPassings == null || markPassings.size() < 1) {
+            noConfidence = true;
             return;
         }
         MarkPassing passedStart = markPassings.first();
@@ -77,35 +96,52 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable{
 
     @Override
     public void run() {
-        GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(competitor);
-        track.lockForRead();
-        Iterator<GPSFixMoving> fixesIterator = track.getFixesIterator(startTime, true);
-
-        while (fixesIterator.hasNext()) {
-            GPSFixMoving fix = fixesIterator.next();
-            if (fix.getTimePoint().after(endTime)) {
-                break;
+        if (noConfidence || (finishedEarlyAtWaypoint != -1 && finishedEarlyAtWaypoint < 3)) {
+            done = true;
+        } else {
+            GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(competitor);
+            track.lockForRead();
+            Iterator<GPSFixMoving> fixesIterator = track.getFixesIterator(startTime, true);
+            TimePoint lastConsideredTimePoint = null;
+            if (finishedEarlyAtWaypoint != -1) {
+                NavigableSet<MarkPassing> markPassings = race.getMarkPassings(competitor);
+                MarkPassing lastConsideredPassing = markPassings.last();
+                lastConsideredPassing = markPassings.lower(lastConsideredPassing);
+                lastConsideredTimePoint = lastConsideredPassing.getTimePoint();
             }
 
-            if (track.hasDirectionChange(fix.getTimePoint(), race.getRace().getBoatClass()
-                    .getManeuverDegreeAngleThreshold())) {
-                continue;
-            }
-            
-            PolarFix polarFix = new PolarFix(fix, race);
-            
-            if (oddFixClassifier.classifiesAsOdd(polarFix)) {
-                logger.log(Level.INFO, String.format("Odd point was found for: %1$s, in Race %2$s, at %3$tk:%3$tM:%3$tS", competitor.getName(), race.getRace().getName(), fix.getTimePoint().asDate()));
-                //continue;
+            while (fixesIterator.hasNext()) {
+                GPSFixMoving fix = fixesIterator.next();
+                if (fix.getTimePoint().after(endTime)
+                        || (lastConsideredTimePoint != null && fix.getTimePoint().after(lastConsideredTimePoint))) {
+                    break;
+                }
+
+                if (track.hasDirectionChange(fix.getTimePoint(), race.getRace().getBoatClass()
+                        .getManeuverDegreeAngleThreshold())) {
+                    continue;
+                }
+
+                WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = race.getWindWithConfidence(
+                        fix.getPosition(), fix.getTimePoint());
+                if (windWithConfidence.useSpeed() && windWithConfidence.getConfidence() > 0.2) {
+                    PolarFix polarFix = new PolarFix(fix, race);
+
+                    if (oddFixClassifier.classifiesAsOdd(polarFix)) {
+                        logger.log(Level.INFO, String.format(
+                                "Odd point was found for: %1$s, in Race %2$s, at %3$tk:%3$tM:%3$tS",
+                                competitor.getName(), race.getRace().getName(), fix.getTimePoint().asDate()));
+                        //continue;
+                    }
+
+                    polarSheetGenerationWorker.addPolarData(Math.round(polarFix.getAngleToWind()),
+                            polarFix.getBoatSpeed(), polarFix.getWind());
+                }
             }
 
-            
-
-            polarSheetGenerationWorker.addPolarData(Math.round(polarFix.getAngleToWind()), polarFix.getBoatSpeed(), polarFix.getWind());
+            track.unlockAfterRead();
+            done = true;
         }
-
-        track.unlockAfterRead();
-        done = true;
     }
     
     public boolean isDone() {

@@ -126,19 +126,20 @@ public class PolarSheetGenerationWorker {
         Integer[] dataCountPerAngle = new Integer[360];
         int dataCount = 0;
         Map<Integer, Integer[]> dataCountPerAngleForWindspeed = new HashMap<Integer, Integer[]>();
-        Map<Integer, Map<Integer,PolarSheetsHistogramData>> histogramDataMap = new HashMap<Integer, Map<Integer,PolarSheetsHistogramData>>();
+        Map<Integer, Map<Integer, PolarSheetsHistogramData>> histogramDataMap = new HashMap<Integer, Map<Integer, PolarSheetsHistogramData>>();
         Map<Integer, Integer> totalDataCountPerWindSpeed = new HashMap<Integer, Integer>();
-        for (int i = 0; i < levelCount; i++) {
-            dataCountPerAngleForWindspeed.put(i, new Integer[360]);
-            histogramDataMap.put(i, new HashMap<Integer,PolarSheetsHistogramData>());
-            totalDataCountPerWindSpeed.put(i, 0);
+        for (int levelIndex = 0; levelIndex < levelCount; levelIndex++) {
+            dataCountPerAngleForWindspeed.put(levelIndex, new Integer[360]);
+            histogramDataMap.put(levelIndex, new HashMap<Integer, PolarSheetsHistogramData>());
+            totalDataCountPerWindSpeed.put(levelIndex, 0);
         }
-        for (int i = 0; i < 360; i++) {
+        for (int angleIndex = 0; angleIndex < 360; angleIndex++) {
             Double[] varianceNominator = new Double[levelCount];
             // Avoid Concurrent modification of lists, so get current state as an array; lock would slow things down
-            BoatAndWindSpeed[] values = polarData.get(i).toArray(new BoatAndWindSpeed[polarData.get(i).size()]);
+            BoatAndWindSpeed[] values = polarData.get(angleIndex).toArray(
+                    new BoatAndWindSpeed[polarData.get(angleIndex).size()]);
             dataCount = dataCount + values.length;
-            dataCountPerAngle[i] = values.length;
+            dataCountPerAngle[angleIndex] = values.length;
             double[] sumsPerWindSpeed = new double[levelCount];
             int[] dataCountPerWindSpeed = new int[levelCount];
             Map<Integer, List<Double>> dataSetForWindLevel = new HashMap<Integer, List<Double>>();
@@ -160,33 +161,34 @@ public class PolarSheetGenerationWorker {
                     dataCountPerWindSpeed[level]++;
                 }
             }
-           
-            for (int j = 0; j < levelCount; j++) {
-                totalDataCountPerWindSpeed.put(j, totalDataCountPerWindSpeed.get(j) + dataCountPerWindSpeed[j]);
-                Double average = sumsPerWindSpeed[j] / dataCountPerWindSpeed[j];
+
+            for (int levelIndex = 0; levelIndex < levelCount; levelIndex++) {
+                totalDataCountPerWindSpeed.put(levelIndex, totalDataCountPerWindSpeed.get(levelIndex)
+                        + dataCountPerWindSpeed[levelIndex]);
+                Double average = sumsPerWindSpeed[levelIndex] / dataCountPerWindSpeed[levelIndex];
                 if (average.isNaN()) {
                     average = new Double(0);
                 }
-                averagedPolarDataByWindSpeed[j][i] = average;
-                dataCountPerAngleForWindspeed.get(j)[i] = dataCountPerWindSpeed[j];
+                averagedPolarDataByWindSpeed[levelIndex][angleIndex] = average;
+                dataCountPerAngleForWindspeed.get(levelIndex)[angleIndex] = dataCountPerWindSpeed[levelIndex];
                 double coefficiantOfVariation = 0;
-                if (dataCountPerWindSpeed[j] > 0 && average > 0) {
-                    Double variance = varianceNominator[j] / dataCountPerWindSpeed[j];
+                if (dataCountPerWindSpeed[levelIndex] > 0 && average > 0) {
+                    Double variance = varianceNominator[levelIndex] / dataCountPerWindSpeed[levelIndex];
                     Double standardDeviation = Math.sqrt(variance);
                     coefficiantOfVariation = standardDeviation / average;
-                } 
-                List<Double> rawData = dataSetForWindLevel.get(j);
+                }
+                List<Double> rawData = dataSetForWindLevel.get(levelIndex);
                 if (rawData == null || rawData.size() <= 0) {
                     continue;
                 }
                 Double min = Collections.min(rawData);
                 Double max = Collections.max(rawData);
-                //TODO make number of columns dynamic to chart size
+                // TODO make number of columns dynamic to chart size
                 int numberOfColumns = 20;
                 double range = (max - min) / numberOfColumns;
                 Double[] xValues = new Double[numberOfColumns];
                 for (int u = 0; u < numberOfColumns; u++) {
-                    xValues[u] = min + u * range + ( 0.5 * range);
+                    xValues[u] = min + u * range + (0.5 * range);
                 }
 
                 Integer[] yValues = new Integer[numberOfColumns];
@@ -202,8 +204,8 @@ public class PolarSheetGenerationWorker {
                     yValues[u]++;
                 }
 
-                PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(i, xValues, yValues, rawData.size(), coefficiantOfVariation);
-                histogramDataMap.get(j).put(i, histogramData);
+                PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angleIndex, xValues, yValues, rawData.size(), coefficiantOfVariation);
+                histogramDataMap.get(levelIndex).put(angleIndex, histogramData);
                 
             }
 

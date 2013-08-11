@@ -96,7 +96,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
             sum = sum + count;
         }
         //TODO make configurable
-        if (sum > /*Make this configurable*/0) {
+        if (sum > /*Make this configurable*/200) {
             return true;
         }
         return false;
@@ -113,7 +113,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
             //TODO make configurable
             if (result.getHistogramDataMap().get(windspeed) == null || 
                     result.getHistogramDataMap().get(windspeed).get(i) == null || 
-                    result.getHistogramDataMap().get(windspeed).get(i).getConfidenceMeasure() < 0.5) {
+                    result.getHistogramDataMap().get(windspeed).get(i).getConfidenceMeasure() < 0) {
                 continue;
             }
             if (points[i] == null) {

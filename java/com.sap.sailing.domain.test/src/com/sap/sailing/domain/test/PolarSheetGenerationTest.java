@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.NavigableSet;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -25,6 +26,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
@@ -35,10 +37,13 @@ import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.tracking.impl.MarkPassingByTimeComparator;
+import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 
 public class PolarSheetGenerationTest {
@@ -52,12 +57,14 @@ public class PolarSheetGenerationTest {
         
         MockTrackedRaceForPolarSheetGeneration race = new MockTrackedRaceForPolarSheetGeneration();
         
-        TimePoint startTime = new MillisecondsTimePoint(1);
-        TimePoint endTime = new MillisecondsTimePoint(4);
+        TimePoint startTime = new MillisecondsTimePoint(9);
+        TimePoint endTime = new MillisecondsTimePoint(80);
         //Only used for storing and exporting results in this test case:
         PolarSheetGenerationWorker resultContainer = new PolarSheetGenerationWorker(new HashSet<TrackedRace>(), executor);
+        
         BoatClass forelle = new BoatClassImpl("Forelle", true);
         Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", new TeamImpl("SAP", null, null), new BoatImpl("Schnelle Forelle", forelle, "GER000"));
+        
         PerRaceAndCompetitorPolarSheetGenerationWorker task = new PerRaceAndCompetitorPolarSheetGenerationWorker(race, resultContainer, startTime, endTime, competitor);
         
         executor.execute(task);
@@ -74,7 +81,7 @@ public class PolarSheetGenerationTest {
         Assert.assertEquals(4, data.getDataCount());
         Assert.assertEquals(4.0, data.getAveragedPolarDataByWindSpeed()[0][45]);
         Assert.assertEquals(2.0, data.getAveragedPolarDataByWindSpeed()[0][55]);
-        Assert.assertEquals(6.0, data.getAveragedPolarDataByWindSpeed()[0][30]);
+        Assert.assertEquals(6.0, data.getAveragedPolarDataByWindSpeed()[0][35]);
         
     }
     
@@ -84,10 +91,15 @@ public class PolarSheetGenerationTest {
         @Override
         public DynamicGPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = new MockDynamicGPSFixMovinTrackForPolarSheetGeneration<Competitor>(competitor, 0);
-            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.0, 1.0), new MillisecondsTimePoint(1), new KnotSpeedWithBearingImpl(3.0, new DegreeBearingImpl(-45.0))));
-            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.001, 1.001), new MillisecondsTimePoint(2), new KnotSpeedWithBearingImpl(5.0, new DegreeBearingImpl(-45.0))));
-            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.002, 1.002), new MillisecondsTimePoint(3), new KnotSpeedWithBearingImpl(2.0, new DegreeBearingImpl(-55.0))));
-            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.003, 1.003), new MillisecondsTimePoint(4), new KnotSpeedWithBearingImpl(6.0, new DegreeBearingImpl(-30.0))));
+            //Before start
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(0.009, 0.009), new MillisecondsTimePoint(3), new KnotSpeedWithBearingImpl(12.0, new DegreeBearingImpl(-45.0))));
+            //Race
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.0, 1.0), new MillisecondsTimePoint(10), new KnotSpeedWithBearingImpl(3.0, new DegreeBearingImpl(-45.0))));
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.001, 1.001), new MillisecondsTimePoint(11), new KnotSpeedWithBearingImpl(5.0, new DegreeBearingImpl(-45.0))));
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.002, 1.002), new MillisecondsTimePoint(12), new KnotSpeedWithBearingImpl(2.0, new DegreeBearingImpl(-55.0))));
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.003, 1.003), new MillisecondsTimePoint(13), new KnotSpeedWithBearingImpl(6.0, new DegreeBearingImpl(-35.0))));
+            //After Finish
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.01, 1.01), new MillisecondsTimePoint(75), new KnotSpeedWithBearingImpl(12.0, new DegreeBearingImpl(-45.0))));
             return track;
         }
         
@@ -100,8 +112,30 @@ public class PolarSheetGenerationTest {
         @Override
         public RaceDefinition getRace() {
             BoatClass forelle = new BoatClassImpl("Forelle", true);
-            RaceDefinition race = new RaceDefinitionImpl("Forelle1", new CourseImpl("ForelleCourse", new ArrayList<Waypoint>()), forelle, new ArrayList<Competitor>());
+            ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
+            waypoints.add(new WaypointImpl(null));
+            waypoints.add(new WaypointImpl(null));
+            waypoints.add(new WaypointImpl(null));
+            waypoints.add(new WaypointImpl(null));
+            waypoints.add(new WaypointImpl(null));
+            waypoints.add(new WaypointImpl(null));
+            waypoints.add(new WaypointImpl(null));
+            RaceDefinition race = new RaceDefinitionImpl("Forelle1", new CourseImpl("ForelleCourse", waypoints), forelle, new ArrayList<Competitor>());
             return race;
+        }
+        
+        @Override
+        public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
+            NavigableSet<MarkPassing> passings = new ConcurrentSkipListSet<MarkPassing>(
+                    MarkPassingByTimeComparator.INSTANCE);
+            passings.add(new MarkPassingImpl(new MillisecondsTimePoint(10), null, competitor));
+            passings.add(new MarkPassingImpl(new MillisecondsTimePoint(20), null, competitor));
+            passings.add(new MarkPassingImpl(new MillisecondsTimePoint(30), null, competitor));
+            passings.add(new MarkPassingImpl(new MillisecondsTimePoint(40), null, competitor));
+            passings.add(new MarkPassingImpl(new MillisecondsTimePoint(50), null, competitor));
+            passings.add(new MarkPassingImpl(new MillisecondsTimePoint(60), null, competitor));
+            passings.add(new MarkPassingImpl(new MillisecondsTimePoint(70), null, competitor));
+            return passings;
         }
     }
     
