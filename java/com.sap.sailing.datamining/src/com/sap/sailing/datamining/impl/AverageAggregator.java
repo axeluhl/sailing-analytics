@@ -4,24 +4,25 @@ import java.util.Collection;
 
 import com.sap.sailing.datamining.Aggregator;
 
-public abstract class AverageAggregator<ExtractedType> implements Aggregator<ExtractedType, Double>  {
+public abstract class AverageAggregator<ExtractedType, AggregatedType> implements Aggregator<ExtractedType, AggregatedType>  {
 
     @Override
-    public Double aggregate(Collection<ExtractedType> data) {
-        SumAggregator<ExtractedType> sumAggregator = new SumAggregator<ExtractedType>() {
+    public AggregatedType aggregate(Collection<ExtractedType> data) {
+        SumAggregator<ExtractedType, AggregatedType> sumAggregator = new SumAggregator<ExtractedType, AggregatedType>() {
             @Override
-            protected Number add(Number number1, Number number2) {
-                return AverageAggregator.this.add(number1, number2);
+            protected AggregatedType add(AggregatedType value1, AggregatedType value2) {
+                return AverageAggregator.this.add(value1, value2);
             }
             @Override
-            protected Number getNumericValue(ExtractedType value) {
-                return AverageAggregator.this.getNumericValue(value);
+            protected AggregatedType getValueFor(ExtractedType extractedValue) {
+                return AverageAggregator.this.getValueFor(extractedValue);
             }
         };
-        return sumAggregator.aggregate(data).doubleValue() / data.size();
+        return divide(sumAggregator.aggregate(data), data.size());
     }
 
-    protected abstract Number add(Number number1, Number number2);
-    protected abstract Number getNumericValue(ExtractedType value);
+    protected abstract AggregatedType add(AggregatedType value1, AggregatedType value2);
+    protected abstract AggregatedType getValueFor(ExtractedType extractedValue);
+    protected abstract AggregatedType divide(AggregatedType sum, int dataAmount);
 
 }

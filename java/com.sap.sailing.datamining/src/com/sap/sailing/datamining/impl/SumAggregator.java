@@ -5,20 +5,20 @@ import java.util.Iterator;
 
 import com.sap.sailing.datamining.Aggregator;
 
-public abstract class SumAggregator<ExtractedType> implements Aggregator<ExtractedType, Number> {
+public abstract class SumAggregator<ExtractedType, AggregatedType> implements Aggregator<ExtractedType, AggregatedType> {
 
     @Override
-    public Number aggregate(Collection<ExtractedType> data) {
+    public AggregatedType aggregate(Collection<ExtractedType> data) {
         Iterator<ExtractedType> dataIterator = data.iterator();
-        Number sum = 0;
+        AggregatedType sum = null;
 
         while (dataIterator.hasNext()) {
-            sum = add(sum, getNumericValue(dataIterator.next()));
+            sum = add(sum, getValueFor(dataIterator.next()));
         }
         return sum;
     }
 
-    protected abstract Number add(Number number1, Number number2);
-    protected abstract Number getNumericValue(ExtractedType value);
+    protected abstract AggregatedType add(AggregatedType value1, AggregatedType value2);
+    protected abstract AggregatedType getValueFor(ExtractedType extractedValue);
 
 }
