@@ -2,11 +2,9 @@ package com.sap.sailing.datamining;
 
 import java.util.Collection;
 
-import com.sap.sailing.datamining.impl.AverageAggregator;
 import com.sap.sailing.datamining.impl.DataAmountExtractor;
 import com.sap.sailing.datamining.impl.FilterByCriteriaImpl;
 import com.sap.sailing.datamining.impl.QueryImpl;
-import com.sap.sailing.datamining.impl.SumAggregator;
 import com.sap.sailing.datamining.impl.gpsfix.GPSFixRetrieverImpl;
 import com.sap.sailing.datamining.impl.gpsfix.GroupGPSFixesByDimension;
 import com.sap.sailing.datamining.shared.AggregatorType;
@@ -15,10 +13,10 @@ public class DataMiningFactory {
     
     private DataMiningFactory() { }
 
-    public static <DataType, ValueType, AveragesTo> Query<DataType, ValueType, AveragesTo> createQuery(
+    public static <DataType, ExtractedType, AggregatedType> Query<DataType, AggregatedType> createQuery(
             DataRetriever<DataType> retriever, Filter<DataType> filter, Grouper<DataType> grouper,
-            Extractor<DataType, ValueType, AveragesTo> extractor, Aggregator<ValueType, AveragesTo> aggregator) {
-        return new QueryImpl<DataType, ValueType, AveragesTo>(retriever, filter, grouper, extractor, aggregator);
+            Extractor<DataType, ExtractedType> extractor, Aggregator<ExtractedType, AggregatedType> aggregator) {
+        return new QueryImpl<DataType, ExtractedType, AggregatedType>(retriever, filter, grouper, extractor, aggregator);
     }
     
     /**
@@ -58,19 +56,19 @@ public class DataMiningFactory {
         return new GroupGPSFixesByDimension(dimensions);
     }
 
-    public static <DataType> Extractor<DataType, Integer, Integer> createDataSizeExtractor() {
+    public static <DataType> Extractor<DataType, Integer> createDataSizeExtractor() {
         return new DataAmountExtractor<DataType>();
     }
 
     public static <ValueType, AveragesTo> Aggregator<ValueType, AveragesTo> createAggregator(
             AggregatorType aggregatorType) {
-        switch (aggregatorType) {
-        case Average:
-            return new AverageAggregator<ValueType, AveragesTo>();
-        case Sum:
-            return new SumAggregator<ValueType, AveragesTo>();
-
-        }
+//        switch (aggregatorType) {
+//        case Average:
+//            return new AverageAggregator<ValueType, AveragesTo>();
+//        case Sum:
+//            return new SumAggregator<ValueType, AveragesTo>();
+//
+//        }
         throw new IllegalArgumentException("Not yet implemented for the given aggregator type: "
                 + aggregatorType.toString());
     }
