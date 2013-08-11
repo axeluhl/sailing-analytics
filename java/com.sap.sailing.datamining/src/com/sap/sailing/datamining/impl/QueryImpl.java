@@ -35,7 +35,7 @@ public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query
     @Override
     public QueryResult<AggregatedType> run(RacingEventService racingEventService) {
         Collection<DataType> filteredData = filter.filter(retriever.retrieveData(racingEventService));
-        QueryResultImpl<AggregatedType> result = new QueryResultImpl<AggregatedType>(filteredData.size());
+        QueryResultImpl<AggregatedType> result = new QueryResultImpl<AggregatedType>(filteredData.size(), createResultSignifier());
         Map<GroupKey, Collection<DataType>> groupedFixes = grouper.group(filteredData);
         for (Entry<GroupKey, Collection<DataType>> groupEntry : groupedFixes.entrySet()) {
             Collection<ExtractedType> extractedData = extractor.extract(groupEntry.getValue());
@@ -43,6 +43,10 @@ public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query
             result.addResult(groupEntry.getKey(), aggregatedData);
         }
         return result;
+    }
+
+    private String createResultSignifier() {
+        return aggregator.getName() + " of the " + extractor.getSignifier();
     }
 
 }

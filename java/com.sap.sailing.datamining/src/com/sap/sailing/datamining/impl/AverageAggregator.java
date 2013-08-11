@@ -2,9 +2,11 @@ package com.sap.sailing.datamining.impl;
 
 import java.util.Collection;
 
-import com.sap.sailing.datamining.Aggregator;
+public abstract class AverageAggregator<ExtractedType, AggregatedType> extends AbstractAggregator<ExtractedType, AggregatedType>  {
 
-public abstract class AverageAggregator<ExtractedType, AggregatedType> implements Aggregator<ExtractedType, AggregatedType>  {
+    public AverageAggregator() {
+        super("Average");
+    }
 
     @Override
     public AggregatedType aggregate(Collection<ExtractedType> data) {

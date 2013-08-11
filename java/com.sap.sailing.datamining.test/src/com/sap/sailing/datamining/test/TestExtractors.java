@@ -15,7 +15,7 @@ public class TestExtractors {
     @Test
     public void testAbstractExtractor() {
         Collection<String> data = Arrays.asList("Fu", "Bar", "Blub");
-        Extractor<String, Integer> lengthExtractor = new AbstractExtractor<String, Integer>() {
+        Extractor<String, Integer> lengthExtractor = new AbstractExtractor<String, Integer>("Test") {
             @Override
             public Integer extract(String dataEntry) {
                 return dataEntry.length();

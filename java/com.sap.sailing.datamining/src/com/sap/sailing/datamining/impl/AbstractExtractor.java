@@ -6,6 +6,17 @@ import java.util.Collection;
 import com.sap.sailing.datamining.Extractor;
 
 public abstract class AbstractExtractor<DataType, ExtractedType> implements Extractor<DataType, ExtractedType> {
+    
+    private String signifier;
+
+    public AbstractExtractor(String signifier) {
+        this.signifier = signifier;
+    }
+    
+    @Override
+    public String getSignifier() {
+        return signifier;
+    }
 
     @Override
     public Collection<ExtractedType> extract(Collection<DataType> data) {

@@ -3,9 +3,11 @@ package com.sap.sailing.datamining.impl;
 import java.util.Collection;
 import java.util.Iterator;
 
-import com.sap.sailing.datamining.Aggregator;
+public abstract class SumAggregator<ExtractedType, AggregatedType> extends AbstractAggregator<ExtractedType, AggregatedType> {
 
-public abstract class SumAggregator<ExtractedType, AggregatedType> implements Aggregator<ExtractedType, AggregatedType> {
+    public SumAggregator() {
+        super("Sum");
+    }
 
     @Override
     public AggregatedType aggregate(Collection<ExtractedType> data) {

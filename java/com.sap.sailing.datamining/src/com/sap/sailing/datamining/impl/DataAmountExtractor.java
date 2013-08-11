@@ -3,9 +3,11 @@ package com.sap.sailing.datamining.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.sap.sailing.datamining.Extractor;
+public class DataAmountExtractor<DataType> extends AbstractExtractor<DataType, Integer> {
 
-public class DataAmountExtractor<DataType> implements Extractor<DataType, Integer> {
+    public DataAmountExtractor() {
+        super("amount of fixes");
+    }
 
     @Override
     public Collection<Integer> extract(Collection<DataType> data) {
@@ -14,6 +16,7 @@ public class DataAmountExtractor<DataType> implements Extractor<DataType, Intege
         return extractedData;
     }
 
+    @Override
     public Integer extract(DataType dataEntry) {
         return 1;
     }

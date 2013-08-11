@@ -8,5 +8,10 @@ public interface QueryResult<AggregatedType> extends Serializable {
     
     public int getDataSize();
     public Map<GroupKey, AggregatedType> getResults();
+    
+    /**
+     * @return a description what kind of results are contained.
+     */
+    public String getResultSignifier();
 
 }
