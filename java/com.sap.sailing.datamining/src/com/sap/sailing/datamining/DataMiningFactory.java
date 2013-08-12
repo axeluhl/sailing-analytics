@@ -6,9 +6,11 @@ import java.util.Collection;
 import com.sap.sailing.datamining.impl.DataAmountExtractor;
 import com.sap.sailing.datamining.impl.FilterByCriteriaImpl;
 import com.sap.sailing.datamining.impl.QueryImpl;
+import com.sap.sailing.datamining.impl.criterias.DimensionValuesFilterCriteria;
 import com.sap.sailing.datamining.impl.gpsfix.GPSFixRetrieverImpl;
 import com.sap.sailing.datamining.impl.gpsfix.GroupGPSFixesByDimension;
 import com.sap.sailing.datamining.shared.AggregatorType;
+import com.sap.sailing.datamining.shared.Dimensions.GPSFix;
 
 public class DataMiningFactory {
     
@@ -26,7 +28,7 @@ public class DataMiningFactory {
     @SuppressWarnings("unchecked")
     public static <DataType> DataRetriever<DataType> createDataRetriever(com.sap.sailing.datamining.shared.DataType dataType) {
         switch (dataType) {
-        case GPSFixes:
+        case GPSFix:
             return (DataRetriever<DataType>) new GPSFixRetrieverImpl();
         }
         throw new IllegalArgumentException("Not yet implemented for the given data type: "
@@ -51,6 +53,15 @@ public class DataMiningFactory {
 
     public static <DataType> Filter<DataType> createCriteriaFilter(FilterCriteria<DataType> criteria) {
         return new FilterByCriteriaImpl<DataType>(criteria);
+    }
+    
+    public static <ValueType> FilterCriteria<GPSFixWithContext> createGPSFixDimensionFilterCriteria(GPSFix dimensionType, Collection<ValueType> values) {
+        Dimension<GPSFixWithContext, ValueType> dimension = Dimensions.GPSFix.getDimensionFor(dimensionType);
+        return createDimensionFilterCriteria(dimension, values);
+    }
+    
+    public static <DataType, ValueType> FilterCriteria<DataType> createDimensionFilterCriteria(Dimension<DataType, ValueType> dimension, Collection<ValueType> values) {
+        return new DimensionValuesFilterCriteria<DataType, ValueType>(dimension, values);
     }
 
     public static <ValueType> Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(Dimension<GPSFixWithContext, ValueType>... dimensions) {
