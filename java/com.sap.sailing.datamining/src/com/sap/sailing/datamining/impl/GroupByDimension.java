@@ -1,6 +1,5 @@
 package com.sap.sailing.datamining.impl;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -12,8 +11,8 @@ public abstract class GroupByDimension<DataType, ValueType> extends AbstractGrou
     
     private Collection<Dimension<DataType, ValueType>> dimensions;
 
-    public GroupByDimension(Dimension<DataType, ValueType>... dimensions) {
-        this.dimensions = new LinkedHashSet<Dimension<DataType, ValueType>>(Arrays.asList(dimensions));
+    public GroupByDimension(Collection<Dimension<DataType, ValueType>> dimensions) {
+        this.dimensions = new LinkedHashSet<Dimension<DataType, ValueType>>(dimensions);
     }
 
     @Override

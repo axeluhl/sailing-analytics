@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import com.sap.sailing.datamining.impl.DataAmountExtractor;
@@ -52,8 +53,9 @@ public class DataMiningFactory {
         return new FilterByCriteriaImpl<DataType>(criteria);
     }
 
-    public static Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(Dimension<GPSFixWithContext, String>... dimensions) {
-        return new GroupGPSFixesByDimension(dimensions);
+    public static <ValueType> Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(Dimension<GPSFixWithContext, ValueType>... dimensions) {
+        Collection<Dimension<GPSFixWithContext, ValueType>> dimensionCollection = Arrays.asList(dimensions);
+        return new GroupGPSFixesByDimension<ValueType>(dimensionCollection);
     }
 
     public static <DataType> Extractor<DataType, Integer> createDataSizeExtractor() {

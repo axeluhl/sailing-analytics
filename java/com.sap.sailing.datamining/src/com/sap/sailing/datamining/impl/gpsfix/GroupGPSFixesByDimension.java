@@ -1,5 +1,7 @@
 package com.sap.sailing.datamining.impl.gpsfix;
 
+import java.util.Collection;
+
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.datamining.impl.GenericGroupKey;
@@ -8,7 +10,7 @@ import com.sap.sailing.datamining.shared.GroupKey;
 
 public class GroupGPSFixesByDimension<ValueType> extends GroupByDimension<GPSFixWithContext, ValueType> {
 
-    public GroupGPSFixesByDimension(Dimension<GPSFixWithContext, ValueType>... dimensions) {
+    public GroupGPSFixesByDimension(Collection<Dimension<GPSFixWithContext, ValueType>> dimensions) {
         super(dimensions);
     }
 
