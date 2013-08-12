@@ -17,6 +17,7 @@ public abstract class SumAggregator<ExtractedType, AggregatedType> extends Abstr
         while (dataIterator.hasNext()) {
             if (sum == null) {
                 sum = getValueFor(dataIterator.next());
+                continue;
             }
             
             sum = add(sum, getValueFor(dataIterator.next()));

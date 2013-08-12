@@ -17,7 +17,12 @@ public class TestAggregators {
     public void testSumAggregator() {
         Collection<Integer> data = Arrays.asList(1, 7, 6, 3);
         Aggregator<Integer, Integer> sumAggregator = new IntegerSumAggregator();
+        
         Integer expectedAggregation = 17;
+        assertEquals(expectedAggregation, sumAggregator.aggregate(data));
+        
+        data = Arrays.asList(7);
+        expectedAggregation = 7;
         assertEquals(expectedAggregation, sumAggregator.aggregate(data));
     }
     
