@@ -3,6 +3,7 @@ package com.sap.sailing.domain.masterdataimport;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.LeaderboardMasterData;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 
 /**
  * Holds leaderboard group object AND its leaderboards, etc
@@ -11,23 +12,32 @@ import com.sap.sailing.domain.base.LeaderboardMasterData;
  */
 public class LeaderboardGroupMasterData {
 
-    private String name;
-    private String description;
-    private LeaderboardMasterData overallLeaderboardMasterData;
-    private Iterable<LeaderboardMasterData> leaderboards;
-    private boolean displayGroupsRevese;
-    private Set<EventMasterData> events;
-    private Set<RegattaMasterData> regattas;
+    private final String name;
+    private final String description;
+    private final boolean hasOverallLeaderboard;
+    private final ScoringScheme overallLeaderboardScoringScheme;
+    private final int[] overallLeaderboardDiscardingRule;
+    private final Iterable<LeaderboardMasterData> leaderboards;
+    private final boolean displayGroupsRevese;
+    private final Set<EventMasterData> events;
+    private final Set<RegattaMasterData> regattas;
 
-    public LeaderboardGroupMasterData(String name, String description,
-            boolean displayGroupsRevese, LeaderboardMasterData overallLeaderboardMasterData, Iterable<LeaderboardMasterData> leaderboards, Set<EventMasterData> events, Set<RegattaMasterData> regattas) {
-                this.name = name;
-                this.description = description;
-                this.displayGroupsRevese = displayGroupsRevese;
-                this.overallLeaderboardMasterData = overallLeaderboardMasterData;
-                this.leaderboards = leaderboards;
-                this.events = events;
-                this.regattas = regattas;
+
+    public LeaderboardGroupMasterData(String name, String description, boolean displayGroupsRevese,
+            boolean hasOverallLeaderboard,
+            ScoringScheme overallLeaderboardScoringScheme,
+            int[] overallLeaderboardDiscardingRule, Iterable<LeaderboardMasterData> leaderboards, Set<EventMasterData> events,
+            Set<RegattaMasterData> regattas) {
+        super();
+        this.name = name;
+        this.description = description;
+        this.hasOverallLeaderboard = hasOverallLeaderboard;
+        this.overallLeaderboardScoringScheme = overallLeaderboardScoringScheme;
+        this.overallLeaderboardDiscardingRule = overallLeaderboardDiscardingRule;
+        this.leaderboards = leaderboards;
+        this.displayGroupsRevese = displayGroupsRevese;
+        this.events = events;
+        this.regattas = regattas;
     }
 
     public String getName() {
@@ -38,8 +48,16 @@ public class LeaderboardGroupMasterData {
         return description;
     }
 
-    public LeaderboardMasterData getOverallLeaderboardMasterData() {
-        return overallLeaderboardMasterData;
+    public boolean hasOverallLeaderboard() {
+        return hasOverallLeaderboard;
+    }
+
+    public ScoringScheme getOverallLeaderboardScoringScheme() {
+        return overallLeaderboardScoringScheme;
+    }
+
+    public int[] getOverallLeaderboardDiscardingRule() {
+        return overallLeaderboardDiscardingRule;
     }
 
     public Iterable<LeaderboardMasterData> getLeaderboards() {
