@@ -28,7 +28,9 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSer
 public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<LeaderboardGroup> {
 
     public static final String FIELD_LEADERBOARDS = "leaderboards";
-    public static final String FIELD_OVERALL_LEADERBOARD = "overallLeaderboard";
+    public static final String FIELD_HAS_OVERALL_LEADERBOARD = "overallLeaderboard";
+    public static final String FIELD_OVERALL_LEADERBOARD_SCORING_SCHEME = "overallLeaderboardScoringScheme";
+    public static final String FIELD_OVERALL_LEADERBOARD_DISCARDING_THRESHOLDS = "overallLeaderboardScoringScheme";
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_DISPLAY_GROUPS_REVERSE = "displayGroupsReverse";
@@ -67,8 +69,15 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
         JSONObject jsonLeaderboardGroup = new JSONObject();
         jsonLeaderboardGroup.put(FIELD_NAME, leaderboardGroup.getName());
         jsonLeaderboardGroup.put(FIELD_DESCRIPTION, leaderboardGroup.getDescription());
-        jsonLeaderboardGroup.put(FIELD_OVERALL_LEADERBOARD,
-                leadboardSerializer.serialize(leaderboardGroup.getOverallLeaderboard()));
+        jsonLeaderboardGroup.put(FIELD_HAS_OVERALL_LEADERBOARD, leaderboardGroup.getOverallLeaderboard() != null);
+        if (leaderboardGroup.getOverallLeaderboard() != null) {
+            jsonLeaderboardGroup.put(FIELD_OVERALL_LEADERBOARD_DISCARDING_THRESHOLDS,
+                    LeaderboardMasterDataJsonSerializer.createJsonForResultDiscardingRule(leaderboardGroup
+                            .getOverallLeaderboard().getResultDiscardingRule()));
+            jsonLeaderboardGroup.put(FIELD_OVERALL_LEADERBOARD_SCORING_SCHEME,
+                    LeaderboardMasterDataJsonSerializer.createJsonForScoringScheme(leaderboardGroup
+                            .getOverallLeaderboard().getScoringScheme()));
+        }
         jsonLeaderboardGroup.put(FIELD_LEADERBOARDS, createJsonArrayForLeaderboards(leaderboardGroup.getLeaderboards()));
         jsonLeaderboardGroup.put(FIELD_DISPLAY_GROUPS_REVERSE, leaderboardGroup.isDisplayGroupsInReverseOrder());
         
