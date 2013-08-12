@@ -10,7 +10,7 @@ public interface QueryComponentsProvider<DimensionType> {
 
     public Map<DimensionType, Collection<?>> getSelection();
 
-    public DimensionType getDimensionToGroupBy();
+    public Collection<DimensionType> getDimensionsToGroupBy();
 
     public StatisticType getStatisticToCalculate();
 

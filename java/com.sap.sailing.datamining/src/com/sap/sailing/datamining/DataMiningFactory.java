@@ -1,7 +1,7 @@
 package com.sap.sailing.datamining;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -82,9 +82,9 @@ public class DataMiningFactory {
         return new DimensionValuesFilterCriteria<DataType, ValueType>(dimension, (Collection<ValueType>) values);
     }
 
-    public static <ValueType> Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(SharedDimensions.GPSFix... dimensionTypes) {
-        Collection<Dimension<GPSFixWithContext, ValueType>> dimensions = new HashSet<Dimension<GPSFixWithContext, ValueType>>();
-        for (SharedDimensions.GPSFix dimensionType : dimensionTypes) {
+    public static <ValueType> Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(Collection<SharedDimensions.GPSFix> dimensionsToGroupBy) {
+        Collection<Dimension<GPSFixWithContext, ValueType>> dimensions = new LinkedHashSet<Dimension<GPSFixWithContext, ValueType>>();
+        for (SharedDimensions.GPSFix dimensionType : dimensionsToGroupBy) {
             Dimension<GPSFixWithContext, ValueType> dimension = Dimensions.GPSFix.getDimensionFor(dimensionType);
             dimensions.add(dimension);
         }

@@ -37,14 +37,9 @@ public class QueryResultsChart extends SimplePanel {
     public void showResult(QueryResult<Integer> result) {
         reset();
         
+        chart.getYAxis().setAxisTitleText(result.getResultSignifier());
         List<GroupKey> keys = result.getSortedKeys();
-        String[] categories = new String[keys.size()];
-        int index = 0;
-        for (GroupKey groupKey : keys) {
-            categories[index] = groupKey.getMainKey().asString();
-            index++;
-        }
-        chart.getXAxis().setCategories(categories);
+        setCategories(keys);
         
         for (GroupKey key : keys) {
             Point point = new Point(key.getMainKey().asString(), result.getResults().get(key));
@@ -55,6 +50,16 @@ public class QueryResultsChart extends SimplePanel {
             chart.addSeries(series, false, false);
         }
         chart.redraw();
+    }
+
+    private void setCategories(List<GroupKey> keys) {
+        String[] categories = new String[keys.size()];
+        int index = 0;
+        for (GroupKey groupKey : keys) {
+            categories[index] = groupKey.getMainKey().asString();
+            index++;
+        }
+        chart.getXAxis().setCategories(categories);
     }
     
     private Series getOrCreateSeries(GroupKey key) {
@@ -77,7 +82,7 @@ public class QueryResultsChart extends SimplePanel {
                 .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText(stringMessages.dataMiningResult()));
 
-        chart.getYAxis().setAxisTitleText("Result") //TODO
+        chart.getYAxis().setAxisTitleText("Result")
                 .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
                     @Override
                     public String format(AxisLabelsData axisLabelsData) {

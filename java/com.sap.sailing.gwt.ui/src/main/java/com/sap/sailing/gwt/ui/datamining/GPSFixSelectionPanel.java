@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,6 +12,8 @@ import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -18,8 +21,10 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.SharedDimensions;
+import com.sap.sailing.datamining.shared.SharedDimensions.GPSFix;
 import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -37,7 +42,8 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
 
-    private ValueListBox<SharedDimensions.GPSFix> groupByListBox;
+    private HorizontalPanel dimensionsToGroupByPanel;
+    private List<ValueListBox<SharedDimensions.GPSFix>> dimensionsToGroupByBoxes;
     private ValueListBox<StatisticAndAggregatorType> statisticsListBox;
     
     private Map<SharedDimensions.GPSFix, SelectionTable<SharedDimensions.GPSFix, ?, ?>> tablesMappedByDimension;
@@ -56,6 +62,7 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
+        dimensionsToGroupByBoxes = new ArrayList<ValueListBox<GPSFix>>();
         
         add(createSelectionTables());
         
@@ -83,8 +90,14 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
     }
 
     @Override
-    public SharedDimensions.GPSFix getDimensionToGroupBy() {
-        return groupByListBox.getValue();
+    public Collection<SharedDimensions.GPSFix> getDimensionsToGroupBy() {
+        Collection<SharedDimensions.GPSFix> dimensionsToGroupBy = new ArrayList<SharedDimensions.GPSFix>();
+        for (ValueListBox<GPSFix> dimensionToGroupByBox : dimensionsToGroupByBoxes) {
+            if (dimensionToGroupByBox.getValue() != null) {
+                dimensionsToGroupBy.add(dimensionToGroupByBox.getValue());
+            }
+        }
+        return dimensionsToGroupBy;
     }
 
     @Override
@@ -151,22 +164,13 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
         });
         functionsPanel.add(clearSelectionButton);
         
-        functionsPanel.add(new Label(stringMessages.groupBy() + ": "));
-        groupByListBox = new ValueListBox<SharedDimensions.GPSFix>(new Renderer<SharedDimensions.GPSFix>() {
-            @Override
-            public String render(SharedDimensions.GPSFix dimension) {
-                if (dimension == null) {
-                  return "";
-                }
-                return dimension.toString();
-            }
-            @Override
-            public void render(SharedDimensions.GPSFix dimension, Appendable appendable) throws IOException {
-                appendable.append(render(dimension));
-            }
-        });
-        groupByListBox.setAcceptableValues(Arrays.asList(SharedDimensions.GPSFix.values()));
-        functionsPanel.add(groupByListBox);
+        dimensionsToGroupByPanel = new HorizontalPanel();
+        dimensionsToGroupByPanel.setSpacing(5);
+        dimensionsToGroupByPanel.add(new Label(stringMessages.groupBy() + ": "));
+        ValueListBox<SharedDimensions.GPSFix> dimensionToGroupByBox = createDimensionToGroupByBox();
+        dimensionsToGroupByPanel.add(dimensionToGroupByBox);
+        dimensionsToGroupByBoxes.add(dimensionToGroupByBox);
+        functionsPanel.add(dimensionsToGroupByPanel);
         
         functionsPanel.add(new Label(stringMessages.statisticToCalculate() + ": "));
         statisticsListBox = new ValueListBox<StatisticAndAggregatorType>(new Renderer<StatisticAndAggregatorType>() {
@@ -182,10 +186,46 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
                 appendable.append(render(statisticAndAggregatorType));
             }
         });
-        statisticsListBox.setAcceptableValues(Arrays.asList(new StatisticAndAggregatorType(StatisticType.DataAmount, AggregatorType.Average)));
+        List<StatisticAndAggregatorType> statistics = Arrays.asList(new StatisticAndAggregatorType(StatisticType.DataAmount, AggregatorType.Average));
+        statisticsListBox.setAcceptableValues(statistics);
+        statisticsListBox.setValue(statistics.get(0), false);
         functionsPanel.add(statisticsListBox);
         
         return functionsPanel;
+    }
+
+    private ValueListBox<SharedDimensions.GPSFix> createDimensionToGroupByBox() {
+        ValueListBox<SharedDimensions.GPSFix> dimensionToGroupByBox = new ValueListBox<SharedDimensions.GPSFix>(new Renderer<SharedDimensions.GPSFix>() {
+            @Override
+            public String render(SharedDimensions.GPSFix gpsFixDimension) {
+                if (gpsFixDimension == null) {
+                    return "";
+                  }
+                  return gpsFixDimension.toString();
+            }
+            @Override
+            public void render(SharedDimensions.GPSFix gpsFixDimension, Appendable appendable) throws IOException {
+                appendable.append(render(gpsFixDimension));
+                
+            }
+        });
+        dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<SharedDimensions.GPSFix>() {
+            private boolean firstChange = true;
+            @Override
+            public void onValueChange(ValueChangeEvent<GPSFix> event) {
+                if (firstChange && event.getValue() != null) {
+                    ValueListBox<GPSFix> newBox = createDimensionToGroupByBox();
+                    dimensionsToGroupByPanel.add(newBox);
+                    dimensionsToGroupByBoxes.add(newBox);
+                    firstChange = false;
+                } else if (event.getValue() == null) {
+                    dimensionsToGroupByPanel.remove((Widget) event.getSource());
+                    dimensionsToGroupByBoxes.remove(event.getSource());
+                }
+            }
+        });
+        dimensionToGroupByBox.setAcceptableValues(Arrays.asList(SharedDimensions.GPSFix.values()));
+        return dimensionToGroupByBox;
     }
 
     private HorizontalPanel createSelectionTables() {
