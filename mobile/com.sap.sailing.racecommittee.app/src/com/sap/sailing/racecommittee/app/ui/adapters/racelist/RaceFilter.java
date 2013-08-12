@@ -73,6 +73,7 @@ public class RaceFilter extends Filter {
                     }
                     filteredItems.add(raceItem);
                     currentFinishedItem = raceItem;
+                    currentUnscheduledItem = null;
                 } else if (RaceLogRaceStatus.isActive(status)) {
                     filteredItems.add(raceItem);
                     // new run for both types!

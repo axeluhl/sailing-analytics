@@ -178,6 +178,8 @@ public class RRS26StartPhaseFragment extends RaceFragment implements RRS26StartP
     }
 
     private void setNextFlagCountdownLabel(long millisecondsTillStart) {
+        //TODO This method needs to be reviewed and changed. Why List<Object>? Isn't there any more concrete return value type than Object?
+        //Furthermore the Flag name is not shown correctly
         Pair<String, List<Object>> countdownStringPackage = getRace().getState().getStartProcedure()
                 .getNextFlagCountdownUiLabel(getActivity(), millisecondsTillStart);
         CharSequence countdownTime = TimeUtils

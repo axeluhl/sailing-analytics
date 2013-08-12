@@ -12,11 +12,16 @@ public class CourseAreaArrayAdapter extends NamedArrayAdapter<CourseArea> {
     public CourseAreaArrayAdapter(Context context, List<CourseArea> namedList) {
         super(context, namedList);
     }
-    
+
     @Override
     public boolean isEnabled(int position) {
         CourseArea courseArea = getItem(position);
-        return AppPreferences.getManagedCourseAreaNames(getContext()).contains(courseArea.getName());
+        if (AppPreferences.getManagedCourseAreaNames(getContext()).contains(courseArea.getName())) {
+            return true;
+        } else if (AppPreferences.getManagedCourseAreaNames(getContext()).contains("*")) {
+            return true;
+        } else {
+            return false;
+        }
     }
-
 }

@@ -58,10 +58,14 @@ public class SeriesJsonSerializer implements JsonSerializer<Series> {
                     raceColumnJson.put("isLive", trackedRace.isLive(MillisecondsTimePoint.now()));
                     raceColumnJson.put("isTracked", true);
                     raceColumnJson.put("trackedRaceName", trackedRace.getRace().getName());
+                    raceColumnJson.put("hasGpsData", trackedRace.hasGPSData());
+                    raceColumnJson.put("hasWindData", trackedRace.hasWindData());
                 } else {
                     raceColumnJson.put("isLive", false);
                     raceColumnJson.put("isTracked", false);
                     raceColumnJson.put("trackedRaceName", null);
+                    raceColumnJson.put("hasGpsData", false);
+                    raceColumnJson.put("hasWindData", false);
                 }
                 racesPerFleetJson.add(raceColumnJson);
             }

@@ -168,8 +168,7 @@ public abstract class AbstractDataRetriever implements DataRetriever {
 					Collections.<String> emptyList(),
 					new ArrayList<GpxPosition>());
 
-			TrackReader<E, F> trackReader = trackRetriever
-					.retrieveTrackReader(element);
+			TrackReader<E, F> trackReader = trackRetriever.retrieveTrackReader(element);
 			trackReader.getLocker().lock();
 			try {
 				Iterable<F> fixesIter = rawFixes ? trackReader

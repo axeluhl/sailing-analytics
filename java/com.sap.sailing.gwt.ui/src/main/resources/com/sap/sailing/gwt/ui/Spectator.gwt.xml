@@ -41,4 +41,5 @@
   <source path='test'/>
   <source path='actions'/>
   <source path='masterdataimport'/>
+  <source path='simulator'/>
 </module>
