@@ -155,7 +155,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 .get(PARAM_SHOW_RANK_CHART).get(0)) : false;  
                 
         Widget leaderboardViewer;
-        if(leaderboardType.isMetaLeaderboard()) {
+        if (leaderboardType.isMetaLeaderboard()) {
             leaderboardViewer = new MetaLeaderboardViewer(sailingService, new AsyncActionsExecutor(),
                     leaderboardSettings, null, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages, userAgent,
                     showRaceDetails, autoExpandLastRaceColumn, showRankChart);
@@ -164,9 +164,8 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages, userAgent,
                     showRaceDetails, autoExpandLastRaceColumn, showRankChart);
         }
-        
-         contentScrollPanel.setWidget(leaderboardViewer);
-         mainPanel.add(contentScrollPanel);
+        contentScrollPanel.setWidget(leaderboardViewer);
+        mainPanel.add(contentScrollPanel);
     }
    
     private RaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
