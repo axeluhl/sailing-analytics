@@ -80,7 +80,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         leaderboardName = Window.Location.getParameter("name");
         leaderboardGroupName = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
 
-        if(leaderboardName != null) {
+        if (leaderboardName != null) {
             sailingService.checkLeaderboardName(leaderboardName, new AsyncCallback<Pair<String, LeaderboardType>>() {
                 @Override
                 public void onSuccess(Pair<String, LeaderboardType> leaderboardNameAndType) {
