@@ -16,8 +16,8 @@ import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.Grouper;
 import com.sap.sailing.datamining.impl.AbstractDimension;
 import com.sap.sailing.datamining.impl.CompoundGroupKey;
+import com.sap.sailing.datamining.impl.GenericGroupKey;
 import com.sap.sailing.datamining.impl.GroupByDimension;
-import com.sap.sailing.datamining.impl.StringGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
 
 public class TestGroupers {
@@ -152,6 +152,19 @@ public class TestGroupers {
             return getGroupKeyFor(dataEntry);
         }
         
+    }
+    
+    public class StringGroupKey extends GenericGroupKey<String> {
+        
+        public StringGroupKey(String value) {
+            super(value);
+        }
+
+        @Override
+        public String asString() {
+            return getValue();
+        }
+
     }
 
 }

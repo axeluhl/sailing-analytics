@@ -2,19 +2,24 @@ package com.sap.sailing.datamining.impl.gpsfix;
 
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.GPSFixWithContext;
+import com.sap.sailing.datamining.impl.GenericGroupKey;
 import com.sap.sailing.datamining.impl.GroupByDimension;
-import com.sap.sailing.datamining.impl.StringGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
 
-public class GroupGPSFixesByDimension extends GroupByDimension<GPSFixWithContext, String> {
+public class GroupGPSFixesByDimension<ValueType> extends GroupByDimension<GPSFixWithContext, ValueType> {
 
-    public GroupGPSFixesByDimension(Dimension<GPSFixWithContext, String>... dimensions) {
+    public GroupGPSFixesByDimension(Dimension<GPSFixWithContext, ValueType>... dimensions) {
         super(dimensions);
     }
 
     @Override
-    protected GroupKey createGroupKeyFor(GPSFixWithContext dataEntry, Dimension<GPSFixWithContext, String> dimension) {
-        return new StringGroupKey(dimension.getDimensionValueFrom(dataEntry));
+    protected GroupKey createGroupKeyFor(GPSFixWithContext dataEntry, Dimension<GPSFixWithContext, ValueType> dimension) {
+        return new GenericGroupKey<ValueType>(dimension.getDimensionValueFrom(dataEntry)) {
+            @Override
+            public String asString() {
+                return getValue().toString();
+            }
+        };
     }
 
 }
