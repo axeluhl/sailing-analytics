@@ -71,23 +71,25 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
             Competitor deserializedCompetitor = competitorDeserializer.deserialize(competitorJson);
             competitorsById.put(deserializedCompetitor.getId().toString(), deserializedCompetitor);
         }
+        final LeaderboardMasterData result;
         if (isRegattaLeaderBoard) {
             String regattaName = (String) object.get(LeaderboardMasterDataJsonSerializer.FIELD_REGATTA_NAME);
-            return new RegattaLeaderboardMasterData(name, displayName, resultDiscardingRule, competitorsById,
+            result = new RegattaLeaderboardMasterData(name, displayName, resultDiscardingRule, competitorsById,
                     scoreCorrection, regattaName, carriedPoints, suppressedCompetitors, displayNamesByCompetitorId,
                     raceLogEvents);
 
         } else {
             ScoringScheme scoringScheme = deserializeScoringScheme((JSONObject) object
-                    .get(LeaderboardMasterDataJsonSerializer.FIELD_SCORING_SCHEME));
+                    .get(LeaderboardMasterDataJsonSerializer.FIELD_SCORING_SCHEME), domainFactory);
             String courseAreaId = deserializeCourseAreaId((JSONObject) object
                     .get(LeaderboardMasterDataJsonSerializer.FIELD_COURSE_AREA));
             List<RaceColumnMasterData> raceColumns = deserializeRaceColumns((JSONArray) object
                     .get(LeaderboardMasterDataJsonSerializer.FIELD_RACE_COLUMNS));
-            return new FlexibleLeaderboardMasterData(name, displayName, resultDiscardingRule, competitorsById,
+            result = new FlexibleLeaderboardMasterData(name, displayName, resultDiscardingRule, competitorsById,
                     scoreCorrection, scoringScheme, courseAreaId, raceColumns, carriedPoints, suppressedCompetitors,
                     displayNamesByCompetitorId, raceLogEvents);
         }
+        return result;
     }
 
     private Map<String, Map<String, List<RaceLogEvent>>> deserializeRaceLogEvents(JSONArray jsonArray) {
@@ -230,12 +232,12 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
 
     }
 
-    private ScoringScheme deserializeScoringScheme(JSONObject jsonObject) {
+    public static ScoringScheme deserializeScoringScheme(JSONObject jsonObject, DomainFactory domainFactory) {
         String type = (String) jsonObject.get(LeaderboardMasterDataJsonSerializer.FIELD_TYPE);
         return domainFactory.createScoringScheme(ScoringSchemeType.valueOf(type));
     }
-
-    private int[] deserializeResultDesicardingRule(JSONObject jsonObject) {
+    
+    public static int[] deserializeResultDesicardingRule(JSONObject jsonObject) {
         JSONArray indeces = (JSONArray) jsonObject.get(LeaderboardMasterDataJsonSerializer.FIELD_INDICES);
         if (indeces == null) {
             return null;
