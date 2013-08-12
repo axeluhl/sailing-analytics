@@ -356,6 +356,8 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 
         mkdir -p configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
+        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-selector.xml configuration/jetty/etc
+        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
         cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
