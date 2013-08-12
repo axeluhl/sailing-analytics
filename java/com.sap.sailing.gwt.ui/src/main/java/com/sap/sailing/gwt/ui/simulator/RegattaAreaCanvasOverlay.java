@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.Context2d.TextAlign;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.maps.client.MapPaneType;
+import com.google.gwt.maps.client.MapType;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.event.MapMoveEndHandler;
 import com.google.gwt.maps.client.event.PolygonClickHandler;
@@ -12,10 +15,14 @@ import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
 import com.google.gwt.maps.client.overlay.Polygon;
+import com.sap.sailing.gwt.ui.client.shared.racemap.ImageTransformer;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
+import com.sap.sailing.gwt.ui.simulator.util.SimulatorResources;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
 public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
+
+    private static SimulatorResources resources = GWT.create(SimulatorResources.class);
 
 	private SimulatorMap simulatorMap;
     private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
@@ -24,6 +31,11 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 	private RegattaArea currentRegArea = null;
 	private double raceBearing = 0.0;
 	private double diffBearing = 0.0;
+	
+	private ImageTransformer windRoseBackground;
+	private ImageTransformer windRoseNeedle;
+	private int windBackgroundOffset = 20;
+	private int windNeedleOffset = 30;
 
 	public RegattaAreaCanvasOverlay(SimulatorMap simulatorMap) {
 		super();
@@ -42,6 +54,16 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 	protected void initialize(final MapWidget map) {
 		super.initialize(map);
 
+		windRoseBackground = new ImageTransformer(resources.windRoseBackground());
+		windRoseNeedle = new ImageTransformer(resources.windRoseNeedle());
+
+        this.pane = map.getPane(MapPaneType.MAP_PANE);
+        getPane().add(windRoseBackground.getCanvas(), getWidgetPosLeft()+windBackgroundOffset, getWidgetPosTop());
+        getPane().add(windRoseNeedle.getCanvas(), getWidgetPosLeft()+windBackgroundOffset+windNeedleOffset, getWidgetPosTop()+windNeedleOffset);
+
+        //System.out.println("wBackgr: "+getPane().getWidgetIndex(windRoseBackground.getCanvas()));
+        //System.out.println("wNeedle: "+getPane().getWidgetIndex(windRoseNeedle.getCanvas()));
+        
 		LatLng cPos;
 		regAreas = new ArrayList<RegattaArea>();
 		int regIdx;
@@ -174,6 +196,9 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 	protected void redraw(final boolean force) {
 		super.redraw(force);
 
+        getPane().setWidgetPosition(windRoseBackground.getCanvas(), getWidgetPosLeft()+windBackgroundOffset, getWidgetPosTop());
+        getPane().setWidgetPosition(windRoseNeedle.getCanvas(), getWidgetPosLeft()+windBackgroundOffset+windNeedleOffset, getWidgetPosTop()+windNeedleOffset);
+
 		clear();
 		drawRegattaAreas();
 
@@ -187,7 +212,10 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 	protected void drawRegattaAreas() {
 
 		clear();
-
+		
+        windRoseBackground.drawTransformedImage(0.0, 1.0);
+        windRoseNeedle.drawTransformedImage(raceBearing+180.0, 1.0);
+        
 		LatLng cPos = LatLng.newInstance(54.4344,10.19659167);
 		Point centerPoint = getMap().convertLatLngToDivPixel(cPos);
 		Point borderPoint = getMap().convertLatLngToDivPixel(this.getEdgePoint(cPos, 0.015));
@@ -196,11 +224,14 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 		final Context2d context2d = canvas.getContext2d();
 		context2d.setLineWidth(3);
 		context2d.setStrokeStyle("Black");
-
-		for(RegattaArea regArea : regAreas) {
-			centerPoint = getMap().convertLatLngToDivPixel(regArea.centerPos);
-			borderPoint = getMap().convertLatLngToDivPixel(regArea.edgePos);
-			drawRegattaAreaBackground(context2d, centerPoint, borderPoint, regArea.color, pxStroke);
+		
+		MapType normalMap = MapType.getNormalMap();
+		if (this.getMap().getCurrentMapType() == normalMap) {
+			for(RegattaArea regArea : regAreas) {
+				centerPoint = getMap().convertLatLngToDivPixel(regArea.centerPos);
+				borderPoint = getMap().convertLatLngToDivPixel(regArea.edgePos);
+				drawRegattaAreaBackground(context2d, centerPoint, borderPoint, regArea.color, pxStroke);
+			}
 		}
 
 		for(RegattaArea regArea : regAreas) {
@@ -279,8 +310,11 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 	}
 
 	protected void updateRaceCourse(int type, double bearing) {
+		
+		
 		if (type == 1) {
 			raceBearing = bearing;
+	        windRoseNeedle.drawTransformedImage(raceBearing+180.0, 1.0);
 		} else if (type == 2) {
 			diffBearing = bearing;			
 		}

@@ -51,6 +51,12 @@ public class WindPatternSettingListBox implements WindPatternSetting<String>, Is
     }
 
     @Override
+    public String getResolution() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public String getDefault() {
         // TODO Auto-generated method stub
         return null;

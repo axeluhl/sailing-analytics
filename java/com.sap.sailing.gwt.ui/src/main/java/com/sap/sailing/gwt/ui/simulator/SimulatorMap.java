@@ -318,7 +318,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 // mapw.setUI(SimulatorMapOptions.newInstance());
                 // mapw.setSize("100%", "650px");
                 // mapw.setSize("100%", "80%");
-
+                
                 mapw.addControl(new LargeMapControl3D(), new ControlPosition(ControlAnchor.TOP_RIGHT, /* offsetX */0, /* offsetY */
                         30));
                 mapw.addControl(new MenuMapTypeControl());
@@ -394,7 +394,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         // pathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
         this.replayPathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
         // timeListeners.add(replayPathCanvasOverlay);
-        this.legendCanvasOverlay = new PathLegendCanvasOverlay();
+        this.legendCanvasOverlay = new PathLegendCanvasOverlay(this.mode);
 
 		Window.addResizeHandler(new ResizeHandler() {
 
