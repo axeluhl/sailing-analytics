@@ -4,6 +4,8 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.LeaderboardMasterData;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 
 /**
  * Holds leaderboard group object AND its leaderboards, etc
@@ -56,8 +58,9 @@ public class LeaderboardGroupMasterData {
         return overallLeaderboardScoringScheme;
     }
 
-    public int[] getOverallLeaderboardDiscardingRule() {
-        return overallLeaderboardDiscardingRule;
+    public ThresholdBasedResultDiscardingRule getOverallLeaderboardDiscardingRule() {
+        return overallLeaderboardDiscardingRule == null ? new ThresholdBasedResultDiscardingRuleImpl(new int[0]) :
+            new ThresholdBasedResultDiscardingRuleImpl(overallLeaderboardDiscardingRule);
     }
 
     public Iterable<LeaderboardMasterData> getLeaderboards() {
