@@ -16,7 +16,7 @@ public class TestAggregators {
     @Test
     public void testSumAggregator() {
         Collection<Integer> data = Arrays.asList(1, 7, 6, 3);
-        Aggregator<Integer, Integer> sumAggregator = new SimpleIntegerSumAggregator();
+        Aggregator<Integer, Integer> sumAggregator = new IntegerSumAggregator();
         Integer expectedAggregation = 17;
         assertEquals(expectedAggregation, sumAggregator.aggregate(data));
     }
@@ -24,18 +24,9 @@ public class TestAggregators {
     @Test
     public void testAverageAggregator() {
         Collection<Integer> data = Arrays.asList(1, 7, 6, 3);
-        Aggregator<Integer, Integer> averageAggregator = new IntegerAverageAggregator<Integer>(new SimpleIntegerSumAggregator());
+        Aggregator<Integer, Integer> averageAggregator = new IntegerAverageAggregator();
         Integer expectedAggregation = 4;
         assertEquals(expectedAggregation, averageAggregator.aggregate(data));
-    }
-    
-    private class SimpleIntegerSumAggregator extends IntegerSumAggregator<Integer> {
-
-        @Override
-        protected Integer getValueFor(Integer extractedValue) {
-            return extractedValue;
-        }
-        
     }
 
 }

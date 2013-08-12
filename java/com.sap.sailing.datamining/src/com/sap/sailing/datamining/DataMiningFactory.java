@@ -1,11 +1,15 @@
 package com.sap.sailing.datamining;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 
 import com.sap.sailing.datamining.impl.DataAmountExtractor;
 import com.sap.sailing.datamining.impl.FilterByCriteriaImpl;
 import com.sap.sailing.datamining.impl.QueryImpl;
+import com.sap.sailing.datamining.impl.aggregators.DoubleAverageAggregator;
+import com.sap.sailing.datamining.impl.aggregators.DoubleSumAggregator;
+import com.sap.sailing.datamining.impl.aggregators.IntegerAverageAggregator;
+import com.sap.sailing.datamining.impl.aggregators.IntegerSumAggregator;
 import com.sap.sailing.datamining.impl.criterias.DimensionValuesFilterCriteria;
 import com.sap.sailing.datamining.impl.gpsfix.GPSFixRetrieverImpl;
 import com.sap.sailing.datamining.impl.gpsfix.GroupGPSFixesByDimension;
@@ -64,25 +68,39 @@ public class DataMiningFactory {
         return new DimensionValuesFilterCriteria<DataType, ValueType>(dimension, values);
     }
 
-    public static <ValueType> Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(Dimension<GPSFixWithContext, ValueType>... dimensions) {
-        Collection<Dimension<GPSFixWithContext, ValueType>> dimensionCollection = Arrays.asList(dimensions);
-        return new GroupGPSFixesByDimension<ValueType>(dimensionCollection);
+    public static <ValueType> Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(GPSFix... dimensionTypes) {
+        Collection<Dimension<GPSFixWithContext, ValueType>> dimensions = new HashSet<Dimension<GPSFixWithContext, ValueType>>();
+        for (GPSFix dimensionType : dimensionTypes) {
+            Dimension<GPSFixWithContext, ValueType> dimension = Dimensions.GPSFix.getDimensionFor(dimensionType);
+            dimensions.add(dimension);
+        }
+        return new GroupGPSFixesByDimension<ValueType>(dimensions);
     }
 
     public static <DataType> Extractor<DataType, Integer> createDataAmountExtractor() {
         return new DataAmountExtractor<DataType>();
     }
-
-    public static <ExtractedType, AggregatedType> Aggregator<ExtractedType, AggregatedType> createAggregator(
-            AggregatorType aggregatorType) {
-//        switch (aggregatorType) {
-//        case Average:
-//            return new AverageAggregator<ValueType, AveragesTo>();
-//        case Sum:
-//            return new SumAggregator<ValueType, AveragesTo>();
-//
-//        }
+    
+    public static Aggregator<Integer, Integer> createIntegerAggregator(AggregatorType aggregatorType) {
+        switch (aggregatorType) {
+        case Average:
+            return new IntegerAverageAggregator();
+        case Sum:
+            return new IntegerSumAggregator();
+        }
         throw new IllegalArgumentException("Not yet implemented for the given aggregator type: "
                 + aggregatorType.toString());
     }
+    
+    public static Aggregator<Double, Double> createDoubleAggregator(AggregatorType aggregatorType) {
+        switch (aggregatorType) {
+        case Average:
+            return new DoubleAverageAggregator();
+        case Sum:
+            return new DoubleSumAggregator();
+        }
+        throw new IllegalArgumentException("Not yet implemented for the given aggregator type: "
+                + aggregatorType.toString());
+    }
+
 }

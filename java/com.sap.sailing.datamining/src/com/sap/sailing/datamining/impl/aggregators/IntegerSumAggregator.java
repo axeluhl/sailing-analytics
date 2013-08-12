@@ -1,6 +1,6 @@
 package com.sap.sailing.datamining.impl.aggregators;
 
-public abstract class IntegerSumAggregator<ExtractedType> extends SumAggregator<ExtractedType, Integer> {
+public class IntegerSumAggregator extends SimpleSumAggregator<Integer> {
 
     @Override
     protected Integer add(Integer value1, Integer value2) {

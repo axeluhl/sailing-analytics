@@ -1,9 +1,9 @@
 package com.sap.sailing.datamining.impl.aggregators;
 
-public class DoubleAverageAggregator<ExtractedType> extends AverageAggregator<ExtractedType, Double> {
+public class DoubleAverageAggregator extends SimpleAverageAggregator<Double> {
 
-    public DoubleAverageAggregator(SumAggregator<ExtractedType, Double> sumAggregator) {
-        super(sumAggregator);
+    public DoubleAverageAggregator() {
+        super(new DoubleSumAggregator());
     }
 
     @Override
