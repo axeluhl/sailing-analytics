@@ -24,22 +24,26 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindStepping;
+import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionChangeListener, RegattaDisplayer {
+public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionChangeListener, RegattaDisplayer, Component<PolarSheetGenerationSettings> {
 
-    // TODO UI stuff
     public static final String POLARSHEETS_STYLE = "polarSheets";
 
     private SailingServiceAsync sailingService;
@@ -66,8 +70,10 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
 
     private ScrollPanel leftScrollPanel;
 
+    private PolarSheetGenerationSettings settings;
+
     public PolarSheetsPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            StringMessages stringMessages, PolarSheetsEntryPoint polarSheetsEntryPoint) {
+            final StringMessages stringMessages, PolarSheetsEntryPoint polarSheetsEntryPoint) {
         this.polarSheetsEntryPoint = polarSheetsEntryPoint;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -96,8 +102,14 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         Button exportButton = new Button("Export");
         setExportButtonListener(exportButton);
         leftPanel.add(exportButton);
+
+        
         add(rightPanel);
         setEventListenersForPolarSheetChart();
+        
+        PolarSheetGenerationSettings initialSettings = new PolarSheetGenerationSettingsImpl(200, 0.1, 10, 20, 0.5);
+        settings = initialSettings;
+        chartPanel.setSettings(initialSettings);
     }
 
     private void setExportButtonListener(Button exportButton) {
@@ -234,6 +246,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
                 polarSheetsEntryPoint, raceSelectionProvider, stringMessages, true, new RaceFilter(true, true),
                 polarSheetsGenerationButtonClickHandler);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
+        polarSheetsTrackedRacesList.setSettingsHandler(this);
     }
 
     protected void startPolarSheetGeneration() {
@@ -241,7 +254,8 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         final List<RegattaAndRaceIdentifier> selectedRacesInArrayList = new ArrayList<RegattaAndRaceIdentifier>();
         selectedRacesInArrayList.addAll(selectedRaces);
         polarSheetsTrackedRacesList.changeGenerationButtonState(false);
-        sailingService.generatePolarSheetForRaces(selectedRacesInArrayList, new AsyncCallback<PolarSheetGenerationTriggerResponse>() {
+        sailingService.generatePolarSheetForRaces(selectedRacesInArrayList, settings,
+                new AsyncCallback<PolarSheetGenerationTriggerResponse>() {
 
             @Override
             public void onSuccess(PolarSheetGenerationTriggerResponse result) {
@@ -346,5 +360,31 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         };
         timer.schedule(600);
         super.onLoad();
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return true;
+    }
+
+    @Override
+    public SettingsDialogComponent<PolarSheetGenerationSettings> getSettingsDialogComponent() {
+        return new PolarSheetGenerationSettingsDialogComponent(settings, stringMessages);
+    }
+
+    @Override
+    public void updateSettings(PolarSheetGenerationSettings newSettings) {
+        settings = newSettings;
+        chartPanel.setSettings(newSettings);
+    }
+
+    @Override
+    public String getLocalizedShortName() {
+        return stringMessages.polars();
+    }
+
+    @Override
+    public Widget getEntryWidget() {
+        return this;
     }
 }

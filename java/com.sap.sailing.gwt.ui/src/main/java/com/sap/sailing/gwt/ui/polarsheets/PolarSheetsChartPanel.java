@@ -18,6 +18,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -28,6 +29,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
     private Map<String, Series[]> seriesMap;
     
     private Map<Series, String> nameForSeries = new HashMap<Series, String>();
+    private PolarSheetGenerationSettings settings;
 
     public PolarSheetsChartPanel(StringMessages stringMessages) {
         super(Unit.PCT);
@@ -95,8 +97,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         for (int count : dataCountPerAngleForWindspeed) {
             sum = sum + count;
         }
-        //TODO make configurable
-        if (sum > /*Make this configurable*/200) {
+        if (sum >= settings.getMinimumDataCountPerGraph()) {
             return true;
         }
         return false;
@@ -110,10 +111,10 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
             return null;
         }
         for (int i = 0; i < 360; i++) {
-            //TODO make configurable
-            if (result.getHistogramDataMap().get(windspeed) == null || 
-                    result.getHistogramDataMap().get(windspeed).get(i) == null || 
-                    result.getHistogramDataMap().get(windspeed).get(i).getConfidenceMeasure() < 0) {
+            if (result.getHistogramDataMap().get(windspeed) == null
+                    || result.getHistogramDataMap().get(windspeed).get(i) == null
+                    || result.getHistogramDataMap().get(windspeed).get(i).getConfidenceMeasure() < settings
+                            .getMinimumConfidenceMeasure()) {
                 continue;
             }
             if (points[i] == null) {
@@ -210,6 +211,10 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
     public void hideLoadingInfo() {
         chart.hideLoading();
         
+    }
+
+    public void setSettings(PolarSheetGenerationSettings newSettings) {
+        settings = newSettings;   
     }
 
 }

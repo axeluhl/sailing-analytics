@@ -34,6 +34,7 @@ import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -58,11 +59,13 @@ public class PolarSheetGenerationServiceTest {
     public void testPolarSheetGenerationService() throws InterruptedException {
          
         SailingService service = new MockSailingServiceForPolarSheetGeneration();
+
+        PolarSheetGenerationSettingsImpl settings = new PolarSheetGenerationSettingsImpl(200, 0.1, 10, 20, 0.5);
         
         List<RegattaAndRaceIdentifier> idList = new ArrayList<RegattaAndRaceIdentifier>();
         idList.add(new RegattaNameAndRaceName("IrgendeineRegatta", "IrgendeinRennen"));
         
-        PolarSheetGenerationTriggerResponse triggerData = service.generatePolarSheetForRaces(idList);
+        PolarSheetGenerationTriggerResponse triggerData = service.generatePolarSheetForRaces(idList, settings);
         Assert.assertNotNull(triggerData);
         Assert.assertEquals(BOAT_CLASS, triggerData.getBoatClassName());
         Assert.assertNotNull(triggerData.getId());
@@ -84,9 +87,6 @@ public class PolarSheetGenerationServiceTest {
         Assert.assertEquals(4.0, results.getAveragedPolarDataByWindSpeed()[0][45]);
         Assert.assertEquals(2.0, results.getAveragedPolarDataByWindSpeed()[0][55]);
         Assert.assertEquals(6.0, results.getAveragedPolarDataByWindSpeed()[0][30]);
-        
-        
-        
         
     }
     

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -28,45 +29,60 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.polarsheets.PerRaceAndCompetitorPolarSheetGenerationWorker;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
+import com.sap.sailing.domain.polarsheets.PolarSheetHistogramBuilder;
 import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingByTimeComparator;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 
 public class PolarSheetGenerationTest {
     
     @Test
     public void testPolarSheetRawDataGeneration() throws InterruptedException {
-        Executor executor = new ThreadPoolExecutor(/* corePoolSize */ Runtime.getRuntime().availableProcessors(),
-                /* maximumPoolSize */ Runtime.getRuntime().availableProcessors(),
-                /* keepAliveTime */ 60, TimeUnit.SECONDS,
-                /* workQueue */ new LinkedBlockingQueue<Runnable>());
-        
+        Executor executor = new ThreadPoolExecutor(/* corePoolSize */Runtime.getRuntime().availableProcessors(),
+        /* maximumPoolSize */Runtime.getRuntime().availableProcessors(),
+        /* keepAliveTime */60, TimeUnit.SECONDS,
+        /* workQueue */new LinkedBlockingQueue<Runnable>());
+
         MockTrackedRaceForPolarSheetGeneration race = new MockTrackedRaceForPolarSheetGeneration();
-        
+
+        PolarSheetGenerationSettingsImpl settings = new PolarSheetGenerationSettingsImpl(200, 0.1, 1, 20, 0.5);
+
         TimePoint startTime = new MillisecondsTimePoint(9);
         TimePoint endTime = new MillisecondsTimePoint(80);
-        //Only used for storing and exporting results in this test case:
-        PolarSheetGenerationWorker resultContainer = new PolarSheetGenerationWorker(new HashSet<TrackedRace>(), executor);
-        
+        // Only used for storing and exporting results in this test case:
+        PolarSheetGenerationWorker resultContainer = new PolarSheetGenerationWorker(new HashSet<TrackedRace>(),
+                settings, executor);
+
         BoatClass forelle = new BoatClassImpl("Forelle", true);
-        Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", new TeamImpl("SAP", null, null), new BoatImpl("Schnelle Forelle", forelle, "GER000"));
-        
-        PerRaceAndCompetitorPolarSheetGenerationWorker task = new PerRaceAndCompetitorPolarSheetGenerationWorker(race, resultContainer, startTime, endTime, competitor);
-        
+        Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", new TeamImpl("SAP", null, null),
+                new BoatImpl("Schnelle Forelle", forelle, "GER000"));
+
+        PerRaceAndCompetitorPolarSheetGenerationWorker task = new PerRaceAndCompetitorPolarSheetGenerationWorker(race,
+                resultContainer, startTime, endTime, competitor, settings);
+  
         executor.execute(task);
         
         double timeUntilTimeout = 1000;
@@ -83,6 +99,34 @@ public class PolarSheetGenerationTest {
         Assert.assertEquals(2.0, data.getAveragedPolarDataByWindSpeed()[0][55]);
         Assert.assertEquals(6.0, data.getAveragedPolarDataByWindSpeed()[0][35]);
         
+    }
+    
+    @Test
+    public void testHistogramBuilder() {
+        PolarSheetGenerationSettingsImpl settings = new PolarSheetGenerationSettingsImpl(200, 0.1, 10, 10, 0.5);
+        PolarSheetHistogramBuilder builder = new PolarSheetHistogramBuilder(settings);
+        
+        
+        List<Double> rawData = new ArrayList<Double>();
+        rawData.add(1.09);
+        rawData.add(1.0);
+        rawData.add(1.11);
+        rawData.add(1.46);
+        rawData.add(1.56);
+        rawData.add(2.05);
+        rawData.add(2.09);
+        rawData.add(3.0);
+        rawData.add(2.999);
+        PolarSheetsHistogramData result = builder.build(rawData, 0, 0);
+        Number[] xValues = result.getxValues();
+        Assert.assertEquals(10, xValues.length);
+        Assert.assertTrue(xValues[4].doubleValue() > 1.9 - 0.001 && xValues[4].doubleValue() < 1.9 + 0.001);
+        Number[] yValues = result.getyValues();
+        Assert.assertEquals(10, yValues.length);
+        Assert.assertEquals(3, yValues[0]);
+        Assert.assertEquals(null, yValues[1]);
+        Assert.assertEquals(2, yValues[2]);
+        Assert.assertEquals(2, yValues[9]);
     }
     
     
@@ -107,6 +151,24 @@ public class PolarSheetGenerationTest {
         public Wind getWind(Position p, TimePoint at) {
             Wind wind = new WindImpl(p, at, new KnotSpeedWithBearingImpl(2.0, new DegreeBearingImpl(180.0)));
             return wind;
+        }
+        
+        @Override
+        public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+            return getWind(p, at);
+        }
+        
+        @Override
+        public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
+            return new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(new WindImpl(p, at,
+                    new KnotSpeedWithBearingImpl(2.0, new DegreeBearingImpl(180.0))), 0.9,
+                    new Pair<Position, TimePoint>(p, at), true);
+        }
+        
+        @Override
+        public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+                Iterable<WindSource> windSourcesToExclude) {
+            return getWindWithConfidence(p, at);
         }
         
         @Override
@@ -136,6 +198,13 @@ public class PolarSheetGenerationTest {
             passings.add(new MarkPassingImpl(new MillisecondsTimePoint(60), null, competitor));
             passings.add(new MarkPassingImpl(new MillisecondsTimePoint(70), null, competitor));
             return passings;
+        }
+        
+        @Override
+        public Iterable<WindSource> getWindSources(WindSourceType type) {
+            List<WindSource> sources = new ArrayList<WindSource>();
+            sources.add(new WindSourceImpl(type));
+            return sources;
         }
     }
     

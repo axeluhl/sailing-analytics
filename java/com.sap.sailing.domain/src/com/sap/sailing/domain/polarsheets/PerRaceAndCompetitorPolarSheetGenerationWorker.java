@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -44,15 +45,18 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable{
     
     private int finishedEarlyAtWaypoint = -1;
 
+    private PolarSheetGenerationSettings settings;
+
     public PerRaceAndCompetitorPolarSheetGenerationWorker(TrackedRace race,
             PolarSheetGenerationWorker polarSheetGenerationWorker, TimePoint startTime, TimePoint endTime,
-            Competitor competitor) {
+            Competitor competitor, PolarSheetGenerationSettings settings) {
         super();
         this.race = race;
         this.polarSheetGenerationWorker = polarSheetGenerationWorker;
         this.startTime = startTime;
         this.endTime = endTime;
         this.competitor = competitor;
+        this.settings = settings;
         this.oddFixClassifier = new AngleSpeedOddClassifier();
         optimizeStartTime();
         optimizeEndTime();
@@ -124,7 +128,7 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable{
 
                 WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = race.getWindWithConfidence(
                         fix.getPosition(), fix.getTimePoint());
-                if (windWithConfidence.useSpeed() && windWithConfidence.getConfidence() > 0.2) {
+                if (windWithConfidence.useSpeed() && windWithConfidence.getConfidence() >= settings.getMinimumWindConfidence()) {
                     PolarFix polarFix = new PolarFix(fix, race);
 
                     if (oddFixClassifier.classifiesAsOdd(polarFix)) {
