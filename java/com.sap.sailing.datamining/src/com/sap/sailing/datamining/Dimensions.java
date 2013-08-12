@@ -100,7 +100,7 @@ public class Dimensions {
          * @return The dimension for the given dimension type. Throws an exception, if the used <code>ValueType</code> doesn't match the <code>ValueType</code> of the returning dimension.
          */
         @SuppressWarnings("unchecked")
-        public static <ValueType> Dimension<GPSFixWithContext, ValueType> getDimensionFor(com.sap.sailing.datamining.shared.Dimensions.GPSFix dimension) {
+        public static <ValueType> Dimension<GPSFixWithContext, ValueType> getDimensionFor(com.sap.sailing.datamining.shared.SharedDimensions.GPSFix dimension) {
             switch (dimension) {
             case BoatClassName:
                 return (Dimension<GPSFixWithContext, ValueType>) BoatClassName;

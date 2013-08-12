@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
@@ -14,6 +14,7 @@ import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.datamining.shared.GroupKey;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -22,43 +23,50 @@ public class QueryResultsChart extends SimplePanel {
     private StringMessages stringMessages;
     
     private Chart chart;
-    private Series resultSeries;
+    private Map<GroupKey, Series> series;
 
     public QueryResultsChart(StringMessages stringMessages) {
         super();
         this.stringMessages = stringMessages;
+        series = new HashMap<GroupKey, Series>();
         
         createChart();
         setWidget(chart);
     }
 
-    public void showResult(QueryResult result) {
+    public void showResult(QueryResult<Integer> result) {
         reset();
         
-        List<String> keys = new ArrayList<String>(result.getResults().keySet());
-        Collections.sort(keys);
-        chart.getXAxis().setCategories((String[]) keys.toArray(new String[keys.size()]));
+        List<GroupKey> keys = result.getSortedKeys();
+        String[] categories = new String[keys.size()];
+        int index = 0;
+        for (GroupKey groupKey : keys) {
+            categories[index] = groupKey.getMainKey().asString();
+            index++;
+        }
+        chart.getXAxis().setCategories(categories);
         
-        for (String key : keys) {
-            Point point = new Point(key, result.getResults().get(key));
-            resultSeries.addPoint(point);
+        for (GroupKey key : keys) {
+            Point point = new Point(key.getMainKey().asString(), result.getResults().get(key));
+            getOrCreateSeries(key).addPoint(point);
         }
         
-        ensureChartContainsSeries();
+        for (Series series : this.series.values()) {
+            chart.addSeries(series, false, false);
+        }
+        chart.redraw();
     }
     
-    private void ensureChartContainsSeries() {
-        for (Series containedSeries : chart.getSeries()) {
-            if (resultSeries.equals(containedSeries)) {
-                return;
-            }
+    private Series getOrCreateSeries(GroupKey key) {
+        if (!series.containsKey(key)) {
+            series.put(key, chart.createSeries().setName(key.asString()));
         }
-        
-        chart.addSeries(resultSeries);
+        return series.get(key);
     }
     
     private void reset() {
-        resultSeries.setPoints(new Point[0]);
+        chart.removeAllSeries(false);
+        series = new HashMap<GroupKey, Series>();
     }
 
     private void createChart() {
@@ -80,8 +88,6 @@ public class QueryResultsChart extends SimplePanel {
                         }
                     }
                 }));
-        
-        resultSeries = chart.createSeries().setName("Result");
 
 //        chart.setToolTip(new ToolTip()
 //                .setPointFormat("<span style=\"color:{series.color}\">{series.name}</span>: <b>{point.y}s</b><br/>"));

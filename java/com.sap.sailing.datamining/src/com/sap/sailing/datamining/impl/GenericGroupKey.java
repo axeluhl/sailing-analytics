@@ -18,6 +18,11 @@ public abstract class GenericGroupKey<T> extends AbstractGroupKey {
     public boolean hasSubKey() {
         return false;
     }
+    
+    @Override
+    public GroupKey getMainKey() {
+        return this;
+    }
 
     @Override
     public GroupKey getSubKey() {

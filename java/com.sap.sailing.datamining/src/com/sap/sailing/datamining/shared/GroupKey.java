@@ -13,6 +13,11 @@ public interface GroupKey {
      * @return true, if this group key has a sub key
      */
     public boolean hasSubKey();
+
+    /**
+     * @return the main key, if there is one. Otherwise it returns <code>this</code>. 
+     */
+    public GroupKey getMainKey();
     
     /**
      * @return the sub key or null, if there's none.

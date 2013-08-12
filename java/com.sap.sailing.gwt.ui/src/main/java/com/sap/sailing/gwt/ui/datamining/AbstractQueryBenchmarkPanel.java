@@ -16,19 +16,19 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class QueryBenchmarkPanel extends FlowPanel {
+public abstract class AbstractQueryBenchmarkPanel<DimensionType> extends FlowPanel {
     
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
     private StringMessages stringMessages;
-    private QueryComponentsProvider queryComponentsProvider;
+    private QueryComponentsProvider<DimensionType> queryComponentsProvider;
 
     private IntegerBox numberOfQueriesBox;
     private Label benchmarkStatusLabel;
     private QueryBenchmarkResultsChart resultsChart;
 
-    public QueryBenchmarkPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, QueryComponentsProvider queryComponentsProvider) {
+    public AbstractQueryBenchmarkPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
+            ErrorReporter errorReporter, QueryComponentsProvider<DimensionType> queryComponentsProvider) {
         super();
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -51,36 +51,49 @@ public class QueryBenchmarkPanel extends FlowPanel {
             @Override
             public void onSuccess(List<RegattaDTO> regattas) {
                 final int times = numberOfQueriesBox.getValue() == null ? 1 : numberOfQueriesBox.getValue();
-                runQuery(new ClientBenchmarkData(queryComponentsProvider.getSelection(), times, 1));
+                runQuery(new ClientBenchmarkData<DimensionType>(queryComponentsProvider.getSelection(), times, 1));
             }
         });
     }
 
-    private void runQuery(final ClientBenchmarkData benchmarkData) {
+    private void runQuery(final ClientBenchmarkData<DimensionType> benchmarkData) {
         final long startTime = System.currentTimeMillis();
-        sailingService.runQueryAsBenchmark(benchmarkData.getSelection(), queryComponentsProvider.getDimensionToGroupBy(),
-                                           queryComponentsProvider.getStatisticToCalculate(), queryComponentsProvider.getAggregationType(),
-                                           new AsyncCallback<Pair<Double, Integer>>() {
+        sendServerRequest(benchmarkData, new AsyncCallback<Pair<Double, Integer>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running a query: " + caught.getMessage());
             }
             @Override
             public void onSuccess(Pair<Double, Integer> result) {
-                long endTime = System.currentTimeMillis();
-                double overallTime = (endTime - startTime) / 1000.0;
-                resultsChart.addResult(new QueryBenchmarkResult(stringMessages.runAsSubstantive() + " " + benchmarkData.getCurrentRun(), result.getB().intValue(), result.getA(), overallTime));
-                
-                if (benchmarkData.isFinished()) {
-                    benchmarkStatusLabel.setText(" | " + stringMessages.done());
-                    resultsChart.showResults();
-                } else {
-                    benchmarkStatusLabel.setText(" | " + stringMessages.running() + " (" + stringMessages.lastFinished() + ": " + benchmarkData.getCurrentRun() + ")");
-                    benchmarkData.incrementCurrentRun();
-                    runQuery(benchmarkData);
-                }
+                updateResults(benchmarkData, startTime, result);
             }
         });
+    }
+
+    protected abstract void sendServerRequest(ClientBenchmarkData<DimensionType> benchmarkData, AsyncCallback<Pair<Double, Integer>> asyncCallback);
+    
+    protected SailingServiceAsync getSailingService() {
+        return sailingService;
+    }
+    
+    protected QueryComponentsProvider<DimensionType> getQueryComponentsProvider() {
+        return queryComponentsProvider;
+    }
+
+    private void updateResults(final ClientBenchmarkData<DimensionType> benchmarkData, final long startTime,
+            Pair<Double, Integer> result) {
+        long endTime = System.currentTimeMillis();
+        double overallTime = (endTime - startTime) / 1000.0;
+        resultsChart.addResult(new QueryBenchmarkResult(stringMessages.runAsSubstantive() + " " + benchmarkData.getCurrentRun(), result.getB().intValue(), result.getA(), overallTime));
+        
+        if (benchmarkData.isFinished()) {
+            benchmarkStatusLabel.setText(" | " + stringMessages.done());
+            resultsChart.showResults();
+        } else {
+            benchmarkStatusLabel.setText(" | " + stringMessages.running() + " (" + stringMessages.lastFinished() + ": " + benchmarkData.getCurrentRun() + ")");
+            benchmarkData.incrementCurrentRun();
+            runQuery(benchmarkData);
+        }
     }
 
     private HorizontalPanel createFunctionsPanel() {

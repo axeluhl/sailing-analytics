@@ -9,8 +9,8 @@ import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.datamining.shared.AggregatorType;
-import com.sap.sailing.datamining.shared.Dimension;
 import com.sap.sailing.datamining.shared.QueryResult;
+import com.sap.sailing.datamining.shared.SharedDimensions;
 import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
@@ -458,9 +458,9 @@ public interface SailingServiceAsync {
     /**
      * Creates and runs a data mining query with the specified properties.
      */
-    void runQueryAsBenchmark(Map<Dimension, Collection<?>> selection, Dimension groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs, AsyncCallback<Pair<Double, Integer>> asyncCallback);
+    void runGPSFixQueryAsBenchmark(Map<SharedDimensions.GPSFix, Collection<?>> selection, SharedDimensions.GPSFix groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs, AsyncCallback<Pair<Double, Integer>> asyncCallback);
 
-    void runQuery(Map<Dimension, Collection<?>> selection, Dimension groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs, AsyncCallback<QueryResult> asyncCallback);
+    void runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, SharedDimensions.GPSFix groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs, AsyncCallback<QueryResult<Integer>> asyncCallback);
     
 }
 

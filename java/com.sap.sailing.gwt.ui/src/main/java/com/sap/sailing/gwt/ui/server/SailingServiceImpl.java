@@ -52,7 +52,6 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.sap.sailing.datamining.Aggregator;
 import com.sap.sailing.datamining.DataMiningFactory;
 import com.sap.sailing.datamining.DataRetriever;
-import com.sap.sailing.datamining.Dimensions;
 import com.sap.sailing.datamining.Extractor;
 import com.sap.sailing.datamining.Filter;
 import com.sap.sailing.datamining.FilterCriteria;
@@ -60,8 +59,8 @@ import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.datamining.Grouper;
 import com.sap.sailing.datamining.Query;
 import com.sap.sailing.datamining.shared.AggregatorType;
-import com.sap.sailing.datamining.shared.Dimension;
 import com.sap.sailing.datamining.shared.QueryResult;
+import com.sap.sailing.datamining.shared.SharedDimensions;
 import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -3326,23 +3325,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Pair<Double, Integer> runQueryAsBenchmark(Map<Dimension, Collection<?>> selection, Dimension groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
+    public Pair<Double, Integer> runGPSFixQueryAsBenchmark(Map<SharedDimensions.GPSFix, Collection<?>> selection, SharedDimensions.GPSFix groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
         final long startTime = System.nanoTime();
-        Integer gpsFixAmount = runQuery(selection, groupByDimension, statisticToCalculate, aggregatedAs).getDataSize();
+        Integer gpsFixAmount = runGPSFixQuery(selection, groupByDimension, statisticToCalculate, aggregatedAs).getDataSize();
         long endTime = System.nanoTime();
         double serverTime = (endTime - startTime) / 1000000000.0;
         return new Pair<Double, Integer>(serverTime, gpsFixAmount);
     }
     
     @Override
-    public QueryResult<Integer, Integer> runQuery(Map<Dimension, Collection<?>> selection, Dimension groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
+    public QueryResult<Integer> runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, SharedDimensions.GPSFix groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
         DataRetriever<GPSFixWithContext> retriever = DataMiningFactory.createGPSFixRetriever();
-        Filter<GPSFixWithContext> filter = DataMiningFactory.createNoFilter();
-        Grouper<GPSFixWithContext> grouper = DataMiningFactory.createGPSFixByDimensionGrouper(Dimensions.GPSFix.LegType);
-        Extractor<GPSFixWithContext, Integer, Integer> extractor = DataMiningFactory.createDataAmountExtractor();
-        Aggregator<Integer, Integer> aggregator = DataMiningFactory.createAggregator(AggregatorType.Sum);
-        Query<GPSFixWithContext, Integer, Integer> query = DataMiningFactory.createQuery(retriever, filter, grouper, extractor, aggregator);
-        return query.run(getService());
+        FilterCriteria<GPSFixWithContext> filterCriteria = DataMiningFactory.createGPSFixDimensionFilterCriteria(selection);
+        Filter<GPSFixWithContext> filter = DataMiningFactory.createCriteriaFilter(filterCriteria);
+        Grouper<GPSFixWithContext> grouper = DataMiningFactory.createGPSFixByDimensionGrouper(groupByDimension);
+        Extractor<GPSFixWithContext, Integer> extractor = DataMiningFactory.createDataAmountExtractor();
+        Aggregator<Integer, Integer> aggregator = DataMiningFactory.createIntegerAggregator(AggregatorType.Sum);
+        Query<GPSFixWithContext, Integer> query = DataMiningFactory.createQuery(retriever, filter, grouper, extractor, aggregator);
+        QueryResult<Integer> result = query.run(getService());
+        return result;
     }
 
 }

@@ -3,21 +3,19 @@ package com.sap.sailing.gwt.ui.datamining;
 import java.util.Collection;
 import java.util.Map;
 
-import com.sap.sailing.datamining.shared.Dimension;
-
-public class ClientBenchmarkData {
+public class ClientBenchmarkData<DimensionType> {
     
-    private Map<Dimension, Collection<?>> selection;
+    private Map<DimensionType, Collection<?>> selection;
     private int times;
     private int currentRun;
 
-    public ClientBenchmarkData(Map<Dimension, Collection<?>> selection, int times, int currentRun) {
+    public ClientBenchmarkData(Map<DimensionType, Collection<?>> selection, int times, int currentRun) {
         this.selection = selection;
         this.times = times;
         this.currentRun = currentRun;
     }
 
-    public Map<Dimension, Collection<?>> getSelection() {
+    public Map<DimensionType, Collection<?>> getSelection() {
         return selection;
     }
 

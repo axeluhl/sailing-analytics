@@ -25,6 +25,11 @@ public class CompoundGroupKey extends AbstractGroupKey {
     public boolean hasSubKey() {
         return subKey != null;
     }
+    
+    @Override
+    public GroupKey getMainKey() {
+        return mainKey;
+    }
 
     @Override
     public GroupKey getSubKey() {

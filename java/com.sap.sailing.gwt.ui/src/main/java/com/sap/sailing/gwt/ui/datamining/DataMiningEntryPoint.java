@@ -16,15 +16,15 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         FlowPanel dataMiningElementsPanel = new FlowPanel();
         rootPanel.add(dataMiningElementsPanel);
         
-        SelectionPanel selectionPanel = new SelectionPanel(stringMessages, sailingService, this);
+        GPSFixSelectionPanel selectionPanel = new GPSFixSelectionPanel(stringMessages, sailingService, this);
         dataMiningElementsPanel.add(selectionPanel);
         
-        QueryPanel queryPanel = new QueryPanel(stringMessages, sailingService, this, selectionPanel);
+        GPSFixQueryPanel queryPanel = new GPSFixQueryPanel(stringMessages, sailingService, this, selectionPanel);
         dataMiningElementsPanel.add(queryPanel);
         
         String benchmarkParameter = Window.Location.getParameter(PARAM_BENCHMARK);
         if (benchmarkParameter != null && benchmarkParameter.equals("true")) {
-            QueryBenchmarkPanel benchmarkPanel = new QueryBenchmarkPanel(stringMessages, sailingService, this, selectionPanel);
+            GPSFixQueryBenchmarkPanel benchmarkPanel = new GPSFixQueryBenchmarkPanel(stringMessages, sailingService, this, selectionPanel);
             dataMiningElementsPanel.add(benchmarkPanel);
         }
     }

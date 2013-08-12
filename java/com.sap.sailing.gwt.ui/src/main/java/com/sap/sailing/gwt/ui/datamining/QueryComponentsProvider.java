@@ -4,14 +4,13 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.sap.sailing.datamining.shared.AggregatorType;
-import com.sap.sailing.datamining.shared.Dimension;
 import com.sap.sailing.datamining.shared.StatisticType;
 
-public interface QueryComponentsProvider {
+public interface QueryComponentsProvider<DimensionType> {
 
-    public Map<Dimension, Collection<?>> getSelection();
+    public Map<DimensionType, Collection<?>> getSelection();
 
-    public Dimension getDimensionToGroupBy();
+    public DimensionType getDimensionToGroupBy();
 
     public StatisticType getStatisticToCalculate();
 

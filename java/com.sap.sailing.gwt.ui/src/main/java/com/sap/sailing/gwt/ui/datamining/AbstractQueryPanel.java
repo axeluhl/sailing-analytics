@@ -11,17 +11,17 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class QueryPanel extends FlowPanel {
+public abstract class AbstractQueryPanel<DimensionType> extends FlowPanel {
 
     private StringMessages stringMessages;
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
-    private QueryComponentsProvider queryComponentsProvider;
+    private QueryComponentsProvider<DimensionType> queryComponentsProvider;
     
     private QueryResultsChart resultChart;
 
-    public QueryPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, QueryComponentsProvider queryComponentsProvider) {
+    public AbstractQueryPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
+            ErrorReporter errorReporter, QueryComponentsProvider<DimensionType> queryComponentsProvider) {
         super();
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
@@ -34,18 +34,26 @@ public class QueryPanel extends FlowPanel {
     }
 
     private void runQuery() {
-        sailingService.runQuery(queryComponentsProvider.getSelection(), queryComponentsProvider.getDimensionToGroupBy(),
-                                queryComponentsProvider.getStatisticToCalculate(), queryComponentsProvider.getAggregationType(),
-                                new AsyncCallback<QueryResult>() {
+        sendServerRequest(new AsyncCallback<QueryResult<Integer>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running the query: " + caught.getMessage());
             }
             @Override
-            public void onSuccess(QueryResult result) {
+            public void onSuccess(QueryResult<Integer> result) {
                 resultChart.showResult(result);
             }
         });
+    }
+
+    protected abstract void sendServerRequest(AsyncCallback<QueryResult<Integer>> asyncCallback);
+    
+    protected QueryComponentsProvider<DimensionType> getQueryComponentsProvider() {
+        return queryComponentsProvider;
+    }
+    
+    protected SailingServiceAsync getSailingService() {
+        return sailingService;
     }
 
     private HorizontalPanel createFunctionsPanel() {

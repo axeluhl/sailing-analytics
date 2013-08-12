@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.sap.sailing.datamining.shared.AggregatorType;
-import com.sap.sailing.datamining.shared.Dimension;
+import com.sap.sailing.datamining.shared.SharedDimensions;
 import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -31,26 +31,26 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class SelectionPanel extends FlowPanel implements QueryComponentsProvider {
+public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsProvider<SharedDimensions.GPSFix> {
     
     private StringMessages stringMessages;
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
 
-    private ValueListBox<Dimension> groupByListBox;
+    private ValueListBox<SharedDimensions.GPSFix> groupByListBox;
     private ValueListBox<StatisticAndAggregatorType> statisticsListBox;
     
-    private Map<Dimension, SelectionTable<?, ?>> tablesMappedByDimension;
-    private SelectionTable<RegattaDTO, String> regattaNameTable;
-    private SelectionTable<BoatClassDTO, String> boatClassTable;
-    private SelectionTable<RaceDTO, String> raceNameTable;
-    private SelectionTable<Integer, Integer> legNumberTable;
-    private SelectionTable<LegType, LegType> legTypeTable;
-    private SelectionTable<CompetitorDTO, String> competitorNameTable;
-    private SelectionTable<CompetitorDTO, String> competitorSailIDTable;
-    private SelectionTable<String, String> nationalityTable;
+    private Map<SharedDimensions.GPSFix, SelectionTable<SharedDimensions.GPSFix, ?, ?>> tablesMappedByDimension;
+    private SelectionTable<SharedDimensions.GPSFix, RegattaDTO, String> regattaNameTable;
+    private SelectionTable<SharedDimensions.GPSFix, BoatClassDTO, String> boatClassTable;
+    private SelectionTable<SharedDimensions.GPSFix, RaceDTO, String> raceNameTable;
+    private SelectionTable<SharedDimensions.GPSFix, Integer, Integer> legNumberTable;
+    private SelectionTable<SharedDimensions.GPSFix, LegType, LegType> legTypeTable;
+    private SelectionTable<SharedDimensions.GPSFix, CompetitorDTO, String> competitorNameTable;
+    private SelectionTable<SharedDimensions.GPSFix, CompetitorDTO, String> competitorSailIDTable;
+    private SelectionTable<SharedDimensions.GPSFix, String, String> nationalityTable;
     
-    public SelectionPanel(StringMessages stringMessages, SailingServiceAsync sailingService, ErrorReporter errorReporter) {
+    public GPSFixSelectionPanel(StringMessages stringMessages, SailingServiceAsync sailingService, ErrorReporter errorReporter) {
         super();
         
         this.stringMessages = stringMessages;
@@ -65,9 +65,9 @@ public class SelectionPanel extends FlowPanel implements QueryComponentsProvider
     }
 
     @Override
-    public Map<Dimension, Collection<?>> getSelection() {
-        Map<Dimension, Collection<?>> selection = new HashMap<Dimension, Collection<?>>();
-        for (SelectionTable<?, ?> table : tablesMappedByDimension.values()) {
+    public Map<SharedDimensions.GPSFix, Collection<?>> getSelection() {
+        Map<SharedDimensions.GPSFix, Collection<?>> selection = new HashMap<SharedDimensions.GPSFix, Collection<?>>();
+        for (SelectionTable<SharedDimensions.GPSFix,?, ?> table : tablesMappedByDimension.values()) {
             Collection<?> specificSelection = table.getSelection();
             if (!specificSelection.isEmpty()) {
                 selection.put(table.getDimension(), specificSelection);
@@ -77,13 +77,13 @@ public class SelectionPanel extends FlowPanel implements QueryComponentsProvider
     }
 
     private void clearSelection() {
-        for (SelectionTable<?, ?> table : tablesMappedByDimension.values()) {
+        for (SelectionTable<SharedDimensions.GPSFix, ?, ?> table : tablesMappedByDimension.values()) {
             table.clearSelection();
         }
     }
 
     @Override
-    public Dimension getDimensionToGroupBy() {
+    public SharedDimensions.GPSFix getDimensionToGroupBy() {
         return groupByListBox.getValue();
     }
 
@@ -152,20 +152,20 @@ public class SelectionPanel extends FlowPanel implements QueryComponentsProvider
         functionsPanel.add(clearSelectionButton);
         
         functionsPanel.add(new Label(stringMessages.groupBy() + ": "));
-        groupByListBox = new ValueListBox<Dimension>(new Renderer<Dimension>() {
+        groupByListBox = new ValueListBox<SharedDimensions.GPSFix>(new Renderer<SharedDimensions.GPSFix>() {
             @Override
-            public String render(Dimension dimension) {
+            public String render(SharedDimensions.GPSFix dimension) {
                 if (dimension == null) {
                   return "";
                 }
                 return dimension.toString();
             }
             @Override
-            public void render(Dimension dimension, Appendable appendable) throws IOException {
+            public void render(SharedDimensions.GPSFix dimension, Appendable appendable) throws IOException {
                 appendable.append(render(dimension));
             }
         });
-        groupByListBox.setAcceptableValues(Arrays.asList(Dimension.values()));
+        groupByListBox.setAcceptableValues(Arrays.asList(SharedDimensions.GPSFix.values()));
         functionsPanel.add(groupByListBox);
         
         functionsPanel.add(new Label(stringMessages.statisticToCalculate() + ": "));
@@ -191,79 +191,79 @@ public class SelectionPanel extends FlowPanel implements QueryComponentsProvider
     private HorizontalPanel createSelectionTables() {
         HorizontalPanel tablesPanel = new HorizontalPanel();
         tablesPanel.setSpacing(5);
-        tablesMappedByDimension = new HashMap<Dimension, SelectionTable<?,?>>();
+        tablesMappedByDimension = new HashMap<SharedDimensions.GPSFix, SelectionTable<SharedDimensions.GPSFix, ?,?>>();
         
-        regattaNameTable = new SelectionTable<RegattaDTO, String>(stringMessages.regatta(), Dimension.RegattaName) {
+        regattaNameTable = new SelectionTable<SharedDimensions.GPSFix, RegattaDTO, String>(stringMessages.regatta(), SharedDimensions.GPSFix.RegattaName) {
             @Override
             public String getValue(RegattaDTO regatta) {
                 return regatta.getName();
             }
         };
         tablesPanel.add(regattaNameTable);
-        tablesMappedByDimension.put(Dimension.RegattaName, regattaNameTable);
+        tablesMappedByDimension.put(regattaNameTable.getDimension(), regattaNameTable);
         
-        boatClassTable = new SelectionTable<BoatClassDTO, String>(stringMessages.boatClass(), Dimension.BoatClassName) {
+        boatClassTable = new SelectionTable<SharedDimensions.GPSFix, BoatClassDTO, String>(stringMessages.boatClass(), SharedDimensions.GPSFix.BoatClassName) {
             @Override
             public String getValue(BoatClassDTO boatClass) {
                 return boatClass.getName();
             }
         };
         tablesPanel.add(boatClassTable);
-        tablesMappedByDimension.put(Dimension.BoatClassName, boatClassTable);
+        tablesMappedByDimension.put(boatClassTable.getDimension(), boatClassTable);
         
-        raceNameTable = new SelectionTable<RaceDTO, String>(stringMessages.race(), Dimension.RaceName) {
+        raceNameTable = new SelectionTable<SharedDimensions.GPSFix, RaceDTO, String>(stringMessages.race(), SharedDimensions.GPSFix.RaceName) {
             @Override
             public String getValue(RaceDTO race) {
                 return race.getName();
             }
         };
         tablesPanel.add(raceNameTable);
-        tablesMappedByDimension.put(Dimension.RaceName, raceNameTable);
+        tablesMappedByDimension.put(raceNameTable.getDimension(), raceNameTable);
         
-        legNumberTable = new SelectionTable<Integer, Integer>(stringMessages.legLabel(), Dimension.LegNumber) {
+        legNumberTable = new SelectionTable<SharedDimensions.GPSFix, Integer, Integer>(stringMessages.legLabel(), SharedDimensions.GPSFix.LegNumber) {
             @Override
             public Integer getValue(Integer legNumber) {
                 return legNumber;
             }
         };
         tablesPanel.add(legNumberTable);
-        tablesMappedByDimension.put(Dimension.LegNumber, legNumberTable);
+        tablesMappedByDimension.put(legNumberTable.getDimension(), legNumberTable);
         
-        legTypeTable = new SelectionTable<LegType, LegType>(stringMessages.legType(), Dimension.LegType) {
+        legTypeTable = new SelectionTable<SharedDimensions.GPSFix, LegType, LegType>(stringMessages.legType(), SharedDimensions.GPSFix.LegType) {
             @Override
             public LegType getValue(LegType legType) {
                 return legType;
             }
         };
         tablesPanel.add(legTypeTable);
-        tablesMappedByDimension.put(Dimension.LegType, legTypeTable);
+        tablesMappedByDimension.put(legTypeTable.getDimension(), legTypeTable);
         
-        competitorNameTable = new SelectionTable<CompetitorDTO, String>(stringMessages.competitor(), Dimension.CompetitorName) {
+        competitorNameTable = new SelectionTable<SharedDimensions.GPSFix, CompetitorDTO, String>(stringMessages.competitor(), SharedDimensions.GPSFix.CompetitorName) {
             @Override
             public String getValue(CompetitorDTO competitor) {
                 return competitor.getName();
             }
         };
         tablesPanel.add(competitorNameTable);
-        tablesMappedByDimension.put(Dimension.CompetitorName, competitorNameTable);
+        tablesMappedByDimension.put(competitorNameTable.getDimension(), competitorNameTable);
         
-        competitorSailIDTable = new SelectionTable<CompetitorDTO, String>(stringMessages.sailID(), Dimension.SailID) {
+        competitorSailIDTable = new SelectionTable<SharedDimensions.GPSFix, CompetitorDTO, String>(stringMessages.sailID(), SharedDimensions.GPSFix.SailID) {
             @Override
             public String getValue(CompetitorDTO competitor) {
                 return competitor.getSailID();
             }
         };
         tablesPanel.add(competitorSailIDTable);
-        tablesMappedByDimension.put(Dimension.SailID, competitorSailIDTable);
+        tablesMappedByDimension.put(competitorSailIDTable.getDimension(), competitorSailIDTable);
         
-        nationalityTable = new SelectionTable<String, String>(stringMessages.nationality(), Dimension.Nationality) {
+        nationalityTable = new SelectionTable<SharedDimensions.GPSFix, String, String>(stringMessages.nationality(), SharedDimensions.GPSFix.Nationality) {
             @Override
             public String getValue(String nationality) {
                 return nationality;
             }
         };
         tablesPanel.add(nationalityTable);
-        tablesMappedByDimension.put(Dimension.Nationality, nationalityTable);
+        tablesMappedByDimension.put(nationalityTable.getDimension(), nationalityTable);
         
         return tablesPanel;
     }

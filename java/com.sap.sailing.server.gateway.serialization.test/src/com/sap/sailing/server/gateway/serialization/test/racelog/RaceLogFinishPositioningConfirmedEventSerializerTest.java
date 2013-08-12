@@ -47,7 +47,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
         deserializer = new RaceLogFinishPositioningConfirmedEventDeserializer(new CompetitorDeserializer(factory));
 
         now = MillisecondsTimePoint.now();
-        positioningList = new ArrayList<>();
+        positioningList = new ArrayList<Triple<Serializable, String, MaxPointsReason>>();
     }
 
     @Test

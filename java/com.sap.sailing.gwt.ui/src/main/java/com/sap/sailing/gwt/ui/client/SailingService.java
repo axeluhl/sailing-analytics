@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.QueryResult;
+import com.sap.sailing.datamining.shared.SharedDimensions;
 import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
@@ -332,7 +333,7 @@ public interface SailingService extends RemoteService {
 
     MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override);
 
-    Pair<Double, Integer> runQueryAsBenchmark(Map<Dimension, Collection<?>> selection, Dimension groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs);
+    Pair<Double, Integer> runGPSFixQueryAsBenchmark(Map<SharedDimensions.GPSFix, Collection<?>> selection, SharedDimensions.GPSFix groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs);
     
-    QueryResult runQuery(Map<Dimension, Collection<?>> selection, Dimension groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs);
+    QueryResult<Integer> runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, SharedDimensions.GPSFix groupByDimension, StatisticType statisticToCalculate, AggregatorType aggregatedAs);
 }

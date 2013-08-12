@@ -1,6 +1,10 @@
 package com.sap.sailing.datamining.shared;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedType> {
@@ -31,6 +35,18 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     @Override
     public Map<GroupKey, AggregatedType> getResults() {
         return results;
+    }
+
+    @Override
+    public List<GroupKey> getSortedKeys() {
+        List<GroupKey> sortedKeys = new ArrayList<GroupKey>(getResults().keySet());
+        Collections.sort(sortedKeys, new Comparator<GroupKey>() {
+            @Override
+            public int compare(GroupKey key1, GroupKey key2) {
+                return key1.asString().compareTo(key2.asString());
+            }
+        });
+        return null;
     }
 
     @Override
