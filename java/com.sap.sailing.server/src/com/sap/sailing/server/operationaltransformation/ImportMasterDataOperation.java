@@ -149,9 +149,15 @@ public class ImportMasterDataOperation extends
                     masterData.getName()));
         }
         if (masterData.hasOverallLeaderboard() && (override || existingLeaderboardGroup == null)) {
+            if (existingLeaderboardGroup != null && existingLeaderboardGroup.getOverallLeaderboard() != null) {
+                // remove old overall leaderboard if it existed
+                toState.removeLeaderboard(existingLeaderboardGroup.getOverallLeaderboard().getName());
+            }
             LeaderboardGroupMetaLeaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup, masterData.getOverallLeaderboardScoringScheme(),
-                    new ThresholdBasedResultDiscardingRuleImpl(masterData.getOverallLeaderboardDiscardingRule()));
+                    masterData.getOverallLeaderboardDiscardingRule()==null?null:
+                        new ThresholdBasedResultDiscardingRuleImpl(masterData.getOverallLeaderboardDiscardingRule()));
             leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
+            toState.addLeaderboard(overallLeaderboard);
         }
     }
 
