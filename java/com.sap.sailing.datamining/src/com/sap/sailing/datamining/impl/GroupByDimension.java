@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 import com.sap.sailing.datamining.Dimension;
+import com.sap.sailing.datamining.shared.CompoundGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
 
 public abstract class GroupByDimension<DataType, ValueType> extends AbstractGrouper<DataType> {

@@ -59,6 +59,7 @@ import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.datamining.Grouper;
 import com.sap.sailing.datamining.Query;
 import com.sap.sailing.datamining.shared.AggregatorType;
+import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.datamining.shared.SharedDimensions;
 import com.sap.sailing.datamining.shared.StatisticType;
@@ -3349,6 +3350,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Query<GPSFixWithContext, Integer> query = DataMiningFactory.createQuery(retriever, filter, grouper, extractor, aggregator);
         QueryResult<Integer> result = query.run(getService());
         return result;
+    }
+    
+    @Override
+    public GenericGroupKey<String> fooBar() {
+        return null;
     }
 
 }

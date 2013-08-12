@@ -1,7 +1,9 @@
 package com.sap.sailing.datamining.shared;
 
+import java.io.Serializable;
 
-public interface GroupKey {
+
+public interface GroupKey extends Serializable {
     
     /**
      * @return a string representation of this group key.

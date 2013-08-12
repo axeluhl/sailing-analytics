@@ -1,8 +1,8 @@
-package com.sap.sailing.datamining.impl;
+package com.sap.sailing.datamining.shared;
 
-import com.sap.sailing.datamining.shared.GroupKey;
 
 public abstract class AbstractGroupKey implements GroupKey {
+    private static final long serialVersionUID = 183947887066745315L;
     
     @Override
     public String toString() {

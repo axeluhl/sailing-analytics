@@ -14,11 +14,11 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     private int dataSize;
     
     private String resultSignifier;
-
-    @Deprecated
+    
     /**
      * Constructor for the GWT-Serialization. Don't use this!
      */
+    @Deprecated
     public QueryResultImpl() { }
     
     public QueryResultImpl(int dataSize, String resultSiginifier) {
@@ -46,7 +46,7 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
                 return key1.asString().compareTo(key2.asString());
             }
         });
-        return null;
+        return sortedKeys;
     }
 
     @Override

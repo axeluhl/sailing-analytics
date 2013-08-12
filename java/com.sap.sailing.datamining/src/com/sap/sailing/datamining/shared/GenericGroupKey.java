@@ -1,10 +1,16 @@
-package com.sap.sailing.datamining.impl;
+package com.sap.sailing.datamining.shared;
 
-import com.sap.sailing.datamining.shared.GroupKey;
 
-public abstract class GenericGroupKey<T> extends AbstractGroupKey {
+public class GenericGroupKey<T> extends AbstractGroupKey {
+    private static final long serialVersionUID = -3838535617341226965L;
     
     private T value;
+
+    /**
+     * Constructor for the GWT-Serialization. Don't use this!
+     */
+    @Deprecated
+    public GenericGroupKey() { }
 
     public GenericGroupKey(T value) {
         this.value = value;
@@ -27,6 +33,11 @@ public abstract class GenericGroupKey<T> extends AbstractGroupKey {
     @Override
     public GroupKey getSubKey() {
         return null;
+    }
+    
+    @Override
+    public String asString() {
+        return getValue().toString();
     }
 
     @Override

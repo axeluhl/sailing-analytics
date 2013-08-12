@@ -1,11 +1,17 @@
-package com.sap.sailing.datamining.impl;
+package com.sap.sailing.datamining.shared;
 
-import com.sap.sailing.datamining.shared.GroupKey;
 
 public class CompoundGroupKey extends AbstractGroupKey {
-
+    private static final long serialVersionUID = -7902450253393172550L;
+    
     private GroupKey mainKey;
     private GroupKey subKey;
+
+    /**
+     * Constructor for the GWT-Serialization. Don't use this!
+     */
+    @Deprecated
+    public CompoundGroupKey() { }
     
     public CompoundGroupKey(GroupKey mainKey) {
         this(mainKey, null);
