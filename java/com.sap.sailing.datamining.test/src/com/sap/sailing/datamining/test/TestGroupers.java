@@ -28,7 +28,7 @@ public class TestGroupers {
         
         Dimension<Integer, String> crossSum = createCrossSumDimension();
         @SuppressWarnings("unchecked")
-        Grouper<Integer> groupByDimension = createGrouper(crossSum);
+        Grouper<Integer> groupByDimension = new OpenGrouper<Integer>(Arrays.asList(crossSum));
         
         Map<GroupKey, Collection<Integer>> expectedGroups = new HashMap<GroupKey, Collection<Integer>>();
         Collection<Integer> group = new ArrayList<Integer>();
@@ -71,7 +71,7 @@ public class TestGroupers {
         };
         
         @SuppressWarnings("unchecked")
-        OpenGrouper<Integer> grouper = new OpenGrouper<Integer>(first, second, third);
+        OpenGrouper<Integer> grouper = new OpenGrouper<Integer>(Arrays.asList(first, second, third));
         GroupKey expectedGroupKey = new CompoundGroupKey(new StringGroupKey("First"), new CompoundGroupKey(new StringGroupKey("Second"), new StringGroupKey("Third")));
         assertEquals(expectedGroupKey, grouper.getGroupKey(1));
     }
@@ -83,7 +83,7 @@ public class TestGroupers {
         Dimension<Integer, String> crossSum = createCrossSumDimension();
         Dimension<Integer, String> signum = createSignumDimension();
         @SuppressWarnings("unchecked")
-        Grouper<Integer> groupByDimensions = createGrouper(crossSum, signum);
+        Grouper<Integer> groupByDimensions = new OpenGrouper<Integer>(Arrays.asList(crossSum, signum));
 
         Map<GroupKey, Collection<Integer>> expectedGroups = new HashMap<GroupKey, Collection<Integer>>();
         Collection<Integer> expectedGroup = new ArrayList<Integer>();
@@ -132,14 +132,10 @@ public class TestGroupers {
             }
         };
     }
-
-    private GroupByDimension<Integer, String> createGrouper(Dimension<Integer, String>... dimensions) {
-        return new OpenGrouper<Integer>(dimensions);
-    }
     
     private class OpenGrouper<DataType> extends GroupByDimension<DataType, String> {
 
-        public OpenGrouper(Dimension<DataType, String>... dimensions) {
+        public OpenGrouper(Collection<Dimension<DataType, String>> dimensions) {
             super(dimensions);
         }
 

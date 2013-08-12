@@ -58,11 +58,11 @@ public class DataMiningFactory {
         return new GroupGPSFixesByDimension<ValueType>(dimensionCollection);
     }
 
-    public static <DataType> Extractor<DataType, Integer> createDataSizeExtractor() {
+    public static <DataType> Extractor<DataType, Integer> createDataAmountExtractor() {
         return new DataAmountExtractor<DataType>();
     }
 
-    public static <ValueType, AveragesTo> Aggregator<ValueType, AveragesTo> createAggregator(
+    public static <ExtractedType, AggregatedType> Aggregator<ExtractedType, AggregatedType> createAggregator(
             AggregatorType aggregatorType) {
 //        switch (aggregatorType) {
 //        case Average:

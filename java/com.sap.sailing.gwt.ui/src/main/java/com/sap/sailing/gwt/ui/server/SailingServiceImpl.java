@@ -3339,7 +3339,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         DataRetriever<GPSFixWithContext> retriever = DataMiningFactory.createGPSFixRetriever();
         Filter<GPSFixWithContext> filter = DataMiningFactory.createNoFilter();
         Grouper<GPSFixWithContext> grouper = DataMiningFactory.createGPSFixByDimensionGrouper(Dimensions.GPSFix.LegType);
-        Extractor<GPSFixWithContext, Integer, Integer> extractor = DataMiningFactory.createDataSizeExtractor();
+        Extractor<GPSFixWithContext, Integer, Integer> extractor = DataMiningFactory.createDataAmountExtractor();
         Aggregator<Integer, Integer> aggregator = DataMiningFactory.createAggregator(AggregatorType.Sum);
         Query<GPSFixWithContext, Integer, Integer> query = DataMiningFactory.createQuery(retriever, filter, grouper, extractor, aggregator);
         return query.run(getService());
