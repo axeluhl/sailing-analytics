@@ -94,7 +94,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
 
         });
 
-        Button resetButton = ((Button) getView().findViewById(R.id.btnResetRace));
+        Button resetButton = (Button) getView().findViewById(R.id.btnResetRace);
         resetButton.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 ExLog.i(TAG, "Reset race button pressed");
@@ -170,7 +170,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(resetRaceDialogView).setTitle(R.string.race_reset_confirmation_title)
                 .setIcon(R.drawable.ic_dialog_alert_holo_light).setCancelable(true)
-                .setPositiveButton("Reset anyway", new DialogInterface.OnClickListener() {
+                .setPositiveButton(getString(R.string.race_reset_reset_button), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         ExLog.i(ExLog.RACE_RESET_YES, getRace().getId().toString(), getActivity());
                         ExLog.w(TAG, String.format("Race %s is selected for reset.", getRace().getId()));
@@ -202,10 +202,9 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         if (getRace().getState().getCourseDesign() != null) {
 
             CourseBase courseDesign = getRace().getState().getCourseDesign();
-            if (courseDesign.getName() != null) {
-                courseInfoHeader.setText(String.format(getString(R.string.running_on_course), courseDesign.getName()));
-            } else if (Util.isEmpty(courseDesign.getWaypoints())) {
-                courseInfoHeader.setText(getString(R.string.running_on_unknown));
+            if (Util.isEmpty(courseDesign.getWaypoints())) {
+                String courseName = courseDesign.getName();
+                courseInfoHeader.setText(String.format(getString(R.string.running_on_course), courseName));
             } else {
                 courseInfoHeader.setText(String.format(getString(R.string.course_design_number_waypoints),
                         Util.size(courseDesign.getWaypoints())));

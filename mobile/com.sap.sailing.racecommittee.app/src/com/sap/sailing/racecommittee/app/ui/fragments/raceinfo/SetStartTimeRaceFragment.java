@@ -156,6 +156,7 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
             }
         });
 
+        //TODO read the preferences from AppPreferences
         StartProcedureType type = StartProcedureType.ESS;
         boolean overrideStartProcedureType = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(
                 "overrideDefaultStartProcedureType", false);

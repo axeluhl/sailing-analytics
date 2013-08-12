@@ -68,6 +68,10 @@ public class EventSendingService extends Service implements EventSendingListener
     }
 
     private Date lastSuccessfulSend;
+    
+    public List<String> getDelayedIntensContent() {
+        return persistenceManager.getContent();
+    }
 
     public int getDelayedIntentsCount() {
         return persistenceManager.getEventCount();

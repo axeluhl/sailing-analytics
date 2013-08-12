@@ -53,7 +53,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         DatePickerDialog dialog = new DatePickerDialog(getActivity(), null, currentYear, currentMonth, currentDay);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
-        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Set", new DialogInterface.OnClickListener() {
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.choose), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int which) {
                 DatePickerDialog dialog = (DatePickerDialog) dialogInterface;

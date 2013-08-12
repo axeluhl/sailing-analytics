@@ -14,13 +14,13 @@
 	        android:layout_width="150dip"
 	        android:layout_height="wrap_content"
 	        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"
-	        android:text="Nationality"/>
+	        android:text="@string/nationality"/>
         
 		<TextView 
 	        android:layout_width="150dip"
 	        android:layout_height="wrap_content"
 	        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"
-	        android:text="Number"/>
+	        android:text="@string/number"/>
         
     </LinearLayout>
     
