@@ -233,18 +233,34 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
     }
 
     public static ScoringScheme deserializeScoringScheme(JSONObject jsonObject, DomainFactory domainFactory) {
-        String type = (String) jsonObject.get(LeaderboardMasterDataJsonSerializer.FIELD_TYPE);
-        return domainFactory.createScoringScheme(ScoringSchemeType.valueOf(type));
+        final ScoringScheme result;
+        if (jsonObject == null) {
+            result = null;
+        } else {
+            String type = (String) jsonObject.get(LeaderboardMasterDataJsonSerializer.FIELD_TYPE);
+            if (type == null) {
+                result = null;
+            } else {
+                result = domainFactory.createScoringScheme(ScoringSchemeType.valueOf(type));
+            }
+        }
+        return result;
     }
     
     public static int[] deserializeResultDesicardingRule(JSONObject jsonObject) {
-        JSONArray indeces = (JSONArray) jsonObject.get(LeaderboardMasterDataJsonSerializer.FIELD_INDICES);
-        if (indeces == null) {
-            return null;
-        }
-        int[] result = new int[indeces.size()];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = ((Long) indeces.get(i)).intValue();
+        final int[] result;
+        if (jsonObject == null) {
+            result = null;
+        } else {
+            JSONArray indeces = (JSONArray) jsonObject.get(LeaderboardMasterDataJsonSerializer.FIELD_INDICES);
+            if (indeces == null) {
+                result = null;
+            } else {
+                result = new int[indeces.size()];
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = ((Long) indeces.get(i)).intValue();
+                }
+            }
         }
         return result;
     }
