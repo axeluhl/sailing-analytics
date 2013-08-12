@@ -277,7 +277,9 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
 	if [ $testing -eq 0 ]; then
 	    echo "INFO: Skipping tests"
-	    extra="$extra -Dmaven.test.skip=true"
+	    extra="$extra -Dmaven.test.skip=true -DskipTests=true"
+    else
+        extra="$extra -DskipTests=false"
 	fi
 
 	if [ $offline -eq 1 ]; then

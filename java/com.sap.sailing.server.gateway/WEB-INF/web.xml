@@ -223,6 +223,17 @@
  
      <load-on-startup>0</load-on-startup>
    </servlet>
+   
+    <servlet>
+        <servlet-name>websockettest</servlet-name>
+        <servlet-class>com.sap.sailing.server.gateway.impl.WebSocketTestServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>websockettest</servlet-name>
+        <url-pattern>/websockettest</url-pattern>
+    </servlet-mapping>
+	
 <!-- 
    <servlet-mapping>
      <servlet-name>jspServet</servlet-name>
