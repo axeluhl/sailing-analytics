@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.polarsheets;
 
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
@@ -23,6 +24,9 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
     private IntegerBox minimumDataCountPerAngleBox;
     private IntegerBox numberOfHistogramColumnsBox;
     private DoubleBox minimumConfidenceMeasureBox;
+    private CheckBox useOnlyWindGaugesForWindSpeedBox;
+    private CheckBox shouldRemoveOutliersBox;
+    private DoubleBox outlierDetectionFactorBox;
 
     public PolarSheetGenerationSettingsDialogComponent(PolarSheetGenerationSettings settings, StringMessages stringMessages) {
         this.settings = settings;
@@ -32,7 +36,7 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
-        Grid grid = new Grid(5,2);
+        Grid grid = new Grid(8,2);
         grid.setCellPadding(5);
         vp.add(grid);
         setupGrid(grid, dialog);
@@ -52,16 +56,29 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
         grid.setWidget(3, 0, new Label("Minimum Confidence Measure:"));
         minimumConfidenceMeasureBox = dialog.createDoubleBox(settings.getMinimumConfidenceMeasure(), 6);
         grid.setWidget(3, 1, minimumConfidenceMeasureBox);
-        grid.setWidget(4, 0, new Label("Number of histogram columns:"));
+        grid.setWidget(4, 0, new Label("Use only wind gauge data for wind speed:"));
+        useOnlyWindGaugesForWindSpeedBox = dialog.createCheckbox("");
+        useOnlyWindGaugesForWindSpeedBox.setValue(settings.useOnlyWindGaugesForWindSpeed());
+        grid.setWidget(4, 1, useOnlyWindGaugesForWindSpeedBox);
+        grid.setWidget(5, 0, new Label("Remove outliers (Sigma Approach):"));
+        shouldRemoveOutliersBox = dialog.createCheckbox("");
+        shouldRemoveOutliersBox.setValue(settings.shouldRemoveOutliers());
+        grid.setWidget(5, 1, shouldRemoveOutliersBox);
+        grid.setWidget(6, 0, new Label("Outlier Detection Factor"));
+        outlierDetectionFactorBox = dialog.createDoubleBox(settings.getOutlierDetectionFactor(), 6);
+        grid.setWidget(6, 1, outlierDetectionFactorBox);
+        grid.setWidget(7, 0, new Label("Number of histogram columns:"));
         numberOfHistogramColumnsBox = dialog.createIntegerBox(settings.getNumberOfHistogramColumns(), 3);
-        grid.setWidget(4, 1, numberOfHistogramColumnsBox);
+        grid.setWidget(7, 1, numberOfHistogramColumnsBox);
     }
 
     @Override
     public PolarSheetGenerationSettings getResult() {
         return new PolarSheetGenerationSettingsImpl(minimumGraphDataSizeBox.getValue(),
                 minimumWindConfidenceBox.getValue(), minimumDataCountPerAngleBox.getValue(),
-                numberOfHistogramColumnsBox.getValue(), minimumConfidenceMeasureBox.getValue());
+                numberOfHistogramColumnsBox.getValue(), minimumConfidenceMeasureBox.getValue(),
+                useOnlyWindGaugesForWindSpeedBox.getValue(), shouldRemoveOutliersBox.getValue(),
+                outlierDetectionFactorBox.getValue());
     }
 
     @Override

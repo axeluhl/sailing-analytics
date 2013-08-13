@@ -106,8 +106,8 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         
         add(rightPanel);
         setEventListenersForPolarSheetChart();
-        
-        PolarSheetGenerationSettings initialSettings = new PolarSheetGenerationSettingsImpl(200, 0.1, 10, 20, 0.5);
+
+        PolarSheetGenerationSettings initialSettings = PolarSheetGenerationSettingsImpl.createStandardPolarSettings();
         settings = initialSettings;
         chartPanel.setSettings(initialSettings);
     }

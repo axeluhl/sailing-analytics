@@ -25,6 +25,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Position;
@@ -60,7 +61,7 @@ public class PolarSheetGenerationServiceTest {
          
         SailingService service = new MockSailingServiceForPolarSheetGeneration();
 
-        PolarSheetGenerationSettingsImpl settings = new PolarSheetGenerationSettingsImpl(200, 0.1, 10, 20, 0.5);
+        PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createStandardPolarSettings();
         
         List<RegattaAndRaceIdentifier> idList = new ArrayList<RegattaAndRaceIdentifier>();
         idList.add(new RegattaNameAndRaceName("IrgendeineRegatta", "IrgendeinRennen"));

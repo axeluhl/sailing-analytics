@@ -14,4 +14,10 @@ public interface PolarSheetGenerationSettings extends Serializable{
 
     double getMinimumConfidenceMeasure();
 
+    boolean useOnlyWindGaugesForWindSpeed();
+
+    boolean shouldRemoveOutliers();
+
+    double getOutlierDetectionFactor();
+
 }

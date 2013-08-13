@@ -166,6 +166,31 @@ public class PolarSheetGenerationWorker {
             }
 
             for (int levelIndex = 0; levelIndex < levelCount; levelIndex++) {
+                if (settings.shouldRemoveOutliers()) {
+                    List<Double> withoutOutliers = new ArrayList<Double>();
+                    Double average = sumsPerWindSpeed[levelIndex] / dataCountPerWindSpeed[levelIndex];
+                    if (average.isNaN()) {
+                        average = new Double(0);
+                    }
+                    double standardDeviation;
+                    if (dataCountPerWindSpeed[levelIndex] > 0 && average > 0) {
+                        Double variance = sumsPerWindSpeed[levelIndex] / dataCountPerWindSpeed[levelIndex];
+                        standardDeviation = Math.sqrt(variance);
+                        for (int dataIndex = 0; dataIndex < dataSetForWindLevel.get(levelIndex).size(); dataIndex++) {
+                            Double dataPoint = dataSetForWindLevel.get(levelIndex).get(dataIndex);
+                            if (dataPoint > average - settings.getOutlierDetectionFactor() * standardDeviation
+                                    && dataPoint < average + settings.getOutlierDetectionFactor() * standardDeviation) {
+                                withoutOutliers.add(dataPoint);
+                            } else {
+                                sumsPerWindSpeed[levelIndex] = sumsPerWindSpeed[levelIndex] - dataPoint;
+                                dataCountPerWindSpeed[levelIndex]--;
+                            }
+                        }
+                        dataSetForWindLevel.put(levelIndex, withoutOutliers);
+                    }
+                    
+                }
+                
                 if (dataCountPerWindSpeed[levelIndex] < settings.getMinimumDataCountPerAngle()) {
                     dataSetForWindLevel.put(levelIndex, new ArrayList<Double>());
                     sumsPerWindSpeed[levelIndex] = 0;

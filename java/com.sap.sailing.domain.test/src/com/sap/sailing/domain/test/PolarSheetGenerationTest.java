@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Position;
@@ -68,8 +69,7 @@ public class PolarSheetGenerationTest {
 
         MockTrackedRaceForPolarSheetGeneration race = new MockTrackedRaceForPolarSheetGeneration();
 
-        PolarSheetGenerationSettingsImpl settings = new PolarSheetGenerationSettingsImpl(200, 0.1, 1, 20, 0.5);
-
+        PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createStandardPolarSettings();
         TimePoint startTime = new MillisecondsTimePoint(9);
         TimePoint endTime = new MillisecondsTimePoint(80);
         // Only used for storing and exporting results in this test case:
@@ -103,7 +103,7 @@ public class PolarSheetGenerationTest {
     
     @Test
     public void testHistogramBuilder() {
-        PolarSheetGenerationSettingsImpl settings = new PolarSheetGenerationSettingsImpl(200, 0.1, 10, 10, 0.5);
+        PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createStandardPolarSettings();
         PolarSheetHistogramBuilder builder = new PolarSheetHistogramBuilder(settings);
         
         
