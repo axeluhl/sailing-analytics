@@ -1234,8 +1234,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             InterruptedException {
         logger.info("Stopping tracking for " + race + "...");
         synchronized (raceTrackersByRegatta) {
+            final Set<RaceTracker> trackerSet = raceTrackersByRegatta.get(regatta);
             if (raceTrackersByRegatta.containsKey(regatta)) {
-                Iterator<RaceTracker> trackerIter = raceTrackersByRegatta.get(regatta).iterator();
+                Iterator<RaceTracker> trackerIter = trackerSet.iterator();
                 while (trackerIter.hasNext()) {
                     RaceTracker raceTracker = trackerIter.next();
                     if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
@@ -1250,7 +1251,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
             stopTrackingWind(regatta, race);
             // if the last tracked race was removed, confirm that tracking for the entire regatta has stopped
-            if (raceTrackersByRegatta.get(regatta).isEmpty()) {
+            if (trackerSet == null || trackerSet.isEmpty()) {
                 stopTracking(regatta);
             }
         }
