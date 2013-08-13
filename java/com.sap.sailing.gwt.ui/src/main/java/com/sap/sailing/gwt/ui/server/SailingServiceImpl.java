@@ -3346,7 +3346,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         Grouper<GPSFixWithContext> grouper = DataMiningFactory.createGPSFixByDimensionGrouper(dimensionsToGroupBy);
         Extractor<GPSFixWithContext, Integer> extractor = DataMiningFactory.createDataAmountExtractor();
-        Aggregator<Integer, Integer> aggregator = DataMiningFactory.createIntegerAggregator(AggregatorType.Sum);
+        Aggregator<Integer, Integer> aggregator = DataMiningFactory.createIntegerAggregator(aggregatedAs);
         Query<GPSFixWithContext, Integer> query = DataMiningFactory.createQuery(retriever, filter, grouper, extractor, aggregator);
         QueryResult<Integer> result = query.run(getService());
         return result;

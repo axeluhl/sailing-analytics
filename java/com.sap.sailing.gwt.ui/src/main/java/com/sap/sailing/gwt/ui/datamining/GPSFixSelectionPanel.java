@@ -20,6 +20,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.AggregatorType;
@@ -228,9 +230,11 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
         return dimensionToGroupByBox;
     }
 
-    private HorizontalPanel createSelectionTables() {
+    private Panel createSelectionTables() {
         HorizontalPanel tablesPanel = new HorizontalPanel();
         tablesPanel.setSpacing(5);
+        ScrollPanel tablesScrollPanel = new ScrollPanel(tablesPanel);
+        tablesScrollPanel.setHeight("30em");
         tablesMappedByDimension = new HashMap<SharedDimensions.GPSFix, SelectionTable<SharedDimensions.GPSFix, ?,?>>();
         
         regattaNameTable = new SelectionTable<SharedDimensions.GPSFix, RegattaDTO, String>(stringMessages.regatta(), SharedDimensions.GPSFix.RegattaName) {
@@ -305,7 +309,7 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
         tablesPanel.add(nationalityTable);
         tablesMappedByDimension.put(nationalityTable.getDimension(), nationalityTable);
         
-        return tablesPanel;
+        return tablesScrollPanel;
     }
 
 }

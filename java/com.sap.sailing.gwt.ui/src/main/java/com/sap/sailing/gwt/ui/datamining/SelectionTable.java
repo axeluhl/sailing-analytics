@@ -19,7 +19,7 @@ public abstract class SelectionTable<DimensionType, ContentType, ValueType> exte
     
     public SelectionTable(String title, DimensionType dimension) {
         this.dimension = dimension;
-        table = new CellTable<ContentType>();
+        table = new CellTable<ContentType>(500);
         table.addColumn(new TextColumn<ContentType>() {
             @Override
             public String getValue(ContentType content) {
