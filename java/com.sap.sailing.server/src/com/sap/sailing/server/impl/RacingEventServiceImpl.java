@@ -1240,9 +1240,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                     RaceTracker raceTracker = trackerIter.next();
                     if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
                         logger.info("Found tracker to stop for races " + raceTracker.getRaces());
-                        raceTracker.stop(); // this also removes the TrackedRace from trackedRegatta
-                        // do not remove the tracker from raceTrackersByRegatta, because it should still exist there,
-                        // but with the state "non-tracked"
+                        raceTracker.stop();
                         trackerIter.remove();
                         raceTrackersByID.remove(raceTracker.getID());
                     }
@@ -1251,7 +1249,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 logger.warning("Didn't find any trackers for regatta " + regatta);
             }
             stopTrackingWind(regatta, race);
-            // if the last tracked race was removed, remove the entire regatta
+            // if the last tracked race was removed, confirm that tracking for the entire regatta has stopped
             if (raceTrackersByRegatta.get(regatta).isEmpty()) {
                 stopTracking(regatta);
             }
