@@ -18,7 +18,9 @@ public interface WindPatternSetting<SettingsType> extends Named {
     
     public SettingsType getMax();
     
-    public SettingsType getDefault();
+	public SettingsType getResolution();
+
+	public SettingsType getDefault();
     
     public int getSteps();
     
