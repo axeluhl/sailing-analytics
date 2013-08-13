@@ -98,7 +98,7 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
 
     @Override
     public String getCompetitorNationality() {
-        return context.getCompetitor().getTeam().getName();
+        return context.getCompetitor().getTeam().getNationality().getThreeLetterIOCAcronym();
     }
 
     @Override
