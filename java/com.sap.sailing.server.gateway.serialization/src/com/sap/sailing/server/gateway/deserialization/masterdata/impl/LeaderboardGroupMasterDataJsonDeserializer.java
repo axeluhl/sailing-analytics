@@ -96,9 +96,12 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
         String name = (String) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_NAME);
         String description = (String) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_DESCRIPTION);
         boolean displayGroupsReverse = (Boolean) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_DISPLAY_GROUPS_REVERSE);
-        boolean hasOverallLeaderboard = (Boolean) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_HAS_OVERALL_LEADERBOARD);
-        ScoringScheme overallLeaderboardScoringScheme = LeaderboardMasterDataJsonDeserializer.deserializeScoringScheme((JSONObject) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_SCORING_SCHEME), domainFactory);
-        int[] overallLeaderboardResultDiscardingThresholds = LeaderboardMasterDataJsonDeserializer.deserializeResultDesicardingRule((JSONObject) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_DISCARDING_THRESHOLDS));
+        Boolean hasOverallLeaderboard = (Boolean) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_HAS_OVERALL_LEADERBOARD);
+        if (hasOverallLeaderboard == null) {
+            hasOverallLeaderboard = false;
+        }
+        ScoringScheme overallLeaderboardScoringScheme = !hasOverallLeaderboard ? null : LeaderboardMasterDataJsonDeserializer.deserializeScoringScheme((JSONObject) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_SCORING_SCHEME), domainFactory);
+        int[] overallLeaderboardResultDiscardingThresholds = !hasOverallLeaderboard ? null : LeaderboardMasterDataJsonDeserializer.deserializeResultDesicardingRule((JSONObject) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_DISCARDING_THRESHOLDS));
         return new LeaderboardGroupMasterData(name, description, displayGroupsReverse, hasOverallLeaderboard, overallLeaderboardScoringScheme, overallLeaderboardResultDiscardingThresholds, leaderboards, events, regattas);
     }
 

@@ -100,6 +100,7 @@ public class LeaderboardGroupJsonGetServlet extends AbstractJsonHttpServlet {
                                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                                 if (trackedRace != null) {
                                     jsonRaceColumn.put("isTracked", true);
+                                    jsonRaceColumn.put("regattaName", trackedRace.getTrackedRegatta().getRegatta().getName());
                                     jsonRaceColumn.put("trackedRaceName", trackedRace.getRace().getName());
                                     jsonRaceColumn.put("hasGpsData", trackedRace.hasGPSData());
                                     jsonRaceColumn.put("hasWindData", trackedRace.hasWindData());

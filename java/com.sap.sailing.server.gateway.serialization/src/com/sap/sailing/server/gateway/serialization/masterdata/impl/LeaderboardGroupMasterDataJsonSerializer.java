@@ -30,7 +30,7 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
     public static final String FIELD_LEADERBOARDS = "leaderboards";
     public static final String FIELD_HAS_OVERALL_LEADERBOARD = "overallLeaderboard";
     public static final String FIELD_OVERALL_LEADERBOARD_SCORING_SCHEME = "overallLeaderboardScoringScheme";
-    public static final String FIELD_OVERALL_LEADERBOARD_DISCARDING_THRESHOLDS = "overallLeaderboardScoringScheme";
+    public static final String FIELD_OVERALL_LEADERBOARD_DISCARDING_THRESHOLDS = "overallLeaderboardDiscardingThresholds";
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_DISPLAY_GROUPS_REVERSE = "displayGroupsReverse";
