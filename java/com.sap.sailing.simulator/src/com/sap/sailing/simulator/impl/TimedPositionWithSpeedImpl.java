@@ -1,7 +1,7 @@
 package com.sap.sailing.simulator.impl;
 
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 

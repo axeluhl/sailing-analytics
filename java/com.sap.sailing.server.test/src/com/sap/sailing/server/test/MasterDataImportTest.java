@@ -39,7 +39,6 @@ import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
@@ -47,9 +46,12 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
@@ -1192,5 +1194,57 @@ public class MasterDataImportTest {
         Assert.assertNotNull(leaderboardGroup2OnTarget);
         Assert.assertTrue(leaderboardGroup2OnTarget.getLeaderboards().iterator().hasNext());
      
+    }
+    
+    @Test
+    public void testMasterDataImportWithOverallLeaderboard() throws MalformedURLException, IOException, InterruptedException {
+        // Setup source service
+        RacingEventService sourceService = new RacingEventServiceImpl();
+
+        int[] discardRule = { 1, 2, 3, 4 };
+        ScoringScheme scheme = new LowPoint();
+        List<String> leaderboardNames = new ArrayList<String>();
+        sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, 
+                leaderboardNames, discardRule, scheme.getType());
+
+       
+        // Serialize
+        TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
+                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(),
+                sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
+        Set<String> names = new HashSet<String>();
+        names.add(TEST_GROUP_NAME);
+        JSONObject masterDataOverallObject = serializer.serialize(names);
+        Assert.assertNotNull(masterDataOverallObject);
+
+        // Delete all data above from the database, to allow recreating all of it on target server
+        deleteCreatedDataFromDatabase();
+
+        // Deserialization copied from doPost in MasterDataByLeaderboardGroupJsonPostServlet
+        RacingEventService destService = new RacingEventServiceImplMock();
+        DomainFactory domainFactory = DomainFactory.INSTANCE;
+        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+        //Test in override model, to find out if data that was created during import is overriden later on
+        // in the same import process. Number of creations is checked below.
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(
+                masterDataOverallObject.toString(), true);
+
+        //Test correct number of creations
+        Assert.assertEquals(1,creationCount.getLeaderboardGroupCount());
+        
+        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        Assert.assertNotNull(leaderboardGroupOnTarget);
+        Leaderboard overallLeaderboard = leaderboardGroupOnTarget.getOverallLeaderboard();
+        Assert.assertNotNull(overallLeaderboard);
+        
+        Assert.assertNotNull(overallLeaderboard.getResultDiscardingRule());
+        
+        Assert.assertNotNull(overallLeaderboard.getScoringScheme());
+        
+        Assert.assertEquals(scheme.getType(), overallLeaderboard.getScoringScheme().getType());
+
+        Assert.assertEquals(3, ((ThresholdBasedResultDiscardingRule) overallLeaderboard.getResultDiscardingRule())
+                .getDiscardIndexResultsStartingWithHowManyRaces()[2]);
+
     }
 }

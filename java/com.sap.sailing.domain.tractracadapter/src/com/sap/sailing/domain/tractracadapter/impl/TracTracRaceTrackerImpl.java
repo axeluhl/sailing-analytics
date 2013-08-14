@@ -31,11 +31,11 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -93,6 +93,14 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     private final Triple<URL, URI, URI> urls;
     private final ScheduledFuture<?> controlPointPositionPoller;
+
+    /**
+     * Tells if this tracker was created with a valid live URI. If not, the tracker will stop and unregister itself
+     * from the {@link RacingEventService} after having received all stored data.
+     */
+    private final boolean isLiveTracking;
+
+    private final TrackedRegattaRegistry trackedRegattaRegistry;
 
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
@@ -175,8 +183,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         super();
+        this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.tractracEvent = tractracEvent;
         urls = createID(paramURL, liveURI, storedURI);
+        isLiveTracking = liveURI != null;
         this.races = new HashSet<RaceDefinition>();
         this.windStore = windStore;
         this.domainFactory = domainFactory;
@@ -540,11 +550,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         logger.info("stopped TracTrac tracking for "+getRaces());
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
         updateStatusOfTrackedRaces();
-        try {
-            stop(/* stop receivers preemptively */ false);
-        } catch (InterruptedException e) {
-            logger.log(Level.SEVERE, "Exception trying to stop tracker for "+getRaces(), e);
-        } 
     }
 
     private void updateStatusOfTrackedRaces() {
@@ -572,8 +577,20 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     @Override
     public void storedDataEnd() {
         logger.info("Stored data end for race(s) "+getRaces());
-        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1);
-        updateStatusOfTrackedRaces();
+        if (isLiveTracking) {
+            lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1);
+            updateStatusOfTrackedRaces();
+        } else {
+            // ask RacingEventService to cleanly stop and unregister this tracker
+            for (RaceDefinition race : getRaces()) {
+                try {
+                    trackedRegattaRegistry.stopTracking(getRegatta(), race);
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Error trying to stop tracker for race "+race.getName()+
+                            " in regatta "+getRegatta().getName(), e);
+                }
+            }
+        }
     }
 
     @Override

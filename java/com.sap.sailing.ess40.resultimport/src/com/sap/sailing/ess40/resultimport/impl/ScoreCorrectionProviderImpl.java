@@ -16,11 +16,11 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Base64Utils;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {

@@ -9,10 +9,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 

@@ -5,16 +5,16 @@ import java.util.List;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.BearingWithConfidence;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
@@ -122,10 +122,28 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                 speedToNext = e.getPosition().getDistance(next.getPosition())
                         .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
             }
-            result = (!fixHasValidSogAndCog || ((speedToPrevious == null || speedToPrevious.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
-                    * e.getSpeed().getMetersPerSecond())
-                    && (speedToNext == null || speedToNext.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
-                            * e.getSpeed().getMetersPerSecond())))
+            final double speedToPreviousFactor;
+            if (speedToPrevious != null) {
+                if (speedToPrevious.getMetersPerSecond() >= e.getSpeed().getMetersPerSecond()) {
+                    speedToPreviousFactor = speedToPrevious.getMetersPerSecond() / e.getSpeed().getMetersPerSecond();
+                } else {
+                    speedToPreviousFactor = e.getSpeed().getMetersPerSecond() / speedToPrevious.getMetersPerSecond();
+                }
+            } else {
+                speedToPreviousFactor = 0;
+            }
+            final double speedToNextFactor;
+            if (speedToNext != null) {
+                if (speedToNext.getMetersPerSecond() >= e.getSpeed().getMetersPerSecond()) {
+                    speedToNextFactor = speedToNext.getMetersPerSecond() / e.getSpeed().getMetersPerSecond();
+                } else {
+                    speedToNextFactor = e.getSpeed().getMetersPerSecond() / speedToNext.getMetersPerSecond();
+                }
+            } else {
+                speedToNextFactor = 0;
+            }
+            result = (!fixHasValidSogAndCog || ((speedToPrevious == null || speedToPreviousFactor <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING)
+                    && (speedToNext == null || speedToNextFactor <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING)))
                     && (maxSpeedForSmoothing == null
                             || (speedToPrevious == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0) || (speedToNext == null || speedToNext
                             .compareTo(maxSpeedForSmoothing) <= 0));

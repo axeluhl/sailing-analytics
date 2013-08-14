@@ -26,11 +26,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
