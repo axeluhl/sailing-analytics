@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.masterdataimport.EventMasterData;
 import com.sap.sailing.domain.masterdataimport.LeaderboardGroupMasterData;
 import com.sap.sailing.domain.masterdataimport.RaceColumnMasterData;
@@ -41,6 +42,8 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
     
     private final JsonDeserializer<RegattaMasterData> regattaDeserializer;
     
+    private final DomainFactory domainFactory;
+    
     public static JsonDeserializer<LeaderboardGroupMasterData> create(DomainFactory domainFactory) {
         JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
         JsonDeserializer<Nationality> nationalityDeserializer = new NationalityJsonDeserialzer();
@@ -58,15 +61,16 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
         JsonDeserializer<RegattaMasterData> regattaDeserializer = new RegattaMasterDataJsonDeserializer(
                 fleetDeserializer, raceColumnDeserializer);
         JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = new LeaderboardGroupMasterDataJsonDeserializer(
-                leaderboardDeserializer, eventDeserializer, regattaDeserializer);
+                leaderboardDeserializer, eventDeserializer, regattaDeserializer, domainFactory);
         return leaderboardGroupMasterDataDeserializer;
     }
 
     public LeaderboardGroupMasterDataJsonDeserializer(JsonDeserializer<LeaderboardMasterData> leaderboardDeserializer,
-            JsonDeserializer<EventMasterData> eventDeserializer, JsonDeserializer<RegattaMasterData> regattaDeserializer) {
+            JsonDeserializer<EventMasterData> eventDeserializer, JsonDeserializer<RegattaMasterData> regattaDeserializer, DomainFactory domainFactory) {
         this.leaderboardDeserializer = leaderboardDeserializer;
         this.eventDeserializer = eventDeserializer;
         this.regattaDeserializer = regattaDeserializer;
+        this.domainFactory = domainFactory;
     }
 
     @Override
@@ -92,8 +96,13 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
         String name = (String) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_NAME);
         String description = (String) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_DESCRIPTION);
         boolean displayGroupsReverse = (Boolean) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_DISPLAY_GROUPS_REVERSE);
-        LeaderboardMasterData overallLeaderboardMasterData = leaderboardDeserializer.deserialize((JSONObject) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD));
-        return new LeaderboardGroupMasterData(name, description, displayGroupsReverse, overallLeaderboardMasterData, leaderboards, events, regattas);
+        Boolean hasOverallLeaderboard = (Boolean) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_HAS_OVERALL_LEADERBOARD);
+        if (hasOverallLeaderboard == null) {
+            hasOverallLeaderboard = false;
+        }
+        ScoringScheme overallLeaderboardScoringScheme = !hasOverallLeaderboard ? null : LeaderboardMasterDataJsonDeserializer.deserializeScoringScheme((JSONObject) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_SCORING_SCHEME), domainFactory);
+        int[] overallLeaderboardResultDiscardingThresholds = !hasOverallLeaderboard ? null : LeaderboardMasterDataJsonDeserializer.deserializeResultDesicardingRule((JSONObject) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_DISCARDING_THRESHOLDS));
+        return new LeaderboardGroupMasterData(name, description, displayGroupsReverse, hasOverallLeaderboard, overallLeaderboardScoringScheme, overallLeaderboardResultDiscardingThresholds, leaderboards, events, regattas);
     }
 
 }

@@ -20,17 +20,22 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.persistence,
  com.sap.sailing.mongodb,
  com.mongodb.driver;bundle-version="2.6.2",
- javax.servlet;bundle-version="2.5.0",
+ javax.servlet;bundle-version="2.6.0",
  com.sap.sailing.domain.common,
  com.sap.sailing.udpconnector,
  org.jdom;bundle-version="1.0.0",
  com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0",
  javax.servlet.jsp.jstl;bundle-version="1.2.0",
- javax.servlet.jsp;bundle-version="2.1.0",
+ javax.servlet.jsp;bundle-version="2.2.0",
  javax.el;bundle-version="2.1.0",
  rome;bundle-version="1.0.0",
  com.sap.sailing.domain.shared.android;bundle-version="1.0.0",
- com.sap.sailing.server.trackfiles;bundle-version="1.0.0"
+ com.sap.sailing.server.trackfiles;bundle-version="1.0.0",
+ org.eclipse.jetty.websocket.api;bundle-version="9.0.4",
+ org.eclipse.jetty.websocket.server;bundle-version="9.0.4",
+ org.eclipse.jetty.websocket.servlet;bundle-version="9.0.4",
+ org.eclipse.jetty.websocket.client;bundle-version="9.0.4",
+ org.eclipse.jetty.websocket.common;bundle-version="9.0.4"
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway

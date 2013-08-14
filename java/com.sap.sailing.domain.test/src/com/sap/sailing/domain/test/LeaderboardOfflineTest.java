@@ -8,7 +8,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -141,6 +143,10 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             @Override
             public boolean isRaceBeingTracked(RaceDefinition r) {
                 return true;
+            }
+            @Override
+            public void stopTracking(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,
+                    InterruptedException {
             }
         };
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE);
