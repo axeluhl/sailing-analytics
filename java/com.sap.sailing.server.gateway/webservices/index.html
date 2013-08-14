@@ -9,6 +9,40 @@
 </head>
 <body>
 <h1>SAP Sailing Analytics - Web Services Overview</h1>
+<p>A number of web services is available to query the state of a SAP Sailing Analytics server instance.
+Note that different server instances exist, and not all servers hold the same data. Usually, events get
+their own URL which is then made sure to point to a server instance holding the data for that event.</p>
+
+<p>
+For example, <a href="http://kielerwoche2013.sapsailing.com">http://kielerwoche2013.sapsailing.com</a> points
+to the server holding all data of the <em>Kieler Woche 2013</em> event.</a> These base URLs can then be used to
+invoke the services described below, replacing the general <b>www.sapsailing.com</b> URL.
+</p>
+
+<p>
+The best entry point to navigating the contents of a server is usually the <b>leaderboardgroups</b> service,
+listing the leaderboard groups offered by the server. For example,
+<a href="http://www.sapsailing.com/sailingserver/leaderboardgroups">http://www.sapsailing.com/sailingserver/leaderboardgroups</a>
+lists the names of the leaderboard groups that the server instance knows. The names returned in the list can then be used
+as parameter for the <b>leaderboardgroup</b> service, e.g., as follows:
+<a href="http://www.sapsailing.com/sailingserver/leaderboardgroup?leaderboardGroupName=Star%20IDM%202013">http://www.sapsailing.com/sailingserver/leaderboardgroup?leaderboardGroupName=Star%20IDM%202013</a>.
+Note, of course, that the name needs to be URL-encoded with special characters and white spaces correctly
+translated into URL format. 
+</p>
+
+<p>
+The leaderboard group service list the leaderboards in the group. There are essentially two types of leaderboard:
+flexible leaderboards and regatta leaderboards. For flexible leaderboards, the service tells the list of races
+in the leaderboard, and for each race in particular the regatta name and the tracked race name. These two attributes
+can, in turn, be used as parameters for further services to identify the race for which information shall be retrieved.
+Again, note that those names need to be URL-encoded accordingly when used as parameter to a service call.  
+</p>
+
+<p>
+When a service takes a time point as a parameter, there are usually two ways of specifying it: either as an
+ISO time stamp, e.g., 2013-05-08T10:12:59Z or as Unix time stamp (milliseconds since 1970-01-01T00:00:00Z). The parameters
+in the latter format are usually called <b>...asmillis</b>. 
+</p>
 <table>
 <thead>
 	<tr>
@@ -57,6 +91,21 @@
 		<td><a href="windExportDoc.html">wind</a></td>
 		<td>Gets wind data for a race</td>
 		<td><a href="windExportSample.json">Json</a></td>
+	</tr>
+	<tr>
+		<td><a href="showraceDoc.html">showrace</a></td>
+		<td>Gets general time-dependent data for a race and the competitors</td>
+		<td><a href="showraceSample.json">Json</a></td>
+	</tr>
+	<tr>
+		<td><a href="showwaypointsDoc.html">showwaypoints</a></td>
+		<td>Gets course and waypoint data for a race</td>
+		<td><a href="showwaypointsSample.json">Json</a></td>
+	</tr>
+	<tr>
+		<td><a href="showboatpositionsDoc.html">showboatpositions</a></td>
+		<td>Gets boat GPS data for a race</td>
+		<td><a href="showboatpositionsSample.json">Json</a></td>
 	</tr>
 </tbody>
 </table>

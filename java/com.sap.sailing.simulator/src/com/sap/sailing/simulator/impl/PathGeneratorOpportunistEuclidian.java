@@ -235,6 +235,7 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             if (prevDirection == -1) {
 
                 if (startLeft) {
+                	allRight = false;
                     path.add(new TimedPositionWithSpeedImpl(nextTime, plft, lWind));
                     currentPosition = plft;
                     if (prevDirection == 2) {
@@ -245,6 +246,7 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
                     }
                     prevDirection = 1;
                 } else {
+                	allLeft = false;
                     path.add(new TimedPositionWithSpeedImpl(nextTime, prght, rWind));
                     currentPosition = prght;
                     if (prevDirection == 1) {

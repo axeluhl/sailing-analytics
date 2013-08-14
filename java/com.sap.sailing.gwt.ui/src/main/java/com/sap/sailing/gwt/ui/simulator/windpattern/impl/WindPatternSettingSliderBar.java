@@ -19,8 +19,9 @@ public class WindPatternSettingSliderBar implements WindPatternSetting<Double>, 
     private double currentValue;
     private double min;
     private double max;
+    private double res; // resolution of slider bar
     private double defaultValue;
-    private int steps;
+    private int steps; // number of tickmarks
 
     /**
      * Required for serialization
@@ -29,11 +30,12 @@ public class WindPatternSettingSliderBar implements WindPatternSetting<Double>, 
 
     }
 
-    public WindPatternSettingSliderBar(String name, String displayName, double min, double max, double defaultValue, int steps) {
+    public WindPatternSettingSliderBar(String name, String displayName, double min, double max, double res, double defaultValue, int steps) {
         this.name = name;
         this.displayName = displayName;
         this.min = min;
         this.max = max;
+        this.res = res;
         this.defaultValue = defaultValue;
         this.currentValue = defaultValue;
         this.steps = steps;
@@ -59,6 +61,11 @@ public class WindPatternSettingSliderBar implements WindPatternSetting<Double>, 
     @Override
     public Double getMax() {
         return max;
+    }
+
+    @Override
+    public Double getResolution() {
+        return res;
     }
 
     @Override

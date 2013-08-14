@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.Test;
 
 
+
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
@@ -24,6 +25,7 @@ import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
 import com.sap.sailing.domain.swisstimingadapter.Race;
+import com.sap.sailing.domain.swisstimingadapter.RaceType;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.impl.CourseImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.MarkImpl;
@@ -34,6 +36,20 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import difflib.PatchFailedException;
 
 public class SimpleDomainFactoryTest {
+    @Test
+    public void testExtractBoatClassFromSimpleRaceID() {
+        String raceID = "SAW005901";
+        RaceType raceType = DomainFactory.INSTANCE.getRaceTypeFromRaceID(raceID);
+        assertEquals("470", raceType.getBoatClass().getName());
+    }
+    
+    @Test
+    public void testExtractBoatClassFromRaceIDWithEventID() {
+        String raceID = "QINSWC12013;SAW005901";
+        RaceType raceType = DomainFactory.INSTANCE.getRaceTypeFromRaceID(raceID);
+        assertEquals("470", raceType.getBoatClass().getName());
+    }
+    
     /**
      * Tests that an unknown boat class encoded in a regular "SA" format race ID is returned as the unknown boat class
      * instead of null.

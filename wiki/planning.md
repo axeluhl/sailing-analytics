@@ -12,6 +12,8 @@
 
 [[Advanced Wind Field Analysis|wiki/planning/AdvancedWindFieldAnalysis]]
 
+[[Support Specific Analysis Scenarios|wiki/planning/AnalysisScenarios]]
+
 [[Google Earth as Map|wiki/planning/GoogleEarth]]
 
 [[AirMAX vs. MikroTik|/wiki/planning/AirMAXvsMikroTik]]

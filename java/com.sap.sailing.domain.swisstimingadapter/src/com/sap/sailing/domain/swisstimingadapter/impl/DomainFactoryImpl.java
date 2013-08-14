@@ -177,19 +177,47 @@ public class DomainFactoryImpl implements DomainFactory {
 
     /**
      * Returns the SwissTiming olympic race type or race type "UNKNOWN" when no corresponding olympic race type can be found.
-     * Will never return null neither throw a content-related exception.
+     * Will never return <code>null</code> neither throw a content-related exception.<p>
+     * 
+     * The <code>raceID</code> format from which the race type can be inferred either has to be of the form<pre>
+     * 
+     * DDGEEEPUU
+     *
+     *  D = discipline - in this case sailing or SA
+     *  G = gender - M, F or X
+     *  E = event - a three digit code for each event (known as class in sailing)
+     *  P = phase - 1 being the grand final or medal working back to 9 as the first qualification step, generally sailing only uses 1 and 9 but we are investigating using 8 depending on the exact competition format
+     *  U = event unit - race 1 through to 99 in the phase 
+     * </pre>
+     * 
+     * for example "SAW005901" or of the form <pre>
+     * CCCRRRNYYYY;DDGEEEPUU
+     * 
+     *  C = City
+     *  R = Regatta
+     *  N = Regatta Number
+     *  Y = Year
+     * </pre>
+     * 
+     * which allows for a globally-unique race ID as it includes a specification of the event / regatta at which the race
+     * took place.
      */
     @Override
     public RaceType getRaceTypeFromRaceID(String raceID) {
+        final RaceType result;
         if (raceID != null && raceID.length() >= 6) {
-            String swissTimingRaceCode = raceID.substring(0, 6).toUpperCase();
-            RaceType result = raceTypeByID.get(swissTimingRaceCode);
-            if (result != null) {
-                return result;
+            final String[] optionalEventIDAndMandatoryRaceID = raceID.split(";");
+            final String swissTimingRaceCode = optionalEventIDAndMandatoryRaceID[optionalEventIDAndMandatoryRaceID.length-1].substring(0, 6).toUpperCase();
+            RaceType raceType = raceTypeByID.get(swissTimingRaceCode);
+            if (raceType == null) {
+                result = unknownRaceType;
+            } else {
+                result = raceType;
             }
+        } else {
+            result = unknownRaceType;
         }
-        //else 
-        return unknownRaceType;
+        return result;
     }
 
     private Iterable<Competitor> createCompetitorList(StartList startList, RaceType raceType) {

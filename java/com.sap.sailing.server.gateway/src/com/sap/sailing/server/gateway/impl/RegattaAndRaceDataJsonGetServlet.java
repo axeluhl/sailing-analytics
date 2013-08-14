@@ -210,7 +210,10 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                 jsonRace.put("name", trackedRace.getRace().getName());
                 jsonRace.put("startoftracking", trackedRace.getStartOfTracking() == null ? 0l : trackedRace
                         .getStartOfTracking().asMillis());
+                jsonRace.put("endoftracking", trackedRace.getEndOfTracking() == null ? 0l : trackedRace
+                        .getEndOfTracking().asMillis());
                 jsonRace.put("start", trackedRace.getStartOfRace() == null ? 0l : trackedRace.getStartOfRace().asMillis());
+                jsonRace.put("end", trackedRace.getEndOfRace() == null ? 0l : trackedRace.getEndOfRace().asMillis());
                 jsonRace.put("timeofnewestevent", trackedRace.getTimePointOfNewestEvent() == null ? 0l : trackedRace
                         .getTimePointOfNewestEvent().asMillis());
                 jsonRace.put("timeoflastevent", trackedRace.getTimePointOfLastEvent() == null ? 0l : trackedRace
