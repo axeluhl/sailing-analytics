@@ -8,10 +8,10 @@ import java.util.Map.Entry;
 import com.sap.sailing.datamining.impl.DataAmountExtractor;
 import com.sap.sailing.datamining.impl.FilterByCriteriaImpl;
 import com.sap.sailing.datamining.impl.QueryImpl;
-import com.sap.sailing.datamining.impl.aggregators.DoubleAverageAggregator;
-import com.sap.sailing.datamining.impl.aggregators.DoubleSumAggregator;
-import com.sap.sailing.datamining.impl.aggregators.IntegerAverageAggregator;
-import com.sap.sailing.datamining.impl.aggregators.IntegerSumAggregator;
+import com.sap.sailing.datamining.impl.aggregators.SimpleDoubleArithmeticAverageAggregator;
+import com.sap.sailing.datamining.impl.aggregators.SimpleDoubleSumAggregator;
+import com.sap.sailing.datamining.impl.aggregators.SimpleIntegerArithmeticAverageAggregator;
+import com.sap.sailing.datamining.impl.aggregators.SimpleIntegerSumAggregator;
 import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.DimensionValuesFilterCriteria;
@@ -98,9 +98,9 @@ public class DataMiningFactory {
     public static Aggregator<Integer, Integer> createIntegerAggregator(AggregatorType aggregatorType) {
         switch (aggregatorType) {
         case Average:
-            return new IntegerAverageAggregator();
+            return new SimpleIntegerArithmeticAverageAggregator();
         case Sum:
-            return new IntegerSumAggregator();
+            return new SimpleIntegerSumAggregator();
         }
         throw new IllegalArgumentException("Not yet implemented for the given aggregator type: "
                 + aggregatorType.toString());
@@ -109,9 +109,9 @@ public class DataMiningFactory {
     public static Aggregator<Double, Double> createDoubleAggregator(AggregatorType aggregatorType) {
         switch (aggregatorType) {
         case Average:
-            return new DoubleAverageAggregator();
+            return new SimpleDoubleArithmeticAverageAggregator();
         case Sum:
-            return new DoubleSumAggregator();
+            return new SimpleDoubleSumAggregator();
         }
         throw new IllegalArgumentException("Not yet implemented for the given aggregator type: "
                 + aggregatorType.toString());

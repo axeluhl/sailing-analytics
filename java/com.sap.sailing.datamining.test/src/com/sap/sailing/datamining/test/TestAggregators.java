@@ -8,15 +8,15 @@ import java.util.Collection;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.Aggregator;
-import com.sap.sailing.datamining.impl.aggregators.IntegerAverageAggregator;
-import com.sap.sailing.datamining.impl.aggregators.IntegerSumAggregator;
+import com.sap.sailing.datamining.impl.aggregators.SimpleIntegerArithmeticAverageAggregator;
+import com.sap.sailing.datamining.impl.aggregators.SimpleIntegerSumAggregator;
 
 public class TestAggregators {
 
     @Test
     public void testSumAggregator() {
         Collection<Integer> data = Arrays.asList(1, 7, 6, 3);
-        Aggregator<Integer, Integer> sumAggregator = new IntegerSumAggregator();
+        Aggregator<Integer, Integer> sumAggregator = new SimpleIntegerSumAggregator();
         
         Integer expectedAggregation = 17;
         assertEquals(expectedAggregation, sumAggregator.aggregate(data));
@@ -29,7 +29,7 @@ public class TestAggregators {
     @Test
     public void testAverageAggregator() {
         Collection<Integer> data = Arrays.asList(1, 7, 6, 3);
-        Aggregator<Integer, Integer> averageAggregator = new IntegerAverageAggregator();
+        Aggregator<Integer, Integer> averageAggregator = new SimpleIntegerArithmeticAverageAggregator();
         Integer expectedAggregation = 4;
         assertEquals(expectedAggregation, averageAggregator.aggregate(data));
     }
