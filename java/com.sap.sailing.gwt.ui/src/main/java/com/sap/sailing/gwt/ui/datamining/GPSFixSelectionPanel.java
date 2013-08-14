@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -141,9 +143,33 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
                     }
                 }
 
-                regattaNameTable.setContent(regattas);
-                boatClassTable.setContent(boatClasses);
-                raceNameTable.setContent(races);
+                List<RegattaDTO> sortedRegattas = new ArrayList<RegattaDTO>(regattas);
+                Collections.sort(sortedRegattas, new Comparator<RegattaDTO>() {
+                    @Override
+                    public int compare(RegattaDTO o1, RegattaDTO o2) {
+                        return o1.getName().compareTo(o2.getName());
+                    }
+                });
+
+                List<BoatClassDTO> sortedBoatClasses = new ArrayList<BoatClassDTO>(boatClasses);
+                Collections.sort(sortedBoatClasses, new Comparator<BoatClassDTO>() {
+                    @Override
+                    public int compare(BoatClassDTO o1, BoatClassDTO o2) {
+                        return o1.getName().compareTo(o2.getName());
+                    }
+                });
+
+                List<RaceDTO> sortedRaces = new ArrayList<RaceDTO>(races);
+                Collections.sort(sortedRaces, new Comparator<RaceDTO>() {
+                    @Override
+                    public int compare(RaceDTO o1, RaceDTO o2) {
+                        return o1.getName().compareTo(o2.getName());
+                    }
+                });
+                
+                regattaNameTable.setContent(sortedRegattas);
+                boatClassTable.setContent(sortedBoatClasses);
+                raceNameTable.setContent(sortedRaces);
                 legNumberTable.setContent(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 legTypeTable.setContent(Arrays.asList(LegType.values()));
                 competitorNameTable.setContent(competitors);
