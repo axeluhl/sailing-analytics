@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.AggregatorType;
@@ -46,6 +47,7 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
 
+    private TextArea dynamicGrouperScriptTextBox;
     private HorizontalPanel dimensionsToGroupByPanel;
     private List<ValueListBox<SharedDimensions.GPSFix>> dimensionsToGroupByBoxes;
     private ValueListBox<StatisticAndAggregatorType> statisticsListBox;
@@ -192,13 +194,29 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
         });
         functionsPanel.add(clearSelectionButton);
         
+        HorizontalPanel groupByPanel = new HorizontalPanel();
+        groupByPanel.setSpacing(5);
+        groupByPanel.add(new Label(stringMessages.groupBy() + ": "));
+        functionsPanel.add(groupByPanel);
+        
+        FlowPanel groupByOptionsPanel = new FlowPanel();
+        groupByPanel.add(groupByOptionsPanel);
+        
         dimensionsToGroupByPanel = new HorizontalPanel();
         dimensionsToGroupByPanel.setSpacing(5);
-        dimensionsToGroupByPanel.add(new Label(stringMessages.groupBy() + ": "));
         ValueListBox<SharedDimensions.GPSFix> dimensionToGroupByBox = createDimensionToGroupByBox();
         dimensionsToGroupByPanel.add(dimensionToGroupByBox);
         dimensionsToGroupByBoxes.add(dimensionToGroupByBox);
-        functionsPanel.add(dimensionsToGroupByPanel);
+        groupByOptionsPanel.add(dimensionsToGroupByPanel);
+        
+        FlowPanel dynamicGroupByPanel = new FlowPanel();
+        groupByOptionsPanel.add(dynamicGroupByPanel);
+        dynamicGroupByPanel.add(new Label("public Object getValueToGroupByFrom(GPSFix data) {"));
+        dynamicGrouperScriptTextBox = new TextArea();
+        dynamicGrouperScriptTextBox.setCharacterWidth(100);
+        dynamicGrouperScriptTextBox.setVisibleLines(1);
+        dynamicGroupByPanel.add(dynamicGrouperScriptTextBox);
+        dynamicGroupByPanel.add(new Label("}"));
         
         functionsPanel.add(new Label(stringMessages.statisticToCalculate() + ": "));
         statisticsListBox = new ValueListBox<StatisticAndAggregatorType>(new Renderer<StatisticAndAggregatorType>() {
