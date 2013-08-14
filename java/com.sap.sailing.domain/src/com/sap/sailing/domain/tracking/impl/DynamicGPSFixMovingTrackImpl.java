@@ -122,10 +122,28 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                 speedToNext = e.getPosition().getDistance(next.getPosition())
                         .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
             }
-            result = (!fixHasValidSogAndCog || ((speedToPrevious == null || speedToPrevious.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
-                    * e.getSpeed().getMetersPerSecond())
-                    && (speedToNext == null || speedToNext.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
-                            * e.getSpeed().getMetersPerSecond())))
+            final double speedToPreviousFactor;
+            if (speedToPrevious != null) {
+                if (speedToPrevious.getMetersPerSecond() >= e.getSpeed().getMetersPerSecond()) {
+                    speedToPreviousFactor = speedToPrevious.getMetersPerSecond() / e.getSpeed().getMetersPerSecond();
+                } else {
+                    speedToPreviousFactor = e.getSpeed().getMetersPerSecond() / speedToPrevious.getMetersPerSecond();
+                }
+            } else {
+                speedToPreviousFactor = 0;
+            }
+            final double speedToNextFactor;
+            if (speedToNext != null) {
+                if (speedToNext.getMetersPerSecond() >= e.getSpeed().getMetersPerSecond()) {
+                    speedToNextFactor = speedToNext.getMetersPerSecond() / e.getSpeed().getMetersPerSecond();
+                } else {
+                    speedToNextFactor = e.getSpeed().getMetersPerSecond() / speedToNext.getMetersPerSecond();
+                }
+            } else {
+                speedToNextFactor = 0;
+            }
+            result = (!fixHasValidSogAndCog || ((speedToPrevious == null || speedToPreviousFactor <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING)
+                    && (speedToNext == null || speedToNextFactor <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING)))
                     && (maxSpeedForSmoothing == null
                             || (speedToPrevious == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0) || (speedToNext == null || speedToNext
                             .compareTo(maxSpeedForSmoothing) <= 0));
