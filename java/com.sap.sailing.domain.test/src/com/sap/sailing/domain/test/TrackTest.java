@@ -99,8 +99,15 @@ public class TrackTest {
     }
     
     /**
-     * A test regarding bug 968. Three subsequent fixes at the same position with increasing time stamps each, then jumping
-     * to the next position for three seconds. Let's see what distance and SOG do...
+     * A test regarding bug 968. Three subsequent fixes at the same position with increasing time stamps each, then
+     * jumping to the next position for three seconds. Let's see what distance and SOG do...
+     * <p>
+     * 
+     * TODO bug 1504 The challenge with this is that the equal fixes all have a wrong speed value compared to at least
+     * one of their neighbors. They are hence all considered outliers, and no fix remains. There is however a possible
+     * sub-sequence of fixes that constitutes a sequence of all-valid fixes when only valid fixes are checked for
+     * validity with their valid neighbors. But this, at first glance, sounds like an ugly NP-complete problem: find the
+     * longest possible sub-sequence such that all fixes in the sub-sequence are valid w.r.t. their neighbors.
      */
     @Test
     public void testJumpyFixes() {
