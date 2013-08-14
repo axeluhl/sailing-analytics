@@ -1,6 +1,6 @@
 # Sailing Web-Services API
 
-[[TOC]]
+[[_TOC_]]
 
 For all service URLs, please note that we use an Apache reverse proxy to map URLs (and in particular the sub-domain) to a particular server instance. So, www.sapsailing.com may end up on a different server instance than tw2013.sapsailing.com or ess40-2013.sapsailing.com. Usually, we hand out a per-event or per-series URL, such as the ones above (except www.sapsailing.com which is the general landing page), and you would only fetch the content for the event you're interested in, even if the server instance has more.
 
