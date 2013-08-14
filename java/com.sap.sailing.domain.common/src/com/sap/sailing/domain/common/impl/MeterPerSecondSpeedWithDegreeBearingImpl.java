@@ -1,14 +1,15 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.AbstractSpeedImpl;
-import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.Bearing;
 
-public class MeterPerSecondSpeedImpl extends AbstractSpeedImpl implements Speed {
+public class MeterPerSecondSpeedWithDegreeBearingImpl extends AbstractSpeedWithAbstractBearingImpl {
     private static final long serialVersionUID = -524654796500981303L;
     private final double metersPerSecond;
+    private final Bearing bearing;
     
-    public MeterPerSecondSpeedImpl(double metersPerSecond) {
+    public MeterPerSecondSpeedWithDegreeBearingImpl(double metersPerSecond, Bearing bearing) {
         this.metersPerSecond = metersPerSecond;
+        this.bearing = bearing;
     }
     
     @Override
@@ -19,5 +20,10 @@ public class MeterPerSecondSpeedImpl extends AbstractSpeedImpl implements Speed 
     @Override
     public double getKilometersPerHour() {
         return metersPerSecond*3.6;
+    }
+
+    @Override
+    public Bearing getBearing() {
+        return bearing;
     }
 }

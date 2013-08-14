@@ -23,19 +23,21 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedWithDegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -686,6 +688,69 @@ public class TrackTest {
         SpeedWithBearing estimatedSpeedNew = track.getEstimatedSpeed(normalFixesTime);
         assertEquals(estimatedSpeed.getKnots(), estimatedSpeedNew.getKnots(), 0.001);
         assertEquals(estimatedSpeed.getBearing().getDegrees(), estimatedSpeedNew.getBearing().getDegrees(), 0.001);
+    }
+    
+    @Test
+    public void testValidCheckForFixThatSaysItsAsFastAsItWas() {
+        DynamicGPSFixMovingTrackImpl<Boat> myTrack = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("MyFirstBoat", new BoatClassImpl("505", /* typicallyStartsUpwind */
+                true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
+        TimePoint now1 = MillisecondsTimePoint.now();
+        TimePoint now2 = addMillisToTimepoint(now1, 1000); // 1s
+        DegreeBearingImpl bearing = new DegreeBearingImpl(90);
+        Position position1 = new DegreePosition(1, 2);
+        Position position2 = position1.translateGreatCircle(bearing, new MeterDistance(1));
+        GPSFixMovingImpl myGpsFix1 = new GPSFixMovingImpl(position1, now1, new MeterPerSecondSpeedWithDegreeBearingImpl(1, bearing));
+        GPSFixMovingImpl myGpsFix2 = new GPSFixMovingImpl(position2, now2, new MeterPerSecondSpeedWithDegreeBearingImpl(1, bearing));
+        myTrack.addGPSFix(myGpsFix1);
+        myTrack.addGPSFix(myGpsFix2);
+        myTrack.lockForRead();
+        try {
+            assertEquals(2, myTrack.getFixes().size()); // expecting both fixes to be valid
+        } finally {
+            myTrack.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testValidCheckForFixThatSaysItsFasterThanItActuallyWas() {
+        DynamicGPSFixMovingTrackImpl<Boat> myTrack = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("MyFirstBoat", new BoatClassImpl("505", /* typicallyStartsUpwind */
+                true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
+        TimePoint now1 = MillisecondsTimePoint.now();
+        TimePoint now2 = addMillisToTimepoint(now1, 1000); // 1s
+        DegreeBearingImpl bearing = new DegreeBearingImpl(90);
+        Position position1 = new DegreePosition(1, 2);
+        Position position2 = position1.translateGreatCircle(bearing, new MeterDistance(1));
+        GPSFixMovingImpl myGpsFix1 = new GPSFixMovingImpl(position1, now1, new MeterPerSecondSpeedWithDegreeBearingImpl(10, bearing));
+        GPSFixMovingImpl myGpsFix2 = new GPSFixMovingImpl(position2, now2, new MeterPerSecondSpeedWithDegreeBearingImpl(10, bearing));
+        myTrack.addGPSFix(myGpsFix1);
+        myTrack.addGPSFix(myGpsFix2);
+        myTrack.lockForRead();
+        try {
+            assertTrue(myTrack.getFixes().size() < 2); // at least one fix must be classified as outlier
+        } finally {
+            myTrack.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testValidCheckForFixThatSaysItsSlowerThanItActuallyWas() {
+        DynamicGPSFixMovingTrackImpl<Boat> myTrack = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("MyFirstBoat", new BoatClassImpl("505", /* typicallyStartsUpwind */
+                true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
+        TimePoint now1 = MillisecondsTimePoint.now();
+        TimePoint now2 = addMillisToTimepoint(now1, 1000); // 1s
+        DegreeBearingImpl bearing = new DegreeBearingImpl(90);
+        Position position1 = new DegreePosition(1, 2);
+        Position position2 = position1.translateGreatCircle(bearing, new MeterDistance(1));
+        GPSFixMovingImpl myGpsFix1 = new GPSFixMovingImpl(position1, now1, new MeterPerSecondSpeedWithDegreeBearingImpl(0.1, bearing));
+        GPSFixMovingImpl myGpsFix2 = new GPSFixMovingImpl(position2, now2, new MeterPerSecondSpeedWithDegreeBearingImpl(0.1, bearing));
+        myTrack.addGPSFix(myGpsFix1);
+        myTrack.addGPSFix(myGpsFix2);
+        myTrack.lockForRead();
+        try {
+            assertTrue(myTrack.getFixes().size() < 2); // at least one fix must be classified as outlier
+        } finally {
+            myTrack.unlockAfterRead();
+        }
     }
     
     @Test
