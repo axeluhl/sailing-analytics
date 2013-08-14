@@ -3351,10 +3351,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         QueryResult<Integer> result = query.run(getService());
         return result;
     }
-    
+
     @Override
-    public GenericGroupKey<String> fooBar() {
-        return null;
-    }
+    public void pseudoMethodSoThatTheParameterTypesAreAddedToTheGWTSerializationPolicy(GenericGroupKey<String> a) { }
 
 }

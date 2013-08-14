@@ -462,8 +462,16 @@ public interface SailingServiceAsync {
     void runGPSFixQueryAsBenchmark(Map<SharedDimensions.GPSFix, Collection<?>> selection, Collection<SharedDimensions.GPSFix> dimensionsToGroupBy, StatisticType statisticToCalculate, AggregatorType aggregatedAs, AsyncCallback<Pair<Double, Integer>> asyncCallback);
 
     void runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, Collection<SharedDimensions.GPSFix> dimensionsToGroupBy, StatisticType statisticToCalculate, AggregatorType aggregatedAs, AsyncCallback<QueryResult<Integer>> asyncCallback);
-
-    void fooBar(AsyncCallback<GenericGroupKey<String>> callback);
+    
+    /**
+     * This method does nothing, but is needed to ensure, that some types are in the GWT serialization policy.<br />
+     * This may be necessary, if the type is somehow covered from GWT. For Further information look at bug ####.<br />
+     * <br />
+     * If you add generic type to the parameter list, don't use a generic parameter (like &ltT&gt) for the method, ? or Object to prevent specific typization.
+     * This will cause an error loading any entry point. You have to use a concrete type like String or a generic parameter that extends a concrete Type
+     * but not Object (like &ltT extends RaceDTO&gt).
+     */
+    void pseudoMethodSoThatTheParameterTypesAreAddedToTheGWTSerializationPolicy(GenericGroupKey<String> a, AsyncCallback<Void> asyncCallback);
     
 }
 
