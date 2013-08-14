@@ -10,7 +10,7 @@ public class GenericGroupKey<T> extends AbstractGroupKey {
      * Constructor for the GWT-Serialization. Don't use this!
      */
     @Deprecated
-    public GenericGroupKey() { }
+    GenericGroupKey() { }
 
     public GenericGroupKey(T value) {
         this.value = value;

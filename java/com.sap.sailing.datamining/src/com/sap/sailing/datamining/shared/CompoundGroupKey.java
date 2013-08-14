@@ -11,7 +11,7 @@ public class CompoundGroupKey extends AbstractGroupKey {
      * Constructor for the GWT-Serialization. Don't use this!
      */
     @Deprecated
-    public CompoundGroupKey() { }
+    CompoundGroupKey() { }
     
     public CompoundGroupKey(GroupKey mainKey) {
         this(mainKey, null);

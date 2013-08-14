@@ -15,7 +15,7 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
      * Constructor for the GWT-Serialization. Don't use this!
      */
     @Deprecated
-    public QueryResultImpl() { }
+    QueryResultImpl() { }
     
     public QueryResultImpl(int dataSize, String resultSiginifier) {
         this.dataSize = dataSize;
