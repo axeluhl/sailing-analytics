@@ -465,7 +465,7 @@ public interface SailingServiceAsync {
     
     /**
      * This method does nothing, but is needed to ensure, that some types are in the GWT serialization policy.<br />
-     * This may be necessary, if the type is somehow covered from GWT. For Further information look at bug ####.<br />
+     * This may be necessary, if the type is somehow covered from GWT. For Further information look at bug 1503.<br />
      * <br />
      * If you add generic type to the parameter list, don't use a generic parameter (like &ltT&gt) for the method, ? or Object to prevent specific typization.
      * This will cause an error loading any entry point. You have to use a concrete type like String or a generic parameter that extends a concrete Type

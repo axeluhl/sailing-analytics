@@ -34,17 +34,17 @@ public class TestGroupers {
         Collection<Integer> group = new ArrayList<Integer>();
         group.add(11);
         group.add(2);
-        expectedGroups.put(new StringGroupKey("2"), group);
+        expectedGroups.put(new GenericGroupKey<String>("2"), group);
         group = new ArrayList<Integer>();
         group.add(3);
         group.add(21);
         group.add(111);
-        expectedGroups.put(new StringGroupKey("3"), group);
+        expectedGroups.put(new GenericGroupKey<String>("3"), group);
         group = new ArrayList<Integer>();
         group.add(13);
         group.add(4);
         group.add(22);
-        expectedGroups.put(new StringGroupKey("4"), group);
+        expectedGroups.put(new GenericGroupKey<String>("4"), group);
         
         assertEquals(expectedGroups, groupByDimension.group(data));
     }
@@ -72,7 +72,7 @@ public class TestGroupers {
         
         @SuppressWarnings("unchecked")
         OpenGrouper<Integer> grouper = new OpenGrouper<Integer>(Arrays.asList(first, second, third));
-        GroupKey expectedGroupKey = new CompoundGroupKey(new StringGroupKey("First"), new CompoundGroupKey(new StringGroupKey("Second"), new StringGroupKey("Third")));
+        GroupKey expectedGroupKey = new CompoundGroupKey(new GenericGroupKey<String>("First"), new CompoundGroupKey(new GenericGroupKey<String>("Second"), new GenericGroupKey<String>("Third")));
         assertEquals(expectedGroupKey, grouper.getGroupKey(1));
     }
     
@@ -89,17 +89,17 @@ public class TestGroupers {
         Collection<Integer> expectedGroup = new ArrayList<Integer>();
         expectedGroup.add(-3);
         expectedGroup.add(-111);
-        expectedGroups.put(new CompoundGroupKey(new StringGroupKey("3"), new StringGroupKey("-1")), expectedGroup);
+        expectedGroups.put(new CompoundGroupKey(new GenericGroupKey<String>("3"), new GenericGroupKey<String>("-1")), expectedGroup);
         expectedGroup = new ArrayList<Integer>();
         expectedGroup.add(13);
         expectedGroup.add(22);
-        expectedGroups.put(new CompoundGroupKey(new StringGroupKey("4"), new StringGroupKey("1")), expectedGroup);
+        expectedGroups.put(new CompoundGroupKey(new GenericGroupKey<String>("4"), new GenericGroupKey<String>("1")), expectedGroup);
         expectedGroup = new ArrayList<Integer>();
         expectedGroup.add(21);
-        expectedGroups.put(new CompoundGroupKey(new StringGroupKey("3"), new StringGroupKey("1")), expectedGroup);
+        expectedGroups.put(new CompoundGroupKey(new GenericGroupKey<String>("3"), new GenericGroupKey<String>("1")), expectedGroup);
         expectedGroup = new ArrayList<Integer>();
         expectedGroup.add(-4);
-        expectedGroups.put(new CompoundGroupKey(new StringGroupKey("4"), new StringGroupKey("-1")), expectedGroup);
+        expectedGroups.put(new CompoundGroupKey(new GenericGroupKey<String>("4"), new GenericGroupKey<String>("-1")), expectedGroup);
         
         Map<GroupKey, Collection<Integer>> groups = groupByDimensions.group(data);
         for (Entry<GroupKey, Collection<Integer>> expectedGroupEntry : expectedGroups.entrySet()) {
@@ -141,26 +141,13 @@ public class TestGroupers {
 
         @Override
         protected GroupKey createGroupKeyFor(DataType dataEntry, Dimension<DataType, String> dimension) {
-            return new StringGroupKey(dimension.getDimensionValueFrom(dataEntry));
+            return new GenericGroupKey<String>(dimension.getDimensionValueFrom(dataEntry));
         }
         
         public GroupKey getGroupKey(DataType dataEntry) {
             return getGroupKeyFor(dataEntry);
         }
         
-    }
-    
-    public class StringGroupKey extends GenericGroupKey<String> {
-        
-        public StringGroupKey(String value) {
-            super(value);
-        }
-
-        @Override
-        public String asString() {
-            return getValue();
-        }
-
     }
 
 }
