@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
@@ -841,7 +842,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                         next = rawFixes.higher(next);
                     }
                 }
-                isValid = (!atLeastOnePreviousFixInRange || foundValidPreviousFixInRange) || (!atLeastOneNextFixInRange || foundValidNextFixInRange);
+                isValid = (!atLeastOnePreviousFixInRange || foundValidPreviousFixInRange) && (!atLeastOneNextFixInRange || foundValidNextFixInRange);
                 e.cacheValidity(isValid);
             }
         }
@@ -851,7 +852,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     /**
      * After <code>gpsFix</code> was added to this track, invalidate the {@link WithValidityCache validity caches}
      * of the fixes whose validity may be affected. If subclasses redefine {@link #isValid(PartialNavigableSetView, GPSFix)},
-     * they must make sure that this method is redefined accordingly.<p>
+     * they must make sure that this method is redefined accordingly. Here, {@link #getMillisecondsOverWhichToAverageSpeed()}
+     * before and after the fix all fixes' validity caches are reset.<p>
      * 
      * Distance cache invalidation is a bit tricky. Usually, the distance cache is invalidated starting with the time point
      * of the <code>gpsFix</code> "upwards." However, if the adjacent earlier fixes have changed their validity by the addition
@@ -890,7 +892,12 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         if (higher == null) {
             return Collections.emptySet();
         } else {
-            return Collections.singleton(higher);
+            Collection<FixType> result = new ArrayList<FixType>();
+            while (higher != null && higher.getTimePoint().asMillis() - gpsFix.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
+                result.add(higher);
+                higher = getInternalRawFixes().higher(higher);
+            }
+            return result;
         }
     }
 
@@ -899,7 +906,12 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         if (lower == null) {
             return Collections.emptySet();
         } else {
-            return Collections.singleton(lower);
+            Collection<FixType> result = new ArrayList<FixType>();
+            while (lower != null && gpsFix.getTimePoint().asMillis() - lower.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
+                result.add(lower);
+                lower = getInternalRawFixes().lower(lower);
+            }
+            return result;
         }
     }
 

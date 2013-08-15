@@ -148,7 +148,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                     next = rawFixes.higher(next);
                 }
             }
-            isValid = (!atLeastOnePreviousFixInRange || foundValidPreviousFixInRange) || (!atLeastOneNextFixInRange || foundValidNextFixInRange);
+            isValid = (!atLeastOnePreviousFixInRange || foundValidPreviousFixInRange) && (!atLeastOneNextFixInRange || foundValidNextFixInRange);
             e.cacheValidity(isValid);
         }
         return isValid;
