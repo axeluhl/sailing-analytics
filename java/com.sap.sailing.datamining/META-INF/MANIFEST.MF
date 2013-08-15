@@ -11,3 +11,5 @@ Export-Package: com.sap.sailing.datamining,
  com.sap.sailing.datamining.shared
 Require-Bundle: com.sap.sailing.domain;bundle-version="1.0.0",
  com.sap.sailing.domain.common
+Bundle-ClassPath: lib/groovy-all-2.1.6.jar,
+ .
