@@ -507,7 +507,7 @@ public class TrackTest {
         assertEquals(timePointOfLastOriginalFix, newFullIntervalCacheEntry.getA());
         assertEquals(now, newFullIntervalCacheEntry.getB().getA());
         TimePoint timePointForLateOutlier = new MillisecondsTimePoint(now.asMillis() + (steps-1)*timeBetweenFixesInMillis + timeBetweenFixesInMillis/2);
-        Position lateOutlierPosition = new DegreePosition(90, 90);
+        Position lateOutlierPosition = new DegreePosition(-90, 90);
         GPSFix lateOutlier = new GPSFixImpl(lateOutlierPosition, timePointForLateOutlier);
         track.addGPSFix(lateOutlier);
         assertEquals(1, invalidationCalls.size());
