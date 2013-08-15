@@ -507,41 +507,45 @@ public class TrackTest {
         assertEquals(timePointOfLastOriginalFix, newFullIntervalCacheEntry.getA());
         assertEquals(now, newFullIntervalCacheEntry.getB().getA());
         TimePoint timePointForLateOutlier = new MillisecondsTimePoint(now.asMillis() + (steps-1)*timeBetweenFixesInMillis + timeBetweenFixesInMillis/2);
-        Position lateOutlierPosition = new DegreePosition(90, 90);
+        Position lateOutlierPosition = new DegreePosition(-90, 90);
         GPSFix lateOutlier = new GPSFixImpl(lateOutlierPosition, timePointForLateOutlier);
+        // adding the outlier invalidates the fix just before the outlier because it now has a single successor that is in range but not reachable
         track.addGPSFix(lateOutlier);
         assertEquals(1, invalidationCalls.size());
-        TimePoint timePointOfLastFixBeforeLateOutlier = track.getLastFixBefore(timePointForLateOutlier).getTimePoint();
-        assertTrue(invalidationCalls.iterator().next().after(timePointOfLastFixBeforeLateOutlier));
+        TimePoint timePointOfLastRawFixBeforeLateOutlier = track.getLastRawFixBefore(timePointForLateOutlier).getTimePoint();
+        // assert that adding the outlier invalidated the distance cache starting from the raw fix before the late outlier
+        // because its validity changed from true to false
+        assertTrue(invalidationCalls.iterator().next().equals(timePointOfLastRawFixBeforeLateOutlier));
         invalidationCalls.clear();
         // expect the invalidation to have started after the single cache entry, so the cache entry still has to be there:
         final Pair<TimePoint, Pair<TimePoint, Distance>> stillPresentFullIntervalCacheEntry = distanceCache
                 .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
-        assertNotNull(stillPresentFullIntervalCacheEntry); // no more entry for "to"-value start in cache
-        assertEquals(timePointOfLastOriginalFix, stillPresentFullIntervalCacheEntry.getA());
-        assertEquals(now, stillPresentFullIntervalCacheEntry.getB().getA());
+        assertNull(stillPresentFullIntervalCacheEntry); // no more entry for "to"-value start in cache because new temporary outlier lies in previously cached interval
         GPSFix polishedLastFix = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
-        // ...which now still is expected to be the lateOutlier because no succeeding fix qualifies it as outlier:
-        assertEquals(lateOutlier, polishedLastFix);
+        // ...which now is expected to be two fixes before lateOutlier because lateOutlier has previous fixes within the time range
+        // but none of them is reachable with max speed, and the raw fix right before lateOutlier is currently temporarily an outlier too
+        assertEquals(track.getLastRawFixBefore(timePointOfLastRawFixBeforeLateOutlier), polishedLastFix);
         track.lockForRead();
         try {
-            assertEquals(steps+1, Util.size(track.getFixes())); // what will later be detected as outlier is now an additional fix
+            assertEquals(steps-1, Util.size(track.getFixes())); // the lateOutlier and its predecessor are currently detected as outlier, so it's not steps+1 
+            // which would include the lateOutlier, but it's already only steps-1 valid fixes.
         } finally {
             track.unlockAfterRead();
         }
-        // now add another "normal" fix, making the lateOutlier really an outlier
+        // now add another "normal" fix, making the lateOutlier really an outlier; invalidation starts 1ms after the last previously valid
+        // fix before the fix added, or at the earliest fix that changes its validity, whichever is earlier. In this case the earlier time point
+        // is 1ms after the last *valid* fix before the fix inserted because that's the fix two before the lateOutlier, and that fix and all other
+        // earlier fixes don't change their validity
         GPSFix fix = new GPSFixImpl(p, start); // the "overshoot" from the previous loop can be used to generate the next "regular" fix
         track.addGPSFix(fix);
         assertEquals(1, invalidationCalls.size());
-        // now assert that the fix addition also invalidated what is now detected as an outlier
-        assertEquals(timePointForLateOutlier, invalidationCalls.iterator().next());
+        // the lateOutlier's predecessor now is expected to have changed validity again, causing a distance cache invalidation at its time
+        assertEquals(track.getLastFixBefore(timePointOfLastRawFixBeforeLateOutlier).getTimePoint().plus(1), invalidationCalls.iterator().next());
         assertTrue(timePointForLateOutlier.compareTo(fix.getTimePoint()) < 0);
-        // expect the invalidation to have started at the outlier, leaving the previous result ending at the fix right before the outlier intact
+        // expect the invalidation to have started at the fix before the outlier, leaving the previous result ending at the fix right before the outlier intact
         final Pair<TimePoint, Pair<TimePoint, Distance>> stillStillPresentFullIntervalCacheEntry = distanceCache
                 .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
-        assertNotNull(stillStillPresentFullIntervalCacheEntry); // no more entry for "to"-value start in cache
-        assertEquals(timePointOfLastOriginalFix, stillStillPresentFullIntervalCacheEntry.getA());
-        assertEquals(now, stillStillPresentFullIntervalCacheEntry.getB().getA());
+        assertNull(stillStillPresentFullIntervalCacheEntry); // still nothing in the cache
         track.lockForRead();
         try {
             assertEquals(steps+1, Util.size(track.getFixes())); // the one "normal" late fix is added on top of the <steps> fixes, but the two outliers should now be removed

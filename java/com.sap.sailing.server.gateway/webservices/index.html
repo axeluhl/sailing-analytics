@@ -11,15 +11,17 @@
 <h1>SAP Sailing Analytics - Web Services Overview</h1>
 
 <p>
-A number of web services is available to query the state of a SAP Sailing Analytics server instance.
+A number of web services are available to query the state of a SAP Sailing Analytics server instance.
 Note that different server instances exist, and not all servers hold the same data. Usually, events get
 their own URL which is then made sure to point to a server instance holding the data for that event.
-</p>
-
-<p>
-For example, <a href="http://kielerwoche2013.sapsailing.com">http://kielerwoche2013.sapsailing.com</a> points
-to the server holding all data of the <em>Kieler Woche 2013</em> event.</a> These base URLs can then be used to
-invoke the services described below, replacing the general <b>www.sapsailing.com</b> URL.
+We use an Apache reverse proxy to map URLs (and in particular the sub-domain) to a particular server instance.
+So, <a href="http://www.sapsailing.com">www.sapsailing.com</a> may end up on a different server instance than
+<a href="http://tw2013.sapsailing.com">tw2013.sapsailing.com</a>
+or <a href="http://ess40-2013.sapsailing.com">ess40-2013.sapsailing.com</a>. Usually, we hand out a per-event
+or per-series URL, such as the ones above (except www.sapsailing.com which is the general landing page),
+and you would only fetch the content for the event you're interested in, even if the server instance has more.
+In all subsequent explanations, you may replace the "www.sapsailing.com" hostname by an according per-event host
+name to make sure you get to the event you're interested in.
 </p>
 
 <p>
@@ -37,7 +39,8 @@ translated into URL format.
 The leaderboard group service list the leaderboards in the group. There are essentially two types of leaderboard:
 flexible leaderboards and regatta leaderboards. For flexible leaderboards, the service tells the list of races
 in the leaderboard, and for each race in particular the regatta name and the tracked race name. These two attributes
-can, in turn, be used as parameters for further services to identify the race for which information shall be retrieved.
+can, in turn, be used as parameters for further services to identify the race for which information shall be retrieved and
+to fetch information about the regatta with its structure such as series and fleets.
 Again, note that those names need to be URL-encoded accordingly when used as parameter to a service call.  
 </p>
 
