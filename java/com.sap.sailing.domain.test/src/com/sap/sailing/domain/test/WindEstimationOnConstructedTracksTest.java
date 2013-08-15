@@ -82,8 +82,21 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
 
     private void setBearingForCompetitor(Competitor competitor, TimePoint timePoint, double bearingDeg) {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrackedRace().getTrack(competitor);
-        competitorTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint,
-                new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(bearingDeg))));
+        final KnotSpeedWithBearingImpl speed = new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(bearingDeg));
+        final Position position;
+        competitorTrack.lockForRead();
+        try {
+            GPSFixMoving lastFixBefore = competitorTrack.getLastFixBefore(timePoint);
+            if (lastFixBefore != null) {
+                position = lastFixBefore.getPosition().translateGreatCircle(speed.getBearing(), speed.travel(lastFixBefore.getTimePoint(), timePoint));
+            } else {
+                position = new DegreePosition(54.4680424, 10.234451);
+            }
+            // now infer a position that makes sense with the speed
+        } finally {
+            competitorTrack.unlockAfterRead();
+        }
+        competitorTrack.addGPSFix(new GPSFixMovingImpl(position, timePoint, speed));
     }
 
     /**
