@@ -10,11 +10,11 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.simulator.PolarDiagram;
 
@@ -551,7 +551,7 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
         Bearing diffWindTarget = windBearing.getDifferenceTo(targetDirection);
         if (diffWindTarget.equals(new DegreeBearingImpl(0))) {
             //
-            // target is aligned with wind, i.e. target bearing = 0°
+            // target is aligned with wind, i.e. target bearing = 0ï¿½
             //
             Bearing floorBeatAngle;
             if (beatAngles.floorEntry(wind) == null) {
@@ -603,7 +603,7 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
 
         } else {
             //
-            // target is not aligned with wind, i.e. target bearing != 0°
+            // target is not aligned with wind, i.e. target bearing != 0ï¿½
             //
             Set<Bearing> allKeys = new TreeSet<Bearing>(bearingComparator);
             /*

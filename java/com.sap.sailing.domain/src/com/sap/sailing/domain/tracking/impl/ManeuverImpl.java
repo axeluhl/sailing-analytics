@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.Maneuver;
