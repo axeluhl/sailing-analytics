@@ -163,6 +163,11 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         this(trackedItem, millisecondsOverWhichToAverage, DEFAULT_MAX_SPEED_FOR_SMOOTHING);
     }
     
+    /**
+     * @param maxSpeedForSmoothening
+     *            if <code>null</code>, any fix speed will be accepted as long as fix-provided speed (if any) and
+     *            inferred speed can be matched.
+     */
     public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, Speed maxSpeedForSmoothening) {
         super(/* nameForReadWriteLock */ GPSFixTrackImpl.class.getSimpleName()+(trackedItem==null?"":(" for "+trackedItem.toString())));
         this.trackedItem = trackedItem;
