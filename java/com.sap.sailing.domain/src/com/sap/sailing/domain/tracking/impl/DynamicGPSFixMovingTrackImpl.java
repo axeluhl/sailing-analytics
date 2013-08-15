@@ -95,60 +95,63 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
     }
     
     /**
-     * In addition to the base class implementation, we additionally have the speed and bearing as measured by the
-     * device. If the adjacent fixes are within the averaging interval defined by
-     * {@link GPSFixTrackImpl#getMillisecondsOverWhichToAverageSpeed()}, we use the device-measured speed and compare it
-     * with the speed computed based on the timestamp and distance between previous and next fix. If the latter speed
-     * exceeds the measured speed by more than a factor of
+     * In addition to the base class implementation, we may have the speed and bearing as measured by the device (the
+     * special speed/bearing combination 0.0/0.0 is simply ignored). If the adjacent fixes are within the averaging
+     * interval defined by {@link GPSFixTrackImpl#getMillisecondsOverWhichToAverageSpeed()}, we use the device-measured
+     * speed and compare it with the speed computed based on the time stamp and distance between previous and next fix.
+     * If the ratio between the higher and the lower of the two speeds exceeds
      * {@link #MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING}, the fix is considered invalid.
      */
     @Override
     protected boolean isValid(NavigableSet<GPSFixMoving> rawFixes, GPSFixMoving e) {
         assertReadLock();
-        boolean result;
+        final boolean isValid;
         if (e.isValidityCached()) {
-            result = e.isValid();
+            isValid = e.isValid();
         } else {
             boolean fixHasValidSogAndCog = (e.getSpeed().getMetersPerSecond() != 0.0 && e.getSpeed().getBearing().getDegrees() != 0.0);
+
             GPSFixMoving previous = rawFixes.lower(e);
-            GPSFixMoving next = rawFixes.higher(e);
+            final boolean atLeastOnePreviousFixInRange = previous != null && e.getTimePoint().asMillis() - previous.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed();
             Speed speedToPrevious = null;
-            if (previous != null && Math.abs(previous.getTimePoint().asMillis() - e.getTimePoint().asMillis()) <= getMillisecondsOverWhichToAverageSpeed()) {
+            boolean foundValidPreviousFixInRange = false;
+            while (previous != null && !foundValidPreviousFixInRange && e.getTimePoint().asMillis() - previous.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
                 speedToPrevious = previous.getPosition().getDistance(e.getPosition())
                         .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
-            }
-            Speed speedToNext = null;
-            if (next != null && Math.abs(next.getTimePoint().asMillis() - e.getTimePoint().asMillis()) <= getMillisecondsOverWhichToAverageSpeed()) {
-                speedToNext = e.getPosition().getDistance(next.getPosition())
-                        .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
-            }
-            final double speedToPreviousFactor;
-            if (speedToPrevious != null) {
+                final double speedToPreviousFactor;
                 if (speedToPrevious.getMetersPerSecond() >= e.getSpeed().getMetersPerSecond()) {
                     speedToPreviousFactor = speedToPrevious.getMetersPerSecond() / e.getSpeed().getMetersPerSecond();
                 } else {
                     speedToPreviousFactor = e.getSpeed().getMetersPerSecond() / speedToPrevious.getMetersPerSecond();
                 }
-            } else {
-                speedToPreviousFactor = 0;
+                foundValidPreviousFixInRange = (maxSpeedForSmoothing == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0)
+                        && (!fixHasValidSogAndCog || speedToPreviousFactor <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING);
+                previous = rawFixes.lower(previous);
             }
-            final double speedToNextFactor;
-            if (speedToNext != null) {
-                if (speedToNext.getMetersPerSecond() >= e.getSpeed().getMetersPerSecond()) {
-                    speedToNextFactor = speedToNext.getMetersPerSecond() / e.getSpeed().getMetersPerSecond();
-                } else {
-                    speedToNextFactor = e.getSpeed().getMetersPerSecond() / speedToNext.getMetersPerSecond();
+            boolean foundValidNextFixInRange = false;
+            boolean atLeastOneNextFixInRange = false;
+            // only spend the effort to calculate the "next"-related predicate if the "previous"-related part of the disjunction below isn't already false
+            if (!atLeastOnePreviousFixInRange || foundValidPreviousFixInRange) {
+                GPSFixMoving next = rawFixes.higher(e);
+                atLeastOneNextFixInRange = next != null && next.getTimePoint().asMillis() - e.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed();
+                Speed speedToNext = null;
+                while (next != null && !foundValidNextFixInRange && next.getTimePoint().asMillis() - e.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
+                    speedToNext = e.getPosition().getDistance(next.getPosition())
+                            .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
+                    final double speedToNextFactor;
+                    if (speedToNext.getMetersPerSecond() >= e.getSpeed().getMetersPerSecond()) {
+                        speedToNextFactor = speedToNext.getMetersPerSecond() / e.getSpeed().getMetersPerSecond();
+                    } else {
+                        speedToNextFactor = e.getSpeed().getMetersPerSecond() / speedToNext.getMetersPerSecond();
+                    }
+                    foundValidNextFixInRange = (maxSpeedForSmoothing == null || speedToNext.compareTo(maxSpeedForSmoothing) <= 0)
+                            && (!fixHasValidSogAndCog || speedToNextFactor <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING);
+                    next = rawFixes.higher(next);
                 }
-            } else {
-                speedToNextFactor = 0;
             }
-            result = (!fixHasValidSogAndCog || ((speedToPrevious == null || speedToPreviousFactor <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING)
-                    && (speedToNext == null || speedToNextFactor <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING)))
-                    && (maxSpeedForSmoothing == null
-                            || (speedToPrevious == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0) || (speedToNext == null || speedToNext
-                            .compareTo(maxSpeedForSmoothing) <= 0));
-            e.cacheValidity(result);
+            isValid = (!atLeastOnePreviousFixInRange || foundValidPreviousFixInRange) && (!atLeastOneNextFixInRange || foundValidNextFixInRange);
+            e.cacheValidity(isValid);
         }
-        return result;
+        return isValid;
     }
 }
