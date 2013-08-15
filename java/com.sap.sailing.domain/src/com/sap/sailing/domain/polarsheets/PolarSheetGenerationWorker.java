@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.polarsheets;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -166,20 +167,15 @@ public class PolarSheetGenerationWorker {
             }
 
             for (int levelIndex = 0; levelIndex < levelCount; levelIndex++) {
-                if (settings.shouldRemoveOutliers()) {
+                if (settings.shouldRemoveOutliers() && dataSetForWindLevel.get(levelIndex) != null) {
                     List<Double> withoutOutliers = new ArrayList<Double>();
-                    Double average = sumsPerWindSpeed[levelIndex] / dataCountPerWindSpeed[levelIndex];
-                    if (average.isNaN()) {
-                        average = new Double(0);
-                    }
-                    double standardDeviation;
-                    if (dataCountPerWindSpeed[levelIndex] > 0 && average > 0) {
-                        Double variance = sumsPerWindSpeed[levelIndex] / dataCountPerWindSpeed[levelIndex];
-                        standardDeviation = Math.sqrt(variance);
+                    Collections.sort(dataSetForWindLevel.get(levelIndex));
+                    if (dataCountPerWindSpeed[levelIndex] > /* Minimum data count for outlier detection */10) {
                         for (int dataIndex = 0; dataIndex < dataSetForWindLevel.get(levelIndex).size(); dataIndex++) {
                             Double dataPoint = dataSetForWindLevel.get(levelIndex).get(dataIndex);
-                            if (dataPoint > average - settings.getOutlierDetectionFactor() * standardDeviation
-                                    && dataPoint < average + settings.getOutlierDetectionFactor() * standardDeviation) {
+                            double pct = getNeighboorhoodSizePercentage(dataCountPerWindSpeed, dataSetForWindLevel,
+                                    levelIndex, dataIndex, dataPoint, settings);
+                            if (pct >= settings.getOutlierMinimumNeighborhoodPct()) {
                                 withoutOutliers.add(dataPoint);
                             } else {
                                 sumsPerWindSpeed[levelIndex] = sumsPerWindSpeed[levelIndex] - dataPoint;
@@ -188,7 +184,7 @@ public class PolarSheetGenerationWorker {
                         }
                         dataSetForWindLevel.put(levelIndex, withoutOutliers);
                     }
-                    
+
                 }
                 
                 if (dataCountPerWindSpeed[levelIndex] < settings.getMinimumDataCountPerAngle()) {
@@ -233,6 +229,64 @@ public class PolarSheetGenerationWorker {
                 dataCountPerAngleForWindspeed, stepping, histogramDataMap);
 
         return data;
+    }
+
+    /*
+     * This algorithm calculates the pct of their neighborhood based on a distance (in the settings) compared
+     * to the complete dataset.
+     */
+    public static double getNeighboorhoodSizePercentage(int[] dataCountPerWindSpeed,
+            Map<Integer, List<Double>> dataSetForWindLevel, int levelIndex, int dataIndex, Double dataPoint,
+            PolarSheetGenerationSettings settings) {
+      int neighborCount = 0;
+        double pct = .0;
+
+        int index = dataIndex;
+        // Left side
+        boolean done = false;
+        while (!done) {
+            index--;
+            if (index < 0) {
+                done = true;
+            } else {
+                Double dataPointToCheckForNeighborStatus = dataSetForWindLevel.get(levelIndex).get(
+                        index);
+                if (dataPoint - dataPointToCheckForNeighborStatus <= settings
+                        .getOutlierDetectionNeighborhoodRadius()) {
+                    neighborCount++;
+                } else {
+                    done = true;
+                }
+                pct = (double) neighborCount / (double) dataCountPerWindSpeed[levelIndex];
+                if (pct >= settings.getOutlierMinimumNeighborhoodPct()) {
+                    done = true;
+                }
+            }
+        }
+        index = dataIndex;
+        // Right side
+        done = false;
+        while (!done) {
+            index++;
+            if (index >= dataCountPerWindSpeed[levelIndex]) {
+                done = true;
+            } else {
+                Double dataPointToCheckForNeighborStatus = dataSetForWindLevel.get(levelIndex).get(
+                        index);
+                if (dataPointToCheckForNeighborStatus - dataPoint <= settings
+                        .getOutlierDetectionNeighborhoodRadius()) {
+                    neighborCount++;
+                } else {
+                    done = true;
+                }
+                pct = (double) neighborCount / (double) dataCountPerWindSpeed[levelIndex];
+                if (pct >= settings.getOutlierMinimumNeighborhoodPct()) {
+                    done = true;
+                }
+            }
+        }
+        pct = (double) neighborCount / (double) dataCountPerWindSpeed[levelIndex];
+        return pct;
     }
 
     private boolean allWorkersDone() {

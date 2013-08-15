@@ -26,7 +26,8 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
     private DoubleBox minimumConfidenceMeasureBox;
     private CheckBox useOnlyWindGaugesForWindSpeedBox;
     private CheckBox shouldRemoveOutliersBox;
-    private DoubleBox outlierDetectionFactorBox;
+    private DoubleBox outlierRadiusBox;
+    private DoubleBox outlierNeighborhoodPctBox;
 
     public PolarSheetGenerationSettingsDialogComponent(PolarSheetGenerationSettings settings, StringMessages stringMessages) {
         this.settings = settings;
@@ -36,7 +37,7 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
-        Grid grid = new Grid(8,2);
+        Grid grid = new Grid(9,2);
         grid.setCellPadding(5);
         vp.add(grid);
         setupGrid(grid, dialog);
@@ -60,16 +61,19 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
         useOnlyWindGaugesForWindSpeedBox = dialog.createCheckbox("");
         useOnlyWindGaugesForWindSpeedBox.setValue(settings.useOnlyWindGaugesForWindSpeed());
         grid.setWidget(4, 1, useOnlyWindGaugesForWindSpeedBox);
-        grid.setWidget(5, 0, new Label("Remove outliers (Sigma Approach):"));
+        grid.setWidget(5, 0, new Label("Remove outliers (Distance Based):"));
         shouldRemoveOutliersBox = dialog.createCheckbox("");
         shouldRemoveOutliersBox.setValue(settings.shouldRemoveOutliers());
         grid.setWidget(5, 1, shouldRemoveOutliersBox);
-        grid.setWidget(6, 0, new Label("Outlier Detection Factor"));
-        outlierDetectionFactorBox = dialog.createDoubleBox(settings.getOutlierDetectionFactor(), 6);
-        grid.setWidget(6, 1, outlierDetectionFactorBox);
-        grid.setWidget(7, 0, new Label("Number of histogram columns:"));
+        grid.setWidget(6, 0, new Label("Outlier Detection Neighborhood Radius:"));
+        outlierRadiusBox = dialog.createDoubleBox(settings.getOutlierDetectionNeighborhoodRadius(), 6);
+        grid.setWidget(6, 1, outlierRadiusBox);
+        grid.setWidget(7, 0, new Label("Outlier Detection Minimum Neighboorhood Percentage"));
+        outlierNeighborhoodPctBox = dialog.createDoubleBox(settings.getOutlierMinimumNeighborhoodPct(), 6);
+        grid.setWidget(7, 1, outlierNeighborhoodPctBox);
+        grid.setWidget(8, 0, new Label("Number of histogram columns:"));
         numberOfHistogramColumnsBox = dialog.createIntegerBox(settings.getNumberOfHistogramColumns(), 3);
-        grid.setWidget(7, 1, numberOfHistogramColumnsBox);
+        grid.setWidget(8, 1, numberOfHistogramColumnsBox);
     }
 
     @Override
@@ -78,7 +82,7 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
                 minimumWindConfidenceBox.getValue(), minimumDataCountPerAngleBox.getValue(),
                 numberOfHistogramColumnsBox.getValue(), minimumConfidenceMeasureBox.getValue(),
                 useOnlyWindGaugesForWindSpeedBox.getValue(), shouldRemoveOutliersBox.getValue(),
-                outlierDetectionFactorBox.getValue());
+                outlierRadiusBox.getValue(), outlierNeighborhoodPctBox.getValue());
     }
 
     @Override

@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -69,7 +71,9 @@ public class PolarSheetGenerationTest {
 
         MockTrackedRaceForPolarSheetGeneration race = new MockTrackedRaceForPolarSheetGeneration();
 
-        PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createStandardPolarSettings();
+        PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 20, 0, false, true, 5,
+                0.05);
+        
         TimePoint startTime = new MillisecondsTimePoint(9);
         TimePoint endTime = new MillisecondsTimePoint(80);
         // Only used for storing and exporting results in this test case:
@@ -103,7 +107,8 @@ public class PolarSheetGenerationTest {
     
     @Test
     public void testHistogramBuilder() {
-        PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createStandardPolarSettings();
+        PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 10, 0, false, true, 5,
+                0.05);
         PolarSheetHistogramBuilder builder = new PolarSheetHistogramBuilder(settings);
         
         
@@ -127,6 +132,55 @@ public class PolarSheetGenerationTest {
         Assert.assertEquals(null, yValues[1]);
         Assert.assertEquals(2, yValues[2]);
         Assert.assertEquals(2, yValues[9]);
+    }
+    
+    @Test
+    public void testOutlierNeighborhoodAlgorithm() {
+        PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createStandardPolarSettings();
+        List<Double> values = new ArrayList<Double>();
+        values.add(0.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        values.add(20.);
+        int[] count = new int[1];
+        count[0] = values.size();
+        Map<Integer, List<Double>> valuesInMap = new HashMap<Integer, List<Double>>();
+        valuesInMap.put(0, values);
+        double pct = PolarSheetGenerationWorker.getNeighboorhoodSizePercentage(count, valuesInMap, 0, 0, 0., settings);
+        
+        Assert.assertTrue(pct < 0.05);
+        
+        pct = PolarSheetGenerationWorker.getNeighboorhoodSizePercentage(count, valuesInMap, 0, 2, 20., settings);
+        
+        Assert.assertTrue(pct > 0.05);
+        
     }
     
     
@@ -233,6 +287,11 @@ public class PolarSheetGenerationTest {
         @Override
         protected boolean isValid(NavigableSet<GPSFixMoving> rawFixes, GPSFixMoving e) {
             return true;
+        }
+        
+        @Override
+        public SpeedWithBearing getEstimatedSpeed(TimePoint at) {
+            return this.getFirstFixAtOrAfter(at).getSpeed();
         }
         
     }

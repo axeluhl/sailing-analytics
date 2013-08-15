@@ -18,6 +18,8 @@ public interface PolarSheetGenerationSettings extends Serializable{
 
     boolean shouldRemoveOutliers();
 
-    double getOutlierDetectionFactor();
+    double getOutlierDetectionNeighborhoodRadius();
+
+    double getOutlierMinimumNeighborhoodPct();
 
 }
