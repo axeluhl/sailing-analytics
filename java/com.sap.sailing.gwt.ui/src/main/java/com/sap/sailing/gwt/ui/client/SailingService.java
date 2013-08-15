@@ -338,5 +338,7 @@ public interface SailingService extends RemoteService {
     
     QueryResult<Integer> runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, Collection<SharedDimensions.GPSFix> dimensionsToGroupBy, StatisticType statisticToCalculate, AggregatorType aggregatedAs);
 
+    QueryResult<Integer> runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, String grouperScriptText, StatisticType statisticToCalculate, AggregatorType aggregatedAs);
+
     GenericGroupKey<String> pseudoMethodSoThatGenericGroupKeyIsAddedToTheGWTSerializationPolicy();
 }

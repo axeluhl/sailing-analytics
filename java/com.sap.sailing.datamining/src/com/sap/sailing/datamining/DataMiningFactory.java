@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sap.sailing.datamining.impl.DataAmountExtractor;
+import com.sap.sailing.datamining.impl.DynamicGrouper;
 import com.sap.sailing.datamining.impl.FilterByCriteriaImpl;
 import com.sap.sailing.datamining.impl.QueryImpl;
 import com.sap.sailing.datamining.impl.aggregators.SimpleDoubleArithmeticAverageAggregator;
@@ -80,6 +81,10 @@ public class DataMiningFactory {
     @SuppressWarnings("unchecked")
     public static <DataType, ValueType> FilterCriteria<DataType> createDimensionFilterCriteria(Dimension<DataType, ValueType> dimension, Collection<?> values) {
         return new DimensionValuesFilterCriteria<DataType, ValueType>(dimension, (Collection<ValueType>) values);
+    }
+
+    public static <DataType> Grouper<DataType> createDynamicGrouper(String grouperScriptText) {
+        return new DynamicGrouper<DataType>(grouperScriptText);
     }
 
     public static <ValueType> Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(Collection<SharedDimensions.GPSFix> dimensionsToGroupBy) {

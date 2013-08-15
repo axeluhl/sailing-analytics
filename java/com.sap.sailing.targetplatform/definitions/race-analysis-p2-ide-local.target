@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Race Analysis Target (IDE)" sequenceNumber="61">
+<?pde version="3.8"?><target name="Race Analysis Target (IDE)" sequenceNumber="66">
 <locations>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.0.4"/>
+<repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-9.x/9.0.4.v20130625/"/>
+</location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
@@ -8,10 +12,6 @@
 <unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.restlet.feature.group" version="1.0.0"/>
 <repository location="http://p2.sapsailing.com/p2/sailing/"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.equinox.core.sdk.feature.group" version="3.7.1.R37x_v20110907-7uF9LFpFFSuN6-tKJIXPMYaq7NTP"/>
-<repository location="http://download.eclipse.org/releases/indigo"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.commons.fileupload" version="1.2.2.v20111214-1400"/>
@@ -29,13 +29,8 @@
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20130517111416/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.0.4"/>
-<repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-9.x/9.0.4.v20130625/"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.codehaus.groovy.eclipse.feature.feature.group" version="2.8.0.xx-20130703-1700-e42-RELEASE"/>
-<unit id="org.codehaus.groovy.eclipse.feature.source.feature.group" version="2.8.0.xx-20130703-1700-e42-RELEASE"/>
-<repository location="http://dist.springsource.org/release/GRECLIPSE/e4.2"/>
+<unit id="org.eclipse.equinox.core.sdk.feature.group" version="3.7.1.R37x_v20110907-7uF9LFpFFSuN6-tKJIXPMYaq7NTP"/>
+<repository location="http://download.eclipse.org/releases/indigo"/>
 </location>
 </locations>
 </target>

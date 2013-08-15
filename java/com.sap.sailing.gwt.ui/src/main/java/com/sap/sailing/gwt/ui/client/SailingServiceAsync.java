@@ -462,6 +462,8 @@ public interface SailingServiceAsync {
     void runGPSFixQueryAsBenchmark(Map<SharedDimensions.GPSFix, Collection<?>> selection, Collection<SharedDimensions.GPSFix> dimensionsToGroupBy, StatisticType statisticToCalculate, AggregatorType aggregatedAs, AsyncCallback<Pair<Double, Integer>> asyncCallback);
 
     void runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, Collection<SharedDimensions.GPSFix> dimensionsToGroupBy, StatisticType statisticToCalculate, AggregatorType aggregatedAs, AsyncCallback<QueryResult<Integer>> asyncCallback);
+
+    void runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, String grouperScriptText, StatisticType statisticToCalculate, AggregatorType aggregatedAs, AsyncCallback<QueryResult<Integer>> asyncCallback);
     
     /**
      * This method does nothing, but is needed to ensure, that GenericGroupKey&ltString&gt in the GWT serialization policy.<br />

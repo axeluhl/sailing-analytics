@@ -6,8 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Import-Package: com.sap.sailing.server,
- groovy.lang
+Import-Package: com.sap.sailing.server
 Export-Package: com.sap.sailing.datamining,
  com.sap.sailing.datamining.shared
 Require-Bundle: com.sap.sailing.domain;bundle-version="1.0.0",

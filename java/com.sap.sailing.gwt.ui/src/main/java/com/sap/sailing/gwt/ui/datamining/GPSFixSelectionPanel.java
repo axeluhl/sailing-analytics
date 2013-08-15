@@ -19,6 +19,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -47,7 +48,8 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
 
-    private TextArea dynamicGrouperScriptTextBox;
+    private ValueListBox<GrouperType> grouperTypeListBox;
+    private TextArea customGrouperScriptTextBox;
     private HorizontalPanel dimensionsToGroupByPanel;
     private List<ValueListBox<SharedDimensions.GPSFix>> dimensionsToGroupByBoxes;
     private ValueListBox<StatisticAndAggregatorType> statisticsListBox;
@@ -94,13 +96,25 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
             table.clearSelection();
         }
     }
+    
+    @Override
+    public GrouperType getGrouperType() {
+        return grouperTypeListBox.getValue();
+    }
+    
+    @Override
+    public String getCustomGrouperScriptText() {
+        return getGrouperType() == GrouperType.Custom ? customGrouperScriptTextBox.getText() : "";
+    }
 
     @Override
     public Collection<SharedDimensions.GPSFix> getDimensionsToGroupBy() {
         Collection<SharedDimensions.GPSFix> dimensionsToGroupBy = new ArrayList<SharedDimensions.GPSFix>();
-        for (ValueListBox<GPSFix> dimensionToGroupByBox : dimensionsToGroupByBoxes) {
-            if (dimensionToGroupByBox.getValue() != null) {
-                dimensionsToGroupBy.add(dimensionToGroupByBox.getValue());
+        if (getGrouperType() == GrouperType.Dimensions) {
+            for (ValueListBox<GPSFix> dimensionToGroupByBox : dimensionsToGroupByBoxes) {
+                if (dimensionToGroupByBox.getValue() != null) {
+                    dimensionsToGroupBy.add(dimensionToGroupByBox.getValue());
+                }
             }
         }
         return dimensionsToGroupBy;
@@ -194,29 +208,8 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
         });
         functionsPanel.add(clearSelectionButton);
         
-        HorizontalPanel groupByPanel = new HorizontalPanel();
-        groupByPanel.setSpacing(5);
-        groupByPanel.add(new Label(stringMessages.groupBy() + ": "));
+        FlowPanel groupByPanel = createGroupByPanel();
         functionsPanel.add(groupByPanel);
-        
-        FlowPanel groupByOptionsPanel = new FlowPanel();
-        groupByPanel.add(groupByOptionsPanel);
-        
-        dimensionsToGroupByPanel = new HorizontalPanel();
-        dimensionsToGroupByPanel.setSpacing(5);
-        ValueListBox<SharedDimensions.GPSFix> dimensionToGroupByBox = createDimensionToGroupByBox();
-        dimensionsToGroupByPanel.add(dimensionToGroupByBox);
-        dimensionsToGroupByBoxes.add(dimensionToGroupByBox);
-        groupByOptionsPanel.add(dimensionsToGroupByPanel);
-        
-        FlowPanel dynamicGroupByPanel = new FlowPanel();
-        groupByOptionsPanel.add(dynamicGroupByPanel);
-        dynamicGroupByPanel.add(new Label("public Object getValueToGroupByFrom(GPSFix data) {"));
-        dynamicGrouperScriptTextBox = new TextArea();
-        dynamicGrouperScriptTextBox.setCharacterWidth(100);
-        dynamicGrouperScriptTextBox.setVisibleLines(1);
-        dynamicGroupByPanel.add(dynamicGrouperScriptTextBox);
-        dynamicGroupByPanel.add(new Label("}"));
         
         functionsPanel.add(new Label(stringMessages.statisticToCalculate() + ": "));
         statisticsListBox = new ValueListBox<StatisticAndAggregatorType>(new Renderer<StatisticAndAggregatorType>() {
@@ -238,6 +231,67 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
         functionsPanel.add(statisticsListBox);
         
         return functionsPanel;
+    }
+
+    private FlowPanel createGroupByPanel() {
+        FlowPanel groupByPanel = new FlowPanel();
+        
+        HorizontalPanel selectGroupByPanel = new HorizontalPanel();
+        selectGroupByPanel.setSpacing(5);
+        selectGroupByPanel.add(new Label(stringMessages.groupBy() + ": "));
+        groupByPanel.add(selectGroupByPanel);
+        
+        grouperTypeListBox = new ValueListBox<GrouperType>(new Renderer<GrouperType>() {
+            @Override
+            public String render(GrouperType grouperType) {
+                if (grouperType == null) {
+                    return "";
+                  }
+                  return grouperType.toString();
+            }
+            @Override
+            public void render(GrouperType grouperType, Appendable appendable) throws IOException {
+                appendable.append(render(grouperType));
+            }
+        });
+        grouperTypeListBox.setAcceptableValues(Arrays.asList(GrouperType.values()));
+        grouperTypeListBox.setValue(GrouperType.Dimensions, false);
+        selectGroupByPanel.add(grouperTypeListBox);
+        
+        final DeckPanel groupByOptionsPanel = new DeckPanel();
+        groupByPanel.add(groupByOptionsPanel);
+        grouperTypeListBox.addValueChangeHandler(new ValueChangeHandler<GrouperType>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<GrouperType> event) {
+                switch (event.getValue()) {
+                case Custom:
+                    groupByOptionsPanel.showWidget(1);
+                    break;
+                case Dimensions:
+                    groupByOptionsPanel.showWidget(0);
+                    break;
+                }
+            }
+        });
+        
+        dimensionsToGroupByPanel = new HorizontalPanel();
+        dimensionsToGroupByPanel.setSpacing(5);
+        ValueListBox<SharedDimensions.GPSFix> dimensionToGroupByBox = createDimensionToGroupByBox();
+        dimensionsToGroupByPanel.add(dimensionToGroupByBox);
+        dimensionsToGroupByBoxes.add(dimensionToGroupByBox);
+        groupByOptionsPanel.add(dimensionsToGroupByPanel);
+        
+        FlowPanel dynamicGroupByPanel = new FlowPanel();
+        groupByOptionsPanel.add(dynamicGroupByPanel);
+        dynamicGroupByPanel.add(new Label("public Object getValueToGroupByFrom(GPSFix data) {"));
+        customGrouperScriptTextBox = new TextArea();
+        customGrouperScriptTextBox.setCharacterWidth(100);
+        customGrouperScriptTextBox.setVisibleLines(1);
+        dynamicGroupByPanel.add(customGrouperScriptTextBox);
+        dynamicGroupByPanel.add(new Label("}"));
+        
+        groupByOptionsPanel.showWidget(0);
+        return groupByPanel;
     }
 
     private ValueListBox<SharedDimensions.GPSFix> createDimensionToGroupByBox() {
