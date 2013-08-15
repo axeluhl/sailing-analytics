@@ -831,7 +831,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 }
                 boolean foundValidNextFixInRange = false;
                 boolean atLeastOneNextFixInRange = false;
-                if (!foundValidPreviousFixInRange) {
+                // only spend the effort to calculate the "next"-related predicate if the "previous"-related part of the disjunction below isn't already false
+                if (!atLeastOnePreviousFixInRange || foundValidPreviousFixInRange) {
                     FixType next = rawFixes.higher(e);
                     atLeastOneNextFixInRange = next != null && next.getTimePoint().asMillis() - e.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed();
                     Speed speedToNext = null;

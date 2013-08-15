@@ -509,6 +509,7 @@ public class TrackTest {
         TimePoint timePointForLateOutlier = new MillisecondsTimePoint(now.asMillis() + (steps-1)*timeBetweenFixesInMillis + timeBetweenFixesInMillis/2);
         Position lateOutlierPosition = new DegreePosition(-90, 90);
         GPSFix lateOutlier = new GPSFixImpl(lateOutlierPosition, timePointForLateOutlier);
+        // adding the outlier invalidates the fix just before the outlier because it now has a single successor that is in range but not reachable
         track.addGPSFix(lateOutlier);
         assertEquals(1, invalidationCalls.size());
         TimePoint timePointOfLastFixBeforeLateOutlier = track.getLastFixBefore(timePointForLateOutlier).getTimePoint();
@@ -521,11 +522,13 @@ public class TrackTest {
         assertEquals(timePointOfLastOriginalFix, stillPresentFullIntervalCacheEntry.getA());
         assertEquals(now, stillPresentFullIntervalCacheEntry.getB().getA());
         GPSFix polishedLastFix = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
-        // ...which now still is expected to be the lateOutlier because no succeeding fix qualifies it as outlier:
-        assertEquals(lateOutlier, polishedLastFix);
+        // ...which now is expected to be the fix before lateOutlier because lateOutlier has previous fixes within the time range
+        // but none of them is reachable with max speed
+        assertEquals(track.getLastRawFixBefore(lateOutlier.getTimePoint()), polishedLastFix);
         track.lockForRead();
         try {
-            assertEquals(steps+1, Util.size(track.getFixes())); // what will later be detected as outlier is now an additional fix
+            assertEquals(steps, Util.size(track.getFixes())); // the lateOutlier already is detected as outlier, so it's not steps+1 
+            // which would include the lateOutlier, but it's already only steps valid fixes.
         } finally {
             track.unlockAfterRead();
         }
