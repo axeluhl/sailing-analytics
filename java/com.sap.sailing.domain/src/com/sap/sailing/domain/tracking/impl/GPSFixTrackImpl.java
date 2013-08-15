@@ -794,37 +794,53 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     /**
-     * When redefining this method, make sure to redefine {@link #invalidateValidityAndDistanceCaches(GPSFix)} accordingly.
-     * This implementation checks the immediate previous and next fix for <code>e</code>. Therefore, when
+     * When redefining this method, make sure to redefine {@link #invalidateValidityAndDistanceCaches(GPSFix)}
+     * accordingly. This implementation checks the immediate previous and next fix for <code>e</code>. Therefore, when
      * adding a fix, only immediately adjacent fix's validity caches need to be invalidated.
+     * <p>
+     * 
+     * The fix <code>e</code> is considered valid if at least one of its (not necessarily immediate) neighbors that is
+     * within the range of {@link #getMillisecondsOverWhichToAverageSpeed()} is in reach with less than
+     * {@link #maxSpeedForSmoothing}, or if there are no neighbors with the time range defined by
+     * {@link #getMillisecondsOverWhichToAverageSpeed()}.
      */
     protected boolean isValid(NavigableSet<FixType> rawFixes, FixType e) {
         assertReadLock();
-        boolean result;
+        boolean isValid;
         if (maxSpeedForSmoothing == null) {
-            result = true;
+            isValid = true;
         } else {
             if (e.isValidityCached()) {
-                result = e.isValid();
+                isValid = e.isValid();
             } else {
                 FixType previous = rawFixes.lower(e);
-                FixType next = rawFixes.higher(e);
-                Speed speedToPrevious = Speed.NULL;
-                if (previous != null) {
+                final boolean atLeastOnePreviousFixInRange = previous != null && e.getTimePoint().asMillis() - previous.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed();
+                Speed speedToPrevious = null;
+                boolean foundValidPreviousFixInRange = false;
+                while (previous != null && !foundValidPreviousFixInRange && e.getTimePoint().asMillis() - previous.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
                     speedToPrevious = previous.getPosition().getDistance(e.getPosition())
                             .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
+                    foundValidPreviousFixInRange = speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0;
+                    previous = rawFixes.lower(previous);
                 }
-                Speed speedToNext = Speed.NULL;
-                if (next != null) {
-                    speedToNext = e.getPosition().getDistance(next.getPosition())
-                            .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
+                boolean foundValidNextFixInRange = false;
+                boolean atLeastOneNextFixInRange = false;
+                if (!foundValidPreviousFixInRange) {
+                    FixType next = rawFixes.higher(e);
+                    atLeastOneNextFixInRange = next != null && next.getTimePoint().asMillis() - e.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed();
+                    Speed speedToNext = null;
+                    while (next != null && !foundValidNextFixInRange && next.getTimePoint().asMillis() - e.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
+                        speedToNext = e.getPosition().getDistance(next.getPosition())
+                                .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
+                        foundValidNextFixInRange = speedToNext.compareTo(maxSpeedForSmoothing) <= 0;
+                        next = rawFixes.higher(next);
+                    }
                 }
-                result = ((previous == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0) || (next == null || speedToNext
-                        .compareTo(maxSpeedForSmoothing) <= 0));
-                e.cacheValidity(result);
+                isValid = (!atLeastOnePreviousFixInRange || foundValidPreviousFixInRange) || (!atLeastOneNextFixInRange || foundValidNextFixInRange);
+                e.cacheValidity(isValid);
             }
         }
-        return result;
+        return isValid;
     }
 
     /**
