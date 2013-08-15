@@ -64,8 +64,7 @@ public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBa
      *            The maneuvers of the types listed in <code>maneuverTypesFound</code> that where not detected by
      *            {@link ManeuverAnalysisIDMChampionsFinalTest#assertManeuver(List, ManeuverType, MillisecondsTimePoint, int)}
      */
-    protected void assertAllManeuversOfTypesDetected(List<ManeuverType> maneuverTypesFound,
-            List<Maneuver> maneuversNotDetected) {
+    protected void assertAllManeuversOfTypesDetected(List<ManeuverType> maneuverTypesFound, List<Maneuver> maneuversNotDetected) {
         for (Maneuver maneuver : maneuversNotDetected) {
             for (ManeuverType type : maneuverTypesFound) {
                 if (maneuver.getType().equals(type)) {
