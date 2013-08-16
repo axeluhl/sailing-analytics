@@ -16,9 +16,11 @@ import com.sap.sailing.datamining.impl.aggregators.SimpleIntegerSumAggregator;
 import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.DimensionValuesFilterCriteria;
+import com.sap.sailing.datamining.impl.gpsfix.GPSFixBaseBindingProvider;
 import com.sap.sailing.datamining.impl.gpsfix.GPSFixRetrieverImpl;
 import com.sap.sailing.datamining.impl.gpsfix.GroupGPSFixesByDimension;
 import com.sap.sailing.datamining.shared.AggregatorType;
+import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.SharedDimensions;
 
 public class DataMiningFactory {
@@ -35,7 +37,7 @@ public class DataMiningFactory {
      * Creates a retriever for the given data type. Throws an exception, if the used <code>DataType</code> doesn't match the <code>DataType</code> of the returning retriever.
      */
     @SuppressWarnings("unchecked")
-    public static <DataType> DataRetriever<DataType> createDataRetriever(com.sap.sailing.datamining.shared.DataType dataType) {
+    public static <DataType> DataRetriever<DataType> createDataRetriever(com.sap.sailing.datamining.shared.DataTypes dataType) {
         switch (dataType) {
         case GPSFix:
             return (DataRetriever<DataType>) new GPSFixRetrieverImpl();
@@ -83,8 +85,19 @@ public class DataMiningFactory {
         return new DimensionValuesFilterCriteria<DataType, ValueType>(dimension, (Collection<ValueType>) values);
     }
 
-    public static <DataType> Grouper<DataType> createDynamicGrouper(String grouperScriptText) {
-        return new DynamicGrouper<DataType>(grouperScriptText);
+    public static <DataType> Grouper<DataType> createDynamicGrouper(String grouperScriptText, DataTypes dataType) {
+        BaseBindingProvider<DataType> baseBindingProvider = createBaseBindingProvider(dataType);
+        return new DynamicGrouper<DataType>(grouperScriptText, baseBindingProvider);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <DataType> BaseBindingProvider<DataType> createBaseBindingProvider(DataTypes dataType) {
+        switch (dataType) {
+        case GPSFix:
+            return (BaseBindingProvider<DataType>) new GPSFixBaseBindingProvider();
+        }
+        throw new IllegalArgumentException("Not yet implemented for the given data type: "
+                + dataType.toString());
     }
 
     public static <ValueType> Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(Collection<SharedDimensions.GPSFix> dimensionsToGroupBy) {

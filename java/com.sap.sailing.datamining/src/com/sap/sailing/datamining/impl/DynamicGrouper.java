@@ -4,25 +4,26 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 
+import com.sap.sailing.datamining.BaseBindingProvider;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
 
 public class DynamicGrouper<DataType> extends AbstractGrouper<DataType> {
     
     private Script script;
+    private Binding binding;
 
-    public DynamicGrouper(String scriptText) {
+    public DynamicGrouper(String scriptText, BaseBindingProvider<DataType> baseBindingProvider) {
         super();
         script = new GroovyShell().parse(scriptText);
+        binding = baseBindingProvider.createBaseBinding();
     }
 
     @Override
     protected GroupKey getGroupKeyFor(DataType dataEntry) {
-        Binding binding = new Binding();
         binding.setVariable("data", dataEntry);
         script.setBinding(binding);
-        Object value = script.run();
-        return new GenericGroupKey<Object>(value);
+        return new GenericGroupKey<Object>(script.run());
     }
 
 }

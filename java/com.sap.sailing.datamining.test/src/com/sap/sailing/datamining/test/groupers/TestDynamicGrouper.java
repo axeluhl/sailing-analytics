@@ -2,6 +2,8 @@ package com.sap.sailing.datamining.test.groupers;
 
 import static org.junit.Assert.*;
 
+import groovy.lang.Binding;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,6 +12,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.sap.sailing.datamining.BaseBindingProvider;
 import com.sap.sailing.datamining.Grouper;
 import com.sap.sailing.datamining.impl.DynamicGrouper;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
@@ -22,7 +25,7 @@ public class TestDynamicGrouper {
         Collection<Data> data = Arrays.asList(new Data("One", 1), new Data("One", 11), new Data("Two", 2));
         String scriptText = "return data.getKey()";
         
-        Grouper<Data> dynamicGrouper = new DynamicGrouper<Data>(scriptText);
+        Grouper<Data> dynamicGrouper = new DynamicGrouper<Data>(scriptText, new BaseBindingProviderMock());
         
         Map<GroupKey, Collection<Data>> expectedGroups = new HashMap<GroupKey, Collection<Data>>();
         Collection<Data> group = new ArrayList<Data>();
@@ -85,6 +88,15 @@ public class TestDynamicGrouper {
             } else if (!value.equals(other.value))
                 return false;
             return true;
+        }
+        
+    }
+    
+    private static class BaseBindingProviderMock implements BaseBindingProvider<Data> {
+
+        @Override
+        public Binding createBaseBinding() {
+            return new Binding();
         }
         
     }

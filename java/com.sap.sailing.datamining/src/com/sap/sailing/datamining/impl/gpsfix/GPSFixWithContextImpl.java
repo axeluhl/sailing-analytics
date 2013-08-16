@@ -109,7 +109,7 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
 
         return WindStrength.getClusterFor(getWind().getBeaufort(), WindStrength.StandardClusters);
     }
-
+    
     private Wind getWind() {
         if (!windHasBeenInitialized) {
             wind = context.getTrackedRace().getWind(getPosition(), getTimePoint());

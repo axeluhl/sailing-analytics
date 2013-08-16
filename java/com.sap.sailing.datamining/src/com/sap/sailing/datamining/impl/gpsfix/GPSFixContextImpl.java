@@ -71,4 +71,5 @@ public class GPSFixContextImpl implements GPSFixContext {
     public Competitor getCompetitor() {
         return competitor;
     }
+    
 }
