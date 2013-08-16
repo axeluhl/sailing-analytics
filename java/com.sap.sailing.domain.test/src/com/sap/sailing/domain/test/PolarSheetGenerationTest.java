@@ -72,7 +72,7 @@ public class PolarSheetGenerationTest {
         MockTrackedRaceForPolarSheetGeneration race = new MockTrackedRaceForPolarSheetGeneration();
 
         PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 20, 0, false, true, 5,
-                0.05);
+                0.05, false);
         
         TimePoint startTime = new MillisecondsTimePoint(9);
         TimePoint endTime = new MillisecondsTimePoint(80);
@@ -108,7 +108,7 @@ public class PolarSheetGenerationTest {
     @Test
     public void testHistogramBuilder() {
         PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 10, 0, false, true, 5,
-                0.05);
+                0.05, false);
         PolarSheetHistogramBuilder builder = new PolarSheetHistogramBuilder(settings);
         
         

@@ -143,7 +143,7 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable{
                 }
                 
                 if (windWithConfidence.useSpeed() && windWithConfidence.getConfidence() >= settings.getMinimumWindConfidence()) {
-                    PolarFix polarFix = new PolarFix(fix, race, track, windWithConfidence.getObject());
+                    PolarFix polarFix = new PolarFix(fix, race, track, windWithConfidence.getObject(), settings);
 
                     if (oddFixClassifier.classifiesAsOdd(polarFix)) {
                         logger.log(Level.INFO, String.format(

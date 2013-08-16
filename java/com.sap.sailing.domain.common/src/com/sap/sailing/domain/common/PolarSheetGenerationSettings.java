@@ -22,4 +22,6 @@ public interface PolarSheetGenerationSettings extends Serializable{
 
     double getOutlierMinimumNeighborhoodPct();
 
+    boolean useOnlyEstimatedForWindDirection();
+
 }

@@ -6,6 +6,7 @@ import java.util.Set;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
@@ -21,13 +22,19 @@ public class PolarFix {
     private Speed windSpeed;
     private double angleToWind;
 
-    public PolarFix(GPSFixMoving fix, TrackedRace race, GPSFixTrack<Competitor, GPSFixMoving> track, Wind windSpeed) {
+    public PolarFix(GPSFixMoving fix, TrackedRace race, GPSFixTrack<Competitor, GPSFixMoving> track, Wind windSpeed,
+            PolarSheetGenerationSettings settings) {
         boatSpeed = track.getEstimatedSpeed(fix.getTimePoint());
         Bearing bearing = boatSpeed.getBearing();
         
         Position position = fix.getPosition();
         this.windSpeed = windSpeed;
-        Set<WindSource> windSourcesToExclude = collectWindSourcesToIgnoreForBearing(race, true);
+        Set<WindSource> windSourcesToExclude;
+        if (settings.useOnlyEstimatedForWindDirection()) {
+            windSourcesToExclude = collectWindSourcesToIgnoreForBearing(race, true);
+        } else {
+            windSourcesToExclude = new HashSet<WindSource>();
+        }
         
         Wind windEstimated = race.getWind(position, fix.getTimePoint(), windSourcesToExclude);
         if (windEstimated == null) {

@@ -219,8 +219,8 @@ public class PolarSheetGenerationWorker {
         
         for (int j = 0; j < levelCount; j++) {
             for (PolarSheetsHistogramData histogramData : histogramDataMap.get(j).values()) {
-                Double polarSheetPointConfidenceMeasure = (1 - histogramData.getCoefficiantOfVariation()) * 
-                        (histogramData.getDataCount() / (double) totalDataCountPerWindSpeed.get(j)) * 360;
+                Double polarSheetPointConfidenceMeasure = Math.min(1, histogramData.getCoefficiantOfVariation() * 
+                        (histogramData.getDataCount() / (double) totalDataCountPerWindSpeed.get(j)) * 80);
                 histogramData.setConfidenceMeasure(polarSheetPointConfidenceMeasure);
             }
         }

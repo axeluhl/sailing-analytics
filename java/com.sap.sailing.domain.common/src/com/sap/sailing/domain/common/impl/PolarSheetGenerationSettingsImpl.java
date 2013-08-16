@@ -5,7 +5,7 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSettings {
     
     public static PolarSheetGenerationSettings createStandardPolarSettings() {
-        return new PolarSheetGenerationSettingsImpl(200, 0.1, 10, 20, 0.5, true, true, 2, 0.05);
+        return new PolarSheetGenerationSettingsImpl(200, 0.1, 10, 20, 0.1, true, true, 2, 0.05, true);
     }
 
     private static final long serialVersionUID = 2731616509404813790L;
@@ -18,6 +18,7 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
     private boolean shouldRemoveOutliers;
     private double outlierDetectionNeighboorhoodRadius;
     private double outlierMinimumNeighboorhoodPct;
+    private boolean useOnlyEstimationForWindDirection;
     
     //GWT
     PolarSheetGenerationSettingsImpl() {};
@@ -25,7 +26,7 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
     public PolarSheetGenerationSettingsImpl(Integer minimumDataCountPerGraph, double minimumWindConfidence,
             Integer minimumDataCountPerAngle, Integer numberOfHistogramColumns, double minimumConfidenceMeasure,
             boolean useOnlyWindGaugesForWindSpeed, boolean shouldRemoveOutliers, double outlierDetectionNeighboorhoodRadius,
-            double outlierMinimumNeighboorhoodPct) {
+            double outlierMinimumNeighboorhoodPct, boolean useOnlyEstimationForWindDirection) {
         this.minimumDataCountPerGraph = minimumDataCountPerGraph;
         this.minimumWindConfidence = minimumWindConfidence;
         this.minimumDataCountPerAngle = minimumDataCountPerAngle;
@@ -35,6 +36,7 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
         this.shouldRemoveOutliers = shouldRemoveOutliers;
         this.outlierDetectionNeighboorhoodRadius = outlierDetectionNeighboorhoodRadius;
         this.outlierMinimumNeighboorhoodPct = outlierMinimumNeighboorhoodPct;
+        this.useOnlyEstimationForWindDirection = useOnlyEstimationForWindDirection;
     }
 
     @Override
@@ -80,6 +82,11 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
     @Override
     public double getOutlierMinimumNeighborhoodPct() {
         return outlierMinimumNeighboorhoodPct;
+    }
+
+    @Override
+    public boolean useOnlyEstimatedForWindDirection() {
+        return useOnlyEstimationForWindDirection;
     }
 
 
