@@ -6,6 +6,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -17,7 +18,8 @@ public abstract class AbstractQueryPanel<DimensionType> extends FlowPanel {
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
     private QueryComponentsProvider<DimensionType> queryComponentsProvider;
-    
+
+    private Label queryStatusLabel;
     private QueryResultsChart resultChart;
 
     public AbstractQueryPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
@@ -34,6 +36,7 @@ public abstract class AbstractQueryPanel<DimensionType> extends FlowPanel {
     }
 
     private void runQuery() {
+        queryStatusLabel.setText(" | " + stringMessages.running());
         sendServerRequest(new AsyncCallback<QueryResult<Integer>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -41,6 +44,7 @@ public abstract class AbstractQueryPanel<DimensionType> extends FlowPanel {
             }
             @Override
             public void onSuccess(QueryResult<Integer> result) {
+                queryStatusLabel.setText(" | " + stringMessages.done());
                 resultChart.showResult(result);
             }
         });
@@ -69,6 +73,8 @@ public abstract class AbstractQueryPanel<DimensionType> extends FlowPanel {
         });
         functionsPanel.add(runQueryButton);
         
+        queryStatusLabel = new Label();
+        functionsPanel.add(queryStatusLabel);
         return functionsPanel;
     }
 
