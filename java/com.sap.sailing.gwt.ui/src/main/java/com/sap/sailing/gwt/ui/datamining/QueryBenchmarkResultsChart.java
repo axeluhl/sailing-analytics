@@ -74,8 +74,10 @@ public class QueryBenchmarkResultsChart extends SimplePanel implements RequiresR
         updateChartSubtitle(results.get(0).getNumberOfGPSFixes(), averageServerTime, averageOverallTime);
         serverTimeSeries.setPoints(serverTimePoints.toArray(new Point[serverTimePoints.size()]));
         cleanedServerTimeSeries.setPoints(cleanedServerTimePoints);
+        cleanedServerTimeSeries.setName(stringMessages.cleanedServerTime() + "(" + (serverTimePoints.size() - cleanedServerTimePoints.length) + ")");
         overallTimeSeries.setPoints(overallTimePoints.toArray(new Point[overallTimePoints.size()]));
         cleanedOverallTimeSeries.setPoints(cleanedOverallTimePoints);
+        cleanedOverallTimeSeries.setName(stringMessages.cleanedOverallTime() + "(" + (overallTimePoints.size() - cleanedOverallTimePoints.length) + ")");
         updatePlotLines(averageServerTime, averageOverallTime);
         
         ensureChartContainsSeries();
