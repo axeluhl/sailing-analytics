@@ -18,6 +18,6 @@ public interface QueryComponentsProvider<DimensionType> {
 
     public StatisticType getStatisticToCalculate();
 
-    public AggregatorType getAggregationType();
+    public AggregatorType getAggregatorType();
 
 }

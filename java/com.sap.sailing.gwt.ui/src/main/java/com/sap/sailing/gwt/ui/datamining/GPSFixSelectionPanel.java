@@ -126,7 +126,7 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
     }
 
     @Override
-    public AggregatorType getAggregationType() {
+    public AggregatorType getAggregatorType() {
         return statisticsListBox.getValue().getAggregatorType();
     }
 

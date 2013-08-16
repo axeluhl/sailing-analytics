@@ -25,7 +25,7 @@ public class GPSFixQueryPanel extends AbstractQueryPanel<SharedDimensions.GPSFix
     protected void sendServerRequest(AsyncCallback<QueryResult<Integer>> asyncCallback) {
         Map<SharedDimensions.GPSFix, Collection<?>> selection = getQueryComponentsProvider().getSelection();
         StatisticType statisticToCalculate = getQueryComponentsProvider().getStatisticToCalculate();
-        AggregatorType aggregatedAs = getQueryComponentsProvider().getAggregationType();
+        AggregatorType aggregatedAs = getQueryComponentsProvider().getAggregatorType();
         
         GrouperType grouperType = getQueryComponentsProvider().getGrouperType();
         switch (grouperType) {

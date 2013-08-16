@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.datamining.QueryComponentsProvider.GrouperType;
 
 public class GPSFixQueryBenchmarkPanel extends AbstractQueryBenchmarkPanel<SharedDimensions.GPSFix> {
 
@@ -21,15 +22,23 @@ public class GPSFixQueryBenchmarkPanel extends AbstractQueryBenchmarkPanel<Share
     }
 
     @Override
-    protected void sendServerRequest(ClientBenchmarkData<SharedDimensions.GPSFix> benchmarkData,
-            AsyncCallback<Pair<Double, Integer>> asyncCallback) {
-        QueryComponentsProvider<GPSFix> queryComponentsProvider = getQueryComponentsProvider();
+    protected void sendServerRequest(ClientBenchmarkData<SharedDimensions.GPSFix> benchmarkData, AsyncCallback<Pair<Double, Integer>> asyncCallback) {
         Map<GPSFix, Collection<?>> selection = benchmarkData.getSelection();
-        Collection<GPSFix> dimensionsToGroupBy = queryComponentsProvider.getDimensionsToGroupBy();
-        StatisticType statisticToCalculate = queryComponentsProvider.getStatisticToCalculate();
-        AggregatorType aggregationType = queryComponentsProvider.getAggregationType();
-        getSailingService().runGPSFixQueryAsBenchmark(selection, dimensionsToGroupBy, statisticToCalculate,
-                aggregationType, asyncCallback);
+        StatisticType statisticToCalculate = getQueryComponentsProvider().getStatisticToCalculate();
+        AggregatorType aggregatedAs = getQueryComponentsProvider().getAggregatorType();
+        
+        GrouperType grouperType = getQueryComponentsProvider().getGrouperType();
+        switch (grouperType) {
+        case Custom:
+            String grouperScriptText = getQueryComponentsProvider().getCustomGrouperScriptText();
+            getSailingService().runGPSFixQueryAsBenchmark(selection, grouperScriptText, statisticToCalculate, aggregatedAs, asyncCallback);
+            return;
+        case Dimensions:
+            Collection<GPSFix> dimensionsToGroupBy = getQueryComponentsProvider().getDimensionsToGroupBy();
+            getSailingService().runGPSFixQueryAsBenchmark(selection, dimensionsToGroupBy, statisticToCalculate, aggregatedAs, asyncCallback);
+            return;
+        }
+        throw new IllegalArgumentException("Not yet implemented for the given grouper type: " + grouperType);
     }
 
 }
