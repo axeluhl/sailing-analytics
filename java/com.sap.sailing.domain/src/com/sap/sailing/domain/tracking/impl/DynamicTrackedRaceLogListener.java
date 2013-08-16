@@ -116,6 +116,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     @Override
     public void visit(RaceLogStartTimeEvent event) {
         trackedRace.invalidateStartTime();
+        trackedRace.onStartTimeChangedByRaceCommittee(event.getStartTime());
     }
 
     @Override
