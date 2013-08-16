@@ -34,6 +34,8 @@ public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query
 
     @Override
     public QueryResult<AggregatedType> run(RacingEventService racingEventService) {
+        final long startTime = System.nanoTime();
+        
         Collection<DataType> filteredData = filter.filter(retriever.retrieveData(racingEventService));
         QueryResultImpl<AggregatedType> result = new QueryResultImpl<AggregatedType>(filteredData.size(), createResultSignifier());
         Map<GroupKey, Collection<DataType>> groupedFixes = grouper.group(filteredData);
@@ -42,6 +44,9 @@ public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query
             AggregatedType aggregatedData = aggregator.aggregate(extractedData);
             result.addResult(groupEntry.getKey(), aggregatedData);
         }
+        
+        final long endTime = System.nanoTime();
+        result.setCalculationTimeInNanos(endTime - startTime);
         return result;
     }
 

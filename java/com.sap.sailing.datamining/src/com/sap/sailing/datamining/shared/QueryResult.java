@@ -7,11 +7,13 @@ import java.util.Map;
 public interface QueryResult<AggregatedType> extends Serializable {
     
     public int getDataSize();
-    public Map<GroupKey, AggregatedType> getResults();
+    public double getCalculationTimeInSeconds();
     
+
     /**
      * @return a description what kind of results are contained.
      */
     public String getResultSignifier();
-
+    public Map<GroupKey, AggregatedType> getResults();
+    
 }

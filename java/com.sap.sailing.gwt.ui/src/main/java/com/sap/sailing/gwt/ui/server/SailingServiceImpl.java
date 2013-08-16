@@ -3324,24 +3324,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             urlBuffer.insert(0, "http://");
         }
     }
-
-    @Override
-    public Pair<Double, Integer> runGPSFixQueryAsBenchmark(Map<SharedDimensions.GPSFix, Collection<?>> selection, Collection<SharedDimensions.GPSFix> dimensionsToGroupBy, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
-        final long startTime = System.nanoTime();
-        Integer gpsFixAmount = runGPSFixQuery(selection, dimensionsToGroupBy, statisticToCalculate, aggregatedAs).getDataSize();
-        long endTime = System.nanoTime();
-        double serverTime = (endTime - startTime) / 1000000000.0;
-        return new Pair<Double, Integer>(serverTime, gpsFixAmount);
-    }
-
-    @Override
-    public Pair<Double, Integer> runGPSFixQueryAsBenchmark(Map<SharedDimensions.GPSFix, Collection<?>> selection, String grouperScriptText, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
-        final long startTime = System.nanoTime();
-        Integer gpsFixAmount = runGPSFixQuery(selection, grouperScriptText, statisticToCalculate, aggregatedAs).getDataSize();
-        long endTime = System.nanoTime();
-        double serverTime = (endTime - startTime) / 1000000000.0;
-        return new Pair<Double, Integer>(serverTime, gpsFixAmount);
-    }
     
     @Override
     public QueryResult<Integer> runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, Collection<SharedDimensions.GPSFix> dimensionsToGroupBy, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {

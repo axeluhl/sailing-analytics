@@ -6,10 +6,11 @@ import java.util.Map;
 public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedType> {
     private static final long serialVersionUID = 351213515082955565L;
     
-    private Map<GroupKey, AggregatedType> results;
     private int dataSize;
-    
+    private long calculationTimeInNanos;
+
     private String resultSignifier;
+    private Map<GroupKey, AggregatedType> results;
     
     /**
      * Constructor for the GWT-Serialization. Don't use this!
@@ -29,13 +30,22 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     }
 
     @Override
-    public Map<GroupKey, AggregatedType> getResults() {
-        return results;
+    public double getCalculationTimeInSeconds() {
+        return calculationTimeInNanos / 1000000000.0;
+    }
+    
+    public void setCalculationTimeInNanos(long calculationTimeInNanos) {
+        this.calculationTimeInNanos = calculationTimeInNanos;
     }
 
     @Override
     public String getResultSignifier() {
         return resultSignifier;
+    }
+
+    @Override
+    public Map<GroupKey, AggregatedType> getResults() {
+        return results;
     }
 
     public void addResult(GroupKey key, AggregatedType value) {

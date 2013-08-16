@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -58,19 +58,21 @@ public abstract class AbstractQueryBenchmarkPanel<DimensionType> extends FlowPan
 
     private void runQuery(final ClientBenchmarkData<DimensionType> benchmarkData) {
         final long startTime = System.currentTimeMillis();
-        sendServerRequest(benchmarkData, new AsyncCallback<Pair<Double, Integer>>() {
+        sendServerRequest(benchmarkData, new AsyncCallback<QueryResult<Integer>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running a query: " + caught.getMessage());
             }
             @Override
-            public void onSuccess(Pair<Double, Integer> result) {
-                updateResults(benchmarkData, startTime, result);
+            public void onSuccess(QueryResult<Integer> result) {
+                long endTime = System.currentTimeMillis();
+                double overallTime = (endTime - startTime) / 1000.0;
+                updateResults(benchmarkData, overallTime, result);
             }
         });
     }
 
-    protected abstract void sendServerRequest(ClientBenchmarkData<DimensionType> benchmarkData, AsyncCallback<Pair<Double, Integer>> asyncCallback);
+    protected abstract void sendServerRequest(ClientBenchmarkData<DimensionType> benchmarkData, AsyncCallback<QueryResult<Integer>> asyncCallback);
     
     protected SailingServiceAsync getSailingService() {
         return sailingService;
@@ -80,11 +82,9 @@ public abstract class AbstractQueryBenchmarkPanel<DimensionType> extends FlowPan
         return queryComponentsProvider;
     }
 
-    private void updateResults(final ClientBenchmarkData<DimensionType> benchmarkData, final long startTime,
-            Pair<Double, Integer> result) {
-        long endTime = System.currentTimeMillis();
-        double overallTime = (endTime - startTime) / 1000.0;
-        resultsChart.addResult(new QueryBenchmarkResult(stringMessages.runAsSubstantive() + " " + benchmarkData.getCurrentRun(), result.getB().intValue(), result.getA(), overallTime));
+    private void updateResults(final ClientBenchmarkData<DimensionType> benchmarkData, double overallTimeInSeconds, QueryResult<Integer> result) {
+        resultsChart.addResult(new QueryBenchmarkResult(stringMessages.runAsSubstantive() + " " + benchmarkData.getCurrentRun(),
+                                                        result.getDataSize(), result.getCalculationTimeInSeconds(), overallTimeInSeconds));
         
         if (benchmarkData.isFinished()) {
             benchmarkStatusLabel.setText(" | " + stringMessages.done());

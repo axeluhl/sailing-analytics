@@ -456,13 +456,6 @@ public interface SailingServiceAsync {
     
     void importMasterData(String host, String[] names, boolean override, AsyncCallback<MasterDataImportObjectCreationCount> asyncCallback);
 
-    /**
-     * Creates and runs a data mining query with the specified properties.
-     */
-    void runGPSFixQueryAsBenchmark(Map<SharedDimensions.GPSFix, Collection<?>> selection, Collection<SharedDimensions.GPSFix> dimensionsToGroupBy, StatisticType statisticToCalculate, AggregatorType aggregatedAs, AsyncCallback<Pair<Double, Integer>> asyncCallback);
-
-    void runGPSFixQueryAsBenchmark(Map<SharedDimensions.GPSFix, Collection<?>> selection, String grouperScriptText, StatisticType statisticToCalculate, AggregatorType aggregatedAs, AsyncCallback<Pair<Double, Integer>> asyncCallback);
-
     void runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, Collection<SharedDimensions.GPSFix> dimensionsToGroupBy, StatisticType statisticToCalculate, AggregatorType aggregatedAs, AsyncCallback<QueryResult<Integer>> asyncCallback);
 
     void runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, String grouperScriptText, StatisticType statisticToCalculate, AggregatorType aggregatedAs, AsyncCallback<QueryResult<Integer>> asyncCallback);
