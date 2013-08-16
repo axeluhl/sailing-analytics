@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.Point;
@@ -46,6 +47,8 @@ public class QueryResultsChart extends SimplePanel {
         reset();
         
         chart.getYAxis().setAxisTitleText(result.getResultSignifier());
+        updateChartSubtitle(result);
+        
         List<GroupKey> keys = getSortedKeysFrom(result);
         buildGroupKeyValueMaps(keys);
         
@@ -63,6 +66,14 @@ public class QueryResultsChart extends SimplePanel {
         chart.redraw();
     }
     
+    private void updateChartSubtitle(QueryResult<Integer> result) {
+        chart.setChartSubtitle(new ChartSubtitle().setText(stringMessages.queryResultsChartSubtitle(result.getDataSize(), result.getCalculationTimeInSeconds())));
+        //This is needed, so that the subtitle is updated. Otherwise the text would stay empty
+        this.setWidget(null);
+        this.setWidget(chart);
+        
+    }
+
     public List<GroupKey> getSortedKeysFrom(QueryResult<Integer> result) {
         List<GroupKey> sortedKeys = new ArrayList<GroupKey>(result.getResults().keySet());
         Collections.sort(sortedKeys, new Comparator<GroupKey>() {

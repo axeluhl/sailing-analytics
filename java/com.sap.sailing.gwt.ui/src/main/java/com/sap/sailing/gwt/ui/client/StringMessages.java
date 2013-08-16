@@ -766,4 +766,5 @@ public interface StringMessages extends Messages {
     String dataMiningResult();
     String groupBy();
     String statisticToCalculate();
+    String queryResultsChartSubtitle(int dataAmount, double calculationTime);
 }
