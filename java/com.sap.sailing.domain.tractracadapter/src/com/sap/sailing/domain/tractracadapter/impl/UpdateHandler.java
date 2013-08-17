@@ -45,7 +45,7 @@ public class UpdateHandler {
     private final static String ContentTypeApplicationJson = "application/json";
     private final static String EncodingUtf8 = "UTF-8";
     private final static String ResponseCodeForFailure = "FAILURE";
-    private final static String UpdateUrlTemplate = "%s/%s?eventid=%s&raceid=%s&username=%s&password=%s";
+    private final static String UpdateUrlTemplate = "%s%s?eventid=%s&raceid=%s&username=%s&password=%s";
     
     public UpdateHandler(URI updateURI, String action, String tracTracUsername, String tracTracPassword, Serializable tracTracEventId, Serializable raceId) {
         this.updateURI = updateURI;
