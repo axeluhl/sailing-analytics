@@ -6,11 +6,11 @@ import java.util.Collection;
 import com.sap.sailing.datamining.Filter;
 import com.sap.sailing.datamining.FilterCriteria;
 
-public class FilterByCriteriaImpl<DataType> implements Filter<DataType> {
+public class FilterByCriteria<DataType> implements Filter<DataType> {
     
     private FilterCriteria<DataType> criteria;
 
-    public FilterByCriteriaImpl(FilterCriteria<DataType> criteria) {
+    public FilterByCriteria(FilterCriteria<DataType> criteria) {
         this.criteria = criteria;
     }
 

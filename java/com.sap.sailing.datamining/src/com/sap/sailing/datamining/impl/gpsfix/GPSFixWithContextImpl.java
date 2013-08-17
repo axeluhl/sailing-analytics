@@ -1,13 +1,10 @@
 package com.sap.sailing.datamining.impl.gpsfix;
 
-import java.util.Calendar;
-
 import com.sap.sailing.datamining.Clusters.WindStrength;
 import com.sap.sailing.datamining.GPSFixContext;
 import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.datamining.WindStrengthCluster;
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
@@ -22,17 +19,14 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
     private static final long serialVersionUID = -5551381302809417831L;
 
     private GPSFixContext context;
-    private LegType legType;
     private Wind wind;
 
-    private boolean legTypeHasBeenInitialized;
     private boolean windHasBeenInitialized;
 
     public GPSFixWithContextImpl(GPSFixMoving gpsFix, GPSFixContext context) {
         super(copyPosition(gpsFix), copyTimePoint(gpsFix), copySpeed(gpsFix));
         this.context = context;
         
-        legTypeHasBeenInitialized = false;
         windHasBeenInitialized= false;
     }
 
@@ -68,22 +62,12 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
 
     @Override
     public Integer getYear() {
-        TimePoint time = context.getTrackedRace().getStartOfRace() != null ? context.getTrackedRace().getStartOfRace() : context.getTrackedRace().getStartOfTracking();
-        if (time == null) {
-            return null;
-        }
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(time.asDate());
-        return calendar.get(Calendar.YEAR);
+        return context.getYear();
     }
 
     @Override
     public LegType getLegType() {
-        if (!legTypeHasBeenInitialized) {
-            initializeLegType();
-        }
-
-        return legType;
+        return context.getLegType();
     }
 
     @Override
@@ -109,23 +93,14 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
 
         return WindStrength.getClusterFor(getWind().getBeaufort(), WindStrength.StandardClusters);
     }
-    
-    private Wind getWind() {
+
+    public Wind getWind() {
         if (!windHasBeenInitialized) {
             wind = context.getTrackedRace().getWind(getPosition(), getTimePoint());
             windHasBeenInitialized = true;
         }
         
         return wind;
-    }
-
-    private void initializeLegType() {
-        try {
-            legType = context.getTrackedLeg() == null ? null : context.getTrackedLeg().getLegType(getTimePoint());
-        } catch (NoWindException e) {
-            legType = null;
-        }
-        legTypeHasBeenInitialized = true;
     }
 
     private static SpeedWithBearing copySpeed(GPSFixMoving gpsFix) {

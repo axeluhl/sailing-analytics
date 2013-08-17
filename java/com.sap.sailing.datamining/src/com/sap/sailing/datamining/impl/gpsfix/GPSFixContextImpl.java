@@ -1,12 +1,19 @@
 package com.sap.sailing.datamining.impl.gpsfix;
 
+import java.util.Calendar;
+
 import com.sap.sailing.datamining.GPSFixContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class GPSFixContextImpl implements GPSFixContext {
@@ -16,9 +23,14 @@ public class GPSFixContextImpl implements GPSFixContext {
     private CourseArea courseArea;
     private Fleet fleet;
     private TrackedRace trackedRace;
+    private LegType legType;
     private TrackedLeg trackedLeg;
     private int legNumber;
     private Competitor competitor;
+    private Integer year;
+
+    private boolean legTypeHasBeenInitialized;
+    private boolean yearHasBeenInitialized;
 
     public GPSFixContextImpl(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard, CourseArea courseArea,
             Fleet fleet, TrackedRace trackedRace, TrackedLeg trackedLeg, int legNumber, Competitor competitor) {
@@ -63,6 +75,14 @@ public class GPSFixContextImpl implements GPSFixContext {
     }
 
     @Override
+    public LegType getLegType() {
+        if (!legTypeHasBeenInitialized) {
+            initializeLegType();
+        }
+        return legType;
+    }
+
+    @Override
     public int getLegNumber() {
         return legNumber;
     }
@@ -70,6 +90,47 @@ public class GPSFixContextImpl implements GPSFixContext {
     @Override
     public Competitor getCompetitor() {
         return competitor;
+    }
+
+    @Override
+    public Integer getYear() {
+        if (!yearHasBeenInitialized) {
+            initializeYear();
+        }
+        return year;
+    }
+
+    private void initializeLegType() {
+        try {
+            legType = getTrackedLeg() == null ? null : getTrackedLeg().getLegType(getTimePointForLegType());
+        } catch (NoWindException e) {
+            legType = null;
+        }
+        legTypeHasBeenInitialized = true;
+    }
+
+    private TimePoint getTimePointForLegType() {
+        TimePoint at = null;
+        for (TrackedLegOfCompetitor trackedLegOfCompetitor : getTrackedLeg().getTrackedLegsOfCompetitors()) {
+            TimePoint start = trackedLegOfCompetitor.getStartTime();
+            TimePoint finish = trackedLegOfCompetitor.getFinishTime();
+            if (start != null && finish != null) {
+                at = new MillisecondsTimePoint((start.asMillis() + finish.asMillis()) / 2);
+                break;
+            }
+        }
+        return at;
+    }
+
+    private void initializeYear() {
+        TimePoint time = getTrackedRace().getStartOfRace() != null ? getTrackedRace().getStartOfRace() : getTrackedRace().getStartOfTracking();
+        if (time == null) {
+            year = 0;
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(time.asDate());
+        year = calendar.get(Calendar.YEAR);
+        yearHasBeenInitialized = true;
     }
     
 }
