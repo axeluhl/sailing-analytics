@@ -23,17 +23,5 @@ public interface GPSFixWithContext extends GPSFixMoving {
     public String getCompetitorSailID();
     public String getCompetitorNationality();
     public WindStrengthCluster getWindStrength();
-    
-    
-//    /**
-//     * The wind strength at the position and the time of this gps fix. Can be <code>null</code> if there's no wind in the race.
-//     */
-//    /**
-//     * A string representation of the value of the given dimension of this GPS-Fix (for example the name of
-//     * the competitor of this fix, if the dimension is {@link Dimension#CompetitorName}). Can be <code>null</code>,
-//     * if the value is <code>null</code> (possible for wind or leg type).
-//     * 
-//     * @return A string representation of the value of the given dimension of this GPS-Fix.
-//     */
 
 }

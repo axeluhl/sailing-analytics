@@ -16,10 +16,6 @@ public class GenericGroupKey<T> extends AbstractGroupKey {
         this.value = value;
     }
 
-    protected T getValue() {
-        return value;
-    }
-
     @Override
     public boolean hasSubKey() {
         return false;
@@ -37,7 +33,7 @@ public class GenericGroupKey<T> extends AbstractGroupKey {
     
     @Override
     public String asString() {
-        return getValue().toString();
+        return value.toString();
     }
 
     @Override

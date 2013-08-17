@@ -21,7 +21,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
-public class GPSFixRetrieverImpl implements DataRetriever<GPSFixWithContext> {
+public class SimpleGPSFixRetriever implements DataRetriever<GPSFixWithContext> {
     
     
     @Override
@@ -39,8 +39,8 @@ public class GPSFixRetrieverImpl implements DataRetriever<GPSFixWithContext> {
                                 TrackedLeg trackedLeg = trackedRace.getTrackedLeg(leg);
                                 if (trackedLeg != null) {
                                     for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                                        data.addAll(retrieveDataFor(leaderboardGroup, leaderboard, courseArea, fleet, trackedRace,
-                                                trackedLeg, legNumber, competitor));
+                                        GPSFixContext context = new GPSFixContextImpl(leaderboardGroup, leaderboard, courseArea, fleet, trackedRace, trackedLeg, legNumber, competitor);
+                                        data.addAll(retrieveDataFor(context));
                                     }
                                     legNumber++;
                                 }
@@ -53,16 +53,15 @@ public class GPSFixRetrieverImpl implements DataRetriever<GPSFixWithContext> {
         return data;
     }
 
-    private Collection<GPSFixWithContext> retrieveDataFor(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard, CourseArea courseArea, Fleet fleet, TrackedRace trackedRace, TrackedLeg trackedLeg, int legNumber, Competitor competitor) {
+    private Collection<GPSFixWithContext> retrieveDataFor(GPSFixContext context) {
         List<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
-        TrackedLegOfCompetitor trackedLegOfCompetitor = trackedLeg.getTrackedLeg(competitor);
-        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
+        TrackedLegOfCompetitor trackedLegOfCompetitor = context.getTrackedLeg().getTrackedLeg(context.getCompetitor());
+        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = context.getTrackedRace().getTrack(context.getCompetitor());
         competitorTrack.lockForRead();
         try {
             if (trackedLegOfCompetitor.getStartTime() != null && trackedLegOfCompetitor.getFinishTime() != null) {
                 for (GPSFixMoving gpsFix : competitorTrack.getFixes(trackedLegOfCompetitor.getStartTime(), true, trackedLegOfCompetitor.getFinishTime(), true)) {
-                    GPSFixContext context = new GPSFixContextImpl(leaderboardGroup, leaderboard, courseArea, fleet, trackedRace, trackedLeg, legNumber, competitor);
-                    data.add(new GPSFixWithContextImpl(gpsFix, context ));
+                    data.add(new GPSFixWithContextImpl(gpsFix, context));
                 }
             }
         } finally {

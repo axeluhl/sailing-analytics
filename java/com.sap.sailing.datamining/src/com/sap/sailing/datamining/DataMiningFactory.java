@@ -17,7 +17,7 @@ import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.DimensionValuesFilterCriteria;
 import com.sap.sailing.datamining.impl.gpsfix.GPSFixBaseBindingProvider;
-import com.sap.sailing.datamining.impl.gpsfix.GPSFixRetrieverImpl;
+import com.sap.sailing.datamining.impl.gpsfix.SimpleGPSFixRetriever;
 import com.sap.sailing.datamining.impl.gpsfix.GroupGPSFixesByDimension;
 import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.DataTypes;
@@ -40,14 +40,14 @@ public class DataMiningFactory {
     public static <DataType> DataRetriever<DataType> createDataRetriever(com.sap.sailing.datamining.shared.DataTypes dataType) {
         switch (dataType) {
         case GPSFix:
-            return (DataRetriever<DataType>) new GPSFixRetrieverImpl();
+            return (DataRetriever<DataType>) new SimpleGPSFixRetriever();
         }
         throw new IllegalArgumentException("Not yet implemented for the given data type: "
                 + dataType.toString());
     }
 
     public static DataRetriever<GPSFixWithContext> createGPSFixRetriever() {
-        return new GPSFixRetrieverImpl();
+        return new SimpleGPSFixRetriever();
     }
     
     /**
