@@ -21,14 +21,14 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 
-public class CourseDesignChangedByRaceCommitteeHandler extends UpdateHandler implements CourseDesignChangedListener {
+public class TracTracCourseDesignUpdateHandler extends UpdateHandler implements CourseDesignChangedListener {
     
     private final static String ACTION = "update_course";
     
-    private final static Logger logger = Logger.getLogger(CourseDesignChangedByRaceCommitteeHandler.class.getName());
+    private final static Logger logger = Logger.getLogger(TracTracCourseDesignUpdateHandler.class.getName());
     private JsonSerializer<CourseBase> courseSerializer;
     
-    public CourseDesignChangedByRaceCommitteeHandler(URI updateURI, String tracTracUsername, String tracTracPassword, Serializable tracTracEventId, Serializable raceId) {
+    public TracTracCourseDesignUpdateHandler(URI updateURI, String tracTracUsername, String tracTracPassword, Serializable tracTracEventId, Serializable raceId) {
         super(updateURI, ACTION, tracTracUsername, tracTracPassword, tracTracEventId, raceId);
         this.courseSerializer = new CourseJsonSerializer(
                 new CourseBaseJsonSerializer(

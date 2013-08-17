@@ -14,14 +14,14 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 
-public class StartTimeChangedByRaceCommitteeHandler extends UpdateHandler implements StartTimeChangedListener {
+public class TracTracStartTimeUpdateHandler extends UpdateHandler implements StartTimeChangedListener {
     
     private static final String ACTION = "update_race_start_time";
     
-    private final static Logger logger = Logger.getLogger(StartTimeChangedByRaceCommitteeHandler.class.getName());
+    private final static Logger logger = Logger.getLogger(TracTracStartTimeUpdateHandler.class.getName());
     private final static String FIELD_RACE_START_TIME = "race_start_time";
     
-    public StartTimeChangedByRaceCommitteeHandler(URI updateURI, String tracTracUsername, String tracTracPassword, Serializable tracTracEventId, Serializable raceId) {
+    public TracTracStartTimeUpdateHandler(URI updateURI, String tracTracUsername, String tracTracPassword, Serializable tracTracEventId, Serializable raceId) {
         super(updateURI, ACTION, tracTracUsername, tracTracPassword, tracTracEventId, raceId);
     }
 

@@ -158,12 +158,12 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);
         
-        CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler(tracTracUpdateURI, 
+        TracTracCourseDesignUpdateHandler courseDesignHandler = new TracTracCourseDesignUpdateHandler(tracTracUpdateURI, 
                 tracTracUsername, tracTracPassword,
                 getTracTracEvent().getId(), race.getId());
         trackedRace.addCourseDesignChangedListener(courseDesignHandler);
         
-        StartTimeChangedByRaceCommitteeHandler startTimeHandler = new StartTimeChangedByRaceCommitteeHandler(tracTracUpdateURI, 
+        TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(tracTracUpdateURI, 
                 tracTracUsername, tracTracPassword, getTracTracEvent().getId(), race.getId());
         trackedRace.addStartTimeChangedListener(startTimeHandler);
     }

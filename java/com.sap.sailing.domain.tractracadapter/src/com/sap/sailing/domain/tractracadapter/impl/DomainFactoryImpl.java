@@ -486,12 +486,12 @@ public class DomainFactoryImpl implements DomainFactory {
                             delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
                     logger.info("Added race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta());
                     
-                    CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler(tracTracUpdateURI,
+                    TracTracCourseDesignUpdateHandler courseDesignHandler = new TracTracCourseDesignUpdateHandler(tracTracUpdateURI,
                             tracTracUsername, tracTracPassword,
                             tracTracEventUuid, raceDefinition.getId());
                     trackedRace.addCourseDesignChangedListener(courseDesignHandler);
                     
-                    StartTimeChangedByRaceCommitteeHandler startTimeHandler = new StartTimeChangedByRaceCommitteeHandler(tracTracUpdateURI, 
+                    TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(tracTracUpdateURI, 
                             tracTracUsername, tracTracPassword, tracTracEventUuid, raceDefinition.getId());
                     trackedRace.addStartTimeChangedListener(startTimeHandler);
                     
