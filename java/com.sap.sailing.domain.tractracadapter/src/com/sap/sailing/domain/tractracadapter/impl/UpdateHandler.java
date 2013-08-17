@@ -36,6 +36,7 @@ public class UpdateHandler {
     private final Serializable tracTracEventId;
     private final Serializable raceId;
     private final String action;
+    private final boolean active;
     
     private final static String HttpPostRequestMethod = "POST";
     private final static String HttpGetRequestMethod = "GET";
@@ -54,6 +55,11 @@ public class UpdateHandler {
         this.tracTracEventId = tracTracEventId;
         this.raceId = raceId;
         this.updateDeserializer = new UpdateResponseDeserializer();
+        if (updateURI != null && !updateURI.toString().equals("")) {
+            this.active = true;
+        } else {
+            this.active = false;
+        }
     }
 
     protected URL buildUpdateURL(HashMap<String, String> additionalParameters) throws MalformedURLException, UnsupportedEncodingException {
@@ -116,5 +122,9 @@ public class UpdateHandler {
         connection.setUseCaches(false);
         connection.setRequestProperty(ContentType, ContentTypeApplicationJson);
         connection.addRequestProperty(ContentLength, String.valueOf(payload.getBytes().length));
+    }
+    
+    protected boolean isActive() {
+        return this.active;
     }
 }

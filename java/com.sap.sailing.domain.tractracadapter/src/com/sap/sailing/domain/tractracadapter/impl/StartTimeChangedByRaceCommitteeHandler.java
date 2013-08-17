@@ -27,6 +27,10 @@ public class StartTimeChangedByRaceCommitteeHandler extends UpdateHandler implem
 
     @Override
     public void startTimeChanged(TimePoint newStartTime) throws MalformedURLException, IOException {
+        if (!isActive()) {
+            return;
+        }
+        
         HashMap<String, String> additionalParameters = new HashMap<String, String>();
         additionalParameters.put(FIELD_RACE_START_TIME, String.valueOf(newStartTime.asMillis()));
         URL startTimeUpdateURL = buildUpdateURL(additionalParameters);

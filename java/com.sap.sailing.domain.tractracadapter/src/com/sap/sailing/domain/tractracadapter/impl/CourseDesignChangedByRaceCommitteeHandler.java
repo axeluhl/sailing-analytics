@@ -40,6 +40,10 @@ public class CourseDesignChangedByRaceCommitteeHandler extends UpdateHandler imp
 
     @Override
     public void courseDesignChanged(CourseBase newCourseDesign) throws MalformedURLException, IOException {
+        if (!isActive()) {
+            return;
+        }
+        
         JSONObject serializedCourseDesign = courseSerializer.serialize(newCourseDesign);
         String payload = serializedCourseDesign.toJSONString();
         URL currentCourseDesignURL = buildUpdateURL();
