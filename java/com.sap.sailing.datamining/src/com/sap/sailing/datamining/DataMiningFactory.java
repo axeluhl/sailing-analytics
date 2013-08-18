@@ -9,6 +9,7 @@ import com.sap.sailing.datamining.impl.DataAmountExtractor;
 import com.sap.sailing.datamining.impl.DynamicGrouper;
 import com.sap.sailing.datamining.impl.FilterByCriteria;
 import com.sap.sailing.datamining.impl.QueryImpl;
+import com.sap.sailing.datamining.impl.SpeedInKnotsExtractor;
 import com.sap.sailing.datamining.impl.aggregators.SimpleDoubleArithmeticAverageAggregator;
 import com.sap.sailing.datamining.impl.aggregators.SimpleDoubleSumAggregator;
 import com.sap.sailing.datamining.impl.aggregators.SimpleIntegerArithmeticAverageAggregator;
@@ -22,6 +23,8 @@ import com.sap.sailing.datamining.impl.gpsfix.GroupGPSFixesByDimension;
 import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.SharedDimensions;
+import com.sap.sailing.datamining.shared.StatisticType;
+import com.sap.sailing.domain.base.Moving;
 
 public class DataMiningFactory {
     
@@ -107,6 +110,22 @@ public class DataMiningFactory {
             dimensions.add(dimension);
         }
         return new GroupGPSFixesByDimension<ValueType>(dimensions);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <DataType> Extractor<DataType, Integer> createExtractor(StatisticType statisticType) {
+        switch (statisticType) {
+        case DataAmount:
+            return createDataAmountExtractor();
+        case Speed:
+            return (Extractor<DataType, Integer>) createSpeedExtractor();
+        }
+        throw new IllegalArgumentException("Not yet implemented for the given statistic type: "
+                + statisticType.toString());
+    }
+    
+    public static Extractor<Moving, Integer> createSpeedExtractor() {
+        return new SpeedInKnotsExtractor();
     }
 
     public static <DataType> Extractor<DataType, Integer> createDataAmountExtractor() {

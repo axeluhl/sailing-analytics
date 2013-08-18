@@ -225,7 +225,8 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
                 appendable.append(render(statisticAndAggregatorType));
             }
         });
-        List<StatisticAndAggregatorType> statistics = Arrays.asList(new StatisticAndAggregatorType(StatisticType.DataAmount, AggregatorType.Average));
+        List<StatisticAndAggregatorType> statistics = Arrays.asList(new StatisticAndAggregatorType(StatisticType.DataAmount, AggregatorType.Average),
+                                                                    new StatisticAndAggregatorType(StatisticType.Speed, AggregatorType.Average));
         statisticsListBox.setAcceptableValues(statistics);
         statisticsListBox.setValue(statistics.get(0), false);
         functionsPanel.add(statisticsListBox);
