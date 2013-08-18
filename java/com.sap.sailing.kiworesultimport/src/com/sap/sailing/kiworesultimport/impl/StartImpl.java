@@ -7,8 +7,8 @@ import java.text.SimpleDateFormat;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.kiworesultimport.Start;
 
 public class StartImpl extends AbstractNodeWrapper implements Start {

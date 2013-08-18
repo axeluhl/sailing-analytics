@@ -31,6 +31,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -530,6 +531,12 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Iterable<Sideline> getCourseSidelines() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void addStartTimeChangedListener(StartTimeChangedListener listener) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

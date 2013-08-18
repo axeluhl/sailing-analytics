@@ -1,6 +1,6 @@
-package com.sap.sailing.domain.base.impl;
+package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.base.CourseChange;
+import com.sap.sailing.domain.common.CourseChange;
 
 public class CourseChangeImpl implements CourseChange {
     private final double courseChangeInDegrees;

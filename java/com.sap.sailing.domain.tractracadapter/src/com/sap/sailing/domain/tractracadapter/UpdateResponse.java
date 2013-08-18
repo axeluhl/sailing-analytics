@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.tractracadapter;
 
-public interface CourseUpdateResponse {
+public interface UpdateResponse {
     
     String getStatus();
     
