@@ -36,8 +36,9 @@ public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query
     public QueryResult<AggregatedType> run(RacingEventService racingEventService) {
         final long startTime = System.nanoTime();
         
-        Collection<DataType> filteredData = filter.filter(retriever.retrieveData(racingEventService));
-        QueryResultImpl<AggregatedType> result = new QueryResultImpl<AggregatedType>(filteredData.size(), createResultSignifier());
+        Collection<DataType> retrievedData = retriever.retrieveData(racingEventService);
+        Collection<DataType> filteredData = filter.filter(retrievedData);
+        QueryResultImpl<AggregatedType> result = new QueryResultImpl<AggregatedType>(retrievedData.size(), filteredData.size(), createResultSignifier());
         Map<GroupKey, Collection<DataType>> groupedFixes = grouper.group(filteredData);
         for (Entry<GroupKey, Collection<DataType>> groupEntry : groupedFixes.entrySet()) {
             Collection<ExtractedType> extractedData = extractor.extract(groupEntry.getValue());

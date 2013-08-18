@@ -84,7 +84,7 @@ public abstract class AbstractQueryBenchmarkPanel<DimensionType> extends FlowPan
 
     private void updateResults(final ClientBenchmarkData<DimensionType> benchmarkData, double overallTimeInSeconds, QueryResult<Integer> result) {
         resultsChart.addResult(new QueryBenchmarkResult(stringMessages.runAsSubstantive() + " " + benchmarkData.getCurrentRun(),
-                                                        result.getDataSize(), result.getCalculationTimeInSeconds(), overallTimeInSeconds));
+                                                        result.getFilteredDataAmount(), result.getCalculationTimeInSeconds(), overallTimeInSeconds));
         
         if (benchmarkData.isFinished()) {
             benchmarkStatusLabel.setText(" | " + stringMessages.done());
