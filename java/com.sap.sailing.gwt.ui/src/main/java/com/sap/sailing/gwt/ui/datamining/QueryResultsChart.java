@@ -67,7 +67,7 @@ public class QueryResultsChart extends SimplePanel {
     }
     
     private void updateChartSubtitle(QueryResult<Integer> result) {
-        chart.setChartSubtitle(new ChartSubtitle().setText(stringMessages.queryResultsChartSubtitle(result.getFilteredDataAmount(), result.getCalculationTimeInSeconds())));
+        chart.setChartSubtitle(new ChartSubtitle().setText(stringMessages.queryResultsChartSubtitle(result.getRetrievedDataAmount(), result.getFilteredDataAmount(), result.getCalculationTimeInSeconds())));
         //This is needed, so that the subtitle is updated. Otherwise the text would stay empty
         this.setWidget(null);
         this.setWidget(chart);

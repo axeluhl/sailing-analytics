@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedType> {
-    private static final long serialVersionUID = 351213515082955565L;
-
+    private static final long serialVersionUID = -8347731622150585715L;
+    
     private int retrievedDataAmount;
     private int filteredDataAmount;
     private long calculationTimeInNanos;
@@ -21,7 +21,7 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     
     public QueryResultImpl(int retrievedDataAmount, int filteredDataAmount, String resultSiginifier) {
         this.retrievedDataAmount = retrievedDataAmount;
-        this.filteredDataAmount = retrievedDataAmount;
+        this.filteredDataAmount = filteredDataAmount;
         results = new HashMap<GroupKey, AggregatedType>();
         this.resultSignifier = resultSiginifier;
     }
