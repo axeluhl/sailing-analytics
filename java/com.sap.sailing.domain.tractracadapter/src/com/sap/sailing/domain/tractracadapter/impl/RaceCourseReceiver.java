@@ -50,7 +50,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     private final long delayToLiveInMillis;
     private final WindStore windStore;
     private final DynamicRaceDefinitionSet raceDefinitionSetToUpdate;
-    private final URI courseDesignUpdateURI;
+    private final URI tracTracUpdateURI;
     private final String tracTracUsername;
     private final String tracTracPassword;
     
@@ -67,7 +67,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             this.windStore = simulator.simulatingWindStore(windStore);
         }
         this.raceDefinitionSetToUpdate = raceDefinitionSetToUpdate;
-        this.courseDesignUpdateURI = courseDesignUpdateURI;
+        this.tracTracUpdateURI = courseDesignUpdateURI;
         this.tracTracUsername = tracTracUsername;
         this.tracTracPassword = tracTracPassword;
     }
@@ -144,7 +144,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             DynamicTrackedRace trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
                     getTrackedRegatta(), race.getId(), race.getName(), competitorsAndDominantBoatClass.getA(),
                     competitorsAndDominantBoatClass.getB(), course, sidelines, windStore, delayToLiveInMillis,
-                    millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, courseDesignUpdateURI,
+                    millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, tracTracUpdateURI,
                     getTracTracEvent().getId(), tracTracUsername, tracTracPassword);
             if (getSimulator() != null) {
                 getSimulator().setTrackedRace(trackedRace);
@@ -158,10 +158,14 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);
         
-        CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler(courseDesignUpdateURI, 
+        TracTracCourseDesignUpdateHandler courseDesignHandler = new TracTracCourseDesignUpdateHandler(tracTracUpdateURI, 
                 tracTracUsername, tracTracPassword,
                 getTracTracEvent().getId(), race.getId());
         trackedRace.addCourseDesignChangedListener(courseDesignHandler);
+        
+        TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(tracTracUpdateURI, 
+                tracTracUsername, tracTracPassword, getTracTracEvent().getId(), race.getId());
+        trackedRace.addStartTimeChangedListener(startTimeHandler);
     }
 
 }

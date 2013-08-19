@@ -13,12 +13,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -57,7 +57,7 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
      */
     @Test
     public void testSimpleWindEstimationThroughEstimationTrack() throws NoWindException {
-        // at this point in time, most boats are already going upwind again, and Köchlin, Neulen and Findel are tacking,
+        // at this point in time, most boats are already going upwind again, and Kï¿½chlin, Neulen and Findel are tacking,
         // hence have a direction change.
         TimePoint middle = new MillisecondsTimePoint(1308839492322l);
         TrackBasedEstimationWindTrackImpl estimatedWindTrack = new TrackBasedEstimationWindTrackImpl(getTrackedRace(),
@@ -94,7 +94,7 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
     
     @Test
     public void testAnotherSimpleWindEstimation() throws NoWindException {
-        // at this point in time, most boats are already going upwind again, and Köchlin, Neulen and Findel are tacking,
+        // at this point in time, most boats are already going upwind again, and Kï¿½chlin, Neulen and Findel are tacking,
         // hence have a direction change.
         TimePoint middle = new MillisecondsTimePoint(1308839492322l);
         assertTrue(getTrackedRace().getTrack(getCompetitorByName("K.chlin")).hasDirectionChange(middle, /* minimumDegreeDifference */ 15.));

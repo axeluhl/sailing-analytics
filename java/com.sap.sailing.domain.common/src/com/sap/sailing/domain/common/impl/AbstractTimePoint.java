@@ -1,11 +1,10 @@
-package com.sap.sailing.domain.base.impl;
+package com.sap.sailing.domain.common.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.util.SerializableComparator;
 
 public abstract class AbstractTimePoint implements TimePoint {
     private static final long serialVersionUID = 8825508619301420378L;

@@ -21,4 +21,9 @@ public class MeterDistance extends AbstractDistance {
         return new MeterDistance(factor * meters);
     }
 
+    @Override
+    public double getCentralAngleDeg() {
+        return getGeographicalMiles() / 60.;
+    }
+
 }

@@ -12,9 +12,9 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
@@ -100,6 +100,7 @@ public class LeaderboardGroupJsonGetServlet extends AbstractJsonHttpServlet {
                                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                                 if (trackedRace != null) {
                                     jsonRaceColumn.put("isTracked", true);
+                                    jsonRaceColumn.put("regattaName", trackedRace.getTrackedRegatta().getRegatta().getName());
                                     jsonRaceColumn.put("trackedRaceName", trackedRace.getRace().getName());
                                     jsonRaceColumn.put("hasGpsData", trackedRace.hasGPSData());
                                     jsonRaceColumn.put("hasWindData", trackedRace.hasWindData());

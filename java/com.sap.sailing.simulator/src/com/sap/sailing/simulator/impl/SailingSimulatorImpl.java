@@ -8,9 +8,9 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.simulator.Boundary;
@@ -85,7 +85,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
             wf.getWindParameters().baseWindBearing += bd.getSouth().getDegrees();
             // System.out.println("baseWindBearing: " + wf.getWindParameters().baseWindBearing);
             LOGGER.info("base wind: " + this.simulationParameters.getBoatPolarDiagram().getWind().getKnots() + " kn, "
-                    + ((wf.getWindParameters().baseWindBearing) % 360.0) + "°");
+                    + ((wf.getWindParameters().baseWindBearing) % 360.0) + "ï¿½");
 
             // initialize interpolation table for getSpeedAtBearingOverGround, e.g. for what-if or for optimization on overground-grids
             // this.simulationParameters.getBoatPolarDiagram().setCurrent(null); // initialize
@@ -99,7 +99,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
             // DegreeBearingImpl((270.0)%360.0)));
             if (this.simulationParameters.getBoatPolarDiagram().getCurrent() != null) {
                 LOGGER.info("water current: " + this.simulationParameters.getBoatPolarDiagram().getCurrent().getKnots() + " kn, "
-                        + this.simulationParameters.getBoatPolarDiagram().getCurrent().getBearing().getDegrees() + "°");
+                        + this.simulationParameters.getBoatPolarDiagram().getCurrent().getBearing().getDegrees() + "ï¿½");
             }
 
             wf.setBoundary(bd);

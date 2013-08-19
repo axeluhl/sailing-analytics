@@ -88,6 +88,8 @@ public interface DynamicTrackedRace extends TrackedRace {
      *            the new course design to be published
      */
     void onCourseDesignChangedByRaceCommittee(CourseBase courseDesign);
+    
+    void onStartTimeChangedByRaceCommittee(TimePoint newStartTime);
 
     void invalidateStartTime();
     
