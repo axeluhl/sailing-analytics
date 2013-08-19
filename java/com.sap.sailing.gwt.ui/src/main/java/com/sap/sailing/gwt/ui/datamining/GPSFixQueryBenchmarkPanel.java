@@ -22,7 +22,7 @@ public class GPSFixQueryBenchmarkPanel extends AbstractQueryBenchmarkPanel<Share
     }
 
     @Override
-    protected void sendServerRequest(ClientBenchmarkData<SharedDimensions.GPSFix> benchmarkData, AsyncCallback<QueryResult<Integer>> asyncCallback) {
+    protected void sendServerRequest(ClientBenchmarkData<SharedDimensions.GPSFix> benchmarkData, AsyncCallback<QueryResult<Number>> asyncCallback) {
         Map<GPSFix, Collection<?>> selection = benchmarkData.getSelection();
         StatisticType statisticToCalculate = getQueryComponentsProvider().getStatisticToCalculate();
         AggregatorType aggregatedAs = getQueryComponentsProvider().getAggregatorType();

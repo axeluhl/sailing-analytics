@@ -58,13 +58,13 @@ public abstract class AbstractQueryBenchmarkPanel<DimensionType> extends FlowPan
 
     private void runQuery(final ClientBenchmarkData<DimensionType> benchmarkData) {
         final long startTime = System.currentTimeMillis();
-        sendServerRequest(benchmarkData, new AsyncCallback<QueryResult<Integer>>() {
+        sendServerRequest(benchmarkData, new AsyncCallback<QueryResult<Number>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running a query: " + caught.getMessage());
             }
             @Override
-            public void onSuccess(QueryResult<Integer> result) {
+            public void onSuccess(QueryResult<Number> result) {
                 long endTime = System.currentTimeMillis();
                 double overallTime = (endTime - startTime) / 1000.0;
                 updateResults(benchmarkData, overallTime, result);
@@ -72,7 +72,7 @@ public abstract class AbstractQueryBenchmarkPanel<DimensionType> extends FlowPan
         });
     }
 
-    protected abstract void sendServerRequest(ClientBenchmarkData<DimensionType> benchmarkData, AsyncCallback<QueryResult<Integer>> asyncCallback);
+    protected abstract void sendServerRequest(ClientBenchmarkData<DimensionType> benchmarkData, AsyncCallback<QueryResult<Number>> asyncCallback);
     
     protected SailingServiceAsync getSailingService() {
         return sailingService;
@@ -82,7 +82,7 @@ public abstract class AbstractQueryBenchmarkPanel<DimensionType> extends FlowPan
         return queryComponentsProvider;
     }
 
-    private void updateResults(final ClientBenchmarkData<DimensionType> benchmarkData, double overallTimeInSeconds, QueryResult<Integer> result) {
+    private void updateResults(final ClientBenchmarkData<DimensionType> benchmarkData, double overallTimeInSeconds, QueryResult<? extends Number> result) {
         resultsChart.addResult(new QueryBenchmarkResult(stringMessages.runAsSubstantive() + " " + benchmarkData.getCurrentRun(),
                                                         result.getFilteredDataAmount(), result.getCalculationTimeInSeconds(), overallTimeInSeconds));
         

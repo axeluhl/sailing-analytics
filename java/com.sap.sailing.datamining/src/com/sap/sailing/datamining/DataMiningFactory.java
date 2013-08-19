@@ -68,6 +68,14 @@ public class DataMiningFactory {
     public static <DataType> Filter<DataType> createCriteriaFilter(FilterCriteria<DataType> criteria) {
         return new FilterByCriteria<DataType>(criteria);
     }
+    
+    public static Filter<GPSFixWithContext> createGPSFixDimensionFilter(Map<SharedDimensions.GPSFix, Collection<?>> selection) {
+        if (selection.isEmpty()) {
+            return createNoFilter();
+        }
+        
+        return createCriteriaFilter(createGPSFixDimensionFilterCriteria(selection));
+    }
 
     public static FilterCriteria<GPSFixWithContext> createGPSFixDimensionFilterCriteria(Map<SharedDimensions.GPSFix, Collection<?>> selection) {
         CompoundFilterCriteria<GPSFixWithContext> compoundFilterCriteria = new AndCompoundFilterCriteria<GPSFixWithContext>();
@@ -113,23 +121,36 @@ public class DataMiningFactory {
     }
     
     @SuppressWarnings("unchecked")
-    public static <DataType> Extractor<DataType, Integer> createExtractor(StatisticType statisticType) {
+    public static <DataType, ExtractedType extends Number> Extractor<DataType, ExtractedType> createExtractor(StatisticType statisticType) {
         switch (statisticType) {
         case DataAmount:
-            return createDataAmountExtractor();
+            return (Extractor<DataType, ExtractedType>) createDataAmountExtractor();
         case Speed:
-            return (Extractor<DataType, Integer>) createSpeedExtractor();
+            return (Extractor<DataType, ExtractedType>) createSpeedExtractor();
         }
         throw new IllegalArgumentException("Not yet implemented for the given statistic type: "
                 + statisticType.toString());
     }
     
-    public static Extractor<Moving, Integer> createSpeedExtractor() {
+    public static Extractor<Moving, Double> createSpeedExtractor() {
         return new SpeedInKnotsExtractor();
     }
 
     public static <DataType> Extractor<DataType, Integer> createDataAmountExtractor() {
         return new DataAmountExtractor<DataType>();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <ExtractedType, AggregatedType> Aggregator<ExtractedType, AggregatedType> createAggregator(StatisticType statisticToCalculate,
+            AggregatorType aggregatorType) {
+        switch (statisticToCalculate.getValueType()) {
+        case Double:
+            return (Aggregator<ExtractedType, AggregatedType>) createDoubleAggregator(aggregatorType);
+        case Integer:
+            return (Aggregator<ExtractedType, AggregatedType>) createIntegerAggregator(aggregatorType);
+        }
+        throw new IllegalArgumentException("Not yet implemented for the given statistics value type: "
+                + statisticToCalculate.getValueType().toString());
     }
     
     public static Aggregator<Integer, Integer> createIntegerAggregator(AggregatorType aggregatorType) {

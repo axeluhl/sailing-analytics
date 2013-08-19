@@ -54,7 +54,6 @@ import com.sap.sailing.datamining.DataMiningFactory;
 import com.sap.sailing.datamining.DataRetriever;
 import com.sap.sailing.datamining.Extractor;
 import com.sap.sailing.datamining.Filter;
-import com.sap.sailing.datamining.FilterCriteria;
 import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.datamining.Grouper;
 import com.sap.sailing.datamining.Query;
@@ -108,12 +107,12 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
-import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForCompetitorInRace;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -3327,38 +3326,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public QueryResult<Integer> runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, Collection<SharedDimensions.GPSFix> dimensionsToGroupBy, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
+    public <ResultType extends Number> QueryResult<ResultType> runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, Collection<SharedDimensions.GPSFix> dimensionsToGroupBy, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
         DataRetriever<GPSFixWithContext> retriever = DataMiningFactory.createGPSFixRetriever();
-        Filter<GPSFixWithContext> filter = createFilter(selection);
+        Filter<GPSFixWithContext> filter = DataMiningFactory.createGPSFixDimensionFilter(selection);
         Grouper<GPSFixWithContext> grouper = DataMiningFactory.createGPSFixByDimensionGrouper(dimensionsToGroupBy);
-        Extractor<GPSFixWithContext, Integer> extractor = DataMiningFactory.createExtractor(statisticToCalculate);
-        Aggregator<Integer, Integer> aggregator = DataMiningFactory.createIntegerAggregator(aggregatedAs);
-        Query<GPSFixWithContext, Integer> query = DataMiningFactory.createQuery(retriever, filter, grouper, extractor, aggregator);
-        QueryResult<Integer> result = query.run(getService());
+        Extractor<GPSFixWithContext, ResultType> extractor = DataMiningFactory.createExtractor(statisticToCalculate);
+        Aggregator<ResultType, ResultType> aggregator = DataMiningFactory.createAggregator(statisticToCalculate, aggregatedAs);
+        Query<GPSFixWithContext, ResultType> query = DataMiningFactory.createQuery(retriever, filter, grouper, extractor, aggregator);
+        QueryResult<ResultType> result = query.run(getService());
         return result;
     }
 
     @Override
-    public QueryResult<Integer> runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, String grouperScriptText, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
+    public <ResultType extends Number> QueryResult<ResultType> runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, String grouperScriptText, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
         DataRetriever<GPSFixWithContext> retriever = DataMiningFactory.createGPSFixRetriever();
-        Filter<GPSFixWithContext> filter = createFilter(selection);
+        Filter<GPSFixWithContext> filter = DataMiningFactory.createGPSFixDimensionFilter(selection);
         Grouper<GPSFixWithContext> grouper = DataMiningFactory.createDynamicGrouper(grouperScriptText, DataTypes.GPSFix);
-        Extractor<GPSFixWithContext, Integer> extractor = DataMiningFactory.createExtractor(statisticToCalculate);
-        Aggregator<Integer, Integer> aggregator = DataMiningFactory.createIntegerAggregator(aggregatedAs);
-        Query<GPSFixWithContext, Integer> query = DataMiningFactory.createQuery(retriever, filter, grouper, extractor, aggregator);
-        QueryResult<Integer> result = query.run(getService());
+        Extractor<GPSFixWithContext, ResultType> extractor = DataMiningFactory.createExtractor(statisticToCalculate);
+        Aggregator<ResultType, ResultType> aggregator = DataMiningFactory.createAggregator(statisticToCalculate, aggregatedAs);
+        Query<GPSFixWithContext, ResultType> query = DataMiningFactory.createQuery(retriever, filter, grouper, extractor, aggregator);
+        QueryResult<ResultType> result = query.run(getService());
         return result;
-    }
-
-    private Filter<GPSFixWithContext> createFilter(Map<SharedDimensions.GPSFix, Collection<?>> selection) {
-        Filter<GPSFixWithContext> filter;
-        if (selection.isEmpty()) {
-            filter = DataMiningFactory.createNoFilter();
-        } else {
-            FilterCriteria<GPSFixWithContext> filterCriteria = DataMiningFactory.createGPSFixDimensionFilterCriteria(selection);
-            filter = DataMiningFactory.createCriteriaFilter(filterCriteria);
-        }
-        return filter;
     }
     
     @Override

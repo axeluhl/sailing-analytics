@@ -43,7 +43,7 @@ public class QueryResultsChart extends SimplePanel {
         setWidget(chart);
     }
 
-    public void showResult(QueryResult<Integer> result) {
+    public void showResult(QueryResult<? extends Number> result) {
         reset();
         
         chart.getYAxis().setAxisTitleText(result.getResultSignifier());
@@ -66,7 +66,7 @@ public class QueryResultsChart extends SimplePanel {
         chart.redraw();
     }
     
-    private void updateChartSubtitle(QueryResult<Integer> result) {
+    private void updateChartSubtitle(QueryResult<? extends Number> result) {
         chart.setChartSubtitle(new ChartSubtitle().setText(stringMessages.queryResultsChartSubtitle(result.getRetrievedDataAmount(), result.getFilteredDataAmount(), result.getCalculationTimeInSeconds())));
         //This is needed, so that the subtitle is updated. Otherwise the text would stay empty
         this.setWidget(null);
@@ -74,7 +74,7 @@ public class QueryResultsChart extends SimplePanel {
         
     }
 
-    public List<GroupKey> getSortedKeysFrom(QueryResult<Integer> result) {
+    public List<GroupKey> getSortedKeysFrom(QueryResult<? extends Number> result) {
         List<GroupKey> sortedKeys = new ArrayList<GroupKey>(result.getResults().keySet());
         Collections.sort(sortedKeys, new Comparator<GroupKey>() {
             @Override

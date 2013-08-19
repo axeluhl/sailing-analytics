@@ -22,7 +22,7 @@ public class GPSFixQueryPanel extends AbstractQueryPanel<SharedDimensions.GPSFix
     }
 
     @Override
-    protected void sendServerRequest(AsyncCallback<QueryResult<Integer>> asyncCallback) {
+    protected void sendServerRequest(AsyncCallback<QueryResult<Number>> asyncCallback) {
         Map<SharedDimensions.GPSFix, Collection<?>> selection = getQueryComponentsProvider().getSelection();
         StatisticType statisticToCalculate = getQueryComponentsProvider().getStatisticToCalculate();
         AggregatorType aggregatedAs = getQueryComponentsProvider().getAggregatorType();

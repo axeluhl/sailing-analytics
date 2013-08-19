@@ -37,20 +37,20 @@ public abstract class AbstractQueryPanel<DimensionType> extends FlowPanel {
 
     private void runQuery() {
         queryStatusLabel.setText(" | " + stringMessages.running());
-        sendServerRequest(new AsyncCallback<QueryResult<Integer>>() {
+        sendServerRequest(new AsyncCallback<QueryResult<Number>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running the query: " + caught.getMessage());
             }
             @Override
-            public void onSuccess(QueryResult<Integer> result) {
+            public void onSuccess(QueryResult<Number> result) {
                 queryStatusLabel.setText(" | " + stringMessages.done());
                 resultChart.showResult(result);
             }
         });
     }
 
-    protected abstract void sendServerRequest(AsyncCallback<QueryResult<Integer>> asyncCallback);
+    protected abstract void sendServerRequest(AsyncCallback<QueryResult<Number>> asyncCallback);
     
     protected QueryComponentsProvider<DimensionType> getQueryComponentsProvider() {
         return queryComponentsProvider;
