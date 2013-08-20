@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.shared.CompoundGroupKey;
+import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
 
 public abstract class GroupByDimension<DataType, ValueType> extends AbstractGrouper<DataType> {
@@ -30,6 +31,8 @@ public abstract class GroupByDimension<DataType, ValueType> extends AbstractGrou
         }
     }
 
-    protected abstract GroupKey createGroupKeyFor(DataType dataEntry, Dimension<DataType, ValueType> dimension);
+    protected GroupKey createGroupKeyFor(DataType dataEntry, Dimension<DataType, ValueType> dimension){
+        return new GenericGroupKey<ValueType>(dimension.getDimensionValueFrom(dataEntry));
+    };
 
 }

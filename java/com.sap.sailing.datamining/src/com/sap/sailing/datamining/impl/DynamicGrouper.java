@@ -17,12 +17,12 @@ public class DynamicGrouper<DataType> extends AbstractGrouper<DataType> {
         super();
         script = new GroovyShell().parse(scriptText);
         binding = baseBindingProvider.createBaseBinding();
+        script.setBinding(binding);
     }
 
     @Override
     protected GroupKey getGroupKeyFor(DataType dataEntry) {
         binding.setVariable("data", dataEntry);
-        script.setBinding(binding);
         return new GenericGroupKey<Object>(script.run());
     }
 

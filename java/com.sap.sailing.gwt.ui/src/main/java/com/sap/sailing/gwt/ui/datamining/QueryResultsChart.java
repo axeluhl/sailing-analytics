@@ -49,11 +49,30 @@ public class QueryResultsChart extends SimplePanel {
         chart.getYAxis().setAxisTitleText(result.getResultSignifier());
         updateChartSubtitle(result);
         
-        List<GroupKey> keys = getSortedKeysFrom(result);
-        buildGroupKeyValueMaps(keys);
+        List<GroupKey> sortedKeys = getSortedKeysFrom(result);
+        buildGroupKeyValueMaps(sortedKeys);
         
+        if (resultHasComplexKeys(result)) {
+            displayComplexResult(result, sortedKeys);            
+        } else {
+            displaySimpleResult(result, sortedKeys);
+        }
+
+        chart.redraw();
+    }
+
+    private boolean resultHasComplexKeys(QueryResult<? extends Number> result) {
+        for (GroupKey key : result.getResults().keySet()) {
+            if (key.hasSubKey()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void displayComplexResult(QueryResult<? extends Number> result, List<GroupKey> sortedKeys) {
         Map<Series, Boolean> isInChart = new HashMap<Series, Boolean>();
-        for (GroupKey key : keys) {
+        for (GroupKey key : sortedKeys) {
             Point point = new Point(mainKeyToValueMap.get(key.getMainKey()), result.getResults().get(key));
             point.setName(key.getMainKey().asString());
             Series series = getOrCreateSeries(key).addPoint(point, false, false, false);
@@ -62,8 +81,16 @@ public class QueryResultsChart extends SimplePanel {
                 isInChart.put(series, true);
             }
         }
+    }
 
-        chart.redraw();
+    private void displaySimpleResult(QueryResult<? extends Number> result, List<GroupKey> sortedKeys) {
+        Series series = chart.createSeries().setName("Results");
+        for (GroupKey key : sortedKeys) {
+            Point point = new Point(mainKeyToValueMap.get(key.getMainKey()), result.getResults().get(key));
+            point.setName(key.getMainKey().asString());
+            series.addPoint(point, false, false, false);
+        }
+        chart.addSeries(series, false, false);
     }
     
     private void updateChartSubtitle(QueryResult<? extends Number> result) {
