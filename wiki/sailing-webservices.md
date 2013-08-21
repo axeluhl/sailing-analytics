@@ -6,6 +6,9 @@ For all service URLs, please note that we use an Apache reverse proxy to map URL
 
 In all subsequent explanations, you may replace the "www.sapsailing.com" hostname by an according per-event host name to make sure you get to the event you're interested in.
 
+## Webservice Documentation
+http://www.sapsailing.com/sailingserver/webservices
+
 ## Regatta Overview
 
 To get an overview of which regattas a server offers, use
