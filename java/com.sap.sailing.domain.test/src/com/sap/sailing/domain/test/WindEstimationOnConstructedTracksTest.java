@@ -20,8 +20,6 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
@@ -30,6 +28,8 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
@@ -82,8 +82,21 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
 
     private void setBearingForCompetitor(Competitor competitor, TimePoint timePoint, double bearingDeg) {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrackedRace().getTrack(competitor);
-        competitorTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint,
-                new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(bearingDeg))));
+        final KnotSpeedWithBearingImpl speed = new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(bearingDeg));
+        final Position position;
+        competitorTrack.lockForRead();
+        try {
+            GPSFixMoving lastFixBefore = competitorTrack.getLastFixBefore(timePoint);
+            if (lastFixBefore != null) {
+                position = lastFixBefore.getPosition().translateGreatCircle(speed.getBearing(), speed.travel(lastFixBefore.getTimePoint(), timePoint));
+            } else {
+                position = new DegreePosition(54.4680424, 10.234451);
+            }
+            // now infer a position that makes sense with the speed
+        } finally {
+            competitorTrack.unlockAfterRead();
+        }
+        competitorTrack.addGPSFix(new GPSFixMovingImpl(position, timePoint, speed));
     }
 
     /**

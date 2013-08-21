@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
@@ -15,20 +16,20 @@ import java.util.NavigableSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.BearingWithConfidence;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
@@ -163,6 +164,11 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         this(trackedItem, millisecondsOverWhichToAverage, DEFAULT_MAX_SPEED_FOR_SMOOTHING);
     }
     
+    /**
+     * @param maxSpeedForSmoothening
+     *            if <code>null</code>, any fix speed will be accepted as long as fix-provided speed (if any) and
+     *            inferred speed can be matched.
+     */
     public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, Speed maxSpeedForSmoothening) {
         super(/* nameForReadWriteLock */ GPSFixTrackImpl.class.getSimpleName()+(trackedItem==null?"":(" for "+trackedItem.toString())));
         this.trackedItem = trackedItem;
@@ -798,43 +804,61 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     /**
-     * When redefining this method, make sure to redefine {@link #invalidateValidityAndDistanceCaches(GPSFix)} accordingly.
-     * This implementation checks the immediate previous and next fix for <code>e</code>. Therefore, when
+     * When redefining this method, make sure to redefine {@link #invalidateValidityAndDistanceCaches(GPSFix)}
+     * accordingly. This implementation checks the immediate previous and next fix for <code>e</code>. Therefore, when
      * adding a fix, only immediately adjacent fix's validity caches need to be invalidated.
+     * <p>
+     * 
+     * The fix <code>e</code> is considered valid if at least one of its (not necessarily immediate) neighbors that is
+     * within the range of {@link #getMillisecondsOverWhichToAverageSpeed()} is in reach with less than
+     * {@link #maxSpeedForSmoothing}, or if there are no neighbors with the time range defined by
+     * {@link #getMillisecondsOverWhichToAverageSpeed()}.
      */
     protected boolean isValid(NavigableSet<FixType> rawFixes, FixType e) {
         assertReadLock();
-        boolean result;
+        boolean isValid;
         if (maxSpeedForSmoothing == null) {
-            result = true;
+            isValid = true;
         } else {
             if (e.isValidityCached()) {
-                result = e.isValid();
+                isValid = e.isValid();
             } else {
                 FixType previous = rawFixes.lower(e);
-                FixType next = rawFixes.higher(e);
-                Speed speedToPrevious = Speed.NULL;
-                if (previous != null) {
+                final boolean atLeastOnePreviousFixInRange = previous != null && e.getTimePoint().asMillis() - previous.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed();
+                Speed speedToPrevious = null;
+                boolean foundValidPreviousFixInRange = false;
+                while (previous != null && !foundValidPreviousFixInRange && e.getTimePoint().asMillis() - previous.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
                     speedToPrevious = previous.getPosition().getDistance(e.getPosition())
                             .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
+                    foundValidPreviousFixInRange = speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0;
+                    previous = rawFixes.lower(previous);
                 }
-                Speed speedToNext = Speed.NULL;
-                if (next != null) {
-                    speedToNext = e.getPosition().getDistance(next.getPosition())
-                            .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
+                boolean foundValidNextFixInRange = false;
+                boolean atLeastOneNextFixInRange = false;
+                // only spend the effort to calculate the "next"-related predicate if the "previous"-related part of the disjunction below isn't already false
+                if (!atLeastOnePreviousFixInRange || foundValidPreviousFixInRange) {
+                    FixType next = rawFixes.higher(e);
+                    atLeastOneNextFixInRange = next != null && next.getTimePoint().asMillis() - e.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed();
+                    Speed speedToNext = null;
+                    while (next != null && !foundValidNextFixInRange && next.getTimePoint().asMillis() - e.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
+                        speedToNext = e.getPosition().getDistance(next.getPosition())
+                                .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
+                        foundValidNextFixInRange = speedToNext.compareTo(maxSpeedForSmoothing) <= 0;
+                        next = rawFixes.higher(next);
+                    }
                 }
-                result = ((previous == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0) || (next == null || speedToNext
-                        .compareTo(maxSpeedForSmoothing) <= 0));
-                e.cacheValidity(result);
+                isValid = (!atLeastOnePreviousFixInRange || foundValidPreviousFixInRange) && (!atLeastOneNextFixInRange || foundValidNextFixInRange);
+                e.cacheValidity(isValid);
             }
         }
-        return result;
+        return isValid;
     }
 
     /**
      * After <code>gpsFix</code> was added to this track, invalidate the {@link WithValidityCache validity caches}
      * of the fixes whose validity may be affected. If subclasses redefine {@link #isValid(PartialNavigableSetView, GPSFix)},
-     * they must make sure that this method is redefined accordingly.<p>
+     * they must make sure that this method is redefined accordingly. Here, {@link #getMillisecondsOverWhichToAverageSpeed()}
+     * before and after the fix all fixes' validity caches are reset.<p>
      * 
      * Distance cache invalidation is a bit tricky. Usually, the distance cache is invalidated starting with the time point
      * of the <code>gpsFix</code> "upwards." However, if the adjacent earlier fixes have changed their validity by the addition
@@ -873,7 +897,12 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         if (higher == null) {
             return Collections.emptySet();
         } else {
-            return Collections.singleton(higher);
+            Collection<FixType> result = new ArrayList<FixType>();
+            while (higher != null && higher.getTimePoint().asMillis() - gpsFix.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
+                result.add(higher);
+                higher = getInternalRawFixes().higher(higher);
+            }
+            return result;
         }
     }
 
@@ -882,7 +911,12 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         if (lower == null) {
             return Collections.emptySet();
         } else {
-            return Collections.singleton(lower);
+            Collection<FixType> result = new ArrayList<FixType>();
+            while (lower != null && gpsFix.getTimePoint().asMillis() - lower.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
+                result.add(lower);
+                lower = getInternalRawFixes().lower(lower);
+            }
+            return result;
         }
     }
 

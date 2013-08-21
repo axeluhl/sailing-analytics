@@ -4,17 +4,25 @@ import java.util.Collection;
 
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
-import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 
 public class MarksDataHandler extends DataHandler<Collection<Mark>> {
 
-    public MarksDataHandler(OnlineDataManager manager, LoadClient<Collection<Mark>> client) {
-        super(manager, client);
+    public MarksDataHandler(OnlineDataManager manager) {
+        super(manager);
+    }
+    
+    @Override
+    public boolean hasCachedResults() {
+        return !manager.getDataStore().getMarks().isEmpty();
+    }
+    
+    @Override
+    public Collection<Mark> getCachedResults() {
+        return manager.getDataStore().getMarks();
     }
 
     @Override
-    public void onLoaded(Collection<Mark> data) {
-        super.onLoaded(data);
+    public void onResult(Collection<Mark> data) {
         manager.addMarks(data);
     }
 

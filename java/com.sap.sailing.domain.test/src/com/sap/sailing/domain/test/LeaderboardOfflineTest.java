@@ -8,7 +8,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,11 +29,11 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -141,6 +143,10 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             @Override
             public boolean isRaceBeingTracked(RaceDefinition r) {
                 return true;
+            }
+            @Override
+            public void stopTracking(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,
+                    InterruptedException {
             }
         };
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(now, emptySet, trackedRegattaRegistry, DomainFactory.INSTANCE);

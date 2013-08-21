@@ -1,13 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PositioningFragment;
-
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PositioningFragment;
 
 public class EssFinishedRaceFragment extends FinishedRaceFragment {
     @Override

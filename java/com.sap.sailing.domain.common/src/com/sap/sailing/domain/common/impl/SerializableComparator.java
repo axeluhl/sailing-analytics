@@ -1,4 +1,4 @@
-package com.sap.sailing.util;
+package com.sap.sailing.domain.common.impl;
 
 import java.io.Serializable;
 import java.util.Comparator;

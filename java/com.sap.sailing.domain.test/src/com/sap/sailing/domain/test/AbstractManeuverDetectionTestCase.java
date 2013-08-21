@@ -9,9 +9,9 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.TimeZone;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.Maneuver;
 
 public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBasedTest {
@@ -64,8 +64,7 @@ public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBa
      *            The maneuvers of the types listed in <code>maneuverTypesFound</code> that where not detected by
      *            {@link ManeuverAnalysisIDMChampionsFinalTest#assertManeuver(List, ManeuverType, MillisecondsTimePoint, int)}
      */
-    protected void assertAllManeuversOfTypesDetected(List<ManeuverType> maneuverTypesFound,
-            List<Maneuver> maneuversNotDetected) {
+    protected void assertAllManeuversOfTypesDetected(List<ManeuverType> maneuverTypesFound, List<Maneuver> maneuversNotDetected) {
         for (Maneuver maneuver : maneuversNotDetected) {
             for (ManeuverType type : maneuverTypesFound) {
                 if (maneuver.getType().equals(type)) {

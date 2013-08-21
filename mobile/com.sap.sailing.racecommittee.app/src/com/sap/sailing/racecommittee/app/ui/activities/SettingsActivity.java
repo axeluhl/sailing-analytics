@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
@@ -24,6 +25,11 @@ public class SettingsActivity extends PreferenceActivity {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.layout.settings_view);
         
+        setupStartProcedurePreferences();
+        setupLanguageButton();
+    }
+
+    private void setupStartProcedurePreferences() {
         final ListPreference startProcedurePreference = (ListPreference) findPreference("defaultStartProcedureType");
         
         List<CharSequence> entries = new ArrayList<CharSequence>();
@@ -47,8 +53,19 @@ public class SettingsActivity extends PreferenceActivity {
                 return true;
             }
         });
-        
-        
+    }
+
+    private void setupLanguageButton() {
+        Preference button = (Preference)findPreference("languagePref");
+        button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference arg0) { 
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                intent.setClassName("com.android.settings", "com.android.settings.LanguageSettings");            
+                startActivity(intent);
+                return true;
+            }
+        });
     }
     
 }

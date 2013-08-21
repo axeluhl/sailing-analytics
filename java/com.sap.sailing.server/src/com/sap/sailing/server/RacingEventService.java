@@ -192,16 +192,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void removeRace(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,InterruptedException;
 
     /**
-     * Stops all {@link RaceTracker}s currently tracking <code>race</code>. Note that if the same tracker also may have
-     * been tracking other races. Other races of the same event that are currently tracked will continue to be tracked.
-     * If wind tracking for the race is currently running, it will be stopped (see also
-     * {@link #stopTrackingWind(Regatta, RaceDefinition)}). The <code>race</code> (and the other races tracked by the
-     * same tracker) as well as the corresponding {@link TrackedRace}s will continue to exist, e.g., when asking
-     * {@link #getTrackedRace(Regatta, RaceDefinition)}.
-     */
-    void stopTracking(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException;
-
-    /**
      * @param port
      *            the UDP port on which to listen for incoming messages from Expedition clients
      * @param correctByDeclination
