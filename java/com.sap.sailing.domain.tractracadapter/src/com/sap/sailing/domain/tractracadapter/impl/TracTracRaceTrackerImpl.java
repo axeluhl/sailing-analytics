@@ -585,25 +585,26 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             // if the race has all data loaded. Doing this asynchronously because
             // stopping can take longer and if you're loading many races in parallel
             // this can slow down loading extremely
-            Thread raceStopper = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    for (RaceDefinition race : getRaces()) {
-                        try {
-                            DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
-                            if (trackedRace.getStatus().getLoadingProgress() == 1.0) {
-                                trackedRegattaRegistry.stopTracking(getRegatta(), race);
-                            } else {
-                                logger.log(Level.SEVERE, "Not stopping race "+race.getName()+" because it has not all data loaded! Progress: " + trackedRace.getStatus().getLoadingProgress());
+            for (final RaceDefinition race : getRaces()) {
+                DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
+                final Regatta regatta = getRegatta();
+                if (trackedRace.getStatus().getLoadingProgress() == 1.0) {
+                    Thread raceStopper = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                trackedRegattaRegistry.stopTracking(regatta, race);
+                            } catch (Exception e) {
+                                logger.log(Level.SEVERE, "Error trying to stop tracker for race "+race.getName()+
+                                                                            " in regatta "+getRegatta().getName(), e);
                             }
-                        } catch (Exception e) {
-                            logger.log(Level.SEVERE, "Error trying to stop tracker for race "+race.getName()+
-                                    " in regatta "+getRegatta().getName(), e);
                         }
-                    }
+                    });
+                    raceStopper.start();
+                } else {
+                    logger.log(Level.SEVERE, "Not stopping race "+race.getName()+" because it has not all data loaded! Progress: " + trackedRace.getStatus().getLoadingProgress());
                 }
-            });
-            raceStopper.start();
+            }
         }
     }
 
