@@ -582,9 +582,15 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             updateStatusOfTrackedRaces();
         } else {
             // ask RacingEventService to cleanly stop and unregister this tracker
+            // if the race has all data loaded
             for (RaceDefinition race : getRaces()) {
                 try {
-                    trackedRegattaRegistry.stopTracking(getRegatta(), race);
+                    DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
+                    if (trackedRace.getStatus().getLoadingProgress() == 1.0) {
+                        trackedRegattaRegistry.stopTracking(getRegatta(), race);
+                    } else {
+                        logger.log(Level.SEVERE, "Not stopping race "+race.getName()+" because it has not all data loaded!");
+                    }
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "Error trying to stop tracker for race "+race.getName()+
                             " in regatta "+getRegatta().getName(), e);
