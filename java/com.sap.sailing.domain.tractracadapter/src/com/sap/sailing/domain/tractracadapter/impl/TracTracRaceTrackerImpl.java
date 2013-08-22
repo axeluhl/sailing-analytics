@@ -589,7 +589,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                     if (trackedRace.getStatus().getLoadingProgress() == 1.0) {
                         trackedRegattaRegistry.stopTracking(getRegatta(), race);
                     } else {
-                        logger.log(Level.SEVERE, "Not stopping race "+race.getName()+" because it has not all data loaded!");
+                        logger.log(Level.SEVERE, "Not stopping race "+race.getName()+" because it has not all data loaded! Progress: " + trackedRace.getStatus().getLoadingProgress());
                     }
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "Error trying to stop tracker for race "+race.getName()+
