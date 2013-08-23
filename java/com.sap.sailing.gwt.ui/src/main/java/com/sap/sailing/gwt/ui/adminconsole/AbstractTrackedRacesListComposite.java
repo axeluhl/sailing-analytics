@@ -115,6 +115,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
 
         panel = new VerticalPanel();
+        panel.ensureDebugId("TrackedRacesPanel");
         setWidget(panel);
 
         HorizontalPanel filterPanel = new HorizontalPanel();
@@ -125,6 +126,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         filterPanel.add(lblFilterRaces);
         filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
         filterRacesTextbox = new TextBox();
+        filterRacesTextbox.ensureDebugId("FilterRacesTextBox");
         filterRacesTextbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
@@ -134,12 +136,13 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         filterPanel.add(filterRacesTextbox);
 
         noTrackedRacesLabel = new Label(stringMessages.noRacesYet());
+        noTrackedRacesLabel.ensureDebugId("NoTrackedRacesLabel");
         noTrackedRacesLabel.setWordWrap(false);
         panel.add(noTrackedRacesLabel);
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
-        raceTable.ensureDebugId("TrackedRaces");
+        raceTable.ensureDebugId("TrackedRacesTable");
         ListHandler<RaceDTO> columnSortHandler = setupTableColumns(stringMessages);
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(selectionModel);
@@ -169,7 +172,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         panel.add(trackedRacesButtonPanel);
 
         btnRefresh = new Button(stringMessages.refresh());
-        btnRefresh.ensureDebugId("Refresh");
+        btnRefresh.ensureDebugId("RefreshButton");
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
