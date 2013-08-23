@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.logging.Logger;
+
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -26,6 +28,8 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
+    
+    public final Logger log = Logger.getLogger(DynamicTrackedRaceLogListener.class.getName());
 
     private DynamicTrackedRace trackedRace;
     
@@ -105,6 +109,8 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
             // Because this code can be triggered by an obsolete (delayed) event...
             // ... onCourseDesignChangedByRaceCommittee() might be called more than once.
             trackedRace.onCourseDesignChangedByRaceCommittee(courseDesign);
+        } else {
+            log.info("Could not find any course design update on " + trackedRace.getRace().getName());
         }
     }
 
@@ -128,7 +134,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogCourseDesignChangedEvent event) {
-        analyzeCourseDesign();
+        trackedRace.onCourseDesignChangedByRaceCommittee(event.getCourseDesign());
     }
 
     @Override
