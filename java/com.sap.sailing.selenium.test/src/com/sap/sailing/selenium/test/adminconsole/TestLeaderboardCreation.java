@@ -5,10 +5,10 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.FlexibleLeaderboardCreationDialog;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanel;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
-import com.sap.sailing.selenium.test.adminconsole.pages.AdminConsolePage;
-import com.sap.sailing.selenium.test.adminconsole.pages.FlexibleLeaderboardCreationDialog;
-import com.sap.sailing.selenium.test.adminconsole.pages.LeaderboardConfigurationPanel;
 
 /**
  * <p>Tests for creation of leader boards.</p>

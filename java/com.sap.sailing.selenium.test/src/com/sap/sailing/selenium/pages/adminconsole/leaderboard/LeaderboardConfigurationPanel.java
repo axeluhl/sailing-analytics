@@ -1,4 +1,4 @@
-package com.sap.sailing.selenium.test.adminconsole.pages;
+package com.sap.sailing.selenium.pages.adminconsole.leaderboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +9,9 @@ import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
-import com.sap.sailing.selenium.test.PageArea;
-import com.sap.sailing.selenium.test.gwt.widgets.CellTable;
+import com.sap.sailing.selenium.pages.PageArea;
+import com.sap.sailing.selenium.pages.adminconsole.Actions;
+import com.sap.sailing.selenium.pages.gwt.CellTable;
 
 public class LeaderboardConfigurationPanel extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "CreateFlexibleLeaderboardButton")
@@ -22,7 +23,7 @@ public class LeaderboardConfigurationPanel extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "AvailableLeaderboardsTable")
     private WebElement availableLeaderboardsTable;
     
-    protected LeaderboardConfigurationPanel(WebDriver driver, WebElement element) {
+    public LeaderboardConfigurationPanel(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     
@@ -52,11 +53,12 @@ public class LeaderboardConfigurationPanel extends PageArea {
             if(!leaderboard.equals(name.getText()))
                 continue;
             
-            WebElement removeAction = row.findElement(By.xpath(".//td/div/div[@title='Remove']/img"));
-            
+            WebElement removeAction = Actions.findRemoveAction(row);//row.findElement(By.xpath(".//td/div/div[@title='Remove']/img"));
             removeAction.click();
             
-            this.driver.switchTo().alert().accept();
+            Actions.acceptAlert(this.driver);
+            
+            waitForAjaxRequests();
         }
     }
     
