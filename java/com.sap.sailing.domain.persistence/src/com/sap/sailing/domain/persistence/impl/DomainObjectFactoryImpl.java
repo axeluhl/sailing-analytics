@@ -1201,7 +1201,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     private CourseBase loadCourseData(BasicDBList dbCourseList, String courseName) {
         if (courseName == null) {
-            courseName = "Course template";
+            courseName = "Course";
         }
         CourseBase courseData = new CourseDataImpl(courseName);
         int i = 0;
