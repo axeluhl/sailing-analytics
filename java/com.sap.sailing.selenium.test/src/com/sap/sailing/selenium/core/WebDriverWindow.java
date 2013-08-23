@@ -9,29 +9,20 @@ import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebDriverException;
 
 public class WebDriverWindow {
-
-    private static int instanceCount = 0;
+//    private static final String JAVA_SCRIPT = "var anchorTag = document.createElement('a');" +
+//                                              "anchorTag.setAttribute('id', '%s');" +
+//                                              "anchorTag.setAttribute('href', '%s');" +
+//                                              "anchorTag.setAttribute('target', '_blank');" +
+//                                              "anchorTag.setAttribute('style', 'display:block;');" +
+//                                              "anchorTag.appendChild(document.createTextNode('nwh'));" +
+//                                              "document.getElementsByTagName('body')[0].appendChild(anchorTag);";
     
-    private static final String JAVA_SCRIPT = "var anchorTag = document.createElement('a');" +
-                                              "anchorTag.setAttribute('id', '%s');" +
-                                              "anchorTag.setAttribute('href', '%s');" +
-                                              "anchorTag.setAttribute('target', '_blank');" +
-                                              "anchorTag.setAttribute('style', 'display:block;');" +
-                                              "anchorTag.appendChild(document.createTextNode('nwh'));" +
-                                              "document.getElementsByTagName('body')[0].appendChild(anchorTag);";
-    
-    private static String createUniqueName() {
-        return "WebDriverWindow_" + instanceCount++;
-    }
+    private static final String JAVA_SCRIPT = "window.open(%s, '_blank')";
     
     private WebDriver driver;
     
-    private String name;
-    
     private String handle;
     
-    private String parent;
-
     /**
      * Creates a new window for given web driver
      * 
@@ -42,7 +33,6 @@ public class WebDriverWindow {
      */
     public WebDriverWindow(WebDriver driver, String url) {
         this.driver = driver;
-        this.name = createUniqueName();
         
         createWindow(url);
         // Switch to that window and load the url to wait
@@ -53,39 +43,30 @@ public class WebDriverWindow {
         return this.handle;
     }
 
-    public String getParentHandle() {
-        return this.parent;
-    }
-
     public void close() {
-        switchToWindow().close();
-        this.handle = "";
-        // Switch back to the parent window
-        this.driver.switchTo().window(this.parent);
+        WebDriver driver = switchToWindow();
+        driver.close();
+        
+        this.handle = null;
     }
 
     public WebDriver switchToWindow() {
         checkForClosed();
         
-        return switchTo(this.handle);
-    }
-
-    public WebDriver switchToParent() {
-        checkForClosed();
+        TargetLocator locator = this.driver.switchTo();
         
-        return switchTo(this.parent);
+        return locator.window(this.handle);
     }
 
     private void createWindow(String url) {
         // Record old handles
         Set<String> oldHandles = this.driver.getWindowHandles();
-        this.parent = this.driver.getWindowHandle();
-
+        
+        executeScript(url);
         // Inject an anchor element
-        injectAnchorTag(this.name, url);
-
+        //injectAnchorTag(this.name, url);
         // Click on the anchor element
-        this.driver.findElement(By.id(this.name)).click();
+        //this.driver.findElement(By.id(this.name)).click();
 
         this.handle = getNewHandle(oldHandles);
     }
@@ -102,18 +83,13 @@ public class WebDriverWindow {
     }
 
     private void checkForClosed() {
-        if(this.handle == null || this.handle.equals(""))
-            throw new WebDriverException("Web Window closed or not initialized");
+        if(this.handle == null)
+            throw new WebDriverException("Window closed or not initialized"); //$NON-NLS-1$
     }
 
-    private void injectAnchorTag(String id, String url) {
+    private void executeScript(String url) {
         JavascriptExecutor executor = (JavascriptExecutor) this.driver;
-        executor.executeScript(String.format(JAVA_SCRIPT, id, url));
-    }
-    
-    private WebDriver switchTo(String handle) {
-        TargetLocator locator = this.driver.switchTo();
-        
-        return locator.window(handle);
+        //executor.executeScript(String.format(JAVA_SCRIPT, id, url));
+        executor.executeScript(String.format(JAVA_SCRIPT, url));
     }
 }
