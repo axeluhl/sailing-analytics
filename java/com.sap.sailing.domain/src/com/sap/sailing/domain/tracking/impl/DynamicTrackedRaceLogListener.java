@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
@@ -23,21 +24,22 @@ import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     
-    public final Logger log = Logger.getLogger(DynamicTrackedRaceLogListener.class.getName());
+    public static final Logger log = Logger.getLogger(DynamicTrackedRaceLogListener.class.getName());
 
     private DynamicTrackedRace trackedRace;
     
     private final WindSource raceCommitteeWindSource;
 
     private RaceStatusAnalyzer statusAnalyzer;
-
     private LastPublishedCourseDesignFinder courseDesignFinder;
+    private StartTimeFinder startTimeFinder;
 
     public DynamicTrackedRaceLogListener(DynamicTrackedRace trackedRace) {
         this.trackedRace = trackedRace;
@@ -110,21 +112,33 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
             // ... onCourseDesignChangedByRaceCommittee() might be called more than once.
             trackedRace.onCourseDesignChangedByRaceCommittee(courseDesign);
         } else {
-            log.info("Could not find any course design update on " + trackedRace.getRace().getName());
+            log.info("Could not find any course design update on race log of " + trackedRace.getRace().getName() + "! Not sending out any events.");
         }
     }
-
+    
+    private void analyzeStartTime() {
+        /* start time will be set by StartTimeAnalyzer in TrackedRace.getStartTime() */
+        trackedRace.invalidateStartTime();
+        
+        TimePoint startTime = startTimeFinder.analyze();
+        if (startTime != null) {
+            /* invoke listeners with received start time, this will also trigger tractrac update */
+            trackedRace.onStartTimeChangedByRaceCommittee(startTime);
+        } else {
+            log.info("Could not find any valid start time on race log of " + trackedRace.getRace().getName() + "! Not sending out any events.");
+        }
+    }
+    
     @Override
     public void visit(RaceLogPassChangeEvent event) {
         trackedRace.invalidateStartTime();
+        /* this will send tractrac the original start time */
+        trackedRace.onStartTimeChangedByRaceCommittee(trackedRace.getStartTimeReceived());
     }
 
     @Override
     public void visit(RaceLogStartTimeEvent event) {
-        /* start time will be set by StartTimeAnalyzer in TrackedRace.getStartTime() */
-        trackedRace.invalidateStartTime();
-        /* invoke listeners with received start time, this will also trigger tractrac update */
-        trackedRace.onStartTimeChangedByRaceCommittee(event.getStartTime());
+        analyzeStartTime();
     }
 
     @Override
@@ -134,7 +148,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogCourseDesignChangedEvent event) {
-        trackedRace.onCourseDesignChangedByRaceCommittee(event.getCourseDesign());
+        analyzeCourseDesign();
     }
 
     @Override
