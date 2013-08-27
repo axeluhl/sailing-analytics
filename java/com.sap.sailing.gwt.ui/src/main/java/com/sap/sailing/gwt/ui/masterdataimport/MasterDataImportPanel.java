@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.masterdataimport;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -15,7 +16,6 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -207,10 +207,14 @@ public class MasterDataImportPanel extends VerticalPanel {
                     return;
                 }
                 JSONArray leaderboardGroups = JSONParser.parseStrict(body).isArray();
-                leaderboardgroupListBox.setVisibleItemCount(leaderboardGroups.size());
+                List<String> toSort = new ArrayList<String>();
                 for (int i = 0; i < leaderboardGroups.size(); i++) {
-                    JSONString leaderboardGroupName = leaderboardGroups.get(i).isString();
-                    leaderboardgroupListBox.addItem(leaderboardGroupName.stringValue());
+                    toSort.add(leaderboardGroups.get(i).isString().stringValue());
+                }
+                Collections.sort(toSort);
+                leaderboardgroupListBox.setVisibleItemCount(leaderboardGroups.size());
+                for (String lgName : toSort) {
+                    leaderboardgroupListBox.addItem(lgName);
                 }
                 if (leaderboardGroups.size() > 1) {
                     importLeaderboardGroupsButton.setEnabled(true);
