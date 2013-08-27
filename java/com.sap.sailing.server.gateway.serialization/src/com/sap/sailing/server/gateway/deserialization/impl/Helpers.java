@@ -17,8 +17,8 @@ public class Helpers {
         if (object instanceof JSONArray) {
             return (JSONArray) object;
         }
-        throw new JsonDeserializationException(String.format("Expected a JSONArray, got %s.", object.getClass()
-                .getName()));
+        throw new JsonDeserializationException(String.format("Expected a JSONArray, got %s.", object != null ? object.getClass()
+                .getName() : ""));
     }
 
     public static JSONObject toJSONObjectSafe(Object object) throws JsonDeserializationException {

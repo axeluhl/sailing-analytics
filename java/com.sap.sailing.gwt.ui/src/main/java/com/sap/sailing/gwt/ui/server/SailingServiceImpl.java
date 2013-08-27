@@ -822,10 +822,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             logger.info("Loaded race " + record.getName() + " in " + record.getEventName() + " start:" + record.getRaceStartTime() + " trackingStart:" + record.getTrackingStartTime() + " trackingEnd:" + record.getTrackingEndTime());
             // note that the live URI may be null for races that were put into replay mode
             final String effectiveLiveURI;
-            if (liveURI == null || liveURI.trim().length() == 0) {
-                effectiveLiveURI = record.getLiveURI() == null ? null : record.getLiveURI().toString();
+            if (!record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS)) {
+                if (liveURI == null || liveURI.trim().length() == 0) {
+                    effectiveLiveURI = record.getLiveURI() == null ? null : record.getLiveURI().toString();
+                } else {
+                    effectiveLiveURI = liveURI;
+                }
             } else {
-                effectiveLiveURI = liveURI;
+                effectiveLiveURI = null;
             }
             final String effectiveStoredURI;
             if (storedURI == null || storedURI.trim().length() == 0) {

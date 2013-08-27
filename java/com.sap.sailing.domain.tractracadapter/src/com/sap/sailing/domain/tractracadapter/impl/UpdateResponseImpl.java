@@ -1,13 +1,13 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
-import com.sap.sailing.domain.tractracadapter.CourseUpdateResponse;
+import com.sap.sailing.domain.tractracadapter.UpdateResponse;
 
-public class CourseUpdateResponseImpl implements CourseUpdateResponse {
+public class UpdateResponseImpl implements UpdateResponse {
     
     private final String status;
     private final String message;
     
-    public CourseUpdateResponseImpl(String status, String message) {
+    public UpdateResponseImpl(String status, String message) {
         this.status = status;
         this.message = message;
     }

@@ -543,6 +543,8 @@ public interface TrackedRace extends Serializable {
      * @param listener the listener to operate with.
      */
     void addCourseDesignChangedListener(CourseDesignChangedListener listener);
+    
+    void addStartTimeChangedListener(StartTimeChangedListener listener);
 
     /**
      * For a competitor, computes the distance (TODO not yet clear whether over ground or projected onto wind direction)
@@ -573,4 +575,9 @@ public interface TrackedRace extends Serializable {
      * If the competitor hasn't started yet, <code>null</code> is returned.
      */
     Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor);
+
+    /**
+     * Start time received by the tracking infrastructure. To determine real start time use {@link #getStartOfRace()}.
+     */
+    TimePoint getStartTimeReceived();
 }

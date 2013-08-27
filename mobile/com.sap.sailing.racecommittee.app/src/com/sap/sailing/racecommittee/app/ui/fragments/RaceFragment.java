@@ -2,16 +2,17 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import java.io.Serializable;
 
+import android.os.Bundle;
+
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
-import android.app.Fragment;
-import android.os.Bundle;
-
-public abstract class RaceFragment extends Fragment implements TickListener {
+public abstract class RaceFragment extends LoggableFragment implements TickListener {
+    
+    //private static final String TAG = RaceFragment.class.getName();
 
     public static Bundle createArguments(ManagedRace race) {
         Bundle arguments = new Bundle();
@@ -63,7 +64,7 @@ public abstract class RaceFragment extends Fragment implements TickListener {
     
     @Override
     public void notifyTick() {
-        // may be overriden in subclasses.
+        // see subclasses.
     }
 
 }
