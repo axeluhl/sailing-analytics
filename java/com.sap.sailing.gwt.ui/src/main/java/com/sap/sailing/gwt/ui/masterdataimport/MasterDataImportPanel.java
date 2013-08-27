@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.masterdataimport;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -9,6 +10,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -39,7 +42,9 @@ public class MasterDataImportPanel extends VerticalPanel {
     private ListBox leaderboardgroupListBox;
     private TextBox hostBox;
     private Button importLeaderboardGroupsButton;
-    private Button fetchIdsButton;
+    private Button fetchIdsButton;   
+
+    private List<String> allLeaderboardGroupNames;
 
     private RegExp urlValidator;
     private RegExp urlPlusTldValidator;
@@ -113,7 +118,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     protected void importLeaderboardGroups() {
         String[] groupNames = createLeaderBoardGroupNamesFromListBox();
         if (groupNames.length >= 1) {
-            changeAllButtonState(false);
+            disableAllButtons();
             boolean override = overrideSwitch.getValue();
             sailingService.importMasterData(currentHost, groupNames, override,
                     new AsyncCallback<MasterDataImportObjectCreationCount>() {
@@ -135,13 +140,13 @@ public class MasterDataImportPanel extends VerticalPanel {
                             }
                             showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated,
                                     regattasCreated);
-                            changeAllButtonState(true);
+                            changeButtonStateAccordingToApplicationState();
                         }
 
                         @Override
                         public void onFailure(Throwable caught) {
                             showErrorAlert(caught.getLocalizedMessage());
-                            changeAllButtonState(true);
+                            changeButtonStateAccordingToApplicationState();
                         }
                     });
         } else {
@@ -150,10 +155,32 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
 
-    private void changeAllButtonState(boolean enabled) {
+    private void disableAllButtons() {
+        boolean enabled = false;
         importLeaderboardGroupsButton.setEnabled(enabled);
         overrideSwitch.setEnabled(enabled);
         fetchIdsButton.setEnabled(enabled);
+    }
+    
+    private void changeButtonStateAccordingToApplicationState() {
+        if (leaderboardgroupListBox.getItemCount() > 0 && countSelectedItems() > 0) {
+            importLeaderboardGroupsButton.setEnabled(true);
+        } else {
+            importLeaderboardGroupsButton.setEnabled(false);
+        }
+        overrideSwitch.setEnabled(true);
+        fetchIdsButton.setEnabled(true);
+    }
+
+
+    private int countSelectedItems() {
+        int count = 0;
+        for (int i = 0; i < leaderboardgroupListBox.getItemCount(); i++) {
+            if (leaderboardgroupListBox.isItemSelected(i)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated, int eventsCreated,
@@ -187,7 +214,7 @@ public class MasterDataImportPanel extends VerticalPanel {
             showErrorAlert(stringMessages.importUrlInvalid(getLgsUrl));
             return;
         }
-        changeAllButtonState(false);
+        disableAllButtons();
         RequestBuilder getLgsRequestBuilder = new RequestBuilder(RequestBuilder.GET, getLgsUrl);
         getLgsRequestBuilder.setCallback(new RequestCallback() {
 
@@ -196,14 +223,11 @@ public class MasterDataImportPanel extends VerticalPanel {
                 if (response.getStatusCode() != 200) {
                     showErrorAlert(stringMessages.importGetLeaderboardsFailed(response.getStatusCode(), getLgsUrl));
                 }
-                int itemCount = leaderboardgroupListBox.getItemCount();
-                for (int i = itemCount - 1; i >= 0; i--) {
-                    leaderboardgroupListBox.removeItem(i);
-                }
+                clearListBox();
                 String body = response.getText();
                 if (body == null || body.isEmpty()) {
                     showErrorAlert(stringMessages.importNoDataReturned());
-                    changeAllButtonState(true);
+                    changeButtonStateAccordingToApplicationState();
                     return;
                 }
                 JSONArray leaderboardGroups = JSONParser.parseStrict(body).isArray();
@@ -212,29 +236,25 @@ public class MasterDataImportPanel extends VerticalPanel {
                     toSort.add(leaderboardGroups.get(i).isString().stringValue());
                 }
                 Collections.sort(toSort);
+                allLeaderboardGroupNames = toSort;
                 leaderboardgroupListBox.setVisibleItemCount(leaderboardGroups.size());
                 for (String lgName : toSort) {
                     leaderboardgroupListBox.addItem(lgName);
                 }
-                if (leaderboardGroups.size() > 1) {
-                    importLeaderboardGroupsButton.setEnabled(true);
-                } else {
-                    importLeaderboardGroupsButton.setEnabled(false);
-                }
-                changeAllButtonState(true);
+                changeButtonStateAccordingToApplicationState();
             }
 
             @Override
             public void onError(Request request, Throwable exception) {
                 showErrorAlert(stringMessages.importServerError());
-                changeAllButtonState(true);
+                changeButtonStateAccordingToApplicationState();
             }
         });
         try {
             getLgsRequestBuilder.send();
         } catch (RequestException e) {
             showErrorAlert(stringMessages.importServerError());
-            changeAllButtonState(true);
+            changeButtonStateAccordingToApplicationState();
         }
     }
 
@@ -270,8 +290,16 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     private void addContentToLeftPanel(VerticalPanel contentPanel) {
         contentPanel.add(new Label(stringMessages.importLeaderboardGroups()));
+        
+        HorizontalPanel filterPanel = new HorizontalPanel();
+        filterPanel.add(new Label(stringMessages.filterName() + ":"));
+        TextBox filterBox = new TextBox();
+        setFilterHandler(filterBox);
+        filterPanel.add(filterBox);
+        contentPanel.add(filterPanel);
 
         leaderboardgroupListBox = new ListBox(true);
+        addSelectionChangedListener();
         contentPanel.add(leaderboardgroupListBox);
         
         overrideSwitch = new CheckBox(stringMessages.importOverrideSwitchLabel());
@@ -281,6 +309,50 @@ public class MasterDataImportPanel extends VerticalPanel {
         importLeaderboardGroupsButton = new Button(stringMessages.importSelectedLeaderboardGroups());
         importLeaderboardGroupsButton.setEnabled(false);
         contentPanel.add(importLeaderboardGroupsButton);
+    }
+
+    private void addSelectionChangedListener() {
+        leaderboardgroupListBox.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                changeButtonStateAccordingToApplicationState();
+            }
+        });
+    }
+
+    private void setFilterHandler(final TextBox filterBox) {
+        filterBox.addKeyUpHandler(new KeyUpHandler() {
+            
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                clearListBox();
+                int visibleNameCount = 0;
+                List<String> filterTexts = Arrays.asList(filterBox.getText().split(" "));
+                for(String name : allLeaderboardGroupNames) {
+                    boolean containsAllFilterTexts = true;
+                    for (String filterText : filterTexts) {
+                        if (!name.toUpperCase().contains(filterText.toUpperCase())) {
+                            containsAllFilterTexts = false;
+                            break;
+                        }
+                    }
+                    if (containsAllFilterTexts) {
+                        leaderboardgroupListBox.addItem(name);
+                        visibleNameCount++;
+                    }
+                }
+                leaderboardgroupListBox.setVisibleItemCount(visibleNameCount);
+                changeButtonStateAccordingToApplicationState();
+            }
+        });
+    }
+
+    public void clearListBox() {
+        int itemCount = leaderboardgroupListBox.getItemCount();
+        for (int i = itemCount - 1; i >= 0; i--) {
+            leaderboardgroupListBox.removeItem(i);
+        }
     }
 
 }
