@@ -21,6 +21,8 @@ public interface TestEnvironment {
      */
     public WebDriver getWebDriver();
     
+    public WindowManager getWindowManager();
+    
     /**
      * <p>Returns the context root (base URL) against the tests should be executed. The context root identifies the
      *   web application and usually consists of a protocol definition, the host and a path.</p>
