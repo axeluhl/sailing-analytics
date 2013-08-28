@@ -80,7 +80,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.add(createSwissTimingRacePanel,"Create SwissTiming race",false);
         
         TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(sailingService, this, this, stringMessages);
-        //trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
+        trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
         trackedRacesManagementPanel.setSize("90%", "90%");
         tabPanel.add(trackedRacesManagementPanel, stringMessages.trackedRaces(),false);
         regattaDisplayers.add(trackedRacesManagementPanel);

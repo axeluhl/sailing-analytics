@@ -377,25 +377,26 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         HorizontalPanel leaderboardButtonPanel = new HorizontalPanel();
         leaderboardButtonPanel.setSpacing(5);
         leaderboardsPanel.add(leaderboardButtonPanel);
+        
         Button createFlexibleLeaderboardBtn = new Button(stringMessages.createFlexibleLeaderboard() + "...");
         createFlexibleLeaderboardBtn.ensureDebugId("CreateFlexibleLeaderboardButton");
-        leaderboardButtonPanel.add(createFlexibleLeaderboardBtn);
         createFlexibleLeaderboardBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
                 createFlexibleLeaderboard();
             }
         });
+        leaderboardButtonPanel.add(createFlexibleLeaderboardBtn);
 
         Button createRegattaLeaderboardBtn = new Button(stringMessages.createRegattaLeaderboard() + "...");
         createRegattaLeaderboardBtn.ensureDebugId("CreateRegattaLeaderboardButton");
-        leaderboardButtonPanel.add(createRegattaLeaderboardBtn);
         createRegattaLeaderboardBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
                 createRegattaLeaderboard();
             }
         });
+        leaderboardButtonPanel.add(createRegattaLeaderboardBtn);
 
         mainPanel.add(new Grid(1, 1));
 
@@ -1107,6 +1108,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 });
             }
         });
+        dialog.ensureDebugId("CreateRegattaLeaderboardDialog");
         dialog.show();
     }
 
