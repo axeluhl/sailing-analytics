@@ -22,10 +22,11 @@ public class TrackedRacesList extends PageArea {
     public enum Status {
         LOADING,
         TRACKING,
-        FINISHED;
+        FINISHED,
+        UNKOWN;
         
         public static Status fromString(String string) {
-            if (string != null) {
+            if (string != null && !string.isEmpty()) {
                 for (Status status : Status.values()) {
                     if (string.startsWith(status.name())) {
                         return status;
@@ -33,7 +34,7 @@ public class TrackedRacesList extends PageArea {
                 }
             }
             
-            return null;
+            return UNKOWN;
         }
     }
     

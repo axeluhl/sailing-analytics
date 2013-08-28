@@ -17,6 +17,7 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanel;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanel;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanel;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanel;
 
 /**
@@ -32,14 +33,17 @@ public class AdminConsolePage extends HostPage {
     private static final MessageFormat TAB_EXPRESSION = new MessageFormat(
             ".//div[@class=\"gwt-TabBarItem\" and @role=\"tab\"]/div[text()=\"{0}\"]/.."); //$NON-NLS-1$
     
-    private static final String REGATTA_STRUCTURE_TAB_LABEL = "Regattas";
-    private static final String REGATTA_STRUCTURE_TAB_IDENTIFIER = "RegattaStructureManagement";
+    private static final String REGATTA_STRUCTURE_TAB_LABEL = "Regattas"; //$NON-NLS-1$
+    private static final String REGATTA_STRUCTURE_TAB_IDENTIFIER = "RegattaStructureManagement"; //$NON-NLS-1$
     
     private static final String TRACTRAC_EVENTS_TAB_LABEL = "TracTrac Events"; //$NON-NLS-1$
     private static final String TRACTRAC_EVENTS_TAB_IDENTIFIER = "TracTracEventManagement"; //$NON-NLS-1$
 
-    private static final String LEADERBOARD_CONFIGURATION_TAB_LABEL = "Leaderboard Configuration";
-    private static final String LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardConfiguration";
+    private static final String TRACKED_RACES_TAB_LABEL = "Tracked Races"; //$NON-NLS-1$
+    private static final String TRACKED_RACES_TAB_IDENTIFIER = "TrackedRacesManagement"; //$NON-NLS-1$
+    
+    private static final String LEADERBOARD_CONFIGURATION_TAB_LABEL = "Leaderboard Configuration"; //$NON-NLS-1$
+    private static final String LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardConfiguration"; //$NON-NLS-1$
 
     
     /**
@@ -95,6 +99,11 @@ public class AdminConsolePage extends HostPage {
     public TracTracEventManagementPanel goToTracTracEvents() {
         return new TracTracEventManagementPanel(this.driver, goToTab(TRACTRAC_EVENTS_TAB_LABEL,
                 TRACTRAC_EVENTS_TAB_IDENTIFIER));
+    }
+    
+    public TrackedRacesManagementPanel goToTrackedRaces() {
+        return new TrackedRacesManagementPanel(this.driver, goToTab(TRACKED_RACES_TAB_LABEL,
+                TRACKED_RACES_TAB_IDENTIFIER));
     }
     
     public LeaderboardConfigurationPanel goToLeaderboardConfiguration() {

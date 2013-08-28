@@ -38,6 +38,10 @@ public class RegattaList extends PageArea {
             return this.boatClass;
         }
         
+        public String toString() {
+            return this.name + " (" + this.boatClass + ")";
+        }
+        
         @Override
         public int hashCode() {
             return Objects.hash(this.name, this.boatClass);

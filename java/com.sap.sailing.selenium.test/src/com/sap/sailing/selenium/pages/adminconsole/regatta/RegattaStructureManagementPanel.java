@@ -8,6 +8,7 @@ import org.openqa.selenium.WebElement;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
+
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaList.RegattaDescriptor;
 
 public class RegattaStructureManagementPanel extends PageArea {
@@ -30,7 +31,7 @@ public class RegattaStructureManagementPanel extends PageArea {
     public RegattaCreationDialog startRegattaCreation() {
         this.addRegattaButton.click();
         
-        WebElement dialog = findElementBySeleniumId(this.driver, "CreateRegattaDialog");
+        WebElement dialog = findElementBySeleniumId(this.driver, "CreateRegattaDialog"); //$NON-NLS-1$
         
         return new RegattaCreationDialog(this.driver, dialog);
     }
@@ -39,6 +40,7 @@ public class RegattaStructureManagementPanel extends PageArea {
         RegattaCreationDialog dialog = startRegattaCreation();
         dialog.setRegattaName(regatta.getName());
         dialog.setBoatClass(regatta.getBoatClass());
+        // QUESTION: How do we handle an error (here or in the dialog)?
         dialog.pressOk();
     }
     

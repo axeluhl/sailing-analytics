@@ -143,10 +143,7 @@ public class TracTracEventManagementPanel extends PageArea {
         waitForAjaxRequests();
         
 //        // Wait for the tracked races table to become visible
-//        FluentWait<WebElement> wait = new FluentWait<>(this.tabPanel);
-//        wait.withTimeout(30, TimeUnit.SECONDS);
-//        wait.pollingEvery(5, TimeUnit.SECONDS);
-//        
+//        FluentWait<WebElement> wait = createFluentWait(this.tabPanel);
 //        wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
     }
     

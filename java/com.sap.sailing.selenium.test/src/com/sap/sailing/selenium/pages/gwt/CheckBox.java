@@ -27,6 +27,10 @@ public class CheckBox extends PageArea {
             throw new IllegalArgumentException("WebElement does not represent a CheckBox");
     }
     
+    public boolean isEnabled() {
+        return this.checkbox.isEnabled();
+    }
+    
     public String getLabel() {
         return this.label.getText();
     }
