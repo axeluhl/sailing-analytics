@@ -237,7 +237,6 @@ Used for example in the `Select*Fragments`.
 ## ToDo
 
 ### Server
-* no 60s Timeout in RaceTracker
 * Position Parser exception for incoming NMEA data from Android, as three pre-decimal point positions are expected
 * use ManagedRaceIdentifier or RaceLogIdenifier instead String-Triple as response type for the GetRaceLogsInPreRacePhaseServlet and the CreateRaceServlet
   * problem: ManagedRaceIdentifier is available only in the Android context, while RaceLogIdentifier is tightly associated with FlexibleLeaderboard etc, which are not available in the Android context
