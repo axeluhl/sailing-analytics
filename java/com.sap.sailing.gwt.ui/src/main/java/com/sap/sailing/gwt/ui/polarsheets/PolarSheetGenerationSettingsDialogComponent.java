@@ -29,6 +29,7 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
     private DoubleBox outlierRadiusBox;
     private DoubleBox outlierNeighborhoodPctBox;
     private CheckBox useOnlyEstimationForWindSpeedBox;
+    private WindSteppingConfiguratorPanel windSteppingBox;
 
     public PolarSheetGenerationSettingsDialogComponent(PolarSheetGenerationSettings settings, StringMessages stringMessages) {
         this.settings = settings;
@@ -38,7 +39,7 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
-        Grid grid = new Grid(10,2);
+        Grid grid = new Grid(11,2);
         grid.setCellPadding(5);
         vp.add(grid);
         setupGrid(grid, dialog);
@@ -79,6 +80,9 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
         grid.setWidget(9, 0, new Label("Number of histogram columns:"));
         numberOfHistogramColumnsBox = dialog.createIntegerBox(settings.getNumberOfHistogramColumns(), 3);
         grid.setWidget(9, 1, numberOfHistogramColumnsBox);
+        grid.setWidget(10, 0, new Label("Wind stepping in knots:"));
+        windSteppingBox = new WindSteppingConfiguratorPanel(settings.getWindStepping());
+        grid.setWidget(10, 1, windSteppingBox);
     }
 
     @Override
@@ -88,7 +92,7 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
                 numberOfHistogramColumnsBox.getValue(), minimumConfidenceMeasureBox.getValue(),
                 useOnlyWindGaugesForWindSpeedBox.getValue(), shouldRemoveOutliersBox.getValue(),
                 outlierRadiusBox.getValue(), outlierNeighborhoodPctBox.getValue(),
-                useOnlyEstimationForWindSpeedBox.getValue());
+                useOnlyEstimationForWindSpeedBox.getValue(), windSteppingBox.getStepping());
     }
 
     @Override

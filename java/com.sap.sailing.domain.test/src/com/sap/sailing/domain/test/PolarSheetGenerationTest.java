@@ -37,10 +37,11 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
+import com.sap.sailing.domain.common.impl.PolarSheetsWindStepping;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.polarsheets.PerRaceAndCompetitorPolarSheetGenerationWorker;
@@ -70,9 +71,11 @@ public class PolarSheetGenerationTest {
         /* workQueue */new LinkedBlockingQueue<Runnable>());
 
         MockTrackedRaceForPolarSheetGeneration race = new MockTrackedRaceForPolarSheetGeneration();
-
+        
+        Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
+        PolarSheetsWindStepping windStepping = new PolarSheetsWindStepping(levels);
         PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 20, 0, false, true, 5,
-                0.05, false);
+                0.05, false, windStepping);
         
         TimePoint startTime = new MillisecondsTimePoint(9);
         TimePoint endTime = new MillisecondsTimePoint(80);
@@ -107,8 +110,10 @@ public class PolarSheetGenerationTest {
     
     @Test
     public void testHistogramBuilder() {
+        Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
+        PolarSheetsWindStepping windStepping = new PolarSheetsWindStepping(levels);
         PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 10, 0, false, true, 5,
-                0.05, false);
+                0.05, false, windStepping);
         PolarSheetHistogramBuilder builder = new PolarSheetHistogramBuilder(settings);
         
         

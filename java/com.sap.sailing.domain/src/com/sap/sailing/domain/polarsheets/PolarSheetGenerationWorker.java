@@ -53,8 +53,7 @@ public class PolarSheetGenerationWorker {
     public PolarSheetGenerationWorker(Set<TrackedRace> trackedRaces, PolarSheetGenerationSettings settings,
             Executor executor) {
         this.settings = settings;
-        Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
-        stepping = new PolarSheetsWindStepping(levels);
+        stepping = settings.getWindStepping();;
         polarData = initializePolarDataContainer();
         this.executor = executor;
         workers = new HashSet<PerRaceAndCompetitorPolarSheetGenerationWorker>();

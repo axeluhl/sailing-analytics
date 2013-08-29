@@ -5,7 +5,9 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSettings {
     
     public static PolarSheetGenerationSettings createStandardPolarSettings() {
-        return new PolarSheetGenerationSettingsImpl(200, 0.1, 10, 20, 0.1, true, true, 2, 0.05, true);
+        Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
+        PolarSheetsWindStepping windStepping = new PolarSheetsWindStepping(levels);
+        return new PolarSheetGenerationSettingsImpl(200, 0.1, 10, 20, 0.1, true, true, 2, 0.05, true, windStepping);
     }
 
     private static final long serialVersionUID = 2731616509404813790L;
@@ -19,14 +21,16 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
     private double outlierDetectionNeighboorhoodRadius;
     private double outlierMinimumNeighboorhoodPct;
     private boolean useOnlyEstimationForWindDirection;
+    private PolarSheetsWindStepping windStepping;
     
     //GWT
     PolarSheetGenerationSettingsImpl() {};
 
     public PolarSheetGenerationSettingsImpl(Integer minimumDataCountPerGraph, double minimumWindConfidence,
             Integer minimumDataCountPerAngle, Integer numberOfHistogramColumns, double minimumConfidenceMeasure,
-            boolean useOnlyWindGaugesForWindSpeed, boolean shouldRemoveOutliers, double outlierDetectionNeighboorhoodRadius,
-            double outlierMinimumNeighboorhoodPct, boolean useOnlyEstimationForWindDirection) {
+            boolean useOnlyWindGaugesForWindSpeed, boolean shouldRemoveOutliers,
+            double outlierDetectionNeighboorhoodRadius, double outlierMinimumNeighboorhoodPct,
+            boolean useOnlyEstimationForWindDirection, PolarSheetsWindStepping windStepping) {
         this.minimumDataCountPerGraph = minimumDataCountPerGraph;
         this.minimumWindConfidence = minimumWindConfidence;
         this.minimumDataCountPerAngle = minimumDataCountPerAngle;
@@ -37,6 +41,7 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
         this.outlierDetectionNeighboorhoodRadius = outlierDetectionNeighboorhoodRadius;
         this.outlierMinimumNeighboorhoodPct = outlierMinimumNeighboorhoodPct;
         this.useOnlyEstimationForWindDirection = useOnlyEstimationForWindDirection;
+        this.windStepping = windStepping;
     }
 
     @Override
@@ -87,6 +92,11 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
     @Override
     public boolean useOnlyEstimatedForWindDirection() {
         return useOnlyEstimationForWindDirection;
+    }
+
+    @Override
+    public PolarSheetsWindStepping getWindStepping() {
+        return windStepping;
     }
 
 
