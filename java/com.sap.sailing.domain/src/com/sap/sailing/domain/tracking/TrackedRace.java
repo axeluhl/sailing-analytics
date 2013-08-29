@@ -575,4 +575,9 @@ public interface TrackedRace extends Serializable {
      * If the competitor hasn't started yet, <code>null</code> is returned.
      */
     Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor);
+
+    /**
+     * Start time received by the tracking infrastructure. To determine real start time use {@link #getStartOfRace()}.
+     */
+    TimePoint getStartTimeReceived();
 }

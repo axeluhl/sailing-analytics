@@ -500,4 +500,10 @@ public class DummyTrackedRace implements TrackedRace {
         // TODO Auto-generated method stub
         
     }
+
+    @Override
+    public TimePoint getStartTimeReceived() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
