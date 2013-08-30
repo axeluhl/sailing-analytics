@@ -41,6 +41,7 @@ public class TracTracCourseDesignUpdateHandler extends UpdateHandler implements 
     @Override
     public void courseDesignChanged(CourseBase newCourseDesign) throws MalformedURLException, IOException {
         if (!isActive()) {
+            logger.info("Not sending course update to TracTrac because no URL has been provided.");
             return;
         }
         

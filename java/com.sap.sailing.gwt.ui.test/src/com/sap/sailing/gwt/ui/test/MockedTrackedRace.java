@@ -833,4 +833,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         
     }
 
+    @Override
+    public TimePoint getStartTimeReceived() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
