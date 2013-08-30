@@ -92,6 +92,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         filterPanel.add(filterRegattasLabel);
         filterPanel.setCellVerticalAlignment(filterRegattasLabel, HasVerticalAlignment.ALIGN_MIDDLE);
         filterRegattasTextbox = new TextBox();
+        filterRegattasTextbox.ensureDebugId("FilterRegattasTextField");
         filterRegattasTextbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
@@ -101,11 +102,13 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         filterPanel.add(filterRegattasTextbox);
 
         noRegattasLabel = new Label(stringMessages.noRegattasYet());
+        noRegattasLabel.ensureDebugId("NoRegattasLabel");
         noRegattasLabel.setWordWrap(false);
         panel.add(noRegattasLabel);
 
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
         regattaTable = createRegattaTable();
+        regattaTable.ensureDebugId("RegattasTable");
         regattaTable.setVisible(false);
 
         regattaSelectionModel = new MultiSelectionModel<RegattaDTO>();
@@ -213,7 +216,8 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         // now sort again according to selected criterion
         ColumnSortEvent.fire(regattaTable, regattaTable.getColumnSortList());
     }
-
+    
+    // TODO [D049941]: Use MarkedAsyncCallback
     private void removeRegatta(final RegattaDTO regatta) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         sailingService.removeRegatta(regattaIdentifier, new AsyncCallback<Void>() {
@@ -229,6 +233,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         });
     }
 
+    // TODO [D049941]: Use MarkedAsyncCallback
     private void editRegatta(final RegattaDTO toBeEdited) {
         final Collection<RegattaDTO> existingRegattas = getAllRegattas();
         sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
@@ -256,9 +261,11 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
                         commitEditedRegatta(editedRegatta);
                     }
                 });
+        dialog.ensureDebugId("RegattaEditDialog");
         dialog.show();
     }
-
+    
+    // TODO [D049941]: Use MarkedAsyncCallback
     private void commitEditedRegatta(final RegattaDTO editedRegatta) {
         final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
         

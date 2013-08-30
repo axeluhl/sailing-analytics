@@ -68,19 +68,29 @@ public class RegattaDetailsComposite extends Composite {
         mainPanel.add(vPanel);
         Grid grid = new Grid(4, 2);
         vPanel.add(grid);
+        
         regattaName = new Label();
+        regattaName.ensureDebugId("RegattaNameLabel");
         grid.setWidget(0 , 0, new Label(stringMessages.regattaName() + ":"));
         grid.setWidget(0 , 1, regattaName);
+        
         boatClassName = new Label();
+        boatClassName.ensureDebugId("BoatClassNameLabel");
         grid.setWidget(1 , 0, new Label(stringMessages.boatClass() + ":"));
         grid.setWidget(1 , 1, boatClassName);
+        
         defaultCourseArea = new Label();
+        defaultCourseArea.ensureDebugId("CourseAreaLabel");
         grid.setWidget(2 , 0, new Label(stringMessages.courseArea() + ":"));
         grid.setWidget(2 , 1, defaultCourseArea);
+        
         scoringSystem = new Label();
+        scoringSystem.ensureDebugId("ScoringSystemLabel");
         grid.setWidget(3 , 0, new Label(stringMessages.scoringSystem() + ":"));
         grid.setWidget(3 , 1, scoringSystem);
+        
         seriesTable = createRegattaSeriesTable();
+        seriesTable.ensureDebugId("SeriesTabel");
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
         seriesSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -235,6 +245,7 @@ public class RegattaDetailsComposite extends Composite {
                         updateRacesOfRegattaSeries(regatta, result);
                     }
                 });
+        raceDialog.ensureDebugId("SeriesEditDialog");
         raceDialog.show();
     }
 

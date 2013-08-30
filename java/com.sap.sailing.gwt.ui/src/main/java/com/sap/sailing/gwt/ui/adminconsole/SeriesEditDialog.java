@@ -107,11 +107,18 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                 new RaceDialogValidator(regatta, stringMessages), callback);
         this.selectedSeries = selectedSeries;
         this.stringMessages = stringMessages;
+        
         addRacesListBox = createListBox(false);
+        addRacesListBox.ensureDebugId("NumberOfRacesDropDown");
+        
         raceNamePrefixTextBox = createTextBox(null);
+        raceNamePrefixTextBox.ensureDebugId("RaceNamePrefixTextField");
+        
+        raceColumnsGrid = new Grid(0, 0);
+        raceColumnsGrid.ensureDebugId("RacesPanel");
+        
         raceNameEntryFields = new ArrayList<TextBox>();
         raceNameDeleteButtons = new ArrayList<Button>();
-        raceColumnsGrid = new Grid(0, 0);
         discardThresholdBoxes = new DiscardThresholdBoxes(this, selectedSeries.getDiscardThresholds(), stringMessages);
     }
 
@@ -191,16 +198,24 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         String seriesName = getSelectedSeries().getName();
         seriesPanel.add(new Label(stringMessages.series() + ": " + seriesName));
         additionalWidgetPanel.add(seriesPanel);
+        
         isMedalCheckbox = createCheckbox(stringMessages.medalSeries());
+        isMedalCheckbox.ensureDebugId("MedalSeriesCheckbox");
         isMedalCheckbox.setValue(selectedSeries.isMedal());
         additionalWidgetPanel.add(isMedalCheckbox);
+        
         startWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());
+        startWithZeroScoreCheckbox.ensureDebugId("StartsWithZeroScoreCheckbox");
         startWithZeroScoreCheckbox.setValue(selectedSeries.isStartsWithZeroScore());
         additionalWidgetPanel.add(startWithZeroScoreCheckbox);
+        
         firstColumnIsNonDiscardableCarryForwardCheckbox = createCheckbox(stringMessages.firstRaceIsNonDiscardableCarryForward());
+        firstColumnIsNonDiscardableCarryForwardCheckbox.ensureDebugId("StartsWithNonDiscardableCarryForwardCheckbox");
         firstColumnIsNonDiscardableCarryForwardCheckbox.setValue(selectedSeries.isFirstColumnIsNonDiscardableCarryForward());
         additionalWidgetPanel.add(firstColumnIsNonDiscardableCarryForwardCheckbox);
+        
         useSeriesResultDiscardingThresholdsCheckbox = createCheckbox(stringMessages.seriesDefinesResultDiscardingRule());
+        useSeriesResultDiscardingThresholdsCheckbox.ensureDebugId("DefinesResultDiscardingRulesCheckbox");
         useSeriesResultDiscardingThresholdsCheckbox.setValue(selectedSeries.getDiscardThresholds() != null);
         useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -209,11 +224,13 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             }
         });
         additionalWidgetPanel.add(useSeriesResultDiscardingThresholdsCheckbox);
+        
         additionalWidgetPanel.add(discardThresholdBoxes.getWidget());
         discardThresholdBoxes.getWidget().setVisible(useSeriesResultDiscardingThresholdsCheckbox.getValue());
         // add races controls
         HorizontalPanel addRacesPanel = new HorizontalPanel();
         addRacesPanel.setSpacing(3);
+        
         addRacesPanel.add(new Label(stringMessages.add()));
         addRacesPanel.add(addRacesListBox);
         for(int i = 1; i <= 50; i++) {
@@ -227,7 +244,9 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         }
         raceNamePrefixTextBox.setWidth("20px");
         addRacesPanel.add(raceNamePrefixTextBox);
+        
         addRacesBtn = new Button(stringMessages.add());
+        addRacesBtn.ensureDebugId("AddRacesButton");
         addRacesBtn.addStyleName("inlineButton");
         addRacesBtn.addClickHandler(new ClickHandler() {
             @Override

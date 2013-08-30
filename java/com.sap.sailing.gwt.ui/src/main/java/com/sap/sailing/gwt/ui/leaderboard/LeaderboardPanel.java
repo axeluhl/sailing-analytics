@@ -1442,6 +1442,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             setRaceColumnSelectionToLastNStrategy(settings.getNumberOfLastRacesToShow());
             break;
         }
+        
         totalRankColumn = new TotalRankColumn();
         RACE_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableRaceColumnHeader();
         LEG_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegColumnHeader();
@@ -1450,9 +1451,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         LEG_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegColumn();
         LEG_DETAIL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumn();
         TOTAL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableTotalColumn();
-        leaderboardTable = new SortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
-        /* pageSize */10000, tableResources);
-        getLeaderboardTable().setWidth("100%");
+        
         this.userAgent = userAgent;
         if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
             leaderboardSelectionModel = new ToggleSelectionModel<LeaderboardRowDTO>();
@@ -1470,7 +1469,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 updateLeaderboard(getLeaderboard());
             }
         });
-        leaderboardTable.setSelectionModel(leaderboardSelectionModel);
+        
+        this.leaderboardTable = new SortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
+        /* pageSize */10000, tableResources);
+        this.leaderboardTable.ensureDebugId("LeaderboardTable");
+        this.leaderboardTable.setWidth("100%");
+        this.leaderboardTable.setSelectionModel(leaderboardSelectionModel);
+        
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
 
         if (this.preSelectedRace == null) {
@@ -1532,11 +1537,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         refreshPanel.addStyleName("refreshPanel");
         toolbarPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         toolbarPanel.addStyleName("refreshAndSettings");
+        
         playPause = new Anchor(getPlayPauseImgHtml(timer.getPlayState()));
+        playPause.ensureDebugId("AutoRefreshToggleButton");
         playPause.addClickHandler(playPauseHandler);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
         refreshPanel.add(playPause);
+        
         Anchor rankChartsAnchor = new Anchor(AbstractImagePrototype.create(rankChartIcon).getSafeHtml());
+        rankChartsAnchor.ensureDebugId("RankChartsToggleButton");
         rankChartsAnchor.setTitle(stringMessages.showRankChart());
         rankChartsAnchor.addClickHandler(new ClickHandler() {
             @Override
@@ -1544,7 +1553,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 showRankChartDialog();
             }
         });
+        
         Anchor chartsAnchor = new Anchor(AbstractImagePrototype.create(chartIcon).getSafeHtml());
+        chartsAnchor.ensureDebugId("ChartsToggleButton");
         chartsAnchor.setTitle(stringMessages.showCharts());
         chartsAnchor.addClickHandler(new ClickHandler() {
             @Override
@@ -1552,9 +1563,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 showCompareCompetitorsDialog();
             }
         });
+        
         Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(leaderboardSettingsIcon).getSafeHtml());
+        settingsAnchor.ensureDebugId("SettingsToggleButton");
         settingsAnchor.setTitle(stringMessages.settings());
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
+        
         refreshAndSettingsPanel.add(rankChartsAnchor);
         refreshAndSettingsPanel.add(chartsAnchor);
         refreshAndSettingsPanel.add(refreshPanel);

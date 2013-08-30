@@ -127,7 +127,8 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             });
         }
     }
-
+    
+    // TODO [D049941]: Use MarkedAsyncCallback
     private void openCreateRegattaDialog() {
         final Collection<RegattaDTO> existingRegattas = Collections.unmodifiableCollection(regattaListComposite.getAllRegattas());
 
@@ -156,7 +157,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
                 createNewRegatta(newRegatta);
             }
         });
-        dialog.ensureDebugId("CreateRegattaDialog");
+        dialog.ensureDebugId("RegattaCreationDialog");
         dialog.show();
     }
     

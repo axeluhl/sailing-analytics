@@ -181,6 +181,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         raceColumnAndFleetList = new ListDataProvider<RaceColumnDTOAndFleetDTOWithNameBasedEquality>();
         this.errorReporter = errorReporter;
         this.availableLeaderboardList = new ArrayList<StrippedLeaderboardDTO>();
+        
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setWidth("100%");
         this.setWidget(mainPanel);
@@ -405,6 +406,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         mainPanel.add(splitPanel);
 
         selectedLeaderBoardPanel = new CaptionPanel(stringMessages.leaderboard());
+        selectedLeaderBoardPanel.ensureDebugId("LeaderboardDetails");
         selectedLeaderBoardPanel.setWidth("50%");
         splitPanel.add(selectedLeaderBoardPanel);
 
@@ -525,6 +527,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         Label lblRaceNamesIn = new Label(stringMessages.races());
         vPanel.add(lblRaceNamesIn);
         raceColumnTable = new CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality>(/* pageSize */200, tableRes);
+        raceColumnTable.ensureDebugId("RacesTable");
         raceColumnTable.addColumn(raceLinkColumn, stringMessages.name());
         raceColumnTable.addColumn(fleetNameColumn, stringMessages.fleet());
         raceColumnTable.addColumn(isMedalRaceCheckboxColumn, stringMessages.medalRace());
