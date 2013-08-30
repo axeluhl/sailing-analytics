@@ -5,9 +5,9 @@ import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.pages.PageArea;
 
-public class EditRegattaDialog extends PageArea {
+public class RegattaEditDialog extends PageArea {
 
-    public EditRegattaDialog(WebDriver driver, WebElement element) {
+    public RegattaEditDialog(WebDriver driver, WebElement element) {
         super(driver, element);
     }
 

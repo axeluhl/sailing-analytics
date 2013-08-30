@@ -23,8 +23,11 @@ import com.sap.sailing.selenium.pages.adminconsole.leaderboard.FlexibleLeaderboa
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanel;
 
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaCreationDialog;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaDetails;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaList;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaList.RegattaDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanel;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.SeriesEditDialog;
 
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesList;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesList.Status;
@@ -90,26 +93,41 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
     
     @Test
     public void testDynamicLeaderboardConfiguration() {
+        // Open a second window which we use for the leaderboard later
+        WindowManager manager = this.environment.getWindowManager();
+        WebDriverWindow adminConsoleWindow = manager.getCurrentWindow();
+        //WebDriverWindow leaderboardWindow = manager.openNewWindow();
+        
+        adminConsoleWindow.switchToWindow();
+        
+        // Open the admin console and create a regatta with 1 series and 5 races as well as a leaderborad
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         
-        // Create a regatta and a leaderborad
         RegattaStructureManagementPanel regattaStructure = adminConsole.goToRegattaStructure();
         regattaStructure.createRegatta(this.regatta);
+                
+        RegattaDetails regattaDetails = regattaStructure.getRegattaDetails(this.regatta);
+        SeriesEditDialog seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanel.DEFAULT_SERIES_NAME);
+        seriesDialog.addRaces(5);
         
         LeaderboardConfigurationPanel leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
         
-        // Open the leaderboard in a new window and check for empty leaderboard
-        //String url = leaderboardConfiguration.getLeaderboardURL(LEADERBOARD);
-        WindowManager manager = this.environment.getWindowManager();
-        WebDriverWindow adminConsoleWindow = manager.getCurrentWindow();
         WebDriverWindow leaderboardWindow = manager.openNewWindow();
+        leaderboardWindow.switchToWindow();
         
-        // TODO: Check for empty leaderboard
+        // Open the leaderboard and check for empty leaderboard
         LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), this.regatta.toString());
         
+        // TODO: Check for empty leaderboard
+        
+        
+        leaderboard.setAutoRefreshEnabled(true);
         
         adminConsoleWindow.switchToWindow();
+        
+        // Add 5 races to the leaderboard
+        
         // Start the tracking for some races and wait until they are ready to use
         TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
@@ -118,6 +136,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         
         TrackedRacesManagementPanel trackedRaces = adminConsole.goToTrackedRaces();
         
+        // QUESTION: Should this be part (a service) of the page object?
         FluentWait<TrackedRacesList> wait = new FluentWait<>(trackedRaces.getTrackedRacesList());
         wait.pollingEvery(5, TimeUnit.SECONDS);
         wait.withTimeout(30, TimeUnit.SECONDS);
@@ -136,6 +155,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         });
         
         // TODO: Link the races and check the leaderboard
+        leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         
     }
 }

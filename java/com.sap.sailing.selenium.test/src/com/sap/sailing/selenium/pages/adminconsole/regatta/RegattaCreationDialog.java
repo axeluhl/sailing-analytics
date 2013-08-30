@@ -21,8 +21,9 @@ public class RegattaCreationDialog extends DataEntryDialog {
 //    private WebElement eventDropDown;
 //    @FindBy(how = BySeleniumId.class, using = "CourseAreaDropDown")
 //    private WebElement courseAreaDropDown;
-//    @FindBy(how = BySeleniumId.class, using = "AddSeriesButton")
-//    private WebElement addSeriesButton;
+    
+    @FindBy(how = BySeleniumId.class, using = "AddSeriesButton")
+    private WebElement addSeriesButton;
     
     public RegattaCreationDialog(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -36,5 +37,15 @@ public class RegattaCreationDialog extends DataEntryDialog {
     public void setBoatClass(String boatClass) {
         this.boatClassTextField.clear();
         this.boatClassTextField.sendKeys(boatClass);
+    }
+    
+    // TODO: Scoring System, Event and Course Area
+    
+    public SeriesWithFleetsCreationDialog addSeries() {
+        this.addSeriesButton.click();
+        
+        WebElement dialog = findElementBySeleniumId(this.driver, "AddSeriesDialog");
+        
+        return new SeriesWithFleetsCreationDialog(this.driver, dialog);
     }
 }

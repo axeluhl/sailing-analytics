@@ -106,13 +106,14 @@ public class RegattaList extends PageArea {
         return descriptors;
     }
     
-//    public void selectRegatta(RegattaDescriptor regatta) {
-//        selectRegattas(Arrays.asList(regatta));
-//    }
+    public void selectRegatta(RegattaDescriptor regatta) {
+        selectRegattas(Arrays.asList(regatta));
+    }
     
-//    public void selectRegattas(List<RegattaDescriptor> regattas) {
-//        
-//    }
+    public void selectRegattas(List<RegattaDescriptor> regattas) {
+        CellTable table = new CellTable(this.driver, this.regattasTable);
+        table.selectRows(findRegattas(regattas));
+    }
 
 //    public EditRegattaDialog editRegatta(RegattaDescriptor regatta) {
 //        

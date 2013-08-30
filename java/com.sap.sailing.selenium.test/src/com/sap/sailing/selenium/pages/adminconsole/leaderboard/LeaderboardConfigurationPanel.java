@@ -24,6 +24,12 @@ public class LeaderboardConfigurationPanel extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "AvailableLeaderboardsTable")
     private WebElement availableLeaderboardsTable;
     
+    @FindBy(how = BySeleniumId.class, using = "LeaderboardDetails")
+    private WebElement leaderboardDetails;
+    
+    @FindBy(how = BySeleniumId.class, using = "TrackedRacesList")
+    private WebElement trackedRacesList;
+    
     public LeaderboardConfigurationPanel(WebDriver driver, WebElement element) {
         super(driver, element);
     }

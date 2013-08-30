@@ -10,17 +10,17 @@ import org.openqa.selenium.WebDriver;
  *   D049941
  */
 public class HostPage extends PageObject {
-    protected static final String GWT_CODE_SERVER_PARAMETER = "gwt.codesvr"; //$NON-NLS-1$
+    protected static final String GWT_CODE_SERVER_PARAMETER_NAME = "gwt.codesvr"; //$NON-NLS-1$
     
-    protected static final String NO_CODE_SERVER = ""; //$NON-NLS-1$
+    protected static final String NO_CODE_SERVER_PARAMTER_VALUE = ""; //$NON-NLS-1$
     
     protected static final String getGWTCodeServer() {
-        String codeServer = System.getProperty(GWT_CODE_SERVER_PARAMETER);
+        String codeServer = System.getProperty(GWT_CODE_SERVER_PARAMETER_NAME);
         
         if(codeServer == null)
-            return NO_CODE_SERVER;
+            return NO_CODE_SERVER_PARAMTER_VALUE;
         
-        return GWT_CODE_SERVER_PARAMETER + "=" + codeServer;
+        return GWT_CODE_SERVER_PARAMETER_NAME + "=" + codeServer;
     }
     
     /**

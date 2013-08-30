@@ -13,6 +13,8 @@ import org.openqa.selenium.interactions.Actions;
 
 import com.sap.sailing.selenium.pages.PageArea;
 
+import com.sap.sailing.selenium.pages.common.CSSConstants;
+
 /**
  * <p></p>
  * 
@@ -83,12 +85,13 @@ public class CellTable extends PageArea {
         List<WebElement> headers = this.context.findElements(By.xpath(".//thead/tr/th"));
         WebElement header = headers.get(column);
         
+        // NOTE: We use "findElements", since "findElement" throws an exception if there is no image (not sorted)
         List<WebElement> images = header.findElements(By.xpath(".//div/div/img"));
         
         if(images.size() == 0)
             return SortingOrder.None;
         
-        String image = images.get(0).getCssValue("background-image");
+        String image = images.get(0).getCssValue(CSSConstants.CSS_BACKGROUND_IMAGE);
         
         if(ASCENDING_IMAGE.equals(image))
             return SortingOrder.Ascending;
