@@ -1,10 +1,14 @@
-package com.sap.sailing.server.gateway.impl.rs;
+package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,31 +22,34 @@ import javax.ws.rs.core.Response.Status;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
-import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
-import com.sap.sailing.domain.leaderboard.caching.LeaderboardCache;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.gateway.HttpRequestUtils;
-import com.sap.sailing.server.gateway.ParseHttpParameterException;
-import com.sap.sailing.server.gateway.impl.LeaderboardJsonGetServlet.ResultStates;
-import com.sap.sailing.util.SmartFutureCache;
+import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 
 @Path("/v1/leaderboards")
-public class LeaderboardsResource extends AbstractSailingServerResource {
+public class LeaderboardsResource extends AbstractSailingServerResource {   
     
+    public enum ResultStates { Live, Preliminary, Final };
+
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getLeaderboards() {
@@ -57,65 +64,190 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         return Response.ok(json).build();
     }
    
-    /**
-     * Uses a {@link SmartFutureCache}.
-     */
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{name}")
     public Response getLeaderboard(@PathParam("name") String leaderboardName,
-            @DefaultValue("Live") @QueryParam("resultState") LeaderboardJsonCache.ResultStates resultState,
+            @DefaultValue("Live") @QueryParam("resultState") ResultStates resultState,
             @DefaultValue("true") @QueryParam("useCache") boolean useCache,
             @DefaultValue("1000") @QueryParam("maxCompetitorsCount") int maxCompetitorsCount) {
         Response response;
 
         TimePoint requestTimePoint = MillisecondsTimePoint.now();
-            Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-            if (leaderboard == null) {
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Leaderboard "+leaderboardName+" not found");
-            } else {
-                try {
-                    TimePoint resultTimePoint = calculateTimePointForResultState(leaderboard, resultState);
-                    StringBuffer jsonLeaderboardAsString;
-                    if (resultTimePoint != null) {
-                        Triple<TimePoint, ResultStates, Integer> resultStateAndTimePointAndMaxCompetitorsCount =
-                                new Triple<>(resultTimePoint, resultState, maxCompetitorsCount);
-                        if (useCache) {
-                            jsonLeaderboardAsString = getLeaderboardJsonFromCacheOrCompute(leaderboard, resultStateAndTimePointAndMaxCompetitorsCount);
-                        } else {
-                            StringWriter sw = new StringWriter();
-                            computeLeaderboardJson(leaderboard, resultStateAndTimePointAndMaxCompetitorsCount).writeJSONString(sw);
-                            jsonLeaderboardAsString = sw.getBuffer();
-                        }
-                    } else {
-                        StringWriter sw = new StringWriter();
-                        createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint, maxCompetitorsCount).writeJSONString(sw);
-                        jsonLeaderboardAsString = sw.getBuffer();
-                    }
-                    setJsonResponseHeader(resp);
-                    synchronized (jsonLeaderboardAsString) {
-                        int indexOfFirstOpeningBrace = jsonLeaderboardAsString.indexOf("{");
-                        final String requestTimePointAsJson = "\"requestTimepoint\": \""+requestTimePoint.toString()+"\", ";
-                        if (indexOfFirstOpeningBrace >= 0) {
-                            jsonLeaderboardAsString.insert(indexOfFirstOpeningBrace+1, requestTimePointAsJson);
-                        }
-                        resp.getWriter().write(jsonLeaderboardAsString.toString());
-                        if (indexOfFirstOpeningBrace >= 0) {
-                            jsonLeaderboardAsString.delete(indexOfFirstOpeningBrace+1, indexOfFirstOpeningBrace+1+requestTimePointAsJson.length());
-                        }
-                    }
-                } catch (NoWindException e) {
-                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            response = Response.status(Status.NOT_FOUND).entity("Could not find a leaderboard with name '" + leaderboardName + "'.").type(MediaType.TEXT_PLAIN).build();
+        } else {
+            try {
+                TimePoint resultTimePoint = calculateTimePointForResultState(leaderboard, resultState);
+                JSONObject jsonLeaderboard;
+                if (resultTimePoint != null) {
+                    Triple<TimePoint, ResultStates, Integer> resultStateAndTimePoint = new Triple<>(resultTimePoint, resultState, maxCompetitorsCount);
+                    jsonLeaderboard = getLeaderboardJson(leaderboard, resultStateAndTimePoint);
+                } else {
+                    jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint, maxCompetitorsCount);
                 }
+
+                StringWriter sw = new StringWriter();
+                jsonLeaderboard.writeJSONString(sw);
+
+                byte[] json = sw.getBuffer().toString().getBytes();
+                response = Response.ok(json).build();
+            } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
+                response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).type(MediaType.TEXT_PLAIN).build();
             }
-
-        
-        byte[] json = jsonLeaderboardGroup.toJSONString().getBytes();
-        response = Response.ok(json).build();
-
+        }
+ 
         return response;
     }
+   
+    private JSONObject getLeaderboardJson(Leaderboard leaderboard, Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount) 
+                    throws NoWindException, InterruptedException, ExecutionException {
+        LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePointAndResultStateAndMaxCompetitorsCount.getA(),
+                Collections.<String> emptyList(), getService(), getService().getBaseDomainFactory());
+               
+        TimePoint resultTimePoint = timePointAndResultStateAndMaxCompetitorsCount.getA();
+        ResultStates resultState = timePointAndResultStateAndMaxCompetitorsCount.getB();
+        Integer maxCompetitorsCount = timePointAndResultStateAndMaxCompetitorsCount.getC();
+        JSONObject jsonLeaderboard = new JSONObject();
+        
+        writeCommonLeaderboardData(jsonLeaderboard, leaderboardDTO, resultState, resultTimePoint, maxCompetitorsCount);
 
+        JSONArray jsonCompetitorEntries = new JSONArray();
+        jsonLeaderboard.put("competitors", jsonCompetitorEntries);
+        int counter = 1;
+        for (CompetitorDTO competitor : leaderboardDTO.competitors) {
+            LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);
+            
+            if(maxCompetitorsCount != null && counter > maxCompetitorsCount) {
+                break;
+            }
+            JSONObject jsonCompetitor = new JSONObject();
+            jsonCompetitor.put("name", competitor.getName());
+            final String displayName = leaderboardDTO.getDisplayName(competitor);
+            jsonCompetitor.put("displayName", displayName==null?competitor.getName():displayName);
+            jsonCompetitor.put("id", competitor.getIdAsString());
+            jsonCompetitor.put("sailID", competitor.getSailID());
+            jsonCompetitor.put("nationality", competitor.getThreeLetterIocCountryCode());
+            jsonCompetitor.put("countryCode", competitor.getTwoLetterIsoCountryCode());
+            
+            jsonCompetitor.put("rank", counter);
+            jsonCompetitor.put("carriedPoints", leaderboardRowDTO.carriedPoints);
+            jsonCompetitor.put("totalPoints", leaderboardRowDTO.totalPoints);
+            jsonCompetitorEntries.add(jsonCompetitor);
+            JSONObject jsonRaceColumns = new JSONObject();
+            jsonCompetitor.put("raceScores", jsonRaceColumns);
+            for (RaceColumnDTO raceColumn : leaderboardDTO.getRaceList()) {
+                List<CompetitorDTO> rankedCompetitorsForColumn = leaderboardDTO.getCompetitorOrderingPerRaceColumnName().get(raceColumn.getName());
+                JSONObject jsonEntry = new JSONObject();
+                jsonRaceColumns.put(raceColumn.getName(), jsonEntry);
+                LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumn.getName());
+                
+                final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
+                jsonEntry.put("fleet", fleetOfCompetitor==null?"":fleetOfCompetitor.getName());
+                jsonEntry.put("netPoints", leaderboardEntry.netPointsCorrected);
+                jsonEntry.put("uncorrectedNetPoints", leaderboardEntry.netPoints);
+                jsonEntry.put("totalPoints", leaderboardEntry.totalPoints);
+                MaxPointsReason maxPointsReason = leaderboardEntry.reasonForMaxPoints;
+                jsonEntry.put("maxPointsReason", maxPointsReason != null ? maxPointsReason.toString(): null);
+                jsonEntry.put("rank", rankedCompetitorsForColumn.indexOf(competitor)+1);
+//                final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
+//                if (trackedRace != null) {
+//                    jsonEntry.put("raceRank", trackedRace.getRank(competitor, resultTimePoint));
+//                }
+                jsonEntry.put("isDiscarded", leaderboardEntry.discarded);
+                jsonEntry.put("isCorrected", leaderboardEntry.hasScoreCorrection());
+            }
+            counter++;
+        }
+        return jsonLeaderboard;
+    }
+
+    private JSONObject createEmptyLeaderboardJson(Leaderboard leaderboard,
+            ResultStates resultState, TimePoint requestTimePoint, Integer maxCompetitorsCount) throws NoWindException {
+        JSONObject jsonLeaderboard = new JSONObject();
+        
+        writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, null, maxCompetitorsCount);
+
+        JSONArray jsonCompetitorEntries = new JSONArray();
+        jsonLeaderboard.put("competitors", jsonCompetitorEntries);
+        for (Competitor competitor : leaderboard.getCompetitors()) {
+            JSONObject jsonCompetitor = new JSONObject();
+            jsonCompetitor.put("name", competitor.getName());
+            final String displayName = leaderboard.getDisplayName(competitor);
+            jsonCompetitor.put("displayName", displayName==null?competitor.getName():displayName);
+            jsonCompetitor.put("id", competitor.getId().toString());
+            jsonCompetitor.put("sailID", competitor.getBoat().getSailID());
+            Nationality nationality = competitor.getTeam().getNationality();
+            jsonCompetitor.put("nationality", nationality != null ? nationality.getThreeLetterIOCAcronym(): null);
+            jsonCompetitor.put("countryCode", nationality != null ? (nationality.getCountryCode() != null ? nationality.getCountryCode().getTwoLetterISOCode(): null) : null);
+            
+            jsonCompetitor.put("rank", 0);
+            jsonCompetitor.put("carriedPoints", null);
+            jsonCompetitor.put("totalPoints", null);
+            jsonCompetitorEntries.add(jsonCompetitor);
+            JSONObject jsonRaceColumns = new JSONObject();
+            jsonCompetitor.put("raceScores", jsonRaceColumns);
+            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                JSONObject jsonEntry = new JSONObject();
+                jsonRaceColumns.put(raceColumn.getName(), jsonEntry);
+                final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
+                jsonEntry.put("fleet", fleetOfCompetitor==null?"":fleetOfCompetitor.getName());
+                jsonEntry.put("netPoints", null);
+                jsonEntry.put("totalPoints", null);
+                jsonEntry.put("maxPointsReason", "");
+                jsonEntry.put("rank", 0);
+                jsonEntry.put("isDiscarded", false);
+                jsonEntry.put("isCorrected", false);
+            }
+        }
+        return jsonLeaderboard;
+    }
+
+    private void writeCommonLeaderboardData(JSONObject jsonLeaderboard, LeaderboardDTO leaderboard, ResultStates resultState, 
+            TimePoint resultTimePoint, Integer maxCompetitorsCount) {
+        jsonLeaderboard.put("name", leaderboard.name);
+        
+        jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.toString() : null);
+        jsonLeaderboard.put("resultState", resultState.name());
+        jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
+        
+        jsonLeaderboard.put("scoringComment", leaderboard.getComment());
+        Date lastUpdateTimepoint = leaderboard.getTimePointOfLastCorrectionsValidity();
+        jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.toString(): null);
+        
+        JSONArray jsonColumnNames = new JSONArray();
+        jsonLeaderboard.put("columnNames", jsonColumnNames);
+        for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
+            jsonColumnNames.add(raceColumn.getName());
+        }
+    }
+    
+    private void writeCommonLeaderboardData(JSONObject jsonLeaderboard, Leaderboard leaderboard, ResultStates resultState, 
+            TimePoint resultTimePoint, Integer maxCompetitorsCount) {
+        jsonLeaderboard.put("name", leaderboard.getName());
+        
+        jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.toString() : null);
+        jsonLeaderboard.put("resultState", resultState.name());
+        jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
+        
+        SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
+        if (scoreCorrection != null) {
+            jsonLeaderboard.put("scoringComment", scoreCorrection.getComment());
+            TimePoint lastUpdateTimepoint = scoreCorrection.getTimePointOfLastCorrectionsValidity();
+            jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.asDate().toString(): null);
+        } else {
+            jsonLeaderboard.put("scoringComment", null);
+            jsonLeaderboard.put("lastScoringUpdate", null);
+        }
+        
+        JSONArray jsonColumnNames = new JSONArray();
+        jsonLeaderboard.put("columnNames", jsonColumnNames);
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            jsonColumnNames.add(raceColumn.getName());
+        }
+    }
+    
     private TimePoint calculateTimePointForResultState(Leaderboard leaderboard, ResultStates resultState) {
         TimePoint result = null;
         switch (resultState) {

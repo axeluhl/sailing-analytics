@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.impl.rs;
+package com.sap.sailing.server.gateway.jaxrs;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;

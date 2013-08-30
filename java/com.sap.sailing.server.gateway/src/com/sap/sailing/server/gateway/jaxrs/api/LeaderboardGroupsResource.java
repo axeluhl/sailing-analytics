@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.impl.rs;
+package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.util.Map;
 
@@ -25,6 +25,7 @@ import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 
 @Path("/v1/leaderboardgroups")
 public class LeaderboardGroupsResource extends AbstractSailingServerResource {
