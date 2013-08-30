@@ -7,7 +7,8 @@ Bundle-Vendor: GOOGLE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/gwt-dev.jar,
  lib/gwt-user.jar,
- .
+ .,
+ lib/javax.servlet_2.5.0.v201103041518.jar
 Export-Package: com.gargoylesoftware.htmlunit,
  com.gargoylesoftware.htmlunit.attachment,
  com.gargoylesoftware.htmlunit.gae,
@@ -326,6 +327,8 @@ Export-Package: com.gargoylesoftware.htmlunit,
  java_cup,
  java_cup.anttask,
  java_cup.runtime,
+ javax.servlet;version="2.5.0",
+ javax.servlet.http;version="2.5.0",
  net.sourceforge.htmlunit.corejs.classfile,
  net.sourceforge.htmlunit.corejs.javascript,
  net.sourceforge.htmlunit.corejs.javascript.annotations,
@@ -598,5 +601,4 @@ Export-Package: com.gargoylesoftware.htmlunit,
  org.mortbay.util,
  org.mortbay.util.ajax,
  org.mortbay.xml
-Require-Bundle: javax.servlet;bundle-version="2.5.0",
- javax.validation;bundle-version="1.0.0"
+Require-Bundle: javax.validation;bundle-version="1.0.0"

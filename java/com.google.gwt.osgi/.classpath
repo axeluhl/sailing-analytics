@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/javax.servlet_2.5.0.v201103041518.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gwt-dev.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gwt-user.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
