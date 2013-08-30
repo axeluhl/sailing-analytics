@@ -10,14 +10,12 @@
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.jsp.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.restlet.feature.group" version="1.0.0"/>
 <repository location="http://p2.sapsailing.com/p2/sailing/"/>
 </location>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.equinox.core.sdk.feature.group" version="3.7.1.R37x_v20110907-7uF9LFpFFSuN6-tKJIXPMYaq7NTP"/>
-<repository location="http://download.eclipse.org/releases/indigo"/>
+<unit id="org.eclipse.equinox.sdk.feature.group" version="3.9.0.v20130604-2047"/>
+<repository location="http://download.eclipse.org/releases/kepler"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.commons.fileupload" version="1.2.2.v20111214-1400"/>
@@ -28,10 +26,12 @@
 <unit id="org.jdom.source" version="1.0.0.v201005080400"/>
 <unit id="javax.servlet" version="3.0.0.v201112011016"/>
 <unit id="javax.servlet.source" version="3.0.0.v201112011016"/>
-<unit id="javax.servlet.jsp" version="2.2.0.v201112011158"/>
-<unit id="javax.servlet.jsp.source" version="2.2.0.v201112011158"/>
-<unit id="javax.el" version="2.2.0.v201303151357"/>
-<unit id="javax.el.source" version="2.2.0.v201303151357"/>
+<unit id="javax.validation" version="1.0.0.GA_v201205091237"/>
+<unit id="javax.validation.source" version="1.0.0.GA_v201205091237"/>
+<unit id="com.sun.jersey" version="1.17.0.v20130314-2020"/>
+<unit id="com.sun.jersey.source" version="1.17.0.v20130314-2020"/>
+<unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
+<unit id="javax.ws.rs.source" version="1.1.1.v20130318-1750"/>
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20130517111416/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">

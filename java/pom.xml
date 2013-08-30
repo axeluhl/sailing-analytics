@@ -36,7 +36,7 @@
 		<module>com.sap.sailing.www</module>
 		<module>com.sap.sailing.www.events</module>
 		<module>com.sap.sailing.xcelsiusadapter</module>
-		<module>com.google.gwt.osgi</module>
+		<module>com.google.gwt.user.osgi</module>
 		<module>com.sap.sailing.mongodb</module>
 		<module>com.tractrac.clientmodule</module>
 		<module>org.json.simple</module>

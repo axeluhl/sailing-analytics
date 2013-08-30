@@ -7,5 +7,6 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="lib" path="WEB-INF/lib/gwt-servlet.jar" sourcepath="/com.google.gwt.osgi/lib/gwt-user.jar"/>
 	<classpathentry kind="lib" path="WEB-INF/lib/gwt-maps.jar"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
