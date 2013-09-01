@@ -208,13 +208,13 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             TimePoint resultTimePoint, Integer maxCompetitorsCount) {
         jsonLeaderboard.put("name", leaderboard.name);
         
-        jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.toString() : null);
+        jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.asMillis() : null);
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
         
         jsonLeaderboard.put("scoringComment", leaderboard.getComment());
         Date lastUpdateTimepoint = leaderboard.getTimePointOfLastCorrectionsValidity();
-        jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.toString(): null);
+        jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.getTime(): null);
         
         JSONArray jsonColumnNames = new JSONArray();
         jsonLeaderboard.put("columnNames", jsonColumnNames);
@@ -227,7 +227,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             TimePoint resultTimePoint, Integer maxCompetitorsCount) {
         jsonLeaderboard.put("name", leaderboard.getName());
         
-        jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.toString() : null);
+        jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.asMillis() : null);
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
         
@@ -235,7 +235,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         if (scoreCorrection != null) {
             jsonLeaderboard.put("scoringComment", scoreCorrection.getComment());
             TimePoint lastUpdateTimepoint = scoreCorrection.getTimePointOfLastCorrectionsValidity();
-            jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.asDate().toString(): null);
+            jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.asMillis(): null);
         } else {
             jsonLeaderboard.put("scoringComment", null);
             jsonLeaderboard.put("lastScoringUpdate", null);
