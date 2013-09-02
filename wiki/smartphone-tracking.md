@@ -126,6 +126,7 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 
 ### `/smartphone/recordFixes`
 `RecordFixesPostServlet`
+
 **Precondition**
 * race has already been started by sending a `RaceLogPreRacePhaseEndedEvent`
 
@@ -152,6 +153,7 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 
 ### `/sailingserver/racelogtracking/pingMark?leaderboard=<leaderboardName>&raceColumn=<raceColumnName>&fleet=<fleetName>`
 `PingMarkPostServlet`
+
 **Precondition**
 * race has already been started by sending a `RaceLogPreRacePhaseEndedEvent` and has not been stopped yet
 
