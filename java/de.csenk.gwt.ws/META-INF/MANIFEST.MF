@@ -22,3 +22,5 @@ Export-Package: de.csenk.gwt.ws.client,
  de.csenk.gwt.ws.shared.filter.requestresponse,
  de.csenk.gwt.ws.shared.filter.serialization,
  de.csenk.gwt.ws.shared.handler
+Import-Package: javax.servlet;version="2.5.0",
+ javax.servlet.http;version="2.5.0"
