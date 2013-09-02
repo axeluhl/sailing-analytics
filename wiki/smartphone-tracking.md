@@ -115,7 +115,7 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 ```
 
 **Returns**
-* `200` RaceLog Identifier Triple JSON
+* `200` RaceGroup JSON, containing only the Series/Row/Cell structure for the newly created race
 
 **Throws**
 * `400` Invalid JSON in request
