@@ -252,7 +252,6 @@ Used for example in the `Select*Fragments`.
 * security (not everybody can start race, goes hand in hand with user management)
 * support dynamic mapping of smartphone to competitor -> so that it can change during the race
 * support other input channels (e.g. Igtimi)
-* Servlet for getting Competitors for a certain race: Have a look how this is implemented in the serverside-counterpart of the racecommittee-app: /sailingserver/rc/competitors?leaderboard="+raceGroupName+"&raceColumn"+raceColumnName+ "&fleet="+fleetName
 * only transfer competitor ID for registering etc. instead of whole competitor
 
 ### Android
