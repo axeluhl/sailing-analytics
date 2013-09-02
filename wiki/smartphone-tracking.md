@@ -88,7 +88,7 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 * GET request
 
 **Returns**
-* `200` body: JSON array of String Triples that act as RaceLog identifiers (leaderboard name, race column name, fleet name)
+* `200` body: JSON array of RaceGroups
 
 ### `/sailingserver/racelogtracking/createRace`
 `CreateRaceLogTrackedRacePostServlet`
