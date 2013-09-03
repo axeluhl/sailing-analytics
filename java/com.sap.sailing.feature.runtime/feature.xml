@@ -33,6 +33,9 @@
       <import plugin="org.eclipse.jetty.websocket.common"/>
       <import plugin="org.eclipse.jetty.websocket.server"/>
       <import plugin="org.eclipse.jetty.websocket.servlet"/>
+      <import plugin="org.apache.felix.gogo.command"/>
+      <import plugin="org.apache.felix.gogo.runtime"/>
+      <import plugin="org.apache.felix.gogo.shell"/>
    </requires>
 
    <plugin
@@ -85,4 +88,11 @@
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="org.eclipse.equinox.console"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+         
 </feature>
