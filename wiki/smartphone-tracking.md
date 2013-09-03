@@ -238,6 +238,8 @@ Used for example in the `Select*Fragments`.
 ## ToDo
 
 ### Server
+* use extension serializers
+* exchange auto JSON to BSON conversion in MongoObjectFactory / DomainObjectFactory for something suited for productive use
 * set fleet when creating race
 * editing course in the RaceBoardAdmin
 * persist tracking data (GPSFixStore)
