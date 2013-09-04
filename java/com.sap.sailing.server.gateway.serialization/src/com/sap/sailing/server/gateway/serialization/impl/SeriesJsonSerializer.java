@@ -13,7 +13,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 public class SeriesJsonSerializer implements JsonSerializer<Series> {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_FLEETS = "fleets";
-    public static final String FIELD_RACES = "races";
+    public static final String FIELD_RACES = "races"; // TODO: 'races' is wrong here... it's actually 'raceColumns'
     public static final String FIELD_TRACKED_RACES = "trackedRaces";
     public static final String FIELD_STARTS_WITH_ZERO_SCORE = "startsWithZeroScore";
     public static final String FIELD_IS_MEDAL_SERIES = "isMedalSeries";

@@ -39,6 +39,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -63,6 +64,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     private transient DynamicTrackedRaceLogListener logListener;
 
     private transient Set<CourseDesignChangedListener> courseDesignChangedListeners;
+    private transient Set<StartTimeChangedListener> startTimeChangedListeners;
 
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
@@ -70,7 +72,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         super(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation);
         this.logListener = new DynamicTrackedRaceLogListener(this);
-        this.courseDesignChangedListeners = new HashSet<>();
+        this.courseDesignChangedListeners = new HashSet<CourseDesignChangedListener>();
+        this.startTimeChangedListeners = new HashSet<StartTimeChangedListener>();
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
@@ -704,6 +707,22 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onStartTimeChangedByRaceCommittee(TimePoint newStartTime) {
+        try {
+            for (StartTimeChangedListener startTimeChangedListener : startTimeChangedListeners) {
+                startTimeChangedListener.startTimeChanged(newStartTime);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void addStartTimeChangedListener(StartTimeChangedListener listener) {
+        this.startTimeChangedListeners.add(listener);
     }
 
 }

@@ -45,7 +45,8 @@
         <activity
             android:name=".ui.activities.LoginActivity"
             android:screenOrientation="landscape"
-            android:launchMode="singleTop" >
+            android:launchMode="standard"
+            android:finishOnTaskLaunch="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

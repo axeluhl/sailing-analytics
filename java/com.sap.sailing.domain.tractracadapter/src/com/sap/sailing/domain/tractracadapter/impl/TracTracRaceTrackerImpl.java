@@ -178,7 +178,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      *            attached to the events sent to the receivers will again approximate the wall time.
      */
     private TracTracRaceTrackerImpl(Event tractracEvent, final Regatta regatta, DomainFactory domainFactory,
-            URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
+            URL paramURL, URI liveURI, URI storedURI, URI tracTracUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
             long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
             WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
@@ -226,11 +226,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(raceLogStore, tractracEvent, trackedRegattaRegistry) : effectiveRegatta;
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         // Read event data from configuration file
-        controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, courseDesignUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
+        controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, tracTracUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulator, windStore, this, trackedRegattaRegistry, courseDesignUpdateURI, tracTracUsername, tracTracPassword)) {
+                endOfTracking, delayToLiveInMillis, simulator, windStore, this, trackedRegattaRegistry, tracTracUpdateURI, tracTracUsername, tracTracPassword)) {
             receivers.add(receiver);
             for (TypeController typeController : receiver.getTypeControllersAndStart()) {
                 typeControllers.add(typeController);
@@ -263,10 +263,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * @return the task to cancel in case the tracker wants to terminate the poller
      */
     private ScheduledFuture<?> scheduleClientParamsPHPPoller(final URL paramURL, final Simulator simulator,
-            final URI courseDesignUpdateURI, final long delayToLiveInMillis, final String tracTracUsername, final String tracTracPassword) {
+            final URI tracTracUpdateURI, final long delayToLiveInMillis, final String tracTracUsername, final String tracTracPassword) {
         final Runnable command = new Runnable() {
             @Override public void run() {
-                pollAndParseClientParamsPHP(paramURL, simulator, courseDesignUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
+                pollAndParseClientParamsPHP(paramURL, simulator, tracTracUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
             }
         };
         // now run the command once immediately and synchronously; see also bug 1345
@@ -278,7 +278,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
 
     private void pollAndParseClientParamsPHP(final URL paramURL, final Simulator simulator,
-            final URI courseDesignUpdateURI, long delayToLiveInMillis, final String tracTracUsername,
+            final URI tracTracUpdateURI, long delayToLiveInMillis, final String tracTracUsername,
             final String tracTracPassword) {
         // If no race is found, extract all information necessary to create it, in particular the competitor list, course information,
         // data about side lines from the race's metadata as well as the dominant boat class for the race. Otherwise, look for changes
@@ -313,7 +313,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 DynamicTrackedRace trackedRace = domainFactory.getOrCreateRaceDefinitionAndTrackedRace(
                         getTrackedRegatta(), clientParams.getRace().getId(), raceName, competitors,
                         getDominantBoatClass(competitorsInClientParams), course, sidelines, windStore, delayToLiveInMillis,
-                        WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, /* raceDefinitionSetToUpdate */ this, courseDesignUpdateURI,
+                        WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, /* raceDefinitionSetToUpdate */ this, tracTracUpdateURI,
                         tractracEvent.getId(), tracTracUsername, tracTracPassword);
                 if (simulator != null) {
                     simulator.setTrackedRace(trackedRace);
@@ -582,12 +582,27 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             updateStatusOfTrackedRaces();
         } else {
             // ask RacingEventService to cleanly stop and unregister this tracker
-            for (RaceDefinition race : getRaces()) {
-                try {
-                    trackedRegattaRegistry.stopTracking(getRegatta(), race);
-                } catch (Exception e) {
-                    logger.log(Level.SEVERE, "Error trying to stop tracker for race "+race.getName()+
-                            " in regatta "+getRegatta().getName(), e);
+            // if the race has all data loaded. Doing this asynchronously because
+            // stopping can take longer and if you're loading many races in parallel
+            // this can slow down loading extremely
+            for (final RaceDefinition race : getRaces()) {
+                DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
+                final Regatta regatta = getRegatta();
+                if (trackedRace.getStatus().getLoadingProgress() == 1.0) {
+                    Thread raceStopper = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                trackedRegattaRegistry.stopTracking(regatta, race);
+                            } catch (Exception e) {
+                                logger.log(Level.SEVERE, "Error trying to stop tracker for race "+race.getName()+
+                                                                            " in regatta "+getRegatta().getName(), e);
+                            }
+                        }
+                    });
+                    raceStopper.start();
+                } else {
+                    logger.log(Level.SEVERE, "Not stopping race "+race.getName()+" because it has not all data loaded! Progress: " + trackedRace.getStatus().getLoadingProgress());
                 }
             }
         }

@@ -495,7 +495,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }
             }
             if (startTime == null) {
-                startTime = startTimeReceived;
+                startTime = getStartTimeReceived();
                 // If not null, check if the first mark passing for the start line is too much after the
                 // startTimeReceived; if so, return an adjusted, later start time.
                 // If no official start time was received, try to estimate the start time using the mark passings for
@@ -1356,7 +1356,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
     }
 
-    protected TimePoint getStartTimeReceived() {
+    @Override
+    public TimePoint getStartTimeReceived() {
         return startTimeReceived;
     }
 

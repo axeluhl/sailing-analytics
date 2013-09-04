@@ -218,7 +218,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         LastWindFixFinder windFinder = new LastWindFixFinder(getRace().getState().getRaceLog());
         if (windFinder.analyze()!=null){
             Wind wind = windFinder.analyze();
-            windInfoHeader.setText(String.format(getString(R.string.wind_info), wind.getKnots(), wind.getBearing().toString()));
+            windInfoHeader.setText(String.format(getString(R.string.wind_info), wind.getKnots(), wind.getBearing().reverse().toString()));
         }
     }
     

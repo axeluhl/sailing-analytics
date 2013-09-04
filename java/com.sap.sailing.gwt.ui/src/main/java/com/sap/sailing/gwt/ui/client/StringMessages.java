@@ -527,7 +527,7 @@ public interface StringMessages extends Messages {
     String timePointMustBeAfterStartOfTracking();
     String timePointMustBeBeforeEndOfTracking();
     String regattaUsedForTheTrackedRace();
-    String courseDesignUpdateUrl();
+    String tracTracUpdateUrl();
     String passingSide();
     String refreshNow();
     String stopUpdating();
