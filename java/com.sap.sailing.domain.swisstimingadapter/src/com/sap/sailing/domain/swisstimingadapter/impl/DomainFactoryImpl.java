@@ -206,7 +206,7 @@ public class DomainFactoryImpl implements DomainFactory {
     public RaceType getRaceTypeFromRaceID(String raceID) {
         final RaceType result;
         if (raceID != null && raceID.length() >= 6) {
-            final String[] optionalEventIDAndMandatoryRaceID = raceID.split(";");
+            final String[] optionalEventIDAndMandatoryRaceID = raceID.split("_");
             final String swissTimingRaceCode = optionalEventIDAndMandatoryRaceID[optionalEventIDAndMandatoryRaceID.length-1].substring(0, 6).toUpperCase();
             RaceType raceType = raceTypeByID.get(swissTimingRaceCode);
             if (raceType == null) {

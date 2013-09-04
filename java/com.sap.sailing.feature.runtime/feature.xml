@@ -27,17 +27,15 @@
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.eclipse.osgi.services"/>
       <import plugin="slf4j.api"/>
-      <import plugin="javax.el"/>
-      <import plugin="javax.servlet.jsp"/>
-      <import plugin="javax.servlet.jsp.jstl"/>
-      <import plugin="org.apache.jasper.glassfish"/>
-      <import plugin="org.apache.taglibs.standard.glassfish"/>
       <import plugin="org.eclipse.jetty.osgi.boot"/>
       <import plugin="org.eclipse.jetty.websocket.api"/>
       <import plugin="org.eclipse.jetty.websocket.client"/>
       <import plugin="org.eclipse.jetty.websocket.common"/>
       <import plugin="org.eclipse.jetty.websocket.server"/>
       <import plugin="org.eclipse.jetty.websocket.servlet"/>
+      <import plugin="org.apache.felix.gogo.command"/>
+      <import plugin="org.apache.felix.gogo.runtime"/>
+      <import plugin="org.apache.felix.gogo.shell"/>
    </requires>
 
    <plugin
@@ -45,14 +43,6 @@
          download-size="0"
          install-size="0"
          version="9.0.4.v20130625"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.jetty.osgi.boot.jsp"
-         download-size="0"
-         install-size="0"
-         version="9.0.4.v20130625"
-         fragment="true"
          unpack="false"/>
 
    <plugin
@@ -98,4 +88,11 @@
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="org.eclipse.equinox.console"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+         
 </feature>
