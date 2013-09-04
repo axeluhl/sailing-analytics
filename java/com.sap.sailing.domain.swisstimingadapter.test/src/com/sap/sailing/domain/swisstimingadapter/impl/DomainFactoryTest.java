@@ -48,14 +48,6 @@ public class DomainFactoryTest {
     }
     
     @Test
-    public void testGet470WomenBoatClass2() throws Exception {
-        String raceID = "SAW005_xxx";
-        RaceType raceType = swissTimingDomainFactory.getRaceTypeFromRaceID(raceID );
-        assertThat(raceType, is(notNullValue()));
-        assertThat(raceType.getRaceCode(), is(OlympicRaceCode._470_WOMEN));
-    }
-    
-    @Test
     public void testDontGetWrongBoatClass() throws Exception {
         String raceID = "ABC";
         RaceType raceType = swissTimingDomainFactory.getRaceTypeFromRaceID(raceID );
