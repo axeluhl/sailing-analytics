@@ -23,97 +23,16 @@ and you would only fetch the content for the event you're interested in, even if
 In all subsequent explanations, you may replace the "www.sapsailing.com" hostname by an according per-event host
 name to make sure you get to the event you're interested in.
 </p>
-
-<p>
-The best entry point to navigating the contents of a server is usually the <b>leaderboardgroups</b> service,
-listing the leaderboard groups offered by the server. For example,
-<a href="http://www.sapsailing.com/sailingserver/leaderboardgroups">http://www.sapsailing.com/sailingserver/leaderboardgroups</a>
-lists the names of the leaderboard groups that the server instance knows. The names returned in the list can then be used
-as parameter for the <b>leaderboardgroup</b> service, e.g., as follows:
-<a href="http://www.sapsailing.com/sailingserver/leaderboardgroup?leaderboardGroupName=Star%20IDM%202013">http://www.sapsailing.com/sailingserver/leaderboardgroup?leaderboardGroupName=Star%20IDM%202013</a>.
-Note, of course, that the name needs to be URL-encoded with special characters and white spaces correctly
-translated into URL format. 
+<div style="height: 1em;"></div>
+<p style="font-weight:bold;">
+Attention:
+We are going to introduce a new and more managed WebServices API. The old API is marked as deprecated but will continue to work for some time.
 </p>
-
-<p>
-The leaderboard group service list the leaderboards in the group. There are essentially two types of leaderboard:
-flexible leaderboards and regatta leaderboards. For flexible leaderboards, the service tells the list of races
-in the leaderboard, and for each race in particular the regatta name and the tracked race name. These two attributes
-can, in turn, be used as parameters for further services to identify the race for which information shall be retrieved and
-to fetch information about the regatta with its structure such as series and fleets.
-Again, note that those names need to be URL-encoded accordingly when used as parameter to a service call.  
-</p>
-
-<p>
-When a service takes a time point as a parameter, there are usually two ways of specifying it: either as an
-ISO time stamp, e.g., 2013-05-08T10:12:59Z or as Unix time stamp (milliseconds since 1970-01-01T00:00:00Z). The parameters
-in the latter format are usually called <b>...asmillis</b>. 
-</p>
-<table>
-<thead>
-	<tr>
-		<td>Web Service</td>
-		<td>Description</td>
-		<td>Supported formats</td>
-	</trh>
-</thead>
-<tbody>
-	<tr>
-		<td><a href="eventsExportDoc.html">events</a></td>
-		<td>Gets all events</td>
-		<td><a href="eventsExportSample.json">Json</a></td>
-	</tr>
-	<tr>
-		<td><a href="regattasExportDoc.html">regattas</a></td>
-		<td>Gets all regattas</td>
-		<td><a href="regattasExportSample.json">Json</a></td>
-	</tr>
-	<tr>
-		<td><a href="regattaExportDoc.html">regatta</a></td>
-		<td>Gets a regatta</td>
-		<td><a href="regattaExportSample.json">Json</a></td>
-	</tr>
-	<tr>
-		<td><a href="leaderboardGroupsExportDoc.html">leaderboardgroups</a></td>
-		<td>Gets all leaderboard groups</td>
-		<td><a href="leaderboardGroupsExportSample.json">Json</a></td>
-	</tr>
-	<tr>
-		<td><a href="leaderboardGroupExportDoc.html">leaderboardgroup</a></td>
-		<td>Gets a group of leaderboards</td>
-		<td><a href="leaderboardGroupExportSample.json">Json</a></td>
-	</tr>
-	<tr>
-		<td><a href="leaderboardsExportDoc.html">leaderboards</a></td>
-		<td>Gets all leaderboards</td>
-		<td><a href="leaderboardsExportSample.json">Json</a></td>
-	</tr>
-	<tr>
-		<td><a href="leaderboardExportDoc.html">leaderboard</a></td>
-		<td>Gets a leaderboard</td>
-		<td><a href="leaderboardExportSample.json">Json</a></td>
-	</tr>
-	<tr>
-		<td><a href="windExportDoc.html">wind</a></td>
-		<td>Gets wind data for a race</td>
-		<td><a href="windExportSample.json">Json</a></td>
-	</tr>
-	<tr>
-		<td><a href="showraceDoc.html">showrace</a></td>
-		<td>Gets general time-dependent data for a race and the competitors</td>
-		<td><a href="showraceSample.json">Json</a></td>
-	</tr>
-	<tr>
-		<td><a href="showwaypointsDoc.html">showwaypoints</a></td>
-		<td>Gets course and waypoint data for a race</td>
-		<td><a href="showwaypointsSample.json">Json</a></td>
-	</tr>
-	<tr>
-		<td><a href="showboatpositionsDoc.html">showboatpositions</a></td>
-		<td>Gets boat GPS data for a race</td>
-		<td><a href="showboatpositionsSample.json">Json</a></td>
-	</tr>
-</tbody>
-</table>
+<br/>
+<b>Webservices API-Documention:</b><br/>
+<ul style="margin-left: 20px;">
+	<li><a href="api/v1/index.html">SAP Sailing Analytics Webservices Version 1.0 Beta</a></li>
+	<li><a href="api/deprecated/index.html">SAP Sailing Analytics Webservices API (soon replaced with v1)</a></li>
+</ul>
 </body>
 </html>
