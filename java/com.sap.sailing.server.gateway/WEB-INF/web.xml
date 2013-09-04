@@ -178,15 +178,6 @@
 	</servlet-mapping>
 		
 	<servlet>
-		<servlet-name>LiveRaceRankingRssGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.LiveRaceRankingRssGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>LiveRaceRankingRssGetServlet</servlet-name>
-		<url-pattern>/rss/liveRaceRanking</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
 		<servlet-name>MasterDataByLeaderboardGroupJsonGetServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.MasterDataByLeaderboardGroupJsonGetServlet</servlet-class>
 	</servlet>
