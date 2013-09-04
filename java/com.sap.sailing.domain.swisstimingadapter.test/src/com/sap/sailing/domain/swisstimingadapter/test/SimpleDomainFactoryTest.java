@@ -45,7 +45,7 @@ public class SimpleDomainFactoryTest {
     
     @Test
     public void testExtractBoatClassFromRaceIDWithEventID() {
-        String raceID = "QINSWC12013;SAW005901";
+        String raceID = "QINSWC12013_SAW005901";
         RaceType raceType = DomainFactory.INSTANCE.getRaceTypeFromRaceID(raceID);
         assertEquals("470", raceType.getBoatClass().getName());
     }
