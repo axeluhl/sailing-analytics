@@ -1,9 +1,10 @@
-package com.sap.sailing.server.gateway.jaxrs.api;
+package com.sap.sailing.server.gateway.jaxrs;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
 public class UnitSerializationUtil {
+    public static final DecimalFormat distanceDecimalFormatter = new DecimalFormat("#.##");
     public static final DecimalFormat knotsDecimalFormatter = new DecimalFormat("#.##");
     public static final DecimalFormat bearingDecimalFormatter = new DecimalFormat("#.#");
     public static final DecimalFormat speedDecimalFormatter = new DecimalFormat("#.#");
@@ -12,6 +13,7 @@ public class UnitSerializationUtil {
     static {
         DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
         symbol.setDecimalSeparator('.');
+        distanceDecimalFormatter.setDecimalFormatSymbols(symbol);
         knotsDecimalFormatter.setDecimalFormatSymbols(symbol);
         bearingDecimalFormatter.setDecimalFormatSymbols(symbol);
         speedDecimalFormatter.setDecimalFormatSymbols(symbol);

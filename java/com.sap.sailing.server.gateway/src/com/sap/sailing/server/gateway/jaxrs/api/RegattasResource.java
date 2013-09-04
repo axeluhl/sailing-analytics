@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.DefaultValue;
@@ -26,6 +27,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.Tack;
@@ -37,8 +39,10 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.jaxrs.UnitSerializationUtil;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
@@ -167,8 +171,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                 JSONArray jsonCompetitors = new JSONArray();
                 for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                     JSONObject jsonCompetitor = new JSONObject();
-                    jsonCompetitor.put("name", competitor.getName());
                     jsonCompetitor.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
+                    jsonCompetitor.put("name", competitor.getName());
+                    jsonCompetitor.put("sailNumber", competitor.getBoat().getSailID());
+                    
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     JSONArray jsonFixes = new JSONArray();
                     track.lockForRead();
@@ -482,7 +488,7 @@ public class RegattasResource extends AbstractSailingServerResource {
  
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/races/{racename}/competitors/ranks")
+    @Path("{regattaname}/races/{racename}/competitors/legs")
     public Response getCompetitorRanks(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
@@ -493,13 +499,68 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (race == null) {
                 response = Response.status(Status.NOT_FOUND).entity("Could not find a race with name '" + raceName + "'.").type(MediaType.TEXT_PLAIN).build();
             } else {     
-//                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-//                
-//                for (Competitor competitor : race.getCompetitors()) {
-//                    int rank = trackedRace.getRank(competitor, dateAsTimePoint);
-//                }
+                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                TimePoint timePoint = trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now()
+                        : trackedRace.getTimePointOfNewestEvent();
 
-                JSONObject json = new JSONObject();
+                JSONObject jsonRaceResults = new JSONObject();
+                jsonRaceResults.put("name", trackedRace.getRace().getName());
+                jsonRaceResults.put("regatta", regatta.getName());
+
+                JSONArray jsonLegs = new JSONArray();
+                for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
+                    JSONObject jsonLeg = new JSONObject();
+                    jsonLeg.put("from", leg.getLeg().getFrom().getName());
+                    jsonLeg.put("fromWaypointId", leg.getLeg().getFrom().getId());
+                    jsonLeg.put("to", leg.getLeg().getTo().getName());
+                    jsonLeg.put("toWaypointId", leg.getLeg().getTo().getId());
+                    try {
+                        jsonLeg.put("upOrDownwindLeg", leg.isUpOrDownwindLeg(timePoint));
+                    } catch (NoWindException e) {
+                        // no wind, then it's simply no upwind or downwind leg
+                        jsonLeg.put("upOrDownwindLeg", "false");
+                    }
+                    JSONArray jsonCompetitors = new JSONArray();
+                    Map<Competitor, Integer> ranks = leg.getRanks(timePoint);
+                    for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                        JSONObject jsonCompetitorInLeg = new JSONObject();
+                        TrackedLegOfCompetitor trackedLegOfCompetitor = leg.getTrackedLeg(competitor);
+                        if (trackedLegOfCompetitor != null) {
+                            jsonCompetitorInLeg.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
+                            jsonCompetitorInLeg.put("name", competitor.getName());
+                            jsonCompetitorInLeg.put("sailNumber", competitor.getBoat().getSailID());
+
+                            Distance distanceTraveled = trackedLegOfCompetitor.getDistanceTraveled(timePoint);
+                            if (distanceTraveled != null) {
+                                jsonCompetitorInLeg.put("distanceTraveled-m", UnitSerializationUtil.distanceDecimalFormatter.format(distanceTraveled.getMeters()));
+                            }
+                            try {
+                                Integer rank = ranks.get(competitor);
+                                jsonCompetitorInLeg.put("rank", rank);
+                            } catch (RuntimeException re) {
+                                if (re.getCause() != null && re.getCause() instanceof NoWindException) {
+                                    // well, we don't know the wind direction, so we can't compute a ranking
+                                } else {
+                                    throw re;
+                                }
+                            }
+                            try {
+                                jsonCompetitorInLeg.put("gapToLeader-s",
+                                        trackedLegOfCompetitor.getGapToLeaderInSeconds(timePoint));
+                            } catch (NoWindException e1) {
+                                // well, we don't know the wind direction... then no gap to leader will be shown...
+                            }
+                            jsonCompetitorInLeg.put("started", trackedLegOfCompetitor.hasStartedLeg(timePoint));
+                            jsonCompetitorInLeg.put("finished", trackedLegOfCompetitor.hasFinishedLeg(timePoint));
+                            jsonCompetitors.add(jsonCompetitorInLeg);
+                        }
+                    }
+                    jsonLeg.put("competitors", jsonCompetitors);
+                    jsonLegs.add(jsonLeg);
+                }
+                jsonRaceResults.put("legs", jsonLegs);
+
+                byte[] json = jsonRaceResults.toJSONString().getBytes();
                 return Response.ok(json).build();
             }
         }
