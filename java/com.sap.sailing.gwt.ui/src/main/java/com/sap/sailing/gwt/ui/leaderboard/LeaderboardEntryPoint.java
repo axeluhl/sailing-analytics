@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.GwtHttpRequestUtils;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
@@ -47,8 +48,8 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_AUTO_EXPAND_LAST_RACE_COLUMN = "autoExpandLastRaceColumn";
     private static final String PARAM_REGATTA_NAME = "regattaName";
     private static final String PARAM_REFRESH_INTERVAL_MILLIS = "refreshIntervalMillis";
-    private static final String PARAM_SHOW_RANK_CHART = "showRankChart";
-
+    private static final String PARAM_SHOW_CHARTS = "showCharts";
+    private static final String PARAM_CHART_DETAIL = "chartDetail";
     
     /**
      * Parameter to support scaling the complete page by a given factor. This works by either using the
@@ -89,11 +90,6 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                         createUI(showRaceDetails, embedded);
                     } else {
                         RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
-                    }
-                    
-                    final String zoomTo = Window.Location.getParameter(PARAM_ZOOM_TO);
-                    if (zoomTo != null) {
-                        RootPanel.getBodyElement().setAttribute("style", "zoom: "+zoomTo+";-moz-transform: scale("+zoomTo+");-moz-transform-origin: 0 0;-o-transform: scale("+zoomTo+");-o-transform-origin: 0 0;-webkit-transform: scale("+zoomTo+");-webkit-transform-origin: 0 0;");
                     }
                 }
 
@@ -147,22 +143,25 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
             timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, always goes "live"
         }
-        boolean autoExpandLastRaceColumn = Window.Location.getParameterMap().containsKey(
-                PARAM_AUTO_EXPAND_LAST_RACE_COLUMN) ? Boolean.valueOf(Window.Location.getParameterMap()
-                .get(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN).get(0)) : false;
-        boolean showRankChart = Window.Location.getParameterMap().containsKey(
-                PARAM_SHOW_RANK_CHART) ? Boolean.valueOf(Window.Location.getParameterMap()
-                .get(PARAM_SHOW_RANK_CHART).get(0)) : false;  
-                
+        boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
+        boolean showCharts =  GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_CHARTS, false);  
+        String chartDetailParam = GwtHttpRequestUtils.getStringParameter(PARAM_CHART_DETAIL, null);
+        DetailType chartDetailType;
+        if(chartDetailParam != null && (DetailType.REGATTA_RANK.name().equals(chartDetailParam) || DetailType.REGATTA_TOTAL_POINTS.name().equals(chartDetailParam))) {
+            chartDetailType = DetailType.valueOf(chartDetailParam);
+        } else {
+            chartDetailType = DetailType.REGATTA_RANK;
+        }
+        
         Widget leaderboardViewer;
         if (leaderboardType.isMetaLeaderboard()) {
             leaderboardViewer = new MetaLeaderboardViewer(sailingService, new AsyncActionsExecutor(),
                     leaderboardSettings, null, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages, userAgent,
-                    showRaceDetails, autoExpandLastRaceColumn, showRankChart);
+                    showRaceDetails, autoExpandLastRaceColumn, showCharts, chartDetailType);
         } else {
             leaderboardViewer = new LeaderboardViewer(sailingService, new AsyncActionsExecutor(),
                     leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages, userAgent,
-                    showRaceDetails, autoExpandLastRaceColumn, showRankChart);
+                    showRaceDetails, autoExpandLastRaceColumn, showCharts, chartDetailType);
         }
         contentScrollPanel.setWidget(leaderboardViewer);
         mainPanel.add(contentScrollPanel);
