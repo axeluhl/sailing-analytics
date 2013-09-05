@@ -157,7 +157,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
                 createNewRegatta(newRegatta);
             }
         });
-        dialog.ensureDebugId("RegattaCreationDialog");
+        dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
     }
     

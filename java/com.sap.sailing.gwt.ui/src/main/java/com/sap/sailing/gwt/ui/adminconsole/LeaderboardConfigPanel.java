@@ -403,6 +403,8 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
         // caption panels for the selected leaderboard and tracked races
         HorizontalPanel splitPanel = new HorizontalPanel();
+        // TODO [D049941]: Set a debug id and use a page object representing this panel for linkage of races with
+        //                 tracked races
         mainPanel.add(splitPanel);
 
         selectedLeaderBoardPanel = new CaptionPanel(stringMessages.leaderboard());
@@ -1082,7 +1084,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 });
             }
         });
-        dialog.ensureDebugId("CreateFlexibleLeaderboardDialog");
+        dialog.ensureDebugId("FlexibleLeaderboardCreateDialog");
         dialog.show();
     }
 
@@ -1111,7 +1113,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 });
             }
         });
-        dialog.ensureDebugId("CreateRegattaLeaderboardDialog");
+        dialog.ensureDebugId("RegattaLeaderboardCreateDialog");
         dialog.show();
     }
 

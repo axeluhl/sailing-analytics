@@ -90,7 +90,7 @@ public class RegattaDetailsComposite extends Composite {
         grid.setWidget(3 , 1, scoringSystem);
         
         seriesTable = createRegattaSeriesTable();
-        seriesTable.ensureDebugId("SeriesTabel");
+        seriesTable.ensureDebugId("SeriesTable");
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
         seriesSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override

@@ -125,7 +125,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                         updateSeriesGrid(panel);
                     }
                 });
-                dialog.ensureDebugId("AddSeriesDialog");
+                dialog.ensureDebugId("SeriesCreateDialog");
                 dialog.show();
             }
         });
