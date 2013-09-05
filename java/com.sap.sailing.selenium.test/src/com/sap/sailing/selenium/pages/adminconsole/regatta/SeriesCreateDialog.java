@@ -8,7 +8,7 @@ import com.sap.sailing.selenium.core.FindBy;
 
 import com.sap.sailing.selenium.pages.common.DataEntryDialog;
 
-public class SeriesWithFleetsCreationDialog extends DataEntryDialog {
+public class SeriesCreateDialog extends DataEntryDialog {
     @FindBy(how = BySeleniumId.class, using = "SeriesNameTextField")
     private WebElement seriesNameTextField;
     
@@ -30,7 +30,7 @@ public class SeriesWithFleetsCreationDialog extends DataEntryDialog {
 //    @FindBy(how = BySeleniumId.class, using = "AddFleetButton")
 //    private WebElement addFleetButton;
     
-    public SeriesWithFleetsCreationDialog(WebDriver driver, WebElement element) {
+    public SeriesCreateDialog(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     

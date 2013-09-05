@@ -1,5 +1,6 @@
 package com.sap.sailing.selenium.pages.adminconsole.tractrac;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,11 +9,13 @@ import java.util.Objects;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
 
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.core.BySeleniumId;
 
 import com.sap.sailing.selenium.pages.PageArea;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaList.RegattaDescriptor;
 import com.sap.sailing.selenium.pages.gwt.CellTable;
 
 
@@ -67,6 +70,7 @@ public class TracTracEventManagementPanel extends PageArea {
         }
     }
     
+    // TODO [D049941]: Prefix the Ids with the component (e.g. "Button")
     @FindBy(how = BySeleniumId.class, using = "LiveURI")
     private WebElement liveURITextField;
     
@@ -79,8 +83,8 @@ public class TracTracEventManagementPanel extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "ListRaces")
     private WebElement listRacesButton;
     
-    @FindBy(how = BySeleniumId.class, using = "FilterRaces")
-    private WebElement filterTrackableRacesTextField;
+    @FindBy(how = BySeleniumId.class, using = "AvailableRegattas")
+    private WebElement availableRegattasDropDown;
     
     @FindBy(how = BySeleniumId.class, using = "TrackWind")
     private WebElement trackWindCheckBox;
@@ -90,6 +94,9 @@ public class TracTracEventManagementPanel extends PageArea {
     
     @FindBy(how = BySeleniumId.class, using = "SimulateWithStartTimeNow")
     private WebElement simulateWithNowCheckbox;
+    
+    @FindBy(how = BySeleniumId.class, using = "FilterRaces")
+    private WebElement filterTrackableRacesTextField;
     
     @FindBy(how = BySeleniumId.class, using = "RacesTable")
     private WebElement trackableRacesTable;
@@ -170,17 +177,33 @@ public class TracTracEventManagementPanel extends PageArea {
         return descriptors;
     }
     
-//    public List<String> getAvailableReggatasForTracking() {
-//        
-//    }
-//    
-//    public String getReggataForTracking() {
-//        
-//    }
-//    
-//    public void setReggataForTracking(String regatta) {
-//        
-//    }
+    public List<RegattaDescriptor> getAvailableReggatasForTracking() {
+        List<RegattaDescriptor> result = new ArrayList<>();
+        
+        Select select = new Select(this.availableRegattasDropDown);
+        
+        for(WebElement option : select.getOptions()) {
+            RegattaDescriptor regatta = RegattaDescriptor.fromString(option.getAttribute("value"));
+            
+            result.add(regatta);
+        }
+        
+        return result;
+    }
+    
+    public RegattaDescriptor getReggataForTracking() {
+        Select select = new Select(this.availableRegattasDropDown);
+        WebElement option = select.getFirstSelectedOption();
+        RegattaDescriptor regatta = RegattaDescriptor.fromString(option.getAttribute("value"));
+        
+        return regatta;
+    }
+    
+    public void setReggataForTracking(RegattaDescriptor regatta) {
+        Select select = new Select(this.availableRegattasDropDown);
+        
+        select.selectByValue(regatta.toString());
+    }
     
     /**
      * <p>Sets the filter for the trackable races. After the filter is set you can obtain the new resulting list via

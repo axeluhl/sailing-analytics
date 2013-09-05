@@ -150,7 +150,7 @@ public class TrackedRacesList extends PageArea {
             String regatta = columns.get(0).getText();
             String boatClass = columns.get(1).getText();
             String race = columns.get(2).getText();
-            String status = columns.get(2).getText();
+            String status = columns.get(6).getText();
             
             TrackedRaceDescriptor descriptor = new TrackedRaceDescriptor(regatta, boatClass, race);
             
@@ -162,9 +162,42 @@ public class TrackedRacesList extends PageArea {
         return result;
     }
     
+    public void stopTracking(List<TrackedRaceDescriptor> races) {
+        
+    }
+    
+    public void remove(List<TrackedRaceDescriptor> races) {
+        
+    }
+    
     public void refresh() {
         this.refreshButton.click();
         
         waitForAjaxRequests();
     }
+    
+//    private List<WebElement> getTrackedRaces(List<TrackedRaceDescriptor> races) {
+//        List<WebElement> result = new ArrayList<>(Collections.<WebElement>nCopies(races.size(), null));
+//        
+//        CellTable table = new CellTable(this.driver, this.trackedRacesTable);
+//        List<WebElement> rows = table.getRows();
+//        Iterator<WebElement> iterator = rows.iterator();
+//        
+//        while(iterator.hasNext()) {
+//            WebElement row = iterator.next();
+//            
+//            List<WebElement> columns = row.findElements(By.tagName("td"));
+//            String regatta = columns.get(0).getText();
+//            String boatClass = columns.get(1).getText();
+//            String race = columns.get(2).getText();
+//            
+//            TrackedRaceDescriptor descriptor = new TrackedRaceDescriptor(regatta, boatClass, race);
+//            
+//            if(races.contains(descriptor)) {
+//                result.add(row);
+//            }
+//        }
+//        
+//        return result;
+//    }
 }

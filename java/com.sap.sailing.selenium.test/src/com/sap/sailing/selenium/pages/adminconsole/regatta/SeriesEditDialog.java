@@ -6,9 +6,10 @@ import org.openqa.selenium.support.ui.Select;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
-import com.sap.sailing.selenium.pages.PageArea;
 
-public class SeriesEditDialog extends PageArea {
+import com.sap.sailing.selenium.pages.common.DataEntryDialog;
+
+public class SeriesEditDialog extends DataEntryDialog {
     
     @FindBy(how = BySeleniumId.class, using = "MedalSeriesCheckbox")
     private WebElement medalSeriesCheckbox;
@@ -59,18 +60,18 @@ public class SeriesEditDialog extends PageArea {
         this.raceNamePrefixTextField.sendKeys(prefix);
     }
     
-    public void addRaces() {
+    public void pressAddRaces() {
         this.addRacesButton.click();
     }
     
     public void addRaces(int races) {
         setSetNumberOfRacesToAdd(races);
-        addRaces();
+        pressAddRaces();
     }
     
     public void addRaces(int races, String prefix) {
         setSetNumberOfRacesToAdd(races);
         setRaceNamePrefix(prefix);
-        addRaces();
+        pressAddRaces();
     }
 }

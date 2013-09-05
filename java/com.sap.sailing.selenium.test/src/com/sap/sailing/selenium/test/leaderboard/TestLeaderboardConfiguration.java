@@ -19,10 +19,10 @@ import com.sap.sailing.selenium.core.WebDriverWindow;
 import com.sap.sailing.selenium.core.WindowManager;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 
-import com.sap.sailing.selenium.pages.adminconsole.leaderboard.FlexibleLeaderboardCreationDialog;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.FlexibleLeaderboardCreateDialog;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanel;
 
-import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaCreationDialog;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaCreateDialog;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaDetails;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaList;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaList.RegattaDescriptor;
@@ -103,34 +103,37 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         // Open the admin console and create a regatta with 1 series and 5 races as well as a leaderborad
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         
-        RegattaStructureManagementPanel regattaStructure = adminConsole.goToRegattaStructure();
-        regattaStructure.createRegatta(this.regatta);
-                
-        RegattaDetails regattaDetails = regattaStructure.getRegattaDetails(this.regatta);
-        SeriesEditDialog seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanel.DEFAULT_SERIES_NAME);
-        seriesDialog.addRaces(5);
-        
+//        RegattaStructureManagementPanel regattaStructure = adminConsole.goToRegattaStructure();
+//        regattaStructure.createRegatta(this.regatta);
+//                
+//        RegattaDetails regattaDetails = regattaStructure.getRegattaDetails(this.regatta);
+//        SeriesEditDialog seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanel.DEFAULT_SERIES_NAME);
+//        seriesDialog.addRaces(5);
+//        seriesDialog.pressOk();
+//        
         LeaderboardConfigurationPanel leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
-        leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
-        
-        WebDriverWindow leaderboardWindow = manager.openNewWindow();
-        leaderboardWindow.switchToWindow();
-        
-        // Open the leaderboard and check for empty leaderboard
-        LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), this.regatta.toString());
-        
-        // TODO: Check for empty leaderboard
-        
-        
-        leaderboard.setAutoRefreshEnabled(true);
-        
-        adminConsoleWindow.switchToWindow();
+//        leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
+//        
+//        WebDriverWindow leaderboardWindow = manager.openNewWindow();
+//        leaderboardWindow.switchToWindow();
+//        
+//        // Open the leaderboard and check for empty leaderboard
+//        LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), this.regatta.toString());
+//        
+//        // TODO: Check for empty leaderboard
+//        
+//        
+//        leaderboard.setAutoRefreshEnabled(true);
+//        
+//        adminConsoleWindow.switchToWindow();
         
         // Add 5 races to the leaderboard
         
         // Start the tracking for some races and wait until they are ready to use
         TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        
+        tracTracEvents.setReggataForTracking(this.regatta);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRaces(this.trackableRaces);
         

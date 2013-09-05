@@ -39,7 +39,7 @@ public class AdminConsolePage extends HostPage {
     private static final String TRACTRAC_EVENTS_TAB_LABEL = "TracTrac Events"; //$NON-NLS-1$
     private static final String TRACTRAC_EVENTS_TAB_IDENTIFIER = "TracTracEventManagement"; //$NON-NLS-1$
 
-    private static final String TRACKED_RACES_TAB_LABEL = "Tracked Races"; //$NON-NLS-1$
+    private static final String TRACKED_RACES_TAB_LABEL = "Tracked races"; //$NON-NLS-1$
     private static final String TRACKED_RACES_TAB_IDENTIFIER = "TrackedRacesManagement"; //$NON-NLS-1$
     
     private static final String LEADERBOARD_CONFIGURATION_TAB_LABEL = "Leaderboard Configuration"; //$NON-NLS-1$
@@ -60,7 +60,7 @@ public class AdminConsolePage extends HostPage {
         driver.get(root + "gwt/AdminConsole.html?" + getGWTCodeServer()); //$NON-NLS-1$
         
         // TODO: As soon as the security API is available in Selenium we should use it to login into the admin console.
-//        FluentWait<WebDriver> wait = new FluentWait<>(driver);
+//        FluentWait<WebDriver> wait = createFluentWait<>(driver);
 //        wait.withTimeout(5, TimeUnit.SECONDS);
 //        wait.pollingEvery(100, TimeUnit.MILLISECONDS);
 //        

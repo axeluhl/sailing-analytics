@@ -67,7 +67,7 @@ public class RegattaDetails extends PageArea {
             WebElement action = Actions.findEditAction(row);
             action.click();
             
-            WebElement dialog = findElementBySeleniumId(this.driver, "EditSeriesDialog");
+            WebElement dialog = findElementBySeleniumId(this.driver, "SeriesEditDialog");
             
             return new SeriesEditDialog(this.driver, dialog);
         }

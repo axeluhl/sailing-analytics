@@ -8,7 +8,7 @@ import com.sap.sailing.selenium.core.FindBy;
 
 import com.sap.sailing.selenium.pages.common.DataEntryDialog;
 
-public class RegattaCreationDialog extends DataEntryDialog {
+public class RegattaCreateDialog extends DataEntryDialog {
     @FindBy(how = BySeleniumId.class, using = "RegattaNameTextField")
     private WebElement regattaNameTextField;
     
@@ -25,7 +25,7 @@ public class RegattaCreationDialog extends DataEntryDialog {
     @FindBy(how = BySeleniumId.class, using = "AddSeriesButton")
     private WebElement addSeriesButton;
     
-    public RegattaCreationDialog(WebDriver driver, WebElement element) {
+    public RegattaCreateDialog(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     
@@ -41,11 +41,11 @@ public class RegattaCreationDialog extends DataEntryDialog {
     
     // TODO: Scoring System, Event and Course Area
     
-    public SeriesWithFleetsCreationDialog addSeries() {
+    public SeriesCreateDialog addSeries() {
         this.addSeriesButton.click();
         
-        WebElement dialog = findElementBySeleniumId(this.driver, "AddSeriesDialog");
+        WebElement dialog = findElementBySeleniumId(this.driver, "SeriesCreateDialog");
         
-        return new SeriesWithFleetsCreationDialog(this.driver, dialog);
+        return new SeriesCreateDialog(this.driver, dialog);
     }
 }

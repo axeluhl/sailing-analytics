@@ -10,7 +10,7 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaList.RegattaDescriptor;
 import com.sap.sailing.selenium.pages.common.DataEntryDialog;
 
-public class RegattaLeaderboardCreationDialog extends DataEntryDialog {
+public class RegattaLeaderboardCreateDialog extends DataEntryDialog {
 
     @FindBy(how = BySeleniumId.class, using = "LeaderboardNameField")
     private WebElement nameField;
@@ -18,7 +18,7 @@ public class RegattaLeaderboardCreationDialog extends DataEntryDialog {
     @FindBy(how = BySeleniumId.class, using = "RegattaDropDown")
     private WebElement regattaDropDown;
     
-    public RegattaLeaderboardCreationDialog(WebDriver driver, WebElement element) {
+    public RegattaLeaderboardCreateDialog(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     

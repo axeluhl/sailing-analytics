@@ -28,6 +28,31 @@ public class CellTable extends PageArea {
         None;
     }
     
+    // TODO [D049941]: Implement a Row class
+    public class Row extends PageArea {
+        private static final String ROW_TAG_NAME = "tr"; //$NON-NLS-1$
+        
+        private CellTable table;
+        
+        protected Row(CellTable table, WebElement element) {
+            super(table.driver, element);
+            
+            this.table = table;
+        }
+        
+        public CellTable getCellTable() {
+            return this.table;
+        }
+        
+        @Override
+        protected void verify() {
+            WebElement element = (WebElement) this.context;
+            
+            if(!ROW_TAG_NAME.equalsIgnoreCase(element.getTagName()))
+                throw new IllegalArgumentException("WebElement does not represent a Row"); //$NON-NLS-1$
+        }
+    }
+    
     private static final String ASCENDING_IMAGE = "url(\"data:image/png;base64," +                       //$NON-NLS-1$
             "iVBORw0KGgoAAAANSUhEUgAAAAsAAAAHCAYAAADebrddAAAAiklEQVR42mNgwALyKrumFRf3iDAQAvmVXVVAxf/" +  //$NON-NLS-1$
             "zKjq341WYV95hk1fZ+R+MK8C4HqtCkLW5FZ2PQYpyK6AaKjv/5VV1OmIozq3s3AFR0AXFUNMrO5/lV7WKI6yv6m" +  //$NON-NLS-1$

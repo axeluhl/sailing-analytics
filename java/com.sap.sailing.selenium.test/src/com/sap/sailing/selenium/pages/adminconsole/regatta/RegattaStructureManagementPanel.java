@@ -12,7 +12,7 @@ import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaList.RegattaDescriptor;
 
 public class RegattaStructureManagementPanel extends PageArea {
-    public static final String DEFAULT_SERIES_NAME = "Default";
+    public static final String DEFAULT_SERIES_NAME = "Default"; //$NON-NLS-1$
     
     @FindBy(how = BySeleniumId.class, using = "AddRegattaButton")
     WebElement addRegattaButton;
@@ -30,12 +30,12 @@ public class RegattaStructureManagementPanel extends PageArea {
         super(driver, element);
     }
     
-    public RegattaCreationDialog startRegattaCreation() {
+    public RegattaCreateDialog startRegattaCreation() {
         this.addRegattaButton.click();
         
-        WebElement dialog = findElementBySeleniumId(this.driver, "RegattaCreationDialog"); //$NON-NLS-1$
+        WebElement dialog = findElementBySeleniumId(this.driver, "RegattaCreateDialog"); //$NON-NLS-1$
         
-        return new RegattaCreationDialog(this.driver, dialog);
+        return new RegattaCreateDialog(this.driver, dialog);
     }
     
     /**
@@ -44,11 +44,11 @@ public class RegattaStructureManagementPanel extends PageArea {
      * @param regatta
      */
     public void createRegatta(RegattaDescriptor regatta) {
-        RegattaCreationDialog createRegattaDialog = startRegattaCreation();
+        RegattaCreateDialog createRegattaDialog = startRegattaCreation();
         createRegattaDialog.setRegattaName(regatta.getName());
         createRegattaDialog.setBoatClass(regatta.getBoatClass());
         
-        SeriesWithFleetsCreationDialog addSeriesDialog = createRegattaDialog.addSeries();
+        SeriesCreateDialog addSeriesDialog = createRegattaDialog.addSeries();
         addSeriesDialog.setSeriesName(DEFAULT_SERIES_NAME);
         
         addSeriesDialog.pressOk();

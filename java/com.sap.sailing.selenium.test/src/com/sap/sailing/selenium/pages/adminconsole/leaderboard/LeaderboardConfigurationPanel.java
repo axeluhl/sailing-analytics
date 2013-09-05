@@ -11,7 +11,9 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.adminconsole.Actions;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetails.RaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaList.RegattaDescriptor;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesList.TrackedRaceDescriptor;
 import com.sap.sailing.selenium.pages.gwt.CellTable;
 
 public class LeaderboardConfigurationPanel extends PageArea {
@@ -34,31 +36,31 @@ public class LeaderboardConfigurationPanel extends PageArea {
         super(driver, element);
     }
     
-    public FlexibleLeaderboardCreationDialog startCreatingFlexibleLeaderboard() {
+    public FlexibleLeaderboardCreateDialog startCreatingFlexibleLeaderboard() {
         this.createFlexibleLeaderboardButton.click();
         // Wait, since we trigger an AJAX-request to get the available events
         waitForAjaxRequests();
-        WebElement dialog = findElementBySeleniumId(this.driver, "CreateFlexibleLeaderboardDialog");
-        return new FlexibleLeaderboardCreationDialog(this.driver, dialog);
+        WebElement dialog = findElementBySeleniumId(this.driver, "FlexibleLeaderboardCreateDialog");
+        return new FlexibleLeaderboardCreateDialog(this.driver, dialog);
     }
     
     // TODO: Extend with display name, scoring system, event, course area and discars
     public void createFlexibleLeaderboard(String name) {
-        FlexibleLeaderboardCreationDialog dialog = startCreatingFlexibleLeaderboard();
+        FlexibleLeaderboardCreateDialog dialog = startCreatingFlexibleLeaderboard();
         dialog.setName(name);
         dialog.pressOk();
     }
     
-    public RegattaLeaderboardCreationDialog startCreatingRegattaLeaderboard() {
+    public RegattaLeaderboardCreateDialog startCreatingRegattaLeaderboard() {
         this.createRegattaLeaderboardButton.click();
                                                                   
-        WebElement dialog = findElementBySeleniumId(this.driver, "CreateRegattaLeaderboardDialog");
+        WebElement dialog = findElementBySeleniumId(this.driver, "RegattaLeaderboardCreateDialog");
         
-        return new RegattaLeaderboardCreationDialog(this.driver, dialog);
+        return new RegattaLeaderboardCreateDialog(this.driver, dialog);
     }
     
     public void createRegattaLeaderboard(RegattaDescriptor regatta) {
-        RegattaLeaderboardCreationDialog dialog = startCreatingRegattaLeaderboard();
+        RegattaLeaderboardCreateDialog dialog = startCreatingRegattaLeaderboard();
         dialog.selectRegatta(regatta);
         dialog.pressOk();
     }
@@ -113,14 +115,11 @@ public class LeaderboardConfigurationPanel extends PageArea {
         return leaderboards;
     }
     
+    public LeaderboardDetails getLeaderboardDetails(String leaderboard) {
+        return null;
+    }
     
     private CellTable getLeaderboardTable() {
         return new CellTable(this.driver, this.availableLeaderboardsTable);
-    }
-    
-    protected void initElements() {
-        super.initElements();
-        
-        //this.availableLeaderboardsTable = new CellTable(this.driver, findElementBySeleniumId("AvailableLeaderboardsTable"));
     }
 }

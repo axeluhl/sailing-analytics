@@ -25,6 +25,18 @@ public class RegattaList extends PageArea {
         private final String name;
         private final String boatClass;
         
+        // TODO [D049941]: Mark as a bug and remove this method as soon as possible
+        public static RegattaDescriptor fromString(String name) {
+            if(name == null || name.isEmpty())
+                return null;
+            
+            int openingBrace = name.lastIndexOf('(');
+            int closingBrace = name.lastIndexOf(')');
+            
+            return new RegattaDescriptor(name.substring(0, openingBrace - 1),
+                    name.substring(openingBrace + 1, closingBrace));
+        }
+        
         public RegattaDescriptor(String name, String boatClass) {
             this.name = name;
             this.boatClass = boatClass;
@@ -138,9 +150,11 @@ public class RegattaList extends PageArea {
         for(WebElement row : table.getRows()) {
             List<WebElement> columns = row.findElements(By.tagName("td"));
             String name = columns.get(0).getText();
-            String boatClass = columns.get(1).getText();
-            
-            if(regatta.equals(new RegattaDescriptor(name, boatClass)))
+//            String boatClass = columns.get(1).getText();
+//            
+//            if(regatta.equals(new RegattaDescriptor(name, boatClass)))
+//                return row;
+            if(regatta.equals(RegattaDescriptor.fromString(name)))
                 return row;
         }
         
@@ -155,9 +169,11 @@ public class RegattaList extends PageArea {
         for(WebElement row : table.getRows()) {
             List<WebElement> columns = row.findElements(By.tagName("td"));
             String name = columns.get(0).getText();
-            String boatClass = columns.get(1).getText();
-            
-            if(regattas.contains(new RegattaDescriptor(name, boatClass)))
+//            String boatClass = columns.get(1).getText();
+//            
+//            if(regattas.contains(new RegattaDescriptor(name, boatClass)))
+//                result.add(row);
+            if(regattas.contains(RegattaDescriptor.fromString(name)))
                 result.add(row);
         }
         

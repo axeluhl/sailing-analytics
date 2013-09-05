@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
-import com.sap.sailing.selenium.pages.adminconsole.leaderboard.FlexibleLeaderboardCreationDialog;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.FlexibleLeaderboardCreateDialog;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanel;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
@@ -28,16 +28,16 @@ public class TestLeaderboardCreation extends AbstractSeleniumTest {
         LeaderboardConfigurationPanel leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         leaderboardConfiguration.deleteLeaderboard("Humba Humba");
         {
-            FlexibleLeaderboardCreationDialog dialog = leaderboardConfiguration.startCreatingFlexibleLeaderboard();
+            FlexibleLeaderboardCreateDialog dialog = leaderboardConfiguration.startCreatingFlexibleLeaderboard();
             dialog.setName("Humba Humba");
-            assertTrue(dialog.isOkEnabled());
+            assertTrue(dialog.isOkButtonEnabled());
             dialog.pressOk();
         }
         {
-            FlexibleLeaderboardCreationDialog dialog = leaderboardConfiguration.startCreatingFlexibleLeaderboard();
+            FlexibleLeaderboardCreateDialog dialog = leaderboardConfiguration.startCreatingFlexibleLeaderboard();
             dialog.setName("Humba Humba");
-            assertFalse(dialog.isOkEnabled());
-            String errorMessage = dialog.getErrorMessage();
+            assertFalse(dialog.isOkButtonEnabled());
+            String errorMessage = dialog.getStatusMessage();
             assertTrue(errorMessage.length() > 0);
         }
     }
