@@ -181,6 +181,7 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 
 **Expects**
 * GET request
+* URL Parameters leaderboard, raceColumn and fleet
 
 **Returns**
 * `200` body: CourseBase JSON
