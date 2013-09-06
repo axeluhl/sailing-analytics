@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -490,6 +491,18 @@ public class DummyTrackedRace implements TrackedRace {
 
     @Override
     public Iterable<Sideline> getCourseSidelines() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Distance getDistanceToStartLine(Competitor competitor, double secondsBeforeRaceStart) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Speed getSpeed(Competitor competitor, double secondsBeforeRaceStart) {
         // TODO Auto-generated method stub
         return null;
     }
