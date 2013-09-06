@@ -1225,7 +1225,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                 entryDTO.distanceToStartLineFiveSecondsBeforeStartInMeters = distanceToStartLineFiveSecondsBeforeStartOfRace == null ? null
                                         : distanceToStartLineFiveSecondsBeforeStartOfRace.getMeters();
                                 Speed speedFiveSecondsBeforeStartOfRace = trackedRace.getSpeed(competitor, 5);
-                                entryDTO.speedFiveSecondsBeforeStartInKnots = speedFiveSecondsBeforeStartOfRace == null ? null
+                                entryDTO.speedOverGroundFiveSecondsBeforeStartInKnots = speedFiveSecondsBeforeStartOfRace == null ? null
                                         : speedFiveSecondsBeforeStartOfRace.getKnots();
                                 Distance distanceToStartLineAtStartOfRace = trackedRace.getDistanceToStartLine(
                                         competitor, startOfRace);

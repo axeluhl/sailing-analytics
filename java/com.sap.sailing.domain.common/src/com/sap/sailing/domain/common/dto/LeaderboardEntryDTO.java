@@ -47,7 +47,7 @@ public class LeaderboardEntryDTO implements Serializable {
     
     public Double distanceToStartLineFiveSecondsBeforeStartInMeters;
     
-    public Double speedFiveSecondsBeforeStartInKnots;
+    public Double speedOverGroundFiveSecondsBeforeStartInKnots;
     
     public Double distanceToStartLineAtStartOfRaceInMeters;
     
