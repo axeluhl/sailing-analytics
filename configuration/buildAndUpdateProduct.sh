@@ -277,7 +277,9 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
 	if [ $testing -eq 0 ]; then
 	    echo "INFO: Skipping tests"
-	    extra="$extra -Dmaven.test.skip=true"
+	    extra="$extra -Dmaven.test.skip=true -DskipTests=true"
+    else
+        extra="$extra -DskipTests=false"
 	fi
 
 	if [ $offline -eq 1 ]; then
@@ -354,6 +356,8 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 
         mkdir -p configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
+        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-selector.xml configuration/jetty/etc
+        cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
         cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/

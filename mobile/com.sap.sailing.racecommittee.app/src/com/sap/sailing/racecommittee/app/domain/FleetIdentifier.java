@@ -8,11 +8,11 @@ import com.sap.sailing.domain.base.racegroup.RaceGroup;
 
 public interface FleetIdentifier {
 
-	public Fleet getFleet(); 
-	
-	public SeriesBase getSeries();
-	
-	public RaceGroup getRaceGroup();
+    public Fleet getFleet();
 
-	public Serializable getId();
+    public SeriesBase getSeries();
+
+    public RaceGroup getRaceGroup();
+
+    public Serializable getId();
 }

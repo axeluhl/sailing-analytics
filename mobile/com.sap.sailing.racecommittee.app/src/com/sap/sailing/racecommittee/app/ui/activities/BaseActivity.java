@@ -2,12 +2,10 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.util.Date;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,7 +23,7 @@ import com.sap.sailing.racecommittee.app.services.sending.EventSendingService.Ev
 /**
  * Base activity for all race committee cockpit activities enabling basic menu functionality.
  */
-public abstract class BaseActivity extends Activity {
+public abstract class BaseActivity extends LoggableActivity {
     
     private class EventSendingServiceConnection implements ServiceConnection, EventSendingServiceLogger {
         @Override
@@ -34,7 +32,7 @@ public abstract class BaseActivity extends Activity {
             sendingService = binder.getService();
             boundSendingService = true;
             sendingService.setEventSendingServiceLogger(this);
-            updateLiveIcon();
+            updateSendingServiceInformation();
         }
 
         @Override
@@ -44,12 +42,12 @@ public abstract class BaseActivity extends Activity {
 
         @Override
         public void onEventSentSuccessful() {
-            updateLiveIcon();
+            updateSendingServiceInformation();
         }
 
         @Override
         public void onEventSentFailed() {
-            updateLiveIcon();
+            updateSendingServiceInformation();
         }
     }
 
@@ -57,12 +55,11 @@ public abstract class BaseActivity extends Activity {
 
     protected MenuItem menuItemLive;
 
-    boolean boundSendingService = false;
+    protected boolean boundSendingService = false;
+    protected EventSendingService sendingService;
+    private EventSendingServiceConnection sendingServiceConnection;
     
-    EventSendingService sendingService;
-    EventSendingServiceConnection sendingServiceConnection;
-    
-    String sendingServiceStatus = "";
+    private String sendingServiceStatus = "";
     
     public BaseActivity() {
         this.sendingServiceConnection = new EventSendingServiceConnection();
@@ -78,7 +75,6 @@ public abstract class BaseActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
         switch (item.getItemId()) {
         case R.id.options_menu_settings:
             ExLog.i(TAG, "Clicked SETTINGS.");
@@ -87,11 +83,14 @@ public abstract class BaseActivity extends Activity {
         case R.id.options_menu_reload:
             ExLog.i(TAG, "Clicked RESET.");
             InMemoryDataStore.INSTANCE.reset();
-            fadeActivity(LoginActivity.class, true);
-            return true;
+            return onReset();
         case R.id.options_menu_live:
             ExLog.i(TAG, "Clicked LIVE.");
             Toast.makeText(this, getLiveIconText(), Toast.LENGTH_LONG).show();
+            return true;
+        case R.id.options_menu_info:
+            ExLog.i(TAG, "Clicked INFO.");
+            fadeActivity(SystemInformationActivity.class, false);
             return true;
         case android.R.id.home:
             ExLog.i(TAG, "Clicked HOME.");
@@ -103,41 +102,44 @@ public abstract class BaseActivity extends Activity {
     
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        updateLiveIcon();
+        updateSendingServiceInformation();
         return super.onPrepareOptionsMenu(menu);
+    }
+    
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        ExLog.i(TAG, String.format("Back pressed on activity %s", this.getClass().getSimpleName()));
     }
 
     protected boolean onHomeClicked() {
         return false;
     }
-    
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ExLog.i(TAG, String.format("Creating activity %s", this.getClass().getSimpleName()));
+
+    protected boolean onReset() {
+        fadeActivity(LoginActivity.class, true);
+        return true;
     }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
         
-        ExLog.i(TAG, String.format("Starting activity %s", this.getClass().getSimpleName()));
         Intent intent = new Intent(this, EventSendingService.class);
         bindService(intent, sendingServiceConnection, Context.BIND_AUTO_CREATE);
     }
     
     @Override
-    protected void onStop() {
+    public void onStop() {
         super.onStop();
         
-        ExLog.i(TAG, String.format("Stopping activity %s", this.getClass().getSimpleName()));
         if (boundSendingService) {
             unbindService(sendingServiceConnection);
             boundSendingService = false;
         }
     }
 
-    private void updateLiveIcon() {
+    protected void updateSendingServiceInformation() {
         if (menuItemLive == null)
             return;
         

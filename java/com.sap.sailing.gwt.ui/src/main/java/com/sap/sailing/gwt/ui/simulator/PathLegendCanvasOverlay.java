@@ -11,6 +11,7 @@ import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.overlay.Overlay;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
 /**
  * Class to draw the legend for the different paths on the map.
@@ -29,6 +30,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
 
     private double curSpeed;
     private double curBearing;
+    private char mode;
 
     /**
      * Offset where the legend starts
@@ -42,13 +44,19 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
     public String textColor = "Black";
     public String textFont = "10pt OpenSansRegular";
 
-    public PathLegendCanvasOverlay() {
+    public PathLegendCanvasOverlay(char mode) {
+    	this.mode = mode;
+    	
+    	if (this.mode == SailingSimulatorConstants.ModeEvent) {
+    		yOffset = 170;
+    	}
+    	
         this.setPathOverlays(null);
     }
 
     @Override
     protected Overlay copy() {
-        return new PathLegendCanvasOverlay();
+        return new PathLegendCanvasOverlay(this.mode);
     }
 
     @Override

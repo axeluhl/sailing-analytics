@@ -20,7 +20,6 @@ import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
@@ -28,6 +27,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -210,7 +210,10 @@ public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
                 jsonRace.put("name", trackedRace.getRace().getName());
                 jsonRace.put("startoftracking", trackedRace.getStartOfTracking() == null ? 0l : trackedRace
                         .getStartOfTracking().asMillis());
+                jsonRace.put("endoftracking", trackedRace.getEndOfTracking() == null ? 0l : trackedRace
+                        .getEndOfTracking().asMillis());
                 jsonRace.put("start", trackedRace.getStartOfRace() == null ? 0l : trackedRace.getStartOfRace().asMillis());
+                jsonRace.put("end", trackedRace.getEndOfRace() == null ? 0l : trackedRace.getEndOfRace().asMillis());
                 jsonRace.put("timeofnewestevent", trackedRace.getTimePointOfNewestEvent() == null ? 0l : trackedRace
                         .getTimePointOfNewestEvent().asMillis());
                 jsonRace.put("timeoflastevent", trackedRace.getTimePointOfLastEvent() == null ? 0l : trackedRace

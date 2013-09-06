@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.data.http;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,25 +31,24 @@ public abstract class HttpRequest {
         throw new IOException(String.format("Request response had no valid status."));
     }
 
-    private HttpURLConnection connection;
+    private URL url;
 
-    public HttpRequest(URL url) throws IOException {
-        this((HttpURLConnection) url.openConnection());
+    public HttpRequest(URL url) {
+        this.url = url;
     }
-
-    public HttpRequest(HttpURLConnection connection) {
-        this.connection = connection;
-    }
-
-    protected abstract InputStream execute(HttpURLConnection connection) throws IOException;
+    
+    protected abstract BufferedInputStream execute(HttpURLConnection connection) throws IOException;
 
     public InputStream execute() throws Exception {
-        ExLog.i(TAG, String.format("(Request %d) Executing HTTP request on %s.", this.hashCode(), connection.getURL()));
+        ExLog.i(TAG, String.format("(Request %d) Executing HTTP request on %s.", this.hashCode(), url));
+        
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
         connection.setConnectTimeout(5000);
         connection.setReadTimeout(15000);
+        connection.setRequestProperty("connection", "close");
 
-        InputStream stream = null;
+        BufferedInputStream stream = null;
         try {
             stream = execute(connection);
         } catch (FileNotFoundException fnfe) {
@@ -55,12 +57,21 @@ public abstract class HttpRequest {
         }
 
         validateHttpResponse(connection);
+        byte[] streamData = copyStream(stream);
+        connection.disconnect();
+        
         ExLog.i(TAG, String.format("(Request %d) HTTP request executed.", this.hashCode()));
-        return stream;
+        return new ByteArrayInputStream(streamData);
     }
 
-    public void disconnect() {
-        connection.disconnect();
+    private byte[] copyStream(BufferedInputStream stream) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        int len;
+        byte[] buffer = new byte[4096];
+        while ((len = stream.read(buffer)) != -1) {
+          bos.write(buffer, 0, len);
+        }
+        return bos.toByteArray();
     }
 
 }

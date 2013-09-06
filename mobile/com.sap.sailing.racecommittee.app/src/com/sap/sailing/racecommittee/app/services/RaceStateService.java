@@ -9,16 +9,18 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import android.app.AlarmManager;
-import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -38,6 +40,7 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerialize
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 
 public class RaceStateService extends Service {
+
     private final static String TAG = RaceStateService.class.getName();
 
     /**
@@ -50,6 +53,7 @@ public class RaceStateService extends Service {
     }
     
     private final static String EXTRAS_SERVICE_ID = RaceStateService.class.getName() + ".serviceId";
+    private final static int NOTIFICATION_ID = 42;
 
     private final IBinder mBinder = new RaceStateServiceBinder();
 
@@ -66,6 +70,9 @@ public class RaceStateService extends Service {
     private Map<ManagedRace, RaceStateEventListener> registeredStateEventListeners;
     
     private Map<Serializable, List<PendingIntent>> managedIntents;
+    
+    private NotificationManager notificationManager;
+    private NotificationCompat.Builder notificationBuilder;
 
     @Override
     public void onCreate() {
@@ -77,10 +84,27 @@ public class RaceStateService extends Service {
         this.registeredStateChangeListeners = new HashMap<ManagedRace, RaceStateChangedListener>();
         this.registeredStateEventListeners = new HashMap<ManagedRace, RaceStateEventListener>();
         this.managedIntents = new HashMap<Serializable, List<PendingIntent>>();
-
-        startForeground();
-        ExLog.i(TAG, "Started.");
+        
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        setupNotificationBuilder();
+        
+        startForeground(NOTIFICATION_ID, notificationBuilder.build());
         super.onCreate();
+        ExLog.i(TAG, "Started.");
+    }
+
+    private void setupNotificationBuilder() {
+        Intent launcherIntent = new Intent(this, LoginActivity.class);
+        launcherIntent.setAction(Intent.ACTION_MAIN);
+        launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, launcherIntent, 0);
+        notificationBuilder = new NotificationCompat.Builder(this)
+            .setSmallIcon(R.drawable.sap_sailing_app_icon)
+            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.sap_sailing_app_icon))
+            .setContentTitle(getText(R.string.service_info))
+            .setContentText(getText(R.string.service_text_no_races))
+            .setContentIntent(contentIntent)
+            .setOngoing(true);
     }
 
     @Override
@@ -132,27 +156,6 @@ public class RaceStateService extends Service {
         ExLog.i(TAG, "All races unregistered.");
     }
 
-    private void startForeground() {
-        CharSequence text = getText(R.string.service_title);
-
-        // Set the icon, scrolling text and timestamp
-        Notification notification = new Notification(R.drawable.sap_sailing_app_icon, text, System.currentTimeMillis());
-
-        Intent intent = new Intent(this, LoginActivity.class);
-        // clear all activities above started and reuse if already existing!
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        // The PendingIntent to launch our activity if the user selects this
-        // notification
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-        // Set the info for the views that show in the notification panel.
-        notification.setLatestEventInfo(this, getText(R.string.service_info), text, contentIntent);
-        notification.flags |= Notification.FLAG_NO_CLEAR;
-
-        // Send the notification.
-        this.startForeground(42, notification);
-    }
-
     private void handleStartCommand(Intent intent) {
         String action = intent.getAction();
         ExLog.i(TAG, String.format("Command action '%s' received.", action));
@@ -197,6 +200,11 @@ public class RaceStateService extends Service {
     private void handleClearRaces(Intent intent) {
         unregisterAllRaces();
         clearAllRaces();
+        
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder
+                .setNumber(0)
+                .setContentText(getString(R.string.service_text_no_races))
+                .build());
     }
 
     private void clearAllRaces() {
@@ -211,6 +219,12 @@ public class RaceStateService extends Service {
             return;
         }
         registerRace(race);
+        
+        int numRaces = managedIntents.keySet().size();
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder
+                .setNumber(numRaces)
+                .setContentText(String.format(getString(R.string.service_text_num_races), numRaces))
+                .build());
     }
 
     private ManagedRace getRaceFromIntent(Intent intent) {
@@ -245,7 +259,7 @@ public class RaceStateService extends Service {
             
             ExLog.i(TAG, "Race " + race.getId() + " registered.");
         } else {
-            ExLog.e(TAG, "Race " + race.getId() + " was already registered. Ignoring.");
+            ExLog.w(TAG, "Race " + race.getId() + " was already registered. Ignoring.");
         }
     }
 

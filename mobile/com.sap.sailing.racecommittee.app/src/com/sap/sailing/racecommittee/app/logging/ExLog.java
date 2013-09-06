@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.logging;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -127,6 +129,10 @@ public class ExLog {
     public synchronized static void e(String tag, String msg) {
         getInstance().error(tag, msg);
     }
+    
+    public synchronized static void ex(String tag, Exception e) {
+        getInstance().exception(tag, e);
+    }
 
     private final static String logMsgTemplate = "%s - %s - %s : %s";
 
@@ -173,6 +179,19 @@ public class ExLog {
     }
 
     private void error(String tag, String msg) {
+        if (isTargetActive(Target.LOGCAT))
+            Log.e(tag, msg);
+
+        if (isTargetActive(Target.FILE))
+            logToFile(LogLevel.ERROR, tag, msg);
+    }
+    
+    private void exception(String tag, Exception e) {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter stream = new PrintWriter(stringWriter);
+        e.printStackTrace(stream);
+        String msg = stringWriter.toString();
+        
         if (isTargetActive(Target.LOGCAT))
             Log.e(tag, msg);
 

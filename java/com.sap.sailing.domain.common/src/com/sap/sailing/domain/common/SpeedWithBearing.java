@@ -1,0 +1,32 @@
+package com.sap.sailing.domain.common;
+
+
+
+public interface SpeedWithBearing extends Speed {
+    Bearing getBearing();
+
+    /**
+     * Traveling at this speed starting at time <code>from</code> in position <code>pos</code> until time
+     * </code>to</code>, how far have we traveled? If <code>to</code> is before </code>from</code>, the speed will be
+     * applied in reverse.
+     */
+    Position travelTo(Position pos, TimePoint from, TimePoint to);
+
+    /**
+     * Computes the minimal (in terms of bearing change) course and speed change required to reach the
+     * target speed and bearing specified.
+     */
+    CourseChange getCourseChangeRequiredToReach(SpeedWithBearing targetSpeedWithBearing);
+
+    SpeedWithBearing applyCourseChange(CourseChange courseChange);
+
+    /**
+     * Projects this speed onto <code>bearing</code>. The speed will keep its sign, regardless of whether the <code>bearing</code> points in
+     * the opposite direction or not. The resulting speed can never be greater than this speed. If this speed's bearing is orthogonal to
+     * <code>bearing</code>, a zero speed will result.
+     * 
+     * @param position the position at which to perform the projection; the angle between the bearings depends on the position
+     */
+    Speed projectTo(Position position, Bearing bearing);
+
+}

@@ -65,12 +65,9 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -101,6 +98,7 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsFor
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -121,7 +119,9 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationTriggerResponseImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.Util;
@@ -808,10 +808,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             logger.info("Loaded race " + record.getName() + " in " + record.getEventName() + " start:" + record.getRaceStartTime() + " trackingStart:" + record.getTrackingStartTime() + " trackingEnd:" + record.getTrackingEndTime());
             // note that the live URI may be null for races that were put into replay mode
             final String effectiveLiveURI;
-            if (liveURI == null || liveURI.trim().length() == 0) {
-                effectiveLiveURI = record.getLiveURI() == null ? null : record.getLiveURI().toString();
+            if (!record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS)) {
+                if (liveURI == null || liveURI.trim().length() == 0) {
+                    effectiveLiveURI = record.getLiveURI() == null ? null : record.getLiveURI().toString();
+                } else {
+                    effectiveLiveURI = liveURI;
+                }
             } else {
-                effectiveLiveURI = liveURI;
+                effectiveLiveURI = null;
             }
             final String effectiveStoredURI;
             if (storedURI == null || storedURI.trim().length() == 0) {

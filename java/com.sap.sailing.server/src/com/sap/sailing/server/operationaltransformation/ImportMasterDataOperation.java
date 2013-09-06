@@ -21,19 +21,20 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.EventImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
+import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.EventMasterData;
 import com.sap.sailing.domain.masterdataimport.FlexibleLeaderboardMasterData;
 import com.sap.sailing.domain.masterdataimport.LeaderboardGroupMasterData;
@@ -129,13 +130,7 @@ public class ImportMasterDataOperation extends
         }
         int[] overallLeaderboardDiscardThresholds = null;
         ScoringSchemeType overallLeaderboardScoringSchemeType = null;
-        LeaderboardMasterData overallLeaderboard = masterData.getOverallLeaderboardMasterData();
-        if (overallLeaderboard != null && overallLeaderboard instanceof FlexibleLeaderboardMasterData) {
-            FlexibleLeaderboardMasterData flex = (FlexibleLeaderboardMasterData) overallLeaderboard;
-            overallLeaderboardDiscardThresholds = overallLeaderboard.getResultDiscardingRule()
-                    .getDiscardIndexResultsStartingWithHowManyRaces();
-            overallLeaderboardScoringSchemeType = flex.getScoringScheme().getType();
-        }
+        final LeaderboardGroup leaderboardGroup;
         LeaderboardGroup existingLeaderboardGroup = toState.getLeaderboardGroupByName(masterData.getName());
         if (existingLeaderboardGroup != null && override) {
             logger.info(String.format("Leaderboard Group with name %1$s already existed and will be overridden.",
@@ -144,13 +139,24 @@ public class ImportMasterDataOperation extends
             existingLeaderboardGroup = null;
         }
         if (existingLeaderboardGroup == null) {
-            toState.addLeaderboardGroup(masterData.getName(), masterData.getDescription(),
+            leaderboardGroup = toState.addLeaderboardGroup(masterData.getName(), masterData.getDescription(),
                     masterData.isDisplayGroupsRevese(), leaderboardNames, overallLeaderboardDiscardThresholds,
                     overallLeaderboardScoringSchemeType);
             creationCount.addOneLeaderboardGroup(masterData.getName());
         } else {
+            leaderboardGroup = existingLeaderboardGroup;
             logger.info(String.format("Leaderboard Group with name %1$s already exists and hasn't been overridden.",
                     masterData.getName()));
+        }
+        if (masterData.hasOverallLeaderboard() && (override || existingLeaderboardGroup == null)) {
+            if (existingLeaderboardGroup != null && existingLeaderboardGroup.getOverallLeaderboard() != null) {
+                // remove old overall leaderboard if it existed
+                toState.removeLeaderboard(existingLeaderboardGroup.getOverallLeaderboard().getName());
+            }
+            LeaderboardGroupMetaLeaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(
+                    leaderboardGroup, masterData.getOverallLeaderboardScoringScheme(), masterData.getOverallLeaderboardDiscardingRule());
+            leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
+            toState.addLeaderboard(overallLeaderboard);
         }
     }
 
