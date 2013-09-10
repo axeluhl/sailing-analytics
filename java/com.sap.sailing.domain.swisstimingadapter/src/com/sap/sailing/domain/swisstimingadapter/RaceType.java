@@ -26,12 +26,12 @@ public interface RaceType {
         _470_MEN("SAM005", "470", Gender.male), 
         STAR("SAM007", "Star", Gender.male), 
         _49ER("SAM009", "49er", Gender.male), 
+        _49ERFX("SAW009", "49erFX", Gender.female), 
         ELLIOTT6M("SAW007", "Elliott 6M", Gender.female), 
         RSX_WOMEN("SAW102", "RS:X", Gender.female), 
         RSX_MEN("SAM102", "RS:X", Gender.male), 
-        LASER_RADIAL("SAW103", "Laser Radial", Gender.female), 
-        _49ERFX_TODO("xxxxx_TODO_xxxxx", "49er FX", Gender.female), 
-        NACRA17_TOTO("xxxxx_TODO_xxxxx", "Nacra 17", Gender.mixed);
+        NACRA17("SAX017", "Nacra 17", Gender.mixed),
+        LASER_RADIAL("SAW103", "Laser Radial", Gender.female);        
         
         enum Gender {
             male, female, mixed, unspecified;
