@@ -46,14 +46,9 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 
 /**
- * Allows the user to start and stop tracking of events, regattas and races using the TracTrac connector. In particular,
+ * Allows the user to start and stop tracking of races using the SwissTiming connector. In particular,
  * previously configured connections can be retrieved from a drop-down list which then pre-populates all connection
- * parameters. The user can also choose to enter connection information manually. Using a "hierarchical" entry system
- * comparable to that of, e.g., the Eclipse CVS connection setup wizard, components entered will be used to
- * automatically assemble the full URL which can still be overwritten manually. There is a propagation order across the
- * fields. Hostname propagates to JSON URL, Live URI and Stored URI. Port Live Data propagates to Port Stored Data,
- * incremented by one. The ports propagate to Live URI and Stored URI, respectively. The event name propagates to the
- * JSON URL.
+ * parameters. The user can also choose to enter connection information manually.
  * 
  * @author Axel Uhl (D043530)
  * 
@@ -166,7 +161,16 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             }
         };
 
-        TextColumn<SwissTimingRaceRecordDTO> raceStartTrackingColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+        TextColumn<SwissTimingRaceRecordDTO> raceStateColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                String result = object.hasCourse ? "C" : "";
+                result += object.hasStartlist ? "S" : "";
+                return result;
+            }
+        };
+        
+        TextColumn<SwissTimingRaceRecordDTO> raceStartTimeColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.raceStartTime==null?"":dateFormatter.render(object.raceStartTime) + " " + timeFormatter.render(object.raceStartTime);
@@ -228,14 +232,15 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         trackPanel.setStyleName("paddedPanel");
         
         raceNameColumn.setSortable(true);
-        raceStartTrackingColumn.setSortable(true);
+        raceStartTimeColumn.setSortable(true);
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<SwissTimingRaceRecordDTO>(/* pageSize */ 10000, tableRes);
         raceTable.addColumn(raceNameColumn, stringConstants.name());
         raceTable.addColumn(raceDescriptionColumn, stringConstants.description());
         raceTable.addColumn(boatClassColumn, stringConstants.boatClass());
-        raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTimeColumn());
+        raceTable.addColumn(raceStateColumn, stringConstants.status());
+        raceTable.addColumn(raceStartTimeColumn, stringConstants.startTime());
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(new MultiSelectionModel<SwissTimingRaceRecordDTO>() {});
 
@@ -244,7 +249,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
         raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
         raceList.addDataDisplay(raceTable);
-        Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTrackingColumn);
+        Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTimeColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
 
         Label lblTrackSettings = new Label(stringConstants.trackSettings());
