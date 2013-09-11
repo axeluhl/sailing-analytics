@@ -36,7 +36,14 @@ public class ExtenderBundleTracker extends BundleTracker<Bundle> {
     public void modifiedBundle(Bundle bundle, BundleEvent event, Bundle object) {
         String symbolicName = bundle.getSymbolicName();
         logger.info(symbolicName + " " + getBundleStateAsText(event));
-        
+        if (event != null && event.getType() == BundleEvent.STOPPING) {
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            StringBuffer b = new StringBuffer();
+            for (StackTraceElement traceElement : stackTrace) {
+                b.append(traceElement.toString() + "\n");
+            }
+            logger.fine(b.toString());
+        }
         String trackManifestEntry = (String) bundle.getHeaders().get("TrackLifecycle");
         if (trackManifestEntry != null) {
             trackLifecycle(bundle, event);
