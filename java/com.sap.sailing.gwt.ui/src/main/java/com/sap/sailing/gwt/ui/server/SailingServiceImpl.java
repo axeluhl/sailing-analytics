@@ -2028,6 +2028,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             BoatClass boatClass = com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE.getRaceTypeFromRaceID(rr.getRaceID()).getBoatClass();
             swissTimingRaceRecordDTO.boatClass = boatClass != null ? boatClass.getName() : null;
             swissTimingRaceRecordDTO.discipline = rr.getRaceID().length() >= 3 ? rr.getRaceID().substring(2, 3) : null;
+            swissTimingRaceRecordDTO.hasCourse = rr.hasCourse();
+            swissTimingRaceRecordDTO.hasStartlist = rr.hasStartlist();
             result.add(swissTimingRaceRecordDTO);
         }
         return result;
