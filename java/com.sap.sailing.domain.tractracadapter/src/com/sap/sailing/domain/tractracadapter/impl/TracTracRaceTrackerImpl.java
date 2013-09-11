@@ -192,7 +192,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         this.domainFactory = domainFactory;
         final Simulator simulator;
         if (simulateWithStartTimeNow) {
-            simulator = new Simulator();
+            simulator = new Simulator(windStore);
         } else {
             simulator = null;
         }
