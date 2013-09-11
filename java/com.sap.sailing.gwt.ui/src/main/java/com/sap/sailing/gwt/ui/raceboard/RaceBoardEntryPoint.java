@@ -221,7 +221,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         }
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
-        p.addNorth(logoAndTitlePanel, 68);        
+        p.addNorth(logoAndTitlePanel, 68);
         p.addNorth(toolbarPanel, 40);
         p.addSouth(timePanel, 90);                     
         p.add(raceBoardPanel);

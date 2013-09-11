@@ -31,7 +31,7 @@ import com.sap.sailing.domain.tracking.Wind;
 
 public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     
-    public static final Logger log = Logger.getLogger(DynamicTrackedRaceLogListener.class.getName());
+    private static final Logger logger = Logger.getLogger(DynamicTrackedRaceLogListener.class.getName());
 
     private DynamicTrackedRace trackedRace;
     
@@ -112,7 +112,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
             // ... onCourseDesignChangedByRaceCommittee() might be called more than once.
             trackedRace.onCourseDesignChangedByRaceCommittee(courseDesign);
         } else {
-            log.info("Could not find any course design update on race log of " + trackedRace.getRace().getName() + "! Not sending out any events.");
+            logger.info("Could not find any course design update on race log of " + trackedRace.getRace().getName() + "! Not sending out any events.");
         }
     }
     
@@ -125,7 +125,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
             /* invoke listeners with received start time, this will also trigger tractrac update */
             trackedRace.onStartTimeChangedByRaceCommittee(startTime);
         } else {
-            log.info("Could not find any valid start time on race log of " + trackedRace.getRace().getName() + "! Not sending out any events.");
+            logger.info("Could not find any valid start time on race log of " + trackedRace.getRace().getName() + "! Not sending out any events.");
         }
     }
     
