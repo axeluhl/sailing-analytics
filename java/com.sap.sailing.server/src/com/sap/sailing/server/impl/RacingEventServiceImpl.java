@@ -582,7 +582,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public void removeLeaderboard(String leaderboardName) {
         Leaderboard leaderboard = removeLeaderboardFromLeaderboardsByName(leaderboardName);
-        if(leaderboard != null) {
+        if (leaderboard != null) {
             leaderboard.removeRaceColumnListener(raceLogReplicator);
             leaderboard.removeRaceColumnListener(raceLogScoringReplicator);
             mongoObjectFactory.removeLeaderboard(leaderboardName);
