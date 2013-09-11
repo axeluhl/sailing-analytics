@@ -10,17 +10,17 @@ import java.io.ObjectInputStream;
 
 import junit.framework.Assert;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.PathGenerator1Turner;
 import com.sap.sailing.simulator.impl.PolarDiagramCSV;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
-import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 public class PathGenerator1TurnerEval {
@@ -45,7 +45,7 @@ public class PathGenerator1TurnerEval {
     public void initialize() throws IOException, ClassNotFoundException {
 
         this._polarDiagram = new PolarDiagramCSV(POLAR_DIAGRAM_49_STG_CSV_FILE_PATH);
-        this._simulationParameters = new SimulationParametersImpl(null, this._polarDiagram, null, SailingSimulatorUtil.measured);
+        this._simulationParameters = new SimulationParametersImpl(null, this._polarDiagram, null, SailingSimulatorConstants.ModeMeasured, true, true);
         this._pathGenerator = new PathGenerator1Turner(this._simulationParameters);
 
         this._windField = readWindFieldGeneratorFromExternalFile("windField.dat");

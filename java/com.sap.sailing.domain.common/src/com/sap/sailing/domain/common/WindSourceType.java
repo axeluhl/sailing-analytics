@@ -35,7 +35,14 @@ public enum WindSourceType {
      * Wind estimation combined from all other wind sources, using <code>TrackedRace.getWind(...)</code>, based on
      * confidences
      */
-    COMBINED(false, 0.9, /* useSpeed */ true);
+    COMBINED(false, 0.9, /* useSpeed */ true),
+    
+    /**
+     * Manually entered by the race committee over the app. As the race committee measures the wind several times over races for documentation purposes,
+     * their measures are stored in the race log.
+     * 
+     */
+    RACECOMMITTEE(false, 0.9, /* useSpeed */ true);
     
     private final boolean canBeStored;
     

@@ -110,7 +110,6 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
-import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
@@ -583,11 +582,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public void removeLeaderboard(String leaderboardName) {
         Leaderboard leaderboard = removeLeaderboardFromLeaderboardsByName(leaderboardName);
-        leaderboard.removeRaceColumnListener(raceLogReplicator);
-        leaderboard.removeRaceColumnListener(raceLogScoringReplicator);
-        mongoObjectFactory.removeLeaderboard(leaderboardName);
-        syncGroupsAfterLeaderboardRemove(leaderboardName, true);
-        leaderboard.destroy();
+        if (leaderboard != null) {
+            leaderboard.removeRaceColumnListener(raceLogReplicator);
+            leaderboard.removeRaceColumnListener(raceLogScoringReplicator);
+            mongoObjectFactory.removeLeaderboard(leaderboardName);
+            syncGroupsAfterLeaderboardRemove(leaderboardName, true);
+            leaderboard.destroy();
+        }
     }
 
     private Leaderboard removeLeaderboardFromLeaderboardsByName(String leaderboardName) {
@@ -1192,8 +1193,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      * The tracker will initially try to connect to the TracTrac infrastructure to obtain basic race master data. If
      * this fails after some timeout, to avoid garbage and lingering threads, the task scheduled by this method will
      * check after the timeout expires if race master data was successfully received. If so, the tracker continues
-     * normally. Otherwise, the tracker is shut down orderly by {@link Receiver#stopPreemptively() stopping} all
-     * receivers and {@link DataController#stop(boolean) stopping} the TracTrac controller for this tracker.
+     * normally. Otherwise, the tracker is shut down orderly by calling {@link RaceTracker#stop() stopping}.
      * 
      * @return the scheduled task, in case the caller wants to {@link ScheduledFuture#cancel(boolean) cancel} it, e.g.,
      *         when the tracker is stopped or has successfully received the race
@@ -1236,15 +1236,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             InterruptedException {
         logger.info("Stopping tracking for " + race + "...");
         synchronized (raceTrackersByRegatta) {
+            final Set<RaceTracker> trackerSet = raceTrackersByRegatta.get(regatta);
             if (raceTrackersByRegatta.containsKey(regatta)) {
-                Iterator<RaceTracker> trackerIter = raceTrackersByRegatta.get(regatta).iterator();
+                Iterator<RaceTracker> trackerIter = trackerSet.iterator();
                 while (trackerIter.hasNext()) {
                     RaceTracker raceTracker = trackerIter.next();
                     if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
                         logger.info("Found tracker to stop for races " + raceTracker.getRaces());
-                        raceTracker.stop(); // this also removes the TrackedRace from trackedRegatta
-                        // do not remove the tracker from raceTrackersByRegatta, because it should still exist there,
-                        // but with the state "non-tracked"
+                        raceTracker.stop();
                         trackerIter.remove();
                         raceTrackersByID.remove(raceTracker.getID());
                     }
@@ -1253,8 +1252,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 logger.warning("Didn't find any trackers for regatta " + regatta);
             }
             stopTrackingWind(regatta, race);
-            // if the last tracked race was removed, remove the entire regatta
-            if (raceTrackersByRegatta.get(regatta).isEmpty()) {
+            // if the last tracked race was removed, confirm that tracking for the entire regatta has stopped
+            if (trackerSet == null || trackerSet.isEmpty()) {
                 stopTracking(regatta);
             }
         }
@@ -1870,7 +1869,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             createEventWithoutReplication(result);
             replicate(new CreateEvent(eventName, venue, publicationUrl, isPublic, id, courseAreaNames));
         }
-        mongoObjectFactory.storeEvent(result);
         return result;
     }
 
@@ -1883,6 +1881,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
             eventsById.put(result.getId(), result);
         }
+        mongoObjectFactory.storeEvent(result);
     }
 
     @Override
@@ -1952,9 +1951,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public CourseArea addCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId) {
         CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaId, courseAreaName);
         synchronized (eventsById) {
-            Event event = addCourseAreaWithoutReplication(eventId, courseArea);
+            addCourseAreaWithoutReplication(eventId, courseArea);
             replicate(new AddCourseArea(eventId, courseAreaName, courseAreaId));
-            mongoObjectFactory.storeEvent(event);
         }
         return courseArea;
     }
@@ -1967,6 +1965,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
             Event event = eventsById.get(eventId);
             event.getVenue().addCourseArea(courseArea);
+            mongoObjectFactory.storeEvent(event);
             return event;
         }
     }

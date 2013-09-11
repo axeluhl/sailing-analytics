@@ -1,15 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import com.sap.sailing.racecommittee.app.R;
-
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.widget.DatePicker;
 
-public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener,
+import com.sap.sailing.racecommittee.app.R;
+
+public class DatePickerFragment extends LoggableDialogFragment implements DatePickerDialog.OnDateSetListener,
         DatePickerDialog.OnDismissListener {
     
     private DatePickerDialog.OnDateSetListener listener;
@@ -53,7 +52,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         DatePickerDialog dialog = new DatePickerDialog(getActivity(), null, currentYear, currentMonth, currentDay);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
-        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Set", new DialogInterface.OnClickListener() {
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.choose), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int which) {
                 DatePickerDialog dialog = (DatePickerDialog) dialogInterface;

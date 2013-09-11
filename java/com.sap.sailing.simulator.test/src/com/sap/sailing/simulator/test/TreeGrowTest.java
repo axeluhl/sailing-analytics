@@ -4,23 +4,25 @@ import java.sql.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
-import com.sap.sailing.simulator.impl.PathGeneratorTreeGrowTarget;
+import com.sap.sailing.simulator.impl.PathGeneratorTreeGrowWind3;
 import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
-import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorOscillationImpl;
@@ -51,19 +53,20 @@ public class TreeGrowTest {
         TimePoint startTime = new MillisecondsTimePoint(startDate.getTime());
         TimePoint timeStep = new MillisecondsTimePoint(20000);
         wf.generate(startTime, null, timeStep);
-        SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorUtil.freestyle);
+        SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorConstants.ModeFreestyle, true, true);
 
         /*param.setProperty("Heuristic.targetTolerance[double]", 0.05);
         param.setProperty("Heuristic.timeResolution[long]", 30000.0);
         param.setProperty("Djikstra.gridv[int]", 10.0);
         param.setProperty("Djikstra.gridh[int]", 100.0);*/
 
-        PathGeneratorTreeGrowTarget treeGrow = new PathGeneratorTreeGrowTarget(param);
+        PathGeneratorTreeGrowWind3 treeGrow = new PathGeneratorTreeGrowWind3(param);
 
         Path path = treeGrow.getPath();
 
-        System.out.println("tree-grow path points: "+path.getPathPoints().size());
-
+        //System.out.println("tree-grow path points: "+path.getPathPoints().size());
+        Assert.assertNotNull(path.getPathPoints());
+        
         //for(TimedPositionWithSpeed pos : path.getPathPoints()) {
         //    System.out.println(""+pos.getPosition().getLatDeg()+", "+pos.getPosition().getLngDeg());
         //}

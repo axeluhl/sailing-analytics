@@ -36,7 +36,6 @@ public class LastWindFixFinderTest extends RaceLogAnalyzerTest<LastWindFixFinder
         raceLog.add(event1);
         raceLog.add(event2);
 
-        raceLog.lockForRead();
         assertEquals(event2.getWindFix(), analyzer.analyze());
     }
 }

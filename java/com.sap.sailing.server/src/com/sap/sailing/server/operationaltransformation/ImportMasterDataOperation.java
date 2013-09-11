@@ -21,19 +21,20 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.EventImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
+import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.EventMasterData;
 import com.sap.sailing.domain.masterdataimport.FlexibleLeaderboardMasterData;
 import com.sap.sailing.domain.masterdataimport.LeaderboardGroupMasterData;
@@ -63,7 +64,8 @@ public class ImportMasterDataOperation extends
 
     private final boolean override;
 
-    public ImportMasterDataOperation(LeaderboardGroupMasterData masterData, boolean override) {
+    public ImportMasterDataOperation(LeaderboardGroupMasterData masterData, boolean override, MasterDataImportObjectCreationCountImpl existingCreationCount) {
+        this.creationCount.add(existingCreationCount);
         this.masterData = masterData;
         this.override = override;
     }
@@ -81,8 +83,12 @@ public class ImportMasterDataOperation extends
         createRegattas(masterData, toState);
         Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         for (LeaderboardMasterData board : masterData.getLeaderboards()) {
+            leaderboardNames.add(board.getName());
             if (existingLeaderboards.containsKey(board.getName())) {
-                if (override) {
+                if (creationCount.alreadyAddedLeaderboardWithName(board.getName())) {
+                    //Has already been added by this operation
+                    continue;
+                } else if (override) {
                     toState.removeLeaderboard(board.getName());
                     logger.info(String.format("Leaderboard with name %1$s already existed and has been overridden.",
                             board.getName()));
@@ -98,35 +104,33 @@ public class ImportMasterDataOperation extends
             if (leaderboard != null) {
                 leaderboard.setDisplayName(board.getDisplayName());
                 toState.addLeaderboard(leaderboard);
-                leaderboardNames.add(board.getName());
-                creationCount.addOneLeaderboard();
+                creationCount.addOneLeaderboard(leaderboard.getName());
                 Leaderboard newLeaderboard = toState.getLeaderboardByName(board.getName());
                 addRaceColumnsIfNecessary(board, newLeaderboard, toState);
                 // Set dummy tracked race, so that the leaderboard caches the competitors and
                 // will accept the score corrections
                 Pair<RaceColumn, Fleet> dummyColumnAndFleet = addDummyTrackedRace(board.getCompetitorsById().values(),
                         leaderboard, getRegattaIfPossible(leaderboard));
+                boolean addedScoreCorrections = false;
                 if (dummyColumnAndFleet.getA() != null && dummyColumnAndFleet.getB() != null) {
                     addScoreCorrectionsIfPossible(board.getScoreCorrection(), newLeaderboard);
-                    unsetDummy(dummyColumnAndFleet, leaderboard);
+                    addedScoreCorrections = true;
                 }
                 addCarriedPoints(leaderboard, board.getCarriedPoints(), board.getCompetitorsById());
                 addSuppressedCompetitors(leaderboard, board.getSuppressedCompetitors(), board.getCompetitorsById());
                 addCompetitorDisplayNames(leaderboard, board.getDisplayNamesByCompetitorId(),
                         board.getCompetitorsById());
                 addRaceLogEvents(leaderboard, board.getRaceLogEvents());
+                toState.updateStoredLeaderboard(leaderboard);
+                if (addedScoreCorrections) {
+                    unsetDummy(dummyColumnAndFleet, leaderboard);
+                }
 
             }
         }
         int[] overallLeaderboardDiscardThresholds = null;
         ScoringSchemeType overallLeaderboardScoringSchemeType = null;
-        LeaderboardMasterData overallLeaderboard = masterData.getOverallLeaderboardMasterData();
-        if (overallLeaderboard != null && overallLeaderboard instanceof FlexibleLeaderboardMasterData) {
-            FlexibleLeaderboardMasterData flex = (FlexibleLeaderboardMasterData) overallLeaderboard;
-            overallLeaderboardDiscardThresholds = overallLeaderboard.getResultDiscardingRule()
-                    .getDiscardIndexResultsStartingWithHowManyRaces();
-            overallLeaderboardScoringSchemeType = flex.getScoringScheme().getType();
-        }
+        final LeaderboardGroup leaderboardGroup;
         LeaderboardGroup existingLeaderboardGroup = toState.getLeaderboardGroupByName(masterData.getName());
         if (existingLeaderboardGroup != null && override) {
             logger.info(String.format("Leaderboard Group with name %1$s already existed and will be overridden.",
@@ -135,13 +139,24 @@ public class ImportMasterDataOperation extends
             existingLeaderboardGroup = null;
         }
         if (existingLeaderboardGroup == null) {
-            toState.addLeaderboardGroup(masterData.getName(), masterData.getDescription(),
+            leaderboardGroup = toState.addLeaderboardGroup(masterData.getName(), masterData.getDescription(),
                     masterData.isDisplayGroupsRevese(), leaderboardNames, overallLeaderboardDiscardThresholds,
                     overallLeaderboardScoringSchemeType);
-            creationCount.addOneLeaderboardGroup();
+            creationCount.addOneLeaderboardGroup(masterData.getName());
         } else {
+            leaderboardGroup = existingLeaderboardGroup;
             logger.info(String.format("Leaderboard Group with name %1$s already exists and hasn't been overridden.",
                     masterData.getName()));
+        }
+        if (masterData.hasOverallLeaderboard() && (override || existingLeaderboardGroup == null)) {
+            if (existingLeaderboardGroup != null && existingLeaderboardGroup.getOverallLeaderboard() != null) {
+                // remove old overall leaderboard if it existed
+                toState.removeLeaderboard(existingLeaderboardGroup.getOverallLeaderboard().getName());
+            }
+            LeaderboardGroupMetaLeaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(
+                    leaderboardGroup, masterData.getOverallLeaderboardScoringScheme(), masterData.getOverallLeaderboardDiscardingRule());
+            leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
+            toState.addLeaderboard(overallLeaderboard);
         }
     }
 
@@ -267,13 +282,16 @@ public class ImportMasterDataOperation extends
         for (RegattaMasterData singleRegattaData : regattaData) {
             Regatta existingRegatta = toState.getRegatta(new RegattaName(singleRegattaData.getRegattaName()));
             if (existingRegatta != null) {
-                if (override) {
+                if (creationCount.alreadyAddedRegattaWithId(existingRegatta.getId().toString())) {
+                    //Already added earlier in this import process
+                    continue;
+                } else if (override) {
                     logger.info(String.format("Regatta with name %1$s already existed and has been overridden.",
                             singleRegattaData.getRegattaName()));
                     try {
                         toState.removeRegatta(existingRegatta);
                     } catch (IOException | InterruptedException e) {
-                        logger.info(String.format("Regatta with name %1$s could not be deleted due to an error.",
+                        logger.warning(String.format("Regatta with name %1$s could not be deleted due to an error.",
                                 singleRegattaData.getRegattaName()));
                         e.printStackTrace();
                         continue;
@@ -297,7 +315,7 @@ public class ImportMasterDataOperation extends
                     domainFactory.createScoringScheme(ScoringSchemeType.valueOf(scoringSchemeType)),
                     courseAreaUUID).getA();
             toState.setPersistentRegattaForRaceIDs(createdRegatta, singleRegattaData.getRaceIds(), override);
-            creationCount.addOneRegatta();
+            creationCount.addOneRegatta(createdRegatta.getId().toString());
         }
 
     }
@@ -319,6 +337,9 @@ public class ImportMasterDataOperation extends
             while (raceColumnMasterDataIter.hasNext()) {
                 RaceColumnMasterData rcmd = raceColumnMasterDataIter.next();
                 RaceColumnInSeries raceColumn = raceColumnIter.next();
+                if (rcmd.getFactor() != null) {
+                    raceColumn.setFactor(rcmd.getFactor());
+                }
                 for (Map.Entry<String, RaceIdentifier> e : rcmd.getRaceIdentifiersByFleetName().entrySet()) {
                     raceColumn.setRaceIdentifier(raceColumn.getFleetByName(e.getKey()), e.getValue());
                 }
@@ -338,7 +359,7 @@ public class ImportMasterDataOperation extends
         for (EventMasterData event : events) {
             String id = event.getId();
             Event existingEvent = toState.getEvent(UUID.fromString(id));
-            if (existingEvent != null && override) {
+            if (existingEvent != null && override && !creationCount.alreadyAddedEventWithId(id)) {
                 logger.info(String.format("Event with name %1$s already existed and will be overridden.",
                         event.getName()));
                 toState.removeEvent(existingEvent.getId());
@@ -351,7 +372,7 @@ public class ImportMasterDataOperation extends
                 boolean isPublic = event.isPublic();
                 Event newEvent = new EventImpl(name, venueName, pubString, isPublic, UUID.fromString(id));
                 toState.createEventWithoutReplication(newEvent);
-                creationCount.addOneEvent();
+                creationCount.addOneEvent(newEvent.getId().toString());
             } else {
                 logger.info(String.format("Event with name %1$s already exists and hasn't been overridden.",
                         event.getName()));

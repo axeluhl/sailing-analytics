@@ -28,7 +28,7 @@ public class BoatClassImageDataResolver {
     	_470er.setReachingPortIcons(boatImageResources.class470er_ReachingPortIcon(), boatImageResources.class470er_ReachingPortIconSelected());
     	_470er.setReachingStarboardIcons(boatImageResources.class470er_ReachingStarboardIcon(), boatImageResources.class470er_ReachingStarboardIconSelected());
 
-    	BoatClassImageData _49er = new BoatClassImageData("49er", 4.90, 42, 67, 31, "49er FX");
+    	BoatClassImageData _49er = new BoatClassImageData("49er", 4.90, 42, 67, 31, "49erFX", "49FX");
     	_49er.setDownWindPortIcons(boatImageResources.class49er_DownWindPortIcon(), boatImageResources.class49er_DownWindPortIconSelected());
     	_49er.setDownWindStarboardIcons(boatImageResources.class49er_DownWindStarboardIcon(), boatImageResources.class49er_DownWindStarboardIconSelected());
     	_49er.setUpWindPortIcons(boatImageResources.class49er_UpWindPortIcon(), boatImageResources.class49er_UpWindPortIconSelected());

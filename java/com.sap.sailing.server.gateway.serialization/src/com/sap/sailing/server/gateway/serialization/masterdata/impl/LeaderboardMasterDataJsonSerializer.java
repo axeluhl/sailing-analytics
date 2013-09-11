@@ -38,6 +38,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
     public static final String FIELD_SCORING_SCHEME = "scoringScheme";
     public static final String FIELD_TYPE = "type";
     public static final String FIELD_REGATTA_LEADERBOARD = "regattaLeaderboard";
+    public static final String FIELD_META_LEADERBOARD = "metaLeaderboard";
     public static final String FIELD_RESULT_DISCARDING_RULE = "resultDiscardingRule";
     public static final String FIELD_INDICES = "indices";
     public static final String FIELD_COURSE_AREA = "courseArea";
@@ -96,7 +97,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
             jsonLeaderboard.put(FIELD_SCORING_SCHEME, createJsonForScoringScheme(leaderboard.getScoringScheme()));
             jsonLeaderboard.put(FIELD_COURSE_AREA, createJsonForCourseArea(flexibleLeaderboard.getDefaultCourseArea()));
             jsonLeaderboard.put(FIELD_RACE_COLUMNS, createJsonArrayForRaceColumns(leaderboard.getRaceColumns()));
-        } else {
+        } else if (leaderboard instanceof RegattaLeaderboard) {
             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
             jsonLeaderboard.put(FIELD_REGATTA_NAME, regattaLeaderboard.getRegatta().getName());
             CourseArea courseArea = regattaLeaderboard.getRegatta().getDefaultCourseArea();
@@ -106,9 +107,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
             regattas.add(regattaLeaderboard.getRegatta());
             isRegattaLeaderboard = true;
         }
-
         jsonLeaderboard.put(FIELD_REGATTA_LEADERBOARD, isRegattaLeaderboard);
-
         return jsonLeaderboard;
     }
 
@@ -137,11 +136,13 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
     private JSONArray createRaceLogEventsForFleet(RaceColumn raceColumn, Fleet fleet) {
         JSONArray array = new JSONArray();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        raceLog.lockForRead();
-        for (RaceLogEvent event : raceLog.getFixes()) {
-            array.add(raceLogEventSerializer.serialize(event));
+        if (raceLog != null) {
+            raceLog.lockForRead();
+            for (RaceLogEvent event : raceLog.getFixes()) {
+                array.add(raceLogEventSerializer.serialize(event));
+            }
+            raceLog.unlockAfterRead();
         }
-        raceLog.unlockAfterRead();
         return array;
     }
 
@@ -196,7 +197,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         return null;
     }
 
-    private JSONObject createJsonForResultDiscardingRule(ResultDiscardingRule resultDiscardingRule) {
+    public static JSONObject createJsonForResultDiscardingRule(ResultDiscardingRule resultDiscardingRule) {
         JSONObject result = new JSONObject();
         if (resultDiscardingRule instanceof ThresholdBasedResultDiscardingRule) {
             ThresholdBasedResultDiscardingRule rule = (ThresholdBasedResultDiscardingRule) resultDiscardingRule;
@@ -210,7 +211,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         return result;
     }
 
-    private JSONObject createJsonForScoringScheme(ScoringScheme scoringScheme) {
+    public static JSONObject createJsonForScoringScheme(ScoringScheme scoringScheme) {
         JSONObject result = new JSONObject();
         result.put(FIELD_TYPE, scoringScheme.getType().name());
         return result;
@@ -271,13 +272,15 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
             RaceColumn raceColumn, Leaderboard leaderboard) {
         JSONArray scoreCorrectionsForCompetitors = new JSONArray();
         for (Competitor competitor : leaderboard.getAllCompetitors()) {
-            JSONObject scoreCorrectionForCompetitor = new JSONObject();
-            scoreCorrectionForCompetitor.put(FIELD_EXPLICIT_SCORE_CORRECTION,
-                    correction.getExplicitScoreCorrection(competitor, raceColumn));
-            scoreCorrectionForCompetitor.put(FIELD_MAX_POINTS_REASON,
-                    correction.getMaxPointsReason(competitor, raceColumn).toString());
-            scoreCorrectionForCompetitor.put(FIELD_COMPETITOR_ID, competitor.getId().toString());
-            scoreCorrectionsForCompetitors.add(scoreCorrectionForCompetitor);
+            if (correction.isScoreCorrected(competitor, raceColumn)) {
+                JSONObject scoreCorrectionForCompetitor = new JSONObject();
+                scoreCorrectionForCompetitor.put(FIELD_EXPLICIT_SCORE_CORRECTION,
+                        correction.getExplicitScoreCorrection(competitor, raceColumn));
+                scoreCorrectionForCompetitor.put(FIELD_MAX_POINTS_REASON,
+                        correction.getMaxPointsReason(competitor, raceColumn).toString());
+                scoreCorrectionForCompetitor.put(FIELD_COMPETITOR_ID, competitor.getId().toString());
+                scoreCorrectionsForCompetitors.add(scoreCorrectionForCompetitor);
+            }
         }
 
         return scoreCorrectionsForCompetitors;

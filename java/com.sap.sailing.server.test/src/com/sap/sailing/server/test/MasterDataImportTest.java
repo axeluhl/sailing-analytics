@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,7 +39,6 @@ import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
@@ -46,9 +46,12 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
@@ -66,6 +69,7 @@ public class MasterDataImportTest {
     private static final String TEST_GROUP_NAME = "testGroup";
     private static final String TEST_EVENT_NAME = "testEvent";
     private static final String TEST_LEADERBOARD_NAME = "testRegatta (29er)";
+    private static final String TEST_GROUP_NAME2 = "testGroup2";
 
     private final UUID eventUUID = UUID.randomUUID();
 
@@ -86,6 +90,10 @@ public class MasterDataImportTest {
         LeaderboardGroup group = service.getLeaderboardGroupByName(TEST_GROUP_NAME);
         if (group != null) {
             service.removeLeaderboardGroup(TEST_GROUP_NAME);
+        }
+        LeaderboardGroup group2 = service.getLeaderboardGroupByName(TEST_GROUP_NAME2);
+        if (group2 != null) {
+            service.removeLeaderboardGroup(TEST_GROUP_NAME2);
         }
         Leaderboard leaderboard = service.getLeaderboardByName(TEST_LEADERBOARD_NAME);
         if (leaderboard != null) {
@@ -139,17 +147,25 @@ public class MasterDataImportTest {
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
         raceColumnNames.add("T2");
+        final List<String> emptyRaceColumnNamesList = Collections.emptyList();
 
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, raceColumnNames, sourceService));
+        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
+        for (String name : raceColumnNames) {
+            series.get(0).addRaceColumn(name, sourceService);
+        }
+        double factor = 3.0;
+        series.get(0).getRaceColumnByName(raceColumnName).setFactor(factor);
+        
+        
         int[] discardRule = { 1, 2, 3, 4 };
         Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
                 "testDisplayName", discardRule);
@@ -252,6 +268,8 @@ public class MasterDataImportTest {
         TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget);
         Fleet fleet1OnTarget = raceColumnOnTarget.getFleetByName(testFleet1.getName());
         raceColumnOnTarget.setTrackedRace(fleet1OnTarget, trackedRaceForTarget);
+        
+        Assert.assertEquals(factor, raceColumnOnTarget.getFactor());
 
         Iterable<Competitor> competitorsOnTarget = leaderboardOnTarget.getAllCompetitors();
         Iterator<Competitor> competitorIterator = competitorsOnTarget.iterator();
@@ -284,6 +302,145 @@ public class MasterDataImportTest {
     }
     
     @Test
+    public void testMasterDataImportForScoreCorrections() throws MalformedURLException, IOException,
+            InterruptedException {
+        // Setup source service
+        RacingEventService sourceService = new RacingEventServiceImpl();
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID,
+                new ArrayList<String>());
+        UUID courseAreaUUID = UUID.randomUUID();
+        CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
+        event.getVenue().addCourseArea(courseArea);
+
+        List<String> raceColumnNames = new ArrayList<String>();
+        String raceColumnName = "T1";
+        raceColumnNames.add(raceColumnName);
+        raceColumnNames.add("T2");
+        final List<String> emptyRaceColumnNamesList = Collections.emptyList();
+
+        List<Series> series = new ArrayList<Series>();
+        List<Fleet> fleets = new ArrayList<Fleet>();
+        FleetImpl testFleet1 = new FleetImpl("testFleet1");
+        fleets.add(testFleet1);
+        fleets.add(new FleetImpl("testFleet2"));
+        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
+        UUID regattaUUID = UUID.randomUUID();
+        Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
+                courseAreaUUID);
+        event.addRegatta(regatta);
+        for (String name : raceColumnNames) {
+            series.get(0).addRaceColumn(name, sourceService);
+        }
+
+        int[] discardRule = { 1, 2, 3, 4 };
+        Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
+                "testDisplayName", discardRule);
+        List<String> leaderboardNames = new ArrayList<String>();
+        leaderboardNames.add(leaderboard.getName());
+        sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, leaderboardNames, null, null);
+
+        // Set tracked Race with competitors
+        Set<Competitor> competitors = new HashSet<Competitor>();
+        UUID competitorUUID = UUID.randomUUID();
+        Set<Person> sailors = new HashSet<Person>();
+        sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
+                "Oberhoschy"));
+        Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
+                "Der Lennart halt");
+        Team team = new TeamImpl("Pros", sailors, coach);
+        BoatClass boatClass = new BoatClassImpl("H16", true);
+        Boat boat = new BoatImpl("Wingy", boatClass, "GER70133");
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
+        competitors.add(competitor);
+        UUID competitor2UUID = UUID.randomUUID();
+        Set<Person> sailors2 = new HashSet<Person>();
+        sailors2.add(new PersonImpl("Test Mustermann", new NationalityImpl("GER"), new Date(645487200000L), "desc"));
+        Person coach2 = new PersonImpl("Max Test", new NationalityImpl("GER"), new Date(645487200000L), "desc");
+        Team team2 = new TeamImpl("Pros2", sailors2, coach2);
+        Boat boat2 = new BoatImpl("FastBoat", boatClass, "GER70133");
+        CompetitorImpl competitor2 = new CompetitorImpl(competitor2UUID, "Froderik", team2, boat2);
+        competitors.add(competitor2);
+        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta);
+
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        raceColumn.setTrackedRace(testFleet1, trackedRace);
+
+        // Set log event
+        RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
+        TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1, logTimePoint);
+        raceColumn.getRaceLog(testFleet1).add(logEvent);
+        storedLogUUIDs.add(logEvent.getId());
+
+        // Set score correction
+        double scoreCorrection = 12.0;
+        leaderboard.getScoreCorrection().correctScore(competitor, raceColumn, scoreCorrection);
+        MaxPointsReason maxPointsReason = MaxPointsReason.DNS;
+        leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, maxPointsReason);
+
+        // Serialize
+        TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
+                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(),
+                sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
+        Set<String> names = new HashSet<String>();
+        names.add(TEST_GROUP_NAME);
+        JSONObject masterDataOverallObject = serializer.serialize(names);
+        Assert.assertNotNull(masterDataOverallObject);
+
+        // Delete all data above from the database, to allow recreating all of it on target server
+        deleteCreatedDataFromDatabase();
+
+        // Deserialization copied from doPost in MasterDataByLeaderboardGroupJsonPostServlet
+        RacingEventService destService = new RacingEventServiceImplMock();
+        DomainFactory domainFactory = DomainFactory.INSTANCE;
+        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(
+                masterDataOverallObject.toString(), false);
+
+        Assert.assertNotNull(creationCount);
+        Event eventOnTarget = destService.getEvent(eventUUID);
+        Assert.assertNotNull(eventOnTarget);
+        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        Assert.assertNotNull(leaderboardGroupOnTarget);
+        Leaderboard leaderboardOnTarget = destService.getLeaderboardByName(TEST_LEADERBOARD_NAME);
+        Assert.assertNotNull(leaderboardOnTarget);
+        Regatta regattaOnTarget = destService.getRegattaByName(TEST_LEADERBOARD_NAME);
+        Assert.assertNotNull(regattaOnTarget);
+
+        Assert.assertEquals(courseAreaUUID, eventOnTarget.getVenue().getCourseAreas().iterator().next().getId());
+
+        RaceColumn raceColumnOnTarget = leaderboardOnTarget.getRaceColumnByName(raceColumnName);
+        Assert.assertNotNull(raceColumnOnTarget);
+
+        Assert.assertTrue(leaderboardOnTarget.getScoreCorrection().hasCorrectionFor(raceColumnOnTarget));
+        Competitor competitorOnTarget = domainFactory.getExistingCompetitorById(competitorUUID);
+        Competitor competitorOnTarget2 = domainFactory.getExistingCompetitorById(competitor2UUID);
+        Set<Competitor> competitorsCreatedOnTarget = new HashSet<Competitor>();
+        competitorsCreatedOnTarget.add(competitorOnTarget);
+
+        TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget);
+        Fleet fleet1OnTarget = raceColumnOnTarget.getFleetByName(testFleet1.getName());
+        raceColumnOnTarget.setTrackedRace(fleet1OnTarget, trackedRaceForTarget);
+
+        Iterable<Competitor> competitorsOnTarget = leaderboardOnTarget.getAllCompetitors();
+        Iterator<Competitor> competitorIterator = competitorsOnTarget.iterator();
+        Assert.assertTrue(competitorIterator.hasNext());
+        Assert.assertEquals(competitorOnTarget, competitorIterator.next());
+
+        // Check for score corrections
+        Assert.assertEquals(
+                scoreCorrection,
+                leaderboardOnTarget.getScoreCorrection().getExplicitScoreCorrection(competitorOnTarget,
+                        raceColumnOnTarget));
+        Assert.assertEquals(maxPointsReason,
+                leaderboardOnTarget.getScoreCorrection().getMaxPointsReason(competitorOnTarget, raceColumnOnTarget));
+
+        // Checks if score correction was not set if not set on source
+        Assert.assertFalse(leaderboardOnTarget.getScoreCorrection().isScoreCorrected(competitorOnTarget2,
+                raceColumnOnTarget));
+    }
+
+    @Test
     public void testMasterDataImportWithoutOverrideWithoutHttpStack() throws MalformedURLException, IOException, InterruptedException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
@@ -297,17 +454,23 @@ public class MasterDataImportTest {
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
         raceColumnNames.add("T2");
-
+        List<String> emptyRaceColumnNamesList = Collections.emptyList();
+        
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, raceColumnNames, sourceService));
+        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
+        for (String name : raceColumnNames) {
+            series.get(0).addRaceColumn(name, sourceService);
+        }
+        
+        
         int[] discardRule = { 1, 2, 3, 4 };
         Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
                 "testDisplayName", discardRule);
@@ -391,15 +554,20 @@ public class MasterDataImportTest {
         List<String> raceColumnNamesNotToOverride = new ArrayList<String>();
         String raceColumnNameNotToOveride = "T1nottooverride";
         raceColumnNamesNotToOverride.add(raceColumnNameNotToOveride);
+        emptyRaceColumnNamesList = Collections.emptyList();
 
         List<Series> seriesNotToOverride = new ArrayList<Series>();
         List<Fleet> fleetsNotToOverride = new ArrayList<Fleet>();
         FleetImpl testFleet1NotToOverride = new FleetImpl("testFleet1");
         fleetsNotToOverride.add(testFleet1NotToOverride);
-        seriesNotToOverride.add(new SeriesImpl("testSeries", false, fleetsNotToOverride, raceColumnNamesNotToOverride, destService));
+        seriesNotToOverride.add(new SeriesImpl("testSeries", false, fleetsNotToOverride, emptyRaceColumnNamesList, destService));
         Regatta regattaNotToOverride = destService.createRegatta("testRegatta", "29er", regattaUUID, seriesNotToOverride, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regattaNotToOverride);
+        for (String name : raceColumnNamesNotToOverride) {
+            seriesNotToOverride.get(0).addRaceColumn(name, destService);
+        }
+        
         Leaderboard leaderboardNotToOverride = destService.addRegattaLeaderboard(regattaNotToOverride.getRegattaIdentifier(),
                 "testDisplayNameNotToOverride", discardRule);
         List<String> leaderboardNamesNotToOverride = new ArrayList<String>();
@@ -416,8 +584,13 @@ public class MasterDataImportTest {
 
         
         //---Asserts---
-        
+        //Test correct number of creations
         Assert.assertNotNull(creationCount);
+        Assert.assertEquals(0,creationCount.getEventCount());
+        Assert.assertEquals(0,creationCount.getRegattaCount());
+        Assert.assertEquals(0,creationCount.getLeaderboardCount());
+        Assert.assertEquals(0,creationCount.getLeaderboardGroupCount());
+        
         Event eventOnTarget = destService.getEvent(eventUUID);
         Assert.assertNotNull(eventOnTarget);
         
@@ -459,17 +632,22 @@ public class MasterDataImportTest {
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
         raceColumnNames.add("T2");
+        List<String> emptyRaceColumnNamesList = Collections.emptyList();
 
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, raceColumnNames, sourceService));
+        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
+        for (String name : raceColumnNames) {
+            series.get(0).addRaceColumn(name, sourceService);
+        }
+        
         int[] discardRule = { 1, 2, 3, 4 };
         Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
                 "testDisplayName", discardRule);
@@ -554,15 +732,20 @@ public class MasterDataImportTest {
         List<String> raceColumnNamesToOverride = new ArrayList<String>();
         String raceColumnNameToOveride = "T1tooverride";
         raceColumnNamesToOverride.add(raceColumnNameToOveride);
-
+        emptyRaceColumnNamesList = Collections.emptyList();
+        
         List<Series> seriesToOverride = new ArrayList<Series>();
         List<Fleet> fleetsToOverride = new ArrayList<Fleet>();
         FleetImpl testFleet1ToOverride = new FleetImpl("testFleet1");
         fleetsToOverride.add(testFleet1ToOverride);
-        seriesToOverride.add(new SeriesImpl("testSeries", false, fleetsToOverride, raceColumnNamesToOverride, destService));
+        seriesToOverride.add(new SeriesImpl("testSeries", false, fleetsToOverride, emptyRaceColumnNamesList, destService));
         Regatta regattaToOverride = destService.createRegatta("testRegatta", "29er", regattaUUID, seriesToOverride, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regattaToOverride);
+        for (String name : raceColumnNamesToOverride) {
+            seriesToOverride.get(0).addRaceColumn(name, destService);
+        }
+        
         Leaderboard leaderboardToOverride = destService.addRegattaLeaderboard(regattaToOverride.getRegattaIdentifier(),
                 "testDisplayNameNotToOverride", discardRule);
         List<String> leaderboardNamesToOverride = new ArrayList<String>();
@@ -579,8 +762,14 @@ public class MasterDataImportTest {
 
         
         //---Asserts---
-        
+        //Test correct number of creations
         Assert.assertNotNull(creationCount);
+        Assert.assertEquals(1,creationCount.getEventCount());
+        Assert.assertEquals(1,creationCount.getRegattaCount());
+        Assert.assertEquals(1,creationCount.getLeaderboardCount());
+        Assert.assertEquals(1,creationCount.getLeaderboardGroupCount());
+        
+        
         Event eventOnTarget = destService.getEvent(eventUUID);
         Assert.assertNotNull(eventOnTarget);
         
@@ -617,16 +806,20 @@ public class MasterDataImportTest {
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
         raceColumnNames.add("T2");
+        List<String> emptyRaceColumnNamesList = Collections.emptyList();
 
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, raceColumnNames, sourceService));
+        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
                 null);
+        for (String name : raceColumnNames) {
+            series.get(0).addRaceColumn(name, sourceService);
+        }
         int[] discardRule = { 1, 2, 3, 4 };
         Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
                 "testDisplayName", discardRule);
@@ -736,17 +929,23 @@ public class MasterDataImportTest {
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
         raceColumnNames.add("T2");
+        final List<String> emptyRaceColumnNamesList = Collections.emptyList();
 
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, raceColumnNames, sourceService));
+        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
+        for (String name : raceColumnNames) {
+            series.get(0).addRaceColumn(name, sourceService);
+        }
+        
+        
         int[] discardRule = { 1, 2, 3, 4 };
         Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
                 "testDisplayName", discardRule);
@@ -888,6 +1087,164 @@ public class MasterDataImportTest {
         Assert.assertEquals(trackOnSource.dbId, trackOnTarget.dbId);
         
         Assert.assertEquals(trackOnSource.url, trackOnTarget.url);
+
+    }
+    
+    @Test
+    public void testMasterDataImportWithTwoLgsWithSameLeaderboard() throws MalformedURLException, IOException, InterruptedException {
+        // Setup source service
+        RacingEventService sourceService = new RacingEventServiceImpl();
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID,
+                new ArrayList<String>());
+        UUID courseAreaUUID = UUID.randomUUID();
+        CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
+        event.getVenue().addCourseArea(courseArea);
+
+        List<String> raceColumnNames = new ArrayList<String>();
+        String raceColumnName = "T1";
+        raceColumnNames.add(raceColumnName);
+        raceColumnNames.add("T2");
+        final List<String> emptyRaceColumnNamesList = Collections.emptyList();
+
+        List<Series> series = new ArrayList<Series>();
+        List<Fleet> fleets = new ArrayList<Fleet>();
+        FleetImpl testFleet1 = new FleetImpl("testFleet1");
+        fleets.add(testFleet1);
+        fleets.add(new FleetImpl("testFleet2"));
+        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
+        UUID regattaUUID = UUID.randomUUID();
+        Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
+                courseAreaUUID);
+        event.addRegatta(regatta);
+        for (String name : raceColumnNames) {
+            series.get(0).addRaceColumn(name, sourceService);
+        }
+        
+        int[] discardRule = { 1, 2, 3, 4 };
+        Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
+                "testDisplayName", discardRule);
+        List<String> leaderboardNames = new ArrayList<String>();
+        leaderboardNames.add(leaderboard.getName());
+        sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, leaderboardNames, null, null);
+        sourceService.addLeaderboardGroup(TEST_GROUP_NAME2, "testGroupDesc2", false, leaderboardNames, null, null);
+
+        // Set tracked Race with competitors
+        Set<Competitor> competitors = new HashSet<Competitor>();
+        UUID competitorUUID = UUID.randomUUID();
+        Set<Person> sailors = new HashSet<Person>();
+        sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
+                "Oberhoschy"));
+        Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
+                "Der Lennart halt");
+        Team team = new TeamImpl("Pros", sailors, coach);
+        BoatClass boatClass = new BoatClassImpl("H16", true);
+        Boat boat = new BoatImpl("Wingy", boatClass, "GER70133");
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
+        competitors.add(competitor);
+        UUID competitorToSuppressUUID = UUID.randomUUID();
+        Set<Person> sailors2 = new HashSet<Person>();
+        sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
+                "segelt auch mit"));
+        Person coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
+                "Bester Coach");
+        Team team2 = new TeamImpl("Noobs", sailors2, coach2);
+        Boat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
+        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
+        competitors.add(competitorToSuppress);
+        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta);
+
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        raceColumn.setTrackedRace(testFleet1, trackedRace);
+
+        // Serialize
+        TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
+                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(),
+                sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
+        Set<String> names = new HashSet<String>();
+        names.add(TEST_GROUP_NAME);
+        names.add(TEST_GROUP_NAME2);
+        JSONObject masterDataOverallObject = serializer.serialize(names);
+        Assert.assertNotNull(masterDataOverallObject);
+
+        // Delete all data above from the database, to allow recreating all of it on target server
+        deleteCreatedDataFromDatabase();
+
+        // Deserialization copied from doPost in MasterDataByLeaderboardGroupJsonPostServlet
+        RacingEventService destService = new RacingEventServiceImplMock();
+        DomainFactory domainFactory = DomainFactory.INSTANCE;
+        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+        //Test in override model, to find out if data that was created during import is overriden later on
+        // in the same import process. Number of creations is checked below.
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(
+                masterDataOverallObject.toString(), true);
+
+        //Test correct number of creations
+        Assert.assertNotNull(creationCount);
+        Assert.assertEquals(1,creationCount.getEventCount());
+        Assert.assertEquals(1,creationCount.getRegattaCount());
+        Assert.assertEquals(1,creationCount.getLeaderboardCount());
+        Assert.assertEquals(2,creationCount.getLeaderboardGroupCount());
+        
+        Event eventOnTarget = destService.getEvent(eventUUID);
+        Assert.assertNotNull(eventOnTarget);
+        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        Assert.assertNotNull(leaderboardGroupOnTarget);
+        Assert.assertTrue(leaderboardGroupOnTarget.getLeaderboards().iterator().hasNext());
+        LeaderboardGroup leaderboardGroup2OnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME2);
+        Assert.assertNotNull(leaderboardGroup2OnTarget);
+        Assert.assertTrue(leaderboardGroup2OnTarget.getLeaderboards().iterator().hasNext());
+     
+    }
+    
+    @Test
+    public void testMasterDataImportWithOverallLeaderboard() throws MalformedURLException, IOException, InterruptedException {
+        // Setup source service
+        RacingEventService sourceService = new RacingEventServiceImpl();
+
+        int[] discardRule = { 1, 2, 3, 4 };
+        ScoringScheme scheme = new LowPoint();
+        List<String> leaderboardNames = new ArrayList<String>();
+        sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, 
+                leaderboardNames, discardRule, scheme.getType());
+
+       
+        // Serialize
+        TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
+                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(),
+                sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
+        Set<String> names = new HashSet<String>();
+        names.add(TEST_GROUP_NAME);
+        JSONObject masterDataOverallObject = serializer.serialize(names);
+        Assert.assertNotNull(masterDataOverallObject);
+
+        // Delete all data above from the database, to allow recreating all of it on target server
+        deleteCreatedDataFromDatabase();
+
+        // Deserialization copied from doPost in MasterDataByLeaderboardGroupJsonPostServlet
+        RacingEventService destService = new RacingEventServiceImplMock();
+        DomainFactory domainFactory = DomainFactory.INSTANCE;
+        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+        //Test in override model, to find out if data that was created during import is overriden later on
+        // in the same import process. Number of creations is checked below.
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(
+                masterDataOverallObject.toString(), true);
+
+        //Test correct number of creations
+        Assert.assertEquals(1,creationCount.getLeaderboardGroupCount());
+        
+        LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        Assert.assertNotNull(leaderboardGroupOnTarget);
+        Leaderboard overallLeaderboard = leaderboardGroupOnTarget.getOverallLeaderboard();
+        Assert.assertNotNull(overallLeaderboard);
+        
+        Assert.assertNotNull(overallLeaderboard.getResultDiscardingRule());
+        
+        Assert.assertNotNull(overallLeaderboard.getScoringScheme());
+        
+        Assert.assertEquals(scheme.getType(), overallLeaderboard.getScoringScheme().getType());
+
+        Assert.assertEquals(3, ((ThresholdBasedResultDiscardingRule) overallLeaderboard.getResultDiscardingRule())
+                .getDiscardIndexResultsStartingWithHowManyRaces()[2]);
 
     }
 }

@@ -66,9 +66,9 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
         int selIndex = this.availableRegattasListBox.getSelectedIndex();
         // the zero index represents the 'no selection' text
         if (selIndex > 0) {
-            String itemText = this.availableRegattasListBox.getItemText(selIndex);
+            String itemValue = this.availableRegattasListBox.getValue(selIndex);
             for (RegattaDTO regatta : this.availableRegattas) {
-                if (regatta.getName().equals(itemText)) {
+                if (regatta.getName().equals(itemValue)) {
                     result = regatta;
                     break;
                 }

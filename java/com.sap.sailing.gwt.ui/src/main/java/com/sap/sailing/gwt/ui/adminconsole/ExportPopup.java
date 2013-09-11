@@ -53,8 +53,9 @@ public class ExportPopup extends DialogBox {
 
         ListBox lbData = new ListBox(true);
         lbData.setName(TrackFilesExportParameters.DATA);
-        for (TrackFilesDataSource dataSource : TrackFilesDataSource.values())
+        for (TrackFilesDataSource dataSource : TrackFilesDataSource.values()) {
             lbData.addItem(dataSource.name());
+        }
         lbData.setVisibleItemCount(lbData.getItemCount());
         lbData.setItemSelected(0, true);
         mainPanel.add(lbData);

@@ -4,11 +4,15 @@
 
 [[Trim Database|wiki/planning/TrimDatabase]]
 
+[[Smartphone Tracking|wiki/smartphone-tracking]]
+
 [[ORC|wiki/planning/ORC]]
 
 [[ISAF-Internal Projects|wiki/planning/ISAFInternalProjects]]
 
 [[Advanced Wind Field Analysis|wiki/planning/AdvancedWindFieldAnalysis]]
+
+[[Support Specific Analysis Scenarios|wiki/planning/AnalysisScenarios]]
 
 [[Google Earth as Map|wiki/planning/GoogleEarth]]
 

@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.NavigableMap;
 import java.util.Set;
 
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 
 public interface PolarDiagram extends Serializable {
 

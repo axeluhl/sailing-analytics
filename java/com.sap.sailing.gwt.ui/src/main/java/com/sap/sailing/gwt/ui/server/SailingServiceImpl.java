@@ -65,12 +65,9 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -101,6 +98,7 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsFor
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -121,7 +119,9 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationTriggerResponseImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.Util;
@@ -806,14 +806,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             // reload JSON and load clientparams.php
             RaceRecord record = getService().getSingleTracTracRaceRecord(new URL(rr.jsonURL), rr.id, /*loadClientParams*/true);
             logger.info("Loaded race " + record.getName() + " in " + record.getEventName() + " start:" + record.getRaceStartTime() + " trackingStart:" + record.getTrackingStartTime() + " trackingEnd:" + record.getTrackingEndTime());
-            if (liveURI == null || liveURI.trim().length() == 0) {
-                liveURI = record.getLiveURI().toString();
+            // note that the live URI may be null for races that were put into replay mode
+            final String effectiveLiveURI;
+            if (!record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS)) {
+                if (liveURI == null || liveURI.trim().length() == 0) {
+                    effectiveLiveURI = record.getLiveURI() == null ? null : record.getLiveURI().toString();
+                } else {
+                    effectiveLiveURI = liveURI;
+                }
+            } else {
+                effectiveLiveURI = null;
             }
+            final String effectiveStoredURI;
             if (storedURI == null || storedURI.trim().length() == 0) {
-                storedURI = record.getStoredURI().toString();
+                effectiveStoredURI = record.getStoredURI().toString();
+            } else {
+                effectiveStoredURI = storedURI;
             }
             final RacesHandle raceHandle = getService().addTracTracRace(regattaToAddTo, record.getParamURL(),
-                    new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI), new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
+                    effectiveLiveURI == null ? null : new URI(effectiveLiveURI), new URI(effectiveStoredURI),
+                    new URI(courseDesignUpdateURI), new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
                     new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                     MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
@@ -1102,7 +1114,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             if(confidence < minWindConfidence) {
                                 minWindConfidence = confidence;
                             }
-                            if(confidence > maxWindConfidence) {
+                            if (confidence > maxWindConfidence) {
                                 maxWindConfidence = confidence;
                             }
                         }
@@ -1831,6 +1843,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Leaderboard updatedLeaderboard = getService().apply(new UpdateLeaderboard(leaderboardName, newLeaderboardName, newLeaderboardDisplayName, newDiscardingThresholds, newCourseAreaUuid));
         return createStrippedLeaderboardDTO(updatedLeaderboard, false);
     }
+    
+    @Override
+    public void removeLeaderboards(Collection<String> leaderboardNames) {
+        for (String leaderoardName : leaderboardNames) {
+            removeLeaderboard(leaderoardName);
+        }
+    }
 
     @Override
     public void removeLeaderboard(String leaderboardName) {
@@ -2456,7 +2475,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void removeLeaderboardGroup(String groupName) {
+    public void removeLeaderboardGroups(Set<String> groupNames) {
+        for (String groupName : groupNames) {
+            removeLeaderboardGroup(groupName);
+        }
+    }
+
+    private void removeLeaderboardGroup(String groupName) {
         getService().apply(new RemoveLeaderboardGroup(groupName));
     }
 
@@ -2542,6 +2567,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         UUID eventUuid = convertIdentifierStringToUuid(eventIdAsString);
         CourseArea courseArea = getService().apply(new AddCourseArea(eventUuid, courseAreaName, UUID.randomUUID()));
         return convertToCourseAreaDTO(courseArea);
+    }
+
+    @Override
+    public void removeEvents(Collection<String> eventIdsAsStrings) {
+        for (String eventId : eventIdsAsStrings) {
+            removeEvent(eventId);
+        }
     }
 
     @Override
@@ -2670,6 +2702,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return regattaName;
+    }
+
+    @Override
+    public void removeRegattas(Collection<RegattaIdentifier> selectedRegattas) {
+        for (RegattaIdentifier regatta : selectedRegattas) {
+            removeRegatta(regatta);
+        }
     }
     
     @Override

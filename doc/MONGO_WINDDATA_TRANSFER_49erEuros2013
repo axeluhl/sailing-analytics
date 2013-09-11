@@ -1,0 +1,5 @@
+505 WM La Rochelle 
+
+Move wind data from live to archive
+  /opt/mongodb/bin/mongoexport --port 10201 -d winddb -c WIND_TRACKS -q '{REGATTA_NAME: /49er Euros 2013.*/}' >WIND_TRACKS_49erEuros2013.json
+  /opt/mongodb/bin/mongoimport --port 10202 --upsert -d winddb -c WIND_TRACKS WIND_TRACKS_49erEuros2013.json

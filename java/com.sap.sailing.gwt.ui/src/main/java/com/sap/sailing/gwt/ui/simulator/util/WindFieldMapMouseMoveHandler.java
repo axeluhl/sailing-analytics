@@ -12,7 +12,7 @@ import com.google.gwt.maps.client.event.MapMouseMoveHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
-import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
+import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 
 /**
  * To handle MouseMoveEvent to display tool tips around SimulatorWindDTO objects in a wind field

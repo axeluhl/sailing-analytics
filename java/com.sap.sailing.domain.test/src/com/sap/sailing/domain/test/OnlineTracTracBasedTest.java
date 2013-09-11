@@ -19,15 +19,16 @@ import java.util.regex.Pattern;
 import org.junit.Before;
 
 
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -105,8 +106,8 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         addListenersForStoredDataAndStartController(receivers);
         Race tractracRace = getTracTracEvent().getRaceList().iterator().next();
         // now we expect that there is no RaceDefinition for the TracTrac race yet:
-        assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace));
-        race = getDomainFactory().getAndWaitForRaceDefinition(tractracRace);
+        assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace.getId()));
+        race = getDomainFactory().getAndWaitForRaceDefinition(tractracRace.getId());
         assertNotNull(race);
         logger.info("Waiting for stored data to be loaded for " + race.getName());
         synchronized (getSemaphor()) {

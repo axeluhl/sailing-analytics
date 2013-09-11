@@ -6,7 +6,7 @@ import java.util.Collections;
 
 import android.app.Activity;
 import android.app.FragmentManager;
-import android.app.ListFragment;
+import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -20,23 +20,22 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.BaseDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
-public abstract class NamedListFragment<T extends Named> extends ListFragment implements LoadClient<Collection<T>>,
+public abstract class NamedListFragment<T extends Named> extends LoggableListFragment implements LoadClient<Collection<T>>,
         DialogListenerHost {
     
-    private static String TAG = NamedListFragment.class.getName();
+    //private static String TAG = NamedListFragment.class.getName();
     
     private ItemSelectedListener<T> listener;
     private NamedArrayAdapter<T> listAdapter;
-    private ReadonlyDataManager dataManager;
 
     protected ArrayList<T> namedList;
 
@@ -44,14 +43,8 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
 
     protected abstract String getHeaderText();
 
-    protected abstract void loadItems(ReadonlyDataManager manager);
-
     protected NamedArrayAdapter<T> createAdapter(Context context, ArrayList<T> items) {
         return new NamedArrayAdapter<T>(context, items);
-    }
-
-    protected void loadItems() {
-        loadItems(dataManager);
     }
 
     @Override
@@ -64,6 +57,8 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
         super.onAttach(activity);
         this.listener = attachListener(activity);
     }
+    
+    protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(ReadonlyDataManager manager);
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -78,7 +73,11 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
         this.setListAdapter(listAdapter);
 
         showProgressBar(true);
-        dataManager = OnlineDataManager.create(getActivity());
+        loadItems();
+    }
+
+    private void loadItems() {
+        getLoaderManager().restartLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())));
     }
 
     @Override
@@ -99,20 +98,20 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
         textText.setText(getHeaderText());
     }
 
-    public void onLoadSucceded(Collection<T> data) {
+    public void onLoadSucceded(Collection<T> data, boolean isCached) {
         namedList.clear();
         namedList.addAll(data);
         Collections.sort(namedList, new NaturalNamedComparator());
         listAdapter.notifyDataSetChanged();
 
         showProgressBar(false);
-
-        // we set this here to ensure that the screen is initially
-        // not covered with the following text while loading
-        // this.setEmptyText("There is no item available.");
     }
 
+    @Override
     public void onLoadFailed(Exception reason) {
+        namedList.clear();
+        listAdapter.notifyDataSetChanged();
+        
         showProgressBar(false);
 
         String message = reason.getMessage();
@@ -131,13 +130,11 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
 
     private void showLoadFailedDialog(String message) {
         FragmentManager manager = getFragmentManager();
-        if (manager != null) {
-            FragmentAttachedDialogFragment dialog = LoadFailedDialog.create(message);
-            dialog.setTargetFragment(this, 0);
-            dialog.show(manager, "failedDialog");
-        } else {
-            ExLog.e(TAG, String.format("FragmentManager was not available to display message: %s", message));
-        }
+        FragmentAttachedDialogFragment dialog = LoadFailedDialog.create(message);
+        dialog.setTargetFragment(this, 0);
+        // We cannot use DialogFragment#show here because we need to commit the transaction
+        // allowing a state loss, because we are effectively in Loader#onLoadFinished()
+        manager.beginTransaction().add(dialog, "failedDialog").commitAllowingStateLoss();
     }
     
     @Override
@@ -145,13 +142,13 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
         return new DialogResultListener() {
             
             @Override
-            public void onDialogPositiveButton(BaseDialogFragment dialog) {
+            public void onDialogPositiveButton(AttachedDialogFragment dialog) {
                 loadItems();
             }
             
             @Override
-            public void onDialogNegativeButton(BaseDialogFragment dialog) {
-                // no operation
+            public void onDialogNegativeButton(AttachedDialogFragment dialog) {
+                
             }
         };
     }

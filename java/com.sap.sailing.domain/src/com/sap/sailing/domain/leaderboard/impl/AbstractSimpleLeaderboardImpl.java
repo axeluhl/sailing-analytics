@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,9 +37,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -48,6 +47,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -58,6 +58,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -72,6 +73,7 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
@@ -1193,6 +1195,15 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         entryDTO.totalPoints = entry.getTotalPoints();
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
         entryDTO.discarded = entry.isDiscarded();
+        if (trackedRace != null) {
+            entryDTO.timePointOfLastPositionFixAtOrBeforeQueryTimePoint = getTimePointOfLastFixAtOrBefore(competitor, trackedRace, timePoint);
+            if(entryDTO.timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null) {
+                long timeDifferenceInMs = timePoint.asMillis() - entryDTO.timePointOfLastPositionFixAtOrBeforeQueryTimePoint.getTime();
+                entryDTO.timeSinceLastPositionFixInSeconds = timeDifferenceInMs == 0 ? 0.0 : timeDifferenceInMs / 1000.0;  
+            } else {
+                entryDTO.timeSinceLastPositionFixInSeconds = null;  
+            }
+        }
         if (addLegDetails && trackedRace != null) {
             try {
                 RaceDetails raceDetails = getRaceDetails(trackedRace, competitor, timePoint, waitForLatestAnalyses, legRanksCache);
@@ -1243,6 +1254,29 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         final Fleet fleet = entry.getFleet();
         entryDTO.fleet = fleet == null ? null : baseDomainFactory.convertToFleetDTO(fleet);
         return entryDTO;
+    }
+
+    /**
+     * Determines the time point of the last raw fix (with outliers not removed) for <code>competitor</code> in
+     * <code>trackedRace</code>. If the competitor's track is <code>null</code> or empty, <code>null</code> is returned.
+     * @param trackedRace must not be <code>null</code>
+     * @param atOrBefore find the last fix at or before the time point specified
+     */
+    private Date getTimePointOfLastFixAtOrBefore(Competitor competitor, TrackedRace trackedRace, TimePoint atOrBefore) {
+        assert trackedRace != null;
+        final Date timePointOfLastPositionFix;
+        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+        if (track == null) {
+            timePointOfLastPositionFix = null;
+        } else {
+            GPSFixMoving lastFix = track.getLastFixAtOrBefore(atOrBefore);
+            if (lastFix == null) {
+                timePointOfLastPositionFix = null;
+            } else {
+                timePointOfLastPositionFix = lastFix.getTimePoint().asDate();
+            }
+        }
+        return timePointOfLastPositionFix;
     }
 
     private static class RaceDetails {

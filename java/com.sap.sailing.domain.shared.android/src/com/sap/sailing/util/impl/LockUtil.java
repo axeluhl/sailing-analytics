@@ -1,6 +1,5 @@
 package com.sap.sailing.util.impl;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -12,8 +11,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 
 /**
@@ -292,7 +291,7 @@ public class LockUtil {
             synchronized (map) {
                 result = map.get(thread);
                 if (result == null) {
-                    result = new HashMap<Lock, Integer>();
+                    result = new ConcurrentHashMap<Lock, Integer>();
                     map.put(thread, result);
                 }
             }

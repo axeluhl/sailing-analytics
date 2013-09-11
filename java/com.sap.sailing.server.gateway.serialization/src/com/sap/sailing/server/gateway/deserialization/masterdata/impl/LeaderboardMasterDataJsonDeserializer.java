@@ -71,23 +71,25 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
             Competitor deserializedCompetitor = competitorDeserializer.deserialize(competitorJson);
             competitorsById.put(deserializedCompetitor.getId().toString(), deserializedCompetitor);
         }
+        final LeaderboardMasterData result;
         if (isRegattaLeaderBoard) {
             String regattaName = (String) object.get(LeaderboardMasterDataJsonSerializer.FIELD_REGATTA_NAME);
-            return new RegattaLeaderboardMasterData(name, displayName, resultDiscardingRule, competitorsById,
+            result = new RegattaLeaderboardMasterData(name, displayName, resultDiscardingRule, competitorsById,
                     scoreCorrection, regattaName, carriedPoints, suppressedCompetitors, displayNamesByCompetitorId,
                     raceLogEvents);
 
         } else {
             ScoringScheme scoringScheme = deserializeScoringScheme((JSONObject) object
-                    .get(LeaderboardMasterDataJsonSerializer.FIELD_SCORING_SCHEME));
+                    .get(LeaderboardMasterDataJsonSerializer.FIELD_SCORING_SCHEME), domainFactory);
             String courseAreaId = deserializeCourseAreaId((JSONObject) object
                     .get(LeaderboardMasterDataJsonSerializer.FIELD_COURSE_AREA));
             List<RaceColumnMasterData> raceColumns = deserializeRaceColumns((JSONArray) object
                     .get(LeaderboardMasterDataJsonSerializer.FIELD_RACE_COLUMNS));
-            return new FlexibleLeaderboardMasterData(name, displayName, resultDiscardingRule, competitorsById,
+            result = new FlexibleLeaderboardMasterData(name, displayName, resultDiscardingRule, competitorsById,
                     scoreCorrection, scoringScheme, courseAreaId, raceColumns, carriedPoints, suppressedCompetitors,
                     displayNamesByCompetitorId, raceLogEvents);
         }
+        return result;
     }
 
     private Map<String, Map<String, List<RaceLogEvent>>> deserializeRaceLogEvents(JSONArray jsonArray) {
@@ -205,6 +207,7 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
                     .get(RaceColumnMasterDataJsonSerializer.FIELD_NAME);
             Boolean medal = (Boolean) columnJson
                     .get(RaceColumnMasterDataJsonSerializer.FIELD_MEDAL_RACE);
+            Double factor = (Double) columnJson.get(RaceColumnMasterDataJsonSerializer.FIELD_FACTOR);
             Map<String, RaceIdentifier> raceIdentifiers = new HashMap<String, RaceIdentifier>();
             JSONArray jsonRaceIdentifiers = (JSONArray) columnJson.get(RaceColumnMasterDataJsonSerializer.FIELD_RACE_IDENTIFIERS);
             for (Object raceIdentifierObject : jsonRaceIdentifiers) {
@@ -215,7 +218,7 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
                 RaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
                 raceIdentifiers.put(fleetName, raceIdentifier);
             }
-            columns.add(new RaceColumnMasterData(columnName, medal, raceIdentifiers));
+            columns.add(new RaceColumnMasterData(columnName, medal, raceIdentifiers, factor));
         }
         return columns;
     }
@@ -229,19 +232,35 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
 
     }
 
-    private ScoringScheme deserializeScoringScheme(JSONObject jsonObject) {
-        String type = (String) jsonObject.get(LeaderboardMasterDataJsonSerializer.FIELD_TYPE);
-        return domainFactory.createScoringScheme(ScoringSchemeType.valueOf(type));
-    }
-
-    private int[] deserializeResultDesicardingRule(JSONObject jsonObject) {
-        JSONArray indeces = (JSONArray) jsonObject.get(LeaderboardMasterDataJsonSerializer.FIELD_INDICES);
-        if (indeces == null) {
-            return null;
+    public static ScoringScheme deserializeScoringScheme(JSONObject jsonObject, DomainFactory domainFactory) {
+        final ScoringScheme result;
+        if (jsonObject == null) {
+            result = null;
+        } else {
+            String type = (String) jsonObject.get(LeaderboardMasterDataJsonSerializer.FIELD_TYPE);
+            if (type == null) {
+                result = null;
+            } else {
+                result = domainFactory.createScoringScheme(ScoringSchemeType.valueOf(type));
+            }
         }
-        int[] result = new int[indeces.size()];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = ((Long) indeces.get(i)).intValue();
+        return result;
+    }
+    
+    public static int[] deserializeResultDesicardingRule(JSONObject jsonObject) {
+        final int[] result;
+        if (jsonObject == null) {
+            result = null;
+        } else {
+            JSONArray indeces = (JSONArray) jsonObject.get(LeaderboardMasterDataJsonSerializer.FIELD_INDICES);
+            if (indeces == null) {
+                result = null;
+            } else {
+                result = new int[indeces.size()];
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = ((Long) indeces.get(i)).intValue();
+                }
+            }
         }
         return result;
     }

@@ -30,7 +30,7 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
-import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
 
@@ -357,7 +357,7 @@ public class SimulatorUtils {
         WindFieldGenerator wf = parameters.getWindField();
         // int[] gridRes = wf.getGridResolution();
         Position[] gridArea = wf.getGridAreaGps();
-        if (parameters.getMode() == SailingSimulatorUtil.measured) {
+        if (parameters.getMode() == SailingSimulatorConstants.ModeMeasured) {
             ((WindFieldGeneratorMeasured) wf).setGPSWind(gpsPath);
             gridArea = new Position[2];
             gridArea[0] = raceCourse.getPathPoints().get(0).getPosition();

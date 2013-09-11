@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.impl;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -23,10 +24,10 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -59,6 +60,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     
     // for backward compatibility the default result state is live
     private final ResultStates DEFAULT_RESULT_STATE = ResultStates.Live;
+    private static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
     private static final int MAX_TOTAL_NUMBER_OF_CACHE_ENTRIES = 1000;
     
@@ -203,12 +205,13 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                     TimePoint resultTimePoint = calculateTimePointForResultState(leaderboard, resultState);
                     StringBuffer jsonLeaderboardAsString;
                     if (resultTimePoint != null) {
-                        Triple<TimePoint, ResultStates, Integer> resultStateAndTimePoint = new Triple<>(resultTimePoint, resultState, maxCompetitorsCount);
+                        Triple<TimePoint, ResultStates, Integer> resultStateAndTimePointAndMaxCompetitorsCount =
+                                new Triple<>(resultTimePoint, resultState, maxCompetitorsCount);
                         if (useCache) {
-                            jsonLeaderboardAsString = getLeaderboardJsonFromCacheOrCompute(leaderboard, resultStateAndTimePoint, requestTimePoint);
+                            jsonLeaderboardAsString = getLeaderboardJsonFromCacheOrCompute(leaderboard, resultStateAndTimePointAndMaxCompetitorsCount);
                         } else {
                             StringWriter sw = new StringWriter();
-                            computeLeaderboardJson(leaderboard, resultStateAndTimePoint).writeJSONString(sw);
+                            computeLeaderboardJson(leaderboard, resultStateAndTimePointAndMaxCompetitorsCount).writeJSONString(sw);
                             jsonLeaderboardAsString = sw.getBuffer();
                         }
                     } else {
@@ -219,7 +222,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                     setJsonResponseHeader(resp);
                     synchronized (jsonLeaderboardAsString) {
                         int indexOfFirstOpeningBrace = jsonLeaderboardAsString.indexOf("{");
-                        final String requestTimePointAsJson = "\"requestTimepoint\": \""+requestTimePoint.toString()+"\", ";
+                        final String requestTimePointAsJson = "\"requestTimepoint\": \"" + formatTimePoint(requestTimePoint) + "\", ";
                         if (indexOfFirstOpeningBrace >= 0) {
                             jsonLeaderboardAsString.insert(indexOfFirstOpeningBrace+1, requestTimePointAsJson);
                         }
@@ -236,22 +239,24 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     }
 
     private StringBuffer getLeaderboardJsonFromCacheOrCompute(Leaderboard leaderboard,
-            Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount, final TimePoint requestTimePoint) throws NoWindException {
+            Triple<TimePoint, ResultStates, Integer> timePointAndResultStateAndMaxCompetitorsCount) throws NoWindException {
+        final StringBuffer result;
         Map<Triple<TimePoint, ResultStates, Integer>, StringBuffer> cacheEntry = cache.get(leaderboard, /* waitForLatest */ false);
         if (cacheEntry == null || !cacheEntry.containsKey(timePointAndResultStateAndMaxCompetitorsCount)) {
             cacheMisses++;
-            LinkedHashSet<Triple<TimePoint, ResultStates, Integer>> timePointsAndResultStates = new LinkedHashSet<>();
-            timePointsAndResultStates.add(timePointAndResultStateAndMaxCompetitorsCount);
-            cache.triggerUpdate(leaderboard, new LeaderboardJsonCacheUpdateInterval(timePointsAndResultStates));
+            LinkedHashSet<Triple<TimePoint, ResultStates, Integer>> timePointsAndResultStatesAndMaxCompetitorsCount = new LinkedHashSet<>();
+            timePointsAndResultStatesAndMaxCompetitorsCount.add(timePointAndResultStateAndMaxCompetitorsCount);
+            cache.triggerUpdate(leaderboard, new LeaderboardJsonCacheUpdateInterval(timePointsAndResultStatesAndMaxCompetitorsCount));
             // now wait for this entry to be computed
             cacheEntry = cache.get(leaderboard, /* waitForLatest */ true);
             StringBuffer jsonObjectAsString = cacheEntry.get(timePointAndResultStateAndMaxCompetitorsCount);
-            return jsonObjectAsString;
+            result = jsonObjectAsString;
         } else {
             cacheHits++;
+            result = cacheEntry.get(timePointAndResultStateAndMaxCompetitorsCount);
         }
         logger.finest(this+" cache hits/misses: "+cacheHits+"/"+cacheMisses);
-        return cacheEntry.get(timePointAndResultStateAndMaxCompetitorsCount);
+        return result;
     }
 
     private JSONObject computeLeaderboardJson(Leaderboard leaderboard,
@@ -316,6 +321,10 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
         return jsonLeaderboard;
     }
 
+    private String formatTimePoint(TimePoint timepoint) {
+        return timepoint == null ? null : TIMEPOINT_FORMATTER.format(timepoint.asDate());
+    }
+    
     private JSONObject createEmptyLeaderboardJson(Leaderboard leaderboard,
             ResultStates resultState, TimePoint requestTimePoint, Integer maxCompetitorsCount) throws NoWindException {
         JSONObject jsonLeaderboard = new JSONObject();
@@ -362,9 +371,9 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
         jsonLeaderboard.put("name", leaderboard.getName());
         
         // for backward compatibility 
-        jsonLeaderboard.put("timepoint", resultTimePoint != null ? resultTimePoint.toString() : null);
+        jsonLeaderboard.put("timepoint", formatTimePoint(resultTimePoint));
 
-        jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.toString() : null);
+        jsonLeaderboard.put("resultTimepoint", formatTimePoint(resultTimePoint));
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
         
@@ -372,7 +381,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
         if (scoreCorrection != null) {
             jsonLeaderboard.put("scoringComment", scoreCorrection.getComment());
             TimePoint lastUpdateTimepoint = scoreCorrection.getTimePointOfLastCorrectionsValidity();
-            jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.asDate().toString(): null);
+            jsonLeaderboard.put("lastScoringUpdate", formatTimePoint(lastUpdateTimepoint));
         } else {
             jsonLeaderboard.put("scoringComment", null);
             jsonLeaderboard.put("lastScoringUpdate", null);

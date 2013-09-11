@@ -31,6 +31,13 @@ public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoP
     private final YoutubeVideoControl videoControl;
     private final PopoutListener popoutListener;
 
+    /**
+     * Required to indicate whether this control has been requested to close.
+     * Then, it must not call any player functions anymore
+     * not to cause null-access error due to missing DOM elements.
+     */
+    private boolean closing = false;
+
     public YoutubeEmbeddedPlayer(final MediaTrack videoTrack, long raceStartTimeMillis, boolean showSynchControls, Timer raceTimer, MediaServiceAsync mediaService, ErrorReporter errorReporter, PopupCloseListener popupCloseListener, PopoutListener popoutListener) {
         super(videoTrack);
         this.raceTimer = raceTimer;
@@ -84,7 +91,7 @@ public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoP
 
     @Override
     public void onClose(CloseEvent<PopupPanel> event) {
-//        pauseMedia();
+        this.closing  = true;
         this.popupCloseListener.popupClosed();
     }
 
@@ -126,14 +133,14 @@ public class YoutubeEmbeddedPlayer extends AbstractMediaPlayer implements VideoP
 
     @Override
     public void pauseMedia() {
-        if (!isEdited()) {
+        if (!isEdited() && !this.closing) {
             videoControl.pause();
         }
     }
 
     @Override
     public void playMedia() {
-        if (!isEdited()) {
+        if (!isEdited() && !this.closing) {
             videoControl.play();
         }
     }

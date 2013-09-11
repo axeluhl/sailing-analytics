@@ -105,7 +105,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
-        raceDefinition = DomainFactory.INSTANCE.getAndWaitForRaceDefinition(race);
+        raceDefinition = DomainFactory.INSTANCE.getAndWaitForRaceDefinition(race.getId());
         synchronized (semaphor) {
             while (firstData[0] == null) {
                 try {

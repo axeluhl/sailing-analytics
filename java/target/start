@@ -3,6 +3,8 @@
 # source variables
 . `pwd`/env.sh
 
+PARAM=$@
+
 # make some checks
 JAVA_BINARY=$JAVA_HOME/bin/java
 if [[ ! -d "$JAVA_HOME" ]]; then
@@ -27,23 +29,54 @@ LIB_DIR=`pwd`/native-libraries
 
 echo "Script directory is $scriptdir and LIB_DIR is $LIB_DIR"
 
-nohup $JAVA_BINARY $ADDITIONAL_JAVA_ARGS -D$SERVER_NAME -Dcom.sap.sailing.server.name=$SERVER_NAME -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar -console $TELNET_PORT -configuration ./ -clean 2>/dev/null >/dev/null &
+# Make really sure that parameters from config.ini are not used
+sed -i "/mongo.host/d" ./configuration/config.ini
+sed -i "/mongo.port/d" ./configuration/config.ini
+sed -i "/expedition.udp.port/d" ./configuration/config.ini
+sed -i "/replication.exchangeName/d" ./configuration/config.ini
+sed -i "/replication.exchangeHost/d" ./configuration/config.ini
 
-echo "Starting server..."
-sleep 2
+# Ensure that Jetty Port is set correctly
+sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" ./configuration/jetty/etc/jetty-selector.xml
 
-TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$TELNET_PORT"`
-if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
-        echo "Something went wrong with startup. Please check the logs..."
-        exit
+# Update monitoring with the right ports
+sed -i "s/127.0.0.1:[0-9][0-9][0-9][0-9]\//127.0.0.1:$SERVER_PORT\//g" ./configuration/monitoring.properties
+
+# Inject information for system
+HEAD_DATE=$(date "+%Y%m%d%H%M")
+sed -i "s/System:.*$/ System: $MONGODB_HOST:$MONGODB_PORT-$EXPEDITION_PORT-$REPLICATION_HOST\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
+
+# Apply app parameters from env.sh
+APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
+
+# Apply parameters for automatic replication start
+REPLICATION_PARAMETERS="-Dreplication.start=$REPLICATE_ON_START -Dreplicate.master.servlet.host=$REPLICATE_MASTER_SERVLET_HOST -Dreplicate.master.servlet.port=$REPLICATE_MASTER_SERVLET_PORT -Dreplicate.master.queue.host=$REPLICATE_MASTER_QUEUE_HOST -Dreplicate.master.queue.port=$REPLICATE_MASTER_QUEUE_PORT"
+
+if [[ $PARAM == "" ]]; then
+    nohup $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -console $TELNET_PORT -configuration ./ -clean 2>/dev/null >/dev/null &
+    echo "Starting server..."
+    sleep 2
+
+    TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$TELNET_PORT"`
+    if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
+            echo "Something went wrong with startup. Please check the logs..."
+            exit
+    fi
+
+    echo "Configuration for this server is:"
+    echo "SERVER_NAME: $SERVER_NAME"
+    echo "SERVER_PORT: $SERVER_PORT"
+    echo "MEMORY: $MEMORY"
+    echo "TELNET_PORT: $TELNET_PORT"
+    echo "MONGODB_PORT: $MONGODB_PORT"
+    echo "EXPEDITION_PORT: $EXPEDITION_PORT"
+    echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
+    echo "Started $SERVER_NAME - use telnet localhost $TELNET_PORT to connect to the OSGi console. Logs should be found in logs/sailing0.log.0"
+elif [[ $PARAM == "debug" ]]; then
+    echo "Starting remote debugging session on port 8000"
+    $JAVA_BINARY -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -console -configuration ./ -clean
+elif [[ $PARAM == "fg" ]]; then
+    $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -console -configuration ./ -clean
 fi
 
-echo "Configuration for this server is:"
-echo "SERVER_NAME: $SERVER_NAME"
-echo "SERVER_PORT: $SERVER_PORT"
-echo "MEMORY: $MEMORY"
-echo "TELNET_PORT: $TELNET_PORT"
-echo "MONGODB_PORT: $MONGODB_PORT"
-echo "EXPEDITION_PORT: $EXPEDITION_PORT"
-echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
-echo "Started $SERVER_NAME - use telnet localhost $TELNET_PORT to connect to the OSGi console. Logs should be found in logs/sailing0.log.0"
+

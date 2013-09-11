@@ -6,8 +6,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceF
 public class AppConstants {
 
     public static final boolean IS_DATA_OFFLINE = false;
-
-    public final static String ApplicationVersion = "2.0 Beta 1 - Jumbotron";
+    public static final boolean ENABLE_LIFECYCLE_LOGGING = false;
 
     // Intent extra fields
     public final static String COURSE_AREA_UUID_KEY = "courseUuid";
@@ -36,4 +35,6 @@ public class AppConstants {
     public static final String RESET_TIME_FRAGMENT_IS_RESET = SetStartTimeRaceFragment.class.getName() + ".isReset";
 
     public static final int DefaultStartTimeMinuteOffset = 10;
+    
+    public static final int EventResendInterval = 1000 * 30; //30 seconds
 }

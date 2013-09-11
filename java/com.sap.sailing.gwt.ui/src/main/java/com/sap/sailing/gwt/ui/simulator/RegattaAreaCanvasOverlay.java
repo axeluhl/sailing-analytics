@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.Context2d.TextAlign;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.maps.client.MapPaneType;
+import com.google.gwt.maps.client.MapType;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.event.MapMoveEndHandler;
 import com.google.gwt.maps.client.event.PolygonClickHandler;
@@ -12,9 +15,14 @@ import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
 import com.google.gwt.maps.client.overlay.Polygon;
-import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
+import com.sap.sailing.gwt.ui.client.shared.racemap.ImageTransformer;
+import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
+import com.sap.sailing.gwt.ui.simulator.util.SimulatorResources;
+import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
 public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
+
+    private static SimulatorResources resources = GWT.create(SimulatorResources.class);
 
 	private SimulatorMap simulatorMap;
     private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
@@ -23,6 +31,11 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 	private RegattaArea currentRegArea = null;
 	private double raceBearing = 0.0;
 	private double diffBearing = 0.0;
+	
+	private ImageTransformer windRoseBackground;
+	private ImageTransformer windRoseNeedle;
+	private int windBackgroundOffset = 20;
+	private int windNeedleOffset = 30;
 
 	public RegattaAreaCanvasOverlay(SimulatorMap simulatorMap) {
 		super();
@@ -36,71 +49,141 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 		return null;
 	}
 
-	
+
 	@Override
 	protected void initialize(final MapWidget map) {
 		super.initialize(map);
 
+		windRoseBackground = new ImageTransformer(resources.windRoseBackground());
+		windRoseNeedle = new ImageTransformer(resources.windRoseNeedle());
+
+        this.pane = map.getPane(MapPaneType.MAP_PANE);
+        getPane().add(windRoseBackground.getCanvas(), getWidgetPosLeft()+windBackgroundOffset, getWidgetPosTop());
+        getPane().add(windRoseNeedle.getCanvas(), getWidgetPosLeft()+windBackgroundOffset+windNeedleOffset, getWidgetPosTop()+windNeedleOffset);
+
+        //System.out.println("wBackgr: "+getPane().getWidgetIndex(windRoseBackground.getCanvas()));
+        //System.out.println("wNeedle: "+getPane().getWidgetIndex(windRoseNeedle.getCanvas()));
+        
 		LatLng cPos;
 		regAreas = new ArrayList<RegattaArea>();
+		int regIdx;
 
-		// TV
-		cPos = LatLng.newInstance(54.43450,10.19559167);
-		currentRegArea = new RegattaArea("TV", cPos, 0.5, "#EAB75A");
-		regAreas.add(currentRegArea);
+		switch (simulatorMap.getMainPanel().getEvent()) {
 
-		
-		// Golf
-		cPos = LatLng.newInstance(54.41985556,10.19454167);
-		regAreas.add(new RegattaArea("Golf", cPos, 0.35, "#F1F3EF","silver"));
+		case SailingSimulatorConstants.EventKielerWoche:
+			
+			// TV
+			cPos = LatLng.newInstance(54.43450,10.19559167);
+			currentRegArea = new RegattaArea("TV", cPos, 0.5, "#EAB75A");
+			regAreas.add(currentRegArea);
 
-		// Foxtrot
-		cPos = LatLng.newInstance(54.445775,10.29223889);
-		regAreas.add(new RegattaArea("Foxtrot", cPos, 0.65, "#B4287C"));
+			// Golf
+			cPos = LatLng.newInstance(54.41985556,10.19454167);
+			regAreas.add(new RegattaArea("Golf", cPos, 0.35, "#F1F3EF","silver"));
 
-		// India
-		cPos = LatLng.newInstance(54.44803611,10.20863611);
-		regAreas.add(new RegattaArea("India", cPos, 0.40, "#774741"));
+			// Foxtrot
+			cPos = LatLng.newInstance(54.445775,10.29223889);
+			regAreas.add(new RegattaArea("Foxtrot", cPos, 0.65, "#B4287C"));
 
-		// Juliett
-		cPos = LatLng.newInstance(54.46183611,10.2239);
-		regAreas.add(new RegattaArea("Juliett", cPos, 0.55, "#818585"));
+			// India
+			cPos = LatLng.newInstance(54.44803611,10.20863611);
+			regAreas.add(new RegattaArea("India", cPos, 0.40, "#774741"));
 
-		// Echo
-		cPos = LatLng.newInstance(54.47640278,10.20090556);
-		regAreas.add(new RegattaArea("Echo", cPos, 0.60, "#1CADD9"));
-		
-		// Kilo
-		cPos = LatLng.newInstance(54.47808889,10.24033889);
-		regAreas.add(new RegattaArea("Kilo", cPos, 0.55, "#9FC269"));
+			// Juliett
+			cPos = LatLng.newInstance(54.46183611,10.2239);
+			regAreas.add(new RegattaArea("Juliett", cPos, 0.55, "#818585"));
 
-		// Charlie
-		cPos = LatLng.newInstance(54.49327222,10.17525833);
-		regAreas.add(new RegattaArea("Charlie", cPos, 0.70, "#0A5998"));
+			// Echo
+			cPos = LatLng.newInstance(54.47640278,10.20090556);
+			regAreas.add(new RegattaArea("Echo", cPos, 0.60, "#1CADD9"));
 
-		// Delta
-		cPos = LatLng.newInstance(54.49706111,10.21921944);
-		regAreas.add(new RegattaArea("Delta", cPos, 0.75, "#179E8B"));
+			// Kilo
+			cPos = LatLng.newInstance(54.47808889,10.24033889);
+			regAreas.add(new RegattaArea("Kilo", cPos, 0.55, "#9FC269"));
 
-		// Bravo
-		cPos = LatLng.newInstance(54.50911667,10.13973333);
-		regAreas.add(new RegattaArea("Bravo", cPos, 0.80, "#CE3032"));
+			// Charlie
+			cPos = LatLng.newInstance(54.49327222,10.17525833);
+			regAreas.add(new RegattaArea("Charlie", cPos, 0.70, "#0A5998"));
 
-		// Alfa
-		cPos = LatLng.newInstance(54.52905,10.18515278);
-		regAreas.add(new RegattaArea("Alfa", cPos, 1.00, "#D9699B"));
+			// Delta
+			cPos = LatLng.newInstance(54.49706111,10.21921944);
+			regAreas.add(new RegattaArea("Delta", cPos, 0.75, "#179E8B"));
 
-		setVisible(true);
+			// Bravo
+			cPos = LatLng.newInstance(54.50911667,10.13973333);
+			regAreas.add(new RegattaArea("Bravo", cPos, 0.80, "#CE3032"));
 
-		int regIdx = 0;
-		for(RegattaArea regArea : regAreas) {
-			this.drawCircleFromRadius(regIdx, regArea, 10);
-			regIdx++;
+			// Alfa
+			cPos = LatLng.newInstance(54.52905,10.18515278);
+			regAreas.add(new RegattaArea("Alfa", cPos, 1.00, "#D9699B"));
+
+			setVisible(true);
+
+			regIdx = 0;
+			for(RegattaArea regArea : regAreas) {
+				this.drawCircleFromRadius(regIdx, regArea, 10);
+				regIdx++;
+			}
+
+			// Middle of Echo and Klio
+			cPos = LatLng.newInstance(54.477245795,10.220622225);
+			map.panTo(cPos);
+
+			break;
+
+			
+		case SailingSimulatorConstants.EventTravemuenderWoche:
+
+			// Alfa
+			cPos = LatLng.newInstance(54.015,10.835);
+			currentRegArea = new RegattaArea("Alfa", cPos, 0.9, "#FF8030");
+			regAreas.add(currentRegArea);
+
+			// Bravo
+			cPos = LatLng.newInstance(54.01666667,11.01666667);
+			regAreas.add(new RegattaArea("Bravo", cPos, 0.75, "#179E8B"));
+
+			// Charlie
+			cPos = LatLng.newInstance(54.0025,10.98333333);
+			regAreas.add(new RegattaArea("Charlie", cPos, 0.6, "#CE3032"));
+
+			// Delta
+			cPos = LatLng.newInstance(54.02166667,10.92083333);
+			regAreas.add(new RegattaArea("Delta", cPos, 0.75, "#B4287C"));
+
+			// Foxtrot
+			cPos = LatLng.newInstance(54.00833333,10.88333333);
+			regAreas.add(new RegattaArea("Foxtrot", cPos, 0.75, "#FFFFFF", "silver"));
+
+			// Golf
+			cPos = LatLng.newInstance(53.98333333,10.9);
+			regAreas.add(new RegattaArea("Golf", cPos, 0.50, "#1CADD9"));
+
+			// Hotel
+			cPos = LatLng.newInstance(53.99,10.95666667);
+			regAreas.add(new RegattaArea("Hotel", cPos, 0.50, "#FFFF30", "silver"));
+
+			// See
+			cPos = LatLng.newInstance(54.04333333,10.875);
+			regAreas.add(new RegattaArea("See", cPos, 1.25, "#818585"));
+
+
+			setVisible(true);
+
+			regIdx = 0;
+			for(RegattaArea regArea : regAreas) {
+				this.drawCircleFromRadius(regIdx, regArea, 10);
+				regIdx++;
+			}
+
+			// Center of Gravity
+			cPos = LatLng.newInstance(54.01583,10.92583);
+			map.panTo(cPos);
+
+			break;
+
 		}
 
-		// Middle of Echo and Klio
-		cPos = LatLng.newInstance(54.477245795,10.220622225);
-		map.panTo(cPos);
 	}
 
 	@Override
@@ -112,6 +195,9 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 	@Override
 	protected void redraw(final boolean force) {
 		super.redraw(force);
+
+        getPane().setWidgetPosition(windRoseBackground.getCanvas(), getWidgetPosLeft()+windBackgroundOffset, getWidgetPosTop());
+        getPane().setWidgetPosition(windRoseNeedle.getCanvas(), getWidgetPosLeft()+windBackgroundOffset+windNeedleOffset, getWidgetPosTop()+windNeedleOffset);
 
 		clear();
 		drawRegattaAreas();
@@ -126,7 +212,10 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 	protected void drawRegattaAreas() {
 
 		clear();
-
+		
+        windRoseBackground.drawTransformedImage(0.0, 1.0);
+        windRoseNeedle.drawTransformedImage(raceBearing+180.0, 1.0);
+        
 		LatLng cPos = LatLng.newInstance(54.4344,10.19659167);
 		Point centerPoint = getMap().convertLatLngToDivPixel(cPos);
 		Point borderPoint = getMap().convertLatLngToDivPixel(this.getEdgePoint(cPos, 0.015));
@@ -135,11 +224,14 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 		final Context2d context2d = canvas.getContext2d();
 		context2d.setLineWidth(3);
 		context2d.setStrokeStyle("Black");
-
-		for(RegattaArea regArea : regAreas) {
-			centerPoint = getMap().convertLatLngToDivPixel(regArea.centerPos);
-			borderPoint = getMap().convertLatLngToDivPixel(regArea.edgePos);
-			drawRegattaAreaBackground(context2d, centerPoint, borderPoint, regArea.color, pxStroke);
+		
+		MapType normalMap = MapType.getNormalMap();
+		if (this.getMap().getCurrentMapType() == normalMap) {
+			for(RegattaArea regArea : regAreas) {
+				centerPoint = getMap().convertLatLngToDivPixel(regArea.centerPos);
+				borderPoint = getMap().convertLatLngToDivPixel(regArea.edgePos);
+				drawRegattaAreaBackground(context2d, centerPoint, borderPoint, regArea.color, pxStroke);
+			}
 		}
 
 		for(RegattaArea regArea : regAreas) {
@@ -218,15 +310,23 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 	}
 
 	protected void updateRaceCourse(int type, double bearing) {
+		
+		
 		if (type == 1) {
 			raceBearing = bearing;
+	        windRoseNeedle.drawTransformedImage(raceBearing+180.0, 1.0);
 		} else if (type == 2) {
 			diffBearing = bearing;			
 		}
 		if (currentRegArea != null) {
 			//simulatorMap.getMainPanel().setUpdateButtonEnabled(true);
-			raceCourseCanvasOverlay.startPoint = getDistantPoint(currentRegArea.centerPos, 0.9*currentRegArea.radius, 180.0 + raceBearing - diffBearing);
-			raceCourseCanvasOverlay.endPoint = getDistantPoint(currentRegArea.centerPos, 0.9*currentRegArea.radius, 0.0 + raceBearing - diffBearing);
+			if (raceCourseCanvasOverlay.rcDirection == SailingSimulatorConstants.LegTypeDownwind) {
+				raceCourseCanvasOverlay.endPoint = getDistantPoint(currentRegArea.centerPos, 0.9*currentRegArea.radius, 180.0 + raceBearing - diffBearing);
+				raceCourseCanvasOverlay.startPoint = getDistantPoint(currentRegArea.centerPos, 0.9*currentRegArea.radius, 0.0 + raceBearing - diffBearing);
+			} else {
+				raceCourseCanvasOverlay.startPoint = getDistantPoint(currentRegArea.centerPos, 0.9*currentRegArea.radius, 180.0 + raceBearing - diffBearing);
+				raceCourseCanvasOverlay.endPoint = getDistantPoint(currentRegArea.centerPos, 0.9*currentRegArea.radius, 0.0 + raceBearing - diffBearing);
+			}
 		} else {
 			//simulatorMap.getMainPanel().setUpdateButtonEnabled(false);
 		}
@@ -241,7 +341,7 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 		context2d.setGlobalAlpha(1.0f);
 		context2d.setFillStyle("#a6bfde"); // Google Blue
 		context2d.beginPath();
-		context2d.arc(centerPoint.getX() - this.getWidgetPosLeft(), centerPoint.getY() - this.getWidgetPosTop(), pxRadius*1.2, 0.0, 2*Math.PI);
+		context2d.arc(centerPoint.getX() - this.getWidgetPosLeft(), centerPoint.getY() - this.getWidgetPosTop(), pxRadius*1.15, 0.0, 2*Math.PI);
 		context2d.closePath();
 		context2d.fill();
 

@@ -45,7 +45,6 @@ public class ProtestStartTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Pro
         raceLog.add(event1);
         raceLog.add(event2);
 
-        raceLog.lockForRead();
         assertEquals(event2.getProtestStartTime(), analyzer.analyze());
     }
 }

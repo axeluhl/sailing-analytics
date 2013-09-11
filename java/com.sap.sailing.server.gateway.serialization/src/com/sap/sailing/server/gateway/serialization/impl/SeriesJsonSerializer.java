@@ -6,14 +6,14 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class SeriesJsonSerializer implements JsonSerializer<Series> {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_FLEETS = "fleets";
-    public static final String FIELD_RACES = "races";
+    public static final String FIELD_RACES = "races"; // TODO: 'races' is wrong here... it's actually 'raceColumns'
     public static final String FIELD_TRACKED_RACES = "trackedRaces";
     public static final String FIELD_STARTS_WITH_ZERO_SCORE = "startsWithZeroScore";
     public static final String FIELD_IS_MEDAL_SERIES = "isMedalSeries";
@@ -58,10 +58,14 @@ public class SeriesJsonSerializer implements JsonSerializer<Series> {
                     raceColumnJson.put("isLive", trackedRace.isLive(MillisecondsTimePoint.now()));
                     raceColumnJson.put("isTracked", true);
                     raceColumnJson.put("trackedRaceName", trackedRace.getRace().getName());
+                    raceColumnJson.put("hasGpsData", trackedRace.hasGPSData());
+                    raceColumnJson.put("hasWindData", trackedRace.hasWindData());
                 } else {
                     raceColumnJson.put("isLive", false);
                     raceColumnJson.put("isTracked", false);
                     raceColumnJson.put("trackedRaceName", null);
+                    raceColumnJson.put("hasGpsData", false);
+                    raceColumnJson.put("hasWindData", false);
                 }
                 racesPerFleetJson.add(raceColumnJson);
             }

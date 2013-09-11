@@ -22,7 +22,7 @@ public class CompetitorDataRetriever extends AbstractDataRetriever {
 			@Override
 			public TrackReader<Competitor, GPSFixMoving> retrieveTrackReader(
 					Competitor e) {
-				return new GPSFixTrackReader<Competitor, GPSFixMoving>(
+				return new TrackReaderImpl<Competitor, GPSFixMoving>(
 						race.getTrack(e));
 			}
 		};

@@ -68,6 +68,10 @@ public class EventSendingService extends Service implements EventSendingListener
     }
 
     private Date lastSuccessfulSend;
+    
+    public List<String> getDelayedIntensContent() {
+        return persistenceManager.getContent();
+    }
 
     public int getDelayedIntentsCount() {
         return persistenceManager.getEventCount();
@@ -198,7 +202,7 @@ public class EventSendingService extends Service implements EventSendingListener
             persistenceManager.persistIntent(intent);
             if (!isHandlerSet) {
                 SendDelayedEventsCaller delayedCaller = new SendDelayedEventsCaller(this);
-                handler.postDelayed(delayedCaller, 1000 * 30); //after 30 sec, try the sending again
+                handler.postDelayed(delayedCaller, AppConstants.EventResendInterval); //after 30 sec, try the sending again
                 isHandlerSet = true;
             }
             

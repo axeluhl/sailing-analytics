@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -21,16 +19,15 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable.ColumnFormatter;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -77,16 +74,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     
     private ListBox connectionsHistoryListBox;
     
-    private TextBox eventNameTextBox;
-    private TextBox hostnameTextBox;
-
-    private IntegerBox storedDataPortIntegerBox;
-    private IntegerBox liveDataPortIntegerBox;
-    
     private TextBox storedURITextBox;
     private TextBox liveURITextBox;
     private TextBox jsonURLTextBox;
-    private TextBox courseDesignUpdateURITextBox;
+    private TextBox tracTracUpdateURITextBox;
     private TextBox tractracUsernameTextBox;
     private TextBox tractracPasswordTextBox;
     private Label loadingMessageLabel;
@@ -109,8 +100,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         mainPanel.setWidth("100%");
 
         CaptionPanel connectionsPanel = createConnectionsPanel();
-        //connectionsPanel.setWidth("100%");
-
         mainPanel.add(connectionsPanel);
 
         HorizontalPanel racesPanel = createRacesPanel();
@@ -119,37 +108,30 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         mainPanel.add(racesPanel);
         
         fillConfigurations();
-        synchURIs();
         
         return mainPanel;
     }
     
     protected CaptionPanel createConnectionsPanel() {
-        CaptionPanel connectionsPanel = new CaptionPanel(this.stringMessages.connections());
+        CaptionPanel connectionsPanel = new CaptionPanel("TracTrac " + stringMessages.connections());
         connectionsPanel.ensureDebugId("ConnectionsSection");
         connectionsPanel.setStyleName("bold");
 
-        FlexTable layoutTable = new FlexTable();
-        layoutTable.setWidth("100%");
+        Grid grid = new Grid(10, 3);
+        connectionsPanel.setContentWidget(grid);
+        
+        // Existing TracTrac connections
+        Label connectionsHistoryLabel = new Label("TracTrac " + stringMessages.connections() + ":");
 
-        ColumnFormatter columnFormatter = layoutTable.getColumnFormatter();
-        FlexCellFormatter cellFormatter = layoutTable.getFlexCellFormatter();
-
-        columnFormatter.setWidth(0, "130px");
-        //columnFormatter.setWidth(1, "90%");
-
-        // History of connections
-        Label connectionsHistoryLabel = new Label(this.stringMessages.historyOfConnections() + ":");
-
-        this.connectionsHistoryListBox = new ListBox();
-        this.connectionsHistoryListBox.ensureDebugId("ConnectionHistory");
-        this.connectionsHistoryListBox.addChangeHandler(new ChangeHandler() {
+        connectionsHistoryListBox = new ListBox();
+        connectionsHistoryListBox.ensureDebugId("ConnectionHistory");
+        connectionsHistoryListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 updatePanelFromSelectedStoredConfiguration();
             }
         });
-        this.connectionsHistoryListBox.addClickHandler(new ClickHandler() {
+        connectionsHistoryListBox.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 // TODO: This leads to a strange behavior (values are updated by opening the drop down) but at the
@@ -159,184 +141,88 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             }
         });
 
-        layoutTable.setWidget(0, 0, connectionsHistoryLabel);
-        layoutTable.setWidget(0, 1, this.connectionsHistoryListBox);
-
-        // Definition of new connection
-        Label defineNewConnectionLabel = new Label(this.stringMessages.defineNewConnection());
-        Element defineNewConnectionElement = defineNewConnectionLabel.getElement();
-        Style defineNewConnectionStyle = defineNewConnectionElement.getStyle();
-        defineNewConnectionStyle.setPaddingTop(30, Unit.PX);
-        defineNewConnectionStyle.setPaddingBottom(10, Unit.PX);
-        
-        layoutTable.setWidget(1, 0, defineNewConnectionLabel);
-        cellFormatter.setColSpan(1, 0, 2);
-
-        // Host name
-        Label hostnameLabel = new Label(this.stringMessages.hostname() + ":");
-
-        this.hostnameTextBox = new TextBox();
-        this.hostnameTextBox.ensureDebugId("HostName");
-        this.hostnameTextBox.setText("germanmaster.traclive.dk");
-        this.hostnameTextBox.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                synchURIs();
-            }
-        });
-
-        layoutTable.setWidget(2, 0, hostnameLabel);
-        layoutTable.setWidget(2, 1, this.hostnameTextBox);
-
-        // Event name
-        Label eventNameLabel = new Label(this.stringMessages.eventName() + ":");
-        this.eventNameTextBox = new TextBox();
-        this.eventNameTextBox.ensureDebugId("RegattaName");
-        this.eventNameTextBox.setText("event_2011...");
-        this.eventNameTextBox.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                synchURIs();
-            }
-        });
-        layoutTable.setWidget(3, 0, eventNameLabel);
-        layoutTable.setWidget(3, 1, this.eventNameTextBox);
-
-        // Ports (Live and Stored)
-        Label portsLabel = new Label(this.stringMessages.ports() + ":");
-
-        layoutTable.setWidget(4, 0, portsLabel);
-
-        Label liveDataPortLabel = new Label(this.stringMessages.liveData());
-        Element liveDataPortElement = liveDataPortLabel.getElement();
-        Style liveDataPortStyle = liveDataPortElement.getStyle();
-        liveDataPortStyle.setProperty("paddingLeft", "30px");
-
-        this.liveDataPortIntegerBox = new IntegerBox();
-        this.liveDataPortIntegerBox.ensureDebugId("LiveDataPort");
-        this.liveDataPortIntegerBox.setText(Integer.toString(4400));
-        this.liveDataPortIntegerBox.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                updateStoredDataPort();
-                synchURIs();
-            }
-        });
-
-        layoutTable.setWidget(5, 0, liveDataPortLabel);
-        layoutTable.setWidget(5, 1, this.liveDataPortIntegerBox);
-
-        Label storedDataPortLabel = new Label(this.stringMessages.storedData());
-        Element storedDataPortElement = storedDataPortLabel.getElement();
-        Style storedDataPortStyle = storedDataPortElement.getStyle();
-        storedDataPortStyle.setProperty("paddingLeft", "30px");
-
-        this.storedDataPortIntegerBox = new IntegerBox();
-        this.storedDataPortIntegerBox.ensureDebugId("StoredDataPort");
-        this.storedDataPortIntegerBox.setText(Integer.toString(4401));
-        this.storedDataPortIntegerBox.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                synchURIs();
-            }
-        });
-
-        layoutTable.setWidget(6, 0, storedDataPortLabel);
-        layoutTable.setWidget(6, 1, this.storedDataPortIntegerBox);
+        grid.setWidget(0, 0, connectionsHistoryLabel);
+        grid.setWidget(0, 1, connectionsHistoryListBox);
 
         // URIs (Live and Stored)
-        Label urisLabel = new Label(this.stringMessages.uris() + ":");
-        urisLabel.setTitle(this.stringMessages.leaveEmptyForDefault());
+        grid.setWidget(1, 0, new Label(stringMessages.details() + ":"));
 
-        layoutTable.setWidget(7, 0, urisLabel);
+        Label liveURILabel = new Label(stringMessages.liveUri() + ":");
+        liveURILabel.setTitle(stringMessages.leaveEmptyForDefault());
 
-        Label liveURILabel = new Label(this.stringMessages.liveUri());
-        liveURILabel.setTitle(this.stringMessages.leaveEmptyForDefault());
-        Element liveURIElement = liveURILabel.getElement();
-        Style liveURIStyle = liveURIElement.getStyle();
-        liveURIStyle.setProperty("paddingLeft", "30px");
+        liveURITextBox = new TextBox();
+        liveURITextBox.ensureDebugId("LiveURI");
+        liveURITextBox.setVisibleLength(40);
+        liveURITextBox.setTitle(stringMessages.leaveEmptyForDefault());
 
-        this.liveURITextBox = new TextBox();
-        this.liveURITextBox.ensureDebugId("LiveURI");
-        this.liveURITextBox.setVisibleLength(40);
-        this.liveURITextBox.setTitle(this.stringMessages.leaveEmptyForDefault());
+        grid.setWidget(2, 0, liveURILabel);
+        grid.setWidget(2, 1, liveURITextBox);
 
-        layoutTable.setWidget(8, 0, liveURILabel);
-        layoutTable.setWidget(8, 1, this.liveURITextBox);
+        Label storedURILabel = new Label(stringMessages.storedUri() + ":");
+        storedURILabel.setTitle(stringMessages.leaveEmptyForDefault());
 
-        Label storedURILabel = new Label(this.stringMessages.storedUri());
-        storedURILabel.setTitle(this.stringMessages.leaveEmptyForDefault());
-        Element storedURIElement = storedURILabel.getElement();
-        Style storedURIStyle = storedURIElement.getStyle();
-        storedURIStyle.setProperty("paddingLeft", "30px");
+        storedURITextBox = new TextBox();
+        storedURITextBox.ensureDebugId("StoredURI");
+        storedURITextBox.setVisibleLength(40);
+        storedURITextBox.setTitle(stringMessages.leaveEmptyForDefault());
 
-        this.storedURITextBox = new TextBox();
-        this.storedURITextBox.ensureDebugId("StoredURI");
-        this.storedURITextBox.setVisibleLength(40);
-        this.storedURITextBox.setTitle(this.stringMessages.leaveEmptyForDefault());
-
-        layoutTable.setWidget(9, 0, storedURILabel);
-        layoutTable.setWidget(9, 1, this.storedURITextBox);
+        grid.setWidget(3, 0, storedURILabel);
+        grid.setWidget(3, 1, storedURITextBox);
 
         // JSON URL
-        Label jsonURLLabel = new Label(this.stringMessages.jsonUrl() + ":");
+        Label jsonURLLabel = new Label(stringMessages.jsonUrl() + ":");
 
-        this.jsonURLTextBox = new TextBox();
-        this.jsonURLTextBox.ensureDebugId("JSONURL");
-        this.jsonURLTextBox.setVisibleLength(100);
+        jsonURLTextBox = new TextBox();
+        jsonURLTextBox.ensureDebugId("JSONURL");
+        jsonURLTextBox.setVisibleLength(100);
 
-        layoutTable.setWidget(10, 0, jsonURLLabel);
-        layoutTable.setWidget(10, 1, this.jsonURLTextBox);
+        grid.setWidget(4, 0, jsonURLLabel);
+        grid.setWidget(4, 1, jsonURLTextBox);
         
         // Course design Update URL
-        Label courseDesignUpdateURLLabel = new Label(this.stringMessages.courseDesignUpdateUrl() + ":");
+        Label tracTracUpdateURLLabel = new Label(stringMessages.tracTracUpdateUrl() + ":");
         
-        this.courseDesignUpdateURITextBox = new TextBox();
-        this.courseDesignUpdateURITextBox.ensureDebugId("COURSEDESIGNUPDATEURI");
-        this.courseDesignUpdateURITextBox.setVisibleLength(100);
+        tracTracUpdateURITextBox = new TextBox();
+        tracTracUpdateURITextBox.ensureDebugId("TRACTRACUPDATEURI");
+        tracTracUpdateURITextBox.setVisibleLength(100);
         
-        layoutTable.setWidget(11, 0, courseDesignUpdateURLLabel);
-        layoutTable.setWidget(11, 1, this.courseDesignUpdateURITextBox);
+        grid.setWidget(5, 0, tracTracUpdateURLLabel);
+        grid.setWidget(5, 1, tracTracUpdateURITextBox);
         
         // TracTrac Username
-        Label tractracUsernameLabel = new Label(this.stringMessages.tractracUsername() + ":");
+        tractracUsernameTextBox = new TextBox();
+        tractracUsernameTextBox.ensureDebugId("tractracUsername");
+        tractracUsernameTextBox.setVisibleLength(40);
         
-        this.tractracUsernameTextBox = new TextBox();
-        this.tractracUsernameTextBox.ensureDebugId("tractracUsername");
-        this.tractracUsernameTextBox.setVisibleLength(40);
-        
-        layoutTable.setWidget(12, 0, tractracUsernameLabel);
-        layoutTable.setWidget(12, 1, this.tractracUsernameTextBox);
+        grid.setWidget(6, 0, new Label(stringMessages.tractracUsername() + ":"));
+        grid.setWidget(6, 1, tractracUsernameTextBox);
         
         // TracTrac Password
-        Label tractracPasswordLabel = new Label(this.stringMessages.tractracPassword() + ":");
+        tractracPasswordTextBox = new TextBox();
+        tractracPasswordTextBox.ensureDebugId("tractracPassword");
+        tractracPasswordTextBox.setVisibleLength(40);
         
-        this.tractracPasswordTextBox = new TextBox();
-        this.tractracPasswordTextBox.ensureDebugId("tractracPassword");
-        this.tractracPasswordTextBox.setVisibleLength(40);
+        grid.setWidget(7, 0, new Label(stringMessages.tractracPassword() + ":"));
+        grid.setWidget(7, 1, tractracPasswordTextBox);
         
-        layoutTable.setWidget(13, 0, tractracPasswordLabel);
-        layoutTable.setWidget(13, 1, this.tractracPasswordTextBox);
-        
-        final CheckBox listHiddenRaces = new CheckBox(stringMessages.showHiddenRaces());
-        layoutTable.setWidget(14, 0, listHiddenRaces);
+        grid.setWidget(8, 0, new Label(stringMessages.racesWithHiddenState() + ":"));
+        final CheckBox showHiddenRacesCheckbox = new CheckBox(stringMessages.show());
+        grid.setWidget(8, 1, showHiddenRacesCheckbox);
 
         // List Races
-        Button listRacesButton = new Button(this.stringMessages.listRaces());
+        Button listRacesButton = new Button(stringMessages.listRaces());
         listRacesButton.ensureDebugId("ListRaces");
         listRacesButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 loadingMessageLabel.setText(stringMessages.loading());
-                fillRaces(sailingService, listHiddenRaces.getValue());
+                fillRaces(sailingService, showHiddenRacesCheckbox.getValue());
             }
         });
-        layoutTable.setWidget(14, 1, listRacesButton);
+        grid.setWidget(9, 1, listRacesButton);
         
         loadingMessageLabel = new Label();
-        layoutTable.setWidget(14, 2, loadingMessageLabel);
-
-        connectionsPanel.setContentWidget(layoutTable);
+        grid.setWidget(9, 2, loadingMessageLabel);
 
         return connectionsPanel;
     }
@@ -345,13 +231,11 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         HorizontalPanel racesPanel = new HorizontalPanel();
         
         CaptionPanel trackableRacesPanel = createTrackableRacesPanel();
-        //trackableRacesPanel.setWidth("100%");
         
         racesPanel.add(trackableRacesPanel);
         racesPanel.setCellWidth(trackableRacesPanel, "50%");
         
         CaptionPanel trackedRacesPanel = createTrackedRacesPanel();
-        //trackedRacesPanel.setWidth("100%");
         
         racesPanel.add(trackedRacesPanel);
         racesPanel.setCellWidth(trackedRacesPanel, "50%");
@@ -360,7 +244,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
     
     protected CaptionPanel createTrackableRacesPanel() {
-        CaptionPanel trackableRacesPanel = new CaptionPanel(this.stringMessages.trackableRaces());
+        CaptionPanel trackableRacesPanel = new CaptionPanel(stringMessages.trackableRaces());
         trackableRacesPanel.ensureDebugId("TrackableRacesSection");
         trackableRacesPanel.setStyleName("bold");
         
@@ -380,19 +264,19 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         layoutTable.setWidget(0, 1, getAvailableRegattasListBox());
 
         // Track settings (wind)
-        Label trackSettingsLabel = new Label(this.stringMessages.trackSettings() + ":");
+        Label trackSettingsLabel = new Label(stringMessages.trackSettings() + ":");
 
-        final CheckBox trackWindCheckBox = new CheckBox(this.stringMessages.trackWind());
+        final CheckBox trackWindCheckBox = new CheckBox(stringMessages.trackWind());
         trackWindCheckBox.ensureDebugId("TrackWind");
         trackWindCheckBox.setWordWrap(false);
         trackWindCheckBox.setValue(Boolean.TRUE);
 
-        final CheckBox correctWindCheckBox = new CheckBox(this.stringMessages.declinationCheckbox());
+        final CheckBox correctWindCheckBox = new CheckBox(stringMessages.declinationCheckbox());
         correctWindCheckBox.ensureDebugId("CorrectWind");
         correctWindCheckBox.setWordWrap(false);
         correctWindCheckBox.setValue(Boolean.TRUE);
 
-        final CheckBox simulateWithStartTimeNowCheckBox = new CheckBox(this.stringMessages.simulateWithStartTimeNow());
+        final CheckBox simulateWithStartTimeNowCheckBox = new CheckBox(stringMessages.simulateWithStartTimeNow());
         simulateWithStartTimeNowCheckBox.ensureDebugId("SimulateWithStartTimeNow");
         simulateWithStartTimeNowCheckBox.setWordWrap(false);
         simulateWithStartTimeNowCheckBox.setValue(Boolean.FALSE);
@@ -403,7 +287,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         layoutTable.setWidget(3, 1, simulateWithStartTimeNowCheckBox);
         
         // Filter
-        Label racesFilterLabel = new Label(this.stringMessages.filterRacesByName() + ":");
+        Label racesFilterLabel = new Label(stringMessages.filterRacesByName() + ":");
 
         this.racesFilterTextBox = new TextBox();
         this.racesFilterTextBox.ensureDebugId("FilterRaces");
@@ -415,7 +299,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         });
 
         layoutTable.setWidget(4, 0, racesFilterLabel);
-        layoutTable.setWidget(4, 1, this.racesFilterTextBox);
+        layoutTable.setWidget(4, 1, racesFilterTextBox);
 
         // Races
         TextColumn<TracTracRaceRecordDTO> regattaNameColumn = new TextColumn<TracTracRaceRecordDTO>() {
@@ -456,24 +340,24 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         raceStatusColumn.setSortable(true);
         
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
-        this.racesTable = new CellTable<TracTracRaceRecordDTO>(10000, tableResources);
-        this.racesTable.ensureDebugId("RacesTable");
-        this.racesTable.addColumn(regattaNameColumn, this.stringMessages.event());
-        this.racesTable.addColumn(raceNameColumn, this.stringMessages.race());
-        this.racesTable.addColumn(boatClassColumn, this.stringMessages.boatClass());
-        this.racesTable.addColumn(raceStartTrackingColumn, this.stringMessages.startTime());
-        this.racesTable.addColumn(raceStatusColumn, this.stringMessages.raceStatusColumn());
-        this.racesTable.addColumnSortHandler(getRaceTableColumnSortHandler(this.raceList.getList(), raceNameColumn,
+        racesTable = new CellTable<TracTracRaceRecordDTO>(10000, tableResources);
+        racesTable.ensureDebugId("RacesTable");
+        racesTable.addColumn(regattaNameColumn, stringMessages.event());
+        racesTable.addColumn(raceNameColumn, stringMessages.race());
+        racesTable.addColumn(boatClassColumn, stringMessages.boatClass());
+        racesTable.addColumn(raceStartTrackingColumn, stringMessages.startTime());
+        racesTable.addColumn(raceStatusColumn, stringMessages.raceStatusColumn());
+        racesTable.addColumnSortHandler(getRaceTableColumnSortHandler(this.raceList.getList(), raceNameColumn,
                 boatClassColumn, raceStartTrackingColumn, raceStatusColumn));
-        this.racesTable.setSelectionModel(new MultiSelectionModel<TracTracRaceRecordDTO>());
-        this.racesTable.setWidth("100%");
+        racesTable.setSelectionModel(new MultiSelectionModel<TracTracRaceRecordDTO>());
+        racesTable.setWidth("100%");
 
-        this.raceList.addDataDisplay(this.racesTable);
+        raceList.addDataDisplay(racesTable);
 
-        layoutTable.setWidget(5, 0, this.racesTable);
+        layoutTable.setWidget(5, 0, racesTable);
         cellFormatter.setColSpan(5, 0, 2);
         
-        Button startTrackingButton = new Button(this.stringMessages.startTracking());
+        Button startTrackingButton = new Button(stringMessages.startTracking());
         startTrackingButton.ensureDebugId("StartTracking");
         startTrackingButton.addClickHandler(new ClickHandler() {
             @Override
@@ -491,7 +375,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
     
     protected CaptionPanel createTrackedRacesPanel() {
-        CaptionPanel trackedRacesPanel = new CaptionPanel(this.stringMessages.trackedRaces());
+        CaptionPanel trackedRacesPanel = new CaptionPanel(stringMessages.trackedRaces());
         trackedRacesPanel.ensureDebugId("TrackedRacesSection");
         trackedRacesPanel.setStyleName("bold");
         
@@ -548,24 +432,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         return boatClassNames.substring(0, boatClassNames.length() - 2);
     }
 
-    private void synchURIs() {
-        String hostName = this.hostnameTextBox.getValue();
-        String regattaName = this.eventNameTextBox.getValue();
-        Integer liveDataPort = this.liveDataPortIntegerBox.getValue();
-        Integer storedDataPort = this.storedDataPortIntegerBox.getValue();
-        
-        this.liveURITextBox.setValue("tcp://" + hostName + (liveDataPort != null ? ":" + liveDataPort : ""));
-        this.storedURITextBox.setValue("tcp://" + hostName + (storedDataPort != null ? ":" + storedDataPort : ""));
-        this.jsonURLTextBox.setValue("http://" + hostName + "/events/" + regattaName + "/jsonservice.php");
-    }
-
-    private void updateStoredDataPort() {
-        Integer liveDataPort = this.liveDataPortIntegerBox.getValue();
-
-        if(liveDataPort != null)
-            this.storedDataPortIntegerBox.setValue(Integer.valueOf(liveDataPort.intValue() + 1));
-    }
-    
     private void fillConfigurations() {
         this.sailingService.getPreviousTracTracConfigurations(new MarkedAsyncCallback<List<TracTracConfigurationDTO>>() {
             @Override
@@ -592,12 +458,12 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
 
     private void fillRaces(final SailingServiceAsync sailingService, boolean listHiddenRaces) {
-        final String jsonURL = this.jsonURLTextBox.getValue();
-        final String liveDataURI = this.liveURITextBox.getValue();
-        final String storedDataURI = this.storedURITextBox.getValue();
-        final String courseDesignUpdateURI = this.courseDesignUpdateURITextBox.getValue();
-        final String tractracUsername = this.tractracUsernameTextBox.getValue();
-        final String tractracPassword = this.tractracPasswordTextBox.getValue();
+        final String jsonURL = jsonURLTextBox.getValue();
+        final String liveDataURI = liveURITextBox.getValue();
+        final String storedDataURI = storedURITextBox.getValue();
+        final String courseDesignUpdateURI = tracTracUpdateURITextBox.getValue();
+        final String tractracUsername = tractracUsernameTextBox.getValue();
+        final String tractracPassword = tractracPasswordTextBox.getValue();
 
         sailingService.listTracTracRacesInEvent(jsonURL, listHiddenRaces, new MarkedAsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>>() {
             @Override
@@ -672,20 +538,20 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
     
     private void trackSelectedRaces(boolean trackWind, boolean correctWind, final boolean simulateWithStartTimeNow) {
-        String liveURI = this.liveURITextBox.getValue();
-        String storedURI = this.storedURITextBox.getValue();
-        String courseDesignUpdateURI = this.courseDesignUpdateURITextBox.getValue();
-        String tractracUsername = this.tractracUsernameTextBox.getValue();
-        String tractracPassword = this.tractracPasswordTextBox.getValue();
+        String liveURI = liveURITextBox.getValue();
+        String storedURI = storedURITextBox.getValue();
+        String courseDesignUpdateURI = tracTracUpdateURITextBox.getValue();
+        String tractracUsername = tractracUsernameTextBox.getValue();
+        String tractracPassword = tractracPasswordTextBox.getValue();
         RegattaDTO selectedRegatta = getSelectedRegatta();
         RegattaIdentifier regattaIdentifier = null;
         if (selectedRegatta != null) {
             regattaIdentifier = new RegattaName(selectedRegatta.getName());
         }
         // Check if the assigned regatta makes sense
-        List<TracTracRaceRecordDTO> allRaces = this.raceList.getList();
+        List<TracTracRaceRecordDTO> allRaces = raceList.getList();
         List<TracTracRaceRecordDTO> racesWithNotMatchingBoatClasses = new ArrayList<TracTracRaceRecordDTO>();
-        SelectionModel<? super TracTracRaceRecordDTO> selectionModel = this.racesTable.getSelectionModel();
+        SelectionModel<? super TracTracRaceRecordDTO> selectionModel = racesTable.getSelectionModel();
         
         for (TracTracRaceRecordDTO race : allRaces) {
             if (selectionModel.isSelected(race)) {
@@ -697,14 +563,14 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             StringBuilder builder = new StringBuilder(100 + racesWithNotMatchingBoatClasses.size() * 30);
             builder.append("WARNING\n");
             if (selectedRegatta != null) {
-                builder.append(this.stringMessages.boatClassDoesNotMatchSelectedRegatta(
+                builder.append(stringMessages.boatClassDoesNotMatchSelectedRegatta(
                         selectedRegatta.boatClass==null?"":selectedRegatta.boatClass.getName(),
                         selectedRegatta.getName()));
             } else {
-                builder.append(this.stringMessages.regattaExistForSelectedBoatClass());
+                builder.append(stringMessages.regattaExistForSelectedBoatClass());
             }
             builder.append("\n\n");
-            builder.append(this.stringMessages.races());
+            builder.append(stringMessages.races());
             builder.append("\n");
             for (TracTracRaceRecordDTO record: racesWithNotMatchingBoatClasses) {
                 builder.append(record.name);
@@ -716,12 +582,12 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         }
         
         final List<TracTracRaceRecordDTO> selectedRaces = new ArrayList<TracTracRaceRecordDTO>();
-        for (final TracTracRaceRecordDTO race : this.raceList.getList()) {
+        for (final TracTracRaceRecordDTO race : raceList.getList()) {
             if (selectionModel.isSelected(race)) {
                 selectedRaces.add(race);
             }
         }
-        this.sailingService.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI, courseDesignUpdateURI, trackWind, correctWind, 
+        sailingService.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI, courseDesignUpdateURI, trackWind, correctWind, 
                 simulateWithStartTimeNow, tractracUsername, tractracPassword, new MarkedAsyncCallback<Void>() {
                     @Override
                     public void handleFailure(Throwable caught) {
@@ -737,39 +603,35 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
 
     private void updatePanelFromSelectedStoredConfiguration() {
-        int index = this.connectionsHistoryListBox.getSelectedIndex();
+        int index = connectionsHistoryListBox.getSelectedIndex();
 
         if (index == -1)
             return;
         
-        String configurationKey = this.connectionsHistoryListBox.getItemText(index);
-        TracTracConfigurationDTO config = this.previousConfigurations.get(configurationKey);
+        String configurationKey = connectionsHistoryListBox.getItemText(index);
+        TracTracConfigurationDTO config = previousConfigurations.get(configurationKey);
 
-        this.hostnameTextBox.setValue("");
-        this.eventNameTextBox.setValue("");
-        this.liveDataPortIntegerBox.setText("");
-        this.storedDataPortIntegerBox.setText("");
-        this.jsonURLTextBox.setValue(config.jsonURL);
-        this.liveURITextBox.setValue(config.liveDataURI);
-        this.storedURITextBox.setValue(config.storedDataURI);
-        this.courseDesignUpdateURITextBox.setValue(config.courseDesignUpdateURI);
-        this.tractracUsernameTextBox.setValue(config.tractracUsername);
-        this.tractracPasswordTextBox.setValue(config.tractracPassword);
+        jsonURLTextBox.setValue(config.jsonURL);
+        liveURITextBox.setValue(config.liveDataURI);
+        storedURITextBox.setValue(config.storedDataURI);
+        tracTracUpdateURITextBox.setValue(config.courseDesignUpdateURI);
+        tractracUsernameTextBox.setValue(config.tractracUsername);
+        tractracPasswordTextBox.setValue(config.tractracPassword);
     }
 
     private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
-        List<TracTracRaceRecordDTO> races = this.raceList.getList();
+        List<TracTracRaceRecordDTO> races = raceList.getList();
         
         races.clear();
 
-        for (TracTracRaceRecordDTO race : this.availableTracTracRaces) {
+        for (TracTracRaceRecordDTO race : availableTracTracRaces) {
             if (textContainsStringsToCheck(wordsToFilter, race.regattaName, race.name)) {
                 races.add(race);
             }
         }
 
         // now sort again according to selected criterion
-        ColumnSortEvent.fire(this.racesTable, this.racesTable.getColumnSortList());
+        ColumnSortEvent.fire(racesTable, racesTable.getColumnSortList());
     }
 }

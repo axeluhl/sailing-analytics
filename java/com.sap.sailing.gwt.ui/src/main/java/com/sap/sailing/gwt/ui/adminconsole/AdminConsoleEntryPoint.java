@@ -128,7 +128,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
             @Override
             public void onSelection(SelectionEvent<Integer> event) {
                 if (leaderboardConfigPanel.isVisible()) {
-                    leaderboardConfigPanel.loadAndRefreshLeaderboards();
+                    leaderboardConfigPanel.loadLeaderboards();
                 }
                 if (mediaPanel.isVisible()) {
                     mediaPanel.onShow();
