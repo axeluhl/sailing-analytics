@@ -619,7 +619,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     public boolean hasStartlist(String raceID) {
         boolean result = false;
         if (messageLoader != null) {
-            result = messageLoader.hasRaceCourse(raceID);
+            result = messageLoader.hasRaceStartlist(raceID);
         }
         return result;
     }

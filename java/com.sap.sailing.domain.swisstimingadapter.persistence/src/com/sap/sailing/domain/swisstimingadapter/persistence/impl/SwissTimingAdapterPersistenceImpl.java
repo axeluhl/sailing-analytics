@@ -190,7 +190,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         DBCollection races = database.getCollection(CollectionNames.RACES_MESSAGES.name());
         BasicDBObject query = new BasicDBObject();
         query.append(FieldNames.RACE_ID.name(), raceID);
-        query.append(FieldNames.MESSAGE_COMMAND.name(), "STL");
+        query.append(FieldNames.MESSAGE_COMMAND.name(), MessageType.STL.name());
         DBObject object = races.findOne(query);
         return object != null; 
     }
@@ -200,7 +200,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         DBCollection races = database.getCollection(CollectionNames.RACES_MESSAGES.name());
         BasicDBObject query = new BasicDBObject();
         query.append(FieldNames.RACE_ID.name(), raceID);
-        query.append(FieldNames.MESSAGE_COMMAND.name(), "CCG");
+        query.append(FieldNames.MESSAGE_COMMAND.name(), MessageType.CCG.name());
         DBObject object = races.findOne(query);
         return object != null; 
     }
