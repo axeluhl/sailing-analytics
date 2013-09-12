@@ -13,6 +13,9 @@ public class SwissTimingRaceRecordDTO implements IsSerializable {
     public String boatClass;
     public String discipline;
 
+    public boolean hasCourse;
+    public boolean hasStartlist;
+    
     public SwissTimingRaceRecordDTO() {}
     
     public SwissTimingRaceRecordDTO(String id, String description, Date raceStartTime) {
