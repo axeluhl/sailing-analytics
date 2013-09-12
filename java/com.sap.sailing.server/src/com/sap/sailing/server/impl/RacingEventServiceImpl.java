@@ -773,9 +773,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterConnector(hostname, port,
                 swissTimingAdapterPersistence, canSendRequests);
         for (Race race : swissTimingConnector.getRaces()) {
-            TimePoint startTime = swissTimingConnector.getStartTime(race.getRaceID());
-            result.add(new com.sap.sailing.domain.swisstimingadapter.RaceRecord(race.getRaceID(),
-                    race.getDescription(), startTime == null ? null : startTime.asDate()));
+            String raceID = race.getRaceID();
+            TimePoint startTime = swissTimingConnector.getStartTime(raceID);
+            boolean hasCourse = swissTimingConnector.getCourse(raceID) != null;
+            boolean hasStartlist = swissTimingConnector.getStartList(raceID) != null;
+            result.add(new com.sap.sailing.domain.swisstimingadapter.RaceRecord(raceID,
+                    race.getDescription(), startTime == null ? null : startTime.asDate(),
+                    hasCourse, hasStartlist));
         }
         return result;
     }
