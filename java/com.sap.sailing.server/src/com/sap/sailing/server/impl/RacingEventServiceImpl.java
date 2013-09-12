@@ -775,11 +775,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         for (Race race : swissTimingConnector.getRaces()) {
             String raceID = race.getRaceID();
             TimePoint startTime = swissTimingConnector.getStartTime(raceID);
-            boolean hasCourse = swissTimingConnector.getCourse(raceID) != null;
-            boolean hasStartlist = swissTimingConnector.getStartList(raceID) != null;
+            boolean hasCourse = swissTimingConnector.hasCourse(raceID);
+            boolean hasStartlist = swissTimingConnector.hasStartlist(raceID);
             result.add(new com.sap.sailing.domain.swisstimingadapter.RaceRecord(raceID,
                     race.getDescription(), startTime == null ? null : startTime.asDate(),
-                    hasCourse, hasStartlist));
+                            hasCourse, hasStartlist));
         }
         return result;
     }

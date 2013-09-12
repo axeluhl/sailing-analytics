@@ -606,6 +606,24 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         return result;
     }
 
+    @Override
+    public boolean hasCourse(String raceID) {
+        boolean result = false;
+        if (messageLoader != null) {
+            result = messageLoader.hasRaceCourse(raceID);
+        }
+        return result; 
+    }
+
+    @Override
+    public boolean hasStartlist(String raceID) {
+        boolean result = false;
+        if (messageLoader != null) {
+            result = messageLoader.hasRaceCourse(raceID);
+        }
+        return result;
+    }
+    
     private List<Race> parseAvailableRacesMessage(SailMasterMessage availableRacesMessage) {
         assertMessageType(MessageType.RAC, availableRacesMessage);
         int count = Integer.valueOf(availableRacesMessage.getSections()[1]);
