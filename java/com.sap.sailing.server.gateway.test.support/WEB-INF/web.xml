@@ -11,6 +11,6 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>ClearSateServlet</servlet-name>
-        <url-pattern>/clearSate</url-pattern>
+        <url-pattern>/clearState</url-pattern>
 	</servlet-mapping>
  </web-app>
