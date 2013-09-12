@@ -584,7 +584,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             // ask RacingEventService to cleanly stop and unregister this tracker
             // if the race has all data loaded. Doing this asynchronously because
             // stopping can take longer and if you're loading many races in parallel
-            // this can slow down loading extremely
+            // this can slow down loading extremely because this call-back seems to be
+            // called by TTCM synchronously.
             for (final RaceDefinition race : getRaces()) {
                 DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
                 final Regatta regatta = getRegatta();
