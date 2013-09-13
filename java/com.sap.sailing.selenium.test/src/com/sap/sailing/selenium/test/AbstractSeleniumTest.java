@@ -3,6 +3,7 @@ package com.sap.sailing.selenium.test;
 import java.io.File;
 import java.io.IOException;
 
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -39,12 +40,16 @@ import com.sap.sailing.selenium.core.TestEnvironment;
  */
 @RunWith(Selenium.class)
 public abstract class AbstractSeleniumTest {
+    private static final String CLEAR_STATE_URL = "sailingserver/test-support/clearState"; //$NON-NLS-1$
+    
+    private static final int CLEAR_STATE_SUCCESFULL_STATUS_CODE = 204;
+    
     private static final String NOT_SUPPORTED_IMAGE = "/com/sap/sailing/selenium/resources/not-supported.png"; //$NON-NLS-1$
     
     private static final String ATTACHMENT_FORMAT = "[[ATTACHMENT|%s]]"; //$NON-NLS-1$
     
     // TODO: Change to TestWatcher if we support a higher version (4.11) of JUnit.
-    //private class ScreenShotRule2 extends TestWatcher {
+    //private class ScreenShotRule extends TestWatcher {
     //    
     //}
     
@@ -56,6 +61,27 @@ public abstract class AbstractSeleniumTest {
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
+        }
+    }
+    
+    /**
+     * <p></p>
+     * 
+     * @param contextRoot
+     * 
+     * @return
+     *   <code>true</code> if the state was reseted successfully and <code>false</code> otherwise.
+     */
+    protected static boolean clearState(String contextRoot) {
+        try {
+            URL url = new URL(contextRoot + CLEAR_STATE_URL);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.connect();
+            
+            return connection.getResponseCode() == CLEAR_STATE_SUCCESFULL_STATUS_CODE;
+        } catch(Exception exception) {
+            throw new RuntimeException(exception);
         }
     }
     
