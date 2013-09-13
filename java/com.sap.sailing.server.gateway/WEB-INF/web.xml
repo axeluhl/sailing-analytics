@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns="http://java.sun.com/xml/ns/javaee"
 	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
@@ -166,6 +166,15 @@
 	<servlet-mapping>
 		<servlet-name>WindJsonGetServlet</servlet-name>
 		<url-pattern>/wind</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>WindImportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.expeditionimport.WindImportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>WindImportServlet</servlet-name>
+		<url-pattern>/expedition-import</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

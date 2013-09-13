@@ -204,9 +204,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void recordWind(Wind wind, WindSource windSource) {
+    public boolean recordWind(Wind wind, WindSource windSource) {
         if (windSource.getType() == WindSourceType.EXPEDITION) {
             windTrack.add(wind);
+            return true;
+        } else {
+        	return false;
         }
     }
 
