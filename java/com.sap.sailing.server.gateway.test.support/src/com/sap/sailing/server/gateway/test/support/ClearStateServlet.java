@@ -14,7 +14,6 @@ import org.osgi.framework.BundleContext;
 
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 
 public class ClearStateServlet extends HttpServlet {
@@ -30,7 +29,7 @@ public class ClearStateServlet extends HttpServlet {
         ServletContext servletContext = config.getServletContext();
         BundleContext bundleContext = (BundleContext) servletContext.getAttribute(OSGI_BUNDLECONTEXT_ATTRIBUTE_NAME);
         
-        this.tracker = new ServiceTracker<>(bundleContext, RacingEventService.class.getName(), null);
+        this.tracker = new ServiceTracker<>(bundleContext, RacingEventServiceWithTestSupport.class.getName(), null);
         this.tracker.open();
     }
 
