@@ -494,11 +494,8 @@ public class DomainFactoryImpl implements DomainFactory {
                     TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(tracTracUpdateURI, 
                             tracTracUsername, tracTracPassword, tracTracEventUuid, raceDefinition.getId());
                     trackedRace.addStartTimeChangedListener(startTimeHandler);
-                    
-                    synchronized (raceCache) {
-                        raceCache.put(raceId, raceDefinition);
-                        raceCache.notifyAll();
-                    }
+                    raceCache.put(raceId, raceDefinition);
+                    raceCache.notifyAll();
                     return trackedRace;
                 } else {
                     logger.warning("Not adding race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta()+
