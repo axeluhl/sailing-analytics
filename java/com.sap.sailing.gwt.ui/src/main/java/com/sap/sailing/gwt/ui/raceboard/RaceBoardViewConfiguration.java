@@ -12,14 +12,16 @@ public class RaceBoardViewConfiguration {
     private ViewModes viewMode;
     private String activeCompetitorsFilterSetName;
     private boolean canReplayDuringLiveRaces;
+    private final boolean autoSelectMedia;
     
-    public static final String PARAM_VIEW_MODE = "viewMode";
+	public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
     public static final String PARAM_VIEW_SHOW_NAVIGATION_PANEL = "viewShowNavigationPanel";
     public static final String PARAM_VIEW_SHOW_WINDCHART = "viewShowWindChart";
     public static final String PARAM_VIEW_SHOW_COMPETITORSCHART = "viewShowCompetitorsChart";
     public static final String PARAM_VIEW_COMPETITOR_FILTER = "viewCompetitorFilter";
     public static final String PARAM_CAN_REPLAY_DURING_LIVE_RACES = "canReplayDuringLiveRaces";
+    public static final String PARAM_AUTOSELECT_MEDIA = "autoSelectMedia";
 
     public static enum ViewModes { ONESCREEN };
     
@@ -28,16 +30,18 @@ public class RaceBoardViewConfiguration {
         showLeaderboard = true;
         showWindChart = false;
         showCompetitorsChart = false;
-    }
+        autoSelectMedia = false;
+    }	
     
     public RaceBoardViewConfiguration(ViewModes viewMode, String activeCompetitorsFilterSetName,
-            boolean showLeaderboard, boolean showWindChart, boolean showCompetitorsChart, boolean canReplayDuringLiveRaces) {
+            boolean showLeaderboard, boolean showWindChart, boolean showCompetitorsChart, boolean canReplayDuringLiveRaces, boolean autoSelectMedia) {
         this.viewMode = viewMode;
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
         this.showWindChart = showWindChart;
         this.showCompetitorsChart = showCompetitorsChart;
         this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
+		this.autoSelectMedia = autoSelectMedia;
     }
 
     public boolean isShowLeaderboard() {
@@ -63,4 +67,9 @@ public class RaceBoardViewConfiguration {
     public boolean isCanReplayDuringLiveRaces() {
         return canReplayDuringLiveRaces;
     }
+
+    public boolean isAutoSelectMedia() {
+		return autoSelectMedia;
+	}
+
 }
