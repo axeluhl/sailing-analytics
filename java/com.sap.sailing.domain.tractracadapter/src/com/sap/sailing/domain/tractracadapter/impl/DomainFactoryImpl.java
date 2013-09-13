@@ -469,7 +469,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta, UUID raceId,
+    public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
             String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Course course,
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
@@ -479,33 +479,38 @@ public class DomainFactoryImpl implements DomainFactory {
             if (raceDefinition == null) {
                 logger.info("Creating RaceDefinitionImpl for race "+raceName);
                 raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
+            } else {
+                logger.info("Already found RaceDefinitionImpl for race "+raceName);
+            }
+            DynamicTrackedRace trackedRace = trackedRegatta.getExistingTrackedRace(raceDefinition);
+            if (trackedRace == null) {
                 // add to existing regatta only if boat class matches
                 if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
                     trackedRegatta.getRegatta().addRace(raceDefinition);
-                    DynamicTrackedRace trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
+                    trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                             delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
-                    logger.info("Added race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta());
-                    
-                    TracTracCourseDesignUpdateHandler courseDesignHandler = new TracTracCourseDesignUpdateHandler(tracTracUpdateURI,
-                            tracTracUsername, tracTracPassword,
-                            tracTracEventUuid, raceDefinition.getId());
+                    logger.info("Added race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta());
+
+                    TracTracCourseDesignUpdateHandler courseDesignHandler = new TracTracCourseDesignUpdateHandler(
+                            tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
+                            raceDefinition.getId());
                     trackedRace.addCourseDesignChangedListener(courseDesignHandler);
-                    
-                    TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(tracTracUpdateURI, 
-                            tracTracUsername, tracTracPassword, tracTracEventUuid, raceDefinition.getId());
+
+                    TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(
+                            tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
+                            raceDefinition.getId());
                     trackedRace.addStartTimeChangedListener(startTimeHandler);
                     raceCache.put(raceId, raceDefinition);
                     raceCache.notifyAll();
-                    return trackedRace;
                 } else {
-                    logger.warning("Not adding race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta()+
-                            " because boat class "+raceDefinition.getBoatClass()+" doesn't match regatta's boat class "+
-                            trackedRegatta.getRegatta().getBoatClass());
-                    return null;
+                    logger.warning("Not adding race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta()
+                            + " because boat class " + raceDefinition.getBoatClass()
+                            + " doesn't match regatta's boat class " + trackedRegatta.getRegatta().getBoatClass());
                 }
             } else {
-                throw new RuntimeException("Race "+raceName+" already exists");
+                logger.info("Found existing tracked race for race "+raceName+" with ID "+raceId);
             }
+            return trackedRace;
         }
     }
 
