@@ -192,7 +192,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         this.domainFactory = domainFactory;
         final Simulator simulator;
         if (simulateWithStartTimeNow) {
-            simulator = new Simulator();
+            simulator = new Simulator(windStore);
         } else {
             simulator = null;
         }
@@ -225,8 +225,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         // in this case, create a default regatta based on the TracTrac event data
         this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(raceLogStore, tractracEvent, trackedRegattaRegistry) : effectiveRegatta;
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
-        // Read event data from configuration file
-        controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, tracTracUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent, startOfTracking,
@@ -237,6 +235,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             }
         }
         addListenersForStoredDataAndStartController(typeControllers);
+        // Read event data from configuration file
+        controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, tracTracUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
     }
 
     @Override
@@ -550,6 +550,25 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         logger.info("stopped TracTrac tracking for "+getRaces());
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
         updateStatusOfTrackedRaces();
+        for (final RaceDefinition race : getRaces()) {
+            // Ask RacingEventService to cleanly stop and unregister this tracker
+            // if the race has all data loaded. Doing this asynchronously because
+            // stopping can take longer and if you're loading many races in parallel
+            // this can slow down loading extremely because this call-back seems to be
+            // called by TTCM synchronously.
+            Thread raceStopper = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        trackedRegattaRegistry.stopTracking(regatta, race);
+                    } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Error trying to stop tracker for race " + race.getName()
+                                + " in regatta " + getRegatta().getName(), e);
+                    }
+                }
+            });
+            raceStopper.start();
+        }
     }
 
     private void updateStatusOfTrackedRaces() {
@@ -562,7 +581,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     private void updateStatusOfTrackedRace(DynamicTrackedRace trackedRace) {
-        if (lastStatus != null) {
+        // can't update a race status once it has been set to FINISHED
+        if (lastStatus != null && trackedRace.getStatus() != null && trackedRace.getStatus().getStatus() != TrackedRaceStatusEnum.FINISHED) {
             trackedRace.setStatus(lastStatus);
         }
     }
@@ -580,31 +600,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         if (isLiveTracking) {
             lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1);
             updateStatusOfTrackedRaces();
-        } else {
-            // ask RacingEventService to cleanly stop and unregister this tracker
-            // if the race has all data loaded. Doing this asynchronously because
-            // stopping can take longer and if you're loading many races in parallel
-            // this can slow down loading extremely
-            for (final RaceDefinition race : getRaces()) {
-                DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
-                final Regatta regatta = getRegatta();
-                if (trackedRace.getStatus().getLoadingProgress() == 1.0) {
-                    Thread raceStopper = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                trackedRegattaRegistry.stopTracking(regatta, race);
-                            } catch (Exception e) {
-                                logger.log(Level.SEVERE, "Error trying to stop tracker for race "+race.getName()+
-                                                                            " in regatta "+getRegatta().getName(), e);
-                            }
-                        }
-                    });
-                    raceStopper.start();
-                } else {
-                    logger.log(Level.SEVERE, "Not stopping race "+race.getName()+" because it has not all data loaded! Progress: " + trackedRace.getStatus().getLoadingProgress());
-                }
-            }
         }
     }
 

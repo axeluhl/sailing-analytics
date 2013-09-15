@@ -582,11 +582,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public void removeLeaderboard(String leaderboardName) {
         Leaderboard leaderboard = removeLeaderboardFromLeaderboardsByName(leaderboardName);
-        leaderboard.removeRaceColumnListener(raceLogReplicator);
-        leaderboard.removeRaceColumnListener(raceLogScoringReplicator);
-        mongoObjectFactory.removeLeaderboard(leaderboardName);
-        syncGroupsAfterLeaderboardRemove(leaderboardName, true);
-        leaderboard.destroy();
+        if (leaderboard != null) {
+            leaderboard.removeRaceColumnListener(raceLogReplicator);
+            leaderboard.removeRaceColumnListener(raceLogScoringReplicator);
+            mongoObjectFactory.removeLeaderboard(leaderboardName);
+            syncGroupsAfterLeaderboardRemove(leaderboardName, true);
+            leaderboard.destroy();
+        }
     }
 
     private Leaderboard removeLeaderboardFromLeaderboardsByName(String leaderboardName) {
@@ -771,9 +773,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterConnector(hostname, port,
                 swissTimingAdapterPersistence, canSendRequests);
         for (Race race : swissTimingConnector.getRaces()) {
-            TimePoint startTime = swissTimingConnector.getStartTime(race.getRaceID());
-            result.add(new com.sap.sailing.domain.swisstimingadapter.RaceRecord(race.getRaceID(),
-                    race.getDescription(), startTime == null ? null : startTime.asDate()));
+            String raceID = race.getRaceID();
+            TimePoint startTime = swissTimingConnector.getStartTime(raceID);
+            boolean hasCourse = swissTimingConnector.hasCourse(raceID);
+            boolean hasStartlist = swissTimingConnector.hasStartlist(raceID);
+            result.add(new com.sap.sailing.domain.swisstimingadapter.RaceRecord(raceID,
+                    race.getDescription(), startTime == null ? null : startTime.asDate(),
+                            hasCourse, hasStartlist));
         }
         return result;
     }
@@ -1158,7 +1164,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                             stopTrackingWind(regatta, race);
                         }
                     }
-                    raceTracker.stop(); // this also removes the TrackedRace from trackedRegatta
+                    raceTracker.stop();
                     raceTrackersByID.remove(raceTracker.getID());
                 }
                 raceTrackersByRegatta.remove(regatta);
