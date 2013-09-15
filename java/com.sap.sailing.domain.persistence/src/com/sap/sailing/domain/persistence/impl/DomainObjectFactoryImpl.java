@@ -1010,10 +1010,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             loadRaceLogEvents(result, query);
             
             // query for obsolete events
-            query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(String.format("%s.%s.%s", 
-                    identifier.getTemplate().getParentObjectName(),
-                    identifier.getRaceColumnName(),
-                    identifier.getFleetName())));
+            query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(identifier.getObsoleteIdentifier()));
             loadRaceLogEvents(result, query);
         } catch (Throwable t) {
             // something went wrong during DB access; report, then use empty new race log
