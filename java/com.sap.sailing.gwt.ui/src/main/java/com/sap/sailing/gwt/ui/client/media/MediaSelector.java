@@ -65,6 +65,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
     private StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final UserDTO user;
+    private boolean autoSelectMedia;
 
     private MediaPlayer activeAudioPlayer;
     private Date currentRaceTime;
@@ -73,7 +74,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
     public MediaSelector(RegattaAndRaceIdentifier selectedRaceIdentifier, RaceTimesInfoProvider raceTimesInfoProvider,
             Timer raceTimer, MediaServiceAsync mediaService, StringMessages stringMessages,
-            ErrorReporter errorReporter, UserDTO user) {
+            ErrorReporter errorReporter, UserDTO user, boolean autoSelectMedia) {
         this.raceIdentifier = selectedRaceIdentifier;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.raceTimer = raceTimer;
@@ -81,6 +82,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.user = user;
+		this.autoSelectMedia = autoSelectMedia;
 
         Window.addCloseHandler(this);
         Window.addWindowClosingHandler(this);
@@ -120,7 +122,6 @@ public class MediaSelector implements PlayStateListener, TimeListener,
             }
 
         });
-
         setWidgetsVisible(false);
 
     }
@@ -286,6 +287,11 @@ public class MediaSelector implements PlayStateListener, TimeListener,
             setStatus(mediaTrack);
         }
         setWidgetsVisible((this.mediaTracks.size() > 0) || (this.user != null));
+        
+        toggleMediaButton.setValue(autoSelectMedia);
+        if (autoSelectMedia) {
+        	playDefault();
+        }
     }
 
     private void setWidgetsVisible(boolean isVisible) {
