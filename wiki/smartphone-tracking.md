@@ -97,39 +97,18 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 **Returns**
 * `200` body: JSON array of RaceGroups
 
-### `/sailingserver/racelogtracking/createRace`
+### `/sailingserver/racelogtracking/createRace?leaderboard=<leaderboardName>&raceColumn=<raceColumnName>&fleet=<fleetName>`
 `CreateRaceLogTrackedRacePostServlet`
-
-**Expects**
-* POST request body: JSON with Leaderboard-DTO, RaceColumn-DTO and BoatClass (see CreateRaceLogTrackedRaceJsonSerializer)
-```
-{"leaderboard": {
-  "name": "test",
-  "displayName": "test",
-  "discardThresholds": [1,2],
-  "scoringScheme": "LOW_POINT",
-  "courseAreaId": "Kiel"
- },
- "raceColumn": {
-  "name": "test",
-  "isMedalRace": false
- },
- "boatClass": {
-  "name": "49er",
-  "typicallyStartsUpwind": true
- }
-}
-```
 
 **Returns**
 * `200` RaceGroup JSON, containing only the Series/Row/Cell structure for the newly created race
 
 **Throws**
-* `400` Invalid JSON in request
-* `409` RaceColumn and RaceLog already exist in Leaderboard
+* `404` Leaderboard does not exist, RaceColumn does not exist (if the leaderboard is a `RegattaLeaderboard`)
+* `409` The RaceColumn already is linked to a tracked race`
 
 **Comments**
-* If a leaderboard with the supplied does not already exist, a FlexibleLeaderboard is created. Otherwise, the existing Leaderboard is used without raising an error. An existing RaceColumn will raise an error however, as this also means a RaceLog already exists.
+* The behaviour of the servlet depends on the type of leaderboard with the name `leaderboardName`. If this is a `RegattaLeaderboard`, then the RaceColumn with the name `raceColumnName` has to already exist. If it is a `FlexibleLeaderboard`, the RaceColumn will be created if it does not yet exist.
 
 ### `/smartphone/recordFixes`
 `RecordFixesPostServlet`
