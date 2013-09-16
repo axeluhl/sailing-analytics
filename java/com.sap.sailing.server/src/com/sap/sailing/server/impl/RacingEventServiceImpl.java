@@ -1164,7 +1164,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                             stopTrackingWind(regatta, race);
                         }
                     }
-                    raceTracker.stop(); // this also removes the TrackedRace from trackedRegatta
+                    raceTracker.stop();
                     raceTrackersByID.remove(raceTracker.getID());
                 }
                 raceTrackersByRegatta.remove(regatta);
