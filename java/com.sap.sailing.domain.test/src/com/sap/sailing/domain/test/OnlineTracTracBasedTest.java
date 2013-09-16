@@ -13,9 +13,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import org.junit.Before;
+
 
 
 import com.sap.sailing.domain.base.Competitor;
@@ -23,10 +25,10 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -53,6 +55,7 @@ import com.tractrac.clientmodule.Race;
  * 
  */
 public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
+    private final Logger logger = Logger.getLogger(OnlineTracTracBasedTest.class.getName());
     private DomainFactoryImpl domainFactory;
     private Regatta domainEvent;
     private DynamicTrackedRegatta trackedRegatta;
@@ -97,25 +100,31 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
-                }, /* trackedRegattaRegistry */ null, receiverTypes)) {
+                }, /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, receiverTypes)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
         Race tractracRace = getTracTracEvent().getRaceList().iterator().next();
         // now we expect that there is no RaceDefinition for the TracTrac race yet:
-        assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace));
-        race = getDomainFactory().getAndWaitForRaceDefinition(tractracRace);
+        assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace.getId()));
+        race = getDomainFactory().getAndWaitForRaceDefinition(tractracRace.getId());
         assertNotNull(race);
+        logger.info("Waiting for stored data to be loaded for " + race.getName());
         synchronized (getSemaphor()) {
             while (!isStoredDataLoaded()) {
                 getSemaphor().wait();
             }
         }
+        logger.info("Stored data has been loaded for " + race.getName());
         for (Receiver receiver : receivers) {
+            logger.info("Stopping receiver "+receiver);
             receiver.stopAfterNotReceivingEventsForSomeTime(/* timeoutInMilliseconds */ 5000l);
+            logger.info("Stopped receiver "+receiver);
         }
         for (Receiver receiver : receivers) {
+            logger.info("Joining receiver "+receiver);
             receiver.join();
+            logger.info("Joined receiver "+receiver);
         }
         trackedRace = getTrackedRegatta().getTrackedRace(race);
     }

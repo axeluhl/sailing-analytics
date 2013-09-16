@@ -5,11 +5,13 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
 
 public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
     public static final String ACTION_REMOVE = "ACTION_REMOVE";
     public static final String ACTION_UNLINK = "ACTION_UNLINK";
     public static final String ACTION_EDIT = "ACTION_EDIT";
+    public final static String ACTION_REFRESH_RACELOG = "ACTION_REFRESH_RACE_LOG";
     private final StringMessages stringMessages;
     private final SelectedLeaderboardProvider selectedLeaderboardProvider;
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
@@ -30,6 +32,7 @@ public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
             // race columns cannot be removed from a regatta leaderboard; they need to be removed from the regatta instead
             result.add(new ImageSpec(ACTION_REMOVE, stringMessages.actionRaceRemove(), makeImagePrototype(resources.removeIcon())));
         }
+        result.add(new ImageSpec(ACTION_REFRESH_RACELOG, stringMessages.refreshRaceLog(), makeImagePrototype(resources.reloadIcon())));
         return result;
     }
 }

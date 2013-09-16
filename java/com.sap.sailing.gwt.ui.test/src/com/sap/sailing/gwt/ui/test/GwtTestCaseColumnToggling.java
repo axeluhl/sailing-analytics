@@ -11,13 +11,14 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ExpandableSortableColumn;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 
@@ -37,7 +38,9 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     protected static final String tractracTunnelHost = "10.18.206.73"; // System.getProperty("tractrac.tunnel.host", "localhost");
     private final String JSON_URL= "http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/jsonservice.php";
     private final String TRACKED_RACE = "schwerttest";
-    
+    private final String COURSE_DESIGN_UPDATE_URI = "http://tracms.traclive.dk/update_course";
+    private final String TRACTRAC_USERNAME = "tracTest"; //only used for course update authentification
+    private final String TRACTRAC_PASSWORD = "tracTest"; //only used for course update authentification
     
     private LeaderboardDTO leaderboard;
     private TracTracRaceRecordDTO rrDao;
@@ -60,7 +63,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void listRacesInEvent(){
-        service.listTracTracRacesInEvent(JSON_URL, new AsyncCallback<Pair<String,List<TracTracRaceRecordDTO>>>() {
+        service.listTracTracRacesInEvent(JSON_URL, false, new AsyncCallback<Pair<String,List<TracTracRaceRecordDTO>>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -87,7 +90,9 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                 + TracTracConnectionConstants.PORT_TUNNEL_LIVE : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":"
                 + TracTracConnectionConstants.PORT_LIVE, tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
                 + TracTracConnectionConstants.PORT_TUNNEL_STORED : "tcp://" + TracTracConnectionConstants.HOST_NAME
-                + ":" + TracTracConnectionConstants.PORT_STORED, false, false, /* simulateWithStartTimeNow */ false, new AsyncCallback<Void>() {
+                + ":" + TracTracConnectionConstants.PORT_STORED, 
+                COURSE_DESIGN_UPDATE_URI, 
+                false, false, /* simulateWithStartTimeNow */ false, TRACTRAC_USERNAME, TRACTRAC_PASSWORD, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -133,7 +138,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                     public void onSuccess(Void result) {
                         System.out.println("Added column to leaderboard.");
                         RaceColumnDTO race = new RaceColumnDTO(/* isValidInTotalScore */ null);
-                        race.name = COLUMN1_NAME;
+                        race.setName(COLUMN1_NAME);
                         race.setMedalRace(false);
                         leaderboardPanel.addColumn(leaderboardPanel.createRaceColumn(race));
                         linkTrackedRace();
@@ -161,7 +166,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     private void getLeaderboard(){
         ArrayList<String> al = new ArrayList<String>();
         al.add(COLUMN1_NAME);
-        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, new AsyncCallback<LeaderboardDTO>() {
+        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, /* previousLeaderboardId */ null, new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail("Failed to get leaderboard.");
@@ -169,10 +174,10 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
             }
 
             @Override
-            public void onSuccess(LeaderboardDTO result) {
+            public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
                 System.out.println("Got leaderboard.");
                 
-                leaderboard = result;
+                leaderboard = result.getLeaderboardDTO(/* previousVersion */ null);
                 leaderboardPanel.updateLeaderboard(leaderboard);
                 for (int i = 0; i < leaderboardPanel.getLeaderboardTable()
                         .getColumnCount(); i++) {

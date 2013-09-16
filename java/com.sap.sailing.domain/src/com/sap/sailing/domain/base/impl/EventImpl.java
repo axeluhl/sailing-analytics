@@ -9,7 +9,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Venue;
 
-public class EventImpl extends EventDataImpl implements Event {
+public class EventImpl extends EventBaseImpl implements Event {
     private static final long serialVersionUID = 855135446595485715L;
     
     private final Set<Regatta> regattas;
@@ -39,5 +39,9 @@ public class EventImpl extends EventDataImpl implements Event {
     @Override
     public void removeRegatta(Regatta regatta) {
         regattas.remove(regatta);
+    }
+    
+    public String toString() {
+        return getId() + " " + getName() + " " + getVenue().getName() + " " + isPublic();
     }
 }

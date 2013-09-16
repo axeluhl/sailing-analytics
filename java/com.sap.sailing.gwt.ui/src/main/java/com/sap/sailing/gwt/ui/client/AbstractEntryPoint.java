@@ -37,6 +37,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
     private Button dialogCloseButton;
     protected StringMessages stringMessages;
     protected UserAgentDetails userAgent;
+    protected Label persistentAlertLabel;
     
     /**
      * Create a remote service proxy to talk to the server-side sailing service.
@@ -62,7 +63,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
 
     @Override
     public final void onModuleLoad() {
-        if(DebugInfo.isDebugIdEnabled()) {
+        if (DebugInfo.isDebugIdEnabled()) {
             PendingAjaxCallBundle bundle = GWT.create(PendingAjaxCallBundle.class);
             TextResource script = bundle.ajaxSemaphoreJS();
             JavaScriptInjector.inject(script.getText());
@@ -70,10 +71,8 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
             DebugInfo.setDebugIdAttribute(DEBUG_ID_ATTRIBUTE, false);
             DebugInfo.setDebugIdPrefix(DEBUG_ID_PREFIX);
         }
-        
         doOnModuleLoad();
-        
-        if(DebugInfo.isDebugIdEnabled()) {
+        if (DebugInfo.isDebugIdEnabled()) {
             PendingAjaxCallMarker.decrementPendingAjaxCalls(MarkedAsyncCallback.CATEGORY_GLOBAL);
         }
     }
@@ -82,6 +81,8 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
         stringMessages = GWT.create(StringMessages.class);
         errorDialogBox = createErrorDialog(); /* TODO: Make this more generic (e.g. make it support all kinds of messages) */
         userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
+        persistentAlertLabel = new Label("");
+        persistentAlertLabel.setStyleName("global-alert-message");
         
         ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
         ServiceDefTarget mediaServiceDef = (ServiceDefTarget) mediaService;
@@ -109,6 +110,11 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
         } else {
             reportError(message);
         }
+    }
+    
+    @Override
+    public void reportPersistentInformation(String message) {
+        persistentAlertLabel.setText(message);
     }
     
     @Override

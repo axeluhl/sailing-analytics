@@ -7,25 +7,48 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.racelog.Flags;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 
 public class RaceLogTest {
-
+    
+    @Test
+    public void testAddingTwoEventsOfDifferentPassesButSameTimestamps() {
+        TimePoint t1 = MillisecondsTimePoint.now();
+        int passId = 0;
+        RaceLog raceLog = new RaceLogImpl("RaceLogTest", "test-identifier");
+        
+        RaceLogFlagEvent rcEvent1 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, UUID.randomUUID(), new ArrayList<Competitor>(), passId, Flags.CLASS, Flags.NONE, false);
+        RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, UUID.randomUUID(), new ArrayList<Competitor>(), ++passId, Flags.CLASS, Flags.NONE, false);
+        
+        raceLog.add(rcEvent1);
+        raceLog.add(rcEvent2);
+        
+        raceLog.lockForRead();
+        try {
+            assertEquals(2, Util.size(raceLog.getRawFixes()));
+            assertEquals(1, Util.size(raceLog.getFixes()));
+        } finally {
+            raceLog.unlockAfterRead();
+        }
+    }
+    
     @Test
     public void testAddOfEvent() {
-        RaceLog rcEventTrack = new RaceLogImpl("RaceLogTest");
+        RaceLog rcEventTrack = new RaceLogImpl("RaceLogTest", "test-identifier");
         TimePoint t1 = MillisecondsTimePoint.now();
         int passId = 0;
         boolean isDisplayed = true;
@@ -52,7 +75,7 @@ public class RaceLogTest {
 
     @Test
     public void testTrackAPIForEventLogUsage() {
-        RaceLog rcEventTrack = new RaceLogImpl("RaceLog");
+        RaceLog rcEventTrack = new RaceLogImpl("RaceLog", "test-identifier");
         List<RaceLogEvent> expectedOrderingList = new ArrayList<RaceLogEvent>();
         TimePoint t1 = MillisecondsTimePoint.now();
         TimePoint t2 = new MillisecondsTimePoint(t1.asMillis() - 1000);
@@ -72,7 +95,7 @@ public class RaceLogTest {
         RaceLogFlagEvent rcEvent4 = RaceLogEventFactory.INSTANCE.createFlagEvent(t4, passId, Flags.CLASS, Flags.NONE,
                 true);
         RaceLogStartTimeEvent rcEvent5 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(t5, passId,
-                RaceLogRaceStatus.SCHEDULED, t1);
+                t1);
 
         rcEventTrack.add(rcEvent5);
         rcEventTrack.add(rcEvent3);

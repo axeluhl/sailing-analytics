@@ -20,8 +20,6 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
@@ -30,6 +28,8 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
@@ -82,8 +82,21 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
 
     private void setBearingForCompetitor(Competitor competitor, TimePoint timePoint, double bearingDeg) {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrackedRace().getTrack(competitor);
-        competitorTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint,
-                new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(bearingDeg))));
+        final KnotSpeedWithBearingImpl speed = new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(bearingDeg));
+        final Position position;
+        competitorTrack.lockForRead();
+        try {
+            GPSFixMoving lastFixBefore = competitorTrack.getLastFixBefore(timePoint);
+            if (lastFixBefore != null) {
+                position = lastFixBefore.getPosition().translateGreatCircle(speed.getBearing(), speed.travel(lastFixBefore.getTimePoint(), timePoint));
+            } else {
+                position = new DegreePosition(54.4680424, 10.234451);
+            }
+            // now infer a position that makes sense with the speed
+        } finally {
+            competitorTrack.unlockAfterRead();
+        }
+        competitorTrack.addGPSFix(new GPSFixMovingImpl(position, timePoint, speed));
     }
 
     /**
@@ -134,11 +147,13 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
         CombinedWindTrackImpl combinedTrack = new CombinedWindTrackImpl(getTrackedRace(), WindSourceType.COMBINED.getBaseConfidence());
         Wind combinedWindDirection = combinedTrack.getAveragedWind(/* position */ null, now);
-        assertEquals(180., combinedWindDirection.getBearing().getDegrees(), 0.00001);
+        //Since the course layout makes a wind estimation around 7� and the confidence of the cluster based wind estimation is not
+        // way higher that that of the course layout wind, we will not end up with exactly 180 deg.
+        assertEquals(180.2, combinedWindDirection.getBearing().getDegrees(), 0.1);
     }
 
     /**
-     * See <a href="http://sapcoe-app01.pironet-ndh.com/show_bug.cgi?id=166">bug #166</a>
+     * See <a href="http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=166">bug #166</a>
      */
     @Test
     public void testWindEstimationCacheInvalidationAfterLegTypeChange() throws NoWindException {

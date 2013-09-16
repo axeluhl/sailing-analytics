@@ -3,16 +3,16 @@ package com.sap.sailing.racecommittee.app.domain;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.SeriesData;
+import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 
 public interface FleetIdentifier {
 
-	public Fleet getFleet(); 
-	
-	public SeriesData getSeries();
-	
-	public RaceGroup getRaceGroup();
+    public Fleet getFleet();
 
-	public Serializable getId();
+    public SeriesBase getSeries();
+
+    public RaceGroup getRaceGroup();
+
+    public Serializable getId();
 }

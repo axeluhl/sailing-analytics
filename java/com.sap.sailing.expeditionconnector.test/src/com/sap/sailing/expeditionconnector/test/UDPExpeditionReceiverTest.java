@@ -28,11 +28,11 @@ import org.junit.Test;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -79,7 +79,8 @@ public class UDPExpeditionReceiverTest {
                 "#0,9,320.0*05",
                 "#0,9,320.0*05",
                 "#0,1,7.700,2,-36.0,3,25.10,4,-49.5,5,19.41,6,271.5,9,321.0,12,1.07,50,327.3,146,40348.390058*10",
-                "#0,9,321.0*04"
+                "#0,9,321.0*04",
+                "#5,2,-163.2,3,0.00,13,305.8,39,2.0,48,39.500717,49,2.747750*X19"
         };
 
         someValidWithFourInvalidLines = new String[] {

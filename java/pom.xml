@@ -18,72 +18,86 @@
 		<module>com.sap.sailing.domain.shared.android</module>
 		<module>com.sap.sailing.domain</module>
 		<module>com.sap.sailing.operationaltransformation</module>
-		<module>com.sap.sailing.operationaltransformation.test</module>
 		<module>com.sap.sailing.geocoding</module>
-		<module>com.sap.sailing.geocoding.test</module>
 		<module>com.sap.sailing.domain.persistence</module>
-		<module>com.sap.sailing.domain.test</module>
 		<module>com.sap.sailing.domain.tractracadapter</module>
-		<module>com.sap.sailing.domain.tractracadapter.test</module>
 		<module>com.sap.sailing.domain.tractracadapter.persistence</module>
 		<module>com.sap.sailing.domain.swisstimingadapter</module>
 		<module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
-		<module>com.sap.sailing.domain.swisstimingadapter.test</module>
 		<module>com.sap.sailing.domain.swisstimingreplayadapter</module>
-		<module>com.sap.sailing.domain.swisstimingreplayadapter.test</module>
 		<module>com.sap.sailing.declination</module>
-		<module>com.sap.sailing.declination.test</module>
 		<module>com.sap.sailing.udpconnector</module>
 		<module>com.sap.sailing.expeditionconnector</module>
-		<module>com.sap.sailing.expeditionconnector.test</module>
 		<module>com.sap.sailing.server</module>
 		<module>com.sap.sailing.server.gateway</module>
 		<module>com.sap.sailing.server.gateway.ess40</module>
 		<module>com.sap.sailing.server.gateway.serialization</module>
-		<module>com.sap.sailing.server.gateway.serialization.test</module>
 		<module>com.sap.sailing.server.replication</module>
-		<module>com.sap.sailing.server.replication.test</module>
 		<module>com.sap.sailing.www</module>
 		<module>com.sap.sailing.www.events</module>
 		<module>com.sap.sailing.xcelsiusadapter</module>
-	        <module>com.sap.sailing.gwt.ui</module>
-       		<module>com.sap.sailing.gwt.ui.test</module>
 		<module>com.google.gwt.osgi</module>
-		<module>com.sap.sailing.server.test</module>
 		<module>com.sap.sailing.mongodb</module>
-		<module>com.sap.sailing.mongodb.test</module>
 		<module>com.tractrac.clientmodule</module>
 		<module>org.json.simple</module>
 		<module>com.mongodb.driver</module>
 		<module>com.googlecode.java-diff-utils</module>
-		<module>com.googlecode.java-diff-utils.test</module>
 		<module>com.sap.sailing.feature</module>
-		<module>com.sap.sailing.feature.runtime</module>
-		<module>com.sap.sailing.feature.p2build</module>
 		<module>org.moxieapps.gwt.highcharts</module>
+		<module>com.sap.sailing.resultimport</module>
 		<module>com.sap.sailing.kiworesultimport</module>
-		<module>com.sap.sailing.kiworesultimport.test</module>
 		<module>com.sap.sailing.ess40.resultimport</module>
-		<module>com.sap.sailing.ess40.resultimport.test</module>
-		<module>com.sap.sailing.odf.resultimport</module>
-		<module>com.sap.sailing.odf.resultimport.test</module>
 		<module>com.sap.sailing.xrr.resultimport</module>
-		<module>com.sap.sailing.xrr.resultimport.test</module>
 		<module>com.sap.sailing.freg.resultimport</module>
-		<module>com.sap.sailing.freg.resultimport.test</module>
-		<module>com.sap.sailing.selenium.test</module>
 		<module>org.openqa.selenium.osgi</module>
 		<module>com.sap.sailing.monitoring</module>
 		<module>com.sap.sailing.nmeaconnector</module>
-		<module>com.sap.sailing.nmeaconnector.test</module>
 		<module>net.sf.marineapi</module>
 		<module>net.sf.marineapi.test</module>
+		<module>com.sap.sailing.simulator</module>
+		<module>com.sap.sailing.server.trackfiles</module>
+		<module>com.sap.sailing.feature.runtime</module>
+	        <module>com.sap.sailing.gwt.ui</module>
+		<module>com.sap.sailing.domain.tractracadapter.test</module>
+		<module>com.sap.sailing.domain.test</module>
+		<module>com.sap.sailing.domain.shared.android.test</module>
+		<module>com.sap.sailing.operationaltransformation.test</module>
+		<module>com.sap.sailing.geocoding.test</module>
+		<module>com.sap.sailing.domain.swisstimingadapter.test</module>
+		<module>com.sap.sailing.domain.swisstimingreplayadapter.test</module>
+		<module>com.sap.sailing.declination.test</module>
+		<module>com.sap.sailing.expeditionconnector.test</module>
+		<module>com.sap.sailing.server.test</module>
+		<module>com.sap.sailing.server.gateway.test</module>
+		<module>com.sap.sailing.server.gateway.serialization.test</module>
+		<module>com.sap.sailing.server.replication.test</module>
+       	        <module>com.sap.sailing.gwt.ui.test</module>
+		<module>com.sap.sailing.mongodb.test</module>
+		<module>com.googlecode.java-diff-utils.test</module>
+		<module>com.sap.sailing.kiworesultimport.test</module>
+		<module>com.sap.sailing.ess40.resultimport.test</module>
+		<module>com.sap.sailing.xrr.resultimport.test</module>
+		<module>com.sap.sailing.freg.resultimport.test</module>
+		<module>com.sap.sailing.barbados.resultimport</module>
+		<module>com.sap.sailing.barbados.resultimport.test</module>
+		<module>com.sap.sailing.velum.resultimport</module>
+		<module>com.sap.sailing.velum.resultimport.test</module>
+		<module>com.sap.sailing.sailwave.resultimport</module>
+		<module>com.sap.sailing.sailwave.resultimport.test</module>
+		<module>com.sap.sailing.manage2sail.resultimport</module>
+		<module>com.sap.sailing.manage2sail.resultimport.test</module>
+		<module>com.sap.sailing.nmeaconnector.test</module>
+		<module>com.sap.sailing.simulator.test</module>
+		<module>com.sap.sailing.server.trackfiles.test</module>
+		<module>de.csenk.gwt.ws</module>
+		<module>com.sap.sailing.selenium.test</module>
+		<module>com.sap.sailing.feature.p2build</module>
 	</modules>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<tycho-version>0.13.0</tycho-version>
+		<tycho-version>0.18.1</tycho-version>
         
 		<!--
           QUESTION: Which properties or settings are system dependent and differ across
@@ -113,6 +127,7 @@
         -->
         <parameters.proxy>
         </parameters.proxy>
+        <skipTests>false</skipTests>
 	</properties>
 
     <profiles>
@@ -169,7 +184,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.11</version>
+					<version>2.16</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -237,8 +252,8 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
-				<artifactId>maven-osgi-compiler-plugin</artifactId>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
                 <version>${tycho-version}</version>
 				<configuration>
 					<source>1.7</source>
@@ -260,9 +275,9 @@
 	
 	<repositories>
 		<repository>
-			<id>equinox-sdk-3.7</id>
+			<id>equinox-sdk-3.9</id>
 			<layout>p2</layout>
-			<url>http://download.eclipse.org/releases/indigo/</url>
+			<url>http://download.eclipse.org/releases/kepler/</url>
 		</repository>
 <!--		
 		<repository>
@@ -282,7 +297,7 @@
 
 		<repository>
 			<id>sailing-server-maven</id>
-			<url>http://sapcoe-app01.pironet-ndh.com/maven</url>
+			<url>http://maven.sapsailing.com/maven</url>
 		</repository>
 	</repositories>
 </project>

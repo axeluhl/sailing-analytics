@@ -79,7 +79,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {}
                 }, /* delayToLiveInMillis */ 0l, 
-                /* millisecondsOverWhichToAverageWind */ 30000, /* simulator */ null) {
+                /* millisecondsOverWhichToAverageWind */ 30000, /* simulator */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null) {
             @Override
             protected void handleEvent(Triple<Route, RouteData, Race> event) {
                 super.handleEvent(event);
@@ -92,8 +92,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         addListenersForStoredDataAndStartController(receivers);
         Race tractracRace = getTracTracEvent().getRaceList().iterator().next();
         // now we expect that there is no 
-        assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace));
-        race = domainFactory.getAndWaitForRaceDefinition(tractracRace);
+        assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace.getId()));
+        race = domainFactory.getAndWaitForRaceDefinition(tractracRace.getId());
         course = race.getCourse();
         assertNotNull(course);
         assertEquals(3, Util.size(course.getWaypoints()));

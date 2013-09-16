@@ -1,9 +1,14 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.concurrent.Callable;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 
 
 /**
@@ -21,22 +26,29 @@ public class HighPoint extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Integer numberOfCompetitorsInRace) {
+    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher) {
         Double result;
         if (rank == 0) {
             result = null;
         } else {
-            if (numberOfCompetitorsInRace == null) {
-                result = null;
-            } else {
-                result = (double) (numberOfCompetitorsInRace - rank + 1);
+            Integer numberOfCompetitorsInRace;
+            try {
+                numberOfCompetitorsInRace = numberOfCompetitorsInRaceFetcher.call();
+                if (numberOfCompetitorsInRace == null) {
+                    result = null;
+                } else {
+                    result = (double) (numberOfCompetitorsInRace - rank + 1);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
         return result;
     }
 
     @Override
-    public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason, Integer numberOfCompetitorsInRace, int numberOfCompetitorsInLeaderboard) {
+    public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason, Integer numberOfCompetitorsInRace,
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
         return 0.0;
     }
 
@@ -44,4 +56,10 @@ public class HighPoint extends AbstractScoringSchemeImpl {
     public ScoringSchemeType getType() {
         return ScoringSchemeType.HIGH_POINT;
     }
+
+    @Override
+    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
+        return true;
+    }
+    
 }

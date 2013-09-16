@@ -5,6 +5,7 @@ import java.util.Arrays;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
 
 public class EventConfigImagesBarCell extends ImagesBarCell {
     static final String ACTION_REMOVE = "ACTION_REMOVE";
@@ -24,7 +25,9 @@ public class EventConfigImagesBarCell extends ImagesBarCell {
 
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
-        return Arrays.asList(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
-                new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(resources.removeIcon())));
+        return Arrays.asList(
+                new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
+                new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(resources.removeIcon()))
+                );
     }
 }

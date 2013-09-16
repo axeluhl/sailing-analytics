@@ -11,7 +11,11 @@ public enum EmptyRaceLogStore implements RaceLogStore {
     INSTANCE;
 
     @Override
-    public RaceLog getRaceLog(RaceLogIdentifier identifier) {
-        return new RaceLogImpl(UUID.randomUUID().toString());
+    public RaceLog getRaceLog(RaceLogIdentifier identifier, boolean ignoreCache) {
+        return new RaceLogImpl(UUID.randomUUID().toString(), identifier.getIdentifier());
+    }
+
+    @Override
+    public void removeListenersAddedByStoreFrom(RaceLog raceLogAvailable) {
     }
 }

@@ -11,10 +11,13 @@ public abstract class AbstractRaceTrackerImpl implements RaceTracker {
     @Override
     public Set<RegattaAndRaceIdentifier> getRaceIdentifiers() {
         Set<RegattaAndRaceIdentifier> result = new HashSet<RegattaAndRaceIdentifier>();
-        for (RaceDefinition race : getRaces()) {
-            TrackedRace trackedRace = getTrackedRegatta().getTrackedRace(race);
-            if (trackedRace != null) {
-                result.add(trackedRace.getRaceIdentifier());
+        final Set<RaceDefinition> races = getRaces();
+        if (races != null) {
+            for (RaceDefinition race : races) {
+                TrackedRace trackedRace = getTrackedRegatta().getTrackedRace(race);
+                if (trackedRace != null) {
+                    result.add(trackedRace.getRaceIdentifier());
+                }
             }
         }
         return result;

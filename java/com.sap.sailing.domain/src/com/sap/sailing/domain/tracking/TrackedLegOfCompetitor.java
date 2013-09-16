@@ -5,12 +5,12 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
@@ -133,6 +133,10 @@ public interface TrackedLegOfCompetitor extends Serializable {
     
     boolean hasFinishedLeg(TimePoint timePoint);
     
+    /**
+     * @return <code>null</code> if the competitor hasn't yet started this leg; the time point when the competitor passed
+     * the start waypoint of this leg otherwise
+     */
     TimePoint getStartTime();
     
     TimePoint getFinishTime();
@@ -191,7 +195,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * reaching legs are computed as the along-track distance. For upwind/downwind legs it's taken to be the
      * along-wind projection. With this distance measure, the competitors speed and bearing before the maneuver,
      * as defined by <code>timePointBeforeManeuver</code> is extrapolated until <code>timePointAfterManeuver</code>,
-     * and the resulting extrapolated position's "windward distance" is computed to the competitor's actual position
+     * and the resulting extrapolated position's "windward distance" is compared to the competitor's actual position
      * at that time. This distance is returned as the result of this method. 
      */
     Distance getManeuverLoss(TimePoint timePointBeforeManeuver, TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) throws NoWindException;

@@ -52,11 +52,15 @@ public class XcelsiusServlet extends SailingServerHttpServlet {
                     final RegattaDataPerLegAction a = new RegattaDataPerLegAction(req, res, getService(), maxRows);
                     a.perform();
                     return;
-                }else if ("getRegattaList".equals(action)) {
+                } else if ("getRegattaList".equals(action)) {
                     final RegattaListAction a = new RegattaListAction(req, res, getService(), maxRows);
                     a.perform();
                     return;
-                }else {
+                } else if ("getRegattaDataPerRace".equals(action)) {
+                    final RegattaDataPerRaceAction a = new RegattaDataPerRaceAction(req, res, getService(), maxRows);
+                    a.perform();
+                    return;
+                } else {
                 }
                 HttpAction.say("Unknown action", res);
                 return;

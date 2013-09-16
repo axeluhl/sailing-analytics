@@ -2,8 +2,10 @@ package com.sap.sailing.server.replication;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.server.replication.impl.ReplicationServlet;
 
 public interface ReplicationService {
@@ -41,4 +43,23 @@ public interface ReplicationService {
      * replica by type, where the operation type is the key, represented as the operation's class name
      */
     Map<Class<? extends RacingEventServiceOperation<?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor);
+
+    /**
+     * Stops the currently running replication. As there can be only one replication running
+     * this method needs no parameters.
+     * @throws IOException 
+     */
+    void stopToReplicateFromMaster() throws IOException;
+
+    /**
+     * Stops all replica currently registered with this server.
+     * @throws IOException 
+     */
+    void stopAllReplica() throws IOException;
+    
+    /**
+     * Returns an unique server identifier
+     * @return
+     */
+    UUID getServerIdentifier();
 }

@@ -2,9 +2,9 @@ package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.Set;
 
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
 /**
  * Represents a set of race columns that are currently to be shown in a leaderboard. Implementations may, e.g.,
@@ -28,7 +28,7 @@ public interface RaceColumnSelection {
      * A client may request a column to be selected. An implementation doesn't necessarily have to comply with this
      * request, particularly if it represents an implicit, automatic column selection.
      */
-    void requestRaceColumnSelection(String raceColumnName, RaceColumnDTO column);
+    void requestRaceColumnSelection(RaceColumnDTO column);
     
     /**
      * A client may request all columns to be de-selected. An implementation doesn't necessarily have to comply with this

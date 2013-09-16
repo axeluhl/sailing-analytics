@@ -10,15 +10,28 @@ Like businesses, sailors need the latest information to make strategic decisions
 
 * [[Information about this Wiki and HowTo|wiki/howto]]
 * [[General Project Information|wiki/general-information]]
-* [[OnBoarding Information|wiki/onboarding]]
-* [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
+* Production Environment
+  * [[PIRONET (Hosting Provider, Emergency Procedures)|wiki/prionet-related-information]]
+  * [[Amazon EC2|wiki/amazon-ec2]]
   * [[Production Environment|wiki/production-environment]]
+  * [[TracTrac Lifecycle for Event Managers|wiki/tractrac-lifecycle]]
+* Information for Developers
+  * [[Cook Book|wiki/cook-book]]
+  * [[OnBoarding Information|wiki/onboarding]]
+  * [[Typical Development Scenarios|wiki/typical-development-scenarios]]
+  * [[Server Replication|wiki/server-replication]]
+  * [[Configure Races on Server|wiki/typical-development-scenarios]]
   * [[Development Environment|wiki/development-environment]]
-* [[Server Replication|wiki/server-replication]]
-* [[Configure Races on Server|wiki/configure-races-on-server]]
-* [[Planning|wiki/planning]]
-* Event Specifica
-  * [[Extreme Sailing Series|wiki/extreme-sailing-series]]
+  * [[Mobile Development|wiki/mobile-development]]
+* General Information
+  * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
+  * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
+  * [[Inventory|wiki/inventar-liste]]
+  * [[Smartphone Tracking|wiki/smartphone-tracking]]
+* Planning and Event Information
+  * [[Project Planning (bigger development)|wiki/planning]]
+  * [[General Event Planning|wiki/general-event-planning]]
+  * [[Information about Extreme Sailing Series|wiki/extreme-sailing-series]]
 
 ### Internal services (not related to wiki but useful)
 
@@ -27,3 +40,4 @@ Like businesses, sailors need the latest information to make strategic decisions
 * [Maven Repository Browser](http://maven.sapsailing.com/maven/)
 * [Main Sailing Website](http://www.sapsailing.com)
 * [Visitor Statistics](http://analysis.sapsailing.com/)
+* [Traffic and CPU for app01](http://mrtg.sapsailing.com/)

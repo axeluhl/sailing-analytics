@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrack;
 
 public interface MediaServiceAsync {
 
@@ -13,7 +13,7 @@ public interface MediaServiceAsync {
 
     void getAllMediaTracks(AsyncCallback<Collection<MediaTrack>> asyncCallback);
 
-    void addMediaTrack(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
+    void addMediaTrack(MediaTrack mediaTrack, AsyncCallback<String> asyncCallback);
 
     void deleteMediaTrack(MediaTrack mediaTrack, AsyncCallback<Void> asyncCallback);
 

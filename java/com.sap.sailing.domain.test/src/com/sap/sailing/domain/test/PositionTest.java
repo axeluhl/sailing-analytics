@@ -6,15 +6,15 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.tracking.impl.CompactGPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.CompactGPSFixMovingImpl;
@@ -82,7 +82,7 @@ public class PositionTest {
     @Test
     public void translateTest() {
         Position p1 = new DegreePosition(0, 0);
-        // now travel to 123° for 0.001 nautical miles (~ 1.852m)
+        // now travel to 123ï¿½ for 0.001 nautical miles (~ 1.852m)
         Position p2 = p1.translateGreatCircle(new DegreeBearingImpl(123), new NauticalMileDistance(0.001));
         assertEquals(123, p1.getBearingGreatCircle(p2).getDegrees(), 0.0000001);
         assertEquals(0.001, p1.getDistance(p2).getNauticalMiles(), 0.0000001);

@@ -3,12 +3,15 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 import java.util.List;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sailing.domain.common.dto.RaceDTO;
 
-public class RegattaDTO extends NamedDTO implements IsSerializable {
+public class RegattaDTO extends NamedDTO {
+    private static final long serialVersionUID = -4594784946348402759L;
     /**
      * May be <code>null</code> in case the boat class is not known
      */
@@ -27,7 +30,7 @@ public class RegattaDTO extends NamedDTO implements IsSerializable {
     }
 
     public RegattaIdentifier getRegattaIdentifier() {
-        return new RegattaName(name);
+        return new RegattaName(getName());
     }
     
     /**
@@ -50,12 +53,26 @@ public class RegattaDTO extends NamedDTO implements IsSerializable {
         }
         return tracked;
     }
+    
+    /**
+     * @return whether this regatta defines its local per-series result discarding rules; if so, any leaderboard based
+     *         on the regatta has to respect this and has to use a result discarding rule implementation that
+     *         keeps discards local to each series rather than spreading them across the entire leaderboard.
+     */
+    public boolean definesSeriesDiscardThresholds() {
+        for (SeriesDTO s : series) {
+            if (s.definesSeriesDiscardThresholds()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
         result = prime * result + ((scoringScheme == null) ? 0 : scoringScheme.hashCode());
         return result;
     }
@@ -69,10 +86,10 @@ public class RegattaDTO extends NamedDTO implements IsSerializable {
         if (getClass() != obj.getClass())
             return false;
         RegattaDTO other = (RegattaDTO) obj;
-        if (name == null) {
-            if (other.name != null)
+        if (getName() == null) {
+            if (other.getName() != null)
                 return false;
-        } else if (!name.equals(other.name))
+        } else if (!getName().equals(other.getName()))
             return false;
         if (scoringScheme != other.scoringScheme)
             return false;

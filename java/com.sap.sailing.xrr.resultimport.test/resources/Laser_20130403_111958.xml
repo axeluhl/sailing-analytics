@@ -1,0 +1,763 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SailingXRR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sailing.org/uploads/xml/sailingXRR_v1.3.xsd" Date="2013-04-03" Time="11:20:15" Type="SailingXRR" Version="1.3.1">
+  <Boat BoatID="1094919" BoatName="" SailNumber="AUS" />
+  <Boat BoatID="1087452" BoatName="" SailNumber="CYP" />
+  <Boat BoatID="1062315" BoatName="" SailNumber="CRO" />
+  <Boat BoatID="1100786" BoatName="" SailNumber="SWE" />
+  <Boat BoatID="1083279" BoatName="" SailNumber="GUA" />
+  <Boat BoatID="1124975" BoatName="" SailNumber="NZL" />
+  <Boat BoatID="1085473" BoatName="" SailNumber="GBR" />
+  <Boat BoatID="1109194" BoatName="" SailNumber="GER" />
+  <Boat BoatID="1078229" BoatName="" SailNumber="URU" />
+  <Boat BoatID="1079607" BoatName="" SailNumber="FRA" />
+  <Boat BoatID="1107624" BoatName="" SailNumber="ARG" />
+  <Boat BoatID="1107276" BoatName="" SailNumber="ESP" />
+  <Boat BoatID="1104959" BoatName="" SailNumber="NED" />
+  <Boat BoatID="1086898" BoatName="" SailNumber="BRA" />
+  <Boat BoatID="1052366" BoatName="" SailNumber="NOR" />
+  <Boat BoatID="1054093" BoatName="" SailNumber="SIN" />
+  <Boat BoatID="1039736" BoatName="" SailNumber="POL" />
+  <Boat BoatID="1081804" BoatName="" SailNumber="DEN" />
+  <Boat BoatID="1072644" BoatName="" SailNumber="EST" />
+  <Boat BoatID="1122218" BoatName="" SailNumber="AUT" />
+  <Boat BoatID="1120663" BoatName="" SailNumber="HUN" />
+  <Boat BoatID="1102034" BoatName="" SailNumber="POR" />
+  <Boat BoatID="1076910" BoatName="" SailNumber="CAN" />
+  <Boat BoatID="1087268" BoatName="" SailNumber="KOR" />
+  <Boat BoatID="1020432" BoatName="" SailNumber="ISV" />
+  <Boat BoatID="1105298" BoatName="" SailNumber="GRE" />
+  <Boat BoatID="1109397" BoatName="" SailNumber="CZE" />
+  <Boat BoatID="1016539" BoatName="" SailNumber="RUS" />
+  <Boat BoatID="1135083" BoatName="" SailNumber="USA" />
+  <Boat BoatID="1078063" BoatName="" SailNumber="CHI" />
+  <Boat BoatID="1031967" BoatName="" SailNumber="MNE" />
+  <Boat BoatID="1119655" BoatName="" SailNumber="SLO" />
+  <Boat BoatID="250804" BoatName="" SailNumber="FIN" />
+  <Boat BoatID="1087938" BoatName="" SailNumber="ITA" />
+  <Boat BoatID="1128999" BoatName="" SailNumber="BEL" />
+  <Boat BoatID="1029018" BoatName="" SailNumber="TRI" />
+  <Boat BoatID="1063800" BoatName="" SailNumber="IRL" />
+  <Boat BoatID="1073504" BoatName="" SailNumber="TUR" />
+  <Boat BoatID="1076540" BoatName="" SailNumber="MEX" />
+  <Boat BoatID="1105954" BoatName="" SailNumber="COL" />
+  <Boat BoatID="1105340" BoatName="" SailNumber="VEN" />
+  <Boat BoatID="1067110" BoatName="" SailNumber="CHN" />
+  <Boat BoatID="1085839" BoatName="" SailNumber="LTU" />
+  <Boat BoatID="1071554" BoatName="" SailNumber="UKR" />
+  <Boat BoatID="1072016" BoatName="" SailNumber="TUN" />
+  <Boat BoatID="1110630" BoatName="" SailNumber="MON" />
+  <Boat BoatID="1115858" BoatName="" SailNumber="MAS" />
+  <Boat BoatID="1060133" BoatName="" SailNumber="THA" />
+  <Boat BoatID="262797" BoatName="" SailNumber="KGZ" />
+  <Team Gender="Men" NOC="AUS" TeamID="1094919" TeamName="SLINGSBY Tom" BoatID="1094919">
+    <Crew PersonID="1094919" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="CYP" TeamID="1087452" TeamName="KONTIDES Pavlos" BoatID="1087452">
+    <Crew PersonID="1087452" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="CRO" TeamID="1062315" TeamName="STIPANOVIC Tonci" BoatID="1062315">
+    <Crew PersonID="1062315" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="SWE" TeamID="1100786" TeamName="MYRGREN Rasmus" BoatID="1100786">
+    <Crew PersonID="1100786" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GUA" TeamID="1083279" TeamName="MAEGLI AGUERO Juan Ignacio" BoatID="1083279">
+    <Crew PersonID="1083279" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="NZL" TeamID="1124975" TeamName="MURDOCH Andrew" BoatID="1124975">
+    <Crew PersonID="1124975" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GBR" TeamID="1085473" TeamName="GOODISON Paul" BoatID="1085473">
+    <Crew PersonID="1085473" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GER" TeamID="1109194" TeamName="GROTELUSCHEN Simon" BoatID="1109194">
+    <Crew PersonID="1109194" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="URU" TeamID="1078229" TeamName="FOGLIA COSTA Alejandro" BoatID="1078229">
+    <Crew PersonID="1078229" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="FRA" TeamID="1079607" TeamName="BERNAZ Jean Baptiste" BoatID="1079607">
+    <Crew PersonID="1079607" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ARG" TeamID="1107624" TeamName="ALSOGARAY Julio" BoatID="1107624">
+    <Crew PersonID="1107624" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ESP" TeamID="1107276" TeamName="HERNANDEZ CEBRIAN Javier" BoatID="1107276">
+    <Crew PersonID="1107276" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="NED" TeamID="1104959" TeamName="van SCHAARDENBURG Rutger" BoatID="1104959">
+    <Crew PersonID="1104959" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="BRA" TeamID="1086898" TeamName="FONTES Bruno" BoatID="1086898">
+    <Crew PersonID="1086898" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="NOR" TeamID="1052366" TeamName="RUTH Kristian" BoatID="1052366">
+    <Crew PersonID="1052366" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="SIN" TeamID="1054093" TeamName="CHENG Colin" BoatID="1054093">
+    <Crew PersonID="1054093" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="POL" TeamID="1039736" TeamName="ZIEMINSKI Kacper" BoatID="1039736">
+    <Crew PersonID="1039736" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="DEN" TeamID="1081804" TeamName="SCHIERUP Thorbjorn" BoatID="1081804">
+    <Crew PersonID="1081804" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="EST" TeamID="1072644" TeamName="RAMMO Karl-Martin" BoatID="1072644">
+    <Crew PersonID="1072644" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="AUT" TeamID="1122218" TeamName="GERITZER Andreas" BoatID="1122218">
+    <Crew PersonID="1122218" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="HUN" TeamID="1120663" TeamName="BERECZ Zsombor" BoatID="1120663">
+    <Crew PersonID="1120663" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="POR" TeamID="1102034" TeamName="LIMA Gustavo" BoatID="1102034">
+    <Crew PersonID="1102034" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="CAN" TeamID="1076910" TeamName="WRIGHT David" BoatID="1076910">
+    <Crew PersonID="1076910" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="KOR" TeamID="1087268" TeamName="HA Jeemin" BoatID="1087268">
+    <Crew PersonID="1087268" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ISV" TeamID="1020432" TeamName="THOMPSON Cy" BoatID="1020432">
+    <Crew PersonID="1020432" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GRE" TeamID="1105298" TeamName="HIMONAS Vagelis" BoatID="1105298">
+    <Crew PersonID="1105298" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="CZE" TeamID="1109397" TeamName="TEPLY Viktor" BoatID="1109397">
+    <Crew PersonID="1109397" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="RUS" TeamID="1016539" TeamName="LISOVENKO Igor" BoatID="1016539">
+    <Crew PersonID="1016539" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="USA" TeamID="1135083" TeamName="CRANE Rob" BoatID="1135083">
+    <Crew PersonID="1135083" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="CHI" TeamID="1078063" TeamName="del SOLAR Matias" BoatID="1078063">
+    <Crew PersonID="1078063" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="MNE" TeamID="1031967" TeamName="DUKIC Milivoj" BoatID="1031967">
+    <Crew PersonID="1031967" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="SLO" TeamID="1119655" TeamName="HMELJAK Karlo" BoatID="1119655">
+    <Crew PersonID="1119655" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="FIN" TeamID="250804" TeamName="LINDFORS Mattias" BoatID="250804">
+    <Crew PersonID="250804" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ITA" TeamID="1087938" TeamName="REGOLO Michele" BoatID="1087938">
+    <Crew PersonID="1087938" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="BEL" TeamID="1128999" TeamName="Van LAER Wannes" BoatID="1128999">
+    <Crew PersonID="1128999" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="TRI" TeamID="1029018" TeamName="LEWIS Andrew" BoatID="1029018">
+    <Crew PersonID="1029018" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="IRL" TeamID="1063800" TeamName="ESPEY James" BoatID="1063800">
+    <Crew PersonID="1063800" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="TUR" TeamID="1073504" TeamName="CAKIR Mustafa" BoatID="1073504">
+    <Crew PersonID="1073504" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="MEX" TeamID="1076540" TeamName="MONTEMAYOR Ricardo" BoatID="1076540">
+    <Crew PersonID="1076540" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="COL" TeamID="1105954" TeamName="QUINTERO Andrey" BoatID="1105954">
+    <Crew PersonID="1105954" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="VEN" TeamID="1105340" TeamName="RUIZ DURANGO Jose" BoatID="1105340">
+    <Crew PersonID="1105340" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="CHN" TeamID="1067110" TeamName="SHI Jian" BoatID="1067110">
+    <Crew PersonID="1067110" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="LTU" TeamID="1085839" TeamName="MILEVICIUS Rokas" BoatID="1085839">
+    <Crew PersonID="1085839" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="UKR" TeamID="1071554" TeamName="KUDRYASHOV Valeriy" BoatID="1071554">
+    <Crew PersonID="1071554" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="TUN" TeamID="1072016" TeamName="AKROUT Youssef" BoatID="1072016">
+    <Crew PersonID="1072016" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="MON" TeamID="1110630" TeamName="DESPRAT Damien" BoatID="1110630">
+    <Crew PersonID="1110630" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="MAS" TeamID="1115858" TeamName="MOHD AFENDY Khairulnizam" BoatID="1115858">
+    <Crew PersonID="1115858" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="THA" TeamID="1060133" TeamName="BUALONG Keerati" BoatID="1060133">
+    <Crew PersonID="1060133" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="KGZ" TeamID="262797" TeamName="IGNATEV Ilia" BoatID="262797">
+    <Crew PersonID="262797" Position="S" />
+  </Team>
+  <Event EventID="SAM004000" IFEventID="IFRGT-15961" Title="Laser Men" Type="Regatta">
+    <Race RaceID="SAM004901" RaceName="Race 1" RaceNumber="1" RaceStartDate="2012-07-30" RaceStartTime="12:07:00" RaceStatus="result" />
+    <Race RaceID="SAM004902" RaceName="Race 2" RaceNumber="2" RaceStartDate="2012-07-30" RaceStartTime="13:30:00" RaceStatus="result" />
+    <Race RaceID="SAM004903" RaceName="Race 3" RaceNumber="3" RaceStartDate="2012-07-31" RaceStartTime="14:00:00" RaceStatus="result" />
+    <Race RaceID="SAM004904" RaceName="Race 4" RaceNumber="4" RaceStartDate="2012-07-31" RaceStartTime="15:30:00" RaceStatus="result" />
+    <Race RaceID="SAM004905" RaceName="Race 5" RaceNumber="5" RaceStartDate="2012-08-01" RaceStartTime="12:52:00" RaceStatus="result" />
+    <Race RaceID="SAM004906" RaceName="Race 6" RaceNumber="6" RaceStartDate="2012-08-01" RaceStartTime="15:11:00" RaceStatus="result" />
+    <Race RaceID="SAM004907" RaceName="Race 7" RaceNumber="7" RaceStartDate="2012-08-03" RaceStartTime="12:07:00" RaceStatus="result" />
+    <Race RaceID="SAM004908" RaceName="Race 8" RaceNumber="8" RaceStartDate="2012-08-03" RaceStartTime="14:28:00" RaceStatus="result" />
+    <Race RaceID="SAM004909" RaceName="Race 9" RaceNumber="9" RaceStartDate="2012-08-04" RaceStartTime="12:07:00" RaceStatus="result" />
+    <Race RaceID="SAM004910" RaceName="Race 10" RaceNumber="10" RaceStartDate="2012-08-04" RaceStartTime="13:37:00" RaceStatus="result" />
+    <Race RaceID="SAM004101" RaceName="Medal Race" RaceNumber="11" RaceStartDate="2012-08-06" RaceStartTime="14:05:00" RaceStatus="inprogress" />
+    <Division DivisionID="SAM004000" Gender="Men" IFClassID="LSR" Title="Laser">
+      <RaceResult TeamID="1094919" Discard="false" RaceID="SAM004901" RacePoints="2" RaceRank="2" />
+      <RaceResult TeamID="1094919" Discard="false" RaceID="SAM004902" RacePoints="0" RaceRank="1" />
+      <RaceResult TeamID="1094919" Discard="false" RaceID="SAM004903" RacePoints="2" RaceRank="2" />
+      <RaceResult TeamID="1094919" Discard="false" RaceID="SAM004904" RacePoints="6" RaceRank="6" />
+      <RaceResult TeamID="1094919" Discard="true" RaceID="SAM004905" RacePoints="9" RaceRank="9" />
+      <RaceResult TeamID="1094919" Discard="false" RaceID="SAM004906" RacePoints="2" RaceRank="2" />
+      <RaceResult TeamID="1094919" Discard="true" RaceID="SAM004907" RacePoints="14" RaceRank="14" />
+      <RaceResult TeamID="1094919" Discard="false" RaceID="SAM004908" RacePoints="0" RaceRank="1" />
+      <RaceResult TeamID="1094919" Discard="false" RaceID="SAM004909" RacePoints="0" RaceRank="1" />
+      <RaceResult TeamID="1094919" Discard="false" RaceID="SAM004910" RacePoints="0" RaceRank="1" />
+      <RaceResult TeamID="1094919" Discard="false" RaceID="SAM004101" RacePoints="10" RaceRank="5" />
+      <RaceResult TeamID="1087452" Discard="true" RaceID="SAM004901" RacePoints="9" RaceRank="9" />
+      <RaceResult TeamID="1087452" Discard="false" RaceID="SAM004902" RacePoints="4" RaceRank="4" />
+      <RaceResult TeamID="1087452" Discard="false" RaceID="SAM004903" RacePoints="0" RaceRank="1" />
+      <RaceResult TeamID="1087452" Discard="false" RaceID="SAM004904" RacePoints="0" RaceRank="1" />
+      <RaceResult TeamID="1087452" Discard="false" RaceID="SAM004905" RacePoints="2" RaceRank="2" />
+      <RaceResult TeamID="1087452" Discard="false" RaceID="SAM004906" RacePoints="4" RaceRank="4" />
+      <RaceResult TeamID="1087452" Discard="true" RaceID="SAM004907" RacePoints="12" RaceRank="12" />
+      <RaceResult TeamID="1087452" Discard="false" RaceID="SAM004908" RacePoints="7" RaceRank="7" />
+      <RaceResult TeamID="1087452" Discard="false" RaceID="SAM004909" RacePoints="7" RaceRank="7" />
+      <RaceResult TeamID="1087452" Discard="false" RaceID="SAM004910" RacePoints="4" RaceRank="4" />
+      <RaceResult TeamID="1087452" Discard="false" RaceID="SAM004101" RacePoints="12" RaceRank="6" />
+      <RaceResult TeamID="1062315" Discard="false" RaceID="SAM004901" RacePoints="5" RaceRank="5" />
+      <RaceResult TeamID="1062315" Discard="false" RaceID="SAM004902" RacePoints="6" RaceRank="6" />
+      <RaceResult TeamID="1062315" Discard="true" RaceID="SAM004903" RacePoints="20" RaceRank="20" />
+      <RaceResult TeamID="1062315" Discard="false" RaceID="SAM004904" RacePoints="4" RaceRank="4" />
+      <RaceResult TeamID="1062315" Discard="false" RaceID="SAM004905" RacePoints="3" RaceRank="3" />
+      <RaceResult TeamID="1062315" Discard="false" RaceID="SAM004906" RacePoints="0" RaceRank="1" />
+      <RaceResult TeamID="1062315" Discard="false" RaceID="SAM004907" RacePoints="8" RaceRank="8" />
+      <RaceResult TeamID="1062315" Discard="true" RaceID="SAM004908" RacePoints="13" RaceRank="13" />
+      <RaceResult TeamID="1062315" Discard="false" RaceID="SAM004909" RacePoints="6" RaceRank="6" />
+      <RaceResult TeamID="1062315" Discard="false" RaceID="SAM004910" RacePoints="15" RaceRank="15" />
+      <RaceResult TeamID="1062315" Discard="false" RaceID="SAM004101" RacePoints="8" RaceRank="4" />
+      <RaceResult TeamID="1100786" Discard="false" RaceID="SAM004901" RacePoints="11" RaceRank="11" />
+      <RaceResult TeamID="1100786" Discard="false" RaceID="SAM004902" RacePoints="5" RaceRank="5" />
+      <RaceResult TeamID="1100786" Discard="false" RaceID="SAM004903" RacePoints="4" RaceRank="4" />
+      <RaceResult TeamID="1100786" Discard="false" RaceID="SAM004904" RacePoints="5" RaceRank="5" />
+      <RaceResult TeamID="1100786" Discard="true" RaceID="SAM004905" RacePoints="25" RaceRank="25" />
+      <RaceResult TeamID="1100786" Discard="true" RaceID="SAM004906" RacePoints="10" RaceRank="10" />
+      <RaceResult TeamID="1100786" Discard="false" RaceID="SAM004907" RacePoints="4" RaceRank="4" />
+      <RaceResult TeamID="1100786" Discard="false" RaceID="SAM004908" RacePoints="9" RaceRank="9" />
+      <RaceResult TeamID="1100786" Discard="false" RaceID="SAM004909" RacePoints="10" RaceRank="10" />
+      <RaceResult TeamID="1100786" Discard="false" RaceID="SAM004910" RacePoints="2" RaceRank="2" />
+      <RaceResult TeamID="1100786" Discard="false" RaceID="SAM004101" RacePoints="18" RaceRank="9" />
+      <RaceResult TeamID="1083279" Discard="false" RaceID="SAM004901" RacePoints="0" RaceRank="1" />
+      <RaceResult TeamID="1083279" Discard="false" RaceID="SAM004902" RacePoints="10" RaceRank="10" />
+      <RaceResult TeamID="1083279" Discard="false" RaceID="SAM004903" RacePoints="7" RaceRank="7" />
+      <RaceResult TeamID="1083279" Discard="true" RaceID="SAM004904" RacePoints="13" RaceRank="13" />
+      <RaceResult TeamID="1083279" Discard="false" RaceID="SAM004905" RacePoints="5" RaceRank="5" />
+      <RaceResult TeamID="1083279" Discard="false" RaceID="SAM004906" RacePoints="20" RaceRank="20" />
+      <RaceResult TeamID="1083279" Discard="false" RaceID="SAM004907" RacePoints="7" RaceRank="7" />
+      <RaceResult TeamID="1083279" Discard="false" RaceID="SAM004908" RacePoints="10" RaceRank="10" />
+      <RaceResult TeamID="1083279" Discard="true" RaceID="SAM004909" RacePoints="21" RaceRank="21" />
+      <RaceResult TeamID="1083279" Discard="false" RaceID="SAM004910" RacePoints="21" RaceRank="21" />
+      <RaceResult TeamID="1083279" Discard="false" RaceID="SAM004101" RacePoints="0" RaceRank="1" />
+      <RaceResult TeamID="1124975" Discard="false" RaceID="SAM004901" RacePoints="12" RaceRank="12" />
+      <RaceResult TeamID="1124975" Discard="false" RaceID="SAM004902" RacePoints="8" RaceRank="8" />
+      <RaceResult TeamID="1124975" Discard="false" RaceID="SAM004903" RacePoints="17" RaceRank="17" />
+      <RaceResult TeamID="1124975" Discard="true" RaceID="SAM004904" RacePoints="18" RaceRank="18" />
+      <RaceResult TeamID="1124975" Discard="false" RaceID="SAM004905" RacePoints="0" RaceRank="1" />
+      <RaceResult TeamID="1124975" Discard="false" RaceID="SAM004906" RacePoints="7" RaceRank="7" />
+      <RaceResult TeamID="1124975" Discard="false" RaceID="SAM004907" RacePoints="13" RaceRank="13" />
+      <RaceResult TeamID="1124975" Discard="true" RaceID="SAM004908" RacePoints="15" RaceRank="15" />
+      <RaceResult TeamID="1124975" Discard="false" RaceID="SAM004909" RacePoints="3" RaceRank="3" />
+      <RaceResult TeamID="1124975" Discard="false" RaceID="SAM004910" RacePoints="3" RaceRank="3" />
+      <RaceResult TeamID="1124975" Discard="false" RaceID="SAM004101" RacePoints="20" RaceRank="10" />
+      <RaceResult TeamID="1085473" Discard="false" RaceID="SAM004901" RacePoints="10" RaceRank="10" />
+      <RaceResult TeamID="1085473" Discard="true" RaceID="SAM004902" RacePoints="23" RaceRank="23" />
+      <RaceResult TeamID="1085473" Discard="false" RaceID="SAM004903" RacePoints="16" RaceRank="16" />
+      <RaceResult TeamID="1085473" Discard="false" RaceID="SAM004904" RacePoints="2" RaceRank="2" />
+      <RaceResult TeamID="1085473" Discard="false" RaceID="SAM004905" RacePoints="4" RaceRank="4" />
+      <RaceResult TeamID="1085473" Discard="false" RaceID="SAM004906" RacePoints="9" RaceRank="9" />
+      <RaceResult TeamID="1085473" Discard="true" RaceID="SAM004907" RacePoints="17" RaceRank="17" />
+      <RaceResult TeamID="1085473" Discard="false" RaceID="SAM004908" RacePoints="12" RaceRank="12" />
+      <RaceResult TeamID="1085473" Discard="false" RaceID="SAM004909" RacePoints="9" RaceRank="9" />
+      <RaceResult TeamID="1085473" Discard="false" RaceID="SAM004910" RacePoints="8" RaceRank="8" />
+      <RaceResult TeamID="1085473" Discard="false" RaceID="SAM004101" RacePoints="14" RaceRank="7" />
+      <RaceResult TeamID="1109194" Discard="false" RaceID="SAM004901" RacePoints="14" RaceRank="14" />
+      <RaceResult TeamID="1109194" Discard="false" RaceID="SAM004902" RacePoints="12" RaceRank="12" />
+      <RaceResult TeamID="1109194" Discard="true" RaceID="SAM004903" RacePoints="19" RaceRank="19" />
+      <RaceResult TeamID="1109194" Discard="false" RaceID="SAM004904" RacePoints="3" RaceRank="3" />
+      <RaceResult TeamID="1109194" Discard="false" RaceID="SAM004905" RacePoints="7" RaceRank="7" />
+      <RaceResult TeamID="1109194" Discard="false" RaceID="SAM004906" RacePoints="8" RaceRank="8" />
+      <RaceResult TeamID="1109194" Discard="true" RaceID="SAM004907" RacePoints="19" RaceRank="19" />
+      <RaceResult TeamID="1109194" Discard="false" RaceID="SAM004908" RacePoints="4" RaceRank="4" />
+      <RaceResult TeamID="1109194" Discard="false" RaceID="SAM004909" RacePoints="13" RaceRank="13" />
+      <RaceResult TeamID="1109194" Discard="false" RaceID="SAM004910" RacePoints="10" RaceRank="10" />
+      <RaceResult TeamID="1109194" Discard="false" RaceID="SAM004101" RacePoints="16" RaceRank="8" />
+      <RaceResult TeamID="1078229" Discard="false" RaceID="SAM004901" RacePoints="15" RaceRank="15" />
+      <RaceResult TeamID="1078229" Discard="false" RaceID="SAM004902" RacePoints="3" RaceRank="3" />
+      <RaceResult TeamID="1078229" Discard="false" RaceID="SAM004903" RacePoints="28" RaceRank="28" />
+      <RaceResult TeamID="1078229" Discard="false" RaceID="SAM004904" RacePoints="27" RaceRank="27" />
+      <RaceResult TeamID="1078229" Discard="true" RaceID="SAM004905" RacePoints="30" RaceRank="30" />
+      <RaceResult TeamID="1078229" Discard="false" RaceID="SAM004906" RacePoints="6" RaceRank="6" />
+      <RaceResult TeamID="1078229" Discard="true" RaceID="SAM004907" RacePoints="9" RaceRank="9" />
+      <RaceResult TeamID="1078229" Discard="false" RaceID="SAM004908" RacePoints="3" RaceRank="3" />
+      <RaceResult TeamID="1078229" Discard="false" RaceID="SAM004909" RacePoints="5" RaceRank="5" />
+      <RaceResult TeamID="1078229" Discard="false" RaceID="SAM004910" RacePoints="6" RaceRank="6" />
+      <RaceResult TeamID="1078229" Discard="false" RaceID="SAM004101" RacePoints="4" RaceRank="2" />
+      <RaceResult TeamID="1079607" Discard="false" RaceID="SAM004901" RacePoints="3" RaceRank="3" />
+      <RaceResult TeamID="1079607" Discard="true" RaceID="SAM004902" RacePoints="21" RaceRank="21" />
+      <RaceResult TeamID="1079607" Discard="false" RaceID="SAM004903" RacePoints="6" RaceRank="6" />
+      <RaceResult TeamID="1079607" Discard="false" RaceID="SAM004904" RacePoints="9" RaceRank="9" />
+      <RaceResult TeamID="1079607" Discard="false" RaceID="SAM004905" RacePoints="19" RaceRank="19" />
+      <RaceResult TeamID="1079607" Discard="false" RaceID="SAM004906" RacePoints="11" RaceRank="11" />
+      <RaceResult TeamID="1079607" Discard="false" RaceID="SAM004907" RacePoints="2" RaceRank="2" />
+      <RaceResult TeamID="1079607" Discard="false" RaceID="SAM004908" RacePoints="18" RaceRank="18" />
+      <RaceResult TeamID="1079607" Discard="true" RaceID="SAM004909" RacePoints="20" RaceRank="20" />
+      <RaceResult TeamID="1079607" Discard="false" RaceID="SAM004910" RacePoints="34" RaceRank="34" />
+      <RaceResult TeamID="1079607" Discard="false" RaceID="SAM004101" RacePoints="6" RaceRank="3" />
+      <RaceResult TeamID="1107624" Discard="true" RaceID="SAM004901" RacePoints="20" RaceRank="20" />
+      <RaceResult TeamID="1107624" Discard="false" RaceID="SAM004902" RacePoints="7" RaceRank="7" />
+      <RaceResult TeamID="1107624" Discard="false" RaceID="SAM004903" RacePoints="5" RaceRank="5" />
+      <RaceResult TeamID="1107624" Discard="false" RaceID="SAM004904" RacePoints="11" RaceRank="11" />
+      <RaceResult TeamID="1107624" Discard="false" RaceID="SAM004905" RacePoints="12" RaceRank="12" />
+      <RaceResult TeamID="1107624" Discard="false" RaceID="SAM004906" RacePoints="23" RaceRank="23" />
+      <RaceResult TeamID="1107624" Discard="false" RaceID="SAM004907" RacePoints="0" RaceRank="1" />
+      <RaceResult TeamID="1107624" Discard="true" RaceID="SAM004908" RacePoints="50" ScoreCode="BFD" />
+      <RaceResult TeamID="1107624" Discard="false" RaceID="SAM004909" RacePoints="26" RaceRank="26" />
+      <RaceResult TeamID="1107624" Discard="false" RaceID="SAM004910" RacePoints="7" RaceRank="7" />
+      <RaceResult TeamID="1107276" Discard="true" RaceID="SAM004901" RacePoints="34" RaceRank="34" />
+      <RaceResult TeamID="1107276" Discard="false" RaceID="SAM004902" RacePoints="17" RaceRank="17" />
+      <RaceResult TeamID="1107276" Discard="false" RaceID="SAM004903" RacePoints="13" RaceRank="13" />
+      <RaceResult TeamID="1107276" Discard="false" RaceID="SAM004904" RacePoints="15" RaceRank="15" />
+      <RaceResult TeamID="1107276" Discard="false" RaceID="SAM004905" RacePoints="26" RaceRank="26" />
+      <RaceResult TeamID="1107276" Discard="false" RaceID="SAM004906" RacePoints="13" RaceRank="13" />
+      <RaceResult TeamID="1107276" Discard="false" RaceID="SAM004907" RacePoints="6" RaceRank="6" />
+      <RaceResult TeamID="1107276" Discard="true" RaceID="SAM004908" RacePoints="17" RaceRank="17" />
+      <RaceResult TeamID="1107276" Discard="false" RaceID="SAM004909" RacePoints="2" RaceRank="2" />
+      <RaceResult TeamID="1107276" Discard="false" RaceID="SAM004910" RacePoints="9" RaceRank="9" />
+      <RaceResult TeamID="1104959" Discard="true" RaceID="SAM004901" RacePoints="33" RaceRank="33" />
+      <RaceResult TeamID="1104959" Discard="false" RaceID="SAM004902" RacePoints="11" RaceRank="11" />
+      <RaceResult TeamID="1104959" Discard="false" RaceID="SAM004903" RacePoints="14" RaceRank="14" />
+      <RaceResult TeamID="1104959" Discard="false" RaceID="SAM004904" RacePoints="7" RaceRank="7" />
+      <RaceResult TeamID="1104959" Discard="false" RaceID="SAM004905" RacePoints="11" RaceRank="11" />
+      <RaceResult TeamID="1104959" Discard="false" RaceID="SAM004906" RacePoints="14" RaceRank="14" />
+      <RaceResult TeamID="1104959" Discard="true" RaceID="SAM004907" RacePoints="26" RaceRank="26" />
+      <RaceResult TeamID="1104959" Discard="false" RaceID="SAM004908" RacePoints="5" RaceRank="5" />
+      <RaceResult TeamID="1104959" Discard="false" RaceID="SAM004909" RacePoints="19" RaceRank="19" />
+      <RaceResult TeamID="1104959" Discard="false" RaceID="SAM004910" RacePoints="23" RaceRank="23" />
+      <RaceResult TeamID="1086898" Discard="false" RaceID="SAM004901" RacePoints="17" RaceRank="17" />
+      <RaceResult TeamID="1086898" Discard="false" RaceID="SAM004902" RacePoints="2" RaceRank="2" />
+      <RaceResult TeamID="1086898" Discard="false" RaceID="SAM004903" RacePoints="12" RaceRank="12" />
+      <RaceResult TeamID="1086898" Discard="true" RaceID="SAM004904" RacePoints="19" RaceRank="19" />
+      <RaceResult TeamID="1086898" Discard="false" RaceID="SAM004905" RacePoints="10" RaceRank="10" />
+      <RaceResult TeamID="1086898" Discard="true" RaceID="SAM004906" RacePoints="27" RaceRank="27" />
+      <RaceResult TeamID="1086898" Discard="false" RaceID="SAM004907" RacePoints="23" RaceRank="23" />
+      <RaceResult TeamID="1086898" Discard="false" RaceID="SAM004908" RacePoints="21" RaceRank="21" />
+      <RaceResult TeamID="1086898" Discard="false" RaceID="SAM004909" RacePoints="16" RaceRank="16" />
+      <RaceResult TeamID="1086898" Discard="false" RaceID="SAM004910" RacePoints="5" RaceRank="5" />
+      <RaceResult TeamID="1052366" Discard="true" RaceID="SAM004901" RacePoints="32" RaceRank="32" />
+      <RaceResult TeamID="1052366" Discard="false" RaceID="SAM004902" RacePoints="14" RaceRank="14" />
+      <RaceResult TeamID="1052366" Discard="false" RaceID="SAM004903" RacePoints="10" RaceRank="10" />
+      <RaceResult TeamID="1052366" Discard="false" RaceID="SAM004904" RacePoints="17" RaceRank="17" />
+      <RaceResult TeamID="1052366" Discard="false" RaceID="SAM004905" RacePoints="15" RaceRank="15" />
+      <RaceResult TeamID="1052366" Discard="false" RaceID="SAM004906" RacePoints="5" RaceRank="5" />
+      <RaceResult TeamID="1052366" Discard="true" RaceID="SAM004907" RacePoints="50" ScoreCode="DNF" />
+      <RaceResult TeamID="1052366" Discard="false" RaceID="SAM004908" RacePoints="24" RaceRank="24" />
+      <RaceResult TeamID="1052366" Discard="false" RaceID="SAM004909" RacePoints="8" RaceRank="8" />
+      <RaceResult TeamID="1052366" Discard="false" RaceID="SAM004910" RacePoints="20" RaceRank="20" />
+      <RaceResult TeamID="1054093" Discard="false" RaceID="SAM004901" RacePoints="4" RaceRank="4" />
+      <RaceResult TeamID="1054093" Discard="false" RaceID="SAM004902" RacePoints="25" RaceRank="25" />
+      <RaceResult TeamID="1054093" Discard="false" RaceID="SAM004903" RacePoints="26" RaceRank="26" />
+      <RaceResult TeamID="1054093" Discard="false" RaceID="SAM004904" RacePoints="20" RaceRank="20" />
+      <RaceResult TeamID="1054093" Discard="true" RaceID="SAM004905" RacePoints="27" RaceRank="27" />
+      <RaceResult TeamID="1054093" Discard="true" RaceID="SAM004906" RacePoints="34" RaceRank="34" />
+      <RaceResult TeamID="1054093" Discard="false" RaceID="SAM004907" RacePoints="10" RaceRank="10" />
+      <RaceResult TeamID="1054093" Discard="false" RaceID="SAM004908" RacePoints="2" RaceRank="2" />
+      <RaceResult TeamID="1054093" Discard="false" RaceID="SAM004909" RacePoints="17" RaceRank="17" />
+      <RaceResult TeamID="1054093" Discard="false" RaceID="SAM004910" RacePoints="14" RaceRank="14" />
+      <RaceResult TeamID="1039736" Discard="false" RaceID="SAM004901" RacePoints="22" RaceRank="22" />
+      <RaceResult TeamID="1039736" Discard="false" RaceID="SAM004902" RacePoints="13" RaceRank="13" />
+      <RaceResult TeamID="1039736" Discard="false" RaceID="SAM004903" RacePoints="8" RaceRank="8" />
+      <RaceResult TeamID="1039736" Discard="true" RaceID="SAM004904" RacePoints="24" RaceRank="24" />
+      <RaceResult TeamID="1039736" Discard="false" RaceID="SAM004905" RacePoints="18" RaceRank="18" />
+      <RaceResult TeamID="1039736" Discard="false" RaceID="SAM004906" RacePoints="15" RaceRank="15" />
+      <RaceResult TeamID="1039736" Discard="true" RaceID="SAM004907" RacePoints="28" RaceRank="28" />
+      <RaceResult TeamID="1039736" Discard="false" RaceID="SAM004908" RacePoints="11" RaceRank="11" />
+      <RaceResult TeamID="1039736" Discard="false" RaceID="SAM004909" RacePoints="22" RaceRank="22" />
+      <RaceResult TeamID="1039736" Discard="false" RaceID="SAM004910" RacePoints="12" RaceRank="12" />
+      <RaceResult TeamID="1081804" Discard="true" RaceID="SAM004901" RacePoints="36" RaceRank="36" />
+      <RaceResult TeamID="1081804" Discard="false" RaceID="SAM004902" RacePoints="16" RaceRank="16" />
+      <RaceResult TeamID="1081804" Discard="false" RaceID="SAM004903" RacePoints="24" RaceRank="24" />
+      <RaceResult TeamID="1081804" Discard="false" RaceID="SAM004904" RacePoints="8" RaceRank="8" />
+      <RaceResult TeamID="1081804" Discard="false" RaceID="SAM004905" RacePoints="23" RaceRank="23" />
+      <RaceResult TeamID="1081804" Discard="false" RaceID="SAM004906" RacePoints="16" RaceRank="16" />
+      <RaceResult TeamID="1081804" Discard="false" RaceID="SAM004907" RacePoints="5" RaceRank="5" />
+      <RaceResult TeamID="1081804" Discard="false" RaceID="SAM004908" RacePoints="23" RaceRank="23" />
+      <RaceResult TeamID="1081804" Discard="true" RaceID="SAM004909" RacePoints="24" RaceRank="24" />
+      <RaceResult TeamID="1081804" Discard="false" RaceID="SAM004910" RacePoints="18" RaceRank="18" />
+      <RaceResult TeamID="1072644" Discard="false" RaceID="SAM004901" RacePoints="7" RaceRank="7" />
+      <RaceResult TeamID="1072644" Discard="false" RaceID="SAM004902" RacePoints="18" RaceRank="18" />
+      <RaceResult TeamID="1072644" Discard="false" RaceID="SAM004903" RacePoints="3" RaceRank="3" />
+      <RaceResult TeamID="1072644" Discard="true" RaceID="SAM004904" RacePoints="21" RaceRank="21" />
+      <RaceResult TeamID="1072644" Discard="false" RaceID="SAM004905" RacePoints="8" RaceRank="8" />
+      <RaceResult TeamID="1072644" Discard="false" RaceID="SAM004906" RacePoints="12" RaceRank="12" />
+      <RaceResult TeamID="1072644" Discard="false" RaceID="SAM004907" RacePoints="30" RaceRank="30" />
+      <RaceResult TeamID="1072644" Discard="true" RaceID="SAM004908" RacePoints="31" RaceRank="31" />
+      <RaceResult TeamID="1072644" Discard="false" RaceID="SAM004909" RacePoints="18" RaceRank="18" />
+      <RaceResult TeamID="1072644" Discard="false" RaceID="SAM004910" RacePoints="39" RaceRank="39" />
+      <RaceResult TeamID="1122218" Discard="false" RaceID="SAM004901" RacePoints="6" RaceRank="6" />
+      <RaceResult TeamID="1122218" Discard="false" RaceID="SAM004902" RacePoints="20" RaceRank="20" />
+      <RaceResult TeamID="1122218" Discard="true" RaceID="SAM004903" RacePoints="22" RaceRank="22" />
+      <RaceResult TeamID="1122218" Discard="false" RaceID="SAM004904" RacePoints="16" RaceRank="16" />
+      <RaceResult TeamID="1122218" Discard="false" RaceID="SAM004905" RacePoints="6" RaceRank="6" />
+      <RaceResult TeamID="1122218" Discard="false" RaceID="SAM004906" RacePoints="28" RaceRank="28" />
+      <RaceResult TeamID="1122218" Discard="false" RaceID="SAM004907" RacePoints="22" RaceRank="22" />
+      <RaceResult TeamID="1122218" Discard="false" RaceID="SAM004908" RacePoints="22" RaceRank="22" />
+      <RaceResult TeamID="1122218" Discard="true" RaceID="SAM004909" RacePoints="32" RaceRank="32" />
+      <RaceResult TeamID="1122218" Discard="false" RaceID="SAM004910" RacePoints="16" RaceRank="16" />
+      <RaceResult TeamID="1120663" Discard="false" RaceID="SAM004901" RacePoints="30" RaceRank="30" />
+      <RaceResult TeamID="1120663" Discard="true" RaceID="SAM004902" RacePoints="34" RaceRank="34" />
+      <RaceResult TeamID="1120663" Discard="false" RaceID="SAM004903" RacePoints="11" RaceRank="11" />
+      <RaceResult TeamID="1120663" Discard="false" RaceID="SAM004904" RacePoints="12" RaceRank="12" />
+      <RaceResult TeamID="1120663" Discard="false" RaceID="SAM004905" RacePoints="33" RaceRank="33" />
+      <RaceResult TeamID="1120663" Discard="false" RaceID="SAM004906" RacePoints="3" RaceRank="3" />
+      <RaceResult TeamID="1120663" Discard="true" RaceID="SAM004907" RacePoints="21" RaceRank="21" />
+      <RaceResult TeamID="1120663" Discard="false" RaceID="SAM004908" RacePoints="14" RaceRank="14" />
+      <RaceResult TeamID="1120663" Discard="false" RaceID="SAM004909" RacePoints="4" RaceRank="4" />
+      <RaceResult TeamID="1120663" Discard="false" RaceID="SAM004910" RacePoints="31" RaceRank="31" />
+      <RaceResult TeamID="1102034" Discard="false" RaceID="SAM004901" RacePoints="21" RaceRank="21" />
+      <RaceResult TeamID="1102034" Discard="false" RaceID="SAM004902" RacePoints="24" RaceRank="24" />
+      <RaceResult TeamID="1102034" Discard="false" RaceID="SAM004903" RacePoints="27" RaceRank="27" />
+      <RaceResult TeamID="1102034" Discard="true" RaceID="SAM004904" RacePoints="35" RaceRank="35" />
+      <RaceResult TeamID="1102034" Discard="false" RaceID="SAM004905" RacePoints="13" RaceRank="13" />
+      <RaceResult TeamID="1102034" Discard="false" RaceID="SAM004906" RacePoints="18" RaceRank="18" />
+      <RaceResult TeamID="1102034" Discard="false" RaceID="SAM004907" RacePoints="3" RaceRank="3" />
+      <RaceResult TeamID="1102034" Discard="false" RaceID="SAM004908" RacePoints="20" RaceRank="20" />
+      <RaceResult TeamID="1102034" Discard="true" RaceID="SAM004909" RacePoints="34" RaceRank="34" />
+      <RaceResult TeamID="1102034" Discard="false" RaceID="SAM004910" RacePoints="13" RaceRank="13" />
+      <RaceResult TeamID="1076910" Discard="false" RaceID="SAM004901" RacePoints="18" RaceRank="18" />
+      <RaceResult TeamID="1076910" Discard="false" RaceID="SAM004902" RacePoints="15" RaceRank="15" />
+      <RaceResult TeamID="1076910" Discard="false" RaceID="SAM004903" RacePoints="9" RaceRank="9" />
+      <RaceResult TeamID="1076910" Discard="true" RaceID="SAM004904" RacePoints="31" RaceRank="30" />
+      <RaceResult TeamID="1076910" Discard="false" RaceID="SAM004905" RacePoints="14" RaceRank="14" />
+      <RaceResult TeamID="1076910" Discard="false" RaceID="SAM004906" RacePoints="24" RaceRank="24" />
+      <RaceResult TeamID="1076910" Discard="true" RaceID="SAM004907" RacePoints="41" RaceRank="41" />
+      <RaceResult TeamID="1076910" Discard="false" RaceID="SAM004908" RacePoints="6" RaceRank="6" />
+      <RaceResult TeamID="1076910" Discard="false" RaceID="SAM004909" RacePoints="29" RaceRank="29" />
+      <RaceResult TeamID="1076910" Discard="false" RaceID="SAM004910" RacePoints="38" RaceRank="38" />
+      <RaceResult TeamID="1087268" Discard="false" RaceID="SAM004901" RacePoints="8" RaceRank="8" />
+      <RaceResult TeamID="1087268" Discard="false" RaceID="SAM004902" RacePoints="9" RaceRank="9" />
+      <RaceResult TeamID="1087268" Discard="false" RaceID="SAM004903" RacePoints="15" RaceRank="15" />
+      <RaceResult TeamID="1087268" Discard="false" RaceID="SAM004904" RacePoints="14" RaceRank="14" />
+      <RaceResult TeamID="1087268" Discard="true" RaceID="SAM004905" RacePoints="35" RaceRank="35" />
+      <RaceResult TeamID="1087268" Discard="true" RaceID="SAM004906" RacePoints="50" ScoreCode="DNF" />
+      <RaceResult TeamID="1087268" Discard="false" RaceID="SAM004907" RacePoints="50" ScoreCode="DSQ" />
+      <RaceResult TeamID="1087268" Discard="false" RaceID="SAM004908" RacePoints="28" RaceRank="28" />
+      <RaceResult TeamID="1087268" Discard="false" RaceID="SAM004909" RacePoints="12" RaceRank="12" />
+      <RaceResult TeamID="1087268" Discard="false" RaceID="SAM004910" RacePoints="17" RaceRank="17" />
+      <RaceResult TeamID="1020432" Discard="false" RaceID="SAM004901" RacePoints="24" RaceRank="24" />
+      <RaceResult TeamID="1020432" Discard="false" RaceID="SAM004902" RacePoints="22" RaceRank="22" />
+      <RaceResult TeamID="1020432" Discard="true" RaceID="SAM004903" RacePoints="32" RaceRank="32" />
+      <RaceResult TeamID="1020432" Discard="false" RaceID="SAM004904" RacePoints="23" RaceRank="23" />
+      <RaceResult TeamID="1020432" Discard="false" RaceID="SAM004905" RacePoints="17" RaceRank="17" />
+      <RaceResult TeamID="1020432" Discard="false" RaceID="SAM004906" RacePoints="21" RaceRank="21" />
+      <RaceResult TeamID="1020432" Discard="false" RaceID="SAM004907" RacePoints="16" RaceRank="16" />
+      <RaceResult TeamID="1020432" Discard="false" RaceID="SAM004908" RacePoints="26" RaceRank="26" />
+      <RaceResult TeamID="1020432" Discard="true" RaceID="SAM004909" RacePoints="36" RaceRank="36" />
+      <RaceResult TeamID="1020432" Discard="false" RaceID="SAM004910" RacePoints="22" RaceRank="22" />
+      <RaceResult TeamID="1105298" Discard="false" RaceID="SAM004901" RacePoints="13" RaceRank="13" ScoreCode="DPI" />
+      <RaceResult TeamID="1105298" Discard="false" RaceID="SAM004902" RacePoints="19" RaceRank="19" />
+      <RaceResult TeamID="1105298" Discard="false" RaceID="SAM004903" RacePoints="21" RaceRank="21" />
+      <RaceResult TeamID="1105298" Discard="false" RaceID="SAM004904" RacePoints="41" RaceRank="41" />
+      <RaceResult TeamID="1105298" Discard="true" RaceID="SAM004905" RacePoints="50" ScoreCode="DSQ" />
+      <RaceResult TeamID="1105298" Discard="true" RaceID="SAM004906" RacePoints="33" RaceRank="33" />
+      <RaceResult TeamID="1105298" Discard="false" RaceID="SAM004907" RacePoints="15" RaceRank="15" />
+      <RaceResult TeamID="1105298" Discard="false" RaceID="SAM004908" RacePoints="30" RaceRank="30" />
+      <RaceResult TeamID="1105298" Discard="false" RaceID="SAM004909" RacePoints="15" RaceRank="15" />
+      <RaceResult TeamID="1105298" Discard="false" RaceID="SAM004910" RacePoints="19" RaceRank="19" />
+      <RaceResult TeamID="1109397" Discard="false" RaceID="SAM004901" RacePoints="29" RaceRank="29" />
+      <RaceResult TeamID="1109397" Discard="false" RaceID="SAM004902" RacePoints="27" RaceRank="27" />
+      <RaceResult TeamID="1109397" Discard="false" RaceID="SAM004903" RacePoints="31" RaceRank="31" />
+      <RaceResult TeamID="1109397" Discard="true" RaceID="SAM004904" RacePoints="34" RaceRank="34" />
+      <RaceResult TeamID="1109397" Discard="false" RaceID="SAM004905" RacePoints="32" RaceRank="32" />
+      <RaceResult TeamID="1109397" Discard="false" RaceID="SAM004906" RacePoints="25" RaceRank="25" />
+      <RaceResult TeamID="1109397" Discard="false" RaceID="SAM004907" RacePoints="11" RaceRank="11" />
+      <RaceResult TeamID="1109397" Discard="false" RaceID="SAM004908" RacePoints="34" RaceRank="34" />
+      <RaceResult TeamID="1109397" Discard="true" RaceID="SAM004909" RacePoints="37" RaceRank="37" />
+      <RaceResult TeamID="1109397" Discard="false" RaceID="SAM004910" RacePoints="11" RaceRank="11" />
+      <RaceResult TeamID="1016539" Discard="false" RaceID="SAM004901" RacePoints="28" RaceRank="28" />
+      <RaceResult TeamID="1016539" Discard="true" RaceID="SAM004902" RacePoints="40" RaceRank="40" />
+      <RaceResult TeamID="1016539" Discard="false" RaceID="SAM004903" RacePoints="36" RaceRank="36" />
+      <RaceResult TeamID="1016539" Discard="false" RaceID="SAM004904" RacePoints="22" RaceRank="22" />
+      <RaceResult TeamID="1016539" Discard="false" RaceID="SAM004905" RacePoints="24" RaceRank="24" />
+      <RaceResult TeamID="1016539" Discard="false" RaceID="SAM004906" RacePoints="19" RaceRank="19" />
+      <RaceResult TeamID="1016539" Discard="false" RaceID="SAM004907" RacePoints="25" RaceRank="25" />
+      <RaceResult TeamID="1016539" Discard="false" RaceID="SAM004908" RacePoints="16" RaceRank="16" />
+      <RaceResult TeamID="1016539" Discard="true" RaceID="SAM004909" RacePoints="28" RaceRank="28" />
+      <RaceResult TeamID="1016539" Discard="false" RaceID="SAM004910" RacePoints="33" RaceRank="33" />
+      <RaceResult TeamID="1135083" Discard="false" RaceID="SAM004901" RacePoints="35" RaceRank="35" />
+      <RaceResult TeamID="1135083" Discard="true" RaceID="SAM004902" RacePoints="42" RaceRank="42" />
+      <RaceResult TeamID="1135083" Discard="false" RaceID="SAM004903" RacePoints="30" RaceRank="30" />
+      <RaceResult TeamID="1135083" Discard="false" RaceID="SAM004904" RacePoints="28" RaceRank="28" />
+      <RaceResult TeamID="1135083" Discard="false" RaceID="SAM004905" RacePoints="16" RaceRank="16" />
+      <RaceResult TeamID="1135083" Discard="false" RaceID="SAM004906" RacePoints="26" RaceRank="26" />
+      <RaceResult TeamID="1135083" Discard="false" RaceID="SAM004907" RacePoints="18" RaceRank="18" />
+      <RaceResult TeamID="1135083" Discard="false" RaceID="SAM004908" RacePoints="8" RaceRank="8" />
+      <RaceResult TeamID="1135083" Discard="true" RaceID="SAM004909" RacePoints="33" RaceRank="33" />
+      <RaceResult TeamID="1135083" Discard="false" RaceID="SAM004910" RacePoints="44" RaceRank="44" />
+      <RaceResult TeamID="1078063" Discard="false" RaceID="SAM004901" RacePoints="16" RaceRank="16" />
+      <RaceResult TeamID="1078063" Discard="false" RaceID="SAM004902" RacePoints="32" RaceRank="32" />
+      <RaceResult TeamID="1078063" Discard="false" RaceID="SAM004903" RacePoints="25" RaceRank="25" />
+      <RaceResult TeamID="1078063" Discard="true" RaceID="SAM004904" RacePoints="43" RaceRank="43" />
+      <RaceResult TeamID="1078063" Discard="false" RaceID="SAM004905" RacePoints="20" RaceRank="20" />
+      <RaceResult TeamID="1078063" Discard="false" RaceID="SAM004906" RacePoints="17" RaceRank="17" />
+      <RaceResult TeamID="1078063" Discard="true" RaceID="SAM004907" RacePoints="50" ScoreCode="BFD" />
+      <RaceResult TeamID="1078063" Discard="false" RaceID="SAM004908" RacePoints="29" RaceRank="29" />
+      <RaceResult TeamID="1078063" Discard="false" RaceID="SAM004909" RacePoints="44" RaceRank="44" />
+      <RaceResult TeamID="1078063" Discard="false" RaceID="SAM004910" RacePoints="29" RaceRank="29" />
+      <RaceResult TeamID="1031967" Discard="false" RaceID="SAM004901" RacePoints="26" RaceRank="26" />
+      <RaceResult TeamID="1031967" Discard="false" RaceID="SAM004902" RacePoints="33" RaceRank="33" />
+      <RaceResult TeamID="1031967" Discard="true" RaceID="SAM004903" RacePoints="35" RaceRank="35" />
+      <RaceResult TeamID="1031967" Discard="false" RaceID="SAM004904" RacePoints="32" RaceRank="32" />
+      <RaceResult TeamID="1031967" Discard="false" RaceID="SAM004905" RacePoints="22" RaceRank="22" />
+      <RaceResult TeamID="1031967" Discard="false" RaceID="SAM004906" RacePoints="30" RaceRank="30" />
+      <RaceResult TeamID="1031967" Discard="false" RaceID="SAM004907" RacePoints="24" RaceRank="24" />
+      <RaceResult TeamID="1031967" Discard="true" RaceID="SAM004908" RacePoints="38" RaceRank="38" />
+      <RaceResult TeamID="1031967" Discard="false" RaceID="SAM004909" RacePoints="23" RaceRank="23" />
+      <RaceResult TeamID="1031967" Discard="false" RaceID="SAM004910" RacePoints="24" RaceRank="24" />
+      <RaceResult TeamID="1119655" Discard="false" RaceID="SAM004901" RacePoints="23" RaceRank="23" />
+      <RaceResult TeamID="1119655" Discard="false" RaceID="SAM004902" RacePoints="30" RaceRank="30" />
+      <RaceResult TeamID="1119655" Discard="false" RaceID="SAM004903" RacePoints="18" RaceRank="18" />
+      <RaceResult TeamID="1119655" Discard="false" RaceID="SAM004904" RacePoints="33" RaceRank="33" />
+      <RaceResult TeamID="1119655" Discard="true" RaceID="SAM004905" RacePoints="34" RaceRank="34" />
+      <RaceResult TeamID="1119655" Discard="false" RaceID="SAM004906" RacePoints="31" RaceRank="31" />
+      <RaceResult TeamID="1119655" Discard="true" RaceID="SAM004907" RacePoints="50" ScoreCode="DNF" />
+      <RaceResult TeamID="1119655" Discard="false" RaceID="SAM004908" RacePoints="25" RaceRank="25" />
+      <RaceResult TeamID="1119655" Discard="false" RaceID="SAM004909" RacePoints="27" RaceRank="27" />
+      <RaceResult TeamID="1119655" Discard="false" RaceID="SAM004910" RacePoints="32" RaceRank="32" />
+      <RaceResult TeamID="250804" Discard="false" RaceID="SAM004901" RacePoints="25" RaceRank="25" />
+      <RaceResult TeamID="250804" Discard="false" RaceID="SAM004902" RacePoints="28" RaceRank="28" />
+      <RaceResult TeamID="250804" Discard="false" RaceID="SAM004903" RacePoints="23" RaceRank="23" />
+      <RaceResult TeamID="250804" Discard="false" RaceID="SAM004904" RacePoints="30" RaceRank="29" />
+      <RaceResult TeamID="250804" Discard="true" RaceID="SAM004905" RacePoints="36" RaceRank="36" />
+      <RaceResult TeamID="250804" Discard="false" RaceID="SAM004906" RacePoints="22" RaceRank="22" />
+      <RaceResult TeamID="250804" Discard="false" RaceID="SAM004907" RacePoints="20" RaceRank="20" />
+      <RaceResult TeamID="250804" Discard="true" RaceID="SAM004908" RacePoints="42" RaceRank="42" />
+      <RaceResult TeamID="250804" Discard="false" RaceID="SAM004909" RacePoints="39" RaceRank="39" />
+      <RaceResult TeamID="250804" Discard="false" RaceID="SAM004910" RacePoints="40" RaceRank="40" />
+      <RaceResult TeamID="1087938" Discard="false" RaceID="SAM004901" RacePoints="31" RaceRank="31" />
+      <RaceResult TeamID="1087938" Discard="false" RaceID="SAM004902" RacePoints="35" RaceRank="35" />
+      <RaceResult TeamID="1087938" Discard="true" RaceID="SAM004903" RacePoints="46" RaceRank="46" />
+      <RaceResult TeamID="1087938" Discard="false" RaceID="SAM004904" RacePoints="10" RaceRank="10" />
+      <RaceResult TeamID="1087938" Discard="false" RaceID="SAM004905" RacePoints="21" RaceRank="21" />
+      <RaceResult TeamID="1087938" Discard="false" RaceID="SAM004906" RacePoints="32" RaceRank="32" />
+      <RaceResult TeamID="1087938" Discard="true" RaceID="SAM004907" RacePoints="43" RaceRank="43" />
+      <RaceResult TeamID="1087938" Discard="false" RaceID="SAM004908" RacePoints="35" RaceRank="35" />
+      <RaceResult TeamID="1087938" Discard="false" RaceID="SAM004909" RacePoints="43" RaceRank="43" />
+      <RaceResult TeamID="1087938" Discard="false" RaceID="SAM004910" RacePoints="30" RaceRank="30" />
+      <RaceResult TeamID="1128999" Discard="false" RaceID="SAM004901" RacePoints="19" RaceRank="19" />
+      <RaceResult TeamID="1128999" Discard="false" RaceID="SAM004902" RacePoints="26" RaceRank="26" />
+      <RaceResult TeamID="1128999" Discard="true" RaceID="SAM004903" RacePoints="29" RaceRank="29" />
+      <RaceResult TeamID="1128999" Discard="false" RaceID="SAM004904" RacePoints="26" RaceRank="26" />
+      <RaceResult TeamID="1128999" Discard="false" RaceID="SAM004905" RacePoints="29" RaceRank="29" />
+      <RaceResult TeamID="1128999" Discard="false" RaceID="SAM004906" RacePoints="38" RaceRank="38" />
+      <RaceResult TeamID="1128999" Discard="false" RaceID="SAM004907" RacePoints="31" RaceRank="31" />
+      <RaceResult TeamID="1128999" Discard="true" RaceID="SAM004908" RacePoints="50" ScoreCode="BFD" />
+      <RaceResult TeamID="1128999" Discard="false" RaceID="SAM004909" RacePoints="42" RaceRank="42" />
+      <RaceResult TeamID="1128999" Discard="false" RaceID="SAM004910" RacePoints="36" RaceRank="36" />
+      <RaceResult TeamID="1029018" Discard="true" RaceID="SAM004901" RacePoints="46" RaceRank="46" />
+      <RaceResult TeamID="1029018" Discard="false" RaceID="SAM004902" RacePoints="43" RaceRank="43" />
+      <RaceResult TeamID="1029018" Discard="false" RaceID="SAM004903" RacePoints="38" RaceRank="38" />
+      <RaceResult TeamID="1029018" Discard="false" RaceID="SAM004904" RacePoints="40" RaceRank="40" />
+      <RaceResult TeamID="1029018" Discard="false" RaceID="SAM004905" RacePoints="28" RaceRank="28" />
+      <RaceResult TeamID="1029018" Discard="true" RaceID="SAM004906" RacePoints="47" RaceRank="47" />
+      <RaceResult TeamID="1029018" Discard="false" RaceID="SAM004907" RacePoints="34" RaceRank="34" />
+      <RaceResult TeamID="1029018" Discard="false" RaceID="SAM004908" RacePoints="46" RaceRank="46" />
+      <RaceResult TeamID="1029018" Discard="false" RaceID="SAM004909" RacePoints="14" RaceRank="14" />
+      <RaceResult TeamID="1029018" Discard="false" RaceID="SAM004910" RacePoints="26" RaceRank="26" />
+      <RaceResult TeamID="1063800" Discard="false" RaceID="SAM004901" RacePoints="38" RaceRank="38" />
+      <RaceResult TeamID="1063800" Discard="false" RaceID="SAM004902" RacePoints="44" RaceRank="44" />
+      <RaceResult TeamID="1063800" Discard="false" RaceID="SAM004903" RacePoints="39" RaceRank="39" />
+      <RaceResult TeamID="1063800" Discard="false" RaceID="SAM004904" RacePoints="36" RaceRank="36" />
+      <RaceResult TeamID="1063800" Discard="true" RaceID="SAM004905" RacePoints="46" RaceRank="46" />
+      <RaceResult TeamID="1063800" Discard="true" RaceID="SAM004906" RacePoints="42" RaceRank="42" />
+      <RaceResult TeamID="1063800" Discard="false" RaceID="SAM004907" RacePoints="27" RaceRank="27" />
+      <RaceResult TeamID="1063800" Discard="false" RaceID="SAM004908" RacePoints="27" RaceRank="27" />
+      <RaceResult TeamID="1063800" Discard="false" RaceID="SAM004909" RacePoints="25" RaceRank="25" />
+      <RaceResult TeamID="1063800" Discard="false" RaceID="SAM004910" RacePoints="35" RaceRank="35" />
+      <RaceResult TeamID="1073504" Discard="false" RaceID="SAM004901" RacePoints="43" RaceRank="43" />
+      <RaceResult TeamID="1073504" Discard="false" RaceID="SAM004902" RacePoints="29" RaceRank="29" />
+      <RaceResult TeamID="1073504" Discard="false" RaceID="SAM004903" RacePoints="41" RaceRank="41" />
+      <RaceResult TeamID="1073504" Discard="true" RaceID="SAM004904" RacePoints="50" ScoreCode="DNF" />
+      <RaceResult TeamID="1073504" Discard="false" RaceID="SAM004905" RacePoints="37" RaceRank="37" />
+      <RaceResult TeamID="1073504" Discard="false" RaceID="SAM004906" RacePoints="35" RaceRank="35" />
+      <RaceResult TeamID="1073504" Discard="false" RaceID="SAM004907" RacePoints="44" RaceRank="44" />
+      <RaceResult TeamID="1073504" Discard="false" RaceID="SAM004908" RacePoints="19" RaceRank="19" />
+      <RaceResult TeamID="1073504" Discard="true" RaceID="SAM004909" RacePoints="50" ScoreCode="DNF" />
+      <RaceResult TeamID="1073504" Discard="false" RaceID="SAM004910" RacePoints="27" RaceRank="27" />
+      <RaceResult TeamID="1076540" Discard="false" RaceID="SAM004901" RacePoints="39" RaceRank="39" />
+      <RaceResult TeamID="1076540" Discard="false" RaceID="SAM004902" RacePoints="41" RaceRank="41" />
+      <RaceResult TeamID="1076540" Discard="false" RaceID="SAM004903" RacePoints="44" RaceRank="44" />
+      <RaceResult TeamID="1076540" Discard="true" RaceID="SAM004904" RacePoints="46" RaceRank="46" />
+      <RaceResult TeamID="1076540" Discard="false" RaceID="SAM004905" RacePoints="45" RaceRank="45" />
+      <RaceResult TeamID="1076540" Discard="false" RaceID="SAM004906" RacePoints="29" RaceRank="29" />
+      <RaceResult TeamID="1076540" Discard="false" RaceID="SAM004907" RacePoints="29" RaceRank="29" />
+      <RaceResult TeamID="1076540" Discard="true" RaceID="SAM004908" RacePoints="40" RaceRank="40" />
+      <RaceResult TeamID="1076540" Discard="false" RaceID="SAM004909" RacePoints="11" RaceRank="11" />
+      <RaceResult TeamID="1076540" Discard="false" RaceID="SAM004910" RacePoints="42" RaceRank="42" />
+      <RaceResult TeamID="1105954" Discard="true" RaceID="SAM004901" RacePoints="40" RaceRank="40" />
+      <RaceResult TeamID="1105954" Discard="false" RaceID="SAM004902" RacePoints="31" RaceRank="31" />
+      <RaceResult TeamID="1105954" Discard="false" RaceID="SAM004903" RacePoints="37" RaceRank="37" />
+      <RaceResult TeamID="1105954" Discard="false" RaceID="SAM004904" RacePoints="25" RaceRank="25" />
+      <RaceResult TeamID="1105954" Discard="false" RaceID="SAM004905" RacePoints="39" RaceRank="39" />
+      <RaceResult TeamID="1105954" Discard="false" RaceID="SAM004906" RacePoints="41" RaceRank="41" />
+      <RaceResult TeamID="1105954" Discard="false" RaceID="SAM004907" RacePoints="36" RaceRank="36" />
+      <RaceResult TeamID="1105954" Discard="false" RaceID="SAM004908" RacePoints="39" RaceRank="39" />
+      <RaceResult TeamID="1105954" Discard="true" RaceID="SAM004909" RacePoints="50" ScoreCode="DNF" />
+      <RaceResult TeamID="1105954" Discard="false" RaceID="SAM004910" RacePoints="37" RaceRank="37" />
+      <RaceResult TeamID="1105340" Discard="false" RaceID="SAM004901" RacePoints="45" RaceRank="45" />
+      <RaceResult TeamID="1105340" Discard="true" RaceID="SAM004902" RacePoints="46" RaceRank="46" />
+      <RaceResult TeamID="1105340" Discard="false" RaceID="SAM004903" RacePoints="34" RaceRank="34" />
+      <RaceResult TeamID="1105340" Discard="false" RaceID="SAM004904" RacePoints="37" RaceRank="37" />
+      <RaceResult TeamID="1105340" Discard="false" RaceID="SAM004905" RacePoints="41" RaceRank="41" />
+      <RaceResult TeamID="1105340" Discard="false" RaceID="SAM004906" RacePoints="36" RaceRank="36" />
+      <RaceResult TeamID="1105340" Discard="false" RaceID="SAM004907" RacePoints="33" RaceRank="33" />
+      <RaceResult TeamID="1105340" Discard="true" RaceID="SAM004908" RacePoints="44" RaceRank="44" />
+      <RaceResult TeamID="1105340" Discard="false" RaceID="SAM004909" RacePoints="35" RaceRank="35" />
+      <RaceResult TeamID="1105340" Discard="false" RaceID="SAM004910" RacePoints="28" RaceRank="28" />
+      <RaceResult TeamID="1067110" Discard="false" RaceID="SAM004901" RacePoints="27" RaceRank="27" />
+      <RaceResult TeamID="1067110" Discard="false" RaceID="SAM004902" RacePoints="39" RaceRank="39" />
+      <RaceResult TeamID="1067110" Discard="false" RaceID="SAM004903" RacePoints="43" RaceRank="43" />
+      <RaceResult TeamID="1067110" Discard="true" RaceID="SAM004904" RacePoints="45" RaceRank="45" />
+      <RaceResult TeamID="1067110" Discard="false" RaceID="SAM004905" RacePoints="42" RaceRank="42" />
+      <RaceResult TeamID="1067110" Discard="true" RaceID="SAM004906" RacePoints="46" RaceRank="46" />
+      <RaceResult TeamID="1067110" Discard="false" RaceID="SAM004907" RacePoints="32" RaceRank="32" />
+      <RaceResult TeamID="1067110" Discard="false" RaceID="SAM004908" RacePoints="41" RaceRank="41" />
+      <RaceResult TeamID="1067110" Discard="false" RaceID="SAM004909" RacePoints="30" RaceRank="30" />
+      <RaceResult TeamID="1067110" Discard="false" RaceID="SAM004910" RacePoints="41" RaceRank="41" />
+      <RaceResult TeamID="1085839" Discard="false" RaceID="SAM004901" RacePoints="37" RaceRank="37" />
+      <RaceResult TeamID="1085839" Discard="false" RaceID="SAM004902" RacePoints="37" RaceRank="37" />
+      <RaceResult TeamID="1085839" Discard="false" RaceID="SAM004903" RacePoints="33" RaceRank="33" />
+      <RaceResult TeamID="1085839" Discard="false" RaceID="SAM004904" RacePoints="38" RaceRank="38" />
+      <RaceResult TeamID="1085839" Discard="true" RaceID="SAM004905" RacePoints="43" RaceRank="43" />
+      <RaceResult TeamID="1085839" Discard="false" RaceID="SAM004906" RacePoints="37" RaceRank="37" />
+      <RaceResult TeamID="1085839" Discard="false" RaceID="SAM004907" RacePoints="40" RaceRank="40" />
+      <RaceResult TeamID="1085839" Discard="true" RaceID="SAM004908" RacePoints="43" RaceRank="43" />
+      <RaceResult TeamID="1085839" Discard="false" RaceID="SAM004909" RacePoints="31" RaceRank="31" />
+      <RaceResult TeamID="1085839" Discard="false" RaceID="SAM004910" RacePoints="46" RaceRank="46" />
+      <RaceResult TeamID="1071554" Discard="true" RaceID="SAM004901" RacePoints="48" RaceRank="48" />
+      <RaceResult TeamID="1071554" Discard="false" RaceID="SAM004902" RacePoints="38" RaceRank="38" />
+      <RaceResult TeamID="1071554" Discard="false" RaceID="SAM004903" RacePoints="42" RaceRank="42" />
+      <RaceResult TeamID="1071554" Discard="false" RaceID="SAM004904" RacePoints="31" RaceRank="30" ScoreCode="DPI" />
+      <RaceResult TeamID="1071554" Discard="false" RaceID="SAM004905" RacePoints="38" RaceRank="38" />
+      <RaceResult TeamID="1071554" Discard="true" RaceID="SAM004906" RacePoints="40" RaceRank="40" />
+      <RaceResult TeamID="1071554" Discard="false" RaceID="SAM004907" RacePoints="35" RaceRank="35" />
+      <RaceResult TeamID="1071554" Discard="false" RaceID="SAM004908" RacePoints="36" RaceRank="36" />
+      <RaceResult TeamID="1071554" Discard="false" RaceID="SAM004909" RacePoints="38" RaceRank="38" />
+      <RaceResult TeamID="1071554" Discard="false" RaceID="SAM004910" RacePoints="43" RaceRank="43" />
+      <RaceResult TeamID="1072016" Discard="false" RaceID="SAM004901" RacePoints="41" RaceRank="41" />
+      <RaceResult TeamID="1072016" Discard="false" RaceID="SAM004902" RacePoints="36" RaceRank="36" />
+      <RaceResult TeamID="1072016" Discard="false" RaceID="SAM004903" RacePoints="40" RaceRank="40" />
+      <RaceResult TeamID="1072016" Discard="true" RaceID="SAM004904" RacePoints="44" RaceRank="44" />
+      <RaceResult TeamID="1072016" Discard="false" RaceID="SAM004905" RacePoints="31" RaceRank="31" />
+      <RaceResult TeamID="1072016" Discard="false" RaceID="SAM004906" RacePoints="39" RaceRank="39" />
+      <RaceResult TeamID="1072016" Discard="false" RaceID="SAM004907" RacePoints="39" RaceRank="39" />
+      <RaceResult TeamID="1072016" Discard="false" RaceID="SAM004908" RacePoints="33" RaceRank="33" />
+      <RaceResult TeamID="1072016" Discard="true" RaceID="SAM004909" RacePoints="45" RaceRank="45" />
+      <RaceResult TeamID="1072016" Discard="false" RaceID="SAM004910" RacePoints="48" RaceRank="48" />
+      <RaceResult TeamID="1110630" Discard="false" RaceID="SAM004901" RacePoints="44" RaceRank="44" />
+      <RaceResult TeamID="1110630" Discard="true" RaceID="SAM004902" RacePoints="45" RaceRank="45" />
+      <RaceResult TeamID="1110630" Discard="false" RaceID="SAM004903" RacePoints="45" RaceRank="45" />
+      <RaceResult TeamID="1110630" Discard="false" RaceID="SAM004904" RacePoints="39" RaceRank="39" />
+      <RaceResult TeamID="1110630" Discard="false" RaceID="SAM004905" RacePoints="40" RaceRank="40" />
+      <RaceResult TeamID="1110630" Discard="true" RaceID="SAM004906" RacePoints="43" RaceRank="43" />
+      <RaceResult TeamID="1110630" Discard="false" RaceID="SAM004907" RacePoints="42" RaceRank="42" />
+      <RaceResult TeamID="1110630" Discard="false" RaceID="SAM004908" RacePoints="32" RaceRank="32" />
+      <RaceResult TeamID="1110630" Discard="false" RaceID="SAM004909" RacePoints="41" RaceRank="41" />
+      <RaceResult TeamID="1110630" Discard="false" RaceID="SAM004910" RacePoints="25" RaceRank="25" />
+      <RaceResult TeamID="1115858" Discard="false" RaceID="SAM004901" RacePoints="42" RaceRank="42" />
+      <RaceResult TeamID="1115858" Discard="false" RaceID="SAM004902" RacePoints="47" RaceRank="47" />
+      <RaceResult TeamID="1115858" Discard="true" RaceID="SAM004903" RacePoints="48" RaceRank="48" />
+      <RaceResult TeamID="1115858" Discard="false" RaceID="SAM004904" RacePoints="47" RaceRank="47" />
+      <RaceResult TeamID="1115858" Discard="false" RaceID="SAM004905" RacePoints="47" RaceRank="47" />
+      <RaceResult TeamID="1115858" Discard="false" RaceID="SAM004906" RacePoints="44" RaceRank="44" />
+      <RaceResult TeamID="1115858" Discard="false" RaceID="SAM004907" RacePoints="37" RaceRank="37" />
+      <RaceResult TeamID="1115858" Discard="true" RaceID="SAM004908" RacePoints="45" RaceRank="45" />
+      <RaceResult TeamID="1115858" Discard="false" RaceID="SAM004909" RacePoints="40" RaceRank="40" />
+      <RaceResult TeamID="1115858" Discard="false" RaceID="SAM004910" RacePoints="45" RaceRank="45" />
+      <RaceResult TeamID="1060133" Discard="false" RaceID="SAM004901" RacePoints="47" RaceRank="47" />
+      <RaceResult TeamID="1060133" Discard="true" RaceID="SAM004902" RacePoints="48" RaceRank="48" />
+      <RaceResult TeamID="1060133" Discard="false" RaceID="SAM004903" RacePoints="47" RaceRank="47" />
+      <RaceResult TeamID="1060133" Discard="false" RaceID="SAM004904" RacePoints="42" RaceRank="42" />
+      <RaceResult TeamID="1060133" Discard="false" RaceID="SAM004905" RacePoints="44" RaceRank="44" />
+      <RaceResult TeamID="1060133" Discard="false" RaceID="SAM004906" RacePoints="45" RaceRank="45" />
+      <RaceResult TeamID="1060133" Discard="true" RaceID="SAM004907" RacePoints="50" ScoreCode="DSQ" />
+      <RaceResult TeamID="1060133" Discard="false" RaceID="SAM004908" RacePoints="37" RaceRank="37" />
+      <RaceResult TeamID="1060133" Discard="false" RaceID="SAM004909" RacePoints="47" RaceRank="47" />
+      <RaceResult TeamID="1060133" Discard="false" RaceID="SAM004910" RacePoints="47" RaceRank="47" />
+      <RaceResult TeamID="262797" Discard="true" RaceID="SAM004901" RacePoints="49" RaceRank="49" />
+      <RaceResult TeamID="262797" Discard="false" RaceID="SAM004902" RacePoints="49" RaceRank="49" />
+      <RaceResult TeamID="262797" Discard="false" RaceID="SAM004903" RacePoints="49" RaceRank="49" />
+      <RaceResult TeamID="262797" Discard="false" RaceID="SAM004904" RacePoints="48" RaceRank="48" />
+      <RaceResult TeamID="262797" Discard="false" RaceID="SAM004905" RacePoints="48" RaceRank="48" />
+      <RaceResult TeamID="262797" Discard="true" RaceID="SAM004906" RacePoints="48" RaceRank="48" />
+      <RaceResult TeamID="262797" Discard="false" RaceID="SAM004907" RacePoints="38" RaceRank="38" />
+      <RaceResult TeamID="262797" Discard="false" RaceID="SAM004908" RacePoints="47" RaceRank="47" />
+      <RaceResult TeamID="262797" Discard="false" RaceID="SAM004909" RacePoints="46" RaceRank="46" />
+      <RaceResult TeamID="262797" Discard="false" RaceID="SAM004910" RacePoints="49" RaceRank="49" />
+      <SeriesResult TeamID="1094919" NetPoints="22" Rank="1" Tied="false" TotalPoints="45" />
+      <SeriesResult TeamID="1087452" NetPoints="40" Rank="2" Tied="false" TotalPoints="61" />
+      <SeriesResult TeamID="1062315" NetPoints="55" Rank="3" Tied="false" TotalPoints="88" />
+      <SeriesResult TeamID="1100786" NetPoints="68" Rank="4" Tied="false" TotalPoints="103" />
+      <SeriesResult TeamID="1083279" NetPoints="80" Rank="5" Tied="false" TotalPoints="114" />
+      <SeriesResult TeamID="1124975" NetPoints="83" Rank="6" Tied="false" TotalPoints="116" />
+      <SeriesResult TeamID="1085473" NetPoints="84" Rank="7" Tied="false" TotalPoints="124" />
+      <SeriesResult TeamID="1109194" NetPoints="87" Rank="8" Tied="false" TotalPoints="125" />
+      <SeriesResult TeamID="1078229" NetPoints="97" Rank="9" Tied="false" TotalPoints="136" />
+      <SeriesResult TeamID="1079607" NetPoints="108" Rank="10" Tied="false" TotalPoints="149" />
+      <SeriesResult TeamID="1107624" NetPoints="91" Rank="11" Tied="false" TotalPoints="161" />
+      <SeriesResult TeamID="1107276" NetPoints="101" Rank="12" Tied="false" TotalPoints="152" />
+      <SeriesResult TeamID="1104959" NetPoints="104" Rank="13" Tied="false" TotalPoints="163" />
+      <SeriesResult TeamID="1086898" NetPoints="106" Rank="14" Tied="false" TotalPoints="152" />
+      <SeriesResult TeamID="1052366" NetPoints="113" Rank="15" Tied="false" TotalPoints="195" />
+      <SeriesResult TeamID="1054093" NetPoints="118" Rank="16" Tied="false" TotalPoints="179" />
+      <SeriesResult TeamID="1039736" NetPoints="121" Rank="17" Tied="false" TotalPoints="173" />
+      <SeriesResult TeamID="1081804" NetPoints="133" Rank="18" Tied="false" TotalPoints="193" />
+      <SeriesResult TeamID="1072644" NetPoints="135" Rank="19" Tied="false" TotalPoints="187" />
+      <SeriesResult TeamID="1122218" NetPoints="136" Rank="20" Tied="false" TotalPoints="190" />
+      <SeriesResult TeamID="1120663" NetPoints="138" Rank="21" Tied="false" TotalPoints="193" />
+      <SeriesResult TeamID="1102034" NetPoints="139" Rank="22" Tied="false" TotalPoints="208" />
+      <SeriesResult TeamID="1076910" NetPoints="153" Rank="23" Tied="false" TotalPoints="225" />
+      <SeriesResult TeamID="1087268" NetPoints="153" Rank="24" Tied="false" TotalPoints="238" />
+      <SeriesResult TeamID="1020432" NetPoints="171" Rank="25" Tied="false" TotalPoints="239" />
+      <SeriesResult TeamID="1105298" NetPoints="173" Rank="26" Tied="false" TotalPoints="256" />
+      <SeriesResult TeamID="1109397" NetPoints="200" Rank="27" Tied="false" TotalPoints="271" />
+      <SeriesResult TeamID="1016539" NetPoints="203" Rank="28" Tied="false" TotalPoints="271" />
+      <SeriesResult TeamID="1135083" NetPoints="205" Rank="29" Tied="false" TotalPoints="280" />
+      <SeriesResult TeamID="1078063" NetPoints="212" Rank="30" Tied="false" TotalPoints="305" />
+      <SeriesResult TeamID="1031967" NetPoints="214" Rank="31" Tied="false" TotalPoints="287" />
+      <SeriesResult TeamID="1119655" NetPoints="219" Rank="32" Tied="false" TotalPoints="303" />
+      <SeriesResult TeamID="250804" NetPoints="227" Rank="33" Tied="false" TotalPoints="305" />
+      <SeriesResult TeamID="1087938" NetPoints="237" Rank="34" Tied="false" TotalPoints="326" />
+      <SeriesResult TeamID="1128999" NetPoints="247" Rank="35" Tied="false" TotalPoints="326" />
+      <SeriesResult TeamID="1029018" NetPoints="269" Rank="36" Tied="false" TotalPoints="362" />
+      <SeriesResult TeamID="1063800" NetPoints="271" Rank="37" Tied="false" TotalPoints="359" />
+      <SeriesResult TeamID="1073504" NetPoints="275" Rank="38" Tied="false" TotalPoints="375" />
+      <SeriesResult TeamID="1076540" NetPoints="280" Rank="39" Tied="false" TotalPoints="366" />
+      <SeriesResult TeamID="1105954" NetPoints="285" Rank="40" Tied="false" TotalPoints="375" />
+      <SeriesResult TeamID="1105340" NetPoints="289" Rank="41" Tied="false" TotalPoints="379" />
+      <SeriesResult TeamID="1067110" NetPoints="295" Rank="42" Tied="false" TotalPoints="386" />
+      <SeriesResult TeamID="1085839" NetPoints="299" Rank="43" Tied="false" TotalPoints="385" />
+      <SeriesResult TeamID="1071554" NetPoints="301" Rank="44" Tied="false" TotalPoints="389" />
+      <SeriesResult TeamID="1072016" NetPoints="307" Rank="45" Tied="false" TotalPoints="396" />
+      <SeriesResult TeamID="1110630" NetPoints="308" Rank="46" Tied="false" TotalPoints="396" />
+      <SeriesResult TeamID="1115858" NetPoints="349" Rank="47" Tied="false" TotalPoints="442" />
+      <SeriesResult TeamID="1060133" NetPoints="356" Rank="48" Tied="false" TotalPoints="454" />
+      <SeriesResult TeamID="262797" NetPoints="374" Rank="49" Tied="false" TotalPoints="471" />
+    </Division>
+  </Event>
+</SailingXRR>

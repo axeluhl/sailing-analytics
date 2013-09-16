@@ -1,75 +1,107 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.SeriesData;
+import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sailing.racecommittee.app.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.impl.RaceStateImpl;
 
 public class ManagedRaceImpl implements ManagedRace {
-	private static final long serialVersionUID = -4936566684992524001L;
-	
-	//private static final String TAG = ManagedRace.class.getName();
-	
-	private ManagedRaceIdentifier identifier;	
-	private RaceState state;
-	
-	public ManagedRaceImpl(ManagedRaceIdentifier identifier, PassAwareRaceLog raceLog) {
-		this(identifier, new RaceStateImpl(raceLog));
-	}
-	
-	public ManagedRaceImpl(
-			ManagedRaceIdentifier identifier,
-			RaceState state) {
-		this.identifier = identifier;
-		this.state = state;
-	}
+    private static final long serialVersionUID = -4936566684992524001L;
 
-	public Serializable getId() {
-		return identifier.getId();
-	}
+    // private static final String TAG = ManagedRace.class.getName();
 
-	public String getName() {
-		return identifier.getRaceName();
-	}
+    private ManagedRaceIdentifier identifier;
+    private RaceState state;
+    private Collection<Competitor> competitors;
+    private CourseBase courseOnServer;
 
-	public String getRaceName() {
-		return getName();
-	}
+    public ManagedRaceImpl(ManagedRaceIdentifier identifier, StartProcedureType defaultStartProcedureType,
+            RaceLog raceLog) {
+        this(identifier, new RaceStateImpl(defaultStartProcedureType, raceLog));
+    }
 
-	public Fleet getFleet() {
-		return identifier.getFleet();
-	}
+    public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceState state) {
+        this.identifier = identifier;
+        this.state = state;
+        this.competitors = new ArrayList<Competitor>();
+        this.courseOnServer = null;
+    }
 
-	public SeriesData getSeries() {
-		return identifier.getSeries();
-	}
+    public Serializable getId() {
+        return identifier.getId();
+    }
 
-	public RaceGroup getRaceGroup() {
-		return identifier.getRaceGroup();
-	}
+    public String getName() {
+        return identifier.getRaceName();
+    }
 
-	public ManagedRaceIdentifier getIdentifier() {
-		return identifier;
-	}
+    public String getRaceName() {
+        return getName();
+    }
 
-	public RaceState getState() {
-		return state;
-	}
+    public Fleet getFleet() {
+        return identifier.getFleet();
+    }
 
-	public RaceLog getRaceLog() {
-		return state.getRaceLog();
-	}
-	
-	public RaceLogRaceStatus getStatus() {
-		return state.getStatus();
-	}
+    public SeriesBase getSeries() {
+        return identifier.getSeries();
+    }
+
+    public RaceGroup getRaceGroup() {
+        return identifier.getRaceGroup();
+    }
+
+    public ManagedRaceIdentifier getIdentifier() {
+        return identifier;
+    }
+
+    public RaceState getState() {
+        return state;
+    }
+
+    public RaceLog getRaceLog() {
+        return state.getRaceLog();
+    }
+
+    public RaceLogRaceStatus getStatus() {
+        return state.getStatus();
+    }
+
+    @Override
+    public CourseBase getCourseDesign() {
+        return state.getCourseDesign();
+    }
+
+    @Override
+    public Collection<Competitor> getCompetitors() {
+        return competitors;
+    }
+
+    @Override
+    public CourseBase getCourseOnServer() {
+        return courseOnServer;
+    }
+
+    @Override
+    public void setCourseOnServer(CourseBase course) {
+        courseOnServer = course;
+    }
+
+    @Override
+    public void setCompetitors(Collection<Competitor> competitors) {
+        this.competitors = competitors;
+    }
 
 }

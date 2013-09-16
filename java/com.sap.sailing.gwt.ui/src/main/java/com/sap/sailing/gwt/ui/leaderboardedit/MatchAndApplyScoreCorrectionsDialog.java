@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -27,22 +26,22 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
-import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
 
 public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkScoreCorrectionDTO> {
-    private static final RegExp p = RegExp.compile("^([A-Z][A-Z][A-Z])\\s*[^0-9]*([0-9]*)$");
+    private static final RegExp sailIdPattern = RegExp.compile("^([A-Z][A-Z][A-Z])\\s*[^0-9]*([0-9]*)$");
     
     private final LeaderboardDTO leaderboard;
     private final Map<CompetitorDTO, String> defaultOfficialSailIDsForCompetitors;
@@ -209,11 +208,14 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
      */
     private String canonicalizeSailID(String sailID, String defaultNationality) {
         String result = null;
-        MatchResult m = p.exec(sailID.trim());
-        if (p.test(sailID.trim())) {
+        MatchResult m = sailIdPattern.exec(sailID.trim());
+        if (sailIdPattern.test(sailID.trim())) {
             String iocCode = m.getGroup(1);
+            if (iocCode != null) {
+                iocCode = iocCode.toUpperCase();
+            }
             if (defaultNationality != null && (iocCode == null || iocCode.trim().length() == 0)) {
-                iocCode = defaultNationality;
+                iocCode = defaultNationality.toUpperCase();
             }
             if (iocCode != null && iocCode.trim().length() > 0) {
                 String number = m.getGroup(2);
@@ -229,7 +231,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     private Map<String, CompetitorDTO> canonicalizeLeaderboardSailIDs(LeaderboardDTO leaderboard) {
         Map<String, CompetitorDTO> result = new HashMap<String, CompetitorDTO>();
         for (CompetitorDTO competitor : leaderboard.competitors) {
-            String canonicalizedSailID = canonicalizeSailID(competitor.sailID.trim(), competitor.threeLetterIocCountryCode.trim());
+            String canonicalizedSailID = canonicalizeSailID(competitor.getSailID().trim(), competitor.getThreeLetterIocCountryCode().trim());
             if (canonicalizedSailID != null) {
                 result.put(canonicalizedSailID, competitor);
             }
@@ -251,12 +253,16 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                     if (officialSailID != null && raceNameOrNumber != null) {
                         ScoreCorrectionEntryDTO officialCorrectionEntry = regattaScoreCorrection
                                 .getScoreCorrectionsByRaceNameOrNumber().get(raceNameOrNumber).get(officialSailID);
-                        result.addMaxPointsReasonUpdate(competitor, raceColumn,
-                                officialCorrectionEntry.getMaxPointsReason());
-                        if (officialCorrectionEntry.getScore() != null) {
-                            double officialTotalPoints = officialCorrectionEntry.getScore().doubleValue();
-                            double officialNetPoints = officialTotalPoints / raceColumn.getEffectiveFactor();
-                            result.addScoreUpdate(competitor, raceColumn, officialNetPoints);
+                        // the competitor may not have an official result for this race, for example, if in case of split fleets
+                        // the competitor raced in a different fleet
+                        if (officialCorrectionEntry != null) {
+                            result.addMaxPointsReasonUpdate(competitor, raceColumn,
+                                    officialCorrectionEntry.getMaxPointsReason());
+                            if (officialCorrectionEntry.getScore() != null) {
+                                double officialTotalPoints = officialCorrectionEntry.getScore().doubleValue();
+                                double officialNetPoints = officialTotalPoints / raceColumn.getEffectiveFactor();
+                                result.addScoreUpdate(competitor, raceColumn, officialNetPoints);
+                            }
                         }
                     }
                 }
@@ -282,7 +288,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
         int c = 1;
         for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
             VerticalPanel vp = new VerticalPanel();
-            vp.add(new Label(raceColumn.name));
+            vp.add(new Label(raceColumn.getName()));
             vp.add(raceNameOrNumberChoosers.get(raceColumn));
             vp.add(raceColumnCheckboxes.get(raceColumn));
             grid.setWidget(0, c, vp);
@@ -293,13 +299,13 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
             String officialSailID = getSelectedString(officialSailIDChoosers, competitor);
             int column = 0;
             VerticalPanel vp = new VerticalPanel();
-            vp.add(new Label(competitor.sailID+" "+competitor.name));
+            vp.add(new Label(competitor.getSailID()+" "+competitor.getName()));
             vp.add(this.officialSailIDChoosers.get(competitor));
             vp.add(competitorCheckboxes.get(competitor));
             grid.setWidget(row, column++, vp);
             LeaderboardRowDTO leaderboardRow = leaderboard.rows.get(competitor);
             for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-                LeaderboardEntryDTO entry = leaderboardRow.fieldsByRaceColumnName.get(raceColumn.name);
+                LeaderboardEntryDTO entry = leaderboardRow.fieldsByRaceColumnName.get(raceColumn.getName());
                 String raceNameOrNumber = getSelectedString(raceNameOrNumberChoosers, raceColumn);
                 VerticalPanel cell = new VerticalPanel();
                 cell.add(new Label(entry.netPoints+"/"+entry.totalPoints+"/"+entry.reasonForMaxPoints+
@@ -308,36 +314,42 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                     ScoreCorrectionEntryDTO officialCorrectionEntry =
                         regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber()
                         .get(raceNameOrNumber).get(officialSailID);
-                    final Double officialTotalPoints = officialCorrectionEntry.isDiscarded() ? new Double(0) : officialCorrectionEntry.getScore();
-                    final Double officialNetPoints = officialCorrectionEntry.getScore() == null ? null :
+                    final Double officialTotalPoints = officialCorrectionEntry == null ? null :
+                        officialCorrectionEntry.isDiscarded() ? new Double(0) : officialCorrectionEntry.getScore();
+                    final Double officialNetPoints = officialCorrectionEntry == null ? null :
+                        officialCorrectionEntry.getScore() == null ? null :
                         officialCorrectionEntry.getScore() / raceColumn.getEffectiveFactor();
+                    final MaxPointsReason officialMaxPointsReason = officialCorrectionEntry == null ? null :
+                        officialCorrectionEntry.getMaxPointsReason();
                     SafeHtmlBuilder sb = new SafeHtmlBuilder();
-                    boolean entriesDiffer =
-                            ((officialNetPoints == null && entry.netPoints != null) || (officialNetPoints != null && entry.netPoints != null && !new Double(entry.netPoints).equals(officialNetPoints))) ||
-                            ((officialTotalPoints == null && entry.totalPoints != null) || (officialTotalPoints != null &&  entry.totalPoints != null && !new Double(entry.totalPoints).equals(officialTotalPoints))) ||
-                            ((officialCorrectionEntry.getMaxPointsReason() == null && entry.reasonForMaxPoints != MaxPointsReason.NONE) ||
-                                    officialCorrectionEntry.getMaxPointsReason() != null && officialCorrectionEntry.getMaxPointsReason() != entry.reasonForMaxPoints);
+                    // entries not considered "different' in case we haven't got an entry for the competitor/race at all;
+                    // those non-existing "entries" will be ignored by getResults anyhow
+                    boolean entriesDiffer = officialCorrectionEntry != null &&
+                           (((officialNetPoints == null && entry.netPoints != null) || (officialNetPoints != null && (entry.netPoints == null || !new Double(entry.netPoints).equals(officialNetPoints)))) ||
+                            ((officialTotalPoints == null && entry.totalPoints != null) || (officialTotalPoints != null && (entry.totalPoints == null || !new Double(entry.totalPoints).equals(officialTotalPoints)))) ||
+                            ((officialMaxPointsReason == null && entry.reasonForMaxPoints != MaxPointsReason.NONE) ||
+                                    officialMaxPointsReason != null && officialMaxPointsReason != entry.reasonForMaxPoints));
                     if (entriesDiffer) {
                         sb.appendHtmlConstant("<span style=\"color: #0000FF;\"><b>");
                     }
                     if (officialNetPoints == null) {
-                        sb.append(0);
+                        sb.appendEscaped("null");
                     } else {
                         sb.append(officialNetPoints);
                     }
                     sb.appendEscaped("/");
                     if (officialTotalPoints == null) {
-                        sb.append(0);
+                        sb.appendEscaped("null");
                     } else {
                         sb.append(officialTotalPoints);
                     }
                     sb.appendEscaped("/");
-                    if (officialCorrectionEntry.getMaxPointsReason() != null) {
-                        sb.appendEscaped(officialCorrectionEntry.getMaxPointsReason().name());
+                    if (officialMaxPointsReason != null) {
+                        sb.appendEscaped(officialMaxPointsReason.name());
                     } else {
                         sb.appendEscaped(MaxPointsReason.NONE.name());
                     }
-                    if (officialCorrectionEntry.isDiscarded()) {
+                    if (officialCorrectionEntry != null && officialCorrectionEntry.isDiscarded()) {
                         sb.appendEscaped("/discarded");
                     }
                     if (entriesDiffer) {
@@ -409,7 +421,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                 @Override
                 public void onSuccess(Void result) {
                     Window.setStatus(stringMessages.successfullyUpdatedScores());
-                    leaderboardPanel.timeChanged(new Date()); // reload leaderboard contents to reflect changes
+                    leaderboardPanel.timeChanged(/* time point is ignored */ null); // reload leaderboard contents to reflect changes
                     // leaderboard panel sets busy indicator to non-busy after done with updating
                 }
             });

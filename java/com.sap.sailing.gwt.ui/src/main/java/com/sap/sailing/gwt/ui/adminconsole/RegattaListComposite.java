@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -26,17 +28,19 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class RegattaListComposite extends Composite implements RegattaDisplayer {
@@ -67,14 +71,15 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         }
     }
 
-    public RegattaListComposite(final SailingServiceAsync sailingService, final RegattaSelectionProvider regattaSelectionProvider,  
-            RegattaRefresher regattaRefresher, final ErrorReporter errorReporter, final StringMessages stringMessages) {
+    public RegattaListComposite(final SailingServiceAsync sailingService,
+            final RegattaSelectionProvider regattaSelectionProvider, RegattaRefresher regattaRefresher,
+            final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.regattaSelectionProvider = regattaSelectionProvider;
         this.regattaRefresher = regattaRefresher;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        
+
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
         mainPanel.setWidget(panel);
@@ -94,7 +99,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
             }
         });
         filterPanel.add(filterRegattasTextbox);
-        
+
         noRegattasLabel = new Label(stringMessages.noRegattasYet());
         noRegattasLabel.setWordWrap(false);
         panel.add(noRegattasLabel);
@@ -102,8 +107,8 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
         regattaTable = createRegattaTable();
         regattaTable.setVisible(false);
-        
-        regattaSelectionModel = new SingleSelectionModel<RegattaDTO>();
+
+        regattaSelectionModel = new MultiSelectionModel<RegattaDTO>();
         regattaSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -116,9 +121,9 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
             }
         });
         regattaTable.setSelectionModel(regattaSelectionModel);
-        
+
         panel.add(regattaTable);
-        
+
         initWidget(mainPanel);
     }
 
@@ -133,28 +138,28 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         TextColumn<RegattaDTO> regattaNameColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
-                return regatta.name;
+                return regatta.getName();
             }
         };
         regattaNameColumn.setSortable(true);
         columnSortHandler.setComparator(regattaNameColumn, new Comparator<RegattaDTO>() {
             @Override
             public int compare(RegattaDTO r1, RegattaDTO r2) {
-                return r1.name.compareTo(r2.name);
+                return r1.getName().compareTo(r2.getName());
             }
         });
 
         TextColumn<RegattaDTO> regattaBoatClassColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
-                return regatta.boatClass != null ? regatta.boatClass.name : "";
+                return regatta.boatClass != null ? regatta.boatClass.getName() : "";
             }
         };
         regattaBoatClassColumn.setSortable(true);
         columnSortHandler.setComparator(regattaBoatClassColumn, new Comparator<RegattaDTO>() {
             @Override
             public int compare(RegattaDTO r1, RegattaDTO r2) {
-                return r1.boatClass.name.compareTo(r2.boatClass.name);
+                return r1.boatClass.getName().compareTo(r2.boatClass.getName());
             }
         });
 
@@ -163,21 +168,23 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         regattaActionColumn.setFieldUpdater(new FieldUpdater<RegattaDTO, String>() {
             @Override
             public void update(int index, RegattaDTO regatta, String value) {
-                if (RegattaConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.name))) {
+                if (RegattaConfigImagesBarCell.ACTION_EDIT.equals(value)) {
+                    editRegatta(regatta);
+                } else if (RegattaConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
+                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {
                         removeRegatta(regatta);
                     }
                 }
             }
         });
-        
+
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
         table.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
         table.addColumn(regattaActionColumn, stringMessages.actions());
-        
+
         return table;
     }
-    
+
     private void updateFilteredRegattasList() {
         String text = filterRegattasTextbox.getText();
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
@@ -187,9 +194,9 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
                 boolean failed = false;
                 for (String word : wordsToFilter) {
                     String textAsUppercase = word.toUpperCase().trim();
-                    if (!regattaDTO.name.toUpperCase().contains(textAsUppercase)
-                            && !regattaDTO.boatClass.name.toUpperCase().contains(textAsUppercase)
-                            && !regattaDTO.name.toUpperCase().contains(textAsUppercase)) {
+                    if (!regattaDTO.getName().toUpperCase().contains(textAsUppercase)
+                            && (regattaDTO.boatClass == null || !regattaDTO.boatClass.getName().toUpperCase().contains(
+                                    textAsUppercase)) && !regattaDTO.getName().toUpperCase().contains(textAsUppercase)) {
                         failed = true;
                         break;
                     }
@@ -208,11 +215,11 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
     }
 
     private void removeRegatta(final RegattaDTO regatta) {
-        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
+        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         sailingService.removeRegatta(regattaIdentifier, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to remove regatta " + regatta.name + ": " + caught.getMessage());
+                errorReporter.reportError("Error trying to remove regatta " + regatta.getName() + ": " + caught.getMessage());
             }
 
             @Override
@@ -221,7 +228,53 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
             }
         });
     }
-    
+
+    private void editRegatta(final RegattaDTO toBeEdited) {
+        final Collection<RegattaDTO> existingRegattas = getAllRegattas();
+        sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                openEditRegattaDialog(toBeEdited, existingRegattas, Collections.<EventDTO> emptyList());
+            }
+
+            @Override
+            public void onSuccess(List<EventDTO> events) {
+                openEditRegattaDialog(toBeEdited, existingRegattas, Collections.unmodifiableList(events));
+            }
+        });
+    }
+
+    private void openEditRegattaDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
+            List<EventDTO> existingEvents) {
+        RegattaWithSeriesAndFleetsDialog dialog = new RegattaWithSeriesAndFleetsEditDialog(regatta, existingRegattas,
+                existingEvents, stringMessages, new DialogCallback<RegattaDTO>() {
+                    @Override
+                    public void cancel() { }
+
+                    @Override
+                    public void ok(RegattaDTO editedRegatta) {
+                        commitEditedRegatta(editedRegatta);
+                    }
+                });
+        dialog.show();
+    }
+
+    private void commitEditedRegatta(final RegattaDTO editedRegatta) {
+        final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
+        
+        sailingService.updateRegatta(regattaName, editedRegatta.defaultCourseAreaIdAsString, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName() + ": " + caught.getMessage());
+            }
+            
+            @Override
+            public void onSuccess(Void result) {
+                regattaRefresher.fillRegattas();
+            }
+        });
+    }
+
     private List<RegattaDTO> getSelectedRegattas() {
         List<RegattaDTO> result = new ArrayList<RegattaDTO>();
         if (regattaListDataProvider != null) {
@@ -250,7 +303,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         }
         allRegattas = newAllRegattas;
         updateFilteredRegattasList();
-        regattaSelectionProvider.setAllRegattas(newAllRegattaIdentifiers); 
+        regattaSelectionProvider.setAllRegattas(newAllRegattaIdentifiers);
     }
 
     public List<RegattaDTO> getAllRegattas() {

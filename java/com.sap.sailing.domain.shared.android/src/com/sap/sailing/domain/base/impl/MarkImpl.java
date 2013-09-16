@@ -71,4 +71,8 @@ public class MarkImpl extends NamedImpl implements Mark {
     public MarkType getType() {
         return type;
     }
+    
+    public String toString() {
+        return getId() + " " + (getColor()==null?"":(getColor()+" ")) + super.toString();
+    }
 }

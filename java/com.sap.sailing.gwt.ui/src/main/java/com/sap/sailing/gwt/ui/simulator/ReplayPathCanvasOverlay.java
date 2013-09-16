@@ -1,0 +1,60 @@
+package com.sap.sailing.gwt.ui.simulator;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Logger;
+
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
+import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
+
+public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
+
+    private static final long serialVersionUID = -6284996043723173190L;
+    private static Logger logger = Logger.getLogger(ReplayPathCanvasOverlay.class.getName());
+    private List<SimulatorWindDTO> windDTOToDraw;
+
+    public ReplayPathCanvasOverlay(final String name, final Timer timer, WindFieldGenParamsDTO windParams) {
+        super(name, timer, windParams);
+        this.displayWindAlongPath = false;
+        windDTOToDraw = null;
+        //this.timer.addTimeListener(this);
+        canvas.setStyleName("replayPanel");
+    }
+
+    /*
+    @Override
+    protected void drawWindField() {
+        timeChanged(timer.getTime());
+    }
+     */
+    @Override
+    public void timeChanged(final Date date) {
+
+        canvas.getContext2d().clearRect(0/* canvas.getAbsoluteLeft() */, 0/* canvas.getAbsoluteTop() */,
+                canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
+
+        windDTOToDraw = new ArrayList<SimulatorWindDTO>();
+        for (final SimulatorWindDTO windDTO : wl.getMatrix()) {
+            if (windDTO.timepoint <= date.getTime()) {
+                windDTOToDraw.add(windDTO);
+            }
+        }
+        logger.info("In ReplayPathCanvasOverlay.drawWindField drawing " + windDTOToDraw.size() + " points");
+
+        drawWindField(windDTOToDraw);
+    }
+
+    @Override
+    public boolean shallStop() {
+        if (!isVisible() || windDTOToDraw == null || wl == null) {
+            return true;
+        }
+        if (windDTOToDraw.size() == wl.getMatrix().size()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}

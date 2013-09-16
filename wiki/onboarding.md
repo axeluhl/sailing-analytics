@@ -8,7 +8,7 @@ This document describes the onboarding process for a new team member (developer)
 
 1. Eclipse (e.g. Eclipse Classic 4.2.1 (Juno)), http://www.eclipse.org
 2. Eclipse Extensions
-  * Install Eclipse GWT should be version 2.5
+  * Install Eclipse GWT should be version 2.5 (https://developers.google.com/eclipse/docs/download)
 3. Git (e.g. msysGit for Windows v1.7.10), http://git-scm.com
 4. MongoDB (e.g. Production Release 2.0.4), download: http://www.mongodb.org/
 5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang.
@@ -40,7 +40,7 @@ This document describes the onboarding process for a new team member (developer)
 #### Steps to build and run the Race Analysis Suite 
  
 1. Get the content of the git repository
-- Clone the repository to your local file system from ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git  or ssh://[user]@sapsailing.com/home/trac/git
+- Clone the repository to your local file system from `ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git`  or `ssh://[user]@sapsailing.com/home/trac/git`
  
 2. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
 
@@ -73,3 +73,30 @@ Copy the settings.xml from the top-level git folder to your ~/.m2 directory and 
 #### Further hints
 - Configure Eclipse to use Chrome or Firefox as the default browser
 - Install the GWT Browser Plugin (Chrome or Firefox) for the GWT Development mode
+
+#### Additional steps required for Android projects
+
+To ensure that all components of the Analysis Suite are working, you should also import all Android projects into your workspace. There are some additional requirements to enable the build process of these projects.
+
+1. Add the Android Development Tools (ADT) plugin to your Eclipse IDE
+  - In Eclipse click Help -> Install New Software -> Add and enter https://dl-ssl.google.com/android/eclipse/
+  - Select the Developer Tools and install
+  - After restarting Eclipse the "Welcome to Android Development" window should help you with installing the Android SDK
+  - It is also possible to download the Android SDK separately from http://developer.android.com/sdk/index.html ("Use an existing IDE")
+2. Setup the Android SDK
+  - In Eclipse press Window -> Android SDK Manager
+  - Ensure that everything of "Tools" is installed
+  - Install everything of "Android 3.2 API 13"
+  - Install "Android Support Library" (Extras), "Google Play Services" (Extras) and "Google USB Driver" (Extras)
+3. Import the Android projects into your workspace
+  - Android projects can be found in the /mobile subdirectory
+
+To deploy an Android project (for example com.sap.sailing.racecommittee.app) to a device
+1. Plug-in the device
+  - Development mode must be enabled on the device
+  - For certain device/OS combinations additional device drivers are needed
+  - You can check if the device is detected correctly by checking the "Devices" tab of the "DDMS" Eclipse perspective.
+2. Start a run configuration of the project
+3. Select your attached device in the device selection screen
+4. The app should be started after deployment
+

@@ -1,10 +1,11 @@
 #!/bin/bash
 # see http://wiki.eclipse.org/Equinox/p2/Publisher for documentation
 
-set -u
+if [ "$ECLIPSE_HOME" = "" ]; then
+    ECLIPSE_BIN=`which eclipse`
+    ECLIPSE_HOME="`dirname $ECLIPSE_BIN`"
+fi
 
-ECLIPSE_BIN=`which eclipse`
-ECLIPSE_HOME="`dirname $ECLIPSE_BIN`"
 SAILING_GIT_HOME="`pwd`/../../.."
 
 TARGET_PLATFORM_BASE_DIR=${SAILING_GIT_HOME}/java/com.sap.sailing.targetplatform.base

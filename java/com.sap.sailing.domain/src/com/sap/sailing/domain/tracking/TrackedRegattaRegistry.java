@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.tracking;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -41,4 +43,17 @@ public interface TrackedRegattaRegistry {
      * @param raceID the ID as obtained from {@link RaceDefinition#getId()}
      */
     Regatta getRememberedRegattaForRace(Serializable raceID);
+
+    boolean isRaceBeingTracked(RaceDefinition r);
+
+    /**
+     * Stops all {@link RaceTracker}s currently tracking <code>race</code>. Note that if the same tracker also may have
+     * been tracking other races. Other races of the same event that are currently tracked will continue to be tracked.
+     * If wind tracking for the race is currently running, it will be stopped (see also
+     * {@link #stopTrackingWind(Regatta, RaceDefinition)}). The <code>race</code> (and the other races tracked by the
+     * same tracker) as well as the corresponding {@link TrackedRace}s will continue to exist, e.g., when asking
+     * {@link #getTrackedRace(Regatta, RaceDefinition)}.
+     */
+    void stopTracking(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException;
+
 }

@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 
 /**
@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 public interface CompetitorSelectionChangeListener {
     
     void competitorsListChanged(Iterable<CompetitorDTO> competitors);
+    void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors);
     
     void addedToSelection(CompetitorDTO competitor);
     void removedFromSelection(CompetitorDTO competitor);

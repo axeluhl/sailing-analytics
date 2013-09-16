@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 
 /**
  * Shows the {@link LeaderboardRowDTO#totalTimeSailedDownwindInSeconds} attribute.

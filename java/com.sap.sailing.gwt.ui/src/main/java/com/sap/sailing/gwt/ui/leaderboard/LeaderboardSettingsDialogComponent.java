@@ -15,20 +15,20 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
+import com.sap.sailing.gwt.ui.client.IntegerBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
-import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class LeaderboardSettingsDialogComponent implements SettingsDialogComponent<LeaderboardSettings> {
     private final Iterable<RaceColumnDTO> raceColumnSelection;
@@ -44,11 +44,9 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private final Map<DetailType, CheckBox> overallDetailCheckboxes;
     private final StringMessages stringMessages;
     private LongBox refreshIntervalInSecondsBox;
-    private LongBox delayInSecondsBox;
     private final boolean autoExpandPreSelectedRace;
     private final boolean showOverallLeaderboardOnSamePage;
     private final long delayBetweenAutoAdvancesInMilliseconds;
-    private final long delayInMilliseconds;
     private final Integer numberOfLastRacesToShow;
     private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
     private RadioButton explicitRaceColumnSelectionRadioBtn;
@@ -56,12 +54,12 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private IntegerBox numberOfLastRacesToShowBox;
     private CheckBox showOverallLeaderboardOnSamePageCheckbox;
     
-    public LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
+    protected LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection,
             List<DetailType> overallDetailSelection, List<RaceColumnDTO> raceAllRaceColumns,
             Iterable<RaceColumnDTO> raceColumnSelection, RaceColumnSelection raceColumnSelectionStrategy,
             boolean autoExpandPreSelectedRace, boolean showOverallLeaderboardOnSamePage,
-            long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds, StringMessages stringMessages) {
+            long delayBetweenAutoAdvancesInMilliseconds, StringMessages stringMessages) {
         this.raceAllRaceColumns = raceAllRaceColumns;
         this.numberOfLastRacesToShow = raceColumnSelectionStrategy.getNumberOfLastRaceColumnsToShow();
         this.activeRaceColumnSelectionStrategy = raceColumnSelectionStrategy.getType();
@@ -78,7 +76,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         this.stringMessages = stringMessages;
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
-        this.delayInMilliseconds = delayInMilliseconds;
         this.showOverallLeaderboardOnSamePage = showOverallLeaderboardOnSamePage;
     }
 
@@ -115,8 +112,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private FlowPanel createTimingDetailsPanel(DataEntryDialog<?> dialog) {
         FlowPanel timingPanel = new FlowPanel();
         refreshIntervalInSecondsBox = dialog.createLongBox(delayBetweenAutoAdvancesInMilliseconds / 1000l, 4);
-        delayInSecondsBox = dialog.createLongBox(delayInMilliseconds / 1000l, 4);
-        delayInSecondsBox.getElement().getStyle().setFloat(Float.LEFT);
         
         timingPanel.add(dialog.createHeadline(stringMessages.timing(), true));
         timingPanel.addStyleName("SettingsDialogComponent");
@@ -125,16 +120,9 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         timingPanel.add(timingContent);
         
         timingContent.addStyleName("dialogInnerContent");
-        Label delayLabel = new Label(stringMessages.delayInSeconds() + ":");
-        delayLabel.getElement().getStyle().setPaddingRight(5, Unit.PX);
-        delayLabel.getElement().getStyle().setFloat(Float.LEFT);
-        
-        timingContent.add(delayLabel);
-        timingContent.add(delayInSecondsBox);
-
         Label refreshIntervalLabel = new Label(stringMessages.refreshInterval() + ":");
         refreshIntervalLabel.getElement().getStyle().setPaddingRight(5, Unit.PX);
-        refreshIntervalLabel.getElement().getStyle().setPaddingLeft(25, Unit.PX);
+        refreshIntervalLabel.getElement().getStyle().setPaddingLeft(5, Unit.PX);
         refreshIntervalLabel.getElement().getStyle().setFloat(Float.LEFT);
         timingContent.add(refreshIntervalLabel);
         timingContent.add(refreshIntervalInSecondsBox);
@@ -146,16 +134,21 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         FlowPanel raceDetailDialog = new FlowPanel();
         raceDetailDialog.add(dialog.createHeadline(stringMessages.raceDetailsToShow(), true));
         raceDetailDialog.addStyleName("SettingsDialogComponent");
-        FlowPanel raceDetailDialogContent = new FlowPanel();
-        raceDetailDialogContent.addStyleName("dialogInnerContent");
+        int detailCountInCurrentFlowPanel = 0;
         List<DetailType> currentRaceDetailSelection = raceDetailSelection;
+        FlowPanel raceDetailDialogContent = null;
         for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
+            if (detailCountInCurrentFlowPanel % 8 == 0) {
+                raceDetailDialogContent = new FlowPanel();
+                raceDetailDialogContent.addStyleName("dialogInnerContent");
+                raceDetailDialog.add(raceDetailDialogContent);
+            }
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
             checkbox.setValue(currentRaceDetailSelection.contains(type));
             raceDetailCheckboxes.put(type, checkbox);
             raceDetailDialogContent.add(checkbox);
+            detailCountInCurrentFlowPanel++;
         }
-        raceDetailDialog.add(raceDetailDialogContent);
         return raceDetailDialog;
     }
 
@@ -180,16 +173,21 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         FlowPanel legDetailsToShow = new FlowPanel();
         legDetailsToShow.add(dialog.createHeadline(stringMessages.legDetailsToShow(), true));
         legDetailsToShow.addStyleName("SettingsDialogComponent");
-        FlowPanel legDetailsContent = new FlowPanel();
-        legDetailsContent.addStyleName("dialogInnerContent");
+        FlowPanel legDetailsContent = null;
         List<DetailType> currentLegDetailSelection = legDetailSelection;
+        int detailCountInCurrentFlowPanel = 0;
         for (DetailType type : LegColumn.getAvailableLegDetailColumnTypes()) {
+            if (detailCountInCurrentFlowPanel % 8 == 0) {
+                legDetailsContent = new FlowPanel();
+                legDetailsContent.addStyleName("dialogInnerContent");
+                legDetailsToShow.add(legDetailsContent);
+            }
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
             checkbox.setValue(currentLegDetailSelection.contains(type));
             legDetailCheckboxes.put(type, checkbox);
             legDetailsContent.add(checkbox);
+            detailCountInCurrentFlowPanel++;
         }
-        legDetailsToShow.add(legDetailsContent);
         return legDetailsToShow;
     }
 
@@ -329,16 +327,14 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             }
         }
         Long delayBetweenAutoAdvancesValue = refreshIntervalInSecondsBox.getValue();
-        Long delayInSecondsValue = delayInSecondsBox.getValue();
         Integer lastNRacesToShowValue = activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N ?
                 numberOfLastRacesToShowBox.getValue() : null;
         return new LeaderboardSettings(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow,
                 overallDetailsToShow, namesOfRaceColumnsToShow, /* nameOfRacesToShow */null,
                 lastNRacesToShowValue,
                 autoExpandPreSelectedRace, 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
-                1000 * (delayInSecondsValue == null ? 0 : delayInSecondsValue.longValue()),
-                null, true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy,
-                showOverallLeaderboardOnSamePageCheckbox.getValue());
+                null,
+                true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy, showOverallLeaderboardOnSamePageCheckbox.getValue());
     }
 
     @Override
@@ -362,6 +358,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
     @Override
     public FocusWidget getFocusWidget() {
-        return delayInSecondsBox;
+        return refreshIntervalInSecondsBox;
     }
 }

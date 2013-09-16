@@ -4,23 +4,32 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 
 import android.content.Context;
 
+/**
+ * Base class for all data managers. Use {@link DataManager#create(Context)} for creating your {@link DataManager}.
+ */
 public abstract class DataManager implements ReadonlyDataManager {
 
-	public static ReadonlyDataManager create(Context context) {
-		if (AppConstants.IS_DATA_OFFLINE) {
-			return new OfflineDataManager(InMemoryDataStore.INSTANCE);
-		}
-		return new OnlineDataManager(context, InMemoryDataStore.INSTANCE);
-	}
+    public static ReadonlyDataManager create(Context context) {
+        if (AppConstants.IS_DATA_OFFLINE) {
+            return new OfflineDataManager(context, InMemoryDataStore.INSTANCE);
+        }
+        return new OnlineDataManager(context, InMemoryDataStore.INSTANCE);
+    }
 
-	protected DataStore dataStore;
-	
-	public DataManager(DataStore dataStore) {
-		this.dataStore = dataStore;
-	}
-	
-	public DataStore getDataStore() {
-		return dataStore;
-	}
-	
+    protected Context context;
+    protected DataStore dataStore;
+
+    public DataManager(Context context, DataStore dataStore) {
+        this.context = context;
+        this.dataStore = dataStore;
+    }
+
+    public DataStore getDataStore() {
+        return dataStore;
+    }
+
+    public Context getContext() {
+        return context;
+    }
+
 }

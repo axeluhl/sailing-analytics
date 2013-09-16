@@ -17,12 +17,12 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class RacesListBoxPanel extends FormPanel implements RegattaDisplayer, RaceSelectionChangeListener {
@@ -112,7 +112,7 @@ public class RacesListBoxPanel extends FormPanel implements RegattaDisplayer, Ra
     }
 
     private String toString(RaceDTO race) {
-        return race.getRegattaName()+" - "+race.name+(race.isTracked ? " ("+stringConstants.tracked()+")" : "");
+        return race.getRegattaName()+" - "+race.getName()+(race.isTracked ? " ("+stringConstants.tracked()+")" : "");
     }
 
     @Override

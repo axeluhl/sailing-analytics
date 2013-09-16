@@ -26,7 +26,8 @@ public interface SwissTimingReplayService {
     /**
      * @param link
      *            the URL without the implicit "http://" prefix, as obtained, e.g., from
-     *            {@link SwissTimingReplayRace#getLink()}.
+     *            {@link SwissTimingReplayRace#getLink()}, or with an explicit protocol specification
+     *            as in "file:///..."
      * @param replayListener
      *            the listener to receive all persing events
      */

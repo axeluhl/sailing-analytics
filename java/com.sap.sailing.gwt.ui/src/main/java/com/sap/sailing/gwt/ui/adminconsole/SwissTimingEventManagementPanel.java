@@ -34,23 +34,21 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 
 /**
- * Allows the user to start and stop tracking of events, regattas and races using the TracTrac connector. In particular,
+ * Allows the user to start and stop tracking of races using the SwissTiming connector. In particular,
  * previously configured connections can be retrieved from a drop-down list which then pre-populates all connection
- * parameters. The user can also choose to enter connection information manually. Using a "hierarchical" entry system
- * comparable to that of, e.g., the Eclipse CVS connection setup wizard, components entered will be used to
- * automatically assemble the full URL which can still be overwritten manually. There is a propagation order across the
- * fields. Hostname propagates to JSON URL, Live URI and Stored URI. Port Live Data propagates to Port Stored Data,
- * incremented by one. The ports propagate to Live URI and Stored URI, respectively. The event name propagates to the
- * JSON URL.
+ * parameters. The user can also choose to enter connection information manually.
  * 
  * @author Axel Uhl (D043530)
  * 
@@ -138,47 +136,94 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             }
         });
 
-
         TextColumn<SwissTimingRaceRecordDTO> raceNameColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.ID;
             }
         };
+
+        TextColumn<SwissTimingRaceRecordDTO> raceDescriptionColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                return object.description;
+            }
+        };
         
-        TextColumn<SwissTimingRaceRecordDTO> raceStartTrackingColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+        TextColumn<SwissTimingRaceRecordDTO> boatClassColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                String result = object.boatClass != null ? object.boatClass : "";
+                if(object.discipline != null) {
+                    result += " (" + object.discipline + ")";
+                }
+                return result;
+            }
+        };
+
+        TextColumn<SwissTimingRaceRecordDTO> raceStateColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                String result = object.hasCourse ? "C✓ " : "";
+                result += object.hasStartlist ? "S✓" : "";
+                return result;
+            }
+        };
+        
+        TextColumn<SwissTimingRaceRecordDTO> raceStartTimeColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.raceStartTime==null?"":dateFormatter.render(object.raceStartTime) + " " + timeFormatter.render(object.raceStartTime);
             }
         };
 
-
         HorizontalPanel racesSplitPanel = new HorizontalPanel();
         mainPanel.add(racesSplitPanel);
         
-        CaptionPanel racesCaptionPanel = new CaptionPanel(stringConstants.trackableRaces());
-        racesSplitPanel.add(racesCaptionPanel);
-        racesCaptionPanel.setWidth("50%");
+        CaptionPanel trackableRacesCaptionPanel = new CaptionPanel(stringConstants.trackableRaces());
+        racesSplitPanel.add(trackableRacesCaptionPanel);
+        trackableRacesCaptionPanel.setWidth("50%");
 
         CaptionPanel trackedRacesCaptionPanel = new CaptionPanel(stringConstants.trackedRaces());
         racesSplitPanel.add(trackedRacesCaptionPanel);
         trackedRacesCaptionPanel.setWidth("50%");
 
-        VerticalPanel racesPanel = new VerticalPanel();
-        racesCaptionPanel.setContentWidget(racesPanel);
-        racesCaptionPanel.setStyleName("bold");
+        VerticalPanel trackableRacesPanel = new VerticalPanel();
+        trackableRacesCaptionPanel.setContentWidget(trackableRacesPanel);
+        trackableRacesCaptionPanel.setStyleName("bold");
 
         VerticalPanel trackedRacesPanel = new VerticalPanel();
         trackedRacesPanel.setWidth("100%");
         trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
         trackedRacesCaptionPanel.setStyleName("bold");
 
+        // Regatta selection
+        HorizontalPanel regattaPanel = new HorizontalPanel();
+        regattaPanel.setSpacing(5);
+        Label regattaForTrackingLabel = new Label(stringMessages.regattaUsedForTheTrackedRace());
+        regattaForTrackingLabel.setWordWrap(false);
+        regattaPanel.add(regattaForTrackingLabel);
+        regattaPanel.add(getAvailableRegattasListBox());
+        trackableRacesPanel.add(regattaPanel);
+
+        Label lblTrackSettings = new Label(stringConstants.trackSettings());
+        trackableRacesPanel.add(lblTrackSettings);
+
+        final CheckBox trackWindCheckbox = new CheckBox(stringConstants.trackWind());
+        trackWindCheckbox.setWordWrap(false);
+        trackWindCheckbox.setValue(true);
+        trackableRacesPanel.add(trackWindCheckbox);
+
+        final CheckBox declinationCheckbox = new CheckBox(stringConstants.declinationCheckbox());
+        declinationCheckbox.setWordWrap(false);
+        declinationCheckbox.setValue(true);
+        trackableRacesPanel.add(declinationCheckbox);
+
         // text box for filtering the cell table
         HorizontalPanel filterPanel = new HorizontalPanel();
         filterPanel.setSpacing(5);
-        racesPanel.add(filterPanel);
-        
+        trackableRacesPanel.add(filterPanel);
+
         Label lblFilterEvents = new Label(stringConstants.filterRacesByName() + ":");
         filterPanel.add(lblFilterEvents);
         filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -190,49 +235,32 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 fillRaceListFromAvailableRacesApplyingFilter(SwissTimingEventManagementPanel.this.filterEventsTextbox.getText());
             }
         });
-        
         filterPanel.add(filterEventsTextbox);
 
-        HorizontalPanel racesHorizontalPanel = new HorizontalPanel();
-        racesPanel.add(racesHorizontalPanel);
-
-        VerticalPanel trackPanel = new VerticalPanel();
-        trackPanel.setStyleName("paddedPanel");
-        
         raceNameColumn.setSortable(true);
-        raceStartTrackingColumn.setSortable(true);
+        raceStartTimeColumn.setSortable(true);
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<SwissTimingRaceRecordDTO>(/* pageSize */ 10000, tableRes);
         raceTable.addColumn(raceNameColumn, stringConstants.name());
-        raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTimeColumn());
+        raceTable.addColumn(raceDescriptionColumn, stringConstants.description());
+        raceTable.addColumn(boatClassColumn, stringConstants.boatClass());
+        raceTable.addColumn(raceStateColumn, stringConstants.status());
+        raceTable.addColumn(raceStartTimeColumn, stringConstants.startTime());
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(new MultiSelectionModel<SwissTimingRaceRecordDTO>() {});
 
-        racesHorizontalPanel.add(raceTable);
-        racesHorizontalPanel.add(trackPanel);
+        trackableRacesPanel.add(raceTable);
 
         raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
         raceList.addDataDisplay(raceTable);
-        Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTrackingColumn);
+        Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTimeColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
-
-        Label lblTrackSettings = new Label(stringConstants.trackSettings());
-        trackPanel.add(lblTrackSettings);
-
-        final CheckBox trackWindCheckbox = new CheckBox(stringConstants.trackWind());
-        trackWindCheckbox.setWordWrap(false);
-        trackWindCheckbox.setValue(true);
-        trackPanel.add(trackWindCheckbox);
-
-        final CheckBox declinationCheckbox = new CheckBox(stringConstants.declinationCheckbox());
-        declinationCheckbox.setWordWrap(false);
-        declinationCheckbox.setValue(true);
-        trackPanel.add(declinationCheckbox);
+        
         trackedRacesPanel.add(trackedRacesListComposite);
 
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
-        racesPanel.add(racesButtonPanel);
+        trackableRacesPanel.add(racesButtonPanel);
 
         Button btnTrack = new Button(stringConstants.startTracking());
         racesButtonPanel.add(btnTrack);
@@ -243,7 +271,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 trackSelectedRaces(trackWindCheckbox.getValue(), declinationCheckbox.getValue());
             }
         });
-
     }
 
     private ListHandler<SwissTimingRaceRecordDTO> getRaceTableColumnSortHandler(List<SwissTimingRaceRecordDTO> raceRecords,
@@ -345,8 +372,13 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 selectedRaces.add(race);
             }
         }
+        RegattaDTO selectedRegatta = getSelectedRegatta();
+        RegattaIdentifier regattaIdentifier = null;
+        if (selectedRegatta != null) {
+            regattaIdentifier = new RegattaName(selectedRegatta.getName());
+        }
         sailingService.trackWithSwissTiming(
-                /* regattaToAddTo */null, // TODO allow user to select a pre-defined regatta
+                /* regattaToAddTo */ regattaIdentifier,
                 selectedRaces, hostname, port, /* canSendRequests */false, trackWind, correctWindByDeclination,
                 new AsyncCallback<Void>() {
                     @Override

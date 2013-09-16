@@ -1,5 +1,6 @@
 package com.sap.sailing.xrr.resultimport.impl;
 
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,17 +13,19 @@ import com.sap.sailing.xrr.resultimport.schema.RaceResult;
 public class ScoreCorrectionForRaceResult implements ScoreCorrectionsForRace {
     private final Parser parser;
     private final Division division;
-    private final String raceID;
+    private final Set<String> raceIDs;
+    private final BigInteger raceNumber;
     
-    public ScoreCorrectionForRaceResult(Parser parser, Division division, String raceID) {
+    public ScoreCorrectionForRaceResult(Parser parser, Division division, BigInteger raceNumber, Set<String> raceIDs) {
         this.parser = parser;
         this.division = division;
-        this.raceID = raceID;
+        this.raceNumber = raceNumber;
+        this.raceIDs = raceIDs;
     }
 
     @Override
     public String getRaceNameOrNumber() {
-        return raceID;
+        return raceNumber.toString();
     }
 
     @Override
@@ -32,7 +35,7 @@ public class ScoreCorrectionForRaceResult implements ScoreCorrectionsForRace {
             // TODO what about TRRaceResult?
             if (o instanceof RaceResult) {
                 RaceResult raceResult = (RaceResult) o;
-                if (raceID.equals(raceResult.getRaceID())) {
+                if (raceIDs.contains(raceResult.getRaceID())) {
                     result.add(parser.getBoat(parser.getTeam(raceResult.getTeamID()).getBoatID()).getSailNumber());
                 }
             }
@@ -42,7 +45,7 @@ public class ScoreCorrectionForRaceResult implements ScoreCorrectionsForRace {
 
     @Override
     public ScoreCorrectionForCompetitorInRace getScoreCorrectionForCompetitor(String sailID) {
-        return new RaceResultAsScoreCorrectionForCompetitorInRace(parser, division, raceID, sailID);
+        return new RaceResultAsScoreCorrectionForCompetitorInRace(parser, division, raceIDs, sailID);
     }
 
 }

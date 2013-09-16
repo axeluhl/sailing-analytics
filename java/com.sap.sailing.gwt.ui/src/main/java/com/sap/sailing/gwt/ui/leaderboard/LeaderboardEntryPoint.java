@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -28,7 +29,6 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.raceboard.GlobalNavigationPanel;
-import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
 
 
 public class LeaderboardEntryPoint extends AbstractEntryPoint {
@@ -46,7 +46,6 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_REGATTA_NAME = "regattaName";
     private static final String PARAM_REFRESH_INTERVAL_MILLIS = "refreshIntervalMillis";
     private static final String PARAM_SHOW_OVERALL_LEADERBOARDS_ON_SAME_PAGE = "showOverallLeaderboardsOnSamePage";
-    private static final String PARAM_DELAY_TO_LIVE_MILLIS = "delayToLiveMillis";
     
     /**
      * Parameter to support scaling the complete page by a given factor. This works by either using the
@@ -73,15 +72,13 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 && Window.Location.getParameter(PARAM_SHOW_RACE_DETAILS).equalsIgnoreCase("true");
         final boolean embedded = Window.Location.getParameter(PARAM_EMBEDDED) != null
                 && Window.Location.getParameter(PARAM_EMBEDDED).equalsIgnoreCase("true");
-        final long delayToLiveMillis = Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS) != null ?
-                Long.valueOf(Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS)) : 5000l; // default 5s
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> leaderboardNames) {
                 leaderboardName = Window.Location.getParameter("name");
                 leaderboardGroupName = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
                 if (leaderboardNames.contains(leaderboardName)) {
-                    createUI(showRaceDetails, embedded, delayToLiveMillis);
+                    createUI(showRaceDetails, embedded);
                 } else {
                     RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                 }
@@ -99,7 +96,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         });
     }
     
-    private void createUI(boolean showRaceDetails, boolean embedded, long delayToLiveMillis) {
+    private void createUI(boolean showRaceDetails, boolean embedded) {
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(mainPanel);
         LogoAndTitlePanel logoAndTitlePanel = null;
@@ -131,7 +128,6 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         long delayBetweenAutoAdvancesInMilliseconds = 3000l;
         final RaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
         Timer timer = new Timer(PlayModes.Replay, delayBetweenAutoAdvancesInMilliseconds);
-        timer.setLivePlayDelayInMillis(delayToLiveMillis);
         final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
         if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
             timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, always goes "live"
@@ -141,7 +137,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     preselectedRace, new CompetitorSelectionModel(
                         /* hasMultiSelection */true), timer, leaderboardGroupName, leaderboardName,
                     LeaderboardEntryPoint.this, stringMessages, userAgent, showRaceDetails, /* raceTimesInfoProvider */ null, Window.Location.getParameterMap().containsKey(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN) ?
-                                    Boolean.valueOf(Window.Location.getParameterMap().get(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN).get(0)) : false);
+                                    Boolean.valueOf(Window.Location.getParameterMap().get(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN).get(0)) : false, /* adjustTimerDelay */ true);
         leaderboardPanel.addStyleName(LeaderboardPanel.LEADERBOARD_MARGIN_STYLE);
         contentScrollPanel.setWidget(leaderboardPanel);
 
@@ -195,11 +191,11 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             result = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
                     /* namesOfRaceColumnsToShow */ null,
                     namesOfRacesToShow, numberOfLastRacesToShow,
-                    autoExpandPreSelectedRace, refreshIntervalMillis, /* delay to live */ null,
-                            /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
-                                            namesOfRacesToShow.get(0) : null, /* ascending */ true,
-                                    /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
-                                    raceColumnSelectionStrategy, showOverallLeaderboardsOnSamePage);
+                    autoExpandPreSelectedRace, refreshIntervalMillis, /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
+                                    namesOfRacesToShow.get(0) : null,
+                            /* ascending */ true, /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
+                                    raceColumnSelectionStrategy,
+                                    showOverallLeaderboardsOnSamePage);
         } else {
             final List<DetailType> overallDetails = Collections.emptyList();
             result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null,
@@ -288,7 +284,6 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     /**
      * Assembles a URL for a leaderboard that displays with the <code>settings</code> and <code>embedded</code> mode
      * as specified by the parameters.
-     * @param leaderboardDisplayName TODO
      */
     public static String getUrl(String leaderboardName, String leaderboardDisplayName, LeaderboardUrlSettings settings) {
         StringBuilder overallDetails = new StringBuilder();
@@ -325,9 +320,6 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 + (leaderboardDisplayName != null ? "&displayName="+leaderboardDisplayName : "")
                 + (settings.isEmbedded() ? "&"+PARAM_EMBEDDED+"=true" : "")
                 + (settings.getLeaderboardSettings().isShowOverallLeaderboardsOnSamePage() ? "&"+PARAM_SHOW_OVERALL_LEADERBOARDS_ON_SAME_PAGE+"=true" : "")
-                + (settings.getLeaderboardSettings().getDelayInMilliseconds() == null &&
-                   settings.getLeaderboardSettings().getDelayInMilliseconds() != 0 ? "" :
-                    "&"+PARAM_DELAY_TO_LIVE_MILLIS+"="+settings.getLeaderboardSettings().getDelayInMilliseconds())
                 + (!settings.isAutoRefresh() || (settings.getLeaderboardSettings().getDelayBetweenAutoAdvancesInMilliseconds() == null &&
                    settings.getLeaderboardSettings().getDelayBetweenAutoAdvancesInMilliseconds() != 0) ? "" :
                     "&"+PARAM_REFRESH_INTERVAL_MILLIS+"="+settings.getLeaderboardSettings().getDelayBetweenAutoAdvancesInMilliseconds())

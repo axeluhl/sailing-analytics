@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -41,6 +42,7 @@ import com.tractrac.clientmodule.setup.KeyValue;
  *
  */
 public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest implements Listener {
+    private static final Logger logger = Logger.getLogger(AbstractTracTracLiveTest.class.getName());
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private Event event;
@@ -118,19 +120,24 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     
     @After
     public void tearDown() throws MalformedURLException, IOException, InterruptedException {
+        logger.info("entering "+getClass().getName()+".tearDown()");
         Thread.sleep(500); // wait a bit before stopping the controller; in earlier versions we did a web request to stop the
         // simulator here; then, the ioThread joined flawlessly; aggressively stopping the controller doesn't let the ioThread join
         if (getController() != null)
         	controller.stop(/* abortStored */ true);
+        logger.info("successfully stopped controller");
         try {
         	if (ioThread != null)
         		ioThread.join(3000); // just wait a little bit, then give up
         } catch (InterruptedException ex) {
             Assert.fail(ex.getMessage());
         }
+        logger.info("successfully joined ioThread");
         for (Receiver receiver : receivers) {
             receiver.stopPreemptively();
+            logger.info("successfully stopped receiver "+receiver);
         }
+        logger.info("leaving "+getClass().getName()+".tearDown()");
     }
 
     
@@ -197,5 +204,17 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
             ttControlPoints.add(new ControlPointAdapter(cp));
         }
         return ttControlPoints;
+    }
+
+    public static URI getCourseDesignUpdateURI() throws URISyntaxException {
+        return new URI("http://tracms.traclive.dk/update_course");
+    }
+
+    public static String getTracTracUsername() {
+        return "tracTest";
+    }
+
+    public static String getTracTracPassword() {
+        return "tracTest";
     }
 }

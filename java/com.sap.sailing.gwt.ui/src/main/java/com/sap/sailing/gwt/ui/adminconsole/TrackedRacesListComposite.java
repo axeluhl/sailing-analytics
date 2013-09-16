@@ -12,15 +12,15 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 
 /**
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link RegattaDisplayer}, e.g., with
@@ -31,6 +31,8 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private Button btnUntrack;
     private Button btnRemoveRace;
     private Button btnSetDelayToLive;
+    private Button btnExport;
+    private ExportPopup exportPopup;
 
     public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, RaceSelectionProvider raceSelectionProvider,
@@ -130,6 +132,17 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             }
         });
         trackedRacesButtonPanel.add(btnSetDelayToLive);
+
+        exportPopup = new ExportPopup(stringMessages);
+        btnExport = new Button(stringMessages.export());
+        btnExport.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                exportPopup.center(getSelectedRaces());
+            }
+        });
+        btnExport.setEnabled(false);
+        trackedRacesButtonPanel.add(btnExport);
     }
 
     @Override
@@ -137,9 +150,11 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         if (selectedRaces.isEmpty()) {
             btnRemoveRace.setEnabled(false);
             btnUntrack.setEnabled(false);
+            btnExport.setEnabled(false);
         } else {
             btnRemoveRace.setEnabled(true);
             btnUntrack.setEnabled(true);
+            btnExport.setEnabled(true);
         }
     }
 
@@ -149,12 +164,14 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             btnUntrack.setVisible(false);
             btnRemoveRace.setVisible(false);
             btnSetDelayToLive.setVisible(false);
+            btnExport.setVisible(false);
         } else {
             btnUntrack.setVisible(true);
             btnUntrack.setEnabled(false);
             btnRemoveRace.setVisible(true);
             btnRemoveRace.setEnabled(false);
             btnSetDelayToLive.setVisible(true);
+            btnExport.setVisible(true);
         }
     }
 

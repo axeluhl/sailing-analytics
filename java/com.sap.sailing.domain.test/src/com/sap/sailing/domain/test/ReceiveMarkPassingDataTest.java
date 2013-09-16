@@ -101,11 +101,11 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {}
                 },
-                /* trackedRegattaRegistry */ null, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
+                /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
-        raceDefinition = DomainFactory.INSTANCE.getAndWaitForRaceDefinition(race);
+        raceDefinition = DomainFactory.INSTANCE.getAndWaitForRaceDefinition(race.getId());
         synchronized (semaphor) {
             while (firstData[0] == null) {
                 try {

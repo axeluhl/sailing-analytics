@@ -12,7 +12,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
@@ -141,7 +141,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     @Override
     public List<SailMasterMessage> loadRaceMessages(String raceID) {
         DBCollection racesMessagesCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
-        racesMessagesCollection.ensureIndex(new BasicDBObject(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), null)); // no sort without index
+        racesMessagesCollection.ensureIndex(new BasicDBObject(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1)); // no sort without index
         BasicDBObject query = new BasicDBObject();
         query.append(FieldNames.RACE_ID.name(), raceID);
         DBCursor results = racesMessagesCollection.find(query).sort(
@@ -185,6 +185,26 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         return null;
     }
 
+    @Override
+    public boolean hasRaceStartlist(String raceID) {
+        DBCollection races = database.getCollection(CollectionNames.RACES_MESSAGES.name());
+        BasicDBObject query = new BasicDBObject();
+        query.append(FieldNames.RACE_ID.name(), raceID);
+        query.append(FieldNames.MESSAGE_COMMAND.name(), MessageType.STL.name());
+        DBObject object = races.findOne(query);
+        return object != null; 
+    }
+
+    @Override
+    public boolean hasRaceCourse(String raceID) {
+        DBCollection races = database.getCollection(CollectionNames.RACES_MESSAGES.name());
+        BasicDBObject query = new BasicDBObject();
+        query.append(FieldNames.RACE_ID.name(), raceID);
+        query.append(FieldNames.MESSAGE_COMMAND.name(), MessageType.CCG.name());
+        DBObject object = races.findOne(query);
+        return object != null; 
+    }
+    
     @Override
     public Iterable<Race> getRaces() {
         DBCollection races = database.getCollection(CollectionNames.RACES_MASTERDATA.name());

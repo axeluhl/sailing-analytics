@@ -1,30 +1,41 @@
 package com.sap.sailing.server.replication.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
+
+import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.impl.CourseDataImpl;
+import com.sap.sailing.domain.base.impl.GateImpl;
+import com.sap.sailing.domain.base.impl.MarkImpl;
+import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
@@ -63,7 +74,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, regatta);
-        addAndValidate(masterLog, replicaLog);
+        addAndValidateEventIds(masterLog, replicaLog);
     }
     
     @Test
@@ -80,7 +91,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
-        addAndValidate(masterLog, replicaLog);
+        addAndValidateEventIds(masterLog, replicaLog);
     }
     
     @Test
@@ -96,7 +107,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
-        addAndValidate(masterLog, replicaLog, raceLogEvent);
+        addAndValidateEventIds(masterLog, replicaLog, raceLogEvent);
     }
     
     @Test
@@ -111,7 +122,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         
         RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
-        addAndValidate(masterLog, replicaLog, raceLogEvent);
+        addAndValidateEventIds(masterLog, replicaLog, raceLogEvent);
     }
 
     @Test
@@ -128,7 +139,30 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
-        addAndValidate(masterLog, replicaLog, anotherRaceLogEvent);
+        addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
+    }
+    
+    @Test
+    public void testRaceEventReplicationCourseDesignOnRegatta() throws ClassNotFoundException, IOException, InterruptedException {
+        final String regattaName = "Test";
+        final String seriesName = "Default";
+        final String fleetName = "Default";
+        final String raceColumnName = "R1";
+        
+        Regatta masterRegatta = setupRegatta(regattaName);
+        RaceLog masterLog = setupRaceColumn(masterRegatta, seriesName, raceColumnName, fleetName);
+        
+        raceLogEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(), 43, createCourseData());
+        masterLog.add(raceLogEvent);
+        
+        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        
+        RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
+        
+        anotherRaceLogEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(), 43, createCourseData());
+        addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
+        
+        compareReplicatedCourseDesignEvent(replicaLog, (RaceLogCourseDesignChangedEvent) anotherRaceLogEvent);
     }
     
     @Test
@@ -144,9 +178,43 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         
         RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
-        addAndValidate(masterLog, replicaLog, anotherRaceLogEvent);
+        addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
     }
     
+    @Test
+    public void testRaceEventReplicationCourseDesignOnFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
+        final String leaderboardName = "Test";
+        final String fleetName = "Default";
+        final String raceColumnName = "R1";
+        
+        FlexibleLeaderboard masterLeaderboard = setupFlexibleLeaderboard(leaderboardName);
+        RaceLog masterLog = setupRaceColumn(leaderboardName, fleetName, raceColumnName);
+        
+        raceLogEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(), 43, createCourseData());
+        masterLog.add(raceLogEvent);
+        
+        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        
+        RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
+        anotherRaceLogEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(), 43, createCourseData());
+        addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
+        compareReplicatedCourseDesignEvent(replicaLog, (RaceLogCourseDesignChangedEvent) anotherRaceLogEvent);
+    }
+    
+    private void compareReplicatedCourseDesignEvent(RaceLog replicaLog, RaceLogCourseDesignChangedEvent courseDesignChangedEvent) {
+        replicaLog.lockForRead();
+        try {
+            RaceLogCourseDesignChangedEvent replicatedEvent = (RaceLogCourseDesignChangedEvent) replicaLog.getLastRawFix();
+            assertEquals(courseDesignChangedEvent.getId(), replicatedEvent.getId());
+            assertEquals(courseDesignChangedEvent.getPassId(), replicatedEvent.getPassId());
+            assertEquals(courseDesignChangedEvent.getTimePoint(), replicatedEvent.getTimePoint());
+            assertEquals(Util.size(courseDesignChangedEvent.getInvolvedBoats()), Util.size(replicatedEvent.getInvolvedBoats()));
+            compareCourseBase(courseDesignChangedEvent.getCourseDesign(), replicatedEvent.getCourseDesign());
+        } finally {
+            replicaLog.unlockAfterRead();
+        }
+    }
+
     @Ignore
     public void testRaceEventReplicationOnRenamingFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
         final String leaderboardName = "Test";
@@ -165,12 +233,15 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         Thread.sleep(3000);
         
         RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
-        addAndValidate(masterLog, replicaLog, anotherRaceLogEvent);
+        addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
     }
     
-    private void addAndValidate(RaceLog masterLog, RaceLog replicaLog, RaceLogEvent... addedEvents) throws InterruptedException {
+    /**
+     * Validation is done based only on the identifier and type of the {@link RaceLogEvent}s.
+     */
+    private void addAndValidateEventIds(RaceLog masterLog, RaceLog replicaLog, RaceLogEvent... addedEvents) throws InterruptedException {
         // 1. Check state of replica after initial load...
-        assertLogsEqual(masterLog, replicaLog);
+        assertEqualsOnId(masterLog, replicaLog);
         
         // 2. ... add all incoming events...
         for (RaceLogEvent event : addedEvents) {
@@ -179,15 +250,18 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         // 3. ... and give replication some time to deliver messages.
         Thread.sleep(3000);
         
-        assertLogsEqual(masterLog, replicaLog);
+        assertEqualsOnId(masterLog, replicaLog);
     }
 
-    private void assertLogsEqual(RaceLog masterLog, RaceLog replicaLog) {
+    /**
+     * Equality of the events is done based only on the identifier and type.
+     */
+    private void assertEqualsOnId(RaceLog masterLog, RaceLog replicaLog) {
         replicaLog.lockForRead();
         try {
             masterLog.lockForRead();
             try {
-                assertEvents(masterLog.getRawFixes(), replicaLog.getRawFixes());
+                assertEqualsOnId(masterLog.getRawFixes(), replicaLog.getRawFixes());
             } finally {
                 masterLog.unlockAfterRead();
             }
@@ -196,17 +270,20 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         }
     }
 
-    private void assertEvents(Iterable<RaceLogEvent> expectedEvents, Iterable<RaceLogEvent> actualEvents) {
-        Collection<RaceLogEvent> expectedCollection = new ArrayList<>();
+    /**
+     * Equality of the events is done based only on the {@link RaceLogEvent}'s identifier and type.
+     */
+    private void assertEqualsOnId(Iterable<RaceLogEvent> expectedEvents, Iterable<RaceLogEvent> actualEvents) {
+        List<RaceLogEvent> expectedCollection = new ArrayList<>();
         Util.addAll(expectedEvents, expectedCollection);
         
-        Collection<RaceLogEvent> actualCollection = new ArrayList<>();
+        List<RaceLogEvent> actualCollection = new ArrayList<>();
         Util.addAll(actualEvents, actualCollection);
         
-        //assertEquals(expectedCollection.size(), actualCollection.size());
         assertEquals(Util.size(expectedEvents), Util.size(actualEvents));
-        for (RaceLogEvent event : expectedEvents) {
-            assertTrue(actualCollection.contains(event));
+        for (int i = 0; i < expectedCollection.size(); i++) {
+            assertEquals(expectedCollection.get(i).getClass(), actualCollection.get(i).getClass());
+            assertEquals(expectedCollection.get(i).getId(), actualCollection.get(i).getId());
         }
     }
 
@@ -253,5 +330,50 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         return masterLog;
     }
     
+    protected CourseBase createCourseData() {
+        CourseBase course = new CourseDataImpl("Test Course");
+        
+        course.addWaypoint(0, new WaypointImpl(new GateImpl(UUID.randomUUID(), 
+                new MarkImpl(UUID.randomUUID(), "Black", MarkType.BUOY, "black", "round", "circle"),
+                new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY, "green", "round", "circle"),
+                "Upper gate")));
+        course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, "white", "conical", "bold"), NauticalSide.PORT));
+        
+        return course;
+    }
+    
+    protected void compareCourseBase(CourseBase masterCourse, CourseBase replicatedCourse) {
+        assertEquals(masterCourse.getFirstWaypoint().getPassingSide(), null);
+        assertEquals(replicatedCourse.getFirstWaypoint().getPassingSide(), null);
+        Assert.assertTrue(masterCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
+        Assert.assertTrue(replicatedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
+        
+        Gate masterGate = (Gate) masterCourse.getFirstWaypoint().getControlPoint();
+        Gate replicatedGate = (Gate) replicatedCourse.getFirstWaypoint().getControlPoint();
+        
+        assertEquals(masterGate.getId(), replicatedGate.getId());
+        assertEquals(masterGate.getName(), replicatedGate.getName());
+        
+        compareMarks(masterGate.getLeft(), replicatedGate.getLeft());
+        compareMarks(masterGate.getRight(), replicatedGate.getRight());
+        
+        assertEquals(masterCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
+        assertEquals(replicatedCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
+        Assert.assertTrue(masterCourse.getLastWaypoint().getControlPoint() instanceof Mark);
+        Assert.assertTrue(replicatedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
+        
+        Mark masterMark = (Mark) masterCourse.getLastWaypoint().getControlPoint();
+        Mark replicatedMark = (Mark) replicatedCourse.getLastWaypoint().getControlPoint();
+        compareMarks(masterMark, replicatedMark);
+    }
+    
+    private void compareMarks(Mark masterMark, Mark replicatedMark) {
+        assertEquals(masterMark.getId(), replicatedMark.getId());
+        assertEquals(masterMark.getColor(), replicatedMark.getColor());
+        assertEquals(masterMark.getName(), replicatedMark.getName());
+        assertEquals(masterMark.getPattern(), replicatedMark.getPattern());
+        assertEquals(masterMark.getShape(), replicatedMark.getShape());
+        assertEquals(masterMark.getType(), replicatedMark.getType());
+    }
     
 }

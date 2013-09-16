@@ -16,9 +16,9 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
 public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceColumnDTO>> {
     private final ListBox addRacesListBox;
@@ -45,7 +45,7 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
                 int index = 0;
                 boolean raceColumnNameNotEmpty = true;
                 for (RaceColumnDTO raceColumn : raceColumnsWithFleetToValidate) {
-                    raceColumnNameNotEmpty = raceColumn.name != null && raceColumn.name.length() > 0;
+                    raceColumnNameNotEmpty = raceColumn.getName() != null && raceColumn.getName().length() > 0;
                     if (!raceColumnNameNotEmpty) {
                         break;
                     }
@@ -55,7 +55,7 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
                 boolean raceColumnUnique = true;
                 HashSet<String> setToFindDuplicates = new HashSet<String>();
                 for (RaceColumnDTO raceColumn : raceColumnsWithFleetToValidate) {
-                    if (!setToFindDuplicates.add(raceColumn.name)) {
+                    if (!setToFindDuplicates.add(raceColumn.getName())) {
                         raceColumnUnique = false;
                         break;
                     }
@@ -109,7 +109,7 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
         for(int i = 0; i < racesCount; i++) {
             String raceColumnName = raceNameEntryFields.get(i).getValue();
             RaceColumnDTO raceColumnDTO = new RaceColumnDTO(/* isValidInTotalScore not relevant here because no scores attached */ null);
-            raceColumnDTO.name = raceColumnName;
+            raceColumnDTO.setName(raceColumnName);
             raceColumnDTO.setMedalRace(isMedalRaceCheckboxes.get(i).getValue());
             racesWithFleet.add(raceColumnDTO);
         }

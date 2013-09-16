@@ -19,15 +19,15 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -62,7 +62,7 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends OnlineTracTr
         TimePoint firstWindwardMarkPassing = hassosMarkPassingsIter.next().getTimePoint();
         List<GPSFixMoving> firstLegFineApproximation = dp.approximate(new MeterDistance(20), startMarkPassing, firstWindwardMarkPassing);
         assertNotNull(firstLegFineApproximation);
-        assertEquals(9, firstLegFineApproximation.size());
+        assertEquals(11, firstLegFineApproximation.size());
         List<GPSFixMoving> firstLegCoarseApproximation = dp.approximate(new MeterDistance(50), startMarkPassing, firstWindwardMarkPassing);
         assertNotNull(firstLegCoarseApproximation);
         assertEquals(4, firstLegCoarseApproximation.size());
@@ -84,17 +84,17 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends OnlineTracTr
         Calendar c = new GregorianCalendar(TimeZone.getTimeZone("Europe/Berlin"));
         c.clear();
         c.set(2011, 6-1, 23, 16, 5, 47);
-        assertManeuver(maneuvers, ManeuverType.TACK, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
-        c.set(2011, 6-1, 23, 16, 8, 31);
         assertManeuver(maneuvers, ManeuverType.TACK, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
-        c.set(2011, 6-1, 23, 16, 11, 03);
+        c.set(2011, 6-1, 23, 16, 8, 33);
         assertManeuver(maneuvers, ManeuverType.TACK, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
+        c.set(2011, 6-1, 23, 16, 11, 03);
+        assertManeuver(maneuvers, ManeuverType.TACK, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
         c.set(2011, 6-1, 23, 16, 16, 13);
-        assertManeuver(maneuvers, ManeuverType.JIBE, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
-        c.set(2011, 6-1, 23, 16, 20, 1);
         assertManeuver(maneuvers, ManeuverType.JIBE, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
-        c.set(2011, 6-1, 23, 16, 22, 25);
+        c.set(2011, 6-1, 23, 16, 20, 1);
         assertManeuver(maneuvers, ManeuverType.JIBE, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
+        c.set(2011, 6-1, 23, 16, 22, 25);
+        assertManeuver(maneuvers, ManeuverType.JIBE, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
     }
 
     private void assertManeuver(List<Maneuver> maneuvers, ManeuverType type, Tack newTack,

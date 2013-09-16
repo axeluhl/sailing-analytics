@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -48,21 +49,21 @@ public interface ScoringScheme extends Serializable {
      * the competitor participated, <code>null</code> is returned, meaning the competitor has no score assigned for that
      * race. 
      */
-    Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Integer numberOfCompetitorsInRace);
+    Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher);
     
     /**
      * If a competitor is disqualified, a penalty score is attributed by this scoring scheme. Some schemes require to
      * know the number of competitors in the race, some need to know the total number of competitors in the leaderboard
      * or regatta.
      * 
-     * @param numberOfCompetitorsInRace
-     *            if <code>null</code>, the caller cannot determine the number of competitors in the single race;
+     * @param numberOfCompetitorsInLeaderboardFetcher
+     *            if it returns <code>null</code>, the caller cannot determine the number of competitors in the single race;
      *            otherwise, this parameter tells the number of competitors in the same race as <code>competitor</code>,
      *            not in the entire <code>raceColumn</code> (those may be more in case of split fleets). The scoring scheme
      *            may use this number, if available, to infer a penalty score.
      */
     Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
-            Integer numberOfCompetitorsInRace, int numberOfCompetitorsInLeaderboard);
+            Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher);
 
     /**
      * @param competitor1Scores scores of the first competitor, in the order of race columns in the leaderboard
@@ -90,7 +91,6 @@ public interface ScoringScheme extends Serializable {
      * for the leaderboard's total scores. This may, e.g., be the case if a column is split into more than one fleet and
      * those fleets are unordered. In that case, scores need to be available for all fleets before the column counts
      * for the total scores.
-     * @param at TODO
      */
     boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at);
 }

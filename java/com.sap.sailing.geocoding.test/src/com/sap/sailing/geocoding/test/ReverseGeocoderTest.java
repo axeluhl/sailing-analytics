@@ -27,7 +27,10 @@ public class ReverseGeocoderTest {
         //Simple Test in Kiel center to check the connection and the parsing from JSONObject to Placemark
         try {
             Placemark kielReversed = geocoder.getPlacemarkNearest(KIEL_POSITION);
-            Assert.assertEquals(KIEL, kielReversed);
+            Assert.assertEquals(KIEL.getName(), kielReversed.getName());
+            Assert.assertEquals(KIEL.getCountryCode(), kielReversed.getCountryCode());
+            Assert.assertEquals(KIEL.getPosition().getLatDeg(), kielReversed.getPosition().getLatDeg(), 0.0001);
+            Assert.assertEquals(KIEL.getPosition().getLngDeg(), kielReversed.getPosition().getLngDeg(), 0.0001);
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         } catch (ParseException e) {
@@ -55,13 +58,22 @@ public class ReverseGeocoderTest {
         
         try {
             Placemark p = geocoder.getPlacemarkLast(abroad, 20, new Placemark.ByPopulation());
-            Assert.assertEquals(KIEL, p);
+            Assert.assertEquals(KIEL.getName(), p.getName());
+            Assert.assertEquals(KIEL.getCountryCode(), p.getCountryCode());
+            Assert.assertEquals(KIEL.getPosition().getLatDeg(), p.getPosition().getLatDeg(), 0.0001);
+            Assert.assertEquals(KIEL.getPosition().getLngDeg(), p.getPosition().getLngDeg(), 0.0001);
             
             p = geocoder.getPlacemarkFirst(abroad, 20, new Placemark.ByDistance(abroad));
-            Assert.assertEquals(firstByDistance, p);
+            Assert.assertEquals(firstByDistance.getName(), p.getName());
+            Assert.assertEquals(firstByDistance.getCountryCode(), p.getCountryCode());
+            Assert.assertEquals(firstByDistance.getPosition().getLatDeg(), p.getPosition().getLatDeg(), 0.0001);
+            Assert.assertEquals(firstByDistance.getPosition().getLngDeg(), p.getPosition().getLngDeg(), 0.0001);
             
             p = geocoder.getPlacemarkLast(abroad, 20, new Placemark.ByPopulationDistanceRatio(abroad));
-            Assert.assertEquals(KIEL, p);
+            Assert.assertEquals(KIEL.getName(), p.getName());
+            Assert.assertEquals(KIEL.getCountryCode(), p.getCountryCode());
+            Assert.assertEquals(KIEL.getPosition().getLatDeg(), p.getPosition().getLatDeg(), 0.0001);
+            Assert.assertEquals(KIEL.getPosition().getLngDeg(), p.getPosition().getLngDeg(), 0.0001);
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         } catch (ParseException e) {

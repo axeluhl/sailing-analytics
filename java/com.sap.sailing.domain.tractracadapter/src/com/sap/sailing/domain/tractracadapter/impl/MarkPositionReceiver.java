@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -9,8 +10,8 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -91,8 +92,11 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
         TimePoint now = MillisecondsTimePoint.now();
         long fromTime = startOfTracking == null ? 0l : startOfTracking.compareTo(now) > 0 ? now.asMillis() : startOfTracking.asMillis();
         long toTime = endOfTracking == null ? Long.MAX_VALUE : endOfTracking.asMillis();
-        logger.fine("subscribing to ControlPointPositionData for time range "+new MillisecondsTimePoint(fromTime)+"/"+
-                new MillisecondsTimePoint(toTime));
+        Collection<Race> races = getTracTracEvent().getRaceList();
+        for (Race race : races) {
+            logger.info("Subscribing to ControlPointPositionData for time range "+new MillisecondsTimePoint(fromTime)+"/"+
+                new MillisecondsTimePoint(toTime) + " for event " + getTracTracEvent().getName() + " " + race.getName());
+        }
         TypeController controlPointListener = ControlPointPositionData.subscribe(getTracTracEvent(),
                 new ICallbackData<ControlPoint, ControlPointPositionData>() {
                     @Override

@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.test;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -42,6 +45,16 @@ public class DummyTrackedRegattaRegistry implements TrackedRegattaRegistry {
     @Override
     public Regatta getRememberedRegattaForRace(Serializable race) {
         return null;
+    }
+
+    @Override
+    public boolean isRaceBeingTracked(RaceDefinition r) {
+        return false;
+    }
+
+    @Override
+    public void stopTracking(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,
+            InterruptedException {
     }
 
 }

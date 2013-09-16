@@ -13,7 +13,6 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
@@ -57,25 +56,47 @@ public class RaceGroupFactory {
         Map<Series, List<RaceColumn>> seriesToRaceColumns = getSeriesToRaceColumns(leaderboard);
 
         Collection<SeriesWithRows> seriesWithRows = new ArrayList<>();
-        for (Series series : seriesToRaceColumns.keySet()) {
+        for (Series series : getSeriesIterable(leaderboard, seriesToRaceColumns)) {
             seriesWithRows.add(new SeriesWithRowsImpl(series.getName(), series.isMedal(), getRows(series,
                     seriesToRaceColumns.get(series))));
         }
         return seriesWithRows;
     }
 
+    private Iterable<? extends Series> getSeriesIterable(Leaderboard leaderboard, Map<Series, List<RaceColumn>> seriesToRaceColumns) {
+        // for RegattaLeaderboards we want to preserve the order of series
+        if (leaderboard instanceof RegattaLeaderboard) {
+            return ((RegattaLeaderboard) leaderboard).getRegatta().getSeries();
+        }
+        return seriesToRaceColumns.keySet();
+    }
+
     private Collection<RaceRow> getRows(Series series, List<RaceColumn> raceColumns) {
         Collection<RaceRow> rows = new ArrayList<>();
         for (Fleet fleet : series.getFleets()) {
-            rows.add(new RaceRowImpl(fleet, getCells(fleet, raceColumns)));
+            // We are taking the fleet name because there might be several "default fleet"
+            // objects when TrackedRaces are linked onto this Leaderboard
+                rows.add(new RaceRowImpl(fleet, getCells(fleet.getName(), raceColumns, isFirstRaceColumnVirtual(series))));
         }
         return rows;
     }
+    
+    private boolean isFirstRaceColumnVirtual(Series series){
+        return series.isFirstColumnIsNonDiscardableCarryForward();
+    }
 
-    private Collection<RaceCell> getCells(Fleet fleet, List<RaceColumn> raceColumns) {
+    private Collection<RaceCell> getCells(String fleetName, List<RaceColumn> raceColumns, boolean isFirstRaceColumnVirtual) {
+        boolean skippedFirst = false;
         Collection<RaceCell> cells = new ArrayList<>();
-        for (RaceColumn raceColumn : raceColumns) {
-            cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet)));
+        if (raceColumns != null) {
+            for (RaceColumn raceColumn : raceColumns) {
+                if (isFirstRaceColumnVirtual && !skippedFirst) {
+                    skippedFirst = true;
+                } else {
+                    Fleet fleet = raceColumn.getFleetByName(fleetName);
+                    cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet)));
+                }
+            }
         }
         return cells;
     }
@@ -94,7 +115,7 @@ public class RaceGroupFactory {
                 insertSeriesIfNew(seriesToRaceColumns, raceColumnSeries).add(raceColumn);
             } else {
                 if (defaultSeries == null) {
-                    defaultSeries = createDefaultSeries();
+                    defaultSeries = createDefaultSeries(raceColumn.getFleets());
                     insertSeriesIfNew(seriesToRaceColumns, defaultSeries);
                 }
                 seriesToRaceColumns.get(defaultSeries).add(raceColumn);
@@ -103,10 +124,10 @@ public class RaceGroupFactory {
         return seriesToRaceColumns;
     }
 
-    private Series createDefaultSeries() {
+    private Series createDefaultSeries(Iterable<? extends Fleet> fleets) {
         Series defaultSeries;
         defaultSeries = new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME, false,
-                Collections.<Fleet> singleton(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)), Collections.<String> emptyList(), null);
+                fleets, Collections.<String> emptyList(), null);
         return defaultSeries;
     }
 

@@ -5,14 +5,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sap.sailing.freg.resultimport.CompetitorEntry;
-import com.sap.sailing.freg.resultimport.CompetitorRow;
-import com.sap.sailing.freg.resultimport.RegattaResults;
+import com.sap.sailing.resultimport.CompetitorEntry;
+import com.sap.sailing.resultimport.CompetitorRow;
+import com.sap.sailing.resultimport.RegattaResults;
+import com.sap.sailing.resultimport.impl.CompetitorRowImpl;
+import com.sap.sailing.resultimport.impl.DefaultCompetitorEntryImpl;
 
 public class FregHtmlParser {
     private static final Logger logger = Logger.getLogger(FregHtmlParser.class.getName());
@@ -105,14 +109,19 @@ public class FregHtmlParser {
             final List<CompetitorRow> result = new ArrayList<CompetitorRow>();
             List<String> rowContents = getRowContents(is);
             is.close();
-            final List<String> metadata = getTagContents(rowContents.get(0), "b"); // header information like regatta name and dates are all in <B> tags
+            final Map<String, String> metadata = new HashMap<String, String>();
+            List<String> tagContents = getTagContents(rowContents.get(0), "b"); // header information like regatta name and dates are all in <B> tags
+            int j = 1;
+            for (String metaInfo : tagContents) {
+                metadata.put("info" + j++, metaInfo);
+			}
             for (int i = 2; i < rowContents.size() - 1; i++) {
                 List<String> tdContent = getTagContents(rowContents.get(i), "td");
                 result.add(createCompetitorRow(tdContent));
             }
             return new RegattaResults() {
                 @Override
-                public List<String> getMetadata() {
+                public Map<String, String> getMetadata() {
                     return metadata;
                 }
                 @Override
@@ -143,10 +152,8 @@ public class FregHtmlParser {
                     getRankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace(tdContent.get(i).trim());
             rankAndMaxPointsReasonAndPointsAndDiscarded.add(rankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace);
         }
-        String[] clubNameAndCountry = getTagContents(tdContent.get(tdContent.size()-1).trim(), "p").get(0).trim().split("<(br|BR)>");
-        String clubName = clubNameAndCountry[0].replace("&nbsp;", " ").trim();
         return new CompetitorRowImpl(totalRank, sailID, names, scoreAfterDiscarding, totalPointsBeforeDiscarding,
-                rankAndMaxPointsReasonAndPointsAndDiscarded, clubName);
+                rankAndMaxPointsReasonAndPointsAndDiscarded);
     }
 
     private CompetitorEntry getRankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace(
@@ -183,7 +190,7 @@ public class FregHtmlParser {
             }
         }
         Double points = lines.length < 2 ? null : Double.valueOf(getTagContents(lines[1], "i").get(0));
-        return new CompetitorEntryImpl(rank, maxPointsReason, points, isDiscarded);
+        return new DefaultCompetitorEntryImpl(rank, maxPointsReason, points, isDiscarded);
     }
 
     private Double getScore(String cell) {

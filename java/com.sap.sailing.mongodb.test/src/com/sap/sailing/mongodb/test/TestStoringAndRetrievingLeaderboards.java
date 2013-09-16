@@ -17,20 +17,21 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
+import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
@@ -48,7 +49,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final String leaderboardName = "TestLeaderboard";
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
+                new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
         leaderboard.addRaceColumn("R1", /* medalRace */ false);
         RaceColumn r2 = leaderboard.addRaceColumn("R2", /* medalRace */ false);
         r2.setFactor(1.5);
@@ -66,7 +67,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final String leaderboardName = "TestLeaderboard";
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
+                new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
         Competitor wolfgang = createCompetitor();
         Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
@@ -95,7 +96,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, scoreCorrection,
-                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
+                new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
         scoreCorrection.setComment("Humba");
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         scoreCorrection.setTimePointOfLastCorrectionsValidity(now);
@@ -111,7 +112,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, scoreCorrection,
-                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
+                new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
         Competitor competitor = createCompetitor();
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 1, /* started */ true);
         final String raceColumnName1 = "My First Race 1";
@@ -132,12 +133,12 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final String leaderboardName = "TestLeaderboard";
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
+                new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
         new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
         Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db).loadLeaderboard(leaderboardName, /* regattaRegistry */ null);
         assertEquals(leaderboardName, loadedLeaderboard.getName());
-        assertTrue(Arrays.equals(discardIndexResultsStartingWithHowManyRaces, loadedLeaderboard.getResultDiscardingRule()
-                .getDiscardIndexResultsStartingWithHowManyRaces()));
+        assertTrue(Arrays.equals(discardIndexResultsStartingWithHowManyRaces,
+                ((ThresholdBasedResultDiscardingRule) loadedLeaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces()));
     }
     
     @Test
@@ -145,7 +146,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final String leaderboardName = "TestLeaderboard";
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new HighPoint(), null);
+                new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new HighPoint(), null);
         new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
         Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db).loadLeaderboard(leaderboardName, /* regattaRegistry */ null);
         assertSame(HighPoint.class, loadedLeaderboard.getScoringScheme().getClass());
@@ -159,7 +160,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final double carriedPointsForWolfgangHunger = 3.7;
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
+                new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
         Competitor competitor = createCompetitor();
         TrackedRace raceWithOneCompetitor = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 1, /* started */ true);
         leaderboard.addRace(raceWithOneCompetitor, raceColumnName, /* medalRace */ false, leaderboard.getFleet(null));
@@ -169,8 +170,8 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         // attach tracked race to leaderboard to ensure that competitor object is assigned properly
         loadedLeaderboard.addRace(raceWithOneCompetitor, raceColumnName, /* medalRace, ignored */ false, leaderboard.getFleet(null));
         assertEquals(leaderboardName, loadedLeaderboard.getName());
-        assertTrue(Arrays.equals(discardIndexResultsStartingWithHowManyRaces, loadedLeaderboard.getResultDiscardingRule()
-                .getDiscardIndexResultsStartingWithHowManyRaces()));
+        assertTrue(Arrays.equals(discardIndexResultsStartingWithHowManyRaces,
+                ((ThresholdBasedResultDiscardingRule) loadedLeaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces()));
         assertEquals(1, Util.size(loadedLeaderboard.getCompetitors()));
         assertEquals(competitor, loadedLeaderboard.getCompetitors().iterator().next());
         assertEquals(carriedPointsForWolfgangHunger, loadedLeaderboard.getCarriedPoints(competitor), 0.000000001);
@@ -184,7 +185,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final double correctedPoints = 2.75;
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
+                new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
         Competitor competitor = createCompetitor();
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 1, /* started */ true);
         TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 2, /* started */ true);
@@ -212,7 +213,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final double correctedPoints = 2.75;
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
+                new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
         Competitor competitor = createCompetitor();
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 1, /* started */ true);
         TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 2, /* started */ true);
@@ -238,7 +239,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final MaxPointsReason maxPointsReason = MaxPointsReason.DNF;
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
+                new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
         Competitor competitor = createCompetitor();
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 1, /* started */ true);
         TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 2, /* started */ true);
@@ -267,7 +268,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final MaxPointsReason maxPointsReason = MaxPointsReason.DNF;
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
+                new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
         Competitor competitor = createCompetitor();
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 1, /* started */ true);
         TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 2, /* started */ true);

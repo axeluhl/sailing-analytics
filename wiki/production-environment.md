@@ -10,6 +10,84 @@ The various processes run in "tmux" sessions to which, once connected to sapsail
 
 For the OSGi containers by convention we have one directory under _/home/trac/servers/_ per deployable branch (dev, test, prod1, prod2). In those directories we have copies of the "install" script from the git's java/target folder. Running it after a successful product build on the branch corresponding to the current directory will copy the compiled product to the server directory. Running the start script will then launch the respective server instance. A safety check in the install script avoids accidentally overwriting a server directory with a non-matching product version by comparing the directory name with the branch name checked out under _/home/trac/git_.
 
+## Firewall
+The current firewall configuration is described in the following table. Firewall is maintained by PIRONET NDH. In order to change the configuration you have to sign a form ([[Click here to open it|wiki/uploads/Firewall-Freischaltungformular-v33-de.doc]]).
+
+<table>
+<tr>
+<th>Source</th>
+<th>Target</th>
+<th>Port</th>
+<th>Type</th>
+</tr>
+<tr>
+<td>ALL</td>
+<td>sapcoe-app01</td>
+<td>80</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>ALL</td>
+<td>sapcoe-app01</td>
+<td>443</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>ALL</td>
+<td>sapcoe-app01</td>
+<td>22</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>sapcoe-app01</td>
+<td>ALL</td>
+<td>123</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>ALL</td>
+<td>sapcoe-app01</td>
+<td>2010-1015</td>
+<td>UDP</td>
+</tr>
+<tr>
+<td>ALL</td>
+<td>sapcoe-app01</td>
+<td>21</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>ALL</td>
+<td>sapcoe-app01</td>
+<td>5672</td>
+<td>TCP</td>
+</tr>
+<tr>
+<td>sapcoe-app01</td>
+<td>78.46.86.151</td>
+<td>ALL</td>
+<td>TCP+UDP</td>
+</tr>
+<tr>
+<td>sapcoe-app01</td>
+<td>46.4.29.12</td>
+<td>ALL</td>
+<td>TCP+UDP</td>
+</tr>
+<tr>
+<td>sapcoe-app01</td>
+<td>89.233.27.2</td>
+<td>ALL</td>
+<td>TCP+UDP</td>
+</tr>
+<tr>
+<td>sapcoe-app01</td>
+<td>gps.sportresult.com</td>
+<td>40300</td>
+<td>TCP+UDP</td>
+</tr>
+</table>
+
 ## Services
 
 Services are vital for the infrastructure. The following sections describe location of configuration and special behaviour.
@@ -26,6 +104,7 @@ To ensure availability and to be able to separate servers holding historical dat
 <th>MongoDB Path</th>
 <th>Replication Channel</th>
 <th>Expedition UDP Port</th>
+<th>OSGi Telnet Port</th>
 </tr>
 <tr>
 <td>DEV</td>
@@ -34,30 +113,52 @@ To ensure availability and to be able to separate servers holding historical dat
 <td>/opt/mongodb/data/mongodb-dev</td>
 <td>sapsailinganalytics-dev</td>
 <td>2010</td>
+<td>14886</td>
 </tr>
 <tr>
-<td>TEST</td>
+<td>LIVE1</td>
 <td>8887</td>
 <td>10201</td>
-<td>/opt/mongodb/data/mongodb-test</td>
-<td>sapsailinganalytics-test</td>
+<td>/opt/mongodb/data/mongodb-live</td>
+<td>sapsailinganalytics-live1</td>
 <td>2011</td>
+<td>14887</td>
 </tr>
 <tr>
-<td>PROD1</td>
+<td>LIVE2</td>
 <td>8888</td>
-<td>10202</td>
-<td>/opt/mongodb/data/mongodb-prod</td>
-<td>sapsailinganalytics-prod1</td>
+<td>10201</td>
+<td>/opt/mongodb/data/mongodb-live</td>
+<td>sapsailinganalytics-live2</td>
 <td>2013</td>
+<td>14888</td>
 </tr>
 <tr>
-<td>PROD2</td>
+<td>ARCHIVE1</td>
 <td>8889</td>
 <td>10202</td>
-<td>/opt/mongodb/data/mongodb-prod</td>
-<td>sapsailinganalytics-prod2</td>
-<td>2014</td>
+<td>/opt/mongodb/data/mongodb-archive</td>
+<td>sapsailinganalytics-archive1</td>
+<td>N/A</td>
+<td>14889</td>
+</tr>
+<tr>
+<td>ARCHIVE2</td>
+<td>8890</td>
+<td>10202</td>
+<td>/opt/mongodb/data/mongodb-archive</td>
+<td>sapsailinganalytics-archive2</td>
+<td>N/A</td>
+<td>14890</td>
+</tr>
+<tr>
+<td>RACECOMMITTEE_APP</td>
+<td>7777</td>
+<td>10201</td>
+<td>/opt/mongodb/data/mongodb-live</td>
+<td>sapsailinganalytics-racecommitteeapp</td>
+<td>2010</td>
+<td>14777</td>
 </tr>
 </table>
 

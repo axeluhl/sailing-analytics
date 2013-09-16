@@ -41,6 +41,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -48,10 +49,9 @@ import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.components.Component;
-import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public abstract class AbstractTrackedRacesListComposite extends SimplePanel implements Component<TrackedRacesSettings>,
         RegattaDisplayer, RaceSelectionChangeListener {
@@ -220,14 +220,14 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         Column<RaceDTO, SafeHtml> raceNameColumn = new Column<RaceDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(RaceDTO raceDTO) {
-                return SafeHtmlUtils.fromString(raceDTO.name);
+                return SafeHtmlUtils.fromString(raceDTO.getName());
             }
         };
         raceNameColumn.setSortable(true);
         columnSortHandler.setComparator(raceNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
-                return r1.name.compareTo(r2.name);
+                return r1.getName().compareTo(r2.getName());
             }
         });
 
@@ -371,7 +371,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                     String textAsUppercase = word.toUpperCase().trim();
                     if (!raceDTO.getRegattaName().toUpperCase().contains(textAsUppercase)
                             && !raceDTO.boatClass.toUpperCase().contains(textAsUppercase)
-                            && !raceDTO.name.toUpperCase().contains(textAsUppercase)) {
+                            && !raceDTO.getName().toUpperCase().contains(textAsUppercase)) {
                         failed = true;
                         break;
                     }
@@ -484,7 +484,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             for (RaceDTO race : raceList.getList()) {
                 String regattaName = race.getRegattaName();
                 if (regattaName.equals(raceIdentifier.getRegattaName())
-                        && race.name.equals(raceIdentifier.getRaceName())) {
+                        && race.getName().equals(raceIdentifier.getRaceName())) {
                     dontFireNextSelectionChangeEvent = true;
                     selectionModel.setSelected(race, true);
                     break;

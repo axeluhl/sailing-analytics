@@ -3,6 +3,7 @@ package com.sap.sailing.domain.swisstimingreplayadapter.test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +16,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
@@ -186,6 +188,20 @@ public class SwissTimingReplayAdapterServiceTest {
     }
 
     @Test
+    public void testStartPerformanceDetection() throws Exception {
+        SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, DomainFactory.INSTANCE,
+                new DummyTrackedRegattaRegistry());
+        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), replayListener);
+        Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
+        TrackedRace trackedRace = trackedRaces.iterator().next();
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            Distance distanceToLineAtStart = trackedRace.getDistanceToStartLine(competitor, trackedRace.getStartOfRace());
+            assertTrue(distanceToLineAtStart.getMeters() > 0);
+            assertTrue(distanceToLineAtStart.getMeters() < 8.5);
+        }
+    }
+
+    @Test
     @Ignore
     public void printRaceData_SAW005906_20120805() throws Exception {
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"),
@@ -195,7 +211,8 @@ public class SwissTimingReplayAdapterServiceTest {
     @Test
     @Ignore
     public void printRaceData_SAM009903_20120731_sapsailing_replay() throws Exception {
-        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAM009903.20120731_sapsailing.replay"),
+        new SwissTimingReplayParserImpl().readData(
+                getClass().getResourceAsStream("/SAM009903.20120731_sapsailing.replay"),
                 new SwissTimingReplayPrintListener());
     }
 
@@ -209,19 +226,36 @@ public class SwissTimingReplayAdapterServiceTest {
     @Test
     @Ignore
     public void printReadRaceData_SAW010955_20120802() throws Exception {
-        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW010955.20120802.replay"), new SwissTimingReplayPrintListener());
+        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW010955.20120802.replay"),
+                new SwissTimingReplayPrintListener());
     }
 
     @Test
     @Ignore
     public void printReadRaceData_SAM002901() throws Exception {
-        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAM002901.replay"), new SwissTimingReplayPrintListener());
+        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAM002901.replay"),
+                new SwissTimingReplayPrintListener());
     }
 
     @Test
     @Ignore
     public void printReadRaceData_SAM009904_20120731() throws Exception {
-        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAM009904.20120731.replay"), new SwissTimingReplayPrintListener());
+        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAM009904.20120731.replay"),
+                new SwissTimingReplayPrintListener());
+    }
+
+    @Test
+    @Ignore
+    public void printRaceData_SAW102101_20120807() throws Exception {
+        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW102101.20120807.replay"),
+                new SwissTimingReplayPrintListener());
+    }
+
+    @Test
+    @Ignore
+    public void printRaceData_SAM102101_20120807() throws Exception {
+        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAM102101.20120807.replay"),
+                new SwissTimingReplayPrintListener());
     }
 
 }

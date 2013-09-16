@@ -18,13 +18,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 
+
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -64,6 +65,9 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         URL paramURL = AbstractTracTracLiveTest.getParamURL(eventID, raceID);
         URI liveURI = AbstractTracTracLiveTest.getLiveURI();
         URI storedURI = AbstractTracTracLiveTest.getStoredURI();
+        URI courseDesignUpdateURI = AbstractTracTracLiveTest.getCourseDesignUpdateURI();
+        String tracTracUsername = AbstractTracTracLiveTest.getTracTracUsername();
+        String tracTracPassword = AbstractTracTracLiveTest.getTracTracPassword();
         GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         cal.set(2011, 05, 23, 13, 14, 31);
         MillisecondsTimePoint startOfTracking = new MillisecondsTimePoint(cal.getTimeInMillis());
@@ -81,8 +85,8 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
             }
         });
         trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE.createTrackingConnectivityParameters(paramURL,
-                liveURI, storedURI, startOfTracking, endOfTracking, /* delayToLiveInMillis */
-                        0l, /* simulateWithStartTimeNow */false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE);
+                liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, /* delayToLiveInMillis */
+                        0l, /* simulateWithStartTimeNow */false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE, tracTracUsername, tracTracPassword);
     }
 
     private void startTracking() throws Exception, InterruptedException {

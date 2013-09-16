@@ -23,18 +23,18 @@ import org.json.simple.JSONObject;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.persistence.MongoFactory;
@@ -191,7 +191,7 @@ public class AdminApp extends SailingServerHttpServlet {
     private void listRacesInEvent(HttpServletRequest req, HttpServletResponse resp) throws IOException, ParseException,
     org.json.simple.parser.ParseException, URISyntaxException {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
-        List<RaceRecord> raceRecords = getService().getTracTracRaceRecords(jsonURL).getB();
+        List<RaceRecord> raceRecords = getService().getTracTracRaceRecords(jsonURL, true).getB();
         JSONArray result = new JSONArray();
         for (RaceRecord raceRecord : raceRecords) {
             JSONObject jsonRaceRecord = new JSONObject();
@@ -215,7 +215,7 @@ public class AdminApp extends SailingServerHttpServlet {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
                 TrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
-                TimePoint time = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
+                TimePoint time = readTimePointParam(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
                 TimePoint oneHourLater = new MillisecondsTimePoint(time.asMillis()+3600*1000);
                 String[] latitudes = req.getParameterValues(PARAM_NAME_LATDEG);
                 String[] longitudes = req.getParameterValues(PARAM_NAME_LNGDEG);
@@ -257,10 +257,10 @@ public class AdminApp extends SailingServerHttpServlet {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
                 TrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
-                TimePoint from = getTimePoint(req, PARAM_NAME_FROM_TIME, PARAM_NAME_FROM_TIME_MILLIS,
+                TimePoint from = readTimePointParam(req, PARAM_NAME_FROM_TIME, PARAM_NAME_FROM_TIME_MILLIS,
                         trackedRace.getStartOfRace()==null?new MillisecondsTimePoint(0):
                             /* 24h before race start */ new MillisecondsTimePoint(trackedRace.getStartOfRace().asMillis()-24*3600*1000));
-                TimePoint to = getTimePoint(req, PARAM_NAME_TO_TIME, PARAM_NAME_TO_TIME_MILLIS, MillisecondsTimePoint.now());
+                TimePoint to = readTimePointParam(req, PARAM_NAME_TO_TIME, PARAM_NAME_TO_TIME_MILLIS, MillisecondsTimePoint.now());
                 JSONObject jsonWindTracks = new JSONObject();
                 List<WindSource> windSources = new ArrayList<WindSource>();
                 for (WindSource windSource : trackedRace.getWindSources()) {
@@ -349,7 +349,7 @@ public class AdminApp extends SailingServerHttpServlet {
                         }
                     }
                     try {
-                        TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
+                        TimePoint timePoint = readTimePointParam(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
                         Wind wind = new WindImpl(p, timePoint, speed);
                         final DynamicTrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getExistingTrackedRace(race);
                         if (trackedRace != null) {
@@ -386,7 +386,7 @@ public class AdminApp extends SailingServerHttpServlet {
                             final DynamicTrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta)
                                     .getTrackedRace(race);
                             WindTrack windTrack = trackedRace.getOrCreateWindTrack(trackedRace.getWindSources(windSourceType).iterator().next());
-                            TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
+                            TimePoint timePoint = readTimePointParam(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
                                     MillisecondsTimePoint.now());
                             Wind wind = windTrack.getLastFixAtOrBefore(timePoint);
                             if (wind != null  && wind.getTimePoint().equals(timePoint)) {
@@ -467,7 +467,10 @@ public class AdminApp extends SailingServerHttpServlet {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addRegatta(jsonURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
+        
+        //The course design update URI is not available at this place
+        getService().addRegatta(jsonURL, liveURI, storedURI, /* courseDesignUpdateURI */ null, getWindStore(req), /* timeoutInMilliseconds */ 60000,
+                /* tracTracUsername */ null, /* tracTracPassword */ null);
     }
 
     private WindStore getWindStore(HttpServletRequest req) throws UnknownHostException, MongoException {
@@ -491,10 +494,12 @@ public class AdminApp extends SailingServerHttpServlet {
         URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addTracTracRace(paramURL, liveURI, storedURI, 
+        //The course design update URI is not available at this place
+        getService().addTracTracRace(paramURL, liveURI, storedURI, /*courseDesignUpdateURI*/ null,
                 MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
                         MongoFactory.INSTANCE.getDefaultDomainObjectFactory()),
-                        getWindStore(req), /* timeoutInMilliseconds */ 60000);
+                        getWindStore(req), /* timeoutInMilliseconds */ 60000,
+                        /*tracTracUsername*/ null, /*tracTracPassword*/ null);
     }
 
     private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {

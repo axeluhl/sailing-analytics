@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.confidence.impl;
 
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.HasConfidenceAndIsScalable;
@@ -47,6 +47,7 @@ public class ConfidenceBasedWindAveragerImpl<RelativeTo> extends
             for (HasConfidenceAndIsScalable<ScalableWind, Wind, RelativeTo> next : values) {
                 double relativeWeight = (getWeigher() == null ? 1.0 : getWeigher().getConfidence(next.getRelativeTo(), at)) * next.getConfidence();
                 ScalableWind weightedNext = next.getScalableValue().multiply(relativeWeight).getValue();
+                double weighedNextKnots = next.getObject().getKnots() * relativeWeight;
                 if (numerator == null) {
                     numerator = weightedNext;
                 } else {
@@ -57,7 +58,7 @@ public class ConfidenceBasedWindAveragerImpl<RelativeTo> extends
                 if (weightedNext.useSpeed()) {
                     atLeastOneFixWasMarkedToUseSpeed = true;
                     speedConfidenceSum += relativeWeight;
-                    knotSum += weightedNext.divide(1.0).getKnots();
+                    knotSum += weighedNextKnots;
                 }
             }
             // TODO consider greater variance to reduce the confidence

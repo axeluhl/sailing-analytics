@@ -22,8 +22,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.kiworesultimport.Boat;
 import com.sap.sailing.kiworesultimport.Crewmember;
@@ -96,7 +96,7 @@ public class ParserTest {
         ResultList resultList = parser.parse(getSampleInputStream(), SAMPLE_INPUT_NAME);
         assertNotNull(resultList);
         assertEquals("D:\\Programme\\KWSailing\\eventlogos\\KielerWoche_Ergebnislistenkopf_2011.jpg", resultList.getImagePath());
-        assertEquals(new String(new byte[] { (byte) 160  /* non-breaking space */}), resultList.getLegend());
+        assertEquals(new String(new char[] { (char) 160  /* non-breaking space */}), resultList.getLegend());
         Iterable<Boat> boats = resultList.getBoats();
         assertFalse(Util.isEmpty(boats));
         assertEquals(48, Util.size(boats));

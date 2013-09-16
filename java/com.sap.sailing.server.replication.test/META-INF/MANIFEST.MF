@@ -6,9 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Fragment-Host: com.sap.sailing.server.replication
-Import-Package: com.rabbitmq.client;version="2.8.4",
- junit.framework;version="4.8.1",
- org.junit;version="4.8.1"
+Import-Package: com.rabbitmq.client;version="2.8.4"
 Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain,
@@ -20,4 +18,6 @@ Require-Bundle: com.sap.sailing.server,
  com.tractrac.clientmodule;bundle-version="2.0.0",
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.domain.swisstimingadapter,
- org.json.simple;bundle-version="1.1.0"
+ org.json.simple;bundle-version="1.1.0",
+ org.junit4;bundle-version="4.8.2",
+ org.hamcrest;bundle-version="1.1.0"

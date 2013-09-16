@@ -18,37 +18,31 @@
    </license>
 
    <requires>
-      <import plugin="javax.servlet" version="2.5.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jetty.deploy" version="7.5.4" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jetty.server" version="7.5.4" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jetty.util" version="7.5.4" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jetty.webapp" version="7.5.4" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jetty.xml" version="7.5.4" match="greaterOrEqual"/>
+      <import plugin="javax.servlet" version="2.6.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jetty.deploy" version="9.0.4" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jetty.server" version="9.0.4" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jetty.util" version="9.0.4" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jetty.webapp" version="9.0.4" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jetty.xml" version="9.0.4" match="greaterOrEqual"/>
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.eclipse.osgi.services"/>
       <import plugin="slf4j.api"/>
-      <import plugin="org.eclipse.jetty.nested" version="7.5.4" match="greaterOrEqual"/>
-      <import plugin="javax.el"/>
-      <import plugin="javax.servlet.jsp"/>
-      <import plugin="javax.servlet.jsp.jstl"/>
-      <import plugin="org.apache.jasper.glassfish"/>
-      <import plugin="org.apache.taglibs.standard.glassfish"/>
       <import plugin="org.eclipse.jetty.osgi.boot"/>
+      <import plugin="org.eclipse.jetty.websocket.api"/>
+      <import plugin="org.eclipse.jetty.websocket.client"/>
+      <import plugin="org.eclipse.jetty.websocket.common"/>
+      <import plugin="org.eclipse.jetty.websocket.server"/>
+      <import plugin="org.eclipse.jetty.websocket.servlet"/>
+      <import plugin="org.apache.felix.gogo.command"/>
+      <import plugin="org.apache.felix.gogo.runtime"/>
+      <import plugin="org.apache.felix.gogo.shell"/>
    </requires>
 
    <plugin
          id="org.eclipse.jetty.osgi.boot"
          download-size="0"
          install-size="0"
-         version="7.5.4.v20111024"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.jetty.osgi.boot.jsp"
-         download-size="0"
-         install-size="0"
-         version="7.5.4.v20111024"
-         fragment="true"
+         version="9.0.4.v20130625"
          unpack="false"/>
 
    <plugin
@@ -95,10 +89,10 @@
          unpack="false"/>
 
    <plugin
-         id="org.apache.commons.fileupload"
+         id="org.eclipse.equinox.console"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
+         
 </feature>

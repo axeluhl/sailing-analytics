@@ -7,7 +7,6 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 
-
 public class RaceLogInformationImpl implements RaceLogInformation {
 
     private final RaceLogStore store;
@@ -30,7 +29,7 @@ public class RaceLogInformationImpl implements RaceLogInformation {
 
     @Override
     public RaceLog getRaceLog(RaceColumn raceColumn, Fleet fleet) {
-        return store.getRaceLog(identifierTemplate.compileRaceLogIdentifier(fleet));
+        return store.getRaceLog(identifierTemplate.compileRaceLogIdentifier(fleet), false);
     }
 
 }

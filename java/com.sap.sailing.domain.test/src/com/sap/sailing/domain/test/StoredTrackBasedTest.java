@@ -18,19 +18,19 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Person;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
@@ -68,6 +68,10 @@ public abstract class StoredTrackBasedTest extends TrackBasedTest {
     private File getFile(Competitor competitor, String regattaName) {
         return new File(RESOURCES + regattaName + "-" + competitor.getName()
                 + (competitor.getBoat().getSailID() == null ? "" : "-" + competitor.getBoat().getSailID()));
+    }
+    
+    public static ObjectInputStream getObjectInputStream(String fileNameWithinResources) throws FileNotFoundException, IOException {
+        return new ObjectInputStream(new FileInputStream(new File(RESOURCES+fileNameWithinResources)));
     }
     
     private Set<String> getCompetitorNamesOfStoredTracks(String regattaName) {

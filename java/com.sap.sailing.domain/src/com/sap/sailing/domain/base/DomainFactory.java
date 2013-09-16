@@ -3,14 +3,24 @@ package com.sap.sailing.domain.base;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.List;
 
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.Placemark;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.PlacemarkDTO;
+import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 public interface DomainFactory extends SharedDomainFactory {
     static DomainFactory INSTANCE = new DomainFactoryImpl();
@@ -83,5 +93,24 @@ public interface DomainFactory extends SharedDomainFactory {
     
     ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType);
 
+    CompetitorDTO convertToCompetitorDTO(Competitor c);
+
+    FleetDTO convertToFleetDTO(Fleet fleet);
+
+    /**
+     * @param trackedRace must not be <code>null</code>
+     */
+    RaceDTO createRaceDTO(TrackedRegattaRegistry trackedRegattaRegistry, boolean withGeoLocationData, RegattaAndRaceIdentifier raceIdentifier, TrackedRace trackedRace);
+
+    PlacemarkDTO convertToPlacemarkDTO(Placemark placemark);
+
+    List<CompetitorDTO> getCompetitorDTOList(List<Competitor> competitors);
+
+    TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace);
+
+    /**
+     * @param trackedRace must not be <code>null</code>
+     */
+    void updateRaceDTOWithTrackedRaceData(TrackedRace trackedRace, RaceDTO raceDTO);
 
 }

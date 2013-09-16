@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,9 +14,9 @@ import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.ui.shared.FleetDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 public class RaceTimesInfoProvider {
@@ -63,7 +64,7 @@ public class RaceTimesInfoProvider {
     /**
      * Adds the given {@link RaceIdentifier} and if <code>forceTimesInfoRequest</code> is <code>true</code>, an independent
      * request to fetch the time infos for the given race is forced. All listeners will receive a
-     * {@link RaceTimesInfoProviderListener#raceTimesInfosReceived(Map)}.
+     * {@link RaceTimesInfoProviderListener#raceTimesInfosReceived(Map, long, Date, long)}.
      * 
      * @param raceIdentifier
      *            The {@link RaceIdentifier} to be added
@@ -73,6 +74,7 @@ public class RaceTimesInfoProvider {
     public void addRaceIdentifier(final RegattaAndRaceIdentifier raceIdentifier, boolean forceTimesInfoRequest) {
         raceIdentifiers.add(raceIdentifier);
         if (forceTimesInfoRequest) {
+            final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
             sailingService.getRaceTimesInfo(raceIdentifier, new AsyncCallback<RaceTimesInfoDTO>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -82,17 +84,42 @@ public class RaceTimesInfoProvider {
 
                 @Override
                 public void onSuccess(RaceTimesInfoDTO raceTimesInfo) {
+                    final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
                     if (raceTimesInfo != null) {
                         RaceTimesInfoProvider.this.raceTimesInfos.put(raceTimesInfo.getRaceIdentifier(), raceTimesInfo);
-                        for (RaceTimesInfoProviderListener listener : listeners) {
-                            listener.raceTimesInfosReceived(getRaceTimesInfos());
-                        }
+                        notifyListeners(clientTimeWhenRequestWasSent, raceTimesInfo.currentServerTime, clientTimeWhenResponseWasReceived);
                     }
                 }
             });
         }
     }
     
+    private void readTimesInfos() {
+        if (!raceIdentifiers.isEmpty()) {
+            final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
+            sailingService.getRaceTimesInfos(raceIdentifiers, new AsyncCallback<List<RaceTimesInfoDTO>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error trying to obtain the race time infos: " + caught.getMessage(),
+                            /* silentMode */ true);
+                }
+
+                @Override
+                public void onSuccess(List<RaceTimesInfoDTO> raceTimesInfos) {
+                    final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
+                    if (!raceTimesInfos.isEmpty()) {
+                        Date currentServerTime = null;
+                        for (RaceTimesInfoDTO raceTimesInfo : raceTimesInfos) {
+                            RaceTimesInfoProvider.this.raceTimesInfos.put(raceTimesInfo.getRaceIdentifier(), raceTimesInfo);
+                            currentServerTime = raceTimesInfo.currentServerTime;
+                        }
+                        notifyListeners(clientTimeWhenRequestWasSent, currentServerTime, clientTimeWhenResponseWasReceived);
+                    }
+                }
+            });
+        }
+    }
+
     /**
      * Removes the given {@link RaceIdentifier} and the contained times info of this race.
      * @param raceIdentifier The {@link RaceIdentifier} to be removed
@@ -148,37 +175,12 @@ public class RaceTimesInfoProvider {
     
     /**
      * Forces an independent request to fetch the time infos for all races. All listeners will receive a
-     * {@link RaceTimesInfoProviderListener#raceTimesInfosReceived(Map)}.
+     * {@link RaceTimesInfoProviderListener#raceTimesInfosReceived(Map, long, Date, long)}.
      */
     public void forceTimesInfosUpdate() {
         readTimesInfos();
     }
     
-    private void readTimesInfos() {
-        if (!raceIdentifiers.isEmpty()) {
-            sailingService.getRaceTimesInfos(raceIdentifiers, new AsyncCallback<List<RaceTimesInfoDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error trying to obtain the race time infos: " + caught.getMessage(),
-                            /* silentMode */ true);
-                }
-
-                @Override
-                public void onSuccess(List<RaceTimesInfoDTO> raceTimesInfos) {
-                    if (!raceTimesInfos.isEmpty()) {
-                        for (RaceTimesInfoDTO raceTimesInfo : raceTimesInfos) {
-                            RaceTimesInfoProvider.this.raceTimesInfos.put(raceTimesInfo.getRaceIdentifier(),
-                                    raceTimesInfo);
-                        }
-                        for (RaceTimesInfoProviderListener listener : listeners) {
-                            listener.raceTimesInfosReceived(getRaceTimesInfos());
-                        }
-                    }
-                }
-            });
-        }
-    }
-
     public RegattaAndRaceIdentifier getFirstStartedAndUnfinishedRace(LeaderboardDTO leaderboard) {
         RegattaAndRaceIdentifier firstStartedAndUnfinishedRace = null;
         Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = getRaceTimesInfos();
@@ -195,6 +197,12 @@ public class RaceTimesInfoProvider {
             }
         }
         return firstStartedAndUnfinishedRace;
+    }
+
+    private void notifyListeners(long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
+        for (RaceTimesInfoProviderListener listener : listeners) {
+            listener.raceTimesInfosReceived(getRaceTimesInfos(), clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
+        }
     }
     
 }

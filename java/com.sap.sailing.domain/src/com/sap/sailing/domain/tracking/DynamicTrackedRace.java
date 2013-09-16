@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -78,4 +79,19 @@ public interface DynamicTrackedRace extends TrackedRace {
     void setRaceIsKnownToStartUpwind(boolean raceIsKnownToStartUpwind);
     
     void setStatus(TrackedRaceStatus newStatus);
+
+    /**
+     * whenever a new course design is published by the race committee and the appropriate event occurs in the race log,
+     * this method is called to propagate the course design to the tracking provider.
+     * 
+     * @param courseDesign
+     *            the new course design to be published
+     */
+    void onCourseDesignChangedByRaceCommittee(CourseBase courseDesign);
+    
+    void onStartTimeChangedByRaceCommittee(TimePoint newStartTime);
+
+    void invalidateStartTime();
+    
+    void invalidateEndTime();
 }

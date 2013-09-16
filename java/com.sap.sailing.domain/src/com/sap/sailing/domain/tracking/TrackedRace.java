@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.Distance;
@@ -19,9 +20,11 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLog;
 
@@ -51,10 +54,12 @@ public interface TrackedRace extends Serializable {
 
     /**
      * Computes the estimated start time for this race (not to be confused with the {@link #getStartOfTracking()} time
-     * point which is expected to be before the race start time). When there are no {@link MarkPassing}s for the first
-     * mark, <code>null</code> is returned. If there are mark passings for the first mark and the start time is less
-     * than {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} before the first mark passing for the
-     * first mark. Otherwise, the first mark passing for the first mark minus
+     * point which is expected to be before the race start time). The highest precedence take the
+     * {@link #attachedRaceLogs race logs} and their start time events, followed by the field {@link #startTimeReceived}
+     * which can explicitly be set using {@link #setStartTimeReceived(TimePoint)}. When there are no {@link MarkPassing}s
+     * for the first mark, <code>null</code> is returned. If there are mark passings for the first mark and the start
+     * time is less than {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} before the first mark
+     * passing for the first mark. Otherwise, the first mark passing for the first mark minus
      * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} is returned as the race start time.
      * <p>
      * 
@@ -85,6 +90,32 @@ public interface TrackedRace extends Serializable {
      * Shorthand for <code>{@link #getStart()}.{@link TimePoint#compareTo(TimePoint) compareTo(at)} &lt;= 0</code>
      */
     boolean hasStarted(TimePoint at);
+   
+    /**
+     * A race is considered "live" if it
+     * {@link TrackedRaceDTO#hasGPSData has GPS data} and {@link TrackedRaceDTO#hasWindData wind data} and if the
+     * <code>at</code> time point is between the start and the end of the race.
+     * <p>
+     * 
+     * The pre-start phase of a race is interesting also in live mode. Therefore, if a {@link TrackedRace#getStartOfRace start
+     * time} is available for the race, the {@link TimingConstants#PRE_START_PHASE_DURATION_IN_MILLIS} is subtracted
+     * from the actual start time so that the pre-start phase also counts as live. If no start time is known for the
+     * race, but a {@link TrackedRace#getStartOfTracking start of tracking time} is known, it is used as the start of
+     * the "live" interval.
+     * <p>
+     * 
+     * If an {@link TrackedRace#getEndOfRace end time} is already known for the race,
+     * {@link TimingConstants#IS_LIVE_GRACE_PERIOD_IN_MILLIS} is added to that and the result is taken to be the end of
+     * the "live" period. If no end time is known but a {@link TrackedRace#getTimePointOfNewestEvent} is set, again the
+     * {@link TimingConstants#IS_LIVE_GRACE_PERIOD_IN_MILLIS} is added to that to mark the end of the "live" interval.
+     * <p>
+     * 
+     * @param at
+     *            the time point at which to determine whether the race for <code>fleet</code>
+     *            is/was live. A <code>null</code> value will use the start time of the race.
+     * @return
+     */
+    boolean isLive(TimePoint at);
 
     /**
      * Clients can safely iterate over the iterable returned because it's a non-live copy of the tracked legs of this
@@ -161,12 +192,6 @@ public interface TrackedRace extends Serializable {
     int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
     /**
-     * For a competitor, computes the distance (TODO not yet clear whether over ground or projected onto wind direction)
-     * into the race <code>secondsIntoTheRace</code> after the race {@link TrackedRace#getStart() started}.
-     */
-    Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace);
-
-    /**
      * For the given waypoint lists the {@link MarkPassing} events that describe which competitor passed the waypoint at
      * which point in time. This can, e.g., be used to sort those competitors who already finished a leg within the leg
      * that ends with <code>waypoint</code>. The remaining competitors need to be ordered by the advantage line-related
@@ -197,6 +222,11 @@ public interface TrackedRace extends Serializable {
     Iterable<Mark> getMarks();
 
     /**
+     * Retrieves all course side lines assigned to the race.
+     */
+    Iterable<Sideline> getCourseSidelines();
+
+    /**
      * If the <code>waypoint</code> only has one {@link #getMarks() mark}, its position at time <code>timePoint</code>
      * is returned. Otherwise, the center of gravity between the mark positions is computed and returned.
      */
@@ -223,7 +253,8 @@ public interface TrackedRace extends Serializable {
     Iterable<WindSource> getWindSources(WindSourceType type);
 
     /**
-     * Retrieves all wind sources used by this race. Callers can freely iterate because a copied collection is returned.
+     * Retrieves all wind sources known to this race, including those {@link #getWindSourcesToExclude() to exclude}.
+     * Callers can freely iterate because a copied collection is returned.
      */
     Iterable<WindSource> getWindSources();
 
@@ -277,8 +308,25 @@ public interface TrackedRace extends Serializable {
      */
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
 
+    /**
+     * This obtains the course's read lock before asking for the read lock for the <code>markPassings</code> structure.
+     * See also bug 1370 (http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=1370). This is necessary because the
+     * code that executes a course update will first ask the course's write lock and then relay execution to the
+     * course change listeners among which there is a {@link TrackedRace} which will then update the mark passings
+     * for all competitors and therefore will need to ask the write lock for those. If the thread calling this method
+     * first obtains the mark passings read lock and later, while holding on to that lock, asks for the course's read
+     * lock, a deadlock may result.<p>
+     * 
+     * The {@link #unlockAfterRead(Iterable)} method will symmetrically unlock the course's read lock after releasing the
+     * read lock for the mark passings.
+     */
     void lockForRead(Iterable<MarkPassing> markPassings);
 
+    /**
+     * Releases the read lock for the mark passings and then the read lock for the course.
+     * 
+     * @see #lockForRead(Iterable)
+     */
     void unlockAfterRead(Iterable<MarkPassing> markPassings);
 
     /**
@@ -471,7 +519,12 @@ public interface TrackedRace extends Serializable {
     /**
      * Detaches the race log associated with this {@link TrackedRace}.
      */
-    void detachRaceLog();
+    void detachRaceLog(Serializable identifier);
+    
+    /**
+     * Detaches all {@link RaceLog} instances from this race
+     */
+    void detachAllRaceLogs();
     
     /**
      * Attaches the passed race log with this {@link TrackedRace}.
@@ -483,5 +536,48 @@ public interface TrackedRace extends Serializable {
      * Returns the attached race log event track for this race if any.
      * Otherwise <code>null</code>.
      */
-    RaceLog getRaceLog();
+    RaceLog getRaceLog(Serializable identifier);
+    
+    /**
+     * a setter for the listener on course design changes. The listener is mostly part of the tracking provider adapter.
+     * @param listener the listener to operate with.
+     */
+    void addCourseDesignChangedListener(CourseDesignChangedListener listener);
+    
+    void addStartTimeChangedListener(StartTimeChangedListener listener);
+
+    /**
+     * For a competitor, computes the distance (TODO not yet clear whether over ground or projected onto wind direction)
+     * into the race <code>secondsIntoTheRace</code> after the race {@link TrackedRace#getStart() started}.
+     */
+    Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace);
+
+    /**
+     * Tells how far the given <code>competitor</code> was from the start line at the given <code>timePoint</code>.
+     * Using the {@link #getStartOfRace() race start time} for <code>timePoint</code>, this tells the competitor's
+     * distance to the line when the race was started.
+     * <p>
+     * 
+     * The distance to the line is calculated by projecting the competitor's position onto the line orthogonally and
+     * computing the distance of the projected position and the competitor's position.
+     * <p
+     * .
+     * 
+     * Should the course be empty, <code>null</code> is returned. If the course's first waypoint is not a line or gate,
+     * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
+     * returned. If the competitor's position cannot be determined, <code>null</code> is returned.
+     */
+    Distance getDistanceToStartLine(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * When the <code>competitor</code> has started, this method returns the distance to the starboard end of the start line
+     * or---if the start waypoint was a single mark---the distance to the single start mark at the time the competitor started.
+     * If the competitor hasn't started yet, <code>null</code> is returned.
+     */
+    Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor);
+
+    /**
+     * Start time received by the tracking infrastructure. To determine real start time use {@link #getStartOfRace()}.
+     */
+    TimePoint getStartTimeReceived();
 }

@@ -9,23 +9,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
-import com.sap.sailing.gwt.ui.shared.FleetDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
 public class TestColumnSwapping {
 
     private LeaderboardDTO lb = null;
     private static final String LEADERBOARDNAME = "test";
     private static final String DEFAULT_FLEET_NAME = "Default";
-    private static final String DEFAULT_SERIES_NAME = "Default";
-    private static final FleetDTO DEFAULT_FLEET = new FleetDTO(DEFAULT_FLEET_NAME, DEFAULT_SERIES_NAME, /* ordering */ 0, /* color */ null);
+    private static final FleetDTO DEFAULT_FLEET = new FleetDTO(DEFAULT_FLEET_NAME, /* ordering */ 0, /* color */ null);
     private SailingServiceImpl service;
     private LeaderboardDTO leaderboardOriginalDTO;
     private LeaderboardDTO leaderboardDTO;
@@ -53,7 +53,12 @@ public class TestColumnSwapping {
         leaderboardCreationDate = new Date();
         try {
             // get Leaderboard with name and current date
-            leaderboardOriginalDTO = new LeaderboardDTO(null, null, /* higherScoreIsBetter */ false);
+            leaderboardOriginalDTO = new LeaderboardDTO(null, null, /* higherScoreIsBetter */ false, new LeaderboardDTO.UUIDGenerator() {
+                @Override
+                public String generateRandomUUID() {
+                    return UUID.randomUUID().toString();
+                }
+            });
             leaderboardOriginalDTO.addRace("Race1", /* explicitFactor */ null, 1., DEFAULT_FLEET, true, null, null);
             leaderboardOriginalDTO.addRace("Race3", /* explicitFactor */ null, 1., DEFAULT_FLEET, true, null, null);
             leaderboardOriginalDTO.addRace("Race2", /* explicitFactor */ null, 1., DEFAULT_FLEET, true, null, null);
@@ -90,7 +95,7 @@ public class TestColumnSwapping {
             sailingService.moveLeaderboardColumnUp(TEST_LEADERBOARD_NAME, races[2]);
             sailingService.updateIsMedalRace(TEST_LEADERBOARD_NAME, races[0], true);
             sailingService.updateIsMedalRace(TEST_LEADERBOARD_NAME, races[2], false);
-            lb = sailingService.getLeaderboardByName(TEST_LEADERBOARD_NAME, new Date(), /* races to load */ null);
+            lb = sailingService.getLeaderboardByName(TEST_LEADERBOARD_NAME, new Date(), /* races to load */ null, /* previous leaderboard ID */ null).getLeaderboardDTO(/* previousVersion */ null);
         } catch (Exception e) {
             // e.printStackTrace();
             fail(e.getLocalizedMessage());
@@ -110,7 +115,12 @@ public class TestColumnSwapping {
 
     @Test
     public void testLeaderBoardDTOMethods() {
-        lb = new LeaderboardDTO(null, null, /* higherScoreIsBetter */ false);
+        lb = new LeaderboardDTO(null, null, /* higherScoreIsBetter */ false, new LeaderboardDTO.UUIDGenerator() {
+            @Override
+            public String generateRandomUUID() {
+                return UUID.randomUUID().toString();
+            }
+        });
         assertNotNull("Leaderboard != NULL", lb);
         lb.addRace("1", /* explicitFactor */ null, 1., DEFAULT_FLEET, false, null, null);
         lb.addRace("2", /* explicitFactor */ null, 1., DEFAULT_FLEET, false, null, null);
@@ -125,7 +135,7 @@ public class TestColumnSwapping {
     public void testColumnSwappingFabian() {
         service.moveLeaderboardColumnUp(LEADERBOARDNAME, "Race3");
         try {
-            leaderboardDTO = service.getLeaderboardByName(LEADERBOARDNAME, leaderboardCreationDate, leglist);
+            leaderboardDTO = service.getLeaderboardByName(LEADERBOARDNAME, leaderboardCreationDate, leglist, /* previous leaderboard ID */ null).getLeaderboardDTO(/* previousVersion */ null);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

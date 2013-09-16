@@ -8,18 +8,20 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
-import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener, RaceTimesInfoProviderListener {
     private final RaceTimesInfoProvider raceTimesInfoProvider;
+    
     private RegattaAndRaceIdentifier selectedRace;
     private boolean autoAdjustPlayMode;
     private RaceTimesInfoDTO lastRaceTimesInfo;
     
-    public RaceTimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider) {
-        super(timer, timeRangeProvider, stringMessages);
+    public RaceTimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
+            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible) {
+        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible);
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
         autoAdjustPlayMode = true;
@@ -34,7 +36,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     @Override
     public RaceTimePanelSettings getSettings() {
         RaceTimePanelSettings result = new RaceTimePanelSettings();
-        result.setDelayToLivePlayInSeconds(timer.getLivePlayDelayInMillis()/1000);
         result.setRefreshInterval(timer.getRefreshInterval());
         result.setRaceTimesInfo(raceTimesInfoProvider.getRaceTimesInfo(selectedRace));
         return result;
@@ -50,11 +51,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             // in case the race is not tracked anymore we reset the time slider
             resetTimeSlider();
         } else {
-            // check if the live delay is already been set
-            if (!isUserExplicitlyChangedLivePlayDelay() && timer.getLivePlayDelayInMillis() != raceTimesInfo.delayToLiveInMs) {
-                timer.setLivePlayDelayInMillis(raceTimesInfo.delayToLiveInMs);
-            }
-            
+            // timer will only accept this update if the delay hasn't been updated explicitly
+            timer.setLivePlayDelayInMillis(raceTimesInfo.delayToLiveInMs);
             if ((raceTimesInfo.startOfTracking != null || raceTimesInfo.startOfRace != null) && 
                     (raceTimesInfo.newestTrackingEvent != null || raceTimesInfo.endOfRace != null)) {
                 // we set here the min and max of the time slider, the start and end of the race as well as the known
@@ -64,6 +62,12 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 setJumpToLiveEnablement(liveModeToBeMadePossible && timer.getPlayMode() != PlayModes.Live);
                 if (autoAdjustPlayMode && liveModeToBeMadePossible) {
                     timer.setPlayMode(PlayModes.Live);
+                }
+                updatePlayPauseButtonsVisibility(timer.getPlayMode());
+                if (liveModeToBeMadePossible && !canReplayWhileLiveIsPossible() &&
+                        timer.getPlayMode()==PlayModes.Replay && timer.getPlayState()==PlayStates.Playing) {
+                    // pause timer because it must not be playing in replay mode while the race is live
+                    timer.pause();
                 }
                 
                 boolean timerAlreadyInitialized = getFromTime() != null && getToTime() != null && timeSlider.getCurrentValue() != null;
@@ -95,27 +99,24 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     public void onTimeZoomReset() {
         super.onTimeZoomReset();
         timeSlider.setZoomed(false);
-        
         timeSlider.setMinValue(new Double(timeRangeProvider.getFromTime().getTime()), false);
         timeSlider.setMaxValue(new Double(timeRangeProvider.getToTime().getTime()), false);
         timeSlider.setCurrentValue(new Double(timer.getTime().getTime()), true);
-        
-//        updateMinMax(this.lastRaceTimesInfo);
         timeSlider.clearMarkersAndLabelsAndTicks();
         redrawAllMarkers(lastRaceTimesInfo);
     }
 
     @Override
     protected boolean isLiveModeToBeMadePossible() {
-        long livePlayDelayInMillis = timer.getLivePlayDelayInMillis();
-        long eventTimeoutTolerance = 60 * 1000; // 60s 
-        long liveTimePointInMillis = System.currentTimeMillis() - livePlayDelayInMillis;
+        long eventTimeoutTolerance = 60 * 1000; // 60s
+        long timeBeforeRaceStartTolerance = 3 * 60 * 1000; // 3min
+        long liveTimePointInMillis = timer.getLiveTimePointInMillis();
         RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null ? raceTimesInfoProvider.getRaceTimesInfo(selectedRace) : null;
         return lastRaceTimesInfo != null &&
                 lastRaceTimesInfo.newestTrackingEvent != null &&
                 liveTimePointInMillis < lastRaceTimesInfo.newestTrackingEvent.getTime() + eventTimeoutTolerance &&
-                lastRaceTimesInfo.startOfTracking != null &&
-                liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime();
+                ((lastRaceTimesInfo.startOfTracking != null && liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime())||
+                 (lastRaceTimesInfo.startOfRace != null && liveTimePointInMillis > lastRaceTimesInfo.startOfRace.getTime() - timeBeforeRaceStartTolerance));
     }
     
     @Override
@@ -131,7 +132,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
         super.playStateChanged(playState, playMode);
-        
         switch (playMode) {
         case Replay:
             autoAdjustPlayMode = false;
@@ -181,7 +181,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             timer.play();
             break;
         case Replay:
-            // set time to end of race
+            // set time to start of race
             if (newRaceTimesInfo.startOfRace != null) {
                 timer.setTime(newRaceTimesInfo.startOfRace.getTime());
             }
@@ -203,9 +203,16 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                     break;
                 }
             }
-            if((lastRaceTimesInfo.endOfRace == null && newRaceTimesInfo.endOfRace != null) ||
-               (lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace == null) ||
-               lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace != null && lastRaceTimesInfo.endOfRace.getTime() != newRaceTimesInfo.endOfRace.getTime()) {
+            if ((lastRaceTimesInfo.startOfRace == null && newRaceTimesInfo.startOfRace != null)
+                    || (lastRaceTimesInfo.startOfRace != null && newRaceTimesInfo.startOfRace == null)
+                    || (lastRaceTimesInfo.startOfRace != null && newRaceTimesInfo.startOfRace != null
+                    && lastRaceTimesInfo.startOfRace.getTime() != newRaceTimesInfo.startOfRace.getTime())) {
+                requiresMarkerUpdate = true;
+            }
+            if ((lastRaceTimesInfo.endOfRace == null && newRaceTimesInfo.endOfRace != null)
+                    || (lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace == null)
+                    || (lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace != null
+                    && lastRaceTimesInfo.endOfRace.getTime() != newRaceTimesInfo.endOfRace.getTime())) {
                 requiresMarkerUpdate = true;
             }
         }
@@ -217,13 +224,22 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private void redrawAllMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
         List<MarkPassingTimesDTO> markPassingTimes = newRaceTimesInfo.getMarkPassingTimes();
         timeSlider.clearMarkers();
+        if(newRaceTimesInfo.startOfRace != null) {
+            long markerTime = newRaceTimesInfo.startOfRace.getTime();
+            if(!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
+                timeSlider.addMarker("S", new Double(markerTime));
+            }
+        }
+        int markPassingCounter = 1;
         for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
-            if (markPassingTimesDTO.firstPassingDate != null) {
+            // ignore the start mark passing
+            if(markPassingCounter > 1 && markPassingTimesDTO.firstPassingDate != null) {
                 long markerTime = markPassingTimesDTO.firstPassingDate.getTime();
                 if(!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
-                    timeSlider.addMarker(markPassingTimesDTO.name, new Double(markerTime));
+                    timeSlider.addMarker(markPassingTimesDTO.getName(), new Double(markerTime));
                 }
             }
+            markPassingCounter++;
         }
         if (newRaceTimesInfo.endOfRace != null) {
             long markerTime = newRaceTimesInfo.endOfRace.getTime();
@@ -235,7 +251,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
     
     @Override
-    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos, long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
+        timer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         updateTimeInfo(raceTimesInfos.get(selectedRace));
     }
 }

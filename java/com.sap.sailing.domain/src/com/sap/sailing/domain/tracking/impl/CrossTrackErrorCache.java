@@ -1,22 +1,25 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -25,9 +28,9 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.util.impl.SmartFutureCache;
-import com.sap.sailing.util.impl.SmartFutureCache.CacheUpdater;
-import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
+import com.sap.sailing.util.SmartFutureCache;
+import com.sap.sailing.util.SmartFutureCache.CacheUpdater;
+import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
 
 /**
  * (Re-)computing the cross track error for a competitor causes significant amounts of CPU cycles. The cross track error
@@ -334,7 +337,9 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     @Override
     public void markPositionChanged(GPSFix fix, Mark mark) {
         TimePoint from = owner.getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix).getA();
-        for (Competitor competitor : cachePerCompetitor.keySet()) {
+        final List<Competitor> shuffledCompetitors = new ArrayList<>(cachePerCompetitor.keySet());
+        Collections.shuffle(shuffledCompetitors);
+        for (Competitor competitor : shuffledCompetitors) {
             invalidate(competitor, from);
         }
     }

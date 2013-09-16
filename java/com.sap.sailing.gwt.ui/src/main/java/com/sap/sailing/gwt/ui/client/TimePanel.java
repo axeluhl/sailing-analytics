@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
@@ -24,16 +23,25 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
-import com.sap.sailing.gwt.ui.shared.components.Component;
-import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
-import com.sap.sailing.gwt.ui.shared.controls.slider.TimeSlider;
+import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.client.shared.controls.slider.SliderBar;
+import com.sap.sailing.gwt.ui.client.shared.controls.slider.TimeSlider;
 
-public class TimePanel<T extends TimePanelSettings> extends FormPanel implements Component<T>, TimeListener, TimeZoomChangeListener,
+public class TimePanel<T extends TimePanelSettings> extends SimplePanel implements Component<T>, TimeListener, TimeZoomChangeListener,
     TimeRangeChangeListener, PlayStateListener, RequiresResize {
     protected final Timer timer;
     protected final TimeRangeWithZoomProvider timeRangeProvider;
+    
+    /**
+     * Tells whether the user shall be enabled to run a replay with the timer auto-advancing while the race is still live.
+     * Live races are often watched by many. If in addition to that several users run the live race based on their own time line,
+     * too many re-calculations will be triggered as the live data will constantly invalidate many caches. Therefore, if scaling
+     * to many concurrent users is an issue, the capability to replay a live race with a non-live timing may be restricted using
+     * this attribute.
+     */
+    private final boolean canReplayWhileLiveIsPossible;
     
     private final IntegerBox playSpeedBox;
     private final Label timeDelayLabel;
@@ -55,13 +63,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     private final Button slowDownButton;
     private final Button speedUpButton;
 
-    /**
-     * The live delay may be adjusted automatically if the server decides so. However, if the user explicitly sets a live delay,
-     * server-side updates to the delay should be suppressed. This flag records whether the user has performed a manual delay
-     * override.
-     */
-    private boolean userExplicitlyChangedLivePlayDelay;
-
     /** 
      * the minimum time the slider extends it's time when the end of the slider is reached
      */
@@ -82,14 +83,14 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         }
     }
 
-    public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages) {
+    public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages, boolean canReplayWhileLiveIsPossible) {
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;
+        this.canReplayWhileLiveIsPossible = canReplayWhileLiveIsPossible;
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
         timeRangeProvider.addTimeRangeChangeListener(this);
-        userExplicitlyChangedLivePlayDelay = false;
         FlowPanel timePanelInnerWrapper = new FlowPanel();
         timePanelInnerWrapper.setStyleName("timePanelInnerWrapper");
         timePanelInnerWrapper.setSize("100%", "100%");
@@ -121,9 +122,10 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         timeSlider.addValueChangeHandler(new ValueChangeHandler<Double>() {
             @Override
             public void onValueChange(ValueChangeEvent<Double> newValue) {
-                if(timeSlider.getCurrentValue() != null) {
+                if (timeSlider.getCurrentValue() != null) {
                     if (TimePanel.this.timer.getPlayMode() == PlayModes.Live) {
-                        // put timer into replay mode when user explicitly adjusts time; avoids having to press pause first
+                        // if canReplayWhileLive==false, playStateChanged(...) will ensure that the timer is paused when
+                        // reaching Replay mode
                         TimePanel.this.timer.setPlayMode(PlayModes.Replay);
                     }
                     TimePanel.this.timer.setTime(timeSlider.getCurrentValue().longValue());
@@ -209,7 +211,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playSpeedBox.setVisibleLength(3);
         playSpeedBox.setWidth("25px");
         playSpeedBox.setHeight("14px");
-        playSpeedBox.setValue(1);
+        playSpeedBox.setValue((int)timer.getPlaySpeedFactor()); // Christopher: initialize play speed box according to play speed factor
         playSpeedBox.setTitle(stringMessages.playSpeedHelp());
         playSpeedBox.addValueChangeHandler(new ValueChangeHandler<Integer>() {
             @Override
@@ -283,7 +285,8 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
 
     @Override
     public void timeChanged(Date time) {
-        if(timeRangeProvider.isZoomed()) {
+        if (timeRangeProvider.isZoomed()) {
+            timeSlider.setCurrentValue(new Double(time.getTime()), false);
         } else {
             if (getFromTime() != null && getToTime() != null) {
                 // handle the case where time advances beyond slider's end.
@@ -335,9 +338,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         if (!min.equals(timeRangeProvider.getFromTime())) {
             changed = true;
             timeSlider.setMinValue(new Double(min.getTime()), fireEvent);
-            if (timeSlider.getCurrentValue() == null) {
-                timeSlider.setCurrentValue(new Double(min.getTime()), fireEvent);
-            }
         }
         if (changed) {
             if(!timeRangeProvider.isZoomed()) {
@@ -350,6 +350,11 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             } else {
                 timeSlider.setStepSize(1000, fireEvent);
             }
+
+            // Christopher: following setCurrentValue requires stepsize to be set <> 0 (otherwise division by zero; NaN)
+            if (timeSlider.getCurrentValue() == null) {
+                timeSlider.setCurrentValue(new Double(min.getTime()), fireEvent);
+            }
         }
     }
 
@@ -358,6 +363,12 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         timeSlider.redraw();
     }
     
+    /**
+     * Makes sure that the invariant regarding {@link #canReplayWhileLiveIsPossible} is fulfilled. The timer will be
+     * {@link Timer#pause() paused} if the state is {@link PlayStates#Playing} and the the play mode is
+     * {@link PlayModes#Replay}.
+     * 
+     */
     @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
         boolean liveModeToBeMadePossible = isLiveModeToBeMadePossible();
@@ -366,6 +377,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         switch (playState) {
         case Playing:
             playPauseButton.getElement().addClassName("playPauseButtonPause");
+            playPauseButton.setVisible(true);
             if (playMode == PlayModes.Live) {
                 playModeImage.setResource(playModeLiveActiveImg);
             } else {
@@ -373,8 +385,8 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             }
             break;
         case Paused:
-        	playPauseButton.getElement().removeClassName("playPauseButtonPause");
         case Stopped:
+            updatePlayPauseButtonsVisibility(playMode);
             playPauseButton.getElement().removeClassName("playPauseButtonPause");
             playModeImage.setResource(playModeInactiveImg);
             break;
@@ -383,7 +395,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         switch (playMode) {
         case Live:
             playModeLabel.setText(stringMessages.playModeLive());
-            timeDelayLabel.setText(stringMessages.timeDelay() + ": " + timer.getCurrentDelayInMillis() / 1000 + " s");
+            timeDelayLabel.setText(stringMessages.timeDelay() + ": " + timer.getLivePlayDelayInMillis() / 1000 + " s");
             timeDelayLabel.setVisible(true);
             timeSlider.setEnabled(true);
             playSpeedBox.setEnabled(false);
@@ -398,8 +410,16 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             playSpeedBox.setEnabled(true);
             slowDownButton.setEnabled(true);
             speedUpButton.setEnabled(true);
+            if (!canReplayWhileLiveIsPossible() && playState == PlayStates.Playing && isLiveModeToBeMadePossible()) {
+                // can't leave the timer playing when race is still live and canReplayWhileLiveIsPossible==false 
+                timer.pause();
+            }
             break;
         }
+    }
+
+    public void updatePlayPauseButtonsVisibility(PlayModes playMode) {
+        playPauseButton.setVisible(playMode == PlayModes.Live || canReplayWhileLiveIsPossible() || !isLiveModeToBeMadePossible());
     }
     
     @Override
@@ -431,16 +451,18 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     }
     
     /**
-     * Iff <code>possible</code>, makes the {@link #backToLivePlayButton} button visible. 
+     * Iff <code>possible</code>, makes the {@link #backToLivePlayButton} button visible. Furthermore, if
+     * <code>possible==false</code> and {@link #canReplayWhileLiveIsPossible}<code>==false</code> and the timer is in
+     * state {@link PlayStates#Paused} and in mode {@link PlayModes#Replay}, the play/pause button will be shown.
      */
     protected void setLiveGenerallyPossible(boolean possible) {
         backToLivePlayButton.setVisible(possible);
+        updatePlayPauseButtonsVisibility(timer.getPlayMode());
     }
 
     @SuppressWarnings("unchecked")
     public T getSettings() {
         TimePanelSettings result = new TimePanelSettings();
-        result.setDelayToLivePlayInSeconds(timer.getLivePlayDelayInMillis()/1000);
         result.setRefreshInterval(timer.getRefreshInterval());
         return (T) result;
     }
@@ -460,26 +482,14 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         return new TimePanelSettingsDialogComponent<T>(getSettings(), stringMessages);
     }
 
-    protected boolean isUserExplicitlyChangedLivePlayDelay() {
-        return userExplicitlyChangedLivePlayDelay;
-    }
-    
     @Override
     public void updateSettings(T newSettings) {
-        boolean delayChanged = newSettings.getDelayToLivePlayInSeconds() != getSettings().getDelayToLivePlayInSeconds();
-        if (delayChanged) {
-            userExplicitlyChangedLivePlayDelay = true;
-            timer.setLivePlayDelayInMillis(1000l * newSettings.getDelayToLivePlayInSeconds());
-            if (timer.getPlayMode() == PlayModes.Live) {
-                timeDelayLabel.setText(String.valueOf(newSettings.getDelayToLivePlayInSeconds()) + " s");
-            }
-        }
         timer.setRefreshInterval(newSettings.getRefreshInterval());
     }
 
     @Override
     public String getLocalizedShortName() {
-        return "Time control";
+        return stringMessages.timePanelName();
     }
     
     @Override
@@ -498,5 +508,9 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
 
     public void setLastReceivedDataTimepoint(Date lastReceivedDataTimepoint) {
         this.lastReceivedDataTimepoint = lastReceivedDataTimepoint;
+    }
+
+    protected boolean canReplayWhileLiveIsPossible() {
+        return canReplayWhileLiveIsPossible;
     }
 }

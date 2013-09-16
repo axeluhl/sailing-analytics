@@ -4,9 +4,11 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 
 public class ScoreCorrectionProviderDTO extends NamedDTO {
+    private static final long serialVersionUID = -636159261445539142L;
     private Map<String, Set<Pair<String, Date>>> hasResultsForBoatClassFromDateByEventName;
     
     public ScoreCorrectionProviderDTO() {}

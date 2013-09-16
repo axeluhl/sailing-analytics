@@ -15,30 +15,31 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
+import com.sap.sailing.domain.swisstimingadapter.RaceType;
 import com.sap.sailing.domain.swisstimingreplayadapter.CompetitorStatus;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayListener;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayParser;
@@ -83,6 +84,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
      */
     private String currentRaceID;
 
+    private RaceType currentRaceType;
+    
     /**
      * Reference time point for time specifications
      */
@@ -158,10 +161,6 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
         return trackedRacePerRaceID.values();
     }
 
-    private BoatClass getCurrentBoatClass() {
-        return domainFactory.getOrCreateBoatClassFromRaceID(currentRaceID);
-    }
-
     @Override
     public void referenceTimestamp(long referenceTimestampMillis) {
         referenceTimePoint = new MillisecondsTimePoint(referenceTimestampMillis);
@@ -175,6 +174,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     @Override
     public void raceID(String raceID) {
         currentRaceID = raceID;
+        currentRaceType = domainFactory.getRaceTypeFromRaceID(currentRaceID);
     }
 
     private boolean isValid(int threeByteValue) {
@@ -236,7 +236,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             short ctPoints_x10_Winner) {
         if (boatType == BoatType.Competitor) {
             Competitor competitor = domainFactory.getOrCreateCompetitor(sailNumberOrTrackerID, threeLetterIOCCode.trim(), name.trim(),
-                    getCurrentBoatClass());
+                    currentRaceType);
             Set<Competitor> competitorsOfCurrentRace = competitorsPerRaceID.get(currentRaceID);
             if (competitorsOfCurrentRace == null) {
                 competitorsOfCurrentRace = new HashSet<>();
@@ -314,7 +314,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 currentRaceID, competitorsPerRaceID.get(currentRaceID), currentCourseDefinition);
         racePerRaceID.put(currentRaceID, race);
         DynamicTrackedRace trackedRace = trackedRegattaRegistry.getOrCreateTrackedRegatta(myRegatta).
-                createTrackedRace(race, EmptyWindStore.INSTANCE, TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS,
+                createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS,
                         WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
                         /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                         /* raceDefinitionSetToUpdate */ null);

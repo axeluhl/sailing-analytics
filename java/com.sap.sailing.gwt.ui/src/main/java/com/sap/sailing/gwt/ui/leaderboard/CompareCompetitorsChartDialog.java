@@ -31,10 +31,10 @@ import com.sap.sailing.gwt.ui.client.TimeRangeChangeListener;
 import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomModel;
 import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomProvider;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiChartPanel;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiChartSettings;
+import com.sap.sailing.gwt.ui.client.shared.components.ComponentToolbar;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
-import com.sap.sailing.gwt.ui.shared.charts.MultiChartPanel;
-import com.sap.sailing.gwt.ui.shared.charts.MultiChartSettings;
-import com.sap.sailing.gwt.ui.shared.components.ComponentToolbar;
 
 /**
  * A dialog box that holds a {@link MultiChartPanel} for comparing a list of preselected competitors.
@@ -152,9 +152,10 @@ public class CompareCompetitorsChartDialog extends DialogBoxExt implements RaceT
     }
     
     @Override
-    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos, long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
+        timer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         RegattaAndRaceIdentifier selectedRace = getSelectedRace();
-        if(selectedRace != null) {
+        if (selectedRace != null) {
             updateMinMax(raceTimesInfos.get(selectedRace));
         }
     }

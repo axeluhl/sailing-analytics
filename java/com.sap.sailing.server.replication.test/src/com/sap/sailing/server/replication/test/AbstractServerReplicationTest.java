@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintWriter;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -25,9 +26,9 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
-import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
+import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.server.replication.impl.ReplicationInstancesManager;
 import com.sap.sailing.server.replication.impl.ReplicationMasterDescriptorImpl;
 import com.sap.sailing.server.replication.impl.ReplicationServiceImpl;
@@ -38,8 +39,10 @@ public abstract class AbstractServerReplicationTest {
     private DomainFactory resolveAgainst;
     protected RacingEventServiceImpl replica;
     protected RacingEventServiceImpl master;
+    protected ReplicationServiceTestImpl replicaReplicator;
     private ReplicaDescriptor replicaDescriptor;
     private ReplicationServiceImpl masterReplicator;
+    private ReplicationMasterDescriptor  masterDescriptor;
     
     /**
      * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.
@@ -52,8 +55,8 @@ public abstract class AbstractServerReplicationTest {
             /* replica=null means create a new one */null);
             result.getA().startToReplicateFrom(result.getB());
         } catch (Exception e) {
-            e.printStackTrace();
             tearDown();
+            throw e;
         }
     }
 
@@ -70,6 +73,8 @@ public abstract class AbstractServerReplicationTest {
     protected Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> basicSetUp(
             boolean dropDB, RacingEventServiceImpl master, RacingEventServiceImpl replica) throws IOException, InterruptedException {
         final String exchangeName = "test-sapsailinganalytics-exchange";
+        final String exchangeHost = "localhost";
+        final UUID serverUuid = UUID.randomUUID();
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
         if (dropDB) {
             mongoDBService.getDB().dropDatabase();
@@ -86,24 +91,37 @@ public abstract class AbstractServerReplicationTest {
             this.replica = new RacingEventServiceImpl(mongoDBService);
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
-        masterReplicator = new ReplicationServiceImpl(exchangeName, rim, this.master);
-        replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost());
+        masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, rim, this.master);
+        replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost(), serverUuid, "");
         masterReplicator.registerReplica(replicaDescriptor);
-        ReplicationMasterDescriptor masterDescriptor = new ReplicationMasterDescriptorImpl("localhost", exchangeName, SERVLET_PORT, 0);
-        ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(exchangeName, resolveAgainst, rim,
+        masterDescriptor = new ReplicationMasterDescriptorImpl("localhost", exchangeName, SERVLET_PORT, 0, UUID.randomUUID().toString());
+        ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(exchangeName, exchangeHost, resolveAgainst, rim,
                 replicaDescriptor, this.replica, this.master, masterReplicator, masterDescriptor);
         Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
         replicaReplicator.startInitialLoadTransmissionServlet();
+        this.replicaReplicator = replicaReplicator; 
         return result;
     }
     
     @After
     public void tearDown() throws Exception {
         masterReplicator.unregisterReplica(replicaDescriptor);
-        URLConnection urlConnection = new URL("http://localhost:"+SERVLET_PORT+"/STOP").openConnection(); // stop the initial load test server thread
-        urlConnection.getInputStream().close();
+        masterDescriptor.stopConnection();
+        try {
+            URLConnection urlConnection = new URL("http://localhost:"+SERVLET_PORT+"/STOP").openConnection(); // stop the initial load test server thread
+            urlConnection.getInputStream().close();
+        } catch (ConnectException ex) {
+            /* do not make tests fail because of a server that has been shut down
+             * or when an exception occured (see setUp()) - let the
+             * original exception propagate */
+            ex.printStackTrace();
+        }
     }
-
+    
+    public void stopReplicatingToMaster() throws IOException {
+        replicaReplicator.stopToReplicateFromMaster();
+    }
+    
     static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
         private final DomainFactory resolveAgainst;
         private final RacingEventService master;
@@ -111,12 +129,12 @@ public abstract class AbstractServerReplicationTest {
         private final ReplicationService masterReplicationService;
         private final ReplicationMasterDescriptor masterDescriptor;
         
-        public ReplicationServiceTestImpl(String exchangeName, DomainFactory resolveAgainst,
+        public ReplicationServiceTestImpl(String exchangeName, String exchangeHost, DomainFactory resolveAgainst,
                 ReplicationInstancesManager replicationInstancesManager, ReplicaDescriptor replicaDescriptor,
                 RacingEventService replica, RacingEventService master, ReplicationService masterReplicationService,
                 ReplicationMasterDescriptor masterDescriptor)
                 throws IOException {
-            super(exchangeName, replicationInstancesManager, replica);
+            super(exchangeName, exchangeHost, replicationInstancesManager, replica);
             this.resolveAgainst = resolveAgainst;
             this.replicaDescriptor = replicaDescriptor;
             this.master = master;
@@ -144,7 +162,12 @@ public abstract class AbstractServerReplicationTest {
                             pw.println("Content-Type: text/plain");
                             pw.println();
                             pw.flush();
-                            if (request.contains("REGISTER")) {
+                            if (request.contains("DEREGISTER")) {
+                                // assuming that it is safe to unregister all replicas for tests
+                                for (ReplicaDescriptor descriptor : getReplicaInfo()) {
+                                    unregisterReplica(descriptor);
+                                }
+                            } else if (request.contains("REGISTER")) {
                                 final String uuid = UUID.randomUUID().toString();
                                 registerReplicaUuidForMaster(uuid, masterDescriptor);
                                 pw.print(uuid.getBytes());

@@ -5,17 +5,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.moxieapps.gwt.highcharts.client.Point;
+import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEventHandler;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
 import com.sap.sailing.domain.common.PolarSheetsData;
@@ -31,12 +38,11 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeListener, RegattaDisplayer {
+public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionChangeListener, RegattaDisplayer {
 
     // TODO UI stuff
     public static final String POLARSHEETS_STYLE = "polarSheets";
 
-    private FlowPanel mainPanel;
     private SailingServiceAsync sailingService;
     private PolarSheetsTrackedRacesList polarSheetsTrackedRacesList;
     private ErrorReporter errorReporter;
@@ -56,6 +62,10 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
     private Map<String,String> idNameMapping;
     private Map<String,String> nameIdMapping;
 
+    private ListBox nameListBox;
+
+    private ScrollPanel leftScrollPanel;
+
     public PolarSheetsPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages, PolarSheetsEntryPoint polarSheetsEntryPoint) {
         this.polarSheetsEntryPoint = polarSheetsEntryPoint;
@@ -65,28 +75,113 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         
         idNameMapping = new HashMap<String, String>();
         nameIdMapping = new HashMap<String, String>();
-
-        this.mainPanel = new FlowPanel();
         setSize("100%", "100%");
 
-        mainPanel.setSize("100%", "100%");
-        setWidget(mainPanel);
-        HorizontalPanel splitPanel = createSplitPanel();
-        VerticalPanel leftPanel = addFilteredTrackedRacesList(splitPanel);
+        VerticalPanel leftPanel = addFilteredTrackedRacesList();
+        leftScrollPanel = new ScrollPanel(leftPanel);
+        addWest(leftScrollPanel, 400);
         polarSheetsGenerationLabel = createPolarSheetGenerationStatusLabel();
         leftPanel.add(polarSheetsGenerationLabel);
         dataCountLabel = new Label();
         leftPanel.add(dataCountLabel);
-        VerticalPanel rightPanel = addPolarSheetsChartPanel(splitPanel);
+        DockLayoutPanel rightPanel = new DockLayoutPanel(Unit.PCT);
+        PolarSheetsChartPanel polarSheetsChartPanel = createPolarSheetsChartPanel();
+        rightPanel.addNorth(polarSheetsChartPanel, 70);
         histogramPanel = new PolarSheetsHistogramPanel(stringMessages);
         histogramPanel.getElement().setAttribute("align", "top");
-        rightPanel.add(histogramPanel);
-        mainPanel.add(splitPanel);
+        rightPanel.addSouth(histogramPanel, 30);
+        nameListBox = new ListBox();
+        leftPanel.add(nameListBox);
+        Button exportButton = new Button("Export");
+        setExportButtonListener(exportButton);
+        leftPanel.add(exportButton);
+        add(rightPanel);
 
         asyncActionsExecutor = new AsyncActionsExecutor();
         setEventListenersForPolarSheetChart();
     }
 
+    private void setExportButtonListener(Button exportButton) {
+        ClickHandler handler = new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                String name = nameListBox.getItemText(nameListBox.getSelectedIndex());
+                if (name!=null && !name.isEmpty()) {
+                    StringBuffer exportData = new StringBuffer();
+                    exportData.append(name + "\n");
+                    Series[] seriesPerWindspeed = chartPanel.getSeriesPerWindspeedForName(name);
+                    for (Series series : seriesPerWindspeed) {
+                        if (series == null) {
+                            continue;
+                        }
+                        String nameOfSeries = chartPanel.getNameForSeries(series);
+                        String[] split = nameOfSeries.split("-");
+                        int windSpeed = Integer.parseInt(split[2]);
+                        Point[] points = series.getPoints();
+                        if (windSpeed == 4) {
+                            int[] degs = {0,50,60,110,130,180};
+                            exportData.append("4 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 6) {
+                            int[] degs = {0,47,60,110,135,180};
+                            exportData.append("6 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 8) {
+                            int[] degs = {0,43,60,110,135,180};
+                            exportData.append("8 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 10) {
+                            int[] degs = {0,41,60,110,140,180};
+                            exportData.append("10 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 12) {
+                            int[] degs = {0,40,60,110,145,180};
+                            exportData.append("12 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 14) {
+                            int[] degs = {0,39,60,110,155,180};
+                            exportData.append("14 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 16) {
+                            int[] degs = {0,38,60,110,155,180};
+                            exportData.append("16 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 20) {
+                            int[] degs = {0,38,60,110,160,180};
+                            exportData.append("20 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 25) {
+                            int[] degs = {0,39,60,110,168,180};
+                            exportData.append("25 " + createStringForDegrees(points, degs) + "\n");
+                        } else if (windSpeed == 30) {
+                            int[] degs = {0,41,60,110,157,180};
+                            exportData.append("30 " + createStringForDegrees(points, degs) + "\n");
+                        }
+                        
+                    }
+                    
+                    Window.alert(exportData.toString());
+                }
+                
+            }
+        };
+        
+        exportButton.addClickHandler(handler);
+        
+    }
+
+    private String createStringForDegrees(Point[] points, int[] degrees) {
+        StringBuffer buffer = new StringBuffer();
+        for (int i = 0; i < degrees.length; i++) {
+            int deg = degrees[i];
+            double average;
+            if (deg > 0 && deg < 180) {
+                double windRight = points[deg].getY().doubleValue();
+                double windLeft = points[360 - deg].getY().doubleValue();
+                average = (windRight + windLeft) / 2;
+            } else {
+                average = points[deg].getY().doubleValue();
+            }
+            NumberFormat fmt = NumberFormat.getDecimalFormat();
+            fmt.overrideFractionDigits(2);
+            buffer.append(deg + " " + fmt.format(average) + " ");
+        }
+        return buffer.toString();
+    }
+    
     private void setEventListenersForPolarSheetChart() {
         PointMouseOverEventHandler pointMouseOverHandler = new PointMouseOverEventHandler() {
 
@@ -127,32 +222,17 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         return polarSheetsGenerationStatusLabel;
     }
 
-    private VerticalPanel addPolarSheetsChartPanel(HorizontalPanel splitPanel) {
-        VerticalPanel verticalPanel = new VerticalPanel();
-        verticalPanel.setSize("100%", "100%");
+    private PolarSheetsChartPanel createPolarSheetsChartPanel() {
         chartPanel = new PolarSheetsChartPanel(stringMessages);
-        verticalPanel.add(chartPanel);
-        verticalPanel.setCellHeight(chartPanel, "800px");
-        splitPanel.add(verticalPanel);
-        splitPanel.setCellWidth(verticalPanel, "50%");
-        return verticalPanel;
+        return chartPanel;
     }
 
-    private HorizontalPanel createSplitPanel() {
-        HorizontalPanel splitPanel = new HorizontalPanel();
-        splitPanel.setSize("100%", "100%");
-        return splitPanel;
-    }
-
-    private VerticalPanel addFilteredTrackedRacesList(HorizontalPanel splitPanel) {
+    private VerticalPanel addFilteredTrackedRacesList() {
         VerticalPanel trackedRacesPanel = new VerticalPanel();
         trackedRacesPanel.setWidth("100%");
 
         createPolarSheetsTrackedRacesList();
         trackedRacesPanel.add(polarSheetsTrackedRacesList);
-
-        splitPanel.add(trackedRacesPanel);
-        splitPanel.setCellWidth(trackedRacesPanel, "50%");
         return trackedRacesPanel;
     }
 
@@ -201,6 +281,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
             index++;
             name = boatClassName + "-" + index;
         } while (nameIdMapping.containsKey(name));
+        nameListBox.addItem(name);
         idNameMapping.put(result.getId(), name);
         nameIdMapping.put(name, result.getId());
     }
@@ -256,4 +337,26 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         polarSheetsTrackedRacesList.fillRegattas(regattas);
     }
 
+    
+    @Override
+    protected void onLoad() {
+        Timer timer = new Timer() {
+            
+            @Override
+            public void run() {
+                setWidgetSize(leftScrollPanel, polarSheetsTrackedRacesList.getOffsetWidth() + 30);
+                Timer timer = new Timer() {
+                    
+                    @Override
+                    public void run() {
+                        chartPanel.onResize();
+                        histogramPanel.onResize();
+                    }
+                };
+                timer.schedule(200);
+            }
+        };
+        timer.schedule(600);
+        super.onLoad();
+    }
 }

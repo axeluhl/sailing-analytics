@@ -12,7 +12,7 @@ import com.sap.sailing.domain.common.WithID;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface Event extends Named, Renamable, WithID, EventData {
+public interface Event extends Named, Renamable, WithID, EventBase {
     Iterable<Regatta> getRegattas();
     
     void addRegatta(Regatta regatta);

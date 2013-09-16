@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.base;
 
-import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -27,7 +25,7 @@ import difflib.PatchFailedException;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Course extends CourseData {
+public interface Course extends CourseBase {
     void lockForRead();
 
     void unlockAfterRead();
@@ -42,5 +40,5 @@ public interface Course extends CourseData {
      * to the registered {@link CourseListener}s as if {@link #addWaypoint(int, Waypoint)} and {@link #removeWaypoint(int)}
      * had been used.
      */
-    void update(List<Pair<ControlPoint, NauticalSide>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
+    void update(Iterable<Pair<ControlPoint, NauticalSide>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
 }

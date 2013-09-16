@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
@@ -33,6 +34,8 @@ public interface RaceColumn extends Named {
      * @param information
      */
     void setRaceLogInformation(RaceLogInformation information);
+    
+    RaceLogInformation getRaceLogInformation();
     
     /**
      * Gets the race column's race log associated to the passed fleet.
@@ -111,6 +114,8 @@ public interface RaceColumn extends Named {
      * 
      * @param fleet
      *            the fleet for which to associate a race by its identifier
+     * @param raceIdentifier
+     *            the race that should be associated with this column+fleet. It should never be null.
      */
     void setRaceIdentifier(Fleet fleet, RaceIdentifier raceIdentifier);
     
@@ -132,7 +137,7 @@ public interface RaceColumn extends Named {
 
     /**
      * Releases the {@link TrackedRace} previously set by {@link #setTrackedRace(Fleet, TrackedRace)} but leaves the
-     * {@link #getRaceIdentifier(Fleet) race identifier} untouched. Therefore, the {@link TrackedRace} may be garbage
+     * {@link #getRaceIdentifier(Fleet) race identifier} untouched(!). Therefore, the {@link TrackedRace} may be garbage
      * collected but may be re-resolved for this column using the race identifier at a later time.
      * 
      * @param fleet
@@ -149,6 +154,19 @@ public interface RaceColumn extends Named {
     double getFactor();
     
     /**
+     * By default, a competitor's total score is computed by summing up the non-discarded total points of each race
+     * across the leaderboard, considering the {@link RaceColumn#getFactor() column factors}. Some race columns,
+     * however, are defined such that participating competitors start with a zero score from this race column on. If
+     * this method returns <code>true</code>, this column advises the leaderboard and scoring scheme to start counting
+     * the total points at this column with zero.
+     */
+    boolean isStartsWithZeroScore();
+    
+    boolean isDiscardable();
+    
+    boolean isCarryForward();
+
+    /**
      * @param factor if <code>null</code>, {@link #getFactor()} will again compute a default value; otherwise, {@link #getFactor()} will
      * then return the double value of <code>factor</code>.
      */
@@ -158,5 +176,29 @@ public interface RaceColumn extends Named {
      * If <code>null</code>, the {@link #getFactor() factor} defaults to 1 for non-medal and {@link #DEFAULT_MEDAL_RACE_FACTOR} for
      * medal races. Otherwise, the explicit factor is used.
      */
-    Double getExplicitFactor();    
+    Double getExplicitFactor();
+
+    /**
+     * Returns the race log identifier associated with this fleet and race log
+     * @param fleet
+     * @return
+     */
+    RaceLogIdentifier getRaceLogIdentifier(Fleet fleet);
+
+    /**
+     * Sets (or reloads) {@link RaceLog} for this column with the given fleet
+     * 
+     * @param raceLogInformation
+     * @param fleetImpl
+     */
+    void setOrReloadRaceLogInformation(RaceLogInformation raceLogInformation, Fleet fleetImpl);
+
+    /**
+     * Remove the association between a race and a column. This is different from
+     * {@link RaceColumn#releaseTrackedRace(Fleet)} because it will also remove the
+     * association from database.
+     * 
+     * @param fleet
+     */
+    void removeRaceIdentifier(Fleet fleet);    
 }

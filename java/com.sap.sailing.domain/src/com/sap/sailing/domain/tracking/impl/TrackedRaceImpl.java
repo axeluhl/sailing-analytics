@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -32,33 +33,36 @@ import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -70,6 +74,7 @@ import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.confidence.impl.HyperbolicTimeDifferenceWeigher;
 import com.sap.sailing.domain.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -85,12 +90,12 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.util.SmartFutureCache;
+import com.sap.sailing.util.SmartFutureCache.AbstractCacheUpdater;
+import com.sap.sailing.util.SmartFutureCache.EmptyUpdateInterval;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
-import com.sap.sailing.util.impl.SmartFutureCache;
-import com.sap.sailing.util.impl.SmartFutureCache.AbstractCacheUpdater;
-import com.sap.sailing.util.impl.SmartFutureCache.EmptyUpdateInterval;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final long serialVersionUID = -4825546964220003507L;
@@ -205,6 +210,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private transient Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
     private final ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
+    
+    private final Map<String, Sideline> courseSidelines;
 
     protected long millisecondsOverWhichToAverageSpeed;
 
@@ -219,10 +226,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private transient CombinedWindTrackImpl combinedWindTrack;
 
-    private transient RaceLog attachedRaceLog;
+    protected transient HashMap<Serializable, RaceLog> attachedRaceLogs;
 
     /**
-     * The time delay to the current point in time in milliseconds.  
+     * The time delay to the current point in time in milliseconds.
      */
     private long delayToLiveInMillis;
 
@@ -242,22 +249,24 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * <em>read</em> lock (note that this may be confusing at first, but we'd like to support many concurrent writers;
      * they each perform their own locking on the individual data structures they write; we only want to lock out a
      * single serialization call which with this lock is represented as the "writer"). The serialization method
-     * {@link #writeObject(ObjectOutputStream)} obtains the <em>write</em> lock. Deadlocks are avoided because the serialization,
-     * once it obtains this write lock, it keeps serializing and releases the write lock when it's done, without doing any further
-     * synchronization or locking.
+     * {@link #writeObject(ObjectOutputStream)} obtains the <em>write</em> lock. Deadlocks are avoided because the
+     * serialization, once it obtains this write lock, it keeps serializing and releases the write lock when it's done,
+     * without doing any further synchronization or locking.
      */
     private final NamedReentrantReadWriteLock serializationLock;
 
     private final Map<Iterable<MarkPassing>, NamedReentrantReadWriteLock> locksForMarkPassings;
 
-    public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final WindStore windStore, 
-            long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            long delayForWindEstimationCacheInvalidation) {
+    public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines, final WindStore windStore,
+            long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
+            long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation) {
         super();
         locksForMarkPassings = new IdentityHashMap<>();
+        attachedRaceLogs = new HashMap<>();
         this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
         this.statusNotifier = new Object[0];
-        this.serializationLock = new NamedReentrantReadWriteLock("Serialization lock for tracked race "+race.getName(), /* fair */ true);
+        this.serializationLock = new NamedReentrantReadWriteLock("Serialization lock for tracked race "
+                + race.getName(), /* fair */true);
         this.cacheInvalidationTimerLock = new Object();
         this.updateCount = 0;
         this.race = race;
@@ -266,7 +275,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
-        this.delayToLiveInMillis = delayToLiveInMillis; 
+        this.delayToLiveInMillis = delayToLiveInMillis;
         this.startToNextMarkCacheInvalidationListeners = new ConcurrentHashMap<Mark, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
         this.maneuverCache = createManeuverCache();
         this.markTracks = new ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>>();
@@ -283,6 +292,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
             i++;
         }
+        courseSidelines = new LinkedHashMap<String, Sideline>();
+        for (Sideline sideline : sidelines) {
+            courseSidelines.put(sideline.getName(), sideline);
+            for (Mark mark : sideline.getMarks()) {
+                getOrCreateTrack(mark);
+            }
+        }
+        
         trackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
         race.getCourse().lockForRead();
         try {
@@ -308,7 +325,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
         windTracks = new ConcurrentHashMap<WindSource, WindTrack>();
-        new Thread("Wind loader for tracked race "+getRace().getName()) {
+        new Thread("Wind loader for tracked race " + getRace().getName()) {
             @Override
             public void run() {
                 // When this tracked race is to be serialized, wait for the loading of the wind tracks to complete.
@@ -318,9 +335,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 try {
                     final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
                             trackedRegatta, TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
-                    synchronized (windTracks) {
-                        windTracks.putAll(loadedWindTracks);
-                    }
+                    windTracks.putAll(loadedWindTracks);
                 } finally {
                     LockUtil.unlockAfterRead(serializationLock);
                     synchronized (TrackedRaceImpl.this) {
@@ -331,18 +346,21 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
         }.start();
         // by default, a tracked race offers one course-based wind estimation and one track-based wind estimation track;
-        // other wind tracks may be added as fixes are received for them and as they are loaded from the persistent store
+        // other wind tracks may be added as fixes are received for them and as they are loaded from the persistent
+        // store
         WindSource courseBasedWindSource = new WindSourceImpl(WindSourceType.COURSE_BASED);
-        windTracks.put(courseBasedWindSource, getOrCreateWindTrack(courseBasedWindSource, delayForWindEstimationCacheInvalidation));
+        windTracks.put(courseBasedWindSource,
+                getOrCreateWindTrack(courseBasedWindSource, delayForWindEstimationCacheInvalidation));
         WindSource trackBasedWindSource = new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION);
-        windTracks.put(trackBasedWindSource, getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
+        windTracks.put(trackBasedWindSource,
+                getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
         this.trackedRegatta = trackedRegatta;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
         competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
     }
 
     /**
-     * Object serialization obtains a read lock for the course so that in cannot change while serializing this object. 
+     * Object serialization obtains a read lock for the course so that in cannot change while serializing this object.
      */
     private void writeObject(ObjectOutputStream s) throws IOException {
         LockUtil.lockForWrite(serializationLock);
@@ -360,6 +378,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
+        attachedRaceLogs = new HashMap<>();
         markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
         cacheInvalidationTimerLock = new Object();
         windStore = EmptyWindStore.INSTANCE;
@@ -385,7 +404,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                             EmptyUpdateInterval updateInterval) throws NoWindException {
                         return computeManeuvers(competitor);
                     }
-                }, /* nameForLocks */ "Maneuver cache for race "+getRace().getName());
+                }, /* nameForLocks */"Maneuver cache for race " + getRace().getName());
     }
 
     /**
@@ -446,11 +465,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return endOfTrackingReceived;
     }
 
-    protected void invalidateStartTime() {
+    public void invalidateStartTime() {
         startTime = null;
     }
 
-    protected void invalidateEndTime() {
+    public void invalidateEndTime() {
         endTime = null;
     }
 
@@ -461,35 +480,46 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     /**
-     * Calculates the start time of the race from various sources
+     * Calculates the start time of the race from various sources. The highest precedence take the {@link #attachedRaceLogs race logs},
+     * followed by the field {@link #startTimeReceived} which can explicitly be set using {@link #setStartTimeReceived(TimePoint)}.
+     * If that does not provide any start time either, a start time is attempted to be inferred from the time points
+     * of the start mark passing events.
      */
     @Override
     public TimePoint getStartOfRace() {
         if (startTime == null) {
-            startTime = startTimeReceived;
-            // If not null, check if the first mark passing for the start line is too much after the startTimeReceived;
-            // if so, return an adjusted, later start time.
-            // If no official start time was received, try to estimate the start time using the mark passings for the
-            // start line.
-            final Waypoint firstWaypoint = getRace().getCourse().getFirstWaypoint();
-            if (firstWaypoint != null) {
-                if (startTimeReceived != null) {
-                    TimePoint timeOfFirstMarkPassing = getFirstPassingTime(firstWaypoint);
-                    if (timeOfFirstMarkPassing != null) {
-                        long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassing.asMillis()
-                                - startTimeReceived.asMillis();
-                        if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
-                            startTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
-                                    - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
-                        } else {
-                            startTime = startTimeReceived;
+            for (RaceLog raceLog : attachedRaceLogs.values()) {
+                startTime = new StartTimeFinder(raceLog).analyze();
+                if (startTime != null) {
+                    break;
+                }
+            }
+            if (startTime == null) {
+                startTime = getStartTimeReceived();
+                // If not null, check if the first mark passing for the start line is too much after the
+                // startTimeReceived; if so, return an adjusted, later start time.
+                // If no official start time was received, try to estimate the start time using the mark passings for
+                // the start line.
+                final Waypoint firstWaypoint = getRace().getCourse().getFirstWaypoint();
+                if (firstWaypoint != null) {
+                    if (startTimeReceived != null) {
+                        TimePoint timeOfFirstMarkPassing = getFirstPassingTime(firstWaypoint);
+                        if (timeOfFirstMarkPassing != null) {
+                            long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassing.asMillis()
+                                    - startTimeReceived.asMillis();
+                            if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
+                                startTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
+                                        - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
+                            } else {
+                                startTime = startTimeReceived;
+                            }
                         }
-                    }
-                } else {
-                    final NavigableSet<MarkPassing> markPassingsForFirstWaypointInOrder = getMarkPassingsInOrderAsNavigableSet(firstWaypoint);
-                    if (markPassingsForFirstWaypointInOrder != null) {
-                        startTime = calculateStartOfRaceFromMarkPassings(markPassingsForFirstWaypointInOrder, getRace()
-                                .getCompetitors());
+                    } else {
+                        final NavigableSet<MarkPassing> markPassingsForFirstWaypointInOrder = getMarkPassingsInOrderAsNavigableSet(firstWaypoint);
+                        if (markPassingsForFirstWaypointInOrder != null) {
+                            startTime = calculateStartOfRaceFromMarkPassings(markPassingsForFirstWaypointInOrder,
+                                    getRace().getCompetitors());
+                        }
                     }
                 }
             }
@@ -611,6 +641,46 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public boolean hasStarted(TimePoint at) {
         return getStartOfRace() != null && getStartOfRace().compareTo(at) <= 0;
     }
+    
+    @Override
+    public boolean isLive(TimePoint at) {
+        final Date startOfLivePeriod;
+        final Date endOfLivePeriod;
+        if (!hasGPSData() || !hasWindData()) {
+            startOfLivePeriod = null;
+            endOfLivePeriod = null;
+        } else {
+            if (getStartOfRace() == null) {
+                startOfLivePeriod = getStartOfTracking().asDate();
+            } else {
+                startOfLivePeriod = new Date(getStartOfRace().asMillis() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS);
+            }
+            if (getEndOfRace() == null) {
+                if (getTimePointOfNewestEvent() != null) {
+                    endOfLivePeriod = new Date(getTimePointOfNewestEvent().asMillis()
+                            + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+                } else {
+                    endOfLivePeriod = null;
+                }
+            } else {
+                endOfLivePeriod = new Date(getEndOfRace().asMillis() + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+            }
+        }
+    
+        // if an empty timepoint is given then take the start of the race
+        if (at == null) {
+            at = new MillisecondsTimePoint(startOfLivePeriod.getTime()+1);
+        }
+        
+        // whenLastTrackedRaceWasLive is null if there is no tracked race for fleet, or the tracked race hasn't started yet at the server time
+        // when this DTO was assembled, or there were no GPS or wind data
+        final boolean result =
+                startOfLivePeriod != null &&
+                endOfLivePeriod != null &&
+                startOfLivePeriod.getTime() <= at.asMillis() &&
+                at.asMillis() <= endOfLivePeriod.getTime();
+        return result;
+    }
 
     @Override
     public RaceDefinition getRace() {
@@ -630,51 +700,43 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> getMarkPassingsTimes() {
-        getRace().getCourse().lockForRead(); // ensure the list of waypoints doesn't change while we're updating the markPassingTimes structure
+        getRace().getCourse().lockForRead(); // ensure the list of waypoints doesn't change while we're updating the
+                                             // markPassingTimes structure
         try {
             synchronized (markPassingsTimes) {
                 if (markPassingsTimes.isEmpty()) {
-                    int wayPointNumber = 1;
                     // Remark: sometimes it can happen that a mark passing with a wrong time stamp breaks the right time
                     // order of the waypoint times
                     Date previousLegPassingTime = null;
                     for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
                         TimePoint firstPassingTime = null;
                         TimePoint lastPassingTime = null;
-                        if (wayPointNumber == 1) {
-                            // For the first leg the use of "firstPassingDate" is not correct,
-                            // because boats can pass the start line before the actual start;
-                            // therefore we are using the calculated start time here
-                            firstPassingTime = getStartOfRace();
-                        } else {
-                            NavigableSet<MarkPassing> markPassings = getMarkPassingsInOrderAsNavigableSet(waypoint);
-                            if (markPassings != null && !markPassings.isEmpty()) {
-                                // ensure the leg times are in the right time order; there may perhaps be left-overs for
-                                // marks to be reached later that
-                                // claim it has been passed in the past which may have been an accidental tracker
-                                // read-out;
-                                // the results of getMarkPassingsInOrder(to) has by definition an ascending time-point
-                                // ordering
-                                lockForRead(markPassings);
-                                try {
-                                    for (MarkPassing currentMarkPassing : markPassings) {
-                                        Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
-                                        if (previousLegPassingTime == null
-                                                || currentPassingDate.after(previousLegPassingTime)) {
-                                            firstPassingTime = currentMarkPassing.getTimePoint();
-                                            previousLegPassingTime = currentPassingDate;
-                                            break;
-                                        }
+                        NavigableSet<MarkPassing> markPassings = getMarkPassingsInOrderAsNavigableSet(waypoint);
+                        if (markPassings != null && !markPassings.isEmpty()) {
+                            // ensure the leg times are in the right time order; there may perhaps be left-overs for
+                            // marks to be reached later that
+                            // claim it has been passed in the past which may have been an accidental tracker
+                            // read-out;
+                            // the results of getMarkPassingsInOrder(to) has by definition an ascending time-point
+                            // ordering
+                            lockForRead(markPassings);
+                            try {
+                                for (MarkPassing currentMarkPassing : markPassings) {
+                                    Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
+                                    if (previousLegPassingTime == null
+                                            || currentPassingDate.after(previousLegPassingTime)) {
+                                        firstPassingTime = currentMarkPassing.getTimePoint();
+                                        previousLegPassingTime = currentPassingDate;
+                                        break;
                                     }
-                                } finally {
-                                    unlockAfterRead(markPassings);
                                 }
+                            } finally {
+                                unlockAfterRead(markPassings);
                             }
                         }
                         Pair<TimePoint, TimePoint> timesPair = new Pair<TimePoint, TimePoint>(firstPassingTime,
                                 lastPassingTime);
                         markPassingsTimes.add(new Pair<Waypoint, Pair<TimePoint, TimePoint>>(waypoint, timesPair));
-                        wayPointNumber++;
                     }
                 }
                 return markPassingsTimes;
@@ -744,7 +806,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         NavigableSet<MarkPassing> roundings = getMarkPassings(competitor);
         lockForRead(roundings);
         try {
-            NavigableSet<MarkPassing> localRoundings = new ArrayListNavigableSet<>(roundings.size(), new TimedComparator());
+            NavigableSet<MarkPassing> localRoundings = new ArrayListNavigableSet<>(roundings.size(),
+                    new TimedComparator());
             localRoundings.addAll(roundings);
         } finally {
             unlockAfterRead(roundings);
@@ -856,8 +919,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         synchronized (competitorRankingsLocks) {
             readWriteLock = competitorRankingsLocks.get(timePoint);
             if (readWriteLock == null) {
-                readWriteLock = new NamedReentrantReadWriteLock("competitor rankings for race "+getRace().getName()+
-                        " for time point "+timePoint, /* fair */ false);
+                readWriteLock = new NamedReentrantReadWriteLock("competitor rankings for race " + getRace().getName()
+                        + " for time point " + timePoint, /* fair */false);
                 competitorRankingsLocks.put(timePoint, readWriteLock);
             }
         }
@@ -878,7 +941,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         try {
             if (rankedCompetitors == null) {
-                rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the write lock after updating the cache
+                rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the write
+                                                                       // lock after updating the cache
                 if (rankedCompetitors == null) {
                     RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
                     rankedCompetitors = new ArrayList<Competitor>();
@@ -902,7 +966,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
+    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis)
+            throws NoWindException {
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         TimePoint from = null;
         lockForRead(markPassings);
@@ -915,7 +980,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         Distance result;
         if (from != null) {
-            result = getAverageCrossTrackError(competitor, from, timePoint, /* upwindOnly */ true, waitForLatestAnalysis);
+            result = getAverageCrossTrackError(competitor, from, timePoint, /* upwindOnly */true, waitForLatestAnalysis);
         } else {
             result = null;
         }
@@ -923,10 +988,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalysis)
-            throws NoWindException {
+    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
+            boolean waitForLatestAnalysis) throws NoWindException {
         Distance result;
-        result = crossTrackErrorCache.getAverageCrossTrackError(competitor, from, to, upwindOnly, waitForLatestAnalysis);
+        result = crossTrackErrorCache
+                .getAverageCrossTrackError(competitor, from, to, upwindOnly, waitForLatestAnalysis);
         return result;
     }
 
@@ -997,11 +1063,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     /**
-     * This method was a synchronization bottleneck when it was using a regular HashMap for {@link #markTracks}.
-     * It is frequently used, and the most frequent case is that the <code>get</code> call on {@link #markTracks}
-     * succeeds with a non-<code>null</code> result. To improve performance for this case, {@link #markTracks} now is
-     * a {@link ConcurrentHashMap} that can be read while writes are going on without locking or synchronization.
-     * Only if the <code>get</code> call does not provide a result, the entire procedure is repeated, this time with
+     * This method was a synchronization bottleneck when it was using a regular HashMap for {@link #markTracks}. It is
+     * frequently used, and the most frequent case is that the <code>get</code> call on {@link #markTracks} succeeds
+     * with a non-<code>null</code> result. To improve performance for this case, {@link #markTracks} now is a
+     * {@link ConcurrentHashMap} that can be read while writes are going on without locking or synchronization. Only if
+     * the <code>get</code> call does not provide a result, the entire procedure is repeated, this time with
      * synchronization to avoid duplicate track creation for the same mark.
      */
     @Override
@@ -1049,26 +1115,28 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * which will not be added to {@link #windTracks} and will not lead to the wind source being listed in
      * {@link #getWindSources()} or {@link #getWindSources(WindSourceType)}. For all other wind sources, checks
      * {@link #windTracks} for the respective source. If found, it's returned; otherwise the wind track is created
-     * through the {@link #windStore} using {@link #createWindTrack(WindSource, long)} and added to {@link #windTracks} before
-     * being returned.
+     * through the {@link #windStore} using {@link #createWindTrack(WindSource, long)} and added to {@link #windTracks}
+     * before being returned.
      * 
-     * @param delayForWindEstimationCacheInvalidation if <code>-1</code> and the parameter is accessed, it will be
-     * replaced by {@link #getMillisecondsOverWhichToAverageWind()}/2
+     * @param delayForWindEstimationCacheInvalidation
+     *            if <code>-1</code> and the parameter is accessed, it will be replaced by
+     *            {@link #getMillisecondsOverWhichToAverageWind()}/2
      */
     @Override
     public WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
         WindTrack result;
         if (windSource.getType() == WindSourceType.COMBINED) {
             if (combinedWindTrack == null) {
-                combinedWindTrack = new CombinedWindTrackImpl(this, WindSourceType.COMBINED.getBaseConfidence());;
+                combinedWindTrack = new CombinedWindTrackImpl(this, WindSourceType.COMBINED.getBaseConfidence());
             }
             result = combinedWindTrack;
         } else {
             synchronized (windTracks) {
                 result = windTracks.get(windSource);
                 if (result == null) {
-                    result = createWindTrack(windSource, delayForWindEstimationCacheInvalidation == -1 ?
-                            getMillisecondsOverWhichToAverageWind()/2 : delayForWindEstimationCacheInvalidation);
+                    result = createWindTrack(windSource,
+                            delayForWindEstimationCacheInvalidation == -1 ? getMillisecondsOverWhichToAverageWind() / 2
+                                    : delayForWindEstimationCacheInvalidation);
                     LockUtil.lockForRead(serializationLock);
                     try {
                         windTracks.put(windSource, result);
@@ -1103,11 +1171,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         Course course = getRace().getCourse();
         Waypoint firstWaypoint = course.getFirstWaypoint();
         TimePoint timepoint = startTime != null ? startTime : startOfTrackingReceived;
-        if(firstWaypoint != null && timepoint != null) {
+        if (firstWaypoint != null && timepoint != null) {
             Position position = getApproximatePosition(firstWaypoint, timepoint);
-            if(position != null) {
+            if (position != null) {
                 Wind wind = getWind(position, timepoint);
-                if(wind != null) {
+                if (wind != null) {
                     result = true;
                 }
             }
@@ -1155,6 +1223,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
+        Set<WindSource> old = new HashSet<>(this.windSourcesToExclude);
         synchronized (this.windSourcesToExclude) {
             LockUtil.lockForRead(serializationLock);
             try {
@@ -1166,6 +1235,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 LockUtil.unlockAfterRead(serializationLock);
             }
         }
+        if (!old.equals(this.windSourcesToExclude)) {
+            clearAllCachesExceptManeuvers();
+            triggerManeuverCacheRecalculationForAllCompetitors();
+        }
     }
 
     @Override
@@ -1173,7 +1246,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             Iterable<WindSource> windSourcesToExclude) {
         boolean canUseSpeedOfAtLeastOneWindSource = false;
         Weigher<Pair<Position, TimePoint>> timeWeigherThatPretendsToAlsoWeighPositions = new PositionAndTimePointWeigher(
-                /* halfConfidenceAfterMilliseconds */10000l);
+        /* halfConfidenceAfterMilliseconds */10000l);
         ConfidenceBasedWindAverager<Pair<Position, TimePoint>> averager = ConfidenceFactory.INSTANCE
                 .createWindAverager(timeWeigherThatPretendsToAlsoWeighPositions);
         List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesWithConfidences = new ArrayList<WindWithConfidence<Pair<Position, TimePoint>>>();
@@ -1181,7 +1254,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             // TODO consider parallelizing and consider caching
             if (!Util.contains(windSourcesToExclude, windSource)) {
                 WindTrack track = getOrCreateWindTrack(windSource);
-                WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = track.getAveragedWindWithConfidence(p, at);
+                WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = track.getAveragedWindWithConfidence(
+                        p, at);
                 if (windWithConfidence != null) {
                     windFixesWithConfidences.add(windWithConfidence);
                     canUseSpeedOfAtLeastOneWindSource = canUseSpeedOfAtLeastOneWindSource
@@ -1282,7 +1356,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
     }
 
-    protected TimePoint getStartTimeReceived() {
+    @Override
+    public TimePoint getStartTimeReceived() {
         return startTimeReceived;
     }
 
@@ -1451,7 +1526,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 toRemove = last;
             }
             if (toRemove != null) {
-                logger.info("Removing tracked leg at zero-based index "+zeroBasedIndex+" from tracked race "+getRace().getName());
+                logger.info("Removing tracked leg at zero-based index " + zeroBasedIndex + " from tracked race "
+                        + getRace().getName());
                 LinkedHashMap<Leg, TrackedLeg> newTrackedLegs = new LinkedHashMap<>();
                 for (Map.Entry<Leg, TrackedLeg> trackedLegsEntry : trackedLegs.entrySet()) {
                     if (trackedLegsEntry.getKey() == toRemove) {
@@ -1463,7 +1539,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 trackedLegs.clear();
                 trackedLegs.putAll(newTrackedLegs);
                 List<Leg> newLegs = getRace().getCourse().getLegs();
-                for (int j=zeroBasedIndex; j<newLegs.size(); j++) {
+                for (int j = zeroBasedIndex; j < newLegs.size(); j++) {
                     trackedLegs.put(newLegs.get(j), createTrackedLeg(newLegs.get(j)));
                 }
                 updated(/* time point */null);
@@ -1492,7 +1568,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         synchronized (locksForMarkPassings) {
             NamedReentrantReadWriteLock lock = locksForMarkPassings.get(markPassings);
             if (lock == null) {
-                lock = new NamedReentrantReadWriteLock("mark passings lock for "+markPassings, /* fair */ false);
+                lock = new NamedReentrantReadWriteLock("mark passings lock for tracked race " + getRace().getName(), /* fair */
+                        false);
                 locksForMarkPassings.put(markPassings, lock);
             }
             return lock;
@@ -1534,7 +1611,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint) {
         DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow = new DummyMarkPassingWithTimePointOnly(timePoint);
         Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
-                // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
+        // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
                 getMillisecondsOverWhichToAverageSpeed(), /* minimum confidence */0.0000000001);
         Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = clusterBearingsByLegType(timePoint, position,
                 dummyMarkPassingForNow, weigher);
@@ -1564,13 +1641,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             if (!bearingClustersDownwind[0].isEmpty() && !bearingClustersDownwind[1].isEmpty()) {
                 BearingWithConfidence<TimePoint> average0 = bearingClustersDownwind[0].getAverage(timePoint);
                 BearingWithConfidence<TimePoint> average1 = bearingClustersDownwind[1].getAverage(timePoint);
-                double downwindConfidence = Math.min(average0.getConfidence(), average1.getConfidence());
                 downwindNumberOfRelevantBoats = Math.min(bearingClustersDownwind[0].size(),
                         bearingClustersDownwind[1].size());
-                confidence = Math.min(confidence, downwindConfidence)
+                confidence = Math.min(average0.getConfidence(), average1.getConfidence())
                         * getRace().getBoatClass().getDownwindWindEstimationConfidence(downwindNumberOfRelevantBoats);
                 downwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject().middle(
-                        average1.getObject()), downwindConfidence, timePoint);
+                        average1.getObject()), confidence, timePoint);
             }
             numberOfBoatsRelevantForEstimate = upwindNumberOfRelevantBoats + downwindNumberOfRelevantBoats;
             BearingWithConfidenceCluster<TimePoint> resultCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
@@ -1586,8 +1662,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         return resultBearing == null ? null : new WindWithConfidenceImpl<TimePoint>(new WindImpl(null, timePoint,
                 new KnotSpeedWithBearingImpl(
-                        /* speedInKnots */numberOfBoatsRelevantForEstimate, resultBearing.getObject())),
-                        resultBearing.getConfidence(), resultBearing.getRelativeTo(), /* useSpeed */false);
+                /* speedInKnots */numberOfBoatsRelevantForEstimate, resultBearing.getObject())),
+                resultBearing.getConfidence(), resultBearing.getRelativeTo(), /* useSpeed */false);
     }
 
     // TODO confidences need to be computed not only based on timePoint but also on position: boats far away don't
@@ -1601,19 +1677,21 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             bearings.put(legType, new BearingWithConfidenceCluster<TimePoint>(weigher));
         }
         Map<TrackedLeg, LegType> legTypesCache = new HashMap<TrackedLeg, LegType>();
-        getRace().getCourse().lockForRead(); // ensure the course doesn't change, particularly lose the leg we're interested in, while we're running
+        getRace().getCourse().lockForRead(); // ensure the course doesn't change, particularly lose the leg we're
+                                             // interested in, while we're running
         try {
             for (Competitor competitor : getRace().getCompetitors()) {
                 TrackedLegOfCompetitor leg;
                 try {
                     leg = getTrackedLeg(competitor, timePoint);
                 } catch (IllegalArgumentException iae) {
-                    logger.warning("Caught "+iae+" during wind estimation; ignoring seemingly broken leg");
-                    logger.throwing(TrackedRaceImpl.class.getName(), "clusterBearingsByLegType", iae);
+                    logger.warning("Caught " + iae + " during wind estimation; ignoring seemingly broken leg");
+                    logger.log(Level.SEVERE, "clusterBearingsByLegType", iae);
                     // supposedly, we got a "Waypoint X isn't start of any leg in Y" exception; leg not found
                     leg = null;
                 }
-                // if bearings was set to null this indicates there was an exception; no need for further calculations, return null
+                // if bearings was set to null this indicates there was an exception; no need for further calculations,
+                // return null
                 if (bearings != null && leg != null) {
                     TrackedLeg trackedLeg = getTrackedLeg(leg.getLeg());
                     LegType legType;
@@ -1660,9 +1738,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                                     BearingWithConfidence<TimePoint> bearing = new BearingWithConfidenceImpl<TimePoint>(
                                             estimatedSpeedWithConfidence.getObject() == null ? null
                                                     : estimatedSpeedWithConfidence.getObject().getBearing(),
-                                                    markPassingProximityConfidenceReduction
+                                            markPassingProximityConfidenceReduction
                                                     * estimatedSpeedWithConfidence.getConfidence(),
-                                                    estimatedSpeedWithConfidence.getRelativeTo());
+                                            estimatedSpeedWithConfidence.getRelativeTo());
                                     BearingWithConfidenceCluster<TimePoint> bearingClusterForLegType = bearings
                                             .get(legType);
                                     bearingClusterForLegType.add(bearing);
@@ -1670,8 +1748,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                             }
                         }
                     } catch (NoWindException e) {
-                        logger.warning("Unable to determine leg type for race " + getRace().getName()
-                                + " while trying to estimate wind");
+                        logger.fine("Unable to determine leg type for race " + getRace().getName()
+                                + " while trying to estimate wind (Background: I've got a NoWindException)");
                         bearings = null;
                     }
                 }
@@ -1703,10 +1781,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * 
      * </pre>
      * 
-     * In this case, the boat's sails will be on the starboard side, so the result has to be {@link Tack#STARBOARD}. The
-     * angle between the boat's heading (which we can only approximate by the boat's bearing) and the wind bearing in
-     * this case is 90 degrees. <code>wind.{@link Bearing#getDifferenceTo(Bearing) getDifferenceTo}(boat)</code> in this
-     * case will return a bearing representing -90 degrees.
+     * In this case, the boat gets the wind from port, so the result has to be {@link Tack#PORT}. The angle between the
+     * boat's heading (which we can only approximate by the boat's course over ground) and the wind bearing in this case
+     * is 90 degrees. <code>wind.{@link Bearing#getDifferenceTo(Bearing) getDifferenceTo}(boat)</code> in this case will
+     * return a bearing representing -90 degrees.
      * <p>
      * 
      * If the wind is blowing the other way, the angle returned by {@link Bearing#getDifferenceTo(Bearing)} will
@@ -1717,7 +1795,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * For the unlikely case of 0 degrees difference, {@link Tack#STARBOARD} will result.
      * 
      * @return <code>null</code> in case the boat's bearing cannot be determined for <code>timePoint</code>
-     * @throws NoWindException 
+     * @throws NoWindException
      */
     @Override
     public Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException {
@@ -1742,12 +1820,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         final Wind wind = getWind(where, timePoint);
         Tack result;
         if (wind == null) {
-            throw new NoWindException("Can't determine wind direction in position "+where+" at "+timePoint+
-                    ", therefore cannot determine tack");
+            throw new NoWindException("Can't determine wind direction in position " + where + " at " + timePoint
+                    + ", therefore cannot determine tack");
         }
         Bearing windBearing = wind.getBearing();
         Bearing difference = windBearing.getDifferenceTo(boatBearing);
-        result = difference.getDegrees() <= 0 ? Tack.STARBOARD : Tack.PORT;
+        result = difference.getDegrees() <= 0 ? Tack.PORT : Tack.STARBOARD;
         return result;
     }
 
@@ -1764,25 +1842,31 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     protected void triggerManeuverCacheRecalculationForAllCompetitors() {
-        for (Competitor competitor : getRace().getCompetitors()) {
+        final List<Competitor> shuffledCompetitors = new ArrayList<>();
+        for (Competitor competitor : (getRace().getCompetitors())) {
+            shuffledCompetitors.add(competitor);
+        }
+        Collections.shuffle(shuffledCompetitors);
+        for (Competitor competitor : shuffledCompetitors) {
             triggerManeuverCacheRecalculation(competitor);
         }
     }
 
     protected void triggerManeuverCacheRecalculation(final Competitor competitor) {
-        if (getStatus().getStatus() != TrackedRaceStatusEnum.LOADING) {
-            maneuverCache.triggerUpdate(competitor, /* updateInterval */ null);
-        }
+        maneuverCache.triggerUpdate(competitor, /* updateInterval */null);
     }
 
     private Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuvers(Competitor competitor) throws NoWindException {
+        logger.fine("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this);
+        long startedAt = System.currentTimeMillis();
         // compute the maneuvers for competitor
         Triple<TimePoint, TimePoint, List<Maneuver>> result = null;
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         boolean markPassingsNotEmpty;
         TimePoint extendedFrom = null;
         MarkPassing crossedFinishLine = null;
-        // getLastWaypoint() will wait for a read lock on the course; do this outside the synchronized block to avoid deadlocks
+        // getLastWaypoint() will wait for a read lock on the course; do this outside the synchronized block to avoid
+        // deadlocks
         final Waypoint lastWaypoint = getRace().getCourse().getLastWaypoint();
         lockForRead(markPassings);
         try {
@@ -1807,13 +1891,29 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }
             }
             if (extendedTo != null) {
-                List<Maneuver> extendedResultForCache = detectManeuvers(
-                        competitor,
-                        approximate(competitor, getRace().getBoatClass().getMaximumDistanceForCourseApproximation(),
-                                extendedFrom, extendedTo));
-                result = new Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom, extendedTo, extendedResultForCache);
+                try {
+                    List<Maneuver> extendedResultForCache = detectManeuvers(
+                            competitor,
+                            approximate(competitor,
+                                    getRace().getBoatClass().getMaximumDistanceForCourseApproximation(), extendedFrom,
+                                    extendedTo));
+                    result = new Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom, extendedTo,
+                            extendedResultForCache);
+                } catch (NoWindException ex) {
+                    // Catching the NoWindException here without letting it propagate thru other handlers.
+                    // This is mainly to avoid having logs flooded with stack traces. It is safe to catch
+                    // it here because we can assume that this exception does not hide any severe problem
+                    // other than that there is no wind. Because maneuvers are mostly computed using a
+                    // future cache and need wind (like getTack) they will often fail before the wind has been
+                    // loaded from database. We can safely return null here because we can be sure that
+                    // cache will be updated when new fixes are fed into the stream therefore leading to a
+                    // recomputation.
+                    logger.fine("NoWindException during computation of maneuvers for " + competitor.getName());
+                }
             } // else competitor has no fixes to consider; remove any maneuver cache entry
         } // else competitor hasn't started yet; remove any maneuver cache entry
+        logger.fine("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this + " took "
+                + (System.currentTimeMillis() - startedAt) + "ms");
         return result;
     }
 
@@ -1858,7 +1958,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         courseChange);
                 if (!courseChangeSequenceInSameDirection.isEmpty()
                         && Math.signum(courseChangeSequenceInSameDirection.get(0).getB().getCourseChangeInDegrees()) != Math
-                        .signum(courseChange.getCourseChangeInDegrees())) {
+                                .signum(courseChange.getCourseChangeInDegrees())) {
                     // course change in different direction; cluster the course changes in same direction so far, then
                     // start new list
                     List<Maneuver> maneuvers = groupChangesInSameDirectionIntoManeuvers(competitor,
@@ -1943,8 +2043,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         List<Pair<GPSFixMoving, CourseChange>> group = new ArrayList<Pair<GPSFixMoving, CourseChange>>();
         if (!courseChangeSequenceInSameDirection.isEmpty()) {
             Distance threeHullLengths = competitor.getBoat().getBoatClass().getHullLength().scale(3);
-            SpeedWithBearing beforeGroupOnApproximation = speedWithBearingOnApproximationAtBeginning; // speed/bearing before group
-            SpeedWithBearing beforeCurrentCourseChangeOnApproximation = beforeGroupOnApproximation; // speed/bearing before current course change
+            SpeedWithBearing beforeGroupOnApproximation = speedWithBearingOnApproximationAtBeginning; // speed/bearing
+                                                                                                      // before group
+            SpeedWithBearing beforeCurrentCourseChangeOnApproximation = beforeGroupOnApproximation; // speed/bearing
+                                                                                                    // before current
+                                                                                                    // course change
             Iterator<Pair<GPSFixMoving, CourseChange>> iter = courseChangeSequenceInSameDirection.iterator();
             double totalCourseChangeInDegrees = 0.0;
             long totalMilliseconds = 0l;
@@ -1954,13 +2057,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 Pair<GPSFixMoving, CourseChange> currentFixAndCourseChange = iter.next();
                 if (!group.isEmpty()
                         // TODO use different maneuver times for upwind / reaching / downwind / cross-leg (mark passing)
-                        // group contains complete maneuver if the next fix is too late or too far away to belong to the same maneuver
-                        // FIXME penalty circles slow down the boat so much that time limit may get exceeded although distance limit is matched
+                        // group contains complete maneuver if the next fix is too late or too far away to belong to the
+                        // same maneuver
+                        // FIXME penalty circles slow down the boat so much that time limit may get exceeded although
+                        // distance limit is matched
                         && currentFixAndCourseChange.getA().getTimePoint().asMillis()
-                        - group.get(group.size() - 1).getA().getTimePoint().asMillis() > getApproximateManeuverDurationInMilliseconds()
+                                - group.get(group.size() - 1).getA().getTimePoint().asMillis() > getApproximateManeuverDurationInMilliseconds()
                         && currentFixAndCourseChange.getA().getPosition()
-                        .getDistance(group.get(group.size() - 1).getA().getPosition())
-                        .compareTo(threeHullLengths) > 0) {
+                                .getDistance(group.get(group.size() - 1).getA().getPosition())
+                                .compareTo(threeHullLengths) > 0) {
                     // if next is more then approximate maneuver duration later or further apart than two hull lengths,
                     // turn the current group into a maneuver and add to result
                     Maneuver maneuver = createManeuverFromGroupOfCourseChanges(competitor, beforeGroupOnApproximation,
@@ -1997,7 +2102,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         MillisecondsTimePoint timePointAfterManeuver = new MillisecondsTimePoint(group.get(group.size() - 1).getA()
                 .getTimePoint().asMillis()
                 + getApproximateManeuverDurationInMilliseconds() / 2);
-        TimePoint maneuverTimePoint = computeManeuverTimepoint(competitor, timePointBeforeManeuver, timePointAfterManeuver);
+        TimePoint maneuverTimePoint = computeManeuverTimepoint(competitor, timePointBeforeManeuver,
+                timePointAfterManeuver);
         Position maneuverPosition = getTrack(competitor)
                 .getEstimatedPosition(maneuverTimePoint, /* extrapolate */false);
         Tack tackBeforeManeuver = getTack(maneuverPosition, timePointBeforeManeuver,
@@ -2010,55 +2116,62 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, timePointBeforeManeuver);
         TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, timePointAfterManeuver);
         Waypoint waypointPassed = null; // set for MARK_PASSING maneuvers only
-        Tack sideToWhichWaypointWasPassed = null; // set for MARK_PASSING maneuvers only
-        // check for mask passing first; a tacking / jibe-setting mark rounding thus takes precedence over being detected as a penalty circle
+        NauticalSide sideToWhichWaypointWasPassed = null; // set for MARK_PASSING maneuvers only
+        // check for mask passing first; a tacking / jibe-setting mark rounding thus takes precedence over being
+        // detected as a penalty circle
         if (legBeforeManeuver != legAfterManeuver
                 // a maneuver at the start line is not to be considered a MARK_PASSING maneuver; show a tack as a tack
                 && legAfterManeuver != null
                 && legAfterManeuver.getLeg().getFrom() != getRace().getCourse().getFirstWaypoint()) {
             maneuverType = ManeuverType.MARK_PASSING;
             waypointPassed = legAfterManeuver.getLeg().getFrom();
-            sideToWhichWaypointWasPassed = totalCourseChangeInDegrees < 0 ? Tack.PORT : Tack.STARBOARD;
+            sideToWhichWaypointWasPassed = totalCourseChangeInDegrees < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
         } else if (Math.abs(totalCourseChangeInDegrees) > PENALTY_CIRCLE_DEGREES_THRESHOLD) {
             maneuverType = ManeuverType.PENALTY_CIRCLE;
             if (legBeforeManeuver != null) {
-                maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, timePointAfterManeuver);
+                maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint,
+                        timePointAfterManeuver);
             }
         } else {
             if (tackBeforeManeuver != tackAfterManeuver) {
                 LegType legType = legBeforeManeuver != null ? getTrackedLeg(legBeforeManeuver.getLeg()).getLegType(
                         timePointBeforeManeuver) : legAfterManeuver != null ? getTrackedLeg(legAfterManeuver.getLeg())
-                                .getLegType(timePointAfterManeuver) : null;
-                                if (legType != null) {
-                                    // tack or jibe
-                                    switch (legType) {
-                                    case UPWIND:
-                                        maneuverType = ManeuverType.TACK;
-                                        if (legBeforeManeuver != null) {
-                                            maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, timePointAfterManeuver);
-                                        }
-                                        break;
-                                    case DOWNWIND:
-                                        maneuverType = ManeuverType.JIBE;
-                                        if (legBeforeManeuver != null) {
-                                            maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, timePointAfterManeuver);
-                                        }
-                                        break;
-                                    default:
-                                        maneuverType = ManeuverType.UNKNOWN;
-                                        if (logger.isLoggable(Level.FINE)) {
-                                            logger.fine("Unknown maneuver for " + competitor + " at " + maneuverTimePoint
-                                                    + (legBeforeManeuver != null ? " on reaching leg " + legBeforeManeuver.getLeg()
-                                                            : " before start"));
-                                        }
-                                        break;
-                                    }
-                                } else {
-                                    maneuverType = ManeuverType.UNKNOWN;
-                                    logger.fine("Can't determine leg type because tracked legs for competitor " + competitor
-                                            + " cannot be determined for time points " + timePointBeforeManeuver + " and "
-                                            + timePointAfterManeuver);
-                                }
+                        .getLegType(timePointAfterManeuver) : null;
+                if (legType != null) {
+                    // tack or jibe
+                    switch (legType) {
+                    case UPWIND:
+                        maneuverType = ManeuverType.TACK;
+                        if (legBeforeManeuver != null) {
+                            maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver,
+                                    maneuverTimePoint, timePointAfterManeuver);
+                        }
+                        break;
+                    case DOWNWIND:
+                        maneuverType = ManeuverType.JIBE;
+                        if (legBeforeManeuver != null) {
+                            maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver,
+                                    maneuverTimePoint, timePointAfterManeuver);
+                        }
+                        break;
+                    default:
+                        maneuverType = ManeuverType.UNKNOWN;
+                        if (logger.isLoggable(Level.FINE)) {
+                            logger.fine("Unknown maneuver for "
+                                    + competitor
+                                    + " at "
+                                    + maneuverTimePoint
+                                    + (legBeforeManeuver != null ? " on reaching leg " + legBeforeManeuver.getLeg()
+                                            : " before start"));
+                        }
+                        break;
+                    }
+                } else {
+                    maneuverType = ManeuverType.UNKNOWN;
+                    logger.fine("Can't determine leg type because tracked legs for competitor " + competitor
+                            + " cannot be determined for time points " + timePointBeforeManeuver + " and "
+                            + timePointAfterManeuver);
+                }
             } else {
                 // heading up or bearing away
                 Wind wind = getWind(maneuverPosition, maneuverTimePoint);
@@ -2073,9 +2186,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         final Maneuver maneuver;
         if (maneuverType == ManeuverType.MARK_PASSING) {
-            maneuver = new MarkPassingManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition, maneuverTimePoint,
-                    speedWithBearingOnApproximationAtBeginning, speedWithBearingOnApproximationAtEnd,
-                    totalCourseChangeInDegrees, maneuverLoss, waypointPassed, sideToWhichWaypointWasPassed);
+            maneuver = new MarkPassingManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition,
+                    maneuverTimePoint, speedWithBearingOnApproximationAtBeginning,
+                    speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss, waypointPassed,
+                    sideToWhichWaypointWasPassed);
         } else {
             maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition, maneuverTimePoint,
                     speedWithBearingOnApproximationAtBeginning, speedWithBearingOnApproximationAtEnd,
@@ -2085,8 +2199,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     /**
-     * Computes the maneuver time point as the time point along between maneuver start and end where the competitor's track has greatest change
-     * in course.
+     * Computes the maneuver time point as the time point along between maneuver start and end where the competitor's
+     * track has greatest change in course.
      */
     private TimePoint computeManeuverTimepoint(Competitor competitor, MillisecondsTimePoint timePointBeforeManeuver,
             MillisecondsTimePoint timePointAfterManeuver) {
@@ -2096,7 +2210,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         double maxAngleSpeedInDegreesPerSecond = 0;
         track.lockForRead();
         try {
-            for (Iterator<GPSFixMoving> i=track.getFixesIterator(timePointBeforeManeuver, /* inclusive */ true); i.hasNext(); ) {
+            for (Iterator<GPSFixMoving> i = track.getFixesIterator(timePointBeforeManeuver, /* inclusive */true); i
+                    .hasNext();) {
                 GPSFixMoving fix = i.next();
                 if (fix.getTimePoint().after(timePointAfterManeuver)) {
                     break;
@@ -2104,8 +2219,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 if (lastFix != null) {
                     Bearing courseAtLastFix = track.getEstimatedSpeed(lastFix.getTimePoint()).getBearing();
                     Bearing courseAtFix = track.getEstimatedSpeed(fix.getTimePoint()).getBearing();
-                    double angleSpeedInDegreesPerSecond = Math.abs((courseAtFix.getDifferenceTo(courseAtLastFix).getDegrees()) /
-                            (double) (fix.getTimePoint().asMillis()-lastFix.getTimePoint().asMillis()));
+                    double angleSpeedInDegreesPerSecond = Math.abs((courseAtFix.getDifferenceTo(courseAtLastFix)
+                            .getDegrees())
+                            / (double) (fix.getTimePoint().asMillis() - lastFix.getTimePoint().asMillis()));
                     if (angleSpeedInDegreesPerSecond > maxAngleSpeedInDegreesPerSecond) {
                         maxAngleSpeedInDegreesPerSecond = angleSpeedInDegreesPerSecond;
                         result = lastFix.getTimePoint();
@@ -2187,9 +2303,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public Iterable<WindSource> getWindSources() {
         while (true) {
             try {
-                synchronized (windTracks) {
-                    return new HashSet<WindSource>(windTracks.keySet());
-                }
+                return new HashSet<WindSource>(windTracks.keySet());
             } catch (ConcurrentModificationException cme) {
                 logger.info("Caught " + cme + "; trying again.");
             }
@@ -2208,12 +2322,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
+    public Iterable<Sideline> getCourseSidelines() {
+        return new ArrayList<Sideline>(courseSidelines.values());
+    }
+
+    @Override
     public long getDelayToLiveInMillis() {
         return delayToLiveInMillis;
     }
 
     protected void setDelayToLiveInMillis(long delayToLiveInMillis) {
-        this.delayToLiveInMillis = delayToLiveInMillis; 
+        this.delayToLiveInMillis = delayToLiveInMillis;
     }
 
     @Override
@@ -2223,6 +2342,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     /**
      * Changes to the {@link #status} variable are synchronized on the {@link #statusNotifier} field.
+     * 
      * @return
      */
     protected Object getStatusNotifier() {
@@ -2230,6 +2350,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     protected void setStatus(TrackedRaceStatus newStatus) {
+        assert newStatus != null;
         final TrackedRaceStatusEnum oldStatus;
         synchronized (getStatusNotifier()) {
             oldStatus = getStatus().getStatus();
@@ -2255,8 +2376,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     /**
-     * Waits on the current ("old") status object which is notified in {@link #setStatus(TrackedRaceStatus)} when the status
-     * is changed. The change as well as the check synchronize on the old status object.
+     * Waits on the current ("old") status object which is notified in {@link #setStatus(TrackedRaceStatus)} when the
+     * status is changed. The change as well as the check synchronize on the old status object.
      */
     @Override
     public void waitUntilNotLoading() {
@@ -2265,7 +2386,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 try {
                     getStatusNotifier().wait();
                 } catch (InterruptedException e) {
-                    logger.info("waitUntilNotLoading on tracked race "+this+" interrupted: "+e.getMessage()+". Continuing to wait.");
+                    logger.info("waitUntilNotLoading on tracked race " + this + " interrupted: " + e.getMessage()
+                            + ". Continuing to wait.");
                 }
             }
         }
@@ -2273,17 +2395,128 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public void attachRaceLog(RaceLog raceLog) {
-        this.attachedRaceLog = raceLog;
+        this.attachedRaceLogs.put(raceLog.getId(), raceLog);
     }
 
     @Override
-    public void detachRaceLog() {
-        // Currently doing not much, be may notify some listeners in the future.
-        this.attachedRaceLog = null;
+    public void detachRaceLog(Serializable identifier) {
+        this.attachedRaceLogs.remove(identifier);
+    }
+    
+    @Override
+    public void detachAllRaceLogs() {
+        this.attachedRaceLogs.clear();
     }
 
     @Override
-    public RaceLog getRaceLog() {
-        return attachedRaceLog;
+    public RaceLog getRaceLog(Serializable identifier) {
+        return attachedRaceLogs.get(identifier);
+    }
+
+    @Override
+    public Distance getDistanceToStartLine(Competitor competitor, TimePoint timePoint) {
+        Waypoint startWaypoint = getRace().getCourse().getFirstWaypoint();
+        final Distance result;
+        if (startWaypoint == null) {
+            result = null;
+        } else {
+            Position competitorPosition = getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */false);
+            if (competitorPosition == null) {
+                result = null;
+            } else {
+                Iterable<Mark> marks = startWaypoint.getControlPoint().getMarks();
+                Iterator<Mark> marksIterator = marks.iterator();
+                Mark first = marksIterator.next();
+                Position firstPosition = getOrCreateTrack(first).getEstimatedPosition(timePoint, /* extrapolate */false);
+                if (firstPosition == null) {
+                    result = null;
+                } else {
+                    if (marksIterator.hasNext()) {
+                        // it's a line / gate
+                        Mark second = marksIterator.next();
+                        Position secondPosition = getOrCreateTrack(second).getEstimatedPosition(timePoint, /* extrapolate */
+                                false);
+                        final Bearing bearingGreatCircle = firstPosition.getBearingGreatCircle(secondPosition);
+                        if (bearingGreatCircle == null) {
+                            result = null;
+                        } else {
+                            Position competitorProjectedOntoStartLine = competitorPosition.projectToLineThrough(
+                                    firstPosition, bearingGreatCircle);
+                            result = competitorPosition.getDistance(competitorProjectedOntoStartLine);
+                        }
+                    } else {
+                        result = competitorPosition.getDistance(firstPosition);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor) {
+        final Distance result;
+        TrackedLegOfCompetitor firstTrackedLegOfCompetitor = getTrackedLeg(competitor, getRace().getCourse().getFirstLeg());
+        TimePoint competitorStartTime = firstTrackedLegOfCompetitor.getStartTime();
+        if (competitorStartTime != null) {
+            Position competitorPositionWhenPassingStart = getTrack(competitor).getEstimatedPosition(
+                    competitorStartTime, /* extrapolate */false);
+            final Position starboardMarkPosition = getStarboardMarkOfStartlinePosition(competitorStartTime);
+            if (competitorPositionWhenPassingStart != null && starboardMarkPosition != null) {
+                result = starboardMarkPosition == null ? null : competitorPositionWhenPassingStart.getDistance(starboardMarkPosition);
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    /**
+     * The method has protected scope in order to allow for testing. Based on the bearing from the start waypoint to the
+     * next mark, identifies which of the two marks of the start line is on starboard. If the start waypoint has only
+     * one mark, that mark is returned. If the start line has two marks but the course has no other waypoint,
+     * <code>null<code> is returned. If the course has no waypoints at all, <code>null</code> is returned.
+     */
+    protected Position getStarboardMarkOfStartlinePosition(TimePoint at) {
+        final Position starboardMarkPosition;
+        final Course course = getRace().getCourse();
+        Iterator<Waypoint> waypointsIter = course.getWaypoints().iterator();
+        if (waypointsIter.hasNext()) {
+            Waypoint startWaypoint = waypointsIter.next();
+            if (Util.size(startWaypoint.getMarks()) == 1) {
+                starboardMarkPosition = getOrCreateTrack(startWaypoint.getMarks().iterator().next())
+                        .getEstimatedPosition(at, /* extrapolate */false);
+            } else {
+                if (waypointsIter.hasNext()) {
+                    final Position approximatePositionOfStart = getApproximatePosition(startWaypoint, at);
+                    // find out which of the marks is the starboard side of the line by checking the angle
+                    // between competitor's COG and bearing to mark
+                    Iterator<Mark> markIter = startWaypoint.getMarks().iterator();
+                    Mark mark1 = markIter.next();
+                    Mark mark2 = markIter.next();
+                    final Position estimatedPositionMark1 = getOrCreateTrack(mark1).getEstimatedPosition(at, /* extrapolate */false);
+                    final Position estimatedPositionMark2 = getOrCreateTrack(mark2).getEstimatedPosition(at, /* extrapolate */false);
+                    Bearing bearingFromMark1ToMark2 = estimatedPositionMark1.getBearingGreatCircle(estimatedPositionMark2);
+                    Waypoint nextWaypoint = waypointsIter.next();
+                    Bearing bearingFromStartToNextWaypoint = approximatePositionOfStart
+                            .getBearingGreatCircle(getApproximatePosition(nextWaypoint, at));
+                    Bearing diffBetweenFromMark1ToMark2AndNextWaypoint = bearingFromMark1ToMark2.getDifferenceTo(bearingFromStartToNextWaypoint);
+                    if (diffBetweenFromMark1ToMark2AndNextWaypoint.getDegrees() > 0) {
+                        starboardMarkPosition = estimatedPositionMark1;
+                    } else {
+                        starboardMarkPosition = estimatedPositionMark2;
+                    }
+                } else {
+                    // only one waypoint in course; cannot determine bearing to next mark
+                    starboardMarkPosition = null;
+                }
+            }
+        } else {
+            // only one waypoint in course; can't determine bearing to next waypoint
+            starboardMarkPosition = null;
+        }
+        return starboardMarkPosition;
     }
 }

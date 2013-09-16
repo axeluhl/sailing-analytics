@@ -1,9 +1,14 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.concurrent.Callable;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 
 
 /**
@@ -22,16 +27,16 @@ public class LowPoint extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Integer numberOfCompetitorsInRace) {
+    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher) {
         return rank == 0 ? null : (double) rank;
     }
 
     @Override
     public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
-            Integer numberOfCompetitorsInRace, int numberOfCompetitorsInLeaderboard) {
+            Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
         Double result;
         if (numberOfCompetitorsInRace == null) {
-            result = (double) (numberOfCompetitorsInLeaderboard+1);
+            result = (double) (numberOfCompetitorsInLeaderboardFetcher.getNumberOfCompetitorsInLeaderboard()+1);
         } else {
             result = (double) (numberOfCompetitorsInRace+1);
         }
@@ -41,5 +46,10 @@ public class LowPoint extends AbstractScoringSchemeImpl {
     @Override
     public ScoringSchemeType getType() {
         return ScoringSchemeType.LOW_POINT;
+    }
+
+    @Override
+    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
+        return true;
     }
 }

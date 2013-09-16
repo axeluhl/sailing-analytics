@@ -35,18 +35,20 @@ import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
-import com.sap.sailing.gwt.ui.shared.FleetDTO;
+import com.sap.sailing.gwt.ui.client.shared.components.CollapsablePanel;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.components.CollapsablePanel;
 
 /**
  * 
@@ -93,6 +95,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     
     private List<LeaderboardGroupDTO> availableGroups;
     private final boolean showRaceDetails;
+    private final Timer timerForClientServerOffset;
 
     public LeaderboardGroupOverviewPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages, boolean showRaceDetails) {
@@ -100,6 +103,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+        this.timerForClientServerOffset = new Timer(PlayModes.Replay);
         availableGroups = new ArrayList<LeaderboardGroupDTO>();
         
         LeaderboardGroupOverviewTableResources tableResources = GWT.create(LeaderboardGroupOverviewTableResources.class);
@@ -225,9 +229,9 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/Spectator.html?"+
                         (showRaceDetails ? "showRaceDetails=true&" : "") +
-                        "leaderboardGroupName=" + group.name + "&root=overview"
+                        "leaderboardGroupName=" + group.getName() + "&root=overview"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                return ANCHORTEMPLATE.anchor(link, group.name);
+                return ANCHORTEMPLATE.anchor(link, group.getName());
             }
         };
         groupsNameColumn.setSortable(true);
@@ -291,7 +295,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         groupsListHandler.setComparator(groupsNameColumn, new Comparator<LeaderboardGroupDTO>() {
             @Override
             public int compare(LeaderboardGroupDTO g1, LeaderboardGroupDTO g2) {
-                return g1.name.compareTo(g2.name);
+                return g1.getName().compareTo(g2.getName());
             }
         });
         groupsListHandler.setComparator(groupsStartDateColumn, new Comparator<LeaderboardGroupDTO>() {
@@ -354,7 +358,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
-                        + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
+                        + "&leaderboardGroupName=" + selectedGroup.getName() + "&root=overview"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.anchor(link, leaderboard.name);
             }
@@ -447,7 +451,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                         String debugParam = Window.Location.getParameter("gwt.codesvr");
                         String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName="
                                 + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName() + "&regattaName="
-                                + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.name
+                                + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.getName()
                                 + "&root=overview"
                                 + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                         name = ANCHORTEMPLATE.anchor(link, raceDisplayName);
@@ -495,9 +499,15 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     }
 
     private void loadGroups() {
+        final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
         sailingService.getLeaderboardGroups(true /*withGeoLocationData*/, new AsyncCallback<List<LeaderboardGroupDTO>>() {
             @Override
             public void onSuccess(List<LeaderboardGroupDTO> result) {
+                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
+                if (result != null && !result.isEmpty()) {
+                    timerForClientServerOffset.adjustClientServerOffset(clientTimeWhenRequestWasSent, result
+                            .get(result.size() - 1).getCurrentServerTime(), clientTimeWhenResponseWasReceived);
+                }
                 availableGroups = result == null ? new ArrayList<LeaderboardGroupDTO>() : result;
                 groupsDataProvider.getList().clear();
                 groupsDataProvider.getList().addAll(availableGroups);
@@ -608,10 +618,10 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                     location.split("\\s"));
         }
         if (result && name != null && name.length() > 0) {
-            result = textContainsStringsToCheck(forGroup.name, name.split("\\s"));
+            result = textContainsStringsToCheck(forGroup.getName(), name.split("\\s"));
         }
         if (result && onlyLiveCheckBox.getValue()) {
-            result = forGroup.hasLiveRace();
+            result = forGroup.hasLiveRace(timerForClientServerOffset.getLiveTimePointInMillis());
         }else if (result) {
             Date startDate = forGroup.getGroupStartDate();
             if (startDate != null) {

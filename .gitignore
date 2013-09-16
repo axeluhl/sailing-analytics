@@ -20,3 +20,10 @@ sailing_debug0*
 /mobile/com.sap.sailing.racecommittee.glue/bin/com.sap.sailing.racecommittee.glue.jar
 /mobile/com.sap.sailing.racecommittee.glue/bin/jarlist.cache
 /java/com.sap.sailing.server.gateway.serialization.test/.settings/*.prefs
+.DS_Store
+java/com.sap.sailing.simulator/bin/com/sap/sailing/simulator/Simulator.gwt.xml
+/mobile/google-play-services_lib/bin/*
+
+/mobile/com.sap.sailing.racecommittee.app/res/values/keys.xml
+/mobile/google-play-services_lib/gen/*
+/mobile/google-play-services_lib/gen/com/google/android/gms/BuildConfig.java

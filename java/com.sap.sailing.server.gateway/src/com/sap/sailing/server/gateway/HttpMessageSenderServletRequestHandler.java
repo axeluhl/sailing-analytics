@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -131,7 +132,7 @@ public abstract class HttpMessageSenderServletRequestHandler {
             } catch (Exception e) {
                 logger.info("Terminating heartbeat on "+HttpMessageSenderServletRequestHandler.this.getClass().getName()+
                         " because of exception "+e);
-                logger.throwing(getClass().getName(), "run", e);
+                logger.log(Level.SEVERE, "run", e);
             }
             HttpMessageSenderServletRequestHandler.this.stop();
         }

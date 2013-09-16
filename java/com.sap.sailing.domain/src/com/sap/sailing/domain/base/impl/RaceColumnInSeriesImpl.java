@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.base.impl;
 
 
+import java.util.Iterator;
+
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -89,5 +91,24 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
         // re-associating the TrackedRace needs to happen before the super call because the RaceIdentifier may have changed
         super.setTrackedRace(fleet, trackedRace);
     }
+    
+    private boolean isFirstColumnInSeries() {
+        Iterator<? extends RaceColumnInSeries> columnIter = getSeries().getRaceColumns().iterator();
+        return columnIter.hasNext() && columnIter.next() == this;
+    }
 
+    @Override
+    public boolean isStartsWithZeroScore() {
+        return getSeries().isStartsWithZeroScore() && isFirstColumnInSeries();
+    }
+
+    @Override
+    public boolean isDiscardable() {
+        return !isMedalRace() && (!isFirstColumnInSeries() || !getSeries().isFirstColumnIsNonDiscardableCarryForward());
+    }
+
+    @Override
+    public boolean isCarryForward() {
+        return isFirstColumnInSeries() && getSeries().isFirstColumnIsNonDiscardableCarryForward();
+    }
 }

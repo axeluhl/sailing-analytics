@@ -15,21 +15,21 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.polarsheets.PerRaceAndCompetitorPolarSheetGenerationWorker;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.test.mock.MockedTrackedRace;
@@ -45,7 +45,7 @@ public class PolarSheetGenerationTest {
     
     @Test
     public void testPolarSheetRawDataGeneration() throws InterruptedException {
-        Executor executor = new ThreadPoolExecutor(/* corePoolSize */ 0,
+        Executor executor = new ThreadPoolExecutor(/* corePoolSize */ Runtime.getRuntime().availableProcessors(),
                 /* maximumPoolSize */ Runtime.getRuntime().availableProcessors(),
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
@@ -72,9 +72,9 @@ public class PolarSheetGenerationTest {
         
         PolarSheetsData data = resultContainer.getPolarData();
         Assert.assertEquals(4, data.getDataCount());
-        Assert.assertEquals(4.0, data.getAveragedPolarDataByWindSpeed()[1][45]);
-        Assert.assertEquals(2.0, data.getAveragedPolarDataByWindSpeed()[1][55]);
-        Assert.assertEquals(6.0, data.getAveragedPolarDataByWindSpeed()[1][30]);
+        Assert.assertEquals(4.0, data.getAveragedPolarDataByWindSpeed()[0][45]);
+        Assert.assertEquals(2.0, data.getAveragedPolarDataByWindSpeed()[0][55]);
+        Assert.assertEquals(6.0, data.getAveragedPolarDataByWindSpeed()[0][30]);
         
     }
     

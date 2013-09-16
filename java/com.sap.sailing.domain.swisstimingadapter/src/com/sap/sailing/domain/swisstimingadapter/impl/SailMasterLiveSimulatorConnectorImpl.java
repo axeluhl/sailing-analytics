@@ -42,7 +42,7 @@ public class SailMasterLiveSimulatorConnectorImpl extends SailMasterConnectorImp
     }
 
     @Override
-    protected void notifyListeners(SailMasterMessage message) throws ParseException {
+    protected void notifyListeners(SailMasterMessage message) {
         // we cache all messages here and deliver them with a different speed
         bufferedMessageList.add(message);
     }

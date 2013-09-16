@@ -3,6 +3,8 @@ package com.sap.sailing.domain.base.impl;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class CourseAreaImpl extends NamedImpl implements CourseArea {
@@ -21,14 +23,7 @@ public class CourseAreaImpl extends NamedImpl implements CourseArea {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof CourseArea) {
-            CourseArea courseArea = (CourseArea) obj;
-            if (this.id.equals(courseArea.getId())) {
-                return true;
-            }
-            return false;
-        }
-        return super.equals(obj);
+    public IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory) {
+        return domainFactory.getOrCreateCourseArea(id, getName());
     }
 }

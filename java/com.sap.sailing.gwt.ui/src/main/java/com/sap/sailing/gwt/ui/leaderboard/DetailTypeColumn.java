@@ -5,9 +5,9 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
-import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public abstract class DetailTypeColumn<FieldType extends Comparable<?>, RenderingType> extends
         SortableColumn<LeaderboardRowDTO, RenderingType> {

@@ -10,14 +10,14 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint.LeaderboardUrlSettings;
-import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
-import com.sap.sailing.gwt.ui.shared.components.Component;
-import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class LeaderboardUrlConfigurationDialog extends SettingsDialog<LeaderboardUrlSettings> {
 
@@ -89,7 +89,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             List<RaceColumnDTO> raceList = leaderboard.getRaceList();
             List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
             for (RaceColumnDTO raceColumn : raceList) {
-                namesOfRaceColumnsToShow.add(raceColumn.name);
+                namesOfRaceColumnsToShow.add(raceColumn.getName());
             }
             LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                     namesOfRaceColumnsToShow, /* namesOfRacesToShow */null, /* nameOfRaceToSort */null, /* autoExpandPreSelectedRace */
@@ -100,7 +100,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
                 /* select all races by default */ raceList, new ExplicitRaceColumnSelection(),
                 /* autoExpandPreSelectedRace */ false,
                 /* showOverallLeaderboardOnSamePage */ false,
-                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, /* delayInMilliseconds */ 3000l, stringMessages);
+                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, stringMessages);
         }
 
         private void updateURL(LeaderboardUrlSettings settings, String leaderboardName, String leaderboardDisplayName) {

@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 
 import java.io.Serializable;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -9,13 +10,15 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 
 public class Helpers {
+    
+    private final static Logger logger = Logger.getLogger(Helpers.class.getName());
 
     public static JSONArray toJSONArraySafe(Object object) throws JsonDeserializationException {
         if (object instanceof JSONArray) {
             return (JSONArray) object;
         }
-        throw new JsonDeserializationException(String.format("Expected a JSONArray, got %s.", object.getClass()
-                .getName()));
+        throw new JsonDeserializationException(String.format("Expected a JSONArray, got %s.", object != null ? object.getClass()
+                .getName() : ""));
     }
 
     public static JSONObject toJSONObjectSafe(Object object) throws JsonDeserializationException {
@@ -45,13 +48,13 @@ public class Helpers {
         return (JSONArray) childObject;
     }
 
-    public static Serializable tryUuidConversion(String id) {
+    public static Serializable tryUuidConversion(Serializable serializableId) {
         try {
-            return UUID.fromString(id);
+            return UUID.fromString(serializableId.toString());
         } catch (IllegalArgumentException iae) {
-            // / TODO: insert warning of non-uuid id.
+            logger.warning("The serializable " + serializableId.toString() + " could not be converted to a UUID");
         }
-        return id;
+        return serializableId;
     }
 
 }

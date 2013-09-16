@@ -1,155 +1,231 @@
 package com.sap.sailing.racecommittee.app.data;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URI;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Collection;
+import java.util.concurrent.Callable;
 
+import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
+import android.content.Loader;
+import android.os.Bundle;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.EventData;
-import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
+import com.sap.sailing.racecommittee.app.data.handlers.CourseBaseHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.ManagedRacesDataHandler;
-import com.sap.sailing.racecommittee.app.data.loaders.DataLoader;
+import com.sap.sailing.racecommittee.app.data.handlers.MarksDataHandler;
+import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderCallbacks;
+import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderCallbacks.LoaderCreator;
+import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
+import com.sap.sailing.racecommittee.app.data.loaders.ImmediateDataLoaderCallbacks;
+import com.sap.sailing.racecommittee.app.data.loaders.OnlineDataLoader;
+import com.sap.sailing.racecommittee.app.data.parsers.CompetitorsDataParser;
+import com.sap.sailing.racecommittee.app.data.parsers.CourseBaseParser;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
-import com.sap.sailing.racecommittee.app.deserialization.impl.BoatClassJsonDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.ColorDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.CourseAreaJsonDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.EventDataJsonDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.FleetDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.RaceCellDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.RaceGroupDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.RaceLogDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.RaceRowDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.SeriesWithRowsDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
+import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.ColorDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.FleetDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceCellDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceRowDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racegroup.impl.SeriesWithRowsDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 
 /**
  * Enables accessing of data.
  */
 public class OnlineDataManager extends DataManager {
-	// private static final String TAG = OnlineDataManager.class.getName();
-	
-	private Context context;
-	
+    private static final String TAG = OnlineDataManager.class.getName();
 
-	OnlineDataManager(Context context, DataStore dataStore) {
-		super(dataStore);
-		this.context = context;
-	}
+    OnlineDataManager(Context context, DataStore dataStore) {
+        super(context, dataStore);
+    }
 
-	public Context getContext() {
-		return context;
-	}
-	
-	public void loadEvents(LoadClient<Collection<EventData>> client) {
-		if (dataStore.getEvents().isEmpty()) {
-			reloadEvents(client);
-		} else {
-			client.onLoadSucceded(dataStore.getEvents());
-		}
-	}
+    public void addEvents(Collection<EventBase> events) {
+        for (EventBase event : events) {
+            dataStore.addEvent(event);
+        }
+    }
 
-	public void addEvents(Collection<EventData> events) {
-		for (EventData event : events) {
-			dataStore.addEvent(event);
-		}
-	}
+    public void addRaces(Collection<ManagedRace> data) {
+        for (ManagedRace race : data) {
+            dataStore.addRace(race);
+        }
+    }
 
-	protected void reloadEvents(LoadClient<Collection<EventData>> client) {
-		DataParser<Collection<EventData>> parser = new EventsDataParser(
-				new EventDataJsonDeserializer(
-					new VenueJsonDeserializer(
-							new CourseAreaJsonDeserializer())));
-		DataHandler<Collection<EventData>> handler = new EventsDataHandler(this, client);
-		
-		try {
-			new DataLoader<Collection<EventData>>(
-					context, 
-					URI.create(AppConstants.getURL(context) + "/sailingserver/rc/events"), 
-					parser, 
-					handler).forceLoad();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    public void addMarks(Collection<Mark> marks) {
+        for (Mark mark : marks) {
+            dataStore.addMark(mark);
+        }
+    }
 
-	public void loadCourseAreas(
-			final Serializable parentEventId,
-			final LoadClient<Collection<CourseArea>> client) {
-		
-		if (dataStore.hasEvent(parentEventId)) {
-			EventData event = dataStore.getEvent(parentEventId);
-			client.onLoadSucceded(dataStore.getCourseAreas(event));
-		} else {
-			reloadEvents(new LoadClient<Collection<EventData>>() {
-				public void onLoadSucceded(Collection<EventData> data) {
-					if (dataStore.hasEvent(parentEventId)) {
-						EventData event = dataStore.getEvent(parentEventId);
-						client.onLoadSucceded(dataStore.getCourseAreas(event));
-					} else {
-						client.onLoadFailed(new DataLoadingException(
-								String.format("There was no event object found for id %s.", parentEventId)));
-					}
-				}
-				
-				public void onLoadFailed(Exception reason) {
-					client.onLoadFailed(new DataLoadingException(
-							String.format("There was no event object found for id %s. While reloading the events an error occured: %s", parentEventId, reason), reason));
-				}
-			});
-		}
-	}
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> createEventsLoader(
+            LoadClient<Collection<EventBase>> callback) {
+        return new DataLoaderCallbacks<Collection<EventBase>>(callback, new LoaderCreator<Collection<EventBase>>() {
+            @Override
+            public Loader<DataLoaderResult<Collection<EventBase>>> create(int id, Bundle args) throws Exception {
+                SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
+                DataParser<Collection<EventBase>> parser = new EventsDataParser(new EventBaseJsonDeserializer(
+                        new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory))));
+                DataHandler<Collection<EventBase>> handler = new EventsDataHandler(OnlineDataManager.this);
 
-	public void addRaces(Collection<ManagedRace> data) {
-		for (ManagedRace race : data) {
-			dataStore.addRace(race);
-		}
-	}
+                ExLog.i(TAG, "getEventsLoader created new loader...");
 
-	public void loadRaces(Serializable courseAreaId, LoadClient<Collection<ManagedRace>> client) {
-		
-		if (!dataStore.hasCourseArea(courseAreaId)) {
-			client.onLoadFailed(new DataLoadingException(String.format("No course area found with id %s", courseAreaId)));
-			return;
-		}
-		
-		/// TODO insert domain factory
-		JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(null);
-		DataParser<Collection<ManagedRace>> parser =  new ManagedRacesDataParser(
-				new RaceGroupDeserializer(
-						boatClassDeserializer,
-						new SeriesWithRowsDeserializer(
-								new RaceRowDeserializer(
-										new FleetDeserializer(
-												new ColorDeserializer()),
-										new RaceCellDeserializer(
-												new RaceLogDeserializer())))));
-		DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(this, client);
-		
-		try {
-			new DataLoader<Collection<ManagedRace>>(
-					context, 
-					URI.create(AppConstants.getURL(context) + "/sailingserver/rc/leaderboards?courseArea=" + courseAreaId.toString()), 
-					parser, 
-					handler).forceLoad();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-	}
+                return new OnlineDataLoader<Collection<EventBase>>(context, new URL(AppPreferences
+                        .getServerBaseURL(context) + "/sailingserver/events"), parser, handler);
+            }
+        });
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(
+            final Serializable parentEventId, LoadClient<Collection<CourseArea>> callback) {
+        return new ImmediateDataLoaderCallbacks<Collection<CourseArea>>(context, callback,
+                new Callable<Collection<CourseArea>>() {
+                    @Override
+                    public Collection<CourseArea> call() throws Exception {
+                        if (dataStore.hasEvent(parentEventId)) {
+                            EventBase event = dataStore.getEvent(parentEventId);
+                            return dataStore.getCourseAreas(event);
+                        } else {
+                            throw new DataLoadingException(String.format(
+                                    "Unable to load course areas for unknown event %s.", parentEventId));
+                        }
+                    }
+                });
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<ManagedRace>>> createRacesLoader(final Serializable courseAreaId,
+            LoadClient<Collection<ManagedRace>> callback) {
+        return new DataLoaderCallbacks<Collection<ManagedRace>>(callback, new LoaderCreator<Collection<ManagedRace>>() {
+            @Override
+            public Loader<DataLoaderResult<Collection<ManagedRace>>> create(int id, Bundle args) throws Exception {
+                SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
+                JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
+                DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(context,
+                        new RaceGroupDeserializer(boatClassDeserializer, new SeriesWithRowsDeserializer(
+                                new RaceRowDeserializer(new FleetDeserializer(new ColorDeserializer()),
+                                        new RaceCellDeserializer(new RaceLogDeserializer(
+                                                RaceLogEventDeserializer.create(domainFactory)))))));
+                DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(OnlineDataManager.this);
+
+                return new OnlineDataLoader<Collection<ManagedRace>>(context, new URL(AppPreferences
+                        .getServerBaseURL(context)
+                        + "/sailingserver/rc/racegroups?courseArea="
+                        + courseAreaId.toString()), parser, handler);
+            }
+        });
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<Mark>>> createMarksLoader(final ManagedRace managedRace,
+            LoadClient<Collection<Mark>> callback) {
+        return new DataLoaderCallbacks<Collection<Mark>>(callback, new LoaderCreator<Collection<Mark>>() {
+            @Override
+            public Loader<DataLoaderResult<Collection<Mark>>> create(int id, Bundle args) throws Exception {
+                SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
+                JsonDeserializer<Mark> markDeserializer = new MarkDeserializer(domainFactory);
+                DataParser<Collection<Mark>> parser = new MarksDataParser(markDeserializer);
+                DataHandler<Collection<Mark>> handler = new MarksDataHandler(OnlineDataManager.this);
+
+                ManagedRaceIdentifier identifier = managedRace.getIdentifier();
+
+                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName());
+                String raceColumnName = URLEncoder.encode(identifier.getRaceName());
+                String fleetName = URLEncoder.encode(identifier.getFleet().getName());
+
+                return new OnlineDataLoader<Collection<Mark>>(context, new URL(AppPreferences
+                        .getServerBaseURL(context)
+                        + "/sailingserver/rc/marks?leaderboard="
+                        + raceGroupName
+                        + "&raceColumn=" + raceColumnName + "&fleet=" + fleetName), parser, handler);
+            }
+        });
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<CourseBase>> createCourseLoader(final ManagedRace managedRace,
+            LoadClient<CourseBase> callback) {
+        return new DataLoaderCallbacks<CourseBase>(callback, new LoaderCreator<CourseBase>() {
+            @Override
+            public Loader<DataLoaderResult<CourseBase>> create(int id, Bundle args) throws Exception {
+                SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
+                JsonDeserializer<CourseBase> courseBaseDeserializer = new CourseBaseDeserializer(
+                        new WaypointDeserializer(new ControlPointDeserializer(new MarkDeserializer(domainFactory),
+                                new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))));
+                DataParser<CourseBase> parser = new CourseBaseParser(courseBaseDeserializer);
+                DataHandler<CourseBase> handler = new CourseBaseHandler(OnlineDataManager.this, managedRace);
+
+                ManagedRaceIdentifier identifier = managedRace.getIdentifier();
+
+                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName());
+                String raceColumnName = URLEncoder.encode(identifier.getRaceName());
+                String fleetName = URLEncoder.encode(identifier.getFleet().getName());
+
+                return new OnlineDataLoader<CourseBase>(context, new URL(AppPreferences.getServerBaseURL(context)
+                        + "/sailingserver/rc/currentcourse?leaderboard=" + raceGroupName + "&raceColumn="
+                        + raceColumnName + "&fleet=" + fleetName), parser, handler);
+            }
+        });
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createCompetitorsLoader(
+            final ManagedRace managedRace, LoadClient<Collection<Competitor>> callback) {
+        return new DataLoaderCallbacks<Collection<Competitor>>(callback, new LoaderCreator<Collection<Competitor>>() {
+            @Override
+            public Loader<DataLoaderResult<Collection<Competitor>>> create(int id, Bundle args) throws Exception {
+                ExLog.i(TAG, String.format("Creating Competitor-OnlineDataLoader %d", id));
+                SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
+                JsonDeserializer<Competitor> competitorDeserializer = new CompetitorDeserializer(domainFactory);
+                DataParser<Collection<Competitor>> parser = new CompetitorsDataParser(competitorDeserializer);
+                DataHandler<Collection<Competitor>> handler = new CompetitorsDataHandler(OnlineDataManager.this,
+                        managedRace);
+
+                ManagedRaceIdentifier identifier = managedRace.getIdentifier();
+
+                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName());
+                String raceColumnName = URLEncoder.encode(identifier.getRaceName());
+                String fleetName = URLEncoder.encode(identifier.getFleet().getName());
+
+                return new OnlineDataLoader<Collection<Competitor>>(context, new URL(AppPreferences
+                        .getServerBaseURL(context)
+                        + "/sailingserver/rc/competitors?leaderboard="
+                        + raceGroupName
+                        + "&raceColumn=" + raceColumnName + "&fleet=" + fleetName), parser, handler);
+            }
+        });
+    }
 }

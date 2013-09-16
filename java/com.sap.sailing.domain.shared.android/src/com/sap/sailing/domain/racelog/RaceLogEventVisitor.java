@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelog;
 
+
 public interface RaceLogEventVisitor {
     public void visit(RaceLogFlagEvent event);
 
@@ -10,4 +11,20 @@ public interface RaceLogEventVisitor {
     public void visit(RaceLogStartTimeEvent event);
 
     public void visit(RaceLogCourseAreaChangedEvent event);
+    
+    public void visit(RaceLogCourseDesignChangedEvent event);
+    
+    public void visit(RaceLogFinishPositioningListChangedEvent event);
+    
+    public void visit(RaceLogFinishPositioningConfirmedEvent event);
+    
+    public void visit(RaceLogPathfinderEvent event);
+    
+    public void visit(RaceLogGateLineOpeningTimeEvent event);
+    
+    public void visit(RaceLogStartProcedureChangedEvent event);
+
+    public void visit(RaceLogProtestStartTimeEvent event);
+    
+    public void visit(RaceLogWindFixEvent event);
 }

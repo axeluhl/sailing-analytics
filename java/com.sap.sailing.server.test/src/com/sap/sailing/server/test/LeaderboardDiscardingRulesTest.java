@@ -12,17 +12,18 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
+import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -47,11 +48,11 @@ public class LeaderboardDiscardingRulesTest {
         FlexibleLeaderboard leaderboard = (FlexibleLeaderboard) racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboard);
         int[] discardingRulesNew = new int[] { 1, 5 };
-        leaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(discardingRulesNew));
+        leaderboard.setCrossLeaderboardResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(discardingRulesNew));
         racingEventService.updateStoredLeaderboard(leaderboard);
         Leaderboard leaderboardNew = racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboardNew);
-        int[] result = leaderboardNew.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
+        int[] result = ((ThresholdBasedResultDiscardingRule) leaderboardNew.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces();
         assertArrayEquals(discardingRulesNew, result);
     }
 

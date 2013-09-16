@@ -19,8 +19,6 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -29,6 +27,8 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -76,9 +76,9 @@ public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBased
                 dennisMarkPassings.last().getTimePoint(), /* waitForLatest */ true);
         Calendar c = new GregorianCalendar(TimeZone.getTimeZone("Europe/Berlin"));
         c.set(2011, 10-1, 30, 13, 32, 42);
-        assertManeuver(maneuvers, ManeuverType.TACK, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
-        c.set(2011, 10-1, 30, 13, 34, 00);
         assertManeuver(maneuvers, ManeuverType.TACK, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
+        c.set(2011, 10-1, 30, 13, 34, 00);
+        assertManeuver(maneuvers, ManeuverType.TACK, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
         c.set(2011, 10-1, 30, 13, 35, 46);
         // tolerance for the JIBE maneuver around 13:35:46 needs to be a bit greater than for the others because depending on coincidental
         // Douglas-Peucker approximation, the DP point after the jibe may either be detected at 13:35:51 which will still make it inside
@@ -86,9 +86,9 @@ public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBased
         // to be grouped into the same maneuver as the DP point before the jibe which is at 13:35:45. In that case, the jibe is detected
         // at 13:35:54 with a much smaller jibing angle while the maneuver before which otherwise is grouped into the jibe then is
         // only a bearing away by a lot.
-        assertManeuver(maneuvers, ManeuverType.JIBE, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 10000);
+        assertManeuver(maneuvers, ManeuverType.JIBE, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 10000);
         c.set(2011, 10-1, 30, 13, 36, 49);
-        assertManeuver(maneuvers, ManeuverType.JIBE, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
+        assertManeuver(maneuvers, ManeuverType.JIBE, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
     }
 
     private void assertManeuver(List<Maneuver> maneuvers, ManeuverType type, Tack newTack,
