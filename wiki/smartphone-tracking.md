@@ -78,6 +78,9 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 **Throws**
 * `400` Invalid JSON in request
 
+**Comments**
+* The server choses the id, so this field can be left blank / not supplied
+
 ### `/sailingserver/racelogtracking/getPersistentCompetitors`
 `PersistentCompetitorsGetServlet`
 
