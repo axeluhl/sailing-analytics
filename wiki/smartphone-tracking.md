@@ -246,6 +246,9 @@ Used for example in the `Select*Fragments`.
 ## ToDo
 
 ### Server
+* RegattaLeaderboard -> define in AdminConsole?
+* only one competitor registered, even though multiple RegisteredEvents in RaceLog?
+* change names of *Events, as they are not events -> also change names of abstract base classes
 * use extension serializers
 * exchange auto JSON to BSON conversion in MongoObjectFactory / DomainObjectFactory for something suited for productive use
 * set fleet when creating race
