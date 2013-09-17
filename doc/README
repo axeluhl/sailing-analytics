@@ -508,7 +508,9 @@ into one in the future.
 		  structure:
 		    { "name": ...,             // race name
 		      "startoftracking": ...,  // millisecond timestamp
+		      "endoftracking": ...,    // millisecond timestamp
 		      "start": ...,	       // millisecond timestamp
+		      "end": ...,	       // millisecond timestamp
 		      "timeofnewestevent": ...,// greatest millisecond timestamp
 		      			       // of any event received so far
 		      "timeoflastevent": ...,  // millisecond timestamp

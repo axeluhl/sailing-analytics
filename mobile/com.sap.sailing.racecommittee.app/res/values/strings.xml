@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="settings_advanced_service_default">http://192.168.56.1:8888</string>
     <string name="hello">Hello World, RaceCommitteeActivity!</string>
     <string name="running_on_course">(on course %s)</string>
     <string name="course_design_number_waypoints">Course has %s waypoints</string>
     <string name="choose_running_course">Choose running course</string>
     <string name="service_info">SAP Race Committee Service</string>
-    <string name="service_title">Monitoring all races on selected event course.</string>
+    <string name="service_text_no_races">Waiting for races to monitor&#8230;</string>
+    <string name="service_text_num_races">Currently monitoring %d races.</string>
+    
     <string name="app_name">SAP Race Committee Cockpit</string>
     <string name="set_time">Start</string>
     <string name="reset_time">Restart</string>
@@ -76,32 +77,21 @@
     <string name="updateIndicator">Update indicator</string>
     <string name="reset_race">Reset race</string>
     <string name="postpone_race">Postpone race</string>
+    <string name="postpone">Postpone</string>
     <string name="fixedLine">Fixed line start</string>
     <string name="gateStart_mode">Gate start</string>
     <string name="confirmation_blue_flag_remove">Are you sure to remove the blue flag?</string>
     <string name="confirmation_blue_flag_display">Are you sure to display the blue flag?</string>
     <string name="confirmation_first_substitute_display">Are you sure to display general recall?</string>
     <string name="finishing_limit_template">Race finishing limit is at %s</string>
-    <string name="race_running_since_template" formatted="false">%s since %s started</string>
+    <string name="race_running_since_template" formatted="false">%s runs since %s</string>
     <string name="race_reset_confirmation_header">You are about to reset the race</string>
     <string name="race_reset_confirmation_warning">Resetting the race removes all its saved data permanently. All information regarding the race state has to be entered again. Only the entered course information are kept. We strongly recommend to not reset the race.</string>
     <string name="race_reset_confirmation_title">Reset race</string>
+    <string name="race_reset_reset_button">Reset anyway</string>
     <string name="race_settime_overlap">The given time overlaps with a previous aborted race. Please select a later time.</string>
     <string name="race_finished_start_time">Race started at:</string>
     <string name="race_finished_end_time">Race finished at:</string>
-    <string name="settings_category_advanced">Advanced Settings</string>
-    <string name="settings_category_general">General Settings</string>
-    <string name="settings_category_race">Race Settings</string>
-    <string name="settings_general_manageareas_header">Managed Course Areas</string>
-    <string name="settings_general_manageareas_description">Enter course area names managed by you (comma-separated)</string>
-    <string name="settings_general_manageareas_default">Alpha</string>
-    <string name="settings_advanced_service_header">Webservice URL</string>
-    <string name="settings_advanced_service_description">Select the JSON Webservice URL</string>
-    <string name="settings_time_frame_header">Race time frame after finish</string>
-    <string name="settings_protest_time_header">Protest time</string>
-    <string name="settings_time_frame_description">Set a time in minutes after which no finishing sailor is counted anymore</string>
-    <item type="integer" name="settings_time_frame_default">30</item>
-    <string name="settings_protest_time_description">Set the protest time in minutes</string>
     <string name="race_startphase_flagdown">Flag is going down&#8230;</string>
     <string name="race_startphase_flagup">Flag is going up&#8230;</string>
     <string name="race_startphase_countdown_mode_remove">%1$s until %2$s flag is removed</string>
@@ -165,16 +155,8 @@
     <string name="availableFinishingCompetitors">Competitors</string>
     <string name="choose_blue_flag_finishing">Finish race</string>
     <string name="drag_handle_description">Drag handle</string>
-    <string name="settings_advanced_mail_default">lukas.niemeier@sap.com</string>
-    <string name="settings_advanced_mail_description">Mail recipient used for positiong list images.</string>
-    <string name="settings_advanced_mail_header">Positioning mail recipient</string>
-    <item type="integer" name="settings_advanced_max_rounds_default">3</item>
-    <string name="settings_advanced_max_rounds_description">Select the maximum number of rounds per course</string>
-    <string name="settings_advanced_max_rounds_header">Maximum rounds per course</string>
-    <item type="integer" name="settings_advanced_min_rounds_default">2</item>
-    <string name="settings_advanced_min_rounds_description">Select the minimum number of rounds per course</string>
-    <string name="settings_advanced_min_rounds_header">Minimum rounds per course</string>
     <string name="options_menu_live">Connection Information</string>
+    <string name="options_menu_info">Expert</string>
     <string name="options_menu_wind">Enter Wind Data</string>
     <string name="options_menu_reload">Reload</string>
     <string name="options_menu_settings">Settings</string>
@@ -189,7 +171,7 @@
     
     <string name="results_mail_subject">[Race Committee] %s</string>
     <string name="results_mail_body">Results for race %s are attached.</string>
-    <string name="wind_direction_degrees">Wind direction (degrees)</string>
+    <string name="wind_direction_degrees">Wind direction from (degrees)</string>
     <string name="wind_speed_knots">Wind speed (knots)</string>
     <string name="enter_wind_direction">1. Enter the wind direction</string>
     <string name="enter_wind_speed">2. Enter the wind speed</string>
@@ -200,18 +182,49 @@
     <string name="longitude">Longitude</string>
     <string name="wind_speed_direction_not_a_valid_number">The wind speed or direction is not a valid number. Please correct the value.</string>
     <string name="wind_location_or_fields_not_valid">The entered location, wind speed or direction is empty. Please correct the values.</string>
-    <string name="your_position">Your position</string>
+    <string name="waiting_for_gps">Waiting for GPS Signal&#8230;</string>
     <string name="store_wind_entry">4. Store wind entry</string>
     <string name="store_wind">Store wind</string>
-    <string name="override_default_start_procedure_type">Override default start procedure type</string>
-    <string name="override_default_start_procedure_type_select">Default start procedure type when overriden</string>
+    
+	<!-- SETTINGS -->
+    <string name="settings_category_general">General Settings</string>    
+    <string name="settings_general_manageareas_header">Managed Course Areas</string>
+    <string name="settings_general_manageareas_description">Enter course area names managed by you (comma-separated)</string>
+    <string name="settings_general_language_header">Select Language</string>
+    <string name="settings_general_language_description">Select the language. You might need to restart the app to have changes applied.</string>
+    
+    <string name="settings_category_race">Race Settings</string>
+    <string name="override_default_start_procedure_type_header">Override default start procedure type</string>
+    <string name="override_default_start_procedure_type_description">Check the box if races should use the start procedure type defined below as a default.</string>
+    <string name="override_default_start_procedure_type_select_header">Default start procedure type when overriden</string>
+    <string name="override_default_start_procedure_type_select_description">Races will use selected start procedure type as a default. For this option to be active override checkbox has to be enabled.</string>
+    <string name="settings_time_frame_header">Race time frame after finish</string>
+    <string name="settings_time_frame_description">Time limit in minutes.</string>
+    
+    <string name="settings_category_advanced">Advanced Settings</string>
+    <string name="settings_advanced_service_header">Webservice URL</string>
+    <string name="settings_advanced_service_description">Select the JSON Webservice URL</string>
+    <string name="settings_advanced_mail_description">Mail recipient used for positiong list images.</string>
+    <string name="settings_advanced_mail_header">Positioning mail recipient</string>
+    <string name="settings_advanced_max_rounds_description">Select the maximum number of rounds per course</string>
+    <string name="settings_advanced_max_rounds_header">Maximum rounds per course</string>
+    <string name="settings_advanced_min_rounds_description">Select the minimum number of rounds per course</string>
+    <string name="settings_advanced_min_rounds_header">Minimum rounds per course</string>
+    
+    <string name="settings_general_manageareas_default">Alpha</string>
+    <string name="settings_advanced_mail_default">lukas.niemeier@sap.com</string>
+    <string name="settings_advanced_service_default">http://192.168.56.1:8888</string>
+    <item name="settings_time_frame_default" type="integer">30</item>
+    <item type="integer" name="settings_advanced_max_rounds_default">3</item>
+    <item type="integer" name="settings_advanced_min_rounds_default">2</item>
+    <!-- SETTINGS -->
     
     <string name="compass_view_compass">Compass</string>
     <string name="compass_view_needle">Needle</string>
     
     <string name="racing_course_area_missing">Course area could not be loaded. Please go back to the login page.</string>
     <string name="racing_load_success">Successfully loaded %d races.</string>
-    <string name="generic_load_failure">There was an error loading the requested data: %s\nDo you want to retry?</string>
+    <string name="generic_load_failure">There was an error loading the requested data:\n\"%s\"\nDo you want to retry?</string>
     <string name="set_course_layout">Set the course layout</string>
     
     <string-array name="course_routes">
@@ -232,5 +245,31 @@
 	<string name="login">Login</string>
 	<string name="login_onto_course_area">Login onto course area</string>
 	<string name="please_select_a_login_type">Please select a login type.</string>
+	
+	<string name="race_list_filter_show_all">Show all</string>
+	<string name="race_list_filter_show_active">Show active</string>
+	
+	<string name="race_reset_time_schedule_race">Schedule race</string>
+	<string name="race_reset_time_startmode_starttime">Select start mode and start time</string>
+	<string name="today">Today</string>
+	<string name="start">Start</string>
+	
+	<string name="application_information">Application Information</string>
+	<string name="application_version">Version</string>
+	<string name="application_install_date">Install Date</string>
+	<string name="persistence_information">Persistence Status</string>
+	<string name="persistence_waiting_events">Waiting events</string>
+	
+	<string name="generic_error">Error</string>
+	
+	<string name="nationality">Nationality</string>
+	<string name="number">Number</string>
+	<string name="set_positionings">Set positionings</string>
+	<string name="confirm_positionings">Confirm positionings</string>
+	<string name="snap">Snap</string>
+	
+	<string name="logout_dialog_title">Are you sure want to logout?</string>
+	<string name="logout_dialog_message">Logging out stops automatic monitoring for all races.</string>
+	<string name="logout">Logout</string>
 	
 </resources>

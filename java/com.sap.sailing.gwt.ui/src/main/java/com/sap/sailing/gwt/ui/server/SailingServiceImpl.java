@@ -65,12 +65,9 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -101,6 +98,7 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsFor
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -121,7 +119,9 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationTriggerResponseImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.Util;
@@ -808,10 +808,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             logger.info("Loaded race " + record.getName() + " in " + record.getEventName() + " start:" + record.getRaceStartTime() + " trackingStart:" + record.getTrackingStartTime() + " trackingEnd:" + record.getTrackingEndTime());
             // note that the live URI may be null for races that were put into replay mode
             final String effectiveLiveURI;
-            if (liveURI == null || liveURI.trim().length() == 0) {
-                effectiveLiveURI = record.getLiveURI() == null ? null : record.getLiveURI().toString();
+            if (!record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS)) {
+                if (liveURI == null || liveURI.trim().length() == 0) {
+                    effectiveLiveURI = record.getLiveURI() == null ? null : record.getLiveURI().toString();
+                } else {
+                    effectiveLiveURI = liveURI;
+                }
             } else {
-                effectiveLiveURI = liveURI;
+                effectiveLiveURI = null;
             }
             final String effectiveStoredURI;
             if (storedURI == null || storedURI.trim().length() == 0) {
@@ -1110,7 +1114,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             if(confidence < minWindConfidence) {
                                 minWindConfidence = confidence;
                             }
-                            if(confidence > maxWindConfidence) {
+                            if (confidence > maxWindConfidence) {
                                 maxWindConfidence = confidence;
                             }
                         }
@@ -1252,13 +1256,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         GPSFixMoving fix = fixIter.next();
                         while (fix != null && (fix.getTimePoint().compareTo(toTimePointExcluding) < 0 ||
                                 (fix.getTimePoint().equals(toTimePointExcluding) && toTimePointExcluding.equals(fromTimePoint)))) {
-                            Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                            Tack tack;
+                            try {
+                                tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                            } catch (NoWindException nwe) {
+                                tack = null;
+                            }
                             TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor,
                                     fix.getTimePoint());
                             LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
                                     trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
                             Wind wind = trackedRace.getWind(fix.getPosition(),toTimePointExcluding);
-                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, toTimePointExcluding);
+                            WindDTO windDTO = wind == null ? null : createWindDTOFromAlreadyAveraged(wind, toTimePointExcluding);
                             GPSFixDTO fixDTO = createGPSFixDTO(fix, fix.getSpeed(), windDTO, tack, legType, /* extrapolate */
                                     false);
                             fixesForCompetitor.add(fixDTO);
@@ -1268,13 +1277,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 // check if fix was at date and if extrapolation is requested
                                 if (!fix.getTimePoint().equals(toTimePointExcluding) && extrapolate) {
                                     Position position = track.getEstimatedPosition(toTimePointExcluding, extrapolate);
-                                    Tack tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
+                                    Tack tack2;
+                                    try {
+                                        tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
+                                    } catch (NoWindException nwe) {
+                                        tack2 = null;
+                                    }
                                     LegType legType2 = trackedLegOfCompetitor == null ? null : trackedRace
                                             .getTrackedLeg(trackedLegOfCompetitor.getLeg()).getLegType(
                                                     fix.getTimePoint());
                                     SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(toTimePointExcluding);
                                     Wind wind2 = trackedRace.getWind(position, toTimePointExcluding);
-                                    WindDTO windDTO2 = createWindDTOFromAlreadyAveraged(wind2, toTimePointExcluding);
+                                    WindDTO windDTO2 = wind2 == null ? null : createWindDTOFromAlreadyAveraged(wind2, toTimePointExcluding);
                                     GPSFixDTO extrapolated = new GPSFixDTO(
                                             toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()),
                                             position==null?null:new PositionDTO(position.getLatDeg(), position.getLngDeg()),
@@ -2024,6 +2038,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             BoatClass boatClass = com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE.getRaceTypeFromRaceID(rr.getRaceID()).getBoatClass();
             swissTimingRaceRecordDTO.boatClass = boatClass != null ? boatClass.getName() : null;
             swissTimingRaceRecordDTO.discipline = rr.getRaceID().length() >= 3 ? rr.getRaceID().substring(2, 3) : null;
+            swissTimingRaceRecordDTO.hasCourse = rr.hasCourse();
+            swissTimingRaceRecordDTO.hasStartlist = rr.hasStartlist();
             result.add(swissTimingRaceRecordDTO);
         }
         return result;

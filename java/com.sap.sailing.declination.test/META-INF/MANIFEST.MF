@@ -6,8 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Fragment-Host: com.sap.sailing.declination
+Require-Bundle: org.junit4;bundle-version="4.8.2"
 Import-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.impl,
- com.sap.sailing.domain.common.quadtree,
- junit.framework;version="4.8.1",
- org.junit;version="4.8.1"
+ com.sap.sailing.domain.common.quadtree

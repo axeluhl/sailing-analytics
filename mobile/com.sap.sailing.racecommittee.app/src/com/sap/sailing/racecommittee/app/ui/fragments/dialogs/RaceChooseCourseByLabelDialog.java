@@ -40,7 +40,7 @@ public class RaceChooseCourseByLabelDialog extends RaceDialogFragment {
             holder.addView(rowLayout);
             for (int round = minNumberOfRounds; round <= maxNumberOfRounds; round++) {
                 Button courseButton = new Button(getActivity());
-                courseButton.setText(courseNumberAndName[0]+" "+round);
+                courseButton.setText(courseNumberAndName[0] + " " + round);
                 courseButton.setOnClickListener( new OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -56,8 +56,6 @@ public class RaceChooseCourseByLabelDialog extends RaceDialogFragment {
         return holder;
     }
 
-
-
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -69,21 +67,10 @@ public class RaceChooseCourseByLabelDialog extends RaceDialogFragment {
         Button selectedButton = (Button) v;
         String internalCourseName = (String) selectedButton.getText();
         
-        String[] courseLayoutsAndNames = getActivity().getResources().getStringArray(R.array.course_routes);
-        String[] courseNumberAndRounds = internalCourseName.split(" ");
-        
-        int courseId = Integer.parseInt(courseNumberAndRounds[0]);
-        String courseName = courseLayoutsAndNames[courseId].split(",")[1];
-        
-        CourseBase courseLayout = new CourseDataImpl(courseName+" Rounds:"+courseNumberAndRounds[1]+" ("+internalCourseName+")");
+        CourseBase courseLayout = new CourseDataImpl(internalCourseName);
         
         getRace().getState().setCourseDesign(courseLayout);
         dismiss();
-    }
-
-    @Override
-    public void notifyTick() {
-
     }
 
 }

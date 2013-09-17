@@ -14,8 +14,8 @@ import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
@@ -159,7 +159,9 @@ public class RRS26RunningRaceFragment extends RaceFragment implements RRS26Runni
 
 
     private void setStarttimeCountupLabel(long millisecondsSinceStart) {
-        countUpTextView.setText(String.format(getString(R.string.race_running_since_template), prettyTimeString(millisecondsSinceStart), getRace().getName()));
+        countUpTextView.setText(String.format(getString(R.string.race_running_since_template), 
+                getRace().getName(),
+                prettyTimeString(millisecondsSinceStart)));
     }
 
     protected CharSequence prettyTimeString(long time) {

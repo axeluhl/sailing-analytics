@@ -58,7 +58,6 @@ public class LeaderboardSettingsFactory {
                 legDetails.add(DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS);
                 legDetails.add(DetailType.RANK_GAIN);
                 List<DetailType> raceDetails = new ArrayList<DetailType>();
-                raceDetails.add(DetailType.RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS);
                 raceDetails.add(DetailType.RACE_DISTANCE_TRAVELED);
                 raceDetails.add(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
                 raceDetails.add(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS);

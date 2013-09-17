@@ -23,19 +23,21 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedWithDegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -97,8 +99,15 @@ public class TrackTest {
     }
     
     /**
-     * A test regarding bug 968. Three subsequent fixes at the same position with increasing time stamps each, then jumping
-     * to the next position for three seconds. Let's see what distance and SOG do...
+     * A test regarding bug 968. Three subsequent fixes at the same position with increasing time stamps each, then
+     * jumping to the next position for three seconds. Let's see what distance and SOG do...
+     * <p>
+     * 
+     * TODO bug 1504 The challenge with this is that the equal fixes all have a wrong speed value compared to at least
+     * one of their neighbors. They are hence all considered outliers, and no fix remains. There is however a possible
+     * sub-sequence of fixes that constitutes a sequence of all-valid fixes when only valid fixes are checked for
+     * validity with their valid neighbors. But this, at first glance, sounds like an ugly NP-complete problem: find the
+     * longest possible sub-sequence such that all fixes in the sub-sequence are valid w.r.t. their neighbors.
      */
     @Test
     public void testJumpyFixes() {
@@ -498,41 +507,45 @@ public class TrackTest {
         assertEquals(timePointOfLastOriginalFix, newFullIntervalCacheEntry.getA());
         assertEquals(now, newFullIntervalCacheEntry.getB().getA());
         TimePoint timePointForLateOutlier = new MillisecondsTimePoint(now.asMillis() + (steps-1)*timeBetweenFixesInMillis + timeBetweenFixesInMillis/2);
-        Position lateOutlierPosition = new DegreePosition(90, 90);
+        Position lateOutlierPosition = new DegreePosition(-90, 90);
         GPSFix lateOutlier = new GPSFixImpl(lateOutlierPosition, timePointForLateOutlier);
+        // adding the outlier invalidates the fix just before the outlier because it now has a single successor that is in range but not reachable
         track.addGPSFix(lateOutlier);
         assertEquals(1, invalidationCalls.size());
-        TimePoint timePointOfLastFixBeforeLateOutlier = track.getLastFixBefore(timePointForLateOutlier).getTimePoint();
-        assertTrue(invalidationCalls.iterator().next().after(timePointOfLastFixBeforeLateOutlier));
+        TimePoint timePointOfLastRawFixBeforeLateOutlier = track.getLastRawFixBefore(timePointForLateOutlier).getTimePoint();
+        // assert that adding the outlier invalidated the distance cache starting from the raw fix before the late outlier
+        // because its validity changed from true to false
+        assertTrue(invalidationCalls.iterator().next().equals(timePointOfLastRawFixBeforeLateOutlier));
         invalidationCalls.clear();
         // expect the invalidation to have started after the single cache entry, so the cache entry still has to be there:
         final Pair<TimePoint, Pair<TimePoint, Distance>> stillPresentFullIntervalCacheEntry = distanceCache
                 .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
-        assertNotNull(stillPresentFullIntervalCacheEntry); // no more entry for "to"-value start in cache
-        assertEquals(timePointOfLastOriginalFix, stillPresentFullIntervalCacheEntry.getA());
-        assertEquals(now, stillPresentFullIntervalCacheEntry.getB().getA());
+        assertNull(stillPresentFullIntervalCacheEntry); // no more entry for "to"-value start in cache because new temporary outlier lies in previously cached interval
         GPSFix polishedLastFix = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
-        // ...which now still is expected to be the lateOutlier because no succeeding fix qualifies it as outlier:
-        assertEquals(lateOutlier, polishedLastFix);
+        // ...which now is expected to be two fixes before lateOutlier because lateOutlier has previous fixes within the time range
+        // but none of them is reachable with max speed, and the raw fix right before lateOutlier is currently temporarily an outlier too
+        assertEquals(track.getLastRawFixBefore(timePointOfLastRawFixBeforeLateOutlier), polishedLastFix);
         track.lockForRead();
         try {
-            assertEquals(steps+1, Util.size(track.getFixes())); // what will later be detected as outlier is now an additional fix
+            assertEquals(steps-1, Util.size(track.getFixes())); // the lateOutlier and its predecessor are currently detected as outlier, so it's not steps+1 
+            // which would include the lateOutlier, but it's already only steps-1 valid fixes.
         } finally {
             track.unlockAfterRead();
         }
-        // now add another "normal" fix, making the lateOutlier really an outlier
+        // now add another "normal" fix, making the lateOutlier really an outlier; invalidation starts 1ms after the last previously valid
+        // fix before the fix added, or at the earliest fix that changes its validity, whichever is earlier. In this case the earlier time point
+        // is 1ms after the last *valid* fix before the fix inserted because that's the fix two before the lateOutlier, and that fix and all other
+        // earlier fixes don't change their validity
         GPSFix fix = new GPSFixImpl(p, start); // the "overshoot" from the previous loop can be used to generate the next "regular" fix
         track.addGPSFix(fix);
         assertEquals(1, invalidationCalls.size());
-        // now assert that the fix addition also invalidated what is now detected as an outlier
-        assertEquals(timePointForLateOutlier, invalidationCalls.iterator().next());
+        // the lateOutlier's predecessor now is expected to have changed validity again, causing a distance cache invalidation at its time
+        assertEquals(track.getLastFixBefore(timePointOfLastRawFixBeforeLateOutlier).getTimePoint().plus(1), invalidationCalls.iterator().next());
         assertTrue(timePointForLateOutlier.compareTo(fix.getTimePoint()) < 0);
-        // expect the invalidation to have started at the outlier, leaving the previous result ending at the fix right before the outlier intact
+        // expect the invalidation to have started at the fix before the outlier, leaving the previous result ending at the fix right before the outlier intact
         final Pair<TimePoint, Pair<TimePoint, Distance>> stillStillPresentFullIntervalCacheEntry = distanceCache
                 .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
-        assertNotNull(stillStillPresentFullIntervalCacheEntry); // no more entry for "to"-value start in cache
-        assertEquals(timePointOfLastOriginalFix, stillStillPresentFullIntervalCacheEntry.getA());
-        assertEquals(now, stillStillPresentFullIntervalCacheEntry.getB().getA());
+        assertNull(stillStillPresentFullIntervalCacheEntry); // still nothing in the cache
         track.lockForRead();
         try {
             assertEquals(steps+1, Util.size(track.getFixes())); // the one "normal" late fix is added on top of the <steps> fixes, but the two outliers should now be removed
@@ -686,6 +699,69 @@ public class TrackTest {
         SpeedWithBearing estimatedSpeedNew = track.getEstimatedSpeed(normalFixesTime);
         assertEquals(estimatedSpeed.getKnots(), estimatedSpeedNew.getKnots(), 0.001);
         assertEquals(estimatedSpeed.getBearing().getDegrees(), estimatedSpeedNew.getBearing().getDegrees(), 0.001);
+    }
+    
+    @Test
+    public void testValidCheckForFixThatSaysItsAsFastAsItWas() {
+        DynamicGPSFixMovingTrackImpl<Boat> myTrack = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("MyFirstBoat", new BoatClassImpl("505", /* typicallyStartsUpwind */
+                true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
+        TimePoint now1 = MillisecondsTimePoint.now();
+        TimePoint now2 = addMillisToTimepoint(now1, 1000); // 1s
+        DegreeBearingImpl bearing = new DegreeBearingImpl(90);
+        Position position1 = new DegreePosition(1, 2);
+        Position position2 = position1.translateGreatCircle(bearing, new MeterDistance(1));
+        GPSFixMovingImpl myGpsFix1 = new GPSFixMovingImpl(position1, now1, new MeterPerSecondSpeedWithDegreeBearingImpl(1, bearing));
+        GPSFixMovingImpl myGpsFix2 = new GPSFixMovingImpl(position2, now2, new MeterPerSecondSpeedWithDegreeBearingImpl(1, bearing));
+        myTrack.addGPSFix(myGpsFix1);
+        myTrack.addGPSFix(myGpsFix2);
+        myTrack.lockForRead();
+        try {
+            assertEquals(2, myTrack.getFixes().size()); // expecting both fixes to be valid
+        } finally {
+            myTrack.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testValidCheckForFixThatSaysItsFasterThanItActuallyWas() {
+        DynamicGPSFixMovingTrackImpl<Boat> myTrack = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("MyFirstBoat", new BoatClassImpl("505", /* typicallyStartsUpwind */
+                true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
+        TimePoint now1 = MillisecondsTimePoint.now();
+        TimePoint now2 = addMillisToTimepoint(now1, 1000); // 1s
+        DegreeBearingImpl bearing = new DegreeBearingImpl(90);
+        Position position1 = new DegreePosition(1, 2);
+        Position position2 = position1.translateGreatCircle(bearing, new MeterDistance(1));
+        GPSFixMovingImpl myGpsFix1 = new GPSFixMovingImpl(position1, now1, new MeterPerSecondSpeedWithDegreeBearingImpl(10, bearing));
+        GPSFixMovingImpl myGpsFix2 = new GPSFixMovingImpl(position2, now2, new MeterPerSecondSpeedWithDegreeBearingImpl(10, bearing));
+        myTrack.addGPSFix(myGpsFix1);
+        myTrack.addGPSFix(myGpsFix2);
+        myTrack.lockForRead();
+        try {
+            assertTrue(myTrack.getFixes().size() < 2); // at least one fix must be classified as outlier
+        } finally {
+            myTrack.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testValidCheckForFixThatSaysItsSlowerThanItActuallyWas() {
+        DynamicGPSFixMovingTrackImpl<Boat> myTrack = new DynamicGPSFixMovingTrackImpl<Boat>(new BoatImpl("MyFirstBoat", new BoatClassImpl("505", /* typicallyStartsUpwind */
+                true), null), /* millisecondsOverWhichToAverage */5000, /* no smoothening */null);
+        TimePoint now1 = MillisecondsTimePoint.now();
+        TimePoint now2 = addMillisToTimepoint(now1, 1000); // 1s
+        DegreeBearingImpl bearing = new DegreeBearingImpl(90);
+        Position position1 = new DegreePosition(1, 2);
+        Position position2 = position1.translateGreatCircle(bearing, new MeterDistance(1));
+        GPSFixMovingImpl myGpsFix1 = new GPSFixMovingImpl(position1, now1, new MeterPerSecondSpeedWithDegreeBearingImpl(0.1, bearing));
+        GPSFixMovingImpl myGpsFix2 = new GPSFixMovingImpl(position2, now2, new MeterPerSecondSpeedWithDegreeBearingImpl(0.1, bearing));
+        myTrack.addGPSFix(myGpsFix1);
+        myTrack.addGPSFix(myGpsFix2);
+        myTrack.lockForRead();
+        try {
+            assertTrue(myTrack.getFixes().size() < 2); // at least one fix must be classified as outlier
+        } finally {
+            myTrack.unlockAfterRead();
+        }
     }
     
     @Test

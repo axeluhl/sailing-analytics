@@ -12,14 +12,14 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseDataDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseDesignChangedEventSerializer;
 
 public class RaceLogCourseDesignChangedEventDeserializer extends BaseRaceLogEventDeserializer {
     
-    private final CourseDataDeserializer courseDataDeserializer;
+    private final CourseBaseDeserializer courseDataDeserializer;
     
-    public RaceLogCourseDesignChangedEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer, CourseDataDeserializer courseDataDeserializer) {
+    public RaceLogCourseDesignChangedEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer, CourseBaseDeserializer courseDataDeserializer) {
         super(competitorDeserializer);
         this.courseDataDeserializer = courseDataDeserializer;
     }

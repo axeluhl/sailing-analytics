@@ -21,7 +21,7 @@ public class BouyDataRetriever extends AbstractDataRetriever {
 		TrackReaderRetriever<Mark, GPSFix> retriever = new TrackReaderRetriever<Mark, GPSFix>() {
 			@Override
 			public TrackReader<Mark, GPSFix> retrieveTrackReader(Mark e) {
-				return new GPSFixTrackReader<Mark, GPSFix>(
+				return new TrackReaderImpl<Mark, GPSFix>(
 						race.getOrCreateTrack(e));
 			}
 		};

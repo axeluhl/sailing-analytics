@@ -10,10 +10,10 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -29,17 +29,21 @@ public class Simulator {
     private static final Logger logger = Logger.getLogger(Simulator.class.getName());
     
     private DynamicTrackedRace trackedRace;
-    private WindStore windStore;
+    private final WindStore windStore;
     private long advanceInMillis = -1;
     private Timer timer = new Timer("Timer for TracTrac Simulator");
     private boolean stopped;
     
+    public Simulator(WindStore windStore) {
+        super();
+        assert windStore != null;
+        this.windStore = windStore;
+    }
+
     /**
-     * Creates a wind store which replays the wind store events against a tracked race, correcting the wind fixes with
-     * the simulation delay. The wind store returned is an {@link EmptyWindStore}.
+     * The wind store returned is an {@link EmptyWindStore}.
      */
     public WindStore simulatingWindStore(WindStore windStore) {
-        this.windStore = windStore;
         return EmptyWindStore.INSTANCE;
     }
 
@@ -63,7 +67,6 @@ public class Simulator {
      */
     private void startWindPlayer() {
         assert this.trackedRace != null;
-        assert this.windStore != null;
         for (final Map.Entry<? extends WindSource, ? extends WindTrack> windSourceAndTrack : windStore.loadWindTracks(
                 trackedRace.getTrackedRegatta(), trackedRace,
                 /* millisecondsOverWhichToAverageWind doesn't matter because we only use raw fixes */ 10000).entrySet()) {

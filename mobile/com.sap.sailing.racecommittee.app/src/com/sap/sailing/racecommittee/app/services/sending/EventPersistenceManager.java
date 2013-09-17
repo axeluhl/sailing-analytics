@@ -102,6 +102,10 @@ public class EventPersistenceManager {
     public int getEventCount() {
         return persistedEvents.size();
     }
+    
+    public List<String> getContent() {
+        return persistedEvents;
+    }
 
     public List<Intent> restoreEvents() {
         List<Intent> delayedIntents = new ArrayList<Intent>();

@@ -25,18 +25,18 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
@@ -606,6 +606,24 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         return result;
     }
 
+    @Override
+    public boolean hasCourse(String raceID) {
+        boolean result = false;
+        if (messageLoader != null) {
+            result = messageLoader.hasRaceCourse(raceID);
+        }
+        return result; 
+    }
+
+    @Override
+    public boolean hasStartlist(String raceID) {
+        boolean result = false;
+        if (messageLoader != null) {
+            result = messageLoader.hasRaceStartlist(raceID);
+        }
+        return result;
+    }
+    
     private List<Race> parseAvailableRacesMessage(SailMasterMessage availableRacesMessage) {
         assertMessageType(MessageType.RAC, availableRacesMessage);
         int count = Integer.valueOf(availableRacesMessage.getSections()[1]);

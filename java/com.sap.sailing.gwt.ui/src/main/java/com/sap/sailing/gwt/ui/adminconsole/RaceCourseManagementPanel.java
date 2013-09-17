@@ -449,6 +449,14 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         };
         result.addColumn(markPatternColumn, stringMessages.pattern());
 
+        TextColumn<MarkDTO> markUUIDColumn = new TextColumn<MarkDTO>() {
+            @Override
+            public String getValue(MarkDTO markDTO) {
+                return markDTO.getIdAsString();
+            }
+        };
+        result.addColumn(markUUIDColumn, "UUID");
+        
         return result;
     }
 

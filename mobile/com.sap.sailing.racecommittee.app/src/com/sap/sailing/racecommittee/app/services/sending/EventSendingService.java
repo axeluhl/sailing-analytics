@@ -81,6 +81,10 @@ public class EventSendingService extends Service implements EventSendingListener
     }
 
     private Date lastSuccessfulSend;
+    
+    public List<String> getDelayedIntensContent() {
+        return persistenceManager.getContent();
+    }
 
     /**
      * a UUID that identifies this client session; can be used, e.g., to let the server identify subsequent requests coming from the same client

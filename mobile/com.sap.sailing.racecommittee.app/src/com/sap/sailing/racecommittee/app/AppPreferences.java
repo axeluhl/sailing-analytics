@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
@@ -36,6 +37,7 @@ public class AppPreferences {
     private final static String PREFERENCE_MANAGED_COURSE_AREAS = "courseAreasPref";
     private final static String PREFERENCE_MIN_ROUNDS = "minRoundsPreference";
     private final static String PREFERENCE_MAX_ROUNDS = "maxRoundsPreference";
+    private final static String PREFERENCE_DEFAULT_START_PROCEDURE_TYPE = "defaultStartProcedureType";
     
     public static BoatClassType getBoatClass(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
@@ -111,13 +113,13 @@ public class AppPreferences {
         return Arrays.asList(managedCourseAreas);
     }
     
-    public static double getWindBearing(Context context) {
+    public static double getWindBearingFromDirection(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         long windBearingAsLong = sp.getLong(PREFERENCE_WIND_BEARING, 0);
         return Double.longBitsToDouble(windBearingAsLong);
     }
     
-    public static void setWindBearing(Context context, double enteredWindBearing) {
+    public static void setWindBearingFromDirection(Context context, double enteredWindBearing) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         long windBearingAsLong = Double.doubleToLongBits(enteredWindBearing);
         sp.edit().putLong(PREFERENCE_WIND_BEARING, windBearingAsLong).apply();
@@ -192,5 +194,12 @@ public class AppPreferences {
             Log.e(TAG, "Unable to parse minimum rounds setting to integer");
         }
         return minRounds; 
+    }
+    
+    public static StartProcedureType getDefaultStartProcedureType(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        String defaultStartProcedureType = sp.getString(PREFERENCE_DEFAULT_START_PROCEDURE_TYPE, "RRS26");
+        StartProcedureType type = StartProcedureType.valueOf(defaultStartProcedureType);
+        return type;
     }
 }

@@ -41,7 +41,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
 
 public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkScoreCorrectionDTO> {
-    private static final RegExp p = RegExp.compile("^([A-Z][A-Z][A-Z])\\s*[^0-9]*([0-9]*)$");
+    private static final RegExp sailIdPattern = RegExp.compile("^([A-Z][A-Z][A-Z])\\s*[^0-9]*([0-9]*)$");
     
     private final LeaderboardDTO leaderboard;
     private final Map<CompetitorDTO, String> defaultOfficialSailIDsForCompetitors;
@@ -208,11 +208,14 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
      */
     private String canonicalizeSailID(String sailID, String defaultNationality) {
         String result = null;
-        MatchResult m = p.exec(sailID.trim());
-        if (p.test(sailID.trim())) {
+        MatchResult m = sailIdPattern.exec(sailID.trim());
+        if (sailIdPattern.test(sailID.trim())) {
             String iocCode = m.getGroup(1);
+            if (iocCode != null) {
+                iocCode = iocCode.toUpperCase();
+            }
             if (defaultNationality != null && (iocCode == null || iocCode.trim().length() == 0)) {
-                iocCode = defaultNationality;
+                iocCode = defaultNationality.toUpperCase();
             }
             if (iocCode != null && iocCode.trim().length() > 0) {
                 String number = m.getGroup(2);

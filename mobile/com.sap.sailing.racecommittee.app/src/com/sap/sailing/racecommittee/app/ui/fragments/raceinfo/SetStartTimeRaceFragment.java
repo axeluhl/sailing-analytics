@@ -21,7 +21,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -156,6 +156,7 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
             }
         });
 
+        //TODO read the preferences from AppPreferences
         StartProcedureType type = StartProcedureType.ESS;
         boolean overrideStartProcedureType = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(
                 "overrideDefaultStartProcedureType", false);

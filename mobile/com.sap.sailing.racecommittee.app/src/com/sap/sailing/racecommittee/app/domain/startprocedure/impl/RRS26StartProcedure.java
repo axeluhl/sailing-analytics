@@ -8,8 +8,8 @@ import java.util.UUID;
 import android.content.Context;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -326,27 +326,27 @@ public class RRS26StartProcedure implements StartProcedure, StartModeChoosableSt
     @Override
     public Pair<String, List<Object>> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart) {
         Pair<String, List<Object>> result;
-        List<Object> milisecondsList = new ArrayList<Object>();
+        List<Object> millisecondsList = new ArrayList<Object>();
         if (millisecondsTillStart < startPhaseStartModeDownInterval) {
-            milisecondsList.add(millisecondsTillStart);
-            milisecondsList.add(this.boatClassName);
+            millisecondsList.add(millisecondsTillStart);
+            millisecondsList.add(this.boatClassName);
             result = new Pair<String, List<Object>>(context.getResources().getString(
-                    R.string.race_startphase_countdown_class_remove), milisecondsList);
+                    R.string.race_startphase_countdown_class_remove), millisecondsList);
         } else if (millisecondsTillStart < startPhaseStartModeUpInterval) {
-            milisecondsList.add(millisecondsTillStart - startPhaseStartModeDownInterval);
-            milisecondsList.add(this.startModeFlag.toString());
+            millisecondsList.add(millisecondsTillStart - startPhaseStartModeDownInterval);
+            millisecondsList.add(this.startModeFlag.toString());
             result = new Pair<String, List<Object>>(context.getResources().getString(
-                    R.string.race_startphase_countdown_mode_remove), milisecondsList);
+                    R.string.race_startphase_countdown_mode_remove), millisecondsList);
         } else if (millisecondsTillStart < startPhaseClassUpInterval) {
-            milisecondsList.add(millisecondsTillStart - startPhaseStartModeUpInterval);
-            milisecondsList.add(this.startModeFlag.toString());
+            millisecondsList.add(millisecondsTillStart - startPhaseStartModeUpInterval);
+            millisecondsList.add(this.startModeFlag.toString());
             result = new Pair<String, List<Object>>(context.getResources().getString(
-                    R.string.race_startphase_countdown_mode_display), milisecondsList);
+                    R.string.race_startphase_countdown_mode_display), millisecondsList);
         } else {
-            milisecondsList.add(millisecondsTillStart - startPhaseClassUpInterval);
-            milisecondsList.add(this.boatClassName);
+            millisecondsList.add(millisecondsTillStart - startPhaseClassUpInterval);
+            millisecondsList.add(this.boatClassName);
             result = new Pair<String, List<Object>>(context.getResources().getString(
-                    R.string.race_startphase_countdown_class_display), milisecondsList);
+                    R.string.race_startphase_countdown_class_display), millisecondsList);
         }
         return result;
     }

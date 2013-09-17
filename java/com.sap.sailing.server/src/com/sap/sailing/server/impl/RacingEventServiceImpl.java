@@ -582,11 +582,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public void removeLeaderboard(String leaderboardName) {
         Leaderboard leaderboard = removeLeaderboardFromLeaderboardsByName(leaderboardName);
-        leaderboard.removeRaceColumnListener(raceLogReplicator);
-        leaderboard.removeRaceColumnListener(raceLogScoringReplicator);
-        mongoObjectFactory.removeLeaderboard(leaderboardName);
-        syncGroupsAfterLeaderboardRemove(leaderboardName, true);
-        leaderboard.destroy();
+        if (leaderboard != null) {
+            leaderboard.removeRaceColumnListener(raceLogReplicator);
+            leaderboard.removeRaceColumnListener(raceLogScoringReplicator);
+            mongoObjectFactory.removeLeaderboard(leaderboardName);
+            syncGroupsAfterLeaderboardRemove(leaderboardName, true);
+            leaderboard.destroy();
+        }
     }
 
     private Leaderboard removeLeaderboardFromLeaderboardsByName(String leaderboardName) {
@@ -771,9 +773,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterConnector(hostname, port,
                 swissTimingAdapterPersistence, canSendRequests);
         for (Race race : swissTimingConnector.getRaces()) {
-            TimePoint startTime = swissTimingConnector.getStartTime(race.getRaceID());
-            result.add(new com.sap.sailing.domain.swisstimingadapter.RaceRecord(race.getRaceID(),
-                    race.getDescription(), startTime == null ? null : startTime.asDate()));
+            String raceID = race.getRaceID();
+            TimePoint startTime = swissTimingConnector.getStartTime(raceID);
+            boolean hasCourse = swissTimingConnector.hasCourse(raceID);
+            boolean hasStartlist = swissTimingConnector.hasStartlist(raceID);
+            result.add(new com.sap.sailing.domain.swisstimingadapter.RaceRecord(raceID,
+                    race.getDescription(), startTime == null ? null : startTime.asDate(),
+                            hasCourse, hasStartlist));
         }
         return result;
     }
@@ -1158,7 +1164,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                             stopTrackingWind(regatta, race);
                         }
                     }
-                    raceTracker.stop(); // this also removes the TrackedRace from trackedRegatta
+                    raceTracker.stop();
                     raceTrackersByID.remove(raceTracker.getID());
                 }
                 raceTrackersByRegatta.remove(regatta);
@@ -1234,15 +1240,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             InterruptedException {
         logger.info("Stopping tracking for " + race + "...");
         synchronized (raceTrackersByRegatta) {
+            final Set<RaceTracker> trackerSet = raceTrackersByRegatta.get(regatta);
             if (raceTrackersByRegatta.containsKey(regatta)) {
-                Iterator<RaceTracker> trackerIter = raceTrackersByRegatta.get(regatta).iterator();
+                Iterator<RaceTracker> trackerIter = trackerSet.iterator();
                 while (trackerIter.hasNext()) {
                     RaceTracker raceTracker = trackerIter.next();
                     if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
                         logger.info("Found tracker to stop for races " + raceTracker.getRaces());
-                        raceTracker.stop(); // this also removes the TrackedRace from trackedRegatta
-                        // do not remove the tracker from raceTrackersByRegatta, because it should still exist there,
-                        // but with the state "non-tracked"
+                        raceTracker.stop();
                         trackerIter.remove();
                         raceTrackersByID.remove(raceTracker.getID());
                     }
@@ -1251,8 +1256,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 logger.warning("Didn't find any trackers for regatta " + regatta);
             }
             stopTrackingWind(regatta, race);
-            // if the last tracked race was removed, remove the entire regatta
-            if (raceTrackersByRegatta.get(regatta).isEmpty()) {
+            // if the last tracked race was removed, confirm that tracking for the entire regatta has stopped
+            if (trackerSet == null || trackerSet.isEmpty()) {
                 stopTracking(regatta);
             }
         }

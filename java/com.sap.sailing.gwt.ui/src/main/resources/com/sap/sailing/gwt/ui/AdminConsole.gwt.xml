@@ -22,10 +22,11 @@
   <inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
   
   <inherits name="com.google.gwt.resources.Resources" />
-    <inherits name="com.google.gwt.logging.Logging"/>
+  <inherits name="com.google.gwt.logging.Logging"/>
   
   <!-- Other module inherits                                      -->
   <inherits name="com.sap.sailing.domain.SailingDomain" />
+  <inherits name="de.csenk.gwt.ws.WebSocket" />  
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.sap.sailing.gwt.ui.adminconsole.AdminConsoleEntryPoint'/>
@@ -53,4 +54,5 @@
   <source path='shared'/>
   <source path='test'/>
   <source path='actions'/>
+  <source path='simulator'/>
 </module>

@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
@@ -34,6 +35,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
     public ManagedRacesDataParser(Context context, JsonDeserializer<RaceGroup> deserializer) {
         this.context = context;
         this.deserializer = deserializer;
+        this.context = context;
     }
 
     public Collection<ManagedRace> parse(Reader reader) throws Exception {
@@ -65,8 +67,9 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 
     private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesBase series, Fleet fleet, String name,
             RaceLog raceLog) {
-        return new ManagedRaceImpl(context, new ManagedRaceIdentifierImpl(name,
-                        new FleetIdentifierImpl(fleet, series, raceGroup)), StartProcedureType.RRS26, raceLog);
+        StartProcedureType startType = AppPreferences.getDefaultStartProcedureType(context);
+        return new ManagedRaceImpl(new ManagedRaceIdentifierImpl(name,
+               new FleetIdentifierImpl(fleet, series, raceGroup)), startType, raceLog);
 
     }
 
