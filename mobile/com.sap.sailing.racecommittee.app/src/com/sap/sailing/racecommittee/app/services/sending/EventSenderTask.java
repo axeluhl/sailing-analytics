@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.services.sending;
 
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
@@ -53,21 +54,18 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Triple<Intent, Bool
         final List<RaceLogEvent> eventsToAdd = new ArrayList<RaceLogEvent>();
         try {
             ExLog.i(TAG, "Posting event: " + serializedEventAsJson);
-            HttpRequest post = new HttpJsonPostRequest(URI.create(url), serializedEventAsJson);
+            HttpRequest post = new HttpJsonPostRequest(new URL(url), serializedEventAsJson);
             SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
-            try {
-                // TODO read JSON-serialized race log events that need to be merged into the local race log because they were added on the server in the interim
-                final InputStream inputStream = post.execute();
-                JSONParser parser = new JSONParser();
-                JSONArray eventsToAddAsJson = (JSONArray) parser.parse(new InputStreamReader(inputStream));
-                for (Object o : eventsToAddAsJson) {
-                    RaceLogEvent eventToAdd = RaceLogEventDeserializer.create(domainFactory).deserialize((JSONObject) o);
-                    eventsToAdd.add(eventToAdd);
-                }
-                inputStream.close();
-            } finally {
-                post.disconnect();
+            // TODO read JSON-serialized race log events that need to be merged into the local race log because they
+            // were added on the server in the interim
+            final InputStream inputStream = post.execute();
+            JSONParser parser = new JSONParser();
+            JSONArray eventsToAddAsJson = (JSONArray) parser.parse(new InputStreamReader(inputStream));
+            for (Object o : eventsToAddAsJson) {
+                RaceLogEvent eventToAdd = RaceLogEventDeserializer.create(domainFactory).deserialize((JSONObject) o);
+                eventsToAdd.add(eventToAdd);
             }
+            inputStream.close();
             ExLog.i(TAG, "Post successful for the following event: " + serializedEventAsJson);
             result = new Triple<Intent, Boolean, Iterable<RaceLogEvent>>(intent, true, eventsToAdd);
         } catch (Exception e) {

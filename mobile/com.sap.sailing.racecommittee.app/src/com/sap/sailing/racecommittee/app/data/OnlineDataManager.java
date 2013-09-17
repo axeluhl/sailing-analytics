@@ -142,14 +142,11 @@ public class OnlineDataManager extends DataManager {
                                         new RaceCellDeserializer(new RaceLogDeserializer(
                                                 RaceLogEventDeserializer.create(domainFactory)))))));
                 DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(OnlineDataManager.this);
-                    + "/sailingserver/rc/racegroups?"+
-                    RaceLogServletConstants.PARAM_COURSE_AREA_FILTER + "=" + courseAreaId.toString()+"&"+
-                    RaceLogServletConstants.PARAMS_CLIENT_UUID + "=" + EventSendingService.uuid), parser, handler)
-
                 return new OnlineDataLoader<Collection<ManagedRace>>(context, new URL(AppPreferences
                         .getServerBaseURL(context)
-                        + "/sailingserver/rc/racegroups?courseArea="
-                        + courseAreaId.toString()), parser, handler);
+                    + "/sailingserver/rc/racegroups?"+
+                    RaceLogServletConstants.PARAM_COURSE_AREA_FILTER + "=" + courseAreaId.toString()+"&"+
+                    RaceLogServletConstants.PARAMS_CLIENT_UUID + "=" + EventSendingService.uuid), parser, handler);
             }
         });
     }
@@ -175,7 +172,7 @@ public class OnlineDataManager extends DataManager {
                         .getServerBaseURL(context)
                     + "/sailingserver/rc/marks?"+RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + raceGroupName +
                     "&"+RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=" + raceColumnName 
-                    + "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler)
+                    + "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler);
             }
         });
     }
@@ -202,7 +199,7 @@ public class OnlineDataManager extends DataManager {
                 return new OnlineDataLoader<CourseBase>(context, new URL(AppPreferences.getServerBaseURL(context)
                     + "/sailingserver/rc/currentcourse?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "="
                     + raceGroupName + "&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName
-                    + "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler).forceLoad();
+                    + "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler);
             }
         });
     }
@@ -226,11 +223,11 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName());
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName());
 
-                return new OnlineDataLoader<Collection<Competitor>>(context, new URL(AppPreferences
-                        .getServerBaseURL(context)
-                    + "/sailingserver/rc/competitors?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + raceGroupName + "&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName 
-                    + "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler)
-
+                return new OnlineDataLoader<Collection<Competitor>>(context, new URL(
+                        AppPreferences.getServerBaseURL(context) + "/sailingserver/rc/competitors?"
+                                + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + raceGroupName + "&"
+                                + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName + "&"
+                                + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName), parser, handler);
             }
         });
     }

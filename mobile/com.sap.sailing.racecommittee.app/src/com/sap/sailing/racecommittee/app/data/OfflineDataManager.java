@@ -12,8 +12,6 @@ import java.util.concurrent.Callable;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 
-import android.content.Context;
-
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
@@ -33,6 +31,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
@@ -59,8 +58,7 @@ public class OfflineDataManager extends DataManager {
     }
 
     private void fillDataStore(DataStore dataStore) {
-        dataStore
-                .addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Cardiff)", "Cardiff", "", true, "DUMBUUIDA"));
+        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Cardiff)", "Cardiff", "", true, "DUMBUUIDA"));
         dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Nice)", "Nice", "", true, "DUMBUUIDB"));
         dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Rio)", "Rio", "", true, "DUMBUUIDC"));
         EventBase newEvent = new EventBaseImpl("Extreme Sailing Series 2013 (Muscat)", "Muscat", "", true, "FIXUUID");
@@ -82,14 +80,15 @@ public class OfflineDataManager extends DataManager {
 
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         RaceLog log = new RaceLogImpl(UUID.randomUUID());
-        log.add(factory.createStartTimeEvent(new MillisecondsTimePoint(new Date().getTime() - 2000), 1,
+        final RaceLogEventAuthor author = AppPreferences.getAuthor(context);
+        log.add(factory.createStartTimeEvent(new MillisecondsTimePoint(new Date().getTime() - 2000), author,
                 1, new MillisecondsTimePoint(new Date().getTime() - 1000)));
 
-        log.add(factory.createRaceStatusEvent(new MillisecondsTimePoint(new Date().getTime()), 1,
+        log.add(factory.createRaceStatusEvent(new MillisecondsTimePoint(new Date().getTime()),
                 AppPreferences.getAuthor(context),
                 1, RaceLogRaceStatus.FINISHING));
 
-        ManagedRace q1 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying,
+        ManagedRace q1 = new ManagedRaceImpl(context, new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying,
                 raceGroup), StartProcedureType.ESS, log);
 
         log = new RaceLogImpl(UUID.randomUUID());
@@ -98,7 +97,7 @@ public class OfflineDataManager extends DataManager {
          * new MillisecondsTimePoint(new Date().getTime() + 100000)));
          */
 
-        ManagedRace q2 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying,
+        ManagedRace q2 = new ManagedRaceImpl(context, new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying,
                 raceGroup), StartProcedureType.ESS, log);
 
         log = new RaceLogImpl(UUID.randomUUID());
@@ -106,7 +105,7 @@ public class OfflineDataManager extends DataManager {
          * log.add(factory.createRaceStatusEvent( new MillisecondsTimePoint(new Date()), 5,
          * RaceLogRaceStatus.FINISHED));
          */
-        ManagedRace q3 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying,
+        ManagedRace q3 = new ManagedRaceImpl(context, new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying,
                 raceGroup), StartProcedureType.ESS, log);
         /*
          * ManagedRace m1 = new ManagedRaceImpl( new ManagedRaceIdentifierImpl( "M1", new FleetImpl("Default"), medal,

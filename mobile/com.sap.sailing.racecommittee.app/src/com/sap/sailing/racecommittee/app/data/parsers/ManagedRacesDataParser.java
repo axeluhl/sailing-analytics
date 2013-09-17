@@ -35,7 +35,6 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
     public ManagedRacesDataParser(Context context, JsonDeserializer<RaceGroup> deserializer) {
         this.context = context;
         this.deserializer = deserializer;
-        this.context = context;
     }
 
     public Collection<ManagedRace> parse(Reader reader) throws Exception {
@@ -68,7 +67,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
     private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesBase series, Fleet fleet, String name,
             RaceLog raceLog) {
         StartProcedureType startType = AppPreferences.getDefaultStartProcedureType(context);
-        return new ManagedRaceImpl(new ManagedRaceIdentifierImpl(name,
+        return new ManagedRaceImpl(context, new ManagedRaceIdentifierImpl(name,
                new FleetIdentifierImpl(fleet, series, raceGroup)), startType, raceLog);
 
     }
