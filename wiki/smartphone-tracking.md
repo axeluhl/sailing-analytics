@@ -231,15 +231,11 @@ Used for example in the `Select*Fragments`.
 ## ToDo
 
 ### Server
-* RegattaLeaderboard -> define in AdminConsole?
 * only one competitor registered, even though multiple RegisteredEvents in RaceLog?
 * change names of *Events, as they are not events -> also change names of abstract base classes
 * use extension serializers
 * exchange auto JSON to BSON conversion in MongoObjectFactory / DomainObjectFactory for something suited for productive use
-* set fleet when creating race
 * editing course in the RaceBoardAdmin
-* persist tracking data (GPSFixStore)
-* load stored tracked smartphone race (Panel in Admin Console, RaceLogConnector, only present such races with the necessary data in the racelog, and allow user to select whole leaderboard to restore)
 * mapping devices to marks
 * generic method for registering listener for NMEA sentence types (e.g. to then process wind) -> move servlet for receiving NMEA out of smartphoneadapter
 * accepting / removing competitors
