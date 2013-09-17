@@ -103,6 +103,9 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 ### `/sailingserver/racelogtracking/createRace?leaderboard=<leaderboardName>&raceColumn=<raceColumnName>&fleet=<fleetName>`
 `CreateRaceLogTrackedRacePostServlet`
 
+**Expects**
+* POST request
+
 **Returns**
 * `200` RaceGroup JSON, containing only the Series/Row/Cell structure for the newly created race
 
