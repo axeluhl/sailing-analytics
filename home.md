@@ -30,8 +30,12 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
   * [[Inventory|wiki/inventar-liste]]
   * [[Smartphone Tracking|wiki/smartphone-tracking]]
+<<<<<<< HEAD:home.md
   * [[Racecommittee App|wiki/racecommittee-app]]
   * [[Web Services API|wiki/sailing-webservices]]
+=======
+  * [[Theses (Bachelor, Master, ...)|wiki/theses]]
+>>>>>>> origin/master:home.md
 * Planning and Event Information
   * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]

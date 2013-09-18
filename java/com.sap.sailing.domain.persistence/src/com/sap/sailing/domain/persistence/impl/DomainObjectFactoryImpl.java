@@ -35,14 +35,11 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
@@ -56,11 +53,14 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -142,7 +142,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private TimePoint loadTimePoint(DBObject object, FieldNames field) {
-        return new MillisecondsTimePoint((Long) object.get(field.name()));
+        return new MillisecondsTimePoint(((Number) object.get(field.name())).longValue());
     }
 
     /**
@@ -1006,20 +1006,31 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         RaceLog result = new RaceLogImpl(RaceLogImpl.class.getSimpleName(), identifier.getIdentifier());
         try {
             BasicDBObject query = new BasicDBObject();
-            query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(identifier.getIdentifier().toString()));
-            DBCollection raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
-            for (DBObject o : raceLog.find(query)) {
-                RaceLogEvent raceLogEvent = loadRaceLogEvent((DBObject) o.get(FieldNames.RACE_LOG_EVENT.name()));
-
-                if (raceLogEvent != null)
-                    result.add(raceLogEvent);
-            }
+            query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(identifier.getIdentifier()));
+            loadRaceLogEvents(result, query);
+            
+            // query for obsolete events
+            query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(String.format("%s.%s.%s", 
+                    identifier.getTemplate().getParentObjectName(),
+                    identifier.getRaceColumnName(),
+                    identifier.getFleetName())));
+            loadRaceLogEvents(result, query);
         } catch (Throwable t) {
             // something went wrong during DB access; report, then use empty new race log
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded race log data. Check MongoDB settings.");
             logger.log(Level.SEVERE, "loadRaceLog", t);
         }
         return result;
+    }
+
+    private void loadRaceLogEvents(RaceLog result, BasicDBObject query) {
+        DBCollection raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
+        for (DBObject o : raceLog.find(query)) {
+            RaceLogEvent raceLogEvent = loadRaceLogEvent((DBObject) o.get(FieldNames.RACE_LOG_EVENT.name()));
+            if (raceLogEvent != null) {
+                result.add(raceLogEvent);
+            }
+        }
     }
 
     public RaceLogEvent loadRaceLogEvent(DBObject dbObject) {
@@ -1190,7 +1201,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     private CourseBase loadCourseData(BasicDBList dbCourseList, String courseName) {
         if (courseName == null) {
-            courseName = "Course template";
+            courseName = "Course";
         }
         CourseBase courseData = new CourseDataImpl(courseName);
         int i = 0;

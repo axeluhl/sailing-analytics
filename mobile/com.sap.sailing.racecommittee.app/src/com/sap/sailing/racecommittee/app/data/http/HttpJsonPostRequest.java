@@ -3,11 +3,9 @@ package com.sap.sailing.racecommittee.app.data.http;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
+import java.net.URL;
 import java.nio.charset.Charset;
 
 public class HttpJsonPostRequest extends HttpRequest {
@@ -15,14 +13,13 @@ public class HttpJsonPostRequest extends HttpRequest {
 
     private String requestBody;
 
-    public HttpJsonPostRequest(URI requestUri, String body) throws MalformedURLException, IOException {
-        super(requestUri.toURL());
+    public HttpJsonPostRequest(URL requestUrl, String body) {
+        super(requestUrl);
         this.requestBody = body;
     }
 
     @Override
-    protected InputStream execute(HttpURLConnection connection) throws IOException {
-        // connection.setDoInput(true);
+    protected BufferedInputStream execute(HttpURLConnection connection) throws IOException {
         connection.setDoOutput(true);
         connection.setChunkedStreamingMode(0);
 

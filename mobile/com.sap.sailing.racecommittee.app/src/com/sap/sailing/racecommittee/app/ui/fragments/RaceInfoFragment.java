@@ -16,7 +16,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.tracking.Wind;
@@ -218,7 +218,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         LastWindFixFinder windFinder = new LastWindFixFinder(getRace().getState().getRaceLog());
         if (windFinder.analyze()!=null){
             Wind wind = windFinder.analyze();
-            windInfoHeader.setText(String.format(getString(R.string.wind_info), wind.getKnots(), wind.getBearing().toString()));
+            windInfoHeader.setText(String.format(getString(R.string.wind_info), wind.getKnots(), wind.getBearing().reverse().toString()));
         }
     }
     

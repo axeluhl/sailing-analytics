@@ -476,6 +476,7 @@ public class SimulatorMainPanel extends SimplePanel {
         double minValue = (Double) s.getMin();
         double maxValue = (Double) s.getMax();
         double defaultValue = (Double) s.getDefault();
+        double stepSize = (Double) s.getResolution();
 
         FlowPanel vp = new FlowPanel();
         vp.getElement().setClassName("sliderWrapper");
@@ -489,8 +490,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
         sliderBar.getElement().getStyle().setProperty("width", "216px");
 
-        //sliderBar.setStepSize(Math.round((maxValue - minValue) / 10.), false);
-        sliderBar.setStepSize(((maxValue - minValue) / (s.getSteps()) ), false);
+        sliderBar.setStepSize(stepSize, false);
         sliderBar.setNumTicks(s.getSteps());
         sliderBar.setNumTickLabels(1);
 

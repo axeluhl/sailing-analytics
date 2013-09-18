@@ -4,17 +4,17 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
+import java.net.URL;
 
 public class HttpGetRequest extends HttpRequest {
 
-    public HttpGetRequest(URI requestUri) throws MalformedURLException, IOException {
-        super(requestUri.toURL());
+    public HttpGetRequest(URL requestUrl) {
+        super(requestUrl);
     }
 
     @Override
-    protected InputStream execute(HttpURLConnection connection) throws IOException {
-        return new BufferedInputStream(connection.getInputStream());
+    protected BufferedInputStream execute(HttpURLConnection connection) throws IOException {
+        InputStream stream = connection.getInputStream();
+        return new BufferedInputStream(stream);
     }
 }

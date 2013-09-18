@@ -1,12 +1,12 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import com.sap.sailing.domain.base.impl.AbstractSpeedWithAbstractBearingImpl;
-import com.sap.sailing.domain.base.impl.AbstractTimePoint;
 import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.AbstractPosition;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.AbstractSpeedWithAbstractBearingImpl;
+import com.sap.sailing.domain.common.impl.AbstractTimePoint;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implements Wind {

@@ -32,7 +32,14 @@ public class FleetIdentifierImpl implements FleetIdentifier {
     }
 
     public Serializable getId() {
-        return String.format("%s.%s.%s", getRaceGroup().getName(), getSeries().getName(), getFleet().getName());
+        return String.format("%s.%s.%s", 
+                escapeIdentifierFragment(getRaceGroup().getName()), 
+                escapeIdentifierFragment(getSeries().getName()), 
+                escapeIdentifierFragment(getFleet().getName()));
+    }
+    
+    protected String escapeIdentifierFragment(String fragment) {
+        return fragment.replace(".", "\\.");
     }
 
 }
