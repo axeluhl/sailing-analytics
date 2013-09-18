@@ -1,3 +1,3 @@
-* Live Audio Streaming
+# Live Audio Streaming
 
 See also [Bug 1522](http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=1522). We currently have the ManyPlayers Race Viewer that supports this use case. It is based on Flash and requires several additional server-side components. Adding live audio support to the HTML-based SAP Sailing Analytics could simplify the consumption of live audio streams for certain use cases and could ease server administration considerably.
