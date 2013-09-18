@@ -581,7 +581,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     private void updateStatusOfTrackedRace(DynamicTrackedRace trackedRace) {
-        if (lastStatus != null) {
+        // can't update a race status once it has been set to FINISHED
+        if (lastStatus != null && trackedRace.getStatus() != null && trackedRace.getStatus().getStatus() != TrackedRaceStatusEnum.FINISHED) {
             trackedRace.setStatus(lastStatus);
         }
     }

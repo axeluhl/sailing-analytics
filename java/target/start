@@ -55,7 +55,7 @@ REPLICATION_PARAMETERS="-Dreplication.start=$REPLICATE_ON_START -Dreplicate.mast
 if [[ $PARAM == "" ]]; then
     nohup $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -console $TELNET_PORT -configuration ./ -clean 2>/dev/null >/dev/null &
     echo "Starting server..."
-    sleep 2
+    sleep 10
 
     TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$TELNET_PORT"`
     if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
