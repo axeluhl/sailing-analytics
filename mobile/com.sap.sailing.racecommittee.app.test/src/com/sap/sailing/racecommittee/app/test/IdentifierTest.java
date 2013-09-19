@@ -37,4 +37,42 @@ public class IdentifierTest {
 
         assertFalse(i1ID.equals(i2ID));
     }
+
+    @Test
+    public void testManagedRaceIdentifierUniqueness2() {
+        final Set<RaceRow> raceRows1 = Collections.emptySet();
+        final SeriesWithRows series1 = new SeriesWithRowsImpl("ghi\\", /* isMedal */ false, /* raceRows */ raceRows1);
+        final Set<SeriesWithRows> raceGroupSeries1 = Collections.singleton(series1);
+        ManagedRaceIdentifier i1 = new ManagedRaceIdentifierImpl("abc", new FleetIdentifierImpl(new FleetImpl("mno.def"), series1,
+                new RaceGroupImpl("jkl", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), new CourseAreaImpl("Alpha", "Alpha ID"), raceGroupSeries1)));
+        String i1ID = i1.getId().toString();
+        
+        final Set<RaceRow> raceRows2 = Collections.emptySet();
+        final SeriesWithRows series2 = new SeriesWithRowsImpl("ghi.mno\\", /* isMedal */ false, /* raceRows */ raceRows2);
+        final Set<SeriesWithRows> raceGroupSeries2 = Collections.singleton(series2);
+        ManagedRaceIdentifier i2 = new ManagedRaceIdentifierImpl("abc", new FleetIdentifierImpl(new FleetImpl("def"), series2,
+                new RaceGroupImpl("jkl", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), new CourseAreaImpl("Alpha", "Alpha ID"), raceGroupSeries2)));
+        String i2ID = i2.getId().toString();
+
+        assertFalse(i1ID.equals(i2ID));
+    }
+
+    @Test
+    public void testManagedRaceIdentifierUniqueness3() {
+        final Set<RaceRow> raceRows1 = Collections.emptySet();
+        final SeriesWithRows series1 = new SeriesWithRowsImpl("ghi", /* isMedal */ false, /* raceRows */ raceRows1);
+        final Set<SeriesWithRows> raceGroupSeries1 = Collections.singleton(series1);
+        ManagedRaceIdentifier i1 = new ManagedRaceIdentifierImpl("abc", new FleetIdentifierImpl(new FleetImpl("def.mno\\"), series1,
+                new RaceGroupImpl("jkl", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), new CourseAreaImpl("Alpha", "Alpha ID"), raceGroupSeries1)));
+        String i1ID = i1.getId().toString();
+        
+        final Set<RaceRow> raceRows2 = Collections.emptySet();
+        final SeriesWithRows series2 = new SeriesWithRowsImpl("ghi", /* isMedal */ false, /* raceRows */ raceRows2);
+        final Set<SeriesWithRows> raceGroupSeries2 = Collections.singleton(series2);
+        ManagedRaceIdentifier i2 = new ManagedRaceIdentifierImpl("mno.abc", new FleetIdentifierImpl(new FleetImpl("def\\"), series2,
+                new RaceGroupImpl("jkl", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), new CourseAreaImpl("Alpha", "Alpha ID"), raceGroupSeries2)));
+        String i2ID = i2.getId().toString();
+
+        assertFalse(i1ID.equals(i2ID));
+    }
 }
