@@ -39,7 +39,7 @@ public class FleetIdentifierImpl implements FleetIdentifier {
     }
     
     protected String escapeIdentifierFragment(String fragment) {
-        return fragment./* this is probably the fix for bug 1524: replace("\\", "\\\\"). */ replace(".", "\\.");
+        return fragment.replace("\\", "\\\\").replace(".", "\\.");
     }
 
 }
