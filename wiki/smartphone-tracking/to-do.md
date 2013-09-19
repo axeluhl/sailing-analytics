@@ -2,7 +2,6 @@
 [[_TOC_]]
 
 ## Server
-* only one competitor registered, even though multiple RegisteredEvents in RaceLog?
 * change names of *Events, as they are not events -> also change names of abstract base classes
 * use extension serializers
 * exchange auto JSON to BSON conversion in MongoObjectFactory / DomainObjectFactory for something suited for productive use
@@ -20,6 +19,7 @@
 * only transfer competitor ID for registering etc. instead of whole competitor
 
 ## Android
+* use EventSendingService for all outgoing requests, not only race log
 * change format of sent position Data to degrees and minutes
 * reuse existing course design functionality to create RaceLogCourseDesignChangedEvent before sending RaceLogPreRacePhaseEndedEvent
 * abstract sending service, so that all POST / GET requests and not only RaceLogEvents can be sent using the semi-connectedness functionality --> just write JSONObjects/Strings directly into the file. The Servlet has to handle deserialization and the client doesn't have to know what type of object it is after having saved it (is this really the case?)
