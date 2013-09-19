@@ -10,8 +10,9 @@ The servlets are listed in the chronological order that they can be called. Firs
 
 To test the servlets manually, in addition to the unit tests, the chrome plugin [Postman](https://chrome.google.com/webstore/detail/postman-rest-client/fdmmgilgnpjigdojojpjoooidkmcomcm) in combination with this collection of [HTTP requests](http://www.getpostman.com/collections/d4eb46b5e4f566e6b7a3) for the servlets described below may come in handy.
 
-## `/sailingserver/racelogtracking/createPersistentCompetitor`
-`CreatePersistentCompetitorPostServlet`
+## createPersistentCompetitor
+URL: `/sailingserver/racelogtracking/createPersistentCompetitor`
+Servlet: `CreatePersistentCompetitorPostServlet`
 
 **Expects**
 * POST request body: Competitor-JSON with a nested Boat-JSON and Team-JSON (see `CompetitorJsonDeserializer`)
@@ -49,8 +50,9 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 **Comments**
 * The server choses the id, so this field can be left blank / not supplied
 
-## `/sailingserver/racelogtracking/getPersistentCompetitors`
-`PersistentCompetitorsGetServlet`
+## getPersistentCompetitors
+URL: `/sailingserver/racelogtracking/getPersistentCompetitors`
+Servlet: `PersistentCompetitorsGetServlet`
 
 **Expects**
 * GET request
@@ -59,8 +61,9 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 * `200` body: JSON array of Competitor objects
 
 
-### `/sailingserver/racelogtracking/getRaceLogsInPreRacePhase`
-`RaceLogsInPreRacePhaseGetServlet`
+## getRaceLogsInPreRacePhase
+URL: `/sailingserver/racelogtracking/getRaceLogsInPreRacePhase`
+Servlet: `RaceLogsInPreRacePhaseGetServlet`
 
 **Expects**
 * GET request
@@ -68,8 +71,9 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 **Returns**
 * `200` body: JSON array of RaceGroups
 
-## `/sailingserver/racelogtracking/createRace?leaderboard=<leaderboardName>&raceColumn=<raceColumnName>&fleet=<fleetName>`
-`CreateRaceLogTrackedRacePostServlet`
+## createRace
+URL: `/sailingserver/racelogtracking/createRace?leaderboard=<leaderboardName>&raceColumn=<raceColumnName>&fleet=<fleetName>`
+Servlet: `CreateRaceLogTrackedRacePostServlet`
 
 **Expects**
 * POST request
@@ -84,8 +88,9 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 **Comments**
 * The behaviour of the servlet depends on the type of leaderboard with the name `leaderboardName`. If this is a `RegattaLeaderboard`, then the RaceColumn with the name `raceColumnName` has to already exist. If it is a `FlexibleLeaderboard`, the RaceColumn will be created if it does not yet exist.
 
-## `/smartphone/recordFixes`
-`RecordFixesPostServlet`
+## recordFixes
+URL: `/smartphone/recordFixes`
+Servlet: `RecordFixesPostServlet`
 
 **Precondition**
 * race has already been started by sending a `RaceLogPreRacePhaseEndedEvent`
@@ -111,8 +116,9 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 **Throws**
 * `409` Device not mapped to race and competitor
 
-## `/sailingserver/racelogtracking/pingMark?leaderboard=<leaderboardName>&raceColumn=<raceColumnName>&fleet=<fleetName>`
-`PingMarkPostServlet`
+## pingMark
+URL: `/sailingserver/racelogtracking/pingMark?leaderboard=<leaderboardName>&raceColumn=<raceColumnName>&fleet=<fleetName>`
+Servlet: `PingMarkPostServlet`
 
 **Precondition**
 * race has already been started by sending a `RaceLogPreRacePhaseEndedEvent` and has not been stopped yet
@@ -136,8 +142,12 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 * `404` Leaderboard, RaceColumn or Fleet not found
 * `409` Race not in tracking state
 
-## `/sailingserver/rc/currentcourse`
-`CourseJsonExportServlet`
+## currentcourse
+URL: `/sailingserver/rc/currentcourse`
+Servlet: `CourseJsonExportServlet`
+
+**Precondition**
+* Race must have been started through a `RaceLogPreRacePhaseEndedEvent`
 
 **Expects**
 * GET request
