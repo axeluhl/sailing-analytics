@@ -39,7 +39,7 @@ public class FleetIdentifierImpl implements FleetIdentifier {
     }
     
     protected String escapeIdentifierFragment(String fragment) {
-        return fragment.replace(".", "\\.");
+        return fragment.replace("\\", "\\\\").replace(".", "\\.");
     }
 
 }

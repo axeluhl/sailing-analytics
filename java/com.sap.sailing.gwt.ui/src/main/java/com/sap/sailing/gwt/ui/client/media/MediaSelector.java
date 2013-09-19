@@ -250,12 +250,12 @@ public class MediaSelector implements PlayStateListener, TimeListener,
     }
 
     private void startPlaying() {
-        if (activeAudioPlayer != null) {
+        if ((activeAudioPlayer != null) && activeAudioPlayer.isCoveringCurrentRaceTime()) {
             activeAudioPlayer.playMedia();
         }
-        for (MediaPlayer player : videoPlayers.values()) {
-            if (player.isMediaPaused()) {
-                player.playMedia();
+        for (MediaPlayer videoPlayer : videoPlayers.values()) {
+            if (videoPlayer.isMediaPaused() && videoPlayer.isCoveringCurrentRaceTime()) {
+                videoPlayer.playMedia();
             }
         }
     }
@@ -458,7 +458,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
     private void ensurePlayState(final MediaPlayer mediaPlayer) {
         switch (this.currentPlayState) {
         case Playing:
-            if (mediaPlayer.isMediaPaused()) {
+            if (mediaPlayer.isMediaPaused() && mediaPlayer.isCoveringCurrentRaceTime()) {
                 mediaPlayer.playMedia();
             }
             break;
