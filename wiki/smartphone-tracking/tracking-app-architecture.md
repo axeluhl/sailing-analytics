@@ -1,7 +1,11 @@
 # Tracking App Architecture
 [[_TOC_]]
 
+## Activities and Fragments of the tracking app
 ![Activities and Fragments of the tracking app](http://i.imagebanana.com/img/20r2qf7g/overview_Fragments_and_Activities.JPG)
+
+## Communication during the race
+![Typical communication between the App, its backend and the SAP Sailing Analytics server during the creation of a race](http://i.imagebanana.com/img/e1blf6xl/Capture.PNG)
 
 ## `LocationChangedReceiver`
 This class gets notified of location changes via intents. Depending on whether the App is in local or remote broadcast mode the corresponding service is started by using intents.
