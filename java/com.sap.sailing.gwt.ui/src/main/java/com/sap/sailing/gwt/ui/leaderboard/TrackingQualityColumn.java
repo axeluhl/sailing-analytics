@@ -27,9 +27,9 @@ public class TrackingQualityColumn extends DetailTypeColumn<Double, Double> {
         public TrackingQualityCell() {
             super(new SafeHtmlRenderer<Double>() {
                 @Override
-                public SafeHtml render(Double rank) {
+                public SafeHtml render(Double timeSinceLastPositionFixInSeconds) {
                     SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                    render(rank, builder);
+                    render(timeSinceLastPositionFixInSeconds, builder);
                     return builder.toSafeHtml();
                 }
 

@@ -15,8 +15,8 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
  * 
  */
 public class MinMaxRenderer {
-    private HasStringAndDoubleValue valueProvider;
-    private Comparator<LeaderboardRowDTO> comparator;
+    private final HasStringAndDoubleValue valueProvider;
+    private final Comparator<LeaderboardRowDTO> comparator;
     private Double minimumValue;
     private Double maximumValue;
 
@@ -56,7 +56,7 @@ public class MinMaxRenderer {
      * @param row
      *            The row to get the percentage for.
      */
-    private int getPercentage(LeaderboardRowDTO row) {
+    protected int getPercentage(LeaderboardRowDTO row) {
         int percentage = 0;
         Double value = valueProvider.getDoubleValue(row);
         if (value != null) {
@@ -105,4 +105,9 @@ public class MinMaxRenderer {
             maximumValue = valueProvider.getDoubleValue(maximumRow);
         }
     }
+
+    protected HasStringAndDoubleValue getValueProvider() {
+        return valueProvider;
+    }
+
 }

@@ -865,7 +865,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 String detailColumnStyle) {
             Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
             result.put(DetailType.RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS, 
+                    new TimeSinceLastGpsFixColumn(DetailType.RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS, 
                             new RaceTimeSinceLastPositionFixInSeconds(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_TRACKING_QUALITY, new TrackingQualityColumn(stringMessages.trackingQuality(), new RaceTrackingQuality(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             
