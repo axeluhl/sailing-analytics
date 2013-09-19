@@ -28,7 +28,7 @@ public class TrackingQualityMinMaxRenderer extends MinMaxRenderer {
         } else if (percent < 66) {
             barStyle = "minMaxBackgroundBar";
         } else {
-            barStyle = "minMaxBackgroundBadBad";
+            barStyle = "minMaxBackgroundBarBad";
         }
         sb.appendHtmlConstant("<div " + (title == null ? "" : "title=\"" + title + "\" ")
                         + "class=\""+barStyle+"\" "
