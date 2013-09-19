@@ -7,7 +7,7 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 
 public abstract class AbstractMediaPlayer implements MediaPlayer {
 
-    private static final int TOLERATED_LAG_IN_MILLISECONDS = 2000;
+    private static final int TOLERATED_LAG_IN_MILLISECONDS = 4000;   
     private final MediaTrack mediaTrack;
     private long raceTimeInMillis;
 
@@ -15,7 +15,7 @@ public abstract class AbstractMediaPlayer implements MediaPlayer {
         this.mediaTrack = mediaTrack;
     }
 
-    public MediaTrack getMediaTrack() {
+	public MediaTrack getMediaTrack() {
         return mediaTrack;
     }
     
@@ -37,6 +37,12 @@ public abstract class AbstractMediaPlayer implements MediaPlayer {
         return Math.round(getCurrentMediaTime() * 1000);
     }
     
+    @Override
+	public boolean isCoveringCurrentRaceTime() {
+        double mediaTime = (raceTimeInMillis - mediaTrack.startTime.getTime()) / 1000d;
+        return (mediaTime >= 0) && (mediaTime <= getDuration());
+	}
+
     protected void alignTime() {
         long mediaStartTimeInMillis = mediaTrack.startTime.getTime();
         long mediaTimeInMillis = mediaStartTimeInMillis + getCurrentMediaTimeMillis();

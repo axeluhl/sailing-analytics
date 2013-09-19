@@ -31,4 +31,6 @@ public interface MediaPlayer {
 
     void close();
 
+	boolean isCoveringCurrentRaceTime();
+
 }
