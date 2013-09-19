@@ -146,13 +146,13 @@ if [[ "$@" == "hot-deploy" ]]; then
         exit
     fi
 
+    if [[ $HAS_OVERWRITTEN_TARGET -eq 1 ]]; then
+        active_branch=$TARGET_SERVER_NAME
+    fi
+
     if [ ! -d $SERVERS_HOME/$active_branch/plugins ]; then
         echo "Could not find target directory $SERVERS_HOME/$active_branch/plugins!"
         exit
-    fi
-
-    if [[ $HAS_OVERWRITTEN_TARGET -eq 1 ]]; then
-        active_branch=$TARGET_SERVER_NAME
     fi
 
     # locate old bundle
