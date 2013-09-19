@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.services.sending;
+package com.sap.sailing.racecommittee.app.domain.racelog.impl;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -20,6 +20,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.services.sending.ServerReplyCallback;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 

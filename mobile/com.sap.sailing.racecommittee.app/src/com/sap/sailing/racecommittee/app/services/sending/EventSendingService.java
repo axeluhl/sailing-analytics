@@ -128,7 +128,7 @@ public class EventSendingService extends Service implements EventSendingListener
         eventIntent.putExtra(AppConstants.RACE_ID_KEY, raceId);
         eventIntent.putExtra(AppConstants.EXTRAS_JSON_SERIALIZED_EVENT, serializedEventAsJson);
         eventIntent.putExtra(AppConstants.EXTRAS_URL, url);
-        eventIntent.putExtra(AppConstants.EXTRAS_CALLBACK_CLASS, callbackClass.getName());
+        eventIntent.putExtra(AppConstants.EXTRAS_CALLBACK_CLASS, callbackClass == null ? null : callbackClass.getName());
         ExLog.i(TAG, "Created event " + eventIntent + " for sending to backend");
         return eventIntent;
     }
@@ -233,11 +233,13 @@ public class EventSendingService extends Service implements EventSendingListener
             
             String callbackClassString = intent.getStringExtra(AppConstants.EXTRAS_CALLBACK_CLASS);
             ServerReplyCallback callback = null;
-            try {
-                callback = (ServerReplyCallback) Class.forName(callbackClassString).newInstance();
-            } catch (Exception e) {
-                ExLog.e(TAG, "Error while passing server response to callback");
-                e.printStackTrace();
+            if (callbackClassString != null) {
+                try {
+                    callback = (ServerReplyCallback) Class.forName(callbackClassString).newInstance();
+                } catch (Exception e) {
+                    ExLog.e(TAG, "Error while passing server response to callback");
+                    e.printStackTrace();
+                }
             }
             if (callback != null) {
                 callback.onReply(intent, this, inputStream);

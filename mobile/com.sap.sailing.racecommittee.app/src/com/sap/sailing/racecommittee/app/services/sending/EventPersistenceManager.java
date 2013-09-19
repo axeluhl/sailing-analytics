@@ -22,6 +22,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
+import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogEventsCallback;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.utils.FileHandlerUtils;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -122,13 +123,15 @@ public class EventPersistenceManager {
             addEventToLog(raceId, serializedEventAsUrlEncodedJson);
 
             Class<? extends RaceLogEventsCallback> callbackClass = null;
-            try {
-                @SuppressWarnings("unchecked")
-                Class<? extends RaceLogEventsCallback> tmp =
+            if (! "null".equals(callbackClassString)) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    Class<? extends RaceLogEventsCallback> tmp =
                     (Class<? extends RaceLogEventsCallback>) Class.forName(callbackClassString);
-                callbackClass = tmp;
-            } catch (ClassNotFoundException e) {
-                ExLog.e(TAG, "Could not find class for callback name: " + callbackClassString);
+                    callbackClass = tmp;
+                } catch (ClassNotFoundException e) {
+                    ExLog.e(TAG, "Could not find class for callback name: " + callbackClassString);
+                }
             }
             
             Intent eventIntent = EventSendingService.createEventIntent(context, url, raceId,
