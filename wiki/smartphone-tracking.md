@@ -10,6 +10,8 @@ On this page the decisions, architecture and API's for using smartphones as an a
 * `cmd-android-tracking`: client side development branch for the tracking application, which enhances the existent race committee app, server side development of using the RaceLog to create a tracking adapter for Commodity Mobile Devices (CMD) such as smartphones
 
 ## Further links
+* [Race Board Admin](/wiki/smartphone-tracking/race-board-admin)
+* [GPSFixStore](/wiki/smartphone-tracking/gpsfixstore)
 * [Servlets](/wiki/smartphone-tracking/servlets)
 * [Race Log Events](/wiki/smartphone-tracking/race-log-events)
 * [Server-side Architecture](/wiki/smartphone-tracking/server-side-architecture)
@@ -30,12 +32,13 @@ On this page the decisions, architecture and API's for using smartphones as an a
 1. [create a persistent competitor](/wiki/smartphone-tracking/servlets#createPersistentCompetitor)
 2. [create a race-log-tracked race](/wiki/smartphone-tracking/servlets#createRace)
 3. [register the competitors](/wiki/smartphone-tracking/race-log-events#Persistent-Competitor-Registered)
-4. [set the course](/wiki/smartphone-tracking/race-log-events#Course-Definition-Changed)
+4. [set the course](/wiki/smartphone-tracking/race-log-events#Course-Design-Changed)
 5. [start the race](/wiki/smartphone-tracking/race-log-events#Pre-Race-Phase-Ended)
 6. [set the start time](/wiki/smartphone-tracking/race-log-events#Start-Time)
 7. [ping the marks](/wiki/smartphone-tracking/servlets#pingMark)
 8. [set the mark rounding times](/wiki/smartphone-tracking/race-board-admin)
 9. view the race in the race viewer
+10. [after a server restart, reload the race from the MongoDB](/wiki/smartphone-tracking/gpsfixstore)
 
 ## Mark Passings
 Without a tracking provider that implements a mark passing algorithm, we have to identify mark passings on our own in the context of smartphone tracking, for Sailing Analytics to be able to do any analytics at all. While the mid-term goal definitely is to implement such a detection algorithm, as a workaround a UI entry option has been provided, that can be found in the branch `race-board-admin`, in which the mark passings can be set by hand. This can be accessed by clicking the _Administer Race_ button of a race in the leaderboard detail table, which can be found in the leaderboard configuration panel of the admin console.
