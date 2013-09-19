@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.services.sending;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URLEncoder;
 import java.util.Calendar;
@@ -16,13 +18,9 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.receiver.ConnectivityChangedReceiver;
@@ -46,7 +44,6 @@ public class EventSendingService extends Service implements EventSendingListener
     private Handler handler;
     private final IBinder mBinder = new EventSendingBinder();
     private EventPersistenceManager persistenceManager;
-    private ReadonlyDataManager dataManager;
     private boolean isHandlerSet;
 
     private EventSendingServiceLogger serviceLogger = new EventSendingServiceLogger() {
@@ -109,9 +106,12 @@ public class EventSendingService extends Service implements EventSendingListener
      *            the race for which the event was created
      * @param serializedEventAsUrlEncodedJson
      *            the event serialized to JSON
+     * @param callbackClass
+     *            the class of the callback which should process the server reply
      * @return the intent that shall be sent to the EventSendingService
      */
-    public static Intent createEventIntent(Context context, ManagedRace race, String serializedEventAsJson) {
+    public static Intent createEventIntent(Context context, ManagedRace race, String serializedEventAsJson,
+            Class<? extends ServerReplyCallback> callbackClass) {
         String url = String.format("%s/sailingserver/rc/racelog?"+
                 RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
                 RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
@@ -119,14 +119,16 @@ public class EventSendingService extends Service implements EventSendingListener
                 RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
                 AppPreferences.getServerBaseURL(context), URLEncoder.encode(race.getRaceGroup().getName()),
                 URLEncoder.encode(race.getName()), URLEncoder.encode(race.getFleet().getName()), uuid);
-        return createEventIntent(context, url, race.getId(), serializedEventAsJson);
+        return createEventIntent(context, url, race.getId(), serializedEventAsJson, callbackClass);
     }
 
-    public static Intent createEventIntent(Context context, String url, Serializable raceId, String serializedEventAsJson) {
+    public static Intent createEventIntent(Context context, String url, Serializable raceId, String serializedEventAsJson,
+            Class<? extends ServerReplyCallback> callbackClass) {
         Intent eventIntent = new Intent(AppConstants.INTENT_ACTION_SEND_EVENT);
         eventIntent.putExtra(AppConstants.RACE_ID_KEY, raceId);
         eventIntent.putExtra(AppConstants.EXTRAS_JSON_SERIALIZED_EVENT, serializedEventAsJson);
         eventIntent.putExtra(AppConstants.EXTRAS_URL, url);
+        eventIntent.putExtra(AppConstants.EXTRAS_CALLBACK_CLASS, callbackClass.getName());
         ExLog.i(TAG, "Created event " + eventIntent + " for sending to backend");
         return eventIntent;
     }
@@ -140,7 +142,6 @@ public class EventSendingService extends Service implements EventSendingListener
     public void onCreate() {
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         persistenceManager = new EventPersistenceManager(this);
-        dataManager = DataManager.create(this);
         handler = new Handler();
         isHandlerSet = false;
         if (persistenceManager.areIntentsDelayed()) {
@@ -212,7 +213,7 @@ public class EventSendingService extends Service implements EventSendingListener
     }
 
     @Override
-    public void onResult(Intent intent, boolean success, Iterable<RaceLogEvent> eventsToAddToRaceLog) {
+    public void onResult(Intent intent, boolean success, InputStream inputStream) {
         if (!success) {
             ExLog.w(TAG, "Error while posting intent to server. Will persist intent...");
             persistenceManager.persistIntent(intent);
@@ -223,23 +224,27 @@ public class EventSendingService extends Service implements EventSendingListener
             }
             serviceLogger.onEventSentFailed();
         } else {
-            ExLog.i(TAG, "Event successfully send.");
+            ExLog.i(TAG, "Event successfully sent.");
             if (persistenceManager.areIntentsDelayed()) {
                 persistenceManager.removeIntent(intent);
             }
             lastSuccessfulSend = Calendar.getInstance().getTime();
             serviceLogger.onEventSentSuccessful();
-            String raceId = intent.getStringExtra(AppConstants.RACE_ID_KEY);
-            RaceLog raceLog = dataManager.getDataStore().getRace(raceId).getRaceLog();
-            if (raceLog != null) {
-                ExLog.i(TAG, "Successfully retrieved race log for race ID " + raceId);
-                for (RaceLogEvent eventToAddToRaceLog : eventsToAddToRaceLog) {
-                    raceLog.add(eventToAddToRaceLog);
-                    ExLog.i(TAG, "added event "+eventToAddToRaceLog.toString()+" to client's race log");
-                }
-            } else {
-                ExLog.w(TAG, "Couldn't retrieve race log for race ID "+raceId);
+            
+            String callbackClassString = intent.getStringExtra(AppConstants.EXTRAS_CALLBACK_CLASS);
+            ServerReplyCallback callback = null;
+            try {
+                callback = (ServerReplyCallback) Class.forName(callbackClassString).newInstance();
+            } catch (Exception e) {
+                ExLog.e(TAG, "Error while passing server response to callback");
+                e.printStackTrace();
             }
+            if (callback != null) {
+                callback.onReply(intent, this, inputStream);
+            }
+            try {
+                inputStream.close();
+            } catch (IOException e) {}
         }
     }
 

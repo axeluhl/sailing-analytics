@@ -51,11 +51,12 @@ public class EventPersistenceManager {
         String raceId = extras.getString(AppConstants.RACE_ID_KEY);
         String url = extras.getString(AppConstants.EXTRAS_URL);
         String serializedEventAsJson = extras.getString(AppConstants.EXTRAS_JSON_SERIALIZED_EVENT);
-        persistEvent(url, raceId, serializedEventAsJson);
+        String callbackClass = extras.getString(AppConstants.EXTRAS_CALLBACK_CLASS);
+        persistEvent(url, raceId, serializedEventAsJson, callbackClass);
     }
 
-    private void persistEvent(String url, String raceId, String serializedEventAsJson) {
-        String eventLine = getSerializedIntentForPersistence(url, raceId, serializedEventAsJson);
+    private void persistEvent(String url, String raceId, String serializedEventAsJson, String callbackClass) {
+        String eventLine = getSerializedIntentForPersistence(url, raceId, serializedEventAsJson, callbackClass);
         ExLog.i(TAG, String.format("Persisting event \"%s\" for race %s.", eventLine, raceId));
         if (persistedEvents.contains(eventLine)) {
             ExLog.i(TAG, "The event already exists. Ignoring.");
@@ -67,8 +68,10 @@ public class EventPersistenceManager {
     /**
      * @param serializedEventAsJson will be URL-encoded to ensure that the resulting string does not contain newlines
      */
-    private String getSerializedIntentForPersistence(String url, String raceId, String serializedEventAsJson) {
-        String eventLine = String.format("%s;%s;%s", raceId, URLEncoder.encode(serializedEventAsJson.toString()), url);
+    private String getSerializedIntentForPersistence(String url, String raceId, 
+            String serializedEventAsJson, String callbackClass) {
+        String eventLine = String.format("%s;%s;%s;%s", raceId, URLEncoder.encode(serializedEventAsJson.toString()), 
+                url, callbackClass);
         return eventLine;
     }
 
@@ -77,13 +80,14 @@ public class EventPersistenceManager {
         String url = extras.getString(AppConstants.EXTRAS_URL);
         String raceId = extras.getString(AppConstants.RACE_ID_KEY);
         String serializedEventAsJson = extras.getString(AppConstants.EXTRAS_JSON_SERIALIZED_EVENT);
-        removeEvent(url, raceId, serializedEventAsJson);
+        String callbackClass = extras.getString(AppConstants.EXTRAS_CALLBACK_CLASS);
+        removeEvent(url, raceId, serializedEventAsJson, callbackClass);
     }
 
-    private void removeEvent(String url, String raceId, String serializedEventAsUrlEncodedJson) {
+    private void removeEvent(String url, String raceId, String serializedEventAsUrlEncodedJson, String callbackClass) {
         if (!persistedEvents.isEmpty()) {
             ExLog.i(TAG, String.format("Removing event \"%s\" for race %s.", serializedEventAsUrlEncodedJson, raceId));
-            String eventLine = getSerializedIntentForPersistence(url, raceId, serializedEventAsUrlEncodedJson);
+            String eventLine = getSerializedIntentForPersistence(url, raceId, serializedEventAsUrlEncodedJson, callbackClass);
             removePersistedEvent(eventLine);
         }
     }
@@ -114,8 +118,21 @@ public class EventPersistenceManager {
             String url = lineParts[2];
             String raceId = lineParts[0];
             String serializedEventAsUrlEncodedJson = lineParts[1];
+            String callbackClassString = lineParts[3];
             addEventToLog(raceId, serializedEventAsUrlEncodedJson);
-            Intent eventIntent = EventSendingService.createEventIntent(context, url, raceId, URLDecoder.decode(serializedEventAsUrlEncodedJson));
+
+            Class<? extends RaceLogEventsCallback> callbackClass = null;
+            try {
+                @SuppressWarnings("unchecked")
+                Class<? extends RaceLogEventsCallback> tmp =
+                    (Class<? extends RaceLogEventsCallback>) Class.forName(callbackClassString);
+                callbackClass = tmp;
+            } catch (ClassNotFoundException e) {
+                ExLog.e(TAG, "Could not find class for callback name: " + callbackClassString);
+            }
+            
+            Intent eventIntent = EventSendingService.createEventIntent(context, url, raceId,
+                    URLDecoder.decode(serializedEventAsUrlEncodedJson), callbackClass);
             if (eventIntent != null) {
                 delayedIntents.add(eventIntent);
             }
