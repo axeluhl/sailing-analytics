@@ -2,14 +2,6 @@
 
 [[_TOC_]]
 
-## Introduction
-
-The servlets are listed in the chronological order that they can be called. First, persistent competitors are needed, so that they can later on be registered for the race (`createPersistentCompetitor`). These can then be listed (`getPersistentCompetitors`). When this is completed, a race in its pre-race phase can be created (`createRace`), which is then also shown in `getRaceLogsInPreRacePhase`. By selecting one of these RaceLogs and sending `RaceLogPersistentCompetitorRegisteredEvent`s and a `RaceLogCourseDefinitionChangedEvent`, the race can then be moved from its pre race phase into the tracking phase by sending the `RaceLogPreRacePhaseEndedEvent` via the race log. From this moment on - given the fact that all necessary information was already included in the RaceLog, tracking data can be added to the race. On the one hand, marks can be pinged (`pingMark`, for which knowledge of the course layout is necessary, which can be accessed through `currentcourse`), on the other hand fixes of competitors can be recorded (`recordFixes`). Pinging the marks is of course only the first step, the plan is to allow the mapping of tracking devices such as smartphones to marks as well as competitors.
-
-**Remember to set a start time via the race log**, as the race map relies heavily on it (e.g., the course based wind estimation needs a start time, and without any other wind sources a missing start time results in no boats and marks being displayed at all, as the `SailingService#getRaceMapData()` then fails with a no wind exception).
-
-To test the servlets manually, in addition to the unit tests, the chrome plugin [Postman](https://chrome.google.com/webstore/detail/postman-rest-client/fdmmgilgnpjigdojojpjoooidkmcomcm) in combination with this collection of [HTTP requests](http://www.getpostman.com/collections/d4eb46b5e4f566e6b7a3) for the servlets described below may come in handy.
-
 ## createPersistentCompetitor
 URL: `/sailingserver/racelogtracking/createPersistentCompetitor`
 Servlet: `CreatePersistentCompetitorPostServlet`
