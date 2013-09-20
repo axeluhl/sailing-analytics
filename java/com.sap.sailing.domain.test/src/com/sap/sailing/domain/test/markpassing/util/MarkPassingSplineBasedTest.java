@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test.markpassing;
+package com.sap.sailing.domain.test.markpassing.util;
 
 import static org.junit.Assert.assertTrue;
 
@@ -22,9 +22,6 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.test.markpassing.util.HermiteCurve;
-import com.sap.sailing.domain.test.markpassing.util.StraightLine;
-import com.sap.sailing.domain.test.markpassing.util.Vector2D;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;

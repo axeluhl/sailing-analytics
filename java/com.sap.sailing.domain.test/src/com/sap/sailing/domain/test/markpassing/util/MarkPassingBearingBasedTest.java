@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test.markpassing;
+package com.sap.sailing.domain.test.markpassing.util;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
