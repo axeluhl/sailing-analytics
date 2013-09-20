@@ -18,16 +18,21 @@ Like businesses, sailors need the latest information to make strategic decisions
 * Information for Developers
   * [[Cook Book|wiki/cook-book]]
   * [[OnBoarding Information|wiki/onboarding]]
+  * [[UI Tests with Selenium|wiki/selenium-ui-tests]]
   * [[Typical Development Scenarios|wiki/typical-development-scenarios]]
   * [[Server Replication|wiki/server-replication]]
   * [[Configure Races on Server|wiki/typical-development-scenarios]]
   * [[Development Environment|wiki/development-environment]]
+  * [[Working with GWT Locally|wiki/local-gwt]]
   * [[Mobile Development|wiki/mobile-development]]
 * General Information
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
   * [[Inventory|wiki/inventar-liste]]
   * [[Smartphone Tracking|wiki/smartphone-tracking]]
+  * [[Racecommittee App|wiki/racecommittee-app]]
+  * [[Web Services API|wiki/sailing-webservices]]
+  * [[Theses (Bachelor, Master, ...)|wiki/theses]]
 * Planning and Event Information
   * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]

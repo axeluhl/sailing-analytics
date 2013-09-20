@@ -164,8 +164,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         TextColumn<SwissTimingRaceRecordDTO> raceStateColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
-                String result = object.hasCourse ? "C" : "";
-                result += object.hasStartlist ? "S" : "";
+                String result = object.hasCourse ? "C✓ " : "";
+                result += object.hasStartlist ? "S✓" : "";
                 return result;
             }
         };
@@ -180,36 +180,49 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         HorizontalPanel racesSplitPanel = new HorizontalPanel();
         mainPanel.add(racesSplitPanel);
         
-        CaptionPanel racesCaptionPanel = new CaptionPanel(stringConstants.trackableRaces());
-        racesSplitPanel.add(racesCaptionPanel);
-        racesCaptionPanel.setWidth("50%");
+        CaptionPanel trackableRacesCaptionPanel = new CaptionPanel(stringConstants.trackableRaces());
+        racesSplitPanel.add(trackableRacesCaptionPanel);
+        trackableRacesCaptionPanel.setWidth("50%");
 
         CaptionPanel trackedRacesCaptionPanel = new CaptionPanel(stringConstants.trackedRaces());
         racesSplitPanel.add(trackedRacesCaptionPanel);
         trackedRacesCaptionPanel.setWidth("50%");
 
-        VerticalPanel racesPanel = new VerticalPanel();
-        racesCaptionPanel.setContentWidget(racesPanel);
-        racesCaptionPanel.setStyleName("bold");
+        VerticalPanel trackableRacesPanel = new VerticalPanel();
+        trackableRacesCaptionPanel.setContentWidget(trackableRacesPanel);
+        trackableRacesCaptionPanel.setStyleName("bold");
 
         VerticalPanel trackedRacesPanel = new VerticalPanel();
         trackedRacesPanel.setWidth("100%");
         trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
         trackedRacesCaptionPanel.setStyleName("bold");
 
-        // text box for filtering the cell table
-        HorizontalPanel filterPanel = new HorizontalPanel();
-        filterPanel.setSpacing(5);
-        racesPanel.add(filterPanel);
-        
-        // Regatta
+        // Regatta selection
         HorizontalPanel regattaPanel = new HorizontalPanel();
         regattaPanel.setSpacing(5);
         Label regattaForTrackingLabel = new Label(stringMessages.regattaUsedForTheTrackedRace());
         regattaForTrackingLabel.setWordWrap(false);
         regattaPanel.add(regattaForTrackingLabel);
         regattaPanel.add(getAvailableRegattasListBox());
-        racesPanel.add(regattaPanel);
+        trackableRacesPanel.add(regattaPanel);
+
+        Label lblTrackSettings = new Label(stringConstants.trackSettings());
+        trackableRacesPanel.add(lblTrackSettings);
+
+        final CheckBox trackWindCheckbox = new CheckBox(stringConstants.trackWind());
+        trackWindCheckbox.setWordWrap(false);
+        trackWindCheckbox.setValue(true);
+        trackableRacesPanel.add(trackWindCheckbox);
+
+        final CheckBox declinationCheckbox = new CheckBox(stringConstants.declinationCheckbox());
+        declinationCheckbox.setWordWrap(false);
+        declinationCheckbox.setValue(true);
+        trackableRacesPanel.add(declinationCheckbox);
+
+        // text box for filtering the cell table
+        HorizontalPanel filterPanel = new HorizontalPanel();
+        filterPanel.setSpacing(5);
+        trackableRacesPanel.add(filterPanel);
 
         Label lblFilterEvents = new Label(stringConstants.filterRacesByName() + ":");
         filterPanel.add(lblFilterEvents);
@@ -222,15 +235,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 fillRaceListFromAvailableRacesApplyingFilter(SwissTimingEventManagementPanel.this.filterEventsTextbox.getText());
             }
         });
-        
         filterPanel.add(filterEventsTextbox);
 
-        HorizontalPanel racesHorizontalPanel = new HorizontalPanel();
-        racesPanel.add(racesHorizontalPanel);
-
-        VerticalPanel trackPanel = new VerticalPanel();
-        trackPanel.setStyleName("paddedPanel");
-        
         raceNameColumn.setSortable(true);
         raceStartTimeColumn.setSortable(true);
         
@@ -244,30 +250,17 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(new MultiSelectionModel<SwissTimingRaceRecordDTO>() {});
 
-        racesHorizontalPanel.add(raceTable);
-        racesHorizontalPanel.add(trackPanel);
+        trackableRacesPanel.add(raceTable);
 
         raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTimeColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
-
-        Label lblTrackSettings = new Label(stringConstants.trackSettings());
-        trackPanel.add(lblTrackSettings);
-
-        final CheckBox trackWindCheckbox = new CheckBox(stringConstants.trackWind());
-        trackWindCheckbox.setWordWrap(false);
-        trackWindCheckbox.setValue(true);
-        trackPanel.add(trackWindCheckbox);
-
-        final CheckBox declinationCheckbox = new CheckBox(stringConstants.declinationCheckbox());
-        declinationCheckbox.setWordWrap(false);
-        declinationCheckbox.setValue(true);
-        trackPanel.add(declinationCheckbox);
+        
         trackedRacesPanel.add(trackedRacesListComposite);
 
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
-        racesPanel.add(racesButtonPanel);
+        trackableRacesPanel.add(racesButtonPanel);
 
         Button btnTrack = new Button(stringConstants.startTracking());
         racesButtonPanel.add(btnTrack);
@@ -278,7 +271,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 trackSelectedRaces(trackWindCheckbox.getValue(), declinationCheckbox.getValue());
             }
         });
-
     }
 
     private ListHandler<SwissTimingRaceRecordDTO> getRaceTableColumnSortHandler(List<SwissTimingRaceRecordDTO> raceRecords,
