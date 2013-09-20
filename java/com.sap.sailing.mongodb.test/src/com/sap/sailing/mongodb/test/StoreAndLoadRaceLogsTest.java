@@ -108,7 +108,7 @@ public class StoreAndLoadRaceLogsTest extends AbstractMongoDBTest {
     }
 
     @Test
-    public void testdLoadObsoleteAndNewIdentifier() {
+    public void testLoadObsoleteAndNewIdentifier() {
         // event1 stored with obsolete identifier
         DBObject dbEvent1 = (DBObject) com.mongodb.util.JSON.parse(createOldFormatRaceLogEventJson(UUID.randomUUID()));
         mongoFactory.getRaceLogCollection().insert(dbEvent1);
