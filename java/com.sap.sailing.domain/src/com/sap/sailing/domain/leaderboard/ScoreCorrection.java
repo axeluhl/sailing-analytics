@@ -39,7 +39,7 @@ public interface ScoreCorrection extends Serializable {
      * and {@link MaxPointsReason#NONE} will be listed as the {@link Result#getMaxPointsReason() correction reason}.
      * Note, though, that {@link MaxPointsReason#NONE} can also be the reason for an explicit score correction, e.g., if
      * the tracking results were overruled by the jury. Clients may use
-     * {@link #isScoreCorrected(Competitor, TrackedRace)} to detect the difference.
+     * {@link #isScoreCorrected(Competitor, TrackedRace, TimePoint)} to detect the difference.
      * 
      * @param numberOfCompetitorsFetcher
      *            can determine the number of competitors to use as the basis for penalty score calculation
@@ -53,11 +53,12 @@ public interface ScoreCorrection extends Serializable {
      * Should, for some reason, the uncorrected score change later, an existing score correction would still remain in
      * place whereas if no score correction exists for the competitor/race combination, the resulting score after
      * "correction" will still be the uncorrected value.<p>
+     * @param timePoint TODO
      * 
      * @return if an explicit score correction was made for the combination of <code>competitor</code> and
      *         <code>raceColumn</code>
      */
-    boolean isScoreCorrected(Competitor competitor, RaceColumn raceColumn);
+    boolean isScoreCorrected(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
 
     boolean hasCorrectionFor(RaceColumn raceInLeaderboard);
 

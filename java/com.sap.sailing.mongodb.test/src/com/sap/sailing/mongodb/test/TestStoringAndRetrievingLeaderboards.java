@@ -200,9 +200,9 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         RaceColumn loadedColumn2 = loadedLeaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace, ignored */ false, 
                 leaderboard.getFleet(null));
         assertEquals(leaderboardName, loadedLeaderboard.getName());
-        assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1));
+        assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1, MillisecondsTimePoint.now()));
         assertEquals(correctedPoints, (double) loadedLeaderboard.getScoreCorrection().getExplicitScoreCorrection(competitor, loadedColumn1), 0.00000001);
-        assertFalse(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn2));
+        assertFalse(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn2, MillisecondsTimePoint.now()));
     }
 
     @Test
@@ -226,9 +226,9 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         RaceColumn loadedColumn1 = loadedLeaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace, ignored */ false, leaderboard.getFleet(null));
         RaceColumn loadedColumn2 = loadedLeaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace, ignored */ false, leaderboard.getFleet(null));
         assertEquals(leaderboardName, loadedLeaderboard.getName());
-        assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1));
+        assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1, MillisecondsTimePoint.now()));
         assertEquals(correctedPoints, (double) loadedLeaderboard.getScoreCorrection().getExplicitScoreCorrection(competitor, loadedColumn1), 0.00000001);
-        assertFalse(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn2));
+        assertFalse(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn2, MillisecondsTimePoint.now()));
     }
 
     @Test
@@ -254,8 +254,8 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         RaceColumn loadedColumn2 = loadedLeaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace, ignored */ false, 
                 leaderboard.getFleet(null));
         assertEquals(leaderboardName, loadedLeaderboard.getName());
-        assertFalse(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1));
-        assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn2));
+        assertFalse(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1, MillisecondsTimePoint.now()));
+        assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn2, MillisecondsTimePoint.now()));
         assertEquals(maxPointsReason, loadedLeaderboard.getScoreCorrection().getMaxPointsReason(competitor, loadedColumn2));
     }
 
@@ -286,9 +286,9 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         RaceColumn loadedColumn2 = loadedLeaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace, ignored */ false, 
                 leaderboard.getFleet(null));
         assertEquals(leaderboardName, loadedLeaderboard.getName());
-        assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1));
+        assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1, MillisecondsTimePoint.now()));
         assertEquals(correctedPoints, (double) loadedLeaderboard.getScoreCorrection().getExplicitScoreCorrection(competitor, loadedColumn1), 0.000000001);
-        assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn2));
+        assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn2, MillisecondsTimePoint.now()));
         assertEquals(maxPointsReason, loadedLeaderboard.getScoreCorrection().getMaxPointsReason(competitor, loadedColumn2));
     }
 

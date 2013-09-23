@@ -615,7 +615,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         TrackedRace trackedRaceForCompetitorInColumn;
         return getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint) && 
-               (getScoreCorrection().isScoreCorrected(competitor, raceColumn) ||
+               (getScoreCorrection().isScoreCorrected(competitor, raceColumn, timePoint) ||
                        ((trackedRaceForCompetitorInColumn=raceColumn.getTrackedRace(competitor)) != null &&
                         trackedRaceForCompetitorInColumn.hasStarted(timePoint)));
     }

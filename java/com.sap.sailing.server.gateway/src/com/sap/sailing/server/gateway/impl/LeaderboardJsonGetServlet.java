@@ -315,7 +315,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                     jsonEntry.put("raceRank", trackedRace.getRank(competitor, resultTimePoint));
                 }
                 jsonEntry.put("isDiscarded", leaderboard.isDiscarded(competitor, raceColumn, resultTimePoint));
-                jsonEntry.put("isCorrected", leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn));
+                jsonEntry.put("isCorrected", leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn, resultTimePoint));
             }
             counter++;
         }

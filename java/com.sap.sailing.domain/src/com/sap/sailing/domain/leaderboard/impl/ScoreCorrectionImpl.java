@@ -135,7 +135,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     }
 
     @Override
-    public boolean isScoreCorrected(Competitor competitor, RaceColumn raceColumn) {
+    public boolean isScoreCorrected(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         Pair<Competitor, RaceColumn> key = raceColumn.getKey(competitor);
         return correctedScores.containsKey(key) || maxPointsReasons.containsKey(key);
     }
@@ -164,7 +164,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      */
     @Override
     public Result getCorrectedScore(Callable<Integer> trackedRankProvider, final Competitor competitor,
-            final RaceColumn raceColumn, TimePoint timePoint, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
+            final RaceColumn raceColumn, final TimePoint timePoint, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
             ScoringScheme scoringScheme) {
         Double result;
         final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn);
@@ -196,7 +196,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
             @Override
             public boolean isCorrected() {
-                return isScoreCorrected(competitor, raceColumn);
+                return isScoreCorrected(competitor, raceColumn, timePoint);
             }
         };
     }

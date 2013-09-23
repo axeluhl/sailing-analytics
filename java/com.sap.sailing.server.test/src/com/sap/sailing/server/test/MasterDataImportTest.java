@@ -437,7 +437,7 @@ public class MasterDataImportTest {
 
         // Checks if score correction was not set if not set on source
         Assert.assertFalse(leaderboardOnTarget.getScoreCorrection().isScoreCorrected(competitorOnTarget2,
-                raceColumnOnTarget));
+                raceColumnOnTarget, MillisecondsTimePoint.now()));
     }
 
     @Test

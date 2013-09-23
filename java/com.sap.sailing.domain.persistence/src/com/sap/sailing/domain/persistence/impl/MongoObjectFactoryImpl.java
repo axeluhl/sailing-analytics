@@ -36,6 +36,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -280,11 +281,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     private void storeScoreCorrections(Leaderboard leaderboard, BasicDBObject dbScoreCorrections) {
+        TimePoint now = MillisecondsTimePoint.now();
         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             BasicDBList dbCorrectionForRace = new BasicDBList();
             for (Competitor competitor : leaderboard.getCompetitors()) {
-                if (scoreCorrection.isScoreCorrected(competitor, raceColumn)) {
+                // TODO bug 655: make score corrections time dependent
+                if (scoreCorrection.isScoreCorrected(competitor, raceColumn, now)) {
                     BasicDBObject dbCorrectionForCompetitor = new BasicDBObject();
                     dbCorrectionForCompetitor.put(FieldNames.COMPETITOR_ID.name(), competitor.getId());
                     MaxPointsReason maxPointsReason = scoreCorrection.getMaxPointsReason(competitor, raceColumn);
