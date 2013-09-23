@@ -459,7 +459,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
-        return getScoreCorrection().getMaxPointsReason(competitor, raceColumn);
+        return getScoreCorrection().getMaxPointsReason(competitor, raceColumn, timePoint);
     }
 
     @Override

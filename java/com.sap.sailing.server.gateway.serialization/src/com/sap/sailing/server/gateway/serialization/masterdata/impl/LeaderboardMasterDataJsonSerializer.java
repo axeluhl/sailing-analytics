@@ -274,12 +274,13 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         JSONArray scoreCorrectionsForCompetitors = new JSONArray();
         for (Competitor competitor : leaderboard.getAllCompetitors()) {
             // TODO bug 655: score corrections shall be time dependent
-            if (correction.isScoreCorrected(competitor, raceColumn, MillisecondsTimePoint.now())) {
+            final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+            if (correction.isScoreCorrected(competitor, raceColumn, now)) {
                 JSONObject scoreCorrectionForCompetitor = new JSONObject();
                 scoreCorrectionForCompetitor.put(FIELD_EXPLICIT_SCORE_CORRECTION,
                         correction.getExplicitScoreCorrection(competitor, raceColumn));
                 scoreCorrectionForCompetitor.put(FIELD_MAX_POINTS_REASON,
-                        correction.getMaxPointsReason(competitor, raceColumn).toString());
+                        correction.getMaxPointsReason(competitor, raceColumn, now).toString());
                 scoreCorrectionForCompetitor.put(FIELD_COMPETITOR_ID, competitor.getId().toString());
                 scoreCorrectionsForCompetitors.add(scoreCorrectionForCompetitor);
             }

@@ -147,7 +147,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     }
 
     @Override
-    public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn) {
+    public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         MaxPointsReason result = maxPointsReasons.get(raceColumn.getKey(competitor));
         if (result == null) {
             result = MaxPointsReason.NONE;
@@ -156,7 +156,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     }
 
     /**
-     * If the {@link #getMaxPointsReason(Competitor, TrackedRace)} for the <code>competitor</code> for the
+     * If the {@link #getMaxPointsReason(Competitor, TrackedRace, TimePoint)} for the <code>competitor</code> for the
      * <code>raceColumn</code>'s tracked race is not {@link MaxPointsReason#NONE}, the
      * {@link #getMaxPoints(TrackedRace) maximum score} is computed for the competitor. Otherwise, the
      * <code>uncorrectedScore</code> is returned.
@@ -167,7 +167,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             final RaceColumn raceColumn, final TimePoint timePoint, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
             ScoringScheme scoringScheme) {
         Double result;
-        final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn);
+        final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn, timePoint);
         if (maxPointsReason == MaxPointsReason.NONE) {
             result = getCorrectedNonMaxedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher);
         } else {
@@ -196,7 +196,12 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
             @Override
             public boolean isCorrected() {
-                return isScoreCorrected(competitor, raceColumn, timePoint);
+                return isScoreCorrected(competitor, raceColumn, getTimePoint());
+            }
+
+            @Override
+            public TimePoint getTimePoint() {
+                return timePoint;
             }
         };
     }

@@ -224,7 +224,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         trackedRegatta[0] = new DynamicTrackedRegattaImpl(loadedRegatta);
         resForLoading.apply(new ConnectTrackedRaceToLeaderboardColumn(loadedLeaderboard.getName(), loadedQ2.getName(), loadedYellow
                 .getName(), q2YellowTrackedRace.getRaceIdentifier()));
-        MaxPointsReason hassosLoadedMaxPointsReason = loadedLeaderboard.getScoreCorrection().getMaxPointsReason(hasso, loadedQ2);
+        MaxPointsReason hassosLoadedMaxPointsReason = loadedLeaderboard.getScoreCorrection().getMaxPointsReason(hasso, loadedQ2, MillisecondsTimePoint.now());
         assertEquals(MaxPointsReason.DNF, hassosLoadedMaxPointsReason);
     }
 

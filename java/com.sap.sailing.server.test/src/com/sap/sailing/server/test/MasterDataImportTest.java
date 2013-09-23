@@ -282,7 +282,7 @@ public class MasterDataImportTest {
                 leaderboardOnTarget.getScoreCorrection().getExplicitScoreCorrection(competitorOnTarget,
                         raceColumnOnTarget));
         Assert.assertEquals(maxPointsReason,
-                leaderboardOnTarget.getScoreCorrection().getMaxPointsReason(competitorOnTarget, raceColumnOnTarget));
+                leaderboardOnTarget.getScoreCorrection().getMaxPointsReason(competitorOnTarget, raceColumnOnTarget, MillisecondsTimePoint.now()));
 
         // Check for carried points
         Assert.assertEquals(carriedPoints, leaderboardOnTarget.getCarriedPoints(competitorOnTarget));
@@ -433,7 +433,7 @@ public class MasterDataImportTest {
                 leaderboardOnTarget.getScoreCorrection().getExplicitScoreCorrection(competitorOnTarget,
                         raceColumnOnTarget));
         Assert.assertEquals(maxPointsReason,
-                leaderboardOnTarget.getScoreCorrection().getMaxPointsReason(competitorOnTarget, raceColumnOnTarget));
+                leaderboardOnTarget.getScoreCorrection().getMaxPointsReason(competitorOnTarget, raceColumnOnTarget, MillisecondsTimePoint.now()));
 
         // Checks if score correction was not set if not set on source
         Assert.assertFalse(leaderboardOnTarget.getScoreCorrection().isScoreCorrected(competitorOnTarget2,

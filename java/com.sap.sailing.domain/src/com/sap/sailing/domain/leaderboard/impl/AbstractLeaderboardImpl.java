@@ -133,7 +133,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         Iterator<Competitor> ci = competitorsFromBestToWorst.iterator();
         while (betterCompetitorRank < rank && ci.hasNext()) {
             Competitor betterTrackedCompetitor = ci.next();
-            MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(betterTrackedCompetitor, raceColumn);
+            MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(betterTrackedCompetitor, raceColumn, timePoint);
             if (maxPointsReasonForBetterCompetitor != null && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE &&
                     maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse()) {
                 correctedRank--;
