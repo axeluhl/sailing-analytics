@@ -100,8 +100,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     private final boolean isLiveTracking;
 
-    private final TrackedRegattaRegistry trackedRegattaRegistry;
-
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
      * data from there. Receiving continues until {@link #stop()} is called.
@@ -183,7 +181,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         super();
-        this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.tractracEvent = tractracEvent;
         urls = createID(paramURL, liveURI, storedURI);
         isLiveTracking = liveURI != null;
@@ -548,27 +545,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     @Override
     public void stopped() {
         logger.info("stopped TracTrac tracking for "+getRaces());
-        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
+        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1.0);
         updateStatusOfTrackedRaces();
-        for (final RaceDefinition race : getRaces()) {
-            // Ask RacingEventService to cleanly stop and unregister this tracker
-            // if the race has all data loaded. Doing this asynchronously because
-            // stopping can take longer and if you're loading many races in parallel
-            // this can slow down loading extremely because this call-back seems to be
-            // called by TTCM synchronously.
-            Thread raceStopper = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        trackedRegattaRegistry.stopTracking(regatta, race);
-                    } catch (Exception e) {
-                        logger.log(Level.SEVERE, "Error trying to stop tracker for race " + race.getName()
-                                + " in regatta " + getRegatta().getName(), e);
-                    }
-                }
-            });
-            raceStopper.start();
-        }
+        // don't stop the tracker (see bug 1517) as it seems that the storedData... callbacks are unreliable, and
+        // we have seen many more fixes been transmitted after having received stopped()
     }
 
     private void updateStatusOfTrackedRaces() {
@@ -606,7 +586,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     @Override
     public void storedDataProgress(float progress) {
         logger.info("Stored data progress for race(s) "+getRaces()+": "+progress);
-        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress);
+        lastStatus = new TrackedRaceStatusImpl(progress==1.0 ? TrackedRaceStatusEnum.TRACKING : TrackedRaceStatusEnum.LOADING, progress);
         updateStatusOfTrackedRaces();
     }
 
