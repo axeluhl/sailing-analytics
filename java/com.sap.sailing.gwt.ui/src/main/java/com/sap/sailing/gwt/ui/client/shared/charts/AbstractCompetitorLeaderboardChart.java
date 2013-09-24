@@ -26,6 +26,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker.Symbol;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -129,7 +130,8 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
         }));
         chart.getYAxis().setAllowDecimals(false).setStartOnTick(true).setEndOnTick(true);
         chart.getYAxis().setShowFirstLabel(false).setShowLastLabel(false);
-//        chart.getYAxis().setMinorTickInterval(null).setTickInterval(1).setTickPixelInterval(100);
+        chart.getYAxis().setMinorTickInterval(null);
+        chart.getYAxis().setTickInterval(1);
         chart.getXAxis().setTickInterval(1);
         
         return chart;
@@ -287,10 +289,19 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
             }
         }
         chart.getYAxis().setMaxPadding(0.5 / maxCompetitorCount).setMinPadding(0.5 / maxCompetitorCount);
-        chart.getYAxis().setTickInterval(1.0);
+        setAxisTickInterval(chart.getYAxis().getNativeAxis(), 1.0);
         chart.setHeight(maxCompetitorCount * 30 + 100 + "px");
     }
 
+    /**
+     * To set tick interval of an axis dynamically we need to access the native javascript object
+     * @param axis the axis 
+     * @param newTickInterval the new value of the tick interval 
+     */
+    private static native void setAxisTickInterval(JavaScriptObject axis, double newTickInterval) /*-{
+        return axis.options.tickInterval = value;
+    }-*/;
+    
     private void fillTotalPointsSeries(List<Triple<String, List<CompetitorDTO>, List<Double>>> result, List<Series> chartSeries) {
         Double maxTotalPoints = 0.0;
         Set<Series> unusedSeries = new HashSet<Series>(competitorSeries.values());
@@ -337,7 +348,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
             }
         }
         chart.getYAxis().setMaxPadding(0.5/maxCompetitorCount).setMinPadding(0.5/maxCompetitorCount);
-        chart.getYAxis().setTickInterval(5.0);
+        setAxisTickInterval(chart.getYAxis().getNativeAxis(), 5.0);
         chart.setHeight(maxCompetitorCount * 30 + 100 + "px");
     }
     
