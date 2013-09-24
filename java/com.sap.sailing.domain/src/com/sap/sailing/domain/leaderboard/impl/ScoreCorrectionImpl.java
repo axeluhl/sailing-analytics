@@ -239,8 +239,44 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * earlier races.
      */
     private boolean isCertainlyAfterRaceFinish(TimePoint timePoint, RaceColumn raceColumn, Competitor competitor) {
-        // TODO
-        return false;
+        final boolean result;
+        TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
+        final TimePoint endOfRace;
+        // endOfRace != null means we at least will have a fallback result even if there are no mark passings for the competitor
+        if (trackedRace != null && (endOfRace = trackedRace.getEndOfRace()) != null) {
+            NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+            final MarkPassing lastMarkPassing;
+            // count race as finished for the competitor if the finish mark passing exists or the time is after the end of race
+            if (!markPassings.isEmpty() && (lastMarkPassing = markPassings.last()).getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint()) {
+                result = timePoint.after(lastMarkPassing.getTimePoint());
+            } else {
+                // if available, use the end of the race as indicator for how long competitor may have been in the race
+                result = timePoint.after(endOfRace);
+            }
+        } else {
+            boolean preResult = false;
+            boolean found = false;
+            for (RaceColumn rc : getLeaderboard().getRaceColumns()) {
+                if (!found && rc == raceColumn) {
+                    found = true;
+                    break;
+                }
+                if (found) {
+                    TrackedRace rcTrackedRace = rc.getTrackedRace(competitor);
+                    if (rcTrackedRace != null) {
+                        // if available, use the start of the race as indicator for whether the competitor is in that
+                        // race at timePoint
+                        TimePoint startOfRace = rcTrackedRace.getStartOfRace();
+                        if (startOfRace != null && timePoint.after(startOfRace)) {
+                            preResult = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            result = preResult;
+        }
+        return result;
     }
 
     @Override
