@@ -144,7 +144,8 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     @Override
     public boolean isScoreCorrected(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         Pair<Competitor, RaceColumn> key = raceColumn.getKey(competitor);
-        return correctedScores.containsKey(key) || maxPointsReasons.containsKey(key);
+        return (correctedScores.containsKey(key) && !isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor))
+                || (maxPointsReasons.containsKey(key) && isMaxPointsReasonApplicable(maxPointsReasons.get(key), timePoint, raceColumn, competitor));
     }
 
     @Override
@@ -192,7 +193,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                 TrackedRace rcTrackedRace = rc.getTrackedRace(competitor);
                 if (rcTrackedRace != null) {
                     NavigableSet<MarkPassing> markPassings = rcTrackedRace.getMarkPassings(competitor);
-                    if (!markPassings.isEmpty()) {
+                    if (markPassings != null && !markPassings.isEmpty()) {
                         MarkPassing lastMarkPassing = markPassings.last();
                         if (lastMarkPassing.getTimePoint().before(timePoint)) {
                             preResult = true;
@@ -216,29 +217,28 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     /**
      * Based on the order of the {@link Leaderboard#getRaceColumns() race columns} in the {@link #getLeaderboard()
      * leaderboard to which this score correction object belongs}, tries to determine whether the <code>timePoint</code>
-     * is after the finish or abandoning of <code>competitor</code>'s race in the race column specified by
+     * is before the finish or abandoning of <code>competitor</code>'s race in the race column specified by
      * <code>raceColumn</code>. If there is a {@link RaceColumn#getTrackedRace(Competitor) tracked race for the
      * competitor associated with the race column}, that race's finish time for <code>competitor</code> (if defined) or
      * the {@link TrackedRace#getEndOfRace() end of the race} is used for the calculation. Otherwise, if there is a
-     * tracked race column after <code>raceColumn</code> in the leaderboard in which <code>competitor</code> competes,
-     * and the competitor has started that race at <code>timePoint</code>, we also know that this must be after the
-     * end of <code>competitor</code>'s race in <code>raceColumn</code> because we assume that the same competitor can
-     * only compete in one race at a time within a single leaderboard.
+     * tracked race column prior to <code>raceColumn</code> in the leaderboard in which <code>competitor</code>
+     * competes, and the competitor has finished that race after <code>timePoint</code>, we also know that this must be
+     * before the end of <code>competitor</code>'s race in <code>raceColumn</code> because we assume that the same
+     * competitor can only compete in one race at a time within a single leaderboard.
      * <p>
      * 
      * In all other cases, <code>false</code> is returned which can either mean that <code>timePoint</code> is certainly
-     * known to be after the race start of <code>competitor</code> in the race for <code>raceColumn</code>, or we just
+     * known to be after the race finish of <code>competitor</code> in the race for <code>raceColumn</code>, or we just
      * can't tell, e.g., because <code>competitor</code>'s race for <code>raceColumn</code> is not tracked, and
      * <code>timePoint</code> is after all prior race column's finishing time for <code>competitor</code>.
      * <p>
      * 
-     * This method can be used to decide whether to apply a {@link MaxPointsReason#DNC}, {@link MaxPointsReason#DNS} or
-     * {@link MaxPointsReason#OCS} correction for <code>competitor</code> at <code>timePoint</code> in the race for
-     * <code>raceColumn</code>, because the correction can be applied at race start but should not be applied any
-     * earlier than that because it would incorrectly influence the total scores displayed for the competitor during
+     * This method can be used to decide whether to apply a score correction for <code>competitor</code> at
+     * <code>timePoint</code> in the race for <code>raceColumn</code>, because the correction should not be applied
+     * before race end because it would incorrectly influence the total scores displayed for the competitor during
      * earlier races.
      */
-    private boolean isCertainlyAfterRaceFinish(TimePoint timePoint, RaceColumn raceColumn, Competitor competitor) {
+    private boolean isCertainlyBeforeRaceFinish(TimePoint timePoint, RaceColumn raceColumn, Competitor competitor) {
         final boolean result;
         TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         final TimePoint endOfRace;
@@ -247,29 +247,42 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
             final MarkPassing lastMarkPassing;
             // count race as finished for the competitor if the finish mark passing exists or the time is after the end of race
-            if (!markPassings.isEmpty() && (lastMarkPassing = markPassings.last()).getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint()) {
-                result = timePoint.after(lastMarkPassing.getTimePoint());
+            if (markPassings != null && !markPassings.isEmpty() &&
+                    (lastMarkPassing = markPassings.last()).getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint()) {
+                result = timePoint.before(lastMarkPassing.getTimePoint());
             } else {
                 // if available, use the end of the race as indicator for how long competitor may have been in the race
-                result = timePoint.after(endOfRace);
+                result = timePoint.before(endOfRace);
             }
         } else {
             boolean preResult = false;
-            boolean found = false;
             for (RaceColumn rc : getLeaderboard().getRaceColumns()) {
-                if (!found && rc == raceColumn) {
-                    found = true;
+                if (rc == raceColumn) {
                     break;
                 }
-                if (found) {
-                    TrackedRace rcTrackedRace = rc.getTrackedRace(competitor);
-                    if (rcTrackedRace != null) {
-                        // if available, use the start of the race as indicator for whether the competitor is in that
-                        // race at timePoint
-                        TimePoint startOfRace = rcTrackedRace.getStartOfRace();
-                        if (startOfRace != null && timePoint.after(startOfRace)) {
+                TrackedRace rcTrackedRace = rc.getTrackedRace(competitor);
+                if (rcTrackedRace != null) {
+                    NavigableSet<MarkPassing> markPassings = rcTrackedRace.getMarkPassings(competitor);
+                    if (markPassings != null && !markPassings.isEmpty()) {
+                        MarkPassing lastMarkPassing = markPassings.last();
+                        if (lastMarkPassing.getTimePoint().before(timePoint)) {
                             preResult = true;
                             break;
+                        }
+                    } else {
+                        // if available, use the end of the race as indicator for how long competitor may have been in the race
+                        TimePoint rcEndOfRace = rcTrackedRace.getEndOfRace();
+                        if (rcEndOfRace != null) {
+                            if (timePoint.before(rcEndOfRace)) {
+                                preResult = true;
+                                break;
+                            }
+                        } else {
+                            TimePoint rcStartOfRace = rcTrackedRace.getStartOfRace();
+                            if (timePoint.before(rcStartOfRace)) {
+                                preResult = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -278,14 +291,33 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         }
         return result;
     }
+    
+    private boolean appliesAtStartOfRace(MaxPointsReason maxPointsReason) {
+        final boolean result;
+        switch (maxPointsReason) {
+        case DNS:
+        case DNC:
+        case OCS:
+            result = true;
+            break;
+        default:
+            result = false;
+        }
+        return result;
+    }
 
     @Override
     public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         MaxPointsReason result = maxPointsReasons.get(raceColumn.getKey(competitor));
-        if (result == null) {
+        if (result == null || !isMaxPointsReasonApplicable(result, timePoint, raceColumn, competitor)) {
             result = MaxPointsReason.NONE;
         }
         return result;
+    }
+
+    private boolean isMaxPointsReasonApplicable(MaxPointsReason maxPointsReason, TimePoint timePoint, RaceColumn raceColumn, Competitor competitor) {
+        return (appliesAtStartOfRace(maxPointsReason) && !isCertainlyBeforeRaceStart(timePoint, raceColumn, competitor))
+                || !isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor);
     }
 
     /**
@@ -370,21 +402,21 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * Under the assumption that the competitor is not assigned the maximum score due to disqualification or other
      * reasons, computes the corrected score. If {@link #correctedScores} contains an entry for the
      * <code>competitor</code>'s key, it is used. Otherwise, the <code>uncorrectedScore</code> is returned.
+     * 
      * @param scoringScheme
      *            used to transform the tracked rank into a score if there is no score correction applied
-     * @param timePoint TODO
      * @return <code>null</code> in case the <code>competitor</code> has no score assigned in that race which is the
-     * case if the score is not corrected by these score corrections, and the <code>trackedRankProvider</code> delivers 0
-     * as the rank, or if the score is not corrected and the scoring scheme cannot find the competitor in any tracked race
-     * of the <code>raceColumn</code>, meaning there cannot be a tracked rank for the competitor regardless what
-     * <code>trackedRankProvider</code> delivers.
+     *         case if the score is not corrected by these score corrections, and the <code>trackedRankProvider</code>
+     *         delivers 0 as the rank, or if the score is not corrected and the scoring scheme cannot find the
+     *         competitor in any tracked race of the <code>raceColumn</code>, meaning there cannot be a tracked rank for
+     *         the competitor regardless what <code>trackedRankProvider</code> delivers.
      */
     private Double getCorrectedNonMaxedScore(final Competitor competitor, final RaceColumn raceColumn,
             Callable<Integer> trackedRankProvider, ScoringScheme scoringScheme,
             final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
         Double correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
         Double result;
-        if (correctedNonMaxedScore == null) {
+        if (correctedNonMaxedScore == null || isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor)) {
             try {
                 int trackedRank = trackedRankProvider.call();
                 result = scoringScheme.getScoreForRank(raceColumn, competitor, trackedRank,
