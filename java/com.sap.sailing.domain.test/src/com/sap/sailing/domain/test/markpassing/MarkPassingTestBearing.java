@@ -9,7 +9,7 @@ public class MarkPassingTestBearing extends AbstractMarkPassingTestNew {
 
     public MarkPassingTestBearing() throws MalformedURLException, URISyntaxException {
 
-        super(new DetectorBearingBased());
+        super(new DetectorClosestGPSFix());
 
     }
 

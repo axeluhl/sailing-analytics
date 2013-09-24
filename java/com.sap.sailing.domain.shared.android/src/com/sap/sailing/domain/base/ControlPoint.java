@@ -5,4 +5,10 @@ import com.sap.sailing.domain.common.WithID;
 
 public interface ControlPoint extends WithID, Named {
     Iterable<Mark> getMarks();
+    
+    boolean hasTwoMarks();
+    
+    boolean isLine();
+     
+    
 }

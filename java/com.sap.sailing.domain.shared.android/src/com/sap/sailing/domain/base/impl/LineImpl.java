@@ -4,11 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.Line;
 import com.sap.sailing.domain.base.Mark;
 
-public class GateImpl implements Gate {
-    private static final long serialVersionUID = 2807354812133070574L;
+public class LineImpl implements Line {
+
+
+    private static final long serialVersionUID = -2771299397766434232L;
     private final Mark left;
     private final Mark right;
     private final String name;
@@ -17,11 +19,10 @@ public class GateImpl implements Gate {
     /**
      * @param name also used as ID for the mark; if you have a better ID, use {@link GateImpl(Serializable, Mark, Mark, String)} instead.
      */
-    public GateImpl(Mark left, Mark right, String name) {
+    public LineImpl(Mark left, Mark right, String name) {
         this(/* ID */ name, left, right, name);
     }
-    
-    public GateImpl(Serializable id, Mark left, Mark right, String name) {
+    public LineImpl(Serializable id, Mark left, Mark right, String name) {
         this.id = id;
         this.left = left;
         this.right = right;
@@ -64,7 +65,7 @@ public class GateImpl implements Gate {
     @Override
     public boolean isLine() {
        
-        return false;
+        return true;
     }
 
     @Override

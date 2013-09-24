@@ -5,44 +5,187 @@ import static org.junit.Assert.assertTrue;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
-import java.lang.Iterable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
+import org.junit.Before;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
-public abstract class AbstractMarkPassingTestNew {
+public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest{
 
-    private DynamicTrackedRace race;
+
 
     private final DetectorMarkPassing detector;
 
     private static final int tolerance = 10000;
 
-    protected AbstractMarkPassingTestNew(DetectorMarkPassing detector) throws MalformedURLException, URISyntaxException {
+    
 
-        this.detector = detector;
+        
 
+  
+    /////!!!!!!!!!!!!!!!!!!!!
+    private boolean forceReload = false;
+
+    public AbstractMarkPassingTestNew(/*Mine*/DetectorMarkPassing detector) throws MalformedURLException,
+                    URISyntaxException {
+            super();
+           /**/ this.detector = detector;
     }
 
-    Iterable<Competitor> competitors = race.getRace().getCompetitors();
+    @Before
+    public void setUp() throws IOException, InterruptedException,
+                    URISyntaxException {
+                            super.setUp();
+                            String raceID = "357c700a-9d9a-11e0-85be-406186cbf87c";
+                            if (!loadData(raceID) && !forceReload) {
+                                    System.out.println("Downloading new data from the web.");
+                                this.setUp("event_20110609_KielerWoch",
+                                                            /* raceId */raceID, 
+                                                            new ReceiverType[] {    ReceiverType.MARKPASSINGS,
+                                                                                                            ReceiverType.MARKPOSITIONS,
+                                                                                                    ReceiverType.RACECOURSE, 
+                                                                                                    ReceiverType.RAWPOSITIONS });
+                                OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(
+                                        new GregorianCalendar(2011, 05, 23).getTime()));
+                                getTrackedRace().recordWind(
+                                        new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
+                                                new DegreeBearingImpl(65))), new WindSourceImpl(WindSourceType.WEB));
+                                saveData();
+                            }
+                    }
+
+    /**
+     * Loads stored data for the given raceID or returns false if no data is present.
+     * @param raceID - ID of the race to load from disk
+     * @return true if data was loaded, false if not
+     */
+    private boolean loadData(String raceID) {
+            String path = null;
+            File file = new File("resources/");
+            if (file.exists() && file.isDirectory()) {
+                    for (String fileName : file.list()) {
+                            if (fileName.endsWith(".data") && fileName.contains(raceID)) {
+                                    path = "resources/" + fileName;
+                                    break;
+                            }
+                    }
+            }
+            if (path == null)
+                    return false;
+            FileInputStream fs = null;
+            ObjectInputStream os = null;
+            Object obj = null;
+    
+            try {
+                    System.out.print("Loading cached data for raceID " + raceID + "...");
+                    fs = new FileInputStream(path);
+                    os = new ObjectInputStream(fs);
+                    obj = os.readObject();
+                    System.out.println("done!");
+            } catch (ClassNotFoundException | IOException e) {
+                    e.printStackTrace();
+                    return false;
+            } finally {
+                    if (os != null) {
+                            try {
+                                    os.close();
+                            } catch (IOException e) {
+                                    e.printStackTrace();
+                                    return false;
+                            }
+                    }
+                    if (fs != null) {
+                            try {
+                                    fs.close();
+                            } catch (IOException e) {
+                                    e.printStackTrace();
+                                    return false;
+                            }
+                    }
+            }
+    
+            if (obj != null && obj instanceof DynamicTrackedRace) {
+                    setTrackedRace((DynamicTrackedRace) obj);
+                    setRace(getTrackedRace().getRace());
+                    return true;
+            }
+            return false;
+    }
+
+    /**
+     * Saves current result of getTrackedRace to disk for future reuse.
+     */
+    private void saveData() {
+            DynamicTrackedRace trackedRace = getTrackedRace();
+            String racePath = "resources/" + trackedRace.getRace().getId() + ".data";
+            FileOutputStream fs = null;
+            ObjectOutputStream os = null;
+            try {
+                    System.out.println("Caching data for raceID " + trackedRace.getRace().getId());
+                    File f = new File(racePath);
+                    f.createNewFile();
+                    fs = new FileOutputStream(f);
+                    os = new ObjectOutputStream(fs);
+                    os.writeObject(trackedRace);
+            } catch (IOException e) {
+                    e.printStackTrace();
+                    return;
+            } finally {
+                    if (os != null) {
+                            try {
+                                    os.close();
+                            } catch (IOException e) {
+                                    e.printStackTrace();
+                                    return;
+                            }
+                    }
+                    if (fs != null) {
+                            try {
+                                    fs.close();
+                            } catch (IOException e) {
+                                    e.printStackTrace();
+                                    return;
+                            }
+                    }
+            }
+    }
+
+////////!!!!!!!!!!!!!!!!!!!
+    
 
     LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> waypointTracks = new LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>>();
     {
 
-        for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
+        for (Waypoint w : /*race.*/getRace().getCourse().getWaypoints()) {
             
 
             ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> marks = new ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>();
 
             for (Mark mark : w.getMarks()) {
-
-                DynamicGPSFixTrack<Mark, GPSFix> markTrack = race.getOrCreateTrack(mark);
+                
+                DynamicGPSFixTrack<Mark, GPSFix> markTrack = /*race.*/getTrackedRace().getOrCreateTrack(mark);
 
                 marks.add(markTrack);
             }
@@ -50,6 +193,7 @@ public abstract class AbstractMarkPassingTestNew {
             waypointTracks.put(w, marks);
 
         }
+        
     }
 
     protected void compareMarkpasses() {
@@ -57,23 +201,23 @@ public abstract class AbstractMarkPassingTestNew {
         int correctPasses = 0;
         int totalPasses = 0;
 
-        for (Competitor c : competitors) {
+        for (Competitor c : getRace().getCompetitors()) {
 
             LinkedHashMap<Waypoint, MarkPassing> givenPasses = new LinkedHashMap<Waypoint, MarkPassing>();
             {
-                for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
-                    MarkPassing markPassing = race.getMarkPassing(c, w);
+                for (Waypoint w : /*race.*/getRace().getCourse().getWaypoints()) {
+                    MarkPassing markPassing = /*race.*/getTrackedRace().getMarkPassing(c, w);
 
                     givenPasses.put(w, markPassing);
                 }
             }
 
-            for (Waypoint w : detector.computeMarkpasses(race.getTrack(c), waypointTracks, race.getStartOfRace()).keySet()) {
+            for (Waypoint w : detector.computeMarkpasses(/*race.*/getTrackedRace().getTrack(c), waypointTracks, /*race.*/getTrackedRace().getStartOfRace()).keySet()) {
 
                 if (givenPasses.containsKey(w)) {
 
                     long timedelta = givenPasses.get(w).getTimePoint().asMillis()
-                            - detector.computeMarkpasses(race.getTrack(c), waypointTracks,race.getStartOfRace()).get(w).getTimePoint()
+                            - detector.computeMarkpasses(/*race.*/getTrackedRace().getTrack(c), waypointTracks,/*race.*/getTrackedRace().getStartOfRace()).get(w).getTimePoint()
                                     .asMillis();
 
                     if ((Math.abs(timedelta) < tolerance)) {
