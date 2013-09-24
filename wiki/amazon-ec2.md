@@ -12,4 +12,6 @@ Associated to the main account are _n_ users that can be configured using the IA
 
 * **Seniors**: Everyone belonging to this group can not access IAM but everything else.
 
+Users configured in the IAM and at least belonging to the group Seniors can log in using the following url https://017363970217.signin.aws.amazon.com/console. All users that belong to one of these groups absolutely need to have MFA activated. MFA (Multi-Factor-Authentication) can be compared to the RSA token that needs to be input every time one wants to access the SAP network. After activation users need to synchronize their device using a barcode that is displayed in IAM. The device can be a software (Google Authenticator for iOS and Android) or a physical device.
+
 [[Creating a new application instance|wiki/amazon-ec2-create-new-app-instance]]
