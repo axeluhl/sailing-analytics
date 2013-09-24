@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test;
+package com.sap.sailing.domain.test.markpassing;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -119,7 +119,7 @@ public class MarkPassingBearingBasedTest extends AbstractMarkPassingTest {
 	 * @param mark - the mark of the given {@link Waypoint} to be checked
 	 * @param fix - the {@link GPSFixMoving} to check
 	 * @param competitor - the {@link Competitor} the given fix belongs to
-	 * @return a {@link MarkPassing} iff the fix represents a passing of the given {@link Waypoint}, null if not
+	 * @return a {@link MarkPassing} if the fix represents a passing of the given {@link Waypoint}, null if not
 	 */
 	private MarkPassing getBuoyPassing(Waypoint waypoint, Mark mark, GPSFixMoving fix, Competitor competitor) {
 		if (waypoint == null || getTrackedRace().getStartOfRace().compareTo(fix.getTimePoint()) > 0) {
@@ -167,7 +167,7 @@ public class MarkPassingBearingBasedTest extends AbstractMarkPassingTest {
 	 * @param waypoint - the {@link Waypoint} to check
 	 * @param fix - the {@link GPSFixMoving} to check
 	 * @param competitor - the {@link Competitor} the given fix belongs to
-	 * @return a {@link MarkPassing} iff the fix represents a passing of the line of the given {@link Waypoint}, null if not
+	 * @return a {@link MarkPassing} if the fix represents a passing of the line of the given {@link Waypoint}, null if not
 	 */
 	private MarkPassing getLinePassing(Waypoint waypoint, GPSFixMoving fix, Competitor competitor) {
 		if (waypoint == null || !isGate(waypoint)) {
@@ -175,7 +175,7 @@ public class MarkPassingBearingBasedTest extends AbstractMarkPassingTest {
 			return null;
 		}
 		
-		/* A boat passes the line, iff the bearing from the boat to mark 1 of the gate equals 
+		/* A boat passes the line, if the bearing from the boat to mark 1 of the gate equals 
 		 * the bearing from mark 2 of the gate to mark 1 of the gate AND the bearing from the boat
 		 * to mark 2 of the gate equals the bearing from mark 1 of the gate to mark 2 of the gate.
 		 */

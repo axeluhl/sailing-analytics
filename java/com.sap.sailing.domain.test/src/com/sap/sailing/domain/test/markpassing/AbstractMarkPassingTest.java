@@ -1,6 +1,6 @@
-package com.sap.sailing.domain.test;
+package com.sap.sailing.domain.test.markpassing;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,6 +37,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -191,7 +192,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 		List<MarkPassing> markPassings = computeAllMarkPassings();
 		// compare computed mark passings to given ones
 		int overallMisses = compareCalculatedAndGivenPassings(markPassings, true);
-		assertTrue("Calculation returned less mark passings than the test data contains", overallMisses == 0);
+		assertEquals("Calculation returned less mark passings than the test data contains", 0, overallMisses);
 	}
 
 	/**

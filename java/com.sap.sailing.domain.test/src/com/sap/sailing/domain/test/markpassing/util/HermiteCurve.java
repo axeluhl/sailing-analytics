@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test.util;
+package com.sap.sailing.domain.test.markpassing.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,7 +57,7 @@ public class HermiteCurve {
 		 * We assume that the numerical error caused by using double as a data type is negligible concerning the mark rounding times calculated from the intersection points.
 		 * 
 		 */
-		// TODO find a quick & efficient way to estimate if the line intersects with the spline to safe the effort if it doesn't.
+		// TODO find a quick & efficient way to estimate if the line intersects with the spline to save the effort if it doesn't.
 		// if (!isIntersectingLine(line)) {
 		//	 return Collections.emptyList();
 		// }
