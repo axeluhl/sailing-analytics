@@ -6,6 +6,8 @@ This project is associated with an account that, for billing purposes, is a subs
 
 The main entry point for the account is https://console.aws.amazon.com/. There you can only log in using the root account. You will then have access to not only the EC2 Console but also to the main account details (including billing details).
 
+<img src="/wiki/images/amazon/RootAccount.JPG" width="100%" height="100%"/>
+
 Associated to the main account are _n_ users that can be configured using the IAM (User Management, https://console.aws.amazon.com/iam/home). Each of these users can belong to different groups that have different rights associated. Currently there are two groups:
 
 * **Administrators**: Users belonging to this group have access to all EC2 services (including IAM). They do not have the right to manage main account information (like billing).
