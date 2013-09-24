@@ -127,7 +127,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         selectedRegattaLeaderboardPanel.updateSettings(newSettings);
     }
 
-    public void setActLeaderboardNames(List<Pair<String, String>> newLeaderboardNamesAndDisplayNames) {
+    public void setRegattaLeaderboardNames(List<Pair<String, String>> newLeaderboardNamesAndDisplayNames) {
         regattaLeaderboardNamesAndDisplayNames.clear();
         regattaLeaderboardNamesAndDisplayNames.addAll(newLeaderboardNamesAndDisplayNames);
         
@@ -139,7 +139,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
             
             @Override
             public void onSuccess(List<Pair<String, String>> leaderboardNamesAndDisplayNames) {
-                setActLeaderboardNames(leaderboardNamesAndDisplayNames);
+                setRegattaLeaderboardNames(leaderboardNamesAndDisplayNames);
             }
             
             @Override
@@ -176,6 +176,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     private void updateSelectedLeaderboard(String selectedLeaderboardName, int newTabIndex) {
         if(selectedLeaderboardName != null) {
             if(selectedRegattaLeaderboardPanel != null && selectedRegattaLeaderboardFlowPanel != null) {
+                timer.removeTimeListener(selectedRegattaLeaderboardPanel);
                 selectedRegattaLeaderboardFlowPanel.remove(selectedRegattaLeaderboardPanel);
                 selectedRegattaLeaderboardPanel = null;
                 selectedRegattaLeaderboardFlowPanel = null;
@@ -189,6 +190,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
             selectedRegattaLeaderboardFlowPanel.add(selectedRegattaLeaderboardPanel);
         } else {
             if(selectedRegattaLeaderboardPanel != null && selectedRegattaLeaderboardFlowPanel != null) {
+                timer.removeTimeListener(selectedRegattaLeaderboardPanel);
                 selectedRegattaLeaderboardFlowPanel.remove(selectedRegattaLeaderboardPanel);
                 selectedRegattaLeaderboardPanel = null;
                 selectedRegattaLeaderboardFlowPanel = null;
