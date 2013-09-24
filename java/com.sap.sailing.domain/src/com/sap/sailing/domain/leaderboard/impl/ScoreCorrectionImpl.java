@@ -161,6 +161,22 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * {@link #getMaxPoints(TrackedRace) maximum score} is computed for the competitor. Otherwise, the
      * <code>uncorrectedScore</code> is returned.
      * <p>
+     * 
+     * The current implementation considers <code>timePoint</code> by comparing it to the <code>competitor</code>'s
+     * times for the tracked race associated for that competitor in <code>raceColumn</code>. If there is no such tracked
+     * race, any score correction available will be applied unchanged. If a tracked race is attached to the column for
+     * the competitor's fleet, the score correction is applied if <code>timePoint</code> is after the competitor
+     * finished or aborted the race. If the <code>timePoint</code> is after the {@link TrackedRace#getStartOfRace() race
+     * start time}, a score correction for the competitor for that race is considered if it is a
+     * {@link MaxPointsReason#DNS}, {@link MaxPointsReason#DNC} or {@link MaxPointsReason#OCS} code. Those penalties
+     * apply already from the start of the race and will cause the penalty score to be applied already during the race
+     * time interval, so the competitor will be sorted to the end of the leaderboard already during replay.
+     * <p>
+     * 
+     * TODO Future versions of this implementation shall also work for untracked race columns by comparing <code>timePoint</code>
+     * to start and finish time points of tracked races in other columns of the same leaderboard owning this {@link ScoreCorrection}
+     * object. From those time relations it can be possible to infer that <code>timePoint</code> is before or after another of
+     * <code>competitor</code>'s races.
      */
     @Override
     public Result getCorrectedScore(Callable<Integer> trackedRankProvider, final Competitor competitor,
@@ -169,7 +185,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         Double result;
         final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn, timePoint);
         if (maxPointsReason == MaxPointsReason.NONE) {
-            result = getCorrectedNonMaxedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher);
+            result = getCorrectedNonMaxedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher, timePoint);
         } else {
             // allow explicit override even when max points reason is specified; calculation may be wrong,
             // e.g., in case we have an untracked race and the number of competitors is estimated incorrectly
@@ -223,16 +239,16 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * <code>competitor</code>'s key, it is used. Otherwise, the <code>uncorrectedScore</code> is returned.
      * @param scoringScheme
      *            used to transform the tracked rank into a score if there is no score correction applied
-     * 
+     * @param timePoint TODO
      * @return <code>null</code> in case the <code>competitor</code> has no score assigned in that race which is the
      * case if the score is not corrected by these score corrections, and the <code>trackedRankProvider</code> delivers 0
      * as the rank, or if the score is not corrected and the scoring scheme cannot find the competitor in any tracked race
      * of the <code>raceColumn</code>, meaning there cannot be a tracked rank for the competitor regardless what
      * <code>trackedRankProvider</code> delivers.
      */
-    protected Double getCorrectedNonMaxedScore(final Competitor competitor, final RaceColumn raceColumn,
+    private Double getCorrectedNonMaxedScore(final Competitor competitor, final RaceColumn raceColumn,
             Callable<Integer> trackedRankProvider, ScoringScheme scoringScheme,
-            final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
+            final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
         Double correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
         Double result;
         if (correctedNonMaxedScore == null) {

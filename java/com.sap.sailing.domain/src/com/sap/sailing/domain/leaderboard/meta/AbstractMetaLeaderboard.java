@@ -20,6 +20,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -74,7 +75,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
     
     public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(new MetaLeaderboardScoreCorrection(), resultDiscardingRule);
+        super(resultDiscardingRule);
         getScoreCorrection().setMetaLeaderboard(this);
         metaFleet = new FleetImpl("MetaFleet");
         this.scoringScheme = scoringScheme;
@@ -83,6 +84,13 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<Leaderboard, ScoreCorrectionListener>();
     }
     
+    @Override
+    protected SettableScoreCorrection createScoreCorrection() {
+        return new MetaLeaderboardScoreCorrection();
+    }
+
+
+
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         columnsForLeaderboards = new WeakHashMap<>();
