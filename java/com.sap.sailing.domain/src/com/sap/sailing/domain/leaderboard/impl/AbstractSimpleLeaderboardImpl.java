@@ -360,7 +360,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      * {@link ScoreCorrectionImpl}.
      */
     protected SettableScoreCorrection createScoreCorrection() {
-        return new ScoreCorrectionImpl();
+        return new ScoreCorrectionImpl(this);
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {

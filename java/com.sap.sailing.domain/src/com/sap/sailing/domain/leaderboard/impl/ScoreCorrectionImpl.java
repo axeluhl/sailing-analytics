@@ -14,7 +14,9 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
+import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -57,8 +59,11 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     private TimePoint timePointOfLastCorrectionsValidity;
 
     private transient Set<ScoreCorrectionListener> scoreCorrectionListeners;
+    
+    private Leaderboard leaderboard;
 
-    public ScoreCorrectionImpl() {
+    public ScoreCorrectionImpl(Leaderboard leaderboard) {
+        this.leaderboard = leaderboard;
         this.maxPointsReasons = new HashMap<Util.Pair<Competitor, RaceColumn>, MaxPointsReason>();
         this.correctedScores = new HashMap<Util.Pair<Competitor, RaceColumn>, Double>();
         this.scoreCorrectionListeners = new HashSet<ScoreCorrectionListener>();
@@ -308,6 +313,10 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     @Override
     public void setComment(String scoreCorrectionComment) {
         this.comment = scoreCorrectionComment;
+    }
+
+    protected Leaderboard getLeaderboard() {
+        return leaderboard;
     }
 
 }
