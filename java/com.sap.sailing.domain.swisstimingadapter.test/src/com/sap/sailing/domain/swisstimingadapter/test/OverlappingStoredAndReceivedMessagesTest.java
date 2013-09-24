@@ -208,4 +208,16 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
         return null;
     }
 
+    @Override
+    public boolean hasRaceStartlist(String raceID) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean hasRaceCourse(String raceID) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }

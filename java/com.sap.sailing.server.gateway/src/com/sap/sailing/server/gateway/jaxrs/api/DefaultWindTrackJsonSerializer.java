@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.server.gateway.jaxrs.UnitSerializationUtil;
 
 public class DefaultWindTrackJsonSerializer implements WindTrackJsonSerializer {
     public static final String FIELD_ID = "id";

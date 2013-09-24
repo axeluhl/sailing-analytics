@@ -146,13 +146,13 @@ if [[ "$@" == "hot-deploy" ]]; then
         exit
     fi
 
+    if [[ $HAS_OVERWRITTEN_TARGET -eq 1 ]]; then
+        active_branch=$TARGET_SERVER_NAME
+    fi
+
     if [ ! -d $SERVERS_HOME/$active_branch/plugins ]; then
         echo "Could not find target directory $SERVERS_HOME/$active_branch/plugins!"
         exit
-    fi
-
-    if [[ $HAS_OVERWRITTEN_TARGET -eq 1 ]]; then
-        active_branch=$TARGET_SERVER_NAME
     fi
 
     # locate old bundle
@@ -344,11 +344,14 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     rm -rf $ACDIR/org.eclipse.*
     rm -rf $ACDIR/configuration/org.eclipse.*
 
+    # always overwrite start and stop scripts as they
+    # should never contain any custom logic
+    cp -v $PROJECT_HOME/java/target/start $ACDIR/
+    cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+    cp -v $PROJECT_HOME/java/target/status $ACDIR/
+
     if [ ! -f "$ACDIR/env.sh" ]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
-        cp -v $PROJECT_HOME/java/target/start $ACDIR/
-        cp -v $PROJECT_HOME/java/target/stop $ACDIR/
-        cp -v $PROJECT_HOME/java/target/status $ACDIR/
     fi
 
     if [ ! -f $ACDIR/no-overwrite ]; then
@@ -363,9 +366,6 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
 
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
-        cp -v $PROJECT_HOME/java/target/start $ACDIR/
-        cp -v $PROJECT_HOME/java/target/stop $ACDIR/
-        cp -v $PROJECT_HOME/java/target/status $ACDIR/
         cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
 
         cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR

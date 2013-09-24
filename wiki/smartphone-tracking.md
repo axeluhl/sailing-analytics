@@ -6,11 +6,13 @@
 On this page the decisions, architecture and API's for using smartphones as an additional input channel for Sailing Analytics are documented. Meanwhile, the architecture of this solution is designed to be flexible enough to support other types of input devices in the future, e.g. [Igtimi](http://www.igtimi.com/) trackers.
 
 ## Branches
-* `cmd-reuse-racelog-for-cmd-tracking`: server side development of using the RaceLog to create a tracking adapter for Commodity Mobile Devices (CMD) such as smartphones
 * `race-board-admin`: manual UI based entry of mark passings for the time being, while we do not have a detection algorithm
-* `cmd-android-tracking`: client side development branch for the tracking application, which enhances the existent race committee app
+* `cmd-android-tracking`: client side development branch for the tracking application, which enhances the existent race committee app, server side development of using the RaceLog to create a tracking adapter for Commodity Mobile Devices (CMD) such as smartphones
 
-## Communication Channels
+## Communication
+
+### Channels
+
 The current plan is to use up to three channels for communicating:
 
 1. **Servlets:** Everything that is not directly related to a specific Race (or rather RaceLog) is handled via POST and GET servlets, where the data should be described as JSON. Examples are: Creating a Race, managing Competitors. Ideally, this would on smartphone side however also benefit from the RaceLog-underlying semi-connectedness functionality. _Caveats: replication and persistence!_
@@ -18,6 +20,10 @@ The current plan is to use up to three channels for communicating:
 2. **RaceLog:** All the "master data" communication concerning one race in particular should piggyback on the existing RaceLog-mechanism, which already deals with semi-connectedness, persistence and replication. Examples for this are: adding competitors to a race, mapping tracking devices to competitors, starting a race, defining the course layout.
 
 3. **Other:** The actual tracking data (perhaps also additional data: wind etc.) also has to be transferred. On client side we want to reuse the communication mechanism which the RaceLog is built on top of.
+
+### Communication during creating a race
+
+![Typical communication between the App, its backend and the SAP Sailing Analytics server during the creation of a race](http://i.imagebanana.com/img/e1blf6xl/Capture.PNG)
 
 ## Server-side Architecture
 On the server-side, the architecture of smartphone tracking is intended to be open for extension, so that different types of input devices can be used for tracking one race. Currently, some parts are still tightly coupled to smartphone tracking (e.g. `RacingEventService#createTrackedRaceForSmartphoneTracking()`), but these can be refactored to be generic.
@@ -30,7 +36,7 @@ The reason for using the OSGi service registry is that it enables decentralized 
 Without a tracking provider that implements a mark passing algorithm, we have to identify mark passings on our own in the context of smartphone tracking, for Sailing Analytics to be able to do any analytics at all. While the mid-term goal definitely is to implement such a detection algorithm, as a workaround a UI entry option has been provided, that can be found in the branch `race-board-admin`, in which the mark passings can be set by hand. This can be accessed by clicking the _Administer Race_ button of a race in the leaderboard detail table, which can be found in the leaderboard configuration panel of the admin console.
 
 ## Servlets
-The servlets are listed in the chronological order that they can be called. First, persistent competitors are needed, so that they can later on be registered for the race (`createPersistentCompetitor`). These can then be listed (`getPersistentCompetitors`). When this is completed, a race in its pre-race phase can be created (`createRace`), which is then also shown in `getRaceLogsInPreRacePhase`. By selecting one of these RaceLogs and sending `RaceLogPersistentCompetitorRegisteredEvent`s, `RaceLogCourseDefinitionChangedEvent`s, the race can then be moved from its pre race phase into the tracking phase by sending the `RaceLogPreRacePhaseEndedEvent` via the race log. From this moment on - given the fact that all necessary information was already included in the RaceLog, tracking data can be added to the race. On the one hand, marks can be pinged (`pingMark`, for which knowledge of the course layout is necessary, which can be accessed through `currentcourse`), on the other hand fixes of competitors can be recorded (`recordFixes`). Pinging the marks is of course only the first step, the plan is to allow the mapping of tracking devices such as smartphones to marks as well as competitors.
+The servlets are listed in the chronological order that they can be called. First, persistent competitors are needed, so that they can later on be registered for the race (`createPersistentCompetitor`). These can then be listed (`getPersistentCompetitors`). When this is completed, a race in its pre-race phase can be created (`createRace`), which is then also shown in `getRaceLogsInPreRacePhase`. By selecting one of these RaceLogs and sending `RaceLogPersistentCompetitorRegisteredEvent`s and a `RaceLogCourseDefinitionChangedEvent`, the race can then be moved from its pre race phase into the tracking phase by sending the `RaceLogPreRacePhaseEndedEvent` via the race log. From this moment on - given the fact that all necessary information was already included in the RaceLog, tracking data can be added to the race. On the one hand, marks can be pinged (`pingMark`, for which knowledge of the course layout is necessary, which can be accessed through `currentcourse`), on the other hand fixes of competitors can be recorded (`recordFixes`). Pinging the marks is of course only the first step, the plan is to allow the mapping of tracking devices such as smartphones to marks as well as competitors.
 
 **Remember to set a start time via the race log**, as the race map relies heavily on it (e.g., the course based wind estimation needs a start time, and without any other wind sources a missing start time results in no boats and marks being displayed at all, as the `SailingService#getRaceMapData()` then fails with a no wind exception).
 
@@ -72,6 +78,9 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 **Throws**
 * `400` Invalid JSON in request
 
+**Comments**
+* The server choses the id, so this field can be left blank / not supplied
+
 ### `/sailingserver/racelogtracking/getPersistentCompetitors`
 `PersistentCompetitorsGetServlet`
 
@@ -89,44 +98,27 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 * GET request
 
 **Returns**
-* `200` body: JSON array of String Triples that act as RaceLog identifiers (leaderboard name, race column name, fleet name)
+* `200` body: JSON array of RaceGroups
 
-### `/sailingserver/racelogtracking/createRace`
+### `/sailingserver/racelogtracking/createRace?leaderboard=<leaderboardName>&raceColumn=<raceColumnName>&fleet=<fleetName>`
 `CreateRaceLogTrackedRacePostServlet`
 
 **Expects**
-* POST request body: JSON with Leaderboard-DTO, RaceColumn-DTO and BoatClass (see CreateRaceLogTrackedRaceJsonSerializer)
-```
-{"leaderboard": {
-  "name": "test",
-  "displayName": "test",
-  "discardThresholds": [1,2],
-  "scoringScheme": "LOW_POINT",
-  "courseAreaId": "Kiel"
- },
- "raceColumn": {
-  "name": "test",
-  "isMedalRace": false
- },
- "boatClass": {
-  "name": "49er",
-  "typicallyStartsUpwind": true
- }
-}
-```
+* POST request
 
 **Returns**
-* `200` RaceLog Identifier Triple JSON
+* `200` RaceGroup JSON, containing only the Series/Row/Cell structure for the newly created race
 
 **Throws**
-* `400` Invalid JSON in request
-* `409` RaceColumn and RaceLog already exist in Leaderboard
+* `404` Leaderboard does not exist, RaceColumn does not exist (if the leaderboard is a `RegattaLeaderboard`)
+* `409` The RaceColumn already is linked to a tracked race`
 
 **Comments**
-* If a leaderboard with the supplied does not already exist, a FlexibleLeaderboard is created. Otherwise, the existing Leaderboard is used without raising an error. An existing RaceColumn will raise an error however, as this also means a RaceLog already exists.
+* The behaviour of the servlet depends on the type of leaderboard with the name `leaderboardName`. If this is a `RegattaLeaderboard`, then the RaceColumn with the name `raceColumnName` has to already exist. If it is a `FlexibleLeaderboard`, the RaceColumn will be created if it does not yet exist.
 
 ### `/smartphone/recordFixes`
 `RecordFixesPostServlet`
+
 **Precondition**
 * race has already been started by sending a `RaceLogPreRacePhaseEndedEvent`
 
@@ -153,15 +145,20 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 
 ### `/sailingserver/racelogtracking/pingMark?leaderboard=<leaderboardName>&raceColumn=<raceColumnName>&fleet=<fleetName>`
 `PingMarkPostServlet`
+
 **Precondition**
 * race has already been started by sending a `RaceLogPreRacePhaseEndedEvent` and has not been stopped yet
 
 **Expects**
 * POST request body: PingMark as JSON
 ```
-{"unixtime": 2394820480284,
- "nmea"    :  "$GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A"
- }
+{
+    "markStringId": "Leeward Mark"
+    "gpsFix": {
+        "unixtime": 1375951388465,
+        "nmea": "$GPRMC,084308,A,41.771311,N,86.933174,E,0.0,0.0,080813,0,W*4D"
+    },
+}
 ```
 
 **Returns**
@@ -176,6 +173,7 @@ To test the servlets manually, in addition to the unit tests, the chrome plugin 
 
 **Expects**
 * GET request
+* URL Parameters leaderboard, raceColumn and fleet
 
 **Returns**
 * `200` body: CourseBase JSON
@@ -191,6 +189,8 @@ Includes a `Competitor` as well a `SmartphoneIdentifier`. On the one hand, every
 ### RaceLogPreRacePhaseEndedEvent
 This does not include any additional data, and merely indicates that the race can be transformed from its pre-race definition state (e.g. waiting for competitors to register, waiting for boat class, waiting for course definition) to an actual race, where no additional competitors can be added, the boat class is fixes, and tracking may begin. This event is picked up by the `RaceLogRaceTracker`, which then creates the actual tracked race from the data in the RaceLog. For successful creation, at least one competitor has to be registered, and a course must have been set through a `RaceLogCourseDefinitionChangedEvent`.
 
+##Tracking App Use Cases
+![Use Cases](http://i.imagebanana.com/img/bda86luu/Use_Cases.jpg)
 
 ##Tracking App Architecture
 
@@ -208,29 +208,34 @@ Sends the location information to a web service.
 ### `SAP Sailor Tracker Service`
 Background process for starting, pausing and stopping tracking. Registers all receivers on a pending intent, which is send periodically.
 
-### `doPostTask`
-Async task that handles the execution of post requests.
+### `AsyncJsonPostTask`
+Async task that handles the execution of post requests with Json content.
 
-### `doGetTask`
-Async task that handles the execution of get requests.
+### `OnlineDataManager`
+Enables accessing of data from a `DataStore`. Loads data from Servlets using GET-Requests using a `DataLoader`. For an example how to use the `OnlineDataManager` refer to `SelectRaceFragment`, which loads the RaceLogsInPreRacePhase so that the user can select the race he wants to take part in.
+
+### `DataStore`
+Interface for the `DataStore` which stores all data that is relevant for the App (managed Races, Competitors, ...)
+Implementation: `InMemoryDataStore`
+
+### `DataLoader`
+`AsyncDataLoader` which does an HTTP GET to a given URL, parses the data (with a `DataParser`) and sends the data to a `DataHandler`.
 
 ### `AppPreferences`
 Helper Class for accessing the App Preferences specified in settings_view.xml
 
-### `DataStore`
-Interface for the DataStore which stores all data that is relevant for the App (managed Races, Competitors, ...)
-Implementation: InMemoryDataStore
-
-### `DataLoader`
-AsyncDataLoader which does an HTTP GET to a given URL, parses the data (with a DataParser) and sends the data to a DataHandler.
+### `ListFragmentWithDataManager`
+Base Class, which provides easy access to the data manager for a Fragment, which wants to display the data in a List.
+Used for example in the `Select*Fragments`.
 
 ## ToDo
 
 ### Server
-* set fleet when creating race
+* only one competitor registered, even though multiple RegisteredEvents in RaceLog?
+* change names of *Events, as they are not events -> also change names of abstract base classes
+* use extension serializers
+* exchange auto JSON to BSON conversion in MongoObjectFactory / DomainObjectFactory for something suited for productive use
 * editing course in the RaceBoardAdmin
-* persist tracking data (GPSFixStore)
-* load stored tracked smartphone race (Panel in Admin Console, RaceLogConnector, only present such races with the necessary data in the racelog, and allow user to select whole leaderboard to restore)
 * mapping devices to marks
 * generic method for registering listener for NMEA sentence types (e.g. to then process wind) -> move servlet for receiving NMEA out of smartphoneadapter
 * accepting / removing competitors
@@ -241,9 +246,10 @@ AsyncDataLoader which does an HTTP GET to a given URL, parses the data (with a D
 * security (not everybody can start race, goes hand in hand with user management)
 * support dynamic mapping of smartphone to competitor -> so that it can change during the race
 * support other input channels (e.g. Igtimi)
-* Servlet for getting Competitors for a certain race: Have a look how this is implemented in the serverside-counterpart of the racecommittee-app: /sailingserver/rc/competitors?leaderboard="+raceGroupName+"&raceColumn"+raceColumnName+ "&fleet="+fleetName
+* only transfer competitor ID for registering etc. instead of whole competitor
 
 ### Android
+* change format of sent position Data to degrees and minutes
 * reuse existing course design functionality to create RaceLogCourseDesignChangedEvent before sending RaceLogPreRacePhaseEndedEvent
 * abstract sending service, so that all POST / GET requests and not only RaceLogEvents can be sent using the semi-connectedness functionality --> just write JSONObjects/Strings directly into the file. The Servlet has to handle deserialization and the client doesn't have to know what type of object it is after having saved it (is this really the case?)
 * simplify settings

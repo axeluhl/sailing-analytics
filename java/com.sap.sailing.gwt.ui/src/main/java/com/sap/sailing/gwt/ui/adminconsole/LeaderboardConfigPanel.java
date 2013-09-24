@@ -816,8 +816,10 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
     private void selectTrackedRaceInRaceList() {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
+        if (selectedLeaderboardName != null) {
         final RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetNameInLeaderboard = getSelectedRaceColumnWithFleet();
-        final String selectedRaceColumnName = selectedRaceColumnAndFleetNameInLeaderboard.getA().getRaceColumnName();
+            final String selectedRaceColumnName = selectedRaceColumnAndFleetNameInLeaderboard.getA()
+                    .getRaceColumnName();
         final String selectedFleetName = selectedRaceColumnAndFleetNameInLeaderboard.getB().getName();
         sailingService.getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(selectedLeaderboardName,
                 selectedRaceColumnName, new AsyncCallback<Map<String, RegattaAndRaceIdentifier>>() {
@@ -831,7 +833,8 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             @Override
             public void onSuccess(Map<String, RegattaAndRaceIdentifier> regattaAndRaceNamesPerFleet) {
                 if (regattaAndRaceNamesPerFleet != null && !regattaAndRaceNamesPerFleet.isEmpty()) {
-                    RegattaAndRaceIdentifier raceIdentifier = regattaAndRaceNamesPerFleet.get(selectedFleetName);
+                                RegattaAndRaceIdentifier raceIdentifier = regattaAndRaceNamesPerFleet
+                                        .get(selectedFleetName);
                     if (raceIdentifier != null) {
                         selectRaceInList(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
                     } else {
@@ -842,6 +845,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 }
             }
         });
+    }
     }
 
     private void selectRaceInList(String regattaName, String raceName) {

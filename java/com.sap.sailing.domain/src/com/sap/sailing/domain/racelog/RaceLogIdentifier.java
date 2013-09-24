@@ -12,6 +12,8 @@ public interface RaceLogIdentifier extends Serializable {
 
     Triple<String, String, String> getIdentifier();
     
+    String getDeprecatedIdentifier();
+    
     RaceLogIdentifierTemplate getTemplate();
     
 }

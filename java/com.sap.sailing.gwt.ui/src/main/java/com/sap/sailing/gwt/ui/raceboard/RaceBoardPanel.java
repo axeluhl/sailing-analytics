@@ -160,7 +160,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
                 
         toolbarPanel = new FlowPanel();
         toolbarPanel.setWidth("100%");
-        mainPanel.add(toolbarPanel);
         componentControlsPanel = new FlowPanel();
         componentControlsPanel.addStyleName("raceBoardNavigation");
         toolbarPanel.add(componentControlsPanel);
@@ -174,7 +173,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         getElement().getStyle().setMarginRight(12, Unit.PX);
         
         CompetitorsFilterSets loadedCompetitorsFilterSets = loadCompetitorsFilterSets();
-        if(loadedCompetitorsFilterSets != null) {
+        if (loadedCompetitorsFilterSets != null) {
             competitorsFilterSets = loadedCompetitorsFilterSets;
             insertSelectedCompetitorsFilter(competitorsFilterSets);
         } else {
@@ -183,9 +182,9 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         }
         
         // in case the URL configuration contains the name of a competitors filter set we try to activate it  
-        if(raceboardViewConfiguration.getActiveCompetitorsFilterSetName() != null) {
-            for(FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: competitorsFilterSets.getFilterSets()) {
-                if(filterSet.getName().equals(raceboardViewConfiguration.getActiveCompetitorsFilterSetName())) {
+        if (raceboardViewConfiguration.getActiveCompetitorsFilterSetName() != null) {
+            for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet: competitorsFilterSets.getFilterSets()) {
+                if (filterSet.getName().equals(raceboardViewConfiguration.getActiveCompetitorsFilterSetName())) {
                     competitorsFilterSets.setActiveFilterSet(filterSet);
                     break;
                 }
@@ -270,7 +269,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     }
     
     private void addMediaSelectorToNavigationMenu() {
-        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, this.user);
+        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, stringMessages, errorReporter, this.user, getConfiguration().isAutoSelectMedia());
 //      raceTimesInfoProvider.addRaceTimesInfoProviderListener(mediaSelector);
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);
@@ -453,7 +452,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     
     private <SettingsType> void addComponentToNavigationMenu(final ComponentViewer componentViewer,
             final Component<SettingsType> component, boolean isToogleCheckboxEnabled) {
-        final CheckBox checkBox= new CheckBox(component.getLocalizedShortName());
+        final CheckBox checkBox = new CheckBox(component.getLocalizedShortName());
         checkBox.getElement().getStyle().setFloat(Style.Float.LEFT);
 
         checkBox.setEnabled(isToogleCheckboxEnabled);
@@ -481,7 +480,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
 
         componentControlsPanel.add(checkBox);
 
-        if(component.hasSettings()) {
+        if (component.hasSettings()) {
             Button settingsButton = new Button("");
             settingsButton.addClickHandler(new ClickHandler() {
                 @Override
