@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -20,6 +21,7 @@ import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -149,6 +151,96 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     public void uncorrectScore(Competitor competitor, RaceColumn raceColumn) {
         Double oldScore = correctedScores.remove(raceColumn.getKey(competitor));
         notifyListeners(competitor, raceColumn, oldScore, null);
+    }
+    
+    /**
+     * Based on the order of the {@link Leaderboard#getRaceColumns() race columns} in the {@link #getLeaderboard()
+     * leaderboard to which this score correction object belongs}, tries to determine whether the <code>timePoint</code>
+     * is before the start of <code>competitor</code>'s race in the race column specified by <code>raceColumn</code>. If
+     * there is a {@link RaceColumn#getTrackedRace(Competitor) tracked race for the competitor associated with the race
+     * column}, that race's start time is used for the calculation. Otherwise, if there is a tracked race column prior
+     * to <code>raceColumn</code> in the leaderboard in which <code>competitor</code> competes, and the competitor
+     * hasn't finished that race at <code>timePoint</code>, we also know that this must be before the start of
+     * <code>competitor</code>'s race in <code>raceColumn</code> because we assume that the same competitor can only
+     * compete in one race at a time within a single leaderboard.
+     * <p>
+     * 
+     * In all other cases, <code>false</code> is returned which can either mean that <code>timePoint</code> is certainly
+     * known to be after the race start of <code>competitor</code> in the race for <code>raceColumn</code>, or we just
+     * can't tell, e.g., because <code>competitor</code>'s race for <code>raceColumn</code> is not tracked, and
+     * <code>timePoint</code> is after all prior race column's finishing time for <code>competitor</code>.
+     * <p>
+     * 
+     * This method can be used to decide whether to apply a {@link MaxPointsReason#DNC}, {@link MaxPointsReason#DNS} or
+     * {@link MaxPointsReason#OCS} correction for <code>competitor</code> at <code>timePoint</code> in the race for
+     * <code>raceColumn</code>, because the correction can be applied at race start but should not be applied any
+     * earlier than that because it would incorrectly influence the total scores displayed for the competitor during
+     * earlier races.
+     */
+    private boolean isCertainlyBeforeRaceStart(TimePoint timePoint, RaceColumn raceColumn, Competitor competitor) {
+        final boolean result;
+        TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
+        final TimePoint startOfRace;
+        if (trackedRace != null && (startOfRace = trackedRace.getStartOfRace()) != null) {
+            result = timePoint.before(startOfRace);
+        } else {
+            boolean preResult = false;
+            for (RaceColumn rc : getLeaderboard().getRaceColumns()) {
+                if (rc == raceColumn) {
+                    break;
+                }
+                TrackedRace rcTrackedRace = rc.getTrackedRace(competitor);
+                if (rcTrackedRace != null) {
+                    NavigableSet<MarkPassing> markPassings = rcTrackedRace.getMarkPassings(competitor);
+                    if (!markPassings.isEmpty()) {
+                        MarkPassing lastMarkPassing = markPassings.last();
+                        if (lastMarkPassing.getTimePoint().before(timePoint)) {
+                            preResult = true;
+                            break;
+                        }
+                    } else {
+                        // if available, use the end of the race as indicator for how long competitor may have been in the race
+                        TimePoint endOfRace = rcTrackedRace.getEndOfRace();
+                        if (endOfRace != null && timePoint.before(endOfRace)) {
+                            preResult = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            result = preResult;
+        }
+        return result;
+    }
+    
+    /**
+     * Based on the order of the {@link Leaderboard#getRaceColumns() race columns} in the {@link #getLeaderboard()
+     * leaderboard to which this score correction object belongs}, tries to determine whether the <code>timePoint</code>
+     * is after the finish or abandoning of <code>competitor</code>'s race in the race column specified by
+     * <code>raceColumn</code>. If there is a {@link RaceColumn#getTrackedRace(Competitor) tracked race for the
+     * competitor associated with the race column}, that race's finish time for <code>competitor</code> (if defined) or
+     * the {@link TrackedRace#getEndOfRace() end of the race} is used for the calculation. Otherwise, if there is a
+     * tracked race column after <code>raceColumn</code> in the leaderboard in which <code>competitor</code> competes,
+     * and the competitor has started that race at <code>timePoint</code>, we also know that this must be after the
+     * end of <code>competitor</code>'s race in <code>raceColumn</code> because we assume that the same competitor can
+     * only compete in one race at a time within a single leaderboard.
+     * <p>
+     * 
+     * In all other cases, <code>false</code> is returned which can either mean that <code>timePoint</code> is certainly
+     * known to be after the race start of <code>competitor</code> in the race for <code>raceColumn</code>, or we just
+     * can't tell, e.g., because <code>competitor</code>'s race for <code>raceColumn</code> is not tracked, and
+     * <code>timePoint</code> is after all prior race column's finishing time for <code>competitor</code>.
+     * <p>
+     * 
+     * This method can be used to decide whether to apply a {@link MaxPointsReason#DNC}, {@link MaxPointsReason#DNS} or
+     * {@link MaxPointsReason#OCS} correction for <code>competitor</code> at <code>timePoint</code> in the race for
+     * <code>raceColumn</code>, because the correction can be applied at race start but should not be applied any
+     * earlier than that because it would incorrectly influence the total scores displayed for the competitor during
+     * earlier races.
+     */
+    private boolean isCertainlyAfterRaceFinish(TimePoint timePoint, RaceColumn raceColumn, Competitor competitor) {
+        // TODO
+        return false;
     }
 
     @Override
