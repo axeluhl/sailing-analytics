@@ -62,6 +62,6 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
 
         addComponentToNavigationMenu(metaLeaderboardPanel, false, stringMessages.seriesLeaderboard());
         addComponentToNavigationMenu(multiCompetitorChart, true, null);
-        addComponentToNavigationMenu(multiLeaderboardPanel, true, stringMessages.actLeaderboards());
+        addComponentToNavigationMenu(multiLeaderboardPanel, true, stringMessages.regattaLeaderboards());
     }
 }
