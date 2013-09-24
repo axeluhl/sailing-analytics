@@ -60,7 +60,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     private transient Set<ScoreCorrectionListener> scoreCorrectionListeners;
     
-    private Leaderboard leaderboard;
+    private final Leaderboard leaderboard;
 
     public ScoreCorrectionImpl(Leaderboard leaderboard) {
         this.leaderboard = leaderboard;
