@@ -594,7 +594,7 @@ public class MasterDataImportTest {
 
         // Check for score corrections
         Assert.assertEquals(MaxPointsReason.DNS,
-                leaderboardOnTarget.getScoreCorrection().getMaxPointsReason(competitorOnTarget, raceColumnOnTarget));
+                leaderboardOnTarget.getScoreCorrection().getMaxPointsReason(competitorOnTarget, raceColumnOnTarget, MillisecondsTimePoint.now()));
     }
 
     @Test
