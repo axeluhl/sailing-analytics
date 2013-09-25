@@ -1025,7 +1025,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         for (DBObject o : raceLog.find(query)) {
             RaceLogEvent raceLogEvent = loadRaceLogEvent((DBObject) o.get(FieldNames.RACE_LOG_EVENT.name()));
             if (raceLogEvent != null) {
-                result.add(raceLogEvent);
+                result.load(raceLogEvent);
             }
         }
     }
