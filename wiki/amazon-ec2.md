@@ -26,6 +26,27 @@ In addition to having a password and MFA set for one user one can activate "Acce
 
 ## EC2 Server Architecture for Sailing Analytics
 
+The architecture is divided into 3 logical tiers. These are represented by firewall configurations (Security Groups).
+
 ## Creating a new application instance
 
 Find detailed instructions on how to create a new instance here wiki/amazon-ec2-create-new-app-instance.
+
+## Glossary
+
+<table>
+<tr>
+<td><b>Term</b></td>
+<td><b>Description</b></td>
+</tr>
+<tr><td>Instance</td><td>Virtual machine that runs on a Xen host. Such an instance runs forever until it is stopped. It will be billed by hours it ran. Each start will be billed by a full hour.</td></tr>
+<tr><td>Spot Instance</td><td>Instances that run whenever there are free resources. It is not possible to control when or where these instances run. These instances are much cheaper than normal instances.</td></tr>
+<tr><td>AMI</td><td>Amazon Machine Image: Image file that contains a filesystem and a preinstalled operating system. One can create AMIs very easily from a stopped Instance by first creating a snapshot and then converting it to an AMI.</td></tr>
+<tr><td>Volume</td><td>An active harddisk that can be associated to one Instance.</td></tr>
+<tr><td>IOPS</td><td>Input/Output operations per second. Metric used to denote the performance of a volume. The higher the IOPS value the better the speed. Be aware of the fact that IOPS is metered by IOPS/h and is very expensive. Use with care!</td></tr>
+<tr><td>Snapshot</td><td>Snapshot of a Volume</td></tr>
+<tr><td>Elastic IP</td><td>IP address that can be associated to an instance. Any Elastic-IP not associated to a running Instance costs some amount of money per hour.</td></tr>
+<tr><td>Security Group</td><td>Firewall configuration that can be associated to an instance. There is no need of configuring iptables or such. One can associate many instances the the same Security Group.</td></tr>
+<tr><td>Load Balancer</td><td>Service that makes it possible to balance over services running on different instances.</td></tr>
+<tr><td>Network Interfaces</td><td>Virtual network interfaces that are mapped to physical network interfaces on instances. </td></tr>
+</table>
