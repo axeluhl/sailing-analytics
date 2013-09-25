@@ -37,13 +37,37 @@ The architecture is divided into 3 logical tiers. These are represented by firew
 <td><b>Name</b></td>
 <td><b>Access Key(s)</b></td>
 <td><b>Security Group</b></td>
+<td><b>Services</b></td>
 <td><b>Description</b></td>
 </tr>
 <tr>
 <td>Webserver</td>
 <td>Administrator</td>
 <td>Webserver</td>
+<td>Apache, GIT, Piwik, Bugzilla</td>
 <td>This tier holds one instance that has one public Elastic IP associated. This instance manages all domains and subdomains associated with this project. It also contains the public GIT repository.</td>
+</tr>
+<tr>
+<td>DB & Messaging</td>
+<td>Administrator</td>
+<td>Database and Messaging</td>
+<td>MongoDB, MySQL</td>
+<td>All databases needed by either the Analytics applications or tools like Piwik and Bugzilla are managed by this instance.</td>
+</tr>
+<tr>
+<td>DB & Messaging</td>
+<td>Administrator</td>
+<td>Database and Messaging</td>
+<td>MongoDB, MySQL</td>
+<td>All databases needed by either the Analytics applications or tools like Piwik and Bugzilla are managed by this instance.</td>
+</tr>
+<tr>
+<td>Archive</td>
+<td>Administrator, Sailing User</td>
+<td>Sailing Analytics App</td>
+<td>Java App</td>
+<td>Instance handling the access to all historical races.</td>
+</tr>
 </table>
 
 ## Creating a new application instance
