@@ -264,8 +264,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                     NavigableSet<MarkPassing> markPassings = rcTrackedRace.getMarkPassings(competitor);
                     if (markPassings != null && !markPassings.isEmpty()) {
                         MarkPassing lastMarkPassing = markPassings.last();
-                        // FIXME needs to be timePoint.before(lastMarkPassing.getTimePoint())
-                        if (lastMarkPassing.getTimePoint().before(timePoint)) {
+                        if (timePoint.before(lastMarkPassing.getTimePoint())) {
                             preResult = true;
                             break;
                         }
