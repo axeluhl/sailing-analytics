@@ -526,6 +526,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         } else {
             logger.info("Joined TracTrac IO thread for race(s) "+getRaces());
         }
+        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */ 1.0);
+        updateStatusOfTrackedRaces();
     }
 
     protected DataController getController() {
@@ -551,6 +553,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         // we have seen many more fixes been transmitted after having received stopped()
     }
 
+    /**
+     * Propagates {@link #lastStatus} to all tracked races to which this tracker writes.
+     * 
+     * @see #updateStatusOfTrackedRace(DynamicTrackedRace)
+     */
     private void updateStatusOfTrackedRaces() {
         for (RaceDefinition race : getRaces()) {
             DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
@@ -560,10 +567,24 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
     }
 
+    /**
+     * Propagates {@link #lastStatus} to <code>trackedRace</code>'s {@link TrackedRace#getStatus() status}. If
+     * {@link #lastStatus} is a {@link TrackedRaceStatusEnum#FINISHED FINISHED} status, the progress value is taken from
+     * the tracked race's current status instead of overwriting it with the progress indicated by
+     * {@link #lastStatus}.
+     */
     private void updateStatusOfTrackedRace(DynamicTrackedRace trackedRace) {
         // can't update a race status once it has been set to FINISHED
         if (lastStatus != null && trackedRace.getStatus() != null && trackedRace.getStatus().getStatus() != TrackedRaceStatusEnum.FINISHED) {
-            trackedRace.setStatus(lastStatus);
+            final TrackedRaceStatus status;
+            if (lastStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
+                // in this case use the tracked race's progress value:
+                status = new TrackedRaceStatusImpl(lastStatus.getStatus(), trackedRace.getStatus() == null ? 0.0
+                        : trackedRace.getStatus().getLoadingProgress());
+            } else {
+                status = lastStatus;
+            }
+            trackedRace.setStatus(status);
         }
     }
 
