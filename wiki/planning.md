@@ -6,7 +6,7 @@
 
 [[Smartphone Tracking|wiki/smartphone-tracking]]
 
-[[Sailing Community|wiki/sailing-community]]
+[[Sailing Community|wiki/planning/sailing-community]]
 
 [[Monitoring and Improving Data Quality|wiki/data-quality]]
 
