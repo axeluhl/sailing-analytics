@@ -30,6 +30,13 @@ The architecture is divided into 3 logical tiers. These are represented by firew
 
 <img src="/wiki/images/amazon/EC2Architecture.JPG" width="100%" height="100%"/>
 
+### Tiers
+
+* Webserver: Holds one or more webserver instances that represent the public facing part of the architecture. Only instances running in this tier should have a public IP assigned.
+* Database: Instances handling all operations related to persistence. Must be reachable by the "Instance" and "Balancer+Group" tier.
+* Instances: Space where all instances, that are not grouped, live.
+* Balancer+Group: Analytics instances grouped and managed by an Elastic Load Balancer. A group is just a term describing multiple instances replicating from one master instance. The word "group" does in this context not refer to the so called "Placement Groups".
+
 ### Instances
 
 <table>
@@ -80,12 +87,13 @@ Find detailed instructions on how to create a new instance here: [[wiki/amazon-e
 </tr>
 <tr><td>Instance</td><td>Virtual machine that runs on a Xen host. Such an instance runs forever until it is stopped. It will be billed by hours it ran. Each start will be billed by a full hour.</td></tr>
 <tr><td>Spot Instance</td><td>Instances that run whenever there are free resources. It is not possible to control when or where these instances run. These instances are much cheaper than normal instances.</td></tr>
-<tr><td>AMI</td><td>Amazon Machine Image: Image file that contains a filesystem and a preinstalled operating system. One can create AMIs very easily from a stopped Instance by first creating a snapshot and then converting it to an AMI.</td></tr>
+<tr><td>Amazon Machine Image (AMI)</td><td>Amazon Machine Image: Image file that contains a filesystem and a preinstalled operating system. One can create AMIs very easily from a stopped Instance by first creating a snapshot and then converting it to an AMI.</td></tr>
 <tr><td>Volume</td><td>An active harddisk that can be associated to one Instance.</td></tr>
 <tr><td>IOPS</td><td>Input/Output operations per second. Metric used to denote the performance of a volume. The higher the IOPS value the better the speed. Be aware of the fact that IOPS is metered by IOPS/h and is very expensive. Use with care!</td></tr>
 <tr><td>Snapshot</td><td>Snapshot of a Volume</td></tr>
 <tr><td>Elastic IP</td><td>IP address that can be associated to an instance. Any Elastic-IP not associated to a running Instance costs some amount of money per hour.</td></tr>
 <tr><td>Security Group</td><td>Firewall configuration that can be associated to an instance. There is no need of configuring iptables or such. One can associate many instances the the same Security Group.</td></tr>
-<tr><td>Load Balancer</td><td>Service that makes it possible to balance over services running on different instances.</td></tr>
+<tr><td>Elastic Load Balancer (ELB)</td><td>Service that makes it possible to balance over services running on different instances.</td></tr>
 <tr><td>Network Interfaces</td><td>Virtual network interfaces that are mapped to physical network interfaces on instances. </td></tr>
+<tr><td>Placement Groups</td><td>Enables applications to get the full-bisection bandwidth and low-latency network performance required for tightly coupled, node-to-node communication. Placement Groups can only contain HVM instance and have other limitations described here: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using_cluster_computing.html</td></tr>
 </table>
