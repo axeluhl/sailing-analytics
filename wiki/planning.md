@@ -6,20 +6,25 @@
 
 [[Smartphone Tracking|wiki/smartphone-tracking]]
 
+[[Monitoring and Improving Data Quality|wiki/data-quality]]
+
 [[ORC|wiki/planning/ORC]]
-
-[[ISAF-Internal Projects|wiki/planning/ISAFInternalProjects]]
-
-[[Advanced Wind Field Analysis|wiki/planning/AdvancedWindFieldAnalysis]]
 
 [[Support Specific Analysis Scenarios|wiki/planning/AnalysisScenarios]]
 
-[[Google Earth as Map|wiki/planning/GoogleEarth]]
+[[Live Audio Streaming Support|wiki/planning/LiveAudioStreaming]]
 
-[[AirMAX vs. MikroTik|/wiki/planning/AirMAXvsMikroTik]]
+[[Renewing the Map (Maps v2.0 discontinued) |wiki/planning/GoogleEarth]]
 
 [[User Management|wiki/planning/usermanagement]]
 
 [[Usability of the Administration Interface|wiki/planning/usability-of-the-administration-interface]]
 
+[[Advanced Wind Field Analysis|wiki/planning/AdvancedWindFieldAnalysis]]
+
+[[AirMAX vs. MikroTik|/wiki/planning/AirMAXvsMikroTik]]
+
 [[Scaling by Server Replication|wiki/planning/scalebyreplication]]
+
+[[ISAF-Internal Projects|wiki/planning/ISAFInternalProjects]]
+

@@ -145,7 +145,8 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                     totalNumberOfCacheEntries -= oldCacheValue.size();
                 }
             } else {
-                result = new LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer>(16, 0.75f, /* access-based eviction */ true) {
+                // Note: don't use access-based ordering as it turns the get(...) call into a "write" access
+                result = new LinkedHashMap<Triple<TimePoint, ResultStates, Integer>, StringBuffer>(16, 0.75f) {
                     private static final long serialVersionUID = -6197983565575024084L;
                     @Override
                     protected boolean removeEldestEntry(Entry<Triple<TimePoint, ResultStates, Integer>, StringBuffer> eldest) {
