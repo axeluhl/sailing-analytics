@@ -26,7 +26,25 @@ In addition to having a password and MFA set for one user one can activate "Acce
 
 ## EC2 Server Architecture for Sailing Analytics
 
-The architecture is divided into 3 logical tiers. These are represented by firewall configurations (Security Groups).
+The architecture is divided into 3 logical tiers. These are represented by firewall configurations (Security Groups) that can be associated to Instances. The following image depicts the parts of the architecture.
+
+<img src="/wiki/images/amazon/EC2Architecture.JPG" width="100%" height="100%"/>
+
+### Instances
+
+<table>
+<tr>
+<td><b>Name</b></td>
+<td><b>Access Key(s)</b></td>
+<td><b>Security Group</b></td>
+<td><b>Description</b></td>
+</tr>
+<tr>
+<td>Webserver</td>
+<td>Administrator</td>
+<td>Webserver</td>
+<td>This tier holds one instance that has one public Elastic IP associated. This instance manages all domains and subdomains associated with this project. It also contains the public GIT repository.</td>
+</table>
 
 ## Creating a new application instance
 
