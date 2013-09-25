@@ -17,7 +17,6 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
-import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -265,6 +264,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                     NavigableSet<MarkPassing> markPassings = rcTrackedRace.getMarkPassings(competitor);
                     if (markPassings != null && !markPassings.isEmpty()) {
                         MarkPassing lastMarkPassing = markPassings.last();
+                        // FIXME needs to be timePoint.before(lastMarkPassing.getTimePoint())
                         if (lastMarkPassing.getTimePoint().before(timePoint)) {
                             preResult = true;
                             break;
@@ -337,11 +337,6 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * apply already from the start of the race and will cause the penalty score to be applied already during the race
      * time interval, so the competitor will be sorted to the end of the leaderboard already during replay.
      * <p>
-     * 
-     * TODO Future versions of this implementation shall also work for untracked race columns by comparing <code>timePoint</code>
-     * to start and finish time points of tracked races in other columns of the same leaderboard owning this {@link ScoreCorrection}
-     * object. From those time relations it can be possible to infer that <code>timePoint</code> is before or after another of
-     * <code>competitor</code>'s races.
      */
     @Override
     public Result getCorrectedScore(Callable<Integer> trackedRankProvider, final Competitor competitor,
