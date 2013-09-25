@@ -14,8 +14,11 @@ As a workaround, use the buildAndUpdateProduct.sh script found in the top-level 
 
 Add restrictions with the following two tags to reduce the number of permutations so that gwt is compiled only in your language and browser:
 
-<set-property name="user.agent" value="gecko1_8" />
 <set-property name="locale" value="en" />
+
+`<set-property name="user.agent" value="gecko1_8" />`
+
+`<set-property name="locale" value="en" />`
 
 Those tags must be put into the *.gwt.xml files e.g. "AdminConsole.gwt.xml".
 
