@@ -5,9 +5,9 @@ import java.net.URISyntaxException;
 
 import org.junit.Test;
 
-public class MarkPassingTestBearing extends AbstractMarkPassingTestNew {
+public class MarkPassingTestClosestGPSFix extends AbstractMarkPassingTestNew {
 
-    public MarkPassingTestBearing() throws MalformedURLException, URISyntaxException {
+    public MarkPassingTestClosestGPSFix() throws MalformedURLException, URISyntaxException {
 
         super(new DetectorClosestGPSFix());
 
