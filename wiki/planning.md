@@ -22,9 +22,12 @@
 
 [[Advanced Wind Field Analysis|wiki/planning/AdvancedWindFieldAnalysis]]
 
+[[Simulator Integration|wiki/planning/SimulatorIntegration]]
+
+[[ISAF SWC Engagement|wiki/planning/ISAFSWCEngagement]]
+
 [[AirMAX vs. MikroTik|/wiki/planning/AirMAXvsMikroTik]]
 
 [[Scaling by Server Replication|wiki/planning/scalebyreplication]]
 
 [[ISAF-Internal Projects|wiki/planning/ISAFInternalProjects]]
-
