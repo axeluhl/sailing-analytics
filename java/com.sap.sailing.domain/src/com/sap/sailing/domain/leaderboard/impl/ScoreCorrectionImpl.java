@@ -279,7 +279,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                             }
                         } else {
                             TimePoint rcStartOfRace = rcTrackedRace.getStartOfRace();
-                            if (timePoint.before(rcStartOfRace)) {
+                            if (rcStartOfRace != null && timePoint.before(rcStartOfRace)) {
                                 preResult = true;
                                 break;
                             }
