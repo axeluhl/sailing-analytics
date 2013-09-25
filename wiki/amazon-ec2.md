@@ -55,13 +55,6 @@ The architecture is divided into 3 logical tiers. These are represented by firew
 <td>All databases needed by either the Analytics applications or tools like Piwik and Bugzilla are managed by this instance.</td>
 </tr>
 <tr>
-<td>DB & Messaging</td>
-<td>Administrator</td>
-<td>Database and Messaging</td>
-<td>MongoDB, MySQL</td>
-<td>All databases needed by either the Analytics applications or tools like Piwik and Bugzilla are managed by this instance.</td>
-</tr>
-<tr>
 <td>Archive</td>
 <td>Administrator, Sailing User</td>
 <td>Sailing Analytics App</td>
