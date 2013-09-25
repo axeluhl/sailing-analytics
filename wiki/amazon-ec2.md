@@ -74,9 +74,15 @@ The architecture is divided into 3 logical tiers. These are represented by firew
 </tr>
 </table>
 
-## Creating a new application instance
+## HowTo
+
+### Create a new Analytics application instance
 
 Find detailed instructions on how to create a new instance here: [[wiki/amazon-ec2-create-new-app-instance]].
+
+### Setup replicated instances with ELB
+
+### Access MongoDB database
 
 ## Glossary
 
