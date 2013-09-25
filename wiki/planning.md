@@ -6,6 +6,8 @@
 
 [[Smartphone Tracking|wiki/smartphone-tracking]]
 
+[[Sailing Community|wiki/sailing-community]]
+
 [[Monitoring and Improving Data Quality|wiki/data-quality]]
 
 [[ORC|wiki/planning/ORC]]
