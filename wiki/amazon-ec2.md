@@ -44,7 +44,7 @@ The architecture is divided into 3 logical tiers. These are represented by firew
 <tr>
 <td>Webserver</td>
 <td>Administrator</td>
-<td>IN: 20, 80, 443 OUT: ALL</td>
+<td>IN: 20, 80, 443, 2010-2015<br/>OUT: ALL</td>
 <td>Webserver</td>
 <td>Apache, GIT, Piwik, Bugzilla</td>
 <td>This tier holds one instance that has one public Elastic IP associated. This instance manages all domains and subdomains associated with this project. It also contains the public GIT repository.</td>
@@ -52,7 +52,7 @@ The architecture is divided into 3 logical tiers. These are represented by firew
 <tr>
 <td>DB & Messaging</td>
 <td>Administrator</td>
-<td>IN: 22, 5672, 10200-10210, 27017 OUT: ALL</td>
+<td>IN: 22, 5672, 10200-10210, 27017<br/>OUT: ALL</td>
 <td>Database and Messaging</td>
 <td>MongoDB, MySQL</td>
 <td>All databases needed by either the Analytics applications or tools like Piwik and Bugzilla are managed by this instance.</td>
@@ -60,7 +60,7 @@ The architecture is divided into 3 logical tiers. These are represented by firew
 <tr>
 <td>Archive</td>
 <td>Administrator, Sailing User</td>
-<td>IN: 22, 2010-2015, 8880-8899 OUT: ALL</td>
+<td>IN: 22, 2010-2015, 8880-8899<br/>OUT: ALL</td>
 <td>Sailing Analytics App</td>
 <td>Java App</td>
 <td>Instance handling the access to all historical races.</td>
@@ -69,7 +69,7 @@ The architecture is divided into 3 logical tiers. These are represented by firew
 
 ## Creating a new application instance
 
-Find detailed instructions on how to create a new instance here wiki/amazon-ec2-create-new-app-instance.
+Find detailed instructions on how to create a new instance here: [[wiki/amazon-ec2-create-new-app-instance]].
 
 ## Glossary
 
