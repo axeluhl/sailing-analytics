@@ -12,7 +12,7 @@ public class AbortingFlagFinder extends RaceLogAnalyzer<RaceLogFlagEvent> {
     }
 
     @Override
-    protected RaceLogFlagEvent performAnalyzation() {
+    protected RaceLogFlagEvent performAnalysis() {
         if (raceLog.getCurrentPassId() <= RaceLog.DefaultPassId) {
             return null;
         }
