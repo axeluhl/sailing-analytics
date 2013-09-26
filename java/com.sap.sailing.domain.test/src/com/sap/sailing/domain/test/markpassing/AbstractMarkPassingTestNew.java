@@ -31,6 +31,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
@@ -169,11 +170,15 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
 
     protected void compareMarkpasses() {
 
-
         int correctPasses = 0;
+        int incorrectPasses = 0;
         int totalPasses = 0;
-        LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> waypointTracks = new LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>>();
+        int missingGivenMarkPassings = 0;
+        int missingCalculatedMarkPassings = 0;
         Iterable<Waypoint> waypoints;
+        LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> waypointTracks = new LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>>();
+
+        // ///// Fill waypoints (Iterable of all Waypoints) /////
 
         try {
             getRace().getCourse().lockForRead();
@@ -182,6 +187,8 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
         } finally {
             getRace().getCourse().unlockAfterRead();
         }
+
+        // / Fill waypointTracks (HashMap of Waypoints and their Tracks) //////
 
         for (Waypoint w : waypoints) {
 
@@ -196,17 +203,17 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
             waypointTracks.put(w, marks);
         }
 
+        // For each competitor:
+
         for (Competitor c : getRace().getCompetitors()) {
-            System.out.println("Competitor " + c.getName());
+
+            System.out.println(c.getName());
 
             LinkedHashMap<Waypoint, MarkPassing> givenPasses = new LinkedHashMap<Waypoint, MarkPassing>();
-            {
-                for (Waypoint w : waypoints) {
-                    MarkPassing markPassing = getTrackedRace().getMarkPassing(c, w);
+            LinkedHashMap<Waypoint, MarkPassing> computedPasses = new LinkedHashMap<Waypoint, MarkPassing>();
+            TimePoint lastWayPoint = getTrackedRace().getStartOfRace();
 
-                    givenPasses.put(w, markPassing);
-                }
-            }
+            // Get GPSFixes
 
             DynamicGPSFixTrack<Competitor, GPSFixMoving> gpsFixes;
 
@@ -216,28 +223,80 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
             } finally {
                 getTrackedRace().getTrack(c).unlockAfterRead();
             }
-            TimePoint startOfRace = getTrackedRace().getStartOfRace();
-            LinkedHashMap<Waypoint, MarkPassing> computed = detector.computeMarkpasses(gpsFixes, waypointTracks, startOfRace);
+            System.out.println(!gpsFixes.equals(null));
 
-            for (Waypoint w : computed.keySet()){
+            // Get given MarkPasses
 
-                long timedelta = givenPasses.get(w).getTimePoint().asMillis()
-                        - computed.get(w).getTimePoint()
-                                .asMillis();
+            for (Waypoint w : waypoints) {
+                MarkPassing markPassing = getTrackedRace().getMarkPassing(c, w);
 
-                if ((Math.abs(timedelta) < tolerance)) {
+                givenPasses.put(w, markPassing);
+                System.out.println("Given Markpass: ");
+                System.out.println(givenPasses.get(w));
+                System.out.println("Passing in MarkPass: ");
+                System.out.println(lastWayPoint);
+                // Actually compute MarkPassings
+                TimePoint markPass;
 
-                    correctPasses++;
+                // try {
+                markPass = detector.computeMarkpass(gpsFixes, waypointTracks.get(w), lastWayPoint);
+                // } catch (NullPointerException e) {
+                // markPass = null;
+                // missingCalculatedMarkPassings++;
+
+                // }
+
+                MarkPassing m = new MarkPassingImpl(markPass, w, c);
+
+                computedPasses.put(w, m);
+                System.out.println("Calculated: " + computedPasses.get(w));
+
+                // Set lastWayPoint to new lastWayPoint
+
+                lastWayPoint = computedPasses.get(w).getTimePoint();
+
+                // Compare computed and calculated MarkPassings
+
+                try {
+                    givenPasses.get(w).getTimePoint();
+
+                    try {
+                        computedPasses.get(w).getTimePoint();
+
+                        long timedelta = givenPasses.get(w).getTimePoint().asMillis()
+                                - computedPasses.get(w).getTimePoint().asMillis();
+
+                        if ((Math.abs(timedelta) < tolerance)) {
+
+                            correctPasses++;
+
+                        } else {
+                            incorrectPasses++;
+                        }
+
+                        totalPasses++;
+
+                    } catch (NullPointerException e) {
+                        missingCalculatedMarkPassings++;
+                    } finally {
+                    }
+
+                } catch (NullPointerException e) {
+                    missingGivenMarkPassings++;
 
                 }
 
-                totalPasses++;
+                finally {
+                }
 
             }
-
         }
 
-        double accuracy = correctPasses / totalPasses;
+        System.out.println("Missing Given MarkPass: " + missingGivenMarkPassings);
+        System.out.println("Failed Calculation: " + missingCalculatedMarkPassings);
+        System.out.println("Incorrect calculation: " + incorrectPasses);
+        System.out.println("Correct Calculation: " + correctPasses);
+        double accuracy = (double) correctPasses / ((double) totalPasses - missingGivenMarkPassings);
         System.out.println(correctPasses + " / " + totalPasses);
         System.out.println(accuracy);
         assertTrue(accuracy > 0.9);
