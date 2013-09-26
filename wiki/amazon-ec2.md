@@ -78,7 +78,9 @@ The architecture is divided into 3 logical tiers. These are represented by firew
 
 ### Create a new Analytics application instance
 
-Find detailed instructions on how to create a new instance here: [[wiki/amazon-ec2-create-new-app-instance]].
+1. First create a new Analytics instance [[wiki/amazon-ec2-create-new-app-instance]].
+2. Log into the instance using the "Sailing User (Apps)" key
+3. Make sure to bring the code to the branch you want
 
 ### Setup replicated instances with ELB
 
