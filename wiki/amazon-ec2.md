@@ -32,10 +32,10 @@ The architecture is divided into 3 logical tiers. These are represented by firew
 
 ### Tiers
 
-* Webserver: Holds one or more webserver instances that represent the public facing part of the architecture. Only instances running in this tier should have a public IP assigned.
-* Database: Instances handling all operations related to persistence. Must be reachable by the "Instance" and "Balancer+Group" tier.
-* Instances: Space where all instances, that are not grouped, live.
-* Balancer+Group: Analytics instances grouped and managed by an Elastic Load Balancer. A group is just a term describing multiple instances replicating from one master instance. The word "group" does in this context not refer to the so called "Placement Groups".
+* **Webserver**: Holds one or more webserver instances that represent the public facing part of the architecture. Only instances running in this tier should have an Elastic IP assigned.
+* **Database**: Instances handling all operations related to persistence. Must be reachable by the "Instance" and "Balancer+Group" tier.
+* **Instances**: Space where all instances, that are not grouped, live.
+* **Balancer+Group**: Analytics instances grouped and managed by an Elastic Load Balancer. A group is just a term describing multiple instances replicating from one master instance. The word "group" does in this context not refer to the so called "Placement Groups".
 
 ### Instances
 
@@ -49,7 +49,7 @@ The architecture is divided into 3 logical tiers. These are represented by firew
 <td><b>Description</b></td>
 </tr>
 <tr>
-<td>Webserver</td>
+<td>Webserver (Elastic IP: 54.229.94.254)</td>
 <td>Administrator</td>
 <td>IN: 20, 80, 443, 2010-2015<br/>OUT: ALL</td>
 <td>Webserver</td>
