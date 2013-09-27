@@ -32,10 +32,10 @@ The architecture is divided into logical tiers. These are represented by firewal
 
 ### Tiers
 
-* **Webserver**: Holds one or more webserver instances that represent the public facing part of the architecture. Only instances running in this tier should have an Elastic IP assigned.
-* **Balancer**: Features an Elastic Load Balancer. Such balancers can be configured to distribute traffic among many other running instances. Internally an ELB consists of multiple balancing instances on which load is distributed by a DNS round robin.
-* **Database**: Instances handling all operations related to persistence. Must be reachable by the "Instance" and "Balancer+Group" tier.
-* **Instances**: Space where all instances, that are not logically grouped, live.
+* **Webserver**: Holds one or more webserver instances that represent the public facing part of the architecture. Only instances running in this tier should have an Elastic IP assigned. In the image you can see one configured instance that delivers content for sapsailing.com. It has some services running on it like an Apache, the GIT repository and the UDP mirror. The Apache is configured to proxy HTTP(S) connections to an Archive or Live server.
+* **Balancer**: Features an Elastic Load Balancer. Such balancers can be configured to distribute traffic among many other running instances. Internally an ELB consists of multiple balancing instances on which load is distributed by a DNS round robin so that bandwidth is not a limiting factor.
+* **Database**: Instances handling all operations related to persistence. Must be reachable by the "Instance" and "Balancer+Group" tier. In the standard setup this tier only contains one database server that handles connections to MongoDB, MySQL and RabbitMQ.
+* **Instances**: Space where all instances, that are not logically grouped, live. In the image one can see three running instances. One serving archived data, one serving a live event and one for build and test purposes.
 * **Balancer+Group**: Analytics instances grouped and managed by an Elastic Load Balancer. A group is just a term describing multiple instances replicating from one master instance. The word "group" does in this context not refer to the so called "Placement Groups".
 
 ### Instances
@@ -79,7 +79,7 @@ The architecture is divided into logical tiers. These are represented by firewal
 
 ### Create a new Analytics application instance
 
-* Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-create-new-app-instance]]. You should use a configuration like the following. If you want to bring the code to a defined level then make sure to specify the BUILD-FROM and BUILD-COMPLETE_NOTIFY variables. If you leave them empty the instance will start using a very old build.
+Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-create-new-app-instance]]. You should use a configuration like the following. If you want to bring the code to a defined level then make sure to specify the BUILD-FROM and BUILD-COMPLETE_NOTIFY variables. If you leave them empty the instance will start using a very old build.
 
 <pre>
 BUILD-FROM=master
