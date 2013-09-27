@@ -84,7 +84,7 @@ Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-cr
 <pre>
 BUILD-FROM=master
 RUN-TESTS=False
-BUILD-COMPLETE-NOTIFY=simon.marcel.pamies@sap.com
+SERVER-STARTUP-NOTIFY=simon.marcel.pamies@sap.com
 SERVER_NAME=LIVE1
 MEMORY=1024m
 REPLICATION_HOST=172.31.25.253
@@ -101,9 +101,13 @@ REPLICATE_MASTER_QUEUE_HOST=
 REPLICATE_MASTER_QUEUE_PORT=
 </pre>
 
+After your instance
+
 ### Setup replicated instances with ELB
 
-### Access MongoDB database
+### Access build server and tests
+
+### Access MongoDB database 
 
 ## Glossary
 
