@@ -101,13 +101,15 @@ REPLICATE_MASTER_QUEUE_HOST=
 REPLICATE_MASTER_QUEUE_PORT=
 </pre>
 
-After your instance
+After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the SERVER-STARTUP-NOTIFY field then you will get an email once the server has been started.
 
 ### Setup replicated instances with ELB
 
+
+
 ### Access build server and tests
 
-### Access MongoDB database 
+### Access MongoDB database
 
 ## Glossary
 
