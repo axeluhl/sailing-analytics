@@ -329,11 +329,11 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
 	if [ $gwtcompile -eq 1 ]; then
 	    # Now move back the backup .gwt.xml files before they were (maybe) patched
+		echo "INFO: restoring backup copies of .gwt.xml files after they has been patched before"
 	    for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
-		echo "INFO: restoring backup copy of $i after it was patched before"
-		mv -v $i.bak $i
+		    mv -v $i.bak $i
 	    done
-        fi
+    fi
 
 	echo "Build complete. Do not forget to install product..."
 fi
