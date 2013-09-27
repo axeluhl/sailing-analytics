@@ -1,10 +1,9 @@
 package com.sap.sailing.domain.test.markpassing;
 
 import java.util.ArrayList;
-import java.util.Map.Entry;
-import java.util.TreeMap;
+import java.util.Iterator;
+import java.util.List;
 
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
@@ -15,52 +14,72 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 public class DetectorClosestGPSFix implements DetectorMarkPassing {
 
     @Override
-    public TimePoint computeMarkpass(DynamicGPSFixTrack<Competitor, GPSFixMoving> gpsFixes,
+    public TimePoint computeMarkpass(ArrayList<GPSFixMoving> gpsFixes,
             ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> markTracks, TimePoint lastWayPoint) {
 
-        System.out.println(!gpsFixes.equals(null));
-        System.out.println(!markTracks.equals(null));
-        System.out.println("Recieved TimePoint");
-        System.out.println(lastWayPoint);
+        TimePoint t = null;
+        // int fixesInZone = 0;
+        // int fixesOutOfZone = 0;
+        // int totalFixes = 0;
 
-        TreeMap<Double, GPSFixMoving> possibleMarkPasses = new TreeMap<Double, GPSFixMoving>();
+        ArrayList<GPSFixMoving> allFixes = gpsFixes;
+        System.out.println("All Fixes: "+allFixes.size());
 
-        // int numberOfMarks = markTracks.size();
-
-        try {
-            gpsFixes.lockForRead();
-
-            for (GPSFixMoving gpsFix : gpsFixes.getFixes()) {
-
-                // //// If Single Mark or Offset (TODO)
-                /*
-                 * if (w.getPassingInstructions().equals("PORT") || w.getPassingInstructions().equals("STARBOARD") ||
-                 * w.getPassingInstructions().equals("OFFSET")) {
-                 */
-
-                // if (numberOfMarks == 1) {
-
-                Distance distance = distanceToSingleWayPoint(markTracks, gpsFix);
-
-                if (distance.getMeters() < 10000 && gpsFix.getTimePoint().after(lastWayPoint)) {
-
-                    possibleMarkPasses.put(distance.getMeters(), gpsFix);
-                    System.out.println("Found posssible Fix");
-
-                }
-
+        // Remove GPSFixes before last MarkPassing
+        Iterator<GPSFixMoving> it = allFixes.iterator();
+        while (it.hasNext()) {
+            // totalFixes++;
+            if (it.next().getTimePoint().before(lastWayPoint)) {
+                it.remove();
             }
-        } finally {
-            gpsFixes.unlockAfterRead();
+        }
+        System.out.println("To early removed: "+ allFixes.size());
+
+        // Create "Hotspot"
+        int startOfHotspot = 0;
+        int endOfHotspot = 0;
+
+        for (int i = 0; i < allFixes.size(); i++) {
+            if (distanceToSingleWayPoint(markTracks, allFixes.get(i)).getMeters() < 100) {
+                startOfHotspot = i;
+                System.out.println(i+" Start: "+ distanceToSingleWayPoint(markTracks, allFixes.get(i)).getMeters());
+                break;
+            }
+
         }
 
-        if (possibleMarkPasses.isEmpty()) {
 
-            return lastWayPoint;
-        } else {
-
-            return possibleMarkPasses.firstEntry().getValue().getTimePoint();
+        for (int i = startOfHotspot; i < allFixes.size(); i++) {
+            if (distanceToSingleWayPoint(markTracks, allFixes.get(i)).getMeters() > 100) {
+                endOfHotspot = i;
+                System.out.println(i+" End: "+ distanceToSingleWayPoint(markTracks, allFixes.get(i)).getMeters());
+                break;
+            }
         }
+        List<GPSFixMoving> hotspot = allFixes.subList(startOfHotspot, endOfHotspot);
+        
+        System.out.println("Hotspot: "+ hotspot.size());
+
+        Distance oldDistance = distanceToSingleWayPoint(markTracks, hotspot.get(0));
+        System.out.println(oldDistance.getMeters());
+
+        for (GPSFixMoving gpsFix : hotspot) {
+            // TODO recognize passing instructions
+            // fixesInZone++;
+            Distance distance = distanceToSingleWayPoint(markTracks, gpsFix);
+
+            if (distance.getMeters() < oldDistance.getMeters()) {
+
+                oldDistance = distance;
+                t = gpsFix.getTimePoint();
+            }
+
+        }
+
+        // System.out.println("Total Fixes: " + totalFixes);
+        // System.out.println("Fixes in Zone: " + fixesInZone);
+
+        return t;
     }
 
     // Distance from a Competitor to a Waypoint

@@ -12,6 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import org.junit.Before;
@@ -172,9 +173,9 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
 
         int correctPasses = 0;
         int incorrectPasses = 0;
-        int totalPasses = 0;
         int missingGivenMarkPassings = 0;
         int missingCalculatedMarkPassings = 0;
+        int detections = 0;
         Iterable<Waypoint> waypoints;
         LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> waypointTracks = new LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>>();
 
@@ -211,19 +212,25 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
 
             LinkedHashMap<Waypoint, MarkPassing> givenPasses = new LinkedHashMap<Waypoint, MarkPassing>();
             LinkedHashMap<Waypoint, MarkPassing> computedPasses = new LinkedHashMap<Waypoint, MarkPassing>();
-            TimePoint lastWayPoint = getTrackedRace().getStartOfRace();
+            TimePoint lastWayPoint = getTrackedRace().getStartOfRace().minus(20000);
 
             // Get GPSFixes
 
-            DynamicGPSFixTrack<Competitor, GPSFixMoving> gpsFixes;
-
+            Iterable<GPSFixMoving> callGPSFixes;
+            ArrayList<GPSFixMoving> gpsFixes = new ArrayList<GPSFixMoving>();
             try {
                 getTrackedRace().getTrack(c).lockForRead();
-                gpsFixes = getTrackedRace().getTrack(c);
+                callGPSFixes = getTrackedRace().getTrack(c).getFixes();
+                Iterator<GPSFixMoving> it = callGPSFixes.iterator();
+                while (it.hasNext()) {
+
+                    gpsFixes.add(it.next());
+
+                }
+
             } finally {
                 getTrackedRace().getTrack(c).unlockAfterRead();
             }
-            System.out.println(!gpsFixes.equals(null));
 
             // Get given MarkPasses
 
@@ -231,74 +238,84 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
                 MarkPassing markPassing = getTrackedRace().getMarkPassing(c, w);
 
                 givenPasses.put(w, markPassing);
-                System.out.println("Given Markpass: ");
-                System.out.println(givenPasses.get(w));
-                System.out.println("Passing in MarkPass: ");
-                System.out.println(lastWayPoint);
+
                 // Actually compute MarkPassings
-                TimePoint markPass;
-
-                // try {
-                markPass = detector.computeMarkpass(gpsFixes, waypointTracks.get(w), lastWayPoint);
-                // } catch (NullPointerException e) {
-                // markPass = null;
-                // missingCalculatedMarkPassings++;
-
-                // }
-
-                MarkPassing m = new MarkPassingImpl(markPass, w, c);
-
-                computedPasses.put(w, m);
-                System.out.println("Calculated: " + computedPasses.get(w));
-
-                // Set lastWayPoint to new lastWayPoint
-
-                lastWayPoint = computedPasses.get(w).getTimePoint();
-
-                // Compare computed and calculated MarkPassings
-
-                try {
-                    givenPasses.get(w).getTimePoint();
-
+                if (!(gpsFixes.size() == 0)) {
                     try {
-                        computedPasses.get(w).getTimePoint();
 
-                        long timedelta = givenPasses.get(w).getTimePoint().asMillis()
-                                - computedPasses.get(w).getTimePoint().asMillis();
+                        TimePoint markPass = detector.computeMarkpass(gpsFixes, waypointTracks.get(w), lastWayPoint);
+                        detections++;
 
-                        if ((Math.abs(timedelta) < tolerance)) {
+                        // Set lastWayPoint to new lastWayPoint
+                        lastWayPoint = markPass;
+                        // ///
 
-                            correctPasses++;
-
-                        } else {
-                            incorrectPasses++;
-                        }
-
-                        totalPasses++;
+                        MarkPassing m = new MarkPassingImpl(markPass, w, c);
+                        computedPasses.put(w, m);
 
                     } catch (NullPointerException e) {
+
                         missingCalculatedMarkPassings++;
+
                     } finally {
+
+                        System.out.println("Calculated: " + computedPasses.get(w));
                     }
 
-                } catch (NullPointerException e) {
-                    missingGivenMarkPassings++;
+                    
 
+                    // Compare computed and calculated MarkPassings
+
+                    try {
+                        givenPasses.get(w).getTimePoint();
+
+                        try {
+                            computedPasses.get(w).getTimePoint();
+
+                            long timedelta = givenPasses.get(w).getTimePoint().asMillis()
+                                    - computedPasses.get(w).getTimePoint().asMillis();
+
+                            if ((Math.abs(timedelta) < tolerance)) {
+
+                                correctPasses++;
+
+                            } else {
+                                incorrectPasses++;
+                            }
+
+                        } catch (NullPointerException e) {
+                            // missingCalculatedMarkPassings++;
+                        } finally {
+                        }
+
+                    } catch (NullPointerException e) {
+                        // missingGivenMarkPassings++;
+
+                    }
+
+                    finally {
+                    }
+
+                } else {
+                    System.out.println("Competitor has no GPSFixes");
+                    try {
+                        givenPasses.get(w).getTimePoint();
+                    } catch (NullPointerException e) {
+                        missingGivenMarkPassings++;
+                    }
                 }
-
-                finally {
-                }
-
             }
         }
-
         System.out.println("Missing Given MarkPass: " + missingGivenMarkPassings);
+        double givenMarkPasses = 240 - missingGivenMarkPassings;
         System.out.println("Failed Calculation: " + missingCalculatedMarkPassings);
-        System.out.println("Incorrect calculation: " + incorrectPasses);
-        System.out.println("Correct Calculation: " + correctPasses);
-        double accuracy = (double) correctPasses / ((double) totalPasses - missingGivenMarkPassings);
-        System.out.println(correctPasses + " / " + totalPasses);
-        System.out.println(accuracy);
+        System.out.println("Detections: " + detections);
+        System.out.println("Incorrect comparison: " + incorrectPasses);
+        System.out.println("Correct comparison: " + correctPasses);
+        System.out.println("Total given MarkPasses: " + givenMarkPasses);
+        double accuracy = (double) correctPasses / givenMarkPasses;
+        System.out.println(correctPasses + " / " + givenMarkPasses);
+        System.out.println("accuracy: " + accuracy);
         assertTrue(accuracy > 0.9);
 
     }
