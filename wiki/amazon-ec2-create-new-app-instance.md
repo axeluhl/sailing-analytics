@@ -23,7 +23,8 @@ Leave Kernel and RAM disk to Default. Then put the configuration for this server
 
 <pre>
 BUILD-FROM=master
-BUILD-COMPLETE-NOTIFY=simon.marcel.pamies@sap.com
+RUN-TESTS=False
+SERVER-STARTUP-NOTIFY=simon.marcel.pamies@sap.com
 SERVER_NAME=LIVE1
 MEMORY=1024m
 REPLICATION_HOST=172.31.25.253
