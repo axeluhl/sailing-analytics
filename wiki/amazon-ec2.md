@@ -83,6 +83,7 @@ Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-cr
 
 <pre>
 BUILD-FROM=master
+RUN-TESTS=False
 BUILD-COMPLETE-NOTIFY=simon.marcel.pamies@sap.com
 SERVER_NAME=LIVE1
 MEMORY=1024m
