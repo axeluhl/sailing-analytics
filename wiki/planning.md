@@ -20,6 +20,8 @@
 
 [[User Management|wiki/planning/usermanagement]]
 
+[[Extracting an "SAP Sports Server" Basis|wiki/planning/sap-sports-server]]
+
 [[Usability of the Administration Interface|wiki/planning/usability-of-the-administration-interface]]
 
 [[Advanced Wind Field Analysis|wiki/planning/AdvancedWindFieldAnalysis]]
