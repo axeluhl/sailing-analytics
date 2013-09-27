@@ -22,6 +22,8 @@ Select the correct instance type. Micro also works if you don't want to put that
 Leave Kernel and RAM disk to Default. Then put the configuration for this server into the text area labeled "User Data". This configuration should at least contain `MONGODB_*` and `REPLICATION_*` parameters. Here one example:
 
 <pre>
+BUILD-FROM=master
+BUILD-COMPLETE-NOTIFY=simon.marcel.pamies@sap.com
 SERVER_NAME=LIVE1
 MEMORY=1024m
 REPLICATION_HOST=172.31.25.253
