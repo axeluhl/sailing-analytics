@@ -5,5 +5,5 @@ The SAP Sailing Simulator, as can be seen, e.g., [here](http://www.sapsailing.co
 Next steps:
 - make simulation available as overlay on sailing analytics referring to the currently selected leg
 - visualize ladder rungs, i.e. advantage line plus intermediate isochrones in distance-steps or time-steps
-- use multiple wind sources to derive spatially resolved wind field and use it in calculation of ladder rungs and simulation of courses
+- use multiple wind sources to derive a spatially resolved wind field and use it in calculation of ladder rungs and simulation of courses
 - extreme sailing series as test environment for simplified wind measurement units and approaches to operate multiple wind sources during a regatta on boats and marks
