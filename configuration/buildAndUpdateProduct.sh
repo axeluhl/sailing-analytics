@@ -270,26 +270,24 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	# yield build so that we get updated product
 
 	cd $PROJECT_HOME/java
-	if [ $onegwtpermutationonly -eq 1 ]; then
-	    echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
-	    for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
-	        echo "INFO: Patching $i files such that only one GWT permutation needs to be compiled"
-		cp $i $i.bak
-	        cat $i | sed -e 's/^[	 ]*<extend-property  *name="locale"  *values="de" *\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="safari" \/>/' >$i.sed
-		mv $i.sed $i
-	    done
-	else
-            echo "INFO: Patching .gwt.xml files such that all GWT permutations are compiled"
-	    for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
-	        echo "INFO: Patching $i files such that all GWT permutations are compiled"
-		cp $i $i.bak
-	        cat $i | sed -e 's/<!-- <extend-property  *name="locale"  *values="de" *\/> --> <set-property name="user.agent" value="safari" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
-		mv $i.sed $i
-	    done
-	fi
 	if [ $gwtcompile -eq 1 ]; then
 	    echo "INFO: Compiling GWT (rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*)"
 	    rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*
+	    if [ $onegwtpermutationonly -eq 1 ]; then
+		echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
+		for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
+		    cp $i $i.bak
+		    cat $i | sed -e 's/^[	 ]*<extend-property name="locale" values="de"\/>[	 ]*$/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="safari" \/>/' >$i.sed
+		    mv $i.sed $i
+		done
+	    else
+		echo "INFO: Patching .gwt.xml files such that all GWT permutations are compiled"
+		for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
+		    cp $i $i.bak
+		    cat $i | sed -e 's/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="safari" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
+		    mv $i.sed $i
+		done
+	    fi
 	else
 	    echo "INFO: GWT Compilation disabled"
 	    extra="-Pdebug.no-gwt-compile"
@@ -318,11 +316,13 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	echo "Using following command: mvn $extra -fae -s $MAVEN_SETTINGS $clean install"
 	mvn $extra -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
 
-	# Now move back the backup .gwt.xml files before they were (maybe) patched
-	for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
-	    echo "INFO: restoring backup copy of $i after it was patched before"
-	    mv -v $i.bak $i
-	done
+	if [ $gwtcompile -eq 1 ]; then
+	    # Now move back the backup .gwt.xml files before they were (maybe) patched
+	    for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
+		echo "INFO: restoring backup copy of $i after it was patched before"
+		mv -v $i.bak $i
+	    done
+        fi
 
 	echo "Build complete. Do not forget to install product..."
 fi
