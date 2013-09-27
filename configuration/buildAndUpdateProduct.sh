@@ -277,7 +277,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 		echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
 		for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
 		    cp $i $i.bak
-		    cat $i | sed -e 's/^[	 ]*<extend-property name="locale" values="de"\/>[	 ]*$/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="safari" \/>/' >$i.sed
+		    cat $i | sed -e 's/^[	 ]*<extend-property name="locale" values="de"\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="safari" \/>/' >$i.sed
 		    mv $i.sed $i
 		done
 	    else
