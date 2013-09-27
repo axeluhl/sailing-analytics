@@ -82,9 +82,9 @@ The architecture is divided into logical tiers. These are represented by firewal
 Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-create-new-app-instance]]. You should use a configuration like the following. If you want to bring the code to a defined level then make sure to specify the BUILD-FROM and BUILD-COMPLETE_NOTIFY variables. If you leave them empty the instance will start using a very old build.
 
 <pre>
-BUILD-FROM=master
-RUN-TESTS=False
-SERVER-STARTUP-NOTIFY=simon.marcel.pamies@sap.com
+BUILD_FROM=master
+RUN_TESTS=False
+SERVER_STARTUP-NOTIFY=simon.marcel.pamies@sap.com
 SERVER_NAME=LIVE1
 MEMORY=1024m
 REPLICATION_HOST=172.31.25.253
