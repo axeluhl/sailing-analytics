@@ -66,7 +66,7 @@ testing=1
 clean="clean"
 offline=0
 proxy=0
-no_confirmation=1
+suppress_confirmation=0
 extra=''
 
 if [ $# -eq 0 ]; then
@@ -124,7 +124,7 @@ do
         s) TARGET_SERVER_NAME=$OPTARG
            HAS_OVERWRITTEN_TARGET=1;;
         w) REMOTE_SERVER_LOGIN=$OPTARG;;
-        u) no_confirmation=1;;
+        u) suppress_confirmation=1;;
         \?) echo "Invalid option"
             exit 4;;
     esac
@@ -185,7 +185,7 @@ if [[ "$@" == "hot-deploy" ]]; then
         echo "WARNING: Bundle versions do not differ. Update not needed."
     fi
 
-	if [ $no_confirmation -eq 0 ]; then
+	if [ $suppress_confirmation -eq 0 ]; then
         read -s -n1 -p "Do you really want to hot-deploy bundle $OSGI_BUNDLE_NAME to $SERVERS_HOME/$active_branch? (y/N): " answer
         case $answer in
         "Y" | "y") echo "Continuing";;
@@ -232,7 +232,7 @@ if [[ "$@" == "hot-deploy" ]]; then
     OLD_ACTIVATED_NAME=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 3`
     echo "Could identify bundle-id $BUNDLE_ID for $OLD_ACTIVATED_NAME"
 
-	if [ $no_confirmation -eq 0 ]; then
+	if [ $suppress_confirmation -eq 0 ]; then
         read -s -n1 -p "I will now stop and reinstall the bundle mentioned in the line above. Is this right? (y/N): " answer
         case $answer in
         "Y" | "y") echo "Continuing";;
@@ -340,7 +340,7 @@ fi
 
 if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 
-	if [ $no_confirmation -eq 0 ]; then
+	if [ $suppress_confirmation -eq 0 ]; then
         read -s -n1 -p "Currently branch $active_branch is active and I will deploy to $ACDIR. Do you want to proceed with $@ (y/N): " answer
         case $answer in
         "Y" | "y") echo "Continuing";;
@@ -431,12 +431,12 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     # using system properties. This works because
     # context.getProperty() searches for system properties
     # if it can't find them in config.ini (framework config)
-    sed -i "/mongo.host/d" $ACDIR/configuration/config.ini
-    sed -i "/mongo.port/d" $ACDIR/configuration/config.ini
-    sed -i "/expedition.udp.port/d" $ACDIR/configuration/config.ini
-    sed -i "/replication.exchangeName/d" $ACDIR/configuration/config.ini
-    sed -i "/replication.exchangeHost/d" $ACDIR/configuration/config.ini
-    sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" $ACDIR/configuration/jetty/etc/jetty.xml
+    sed -i "" "/mongo.host/d" "$ACDIR/configuration/config.ini"
+    sed -i "" "/mongo.port/d" "$ACDIR/configuration/config.ini"
+    sed -i "" "/expedition.udp.port/d" "$ACDIR/configuration/config.ini"
+    sed -i "" "/replication.exchangeName/d" "$ACDIR/configuration/config.ini"
+    sed -i "" "/replication.exchangeHost/d" "$ACDIR/configuration/config.ini"
+    sed -i "" "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" "$ACDIR/configuration/jetty/etc/jetty-selector.xml"
 
     echo "I have read the following configuration from $ACDIR/env.sh:"
     echo "SERVER_NAME: $SERVER_NAME"
@@ -466,7 +466,7 @@ if [[ "$@" == "remote-deploy" ]]; then
     REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/servers'`
     REMOTE_SERVER="$REMOTE_HOME/$SERVER"
 
-	if [ $no_confirmation -eq 0 ]; then
+	if [ $suppress_confirmation -eq 0 ]; then
         read -s -n1 -p "I will deploy the current GIT branch to $REMOTE_SERVER_LOGIN:$REMOTE_SERVER. Is this correct (y/n)? " answer
         case $answer in
         "Y" | "y") OK=1;;
@@ -515,7 +515,7 @@ if [[ "$@" == "remote-deploy" ]]; then
 
     echo "Deployed successfully. I did NOT change any configuration (no env.sh or config.ini or jetty.xml adaption), only code!"
 
-	if [ $no_confirmation -eq 0 ]; then
+	if [ $suppress_confirmation -eq 0 ]; then
         read -s -n1 -p "Do you want me to restart the remote server (y/n)? " answer
         case $answer in
         "Y" | "y") OK=1;;
