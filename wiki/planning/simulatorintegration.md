@@ -6,4 +6,4 @@ Next steps:
 - make simulation available as overlay on sailing analytics referring to the currently selected leg
 - visualize ladder rungs, i.e. advantage lines plus intermediate isochrones in distance-steps or time-steps
 - use multiple wind sources to derive spatially resolved wind field and use it in calculation of ladder rungs and simulation of courses
-- extreme sailing series as test-bed for simplified wind measurement unit and operating multiple wind sources during a regatta on boats and marks
+- extreme sailing series as test environment for simplified wind measurement unit and operating multiple wind sources during a regatta on boats and marks
