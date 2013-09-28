@@ -205,7 +205,6 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
         }
 
         // For each competitor:
-
         for (Competitor c : getRace().getCompetitors()) {
 
             System.out.println(c.getName());
@@ -261,8 +260,6 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
 
                         System.out.println("Calculated: " + computedPasses.get(w));
                     }
-
-                    
 
                     // Compare computed and calculated MarkPassings
 
