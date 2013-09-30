@@ -14,6 +14,8 @@
 
 [[Support Specific Analysis Scenarios|wiki/planning/AnalysisScenarios]]
 
+[[Improve Landing Page|wiki/planning/LandingPage]]
+
 [[Live Audio Streaming Support|wiki/planning/LiveAudioStreaming]]
 
 [[Renewing the Map (Maps v2.0 discontinued) |wiki/planning/GoogleEarth]]
