@@ -20,6 +20,8 @@
 
 [[Renewing the Map (Maps v2.0 discontinued) |wiki/planning/GoogleEarth]]
 
+[[Mobile Version SAP Sailing Analytics|wiki/planning/MobileSailingAnalytics]]
+
 [[User Management|wiki/planning/usermanagement]]
 
 [[Extracting an "SAP Sports Server" Basis|wiki/planning/sap-sports-server]]
