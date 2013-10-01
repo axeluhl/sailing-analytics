@@ -186,6 +186,26 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     }
 
     @Override
+    public boolean hasRaceStartlist(String raceID) {
+        DBCollection races = database.getCollection(CollectionNames.RACES_MESSAGES.name());
+        BasicDBObject query = new BasicDBObject();
+        query.append(FieldNames.RACE_ID.name(), raceID);
+        query.append(FieldNames.MESSAGE_COMMAND.name(), MessageType.STL.name());
+        DBObject object = races.findOne(query);
+        return object != null; 
+    }
+
+    @Override
+    public boolean hasRaceCourse(String raceID) {
+        DBCollection races = database.getCollection(CollectionNames.RACES_MESSAGES.name());
+        BasicDBObject query = new BasicDBObject();
+        query.append(FieldNames.RACE_ID.name(), raceID);
+        query.append(FieldNames.MESSAGE_COMMAND.name(), MessageType.CCG.name());
+        DBObject object = races.findOne(query);
+        return object != null; 
+    }
+    
+    @Override
     public Iterable<Race> getRaces() {
         DBCollection races = database.getCollection(CollectionNames.RACES_MASTERDATA.name());
         DBCursor results = races.find();

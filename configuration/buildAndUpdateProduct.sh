@@ -61,6 +61,7 @@ HAS_OVERWRITTEN_TARGET=0
 TARGET_SERVER_NAME=$active_branch
 
 gwtcompile=1
+onegwtpermutationonly=0
 testing=1
 clean="clean"
 offline=0
@@ -68,9 +69,10 @@ proxy=0
 extra=''
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-g -t -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy]"
+    echo "buildAndUpdateProduct [-b -g -t -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
+    echo "-b Build GWT permutation only for one browser and English language."
     echo "-t Disable tests"
     echo "-o Enable offline mode (does not work for tycho surefire plugin)"
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
@@ -104,12 +106,13 @@ echo PROJECT_HOME is $PROJECT_HOME
 echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 
-options=':gtocpm:n:l:s:w:'
+options=':bgtocpm:n:l:s:w:'
 while getopts $options option
 do
     case $option in
         g) gwtcompile=0;;
         t) testing=0;;
+	b) onegwtpermutationonly=1;;
         o) offline=1;;
         c) clean="";;
         p) proxy=1;;
@@ -146,13 +149,13 @@ if [[ "$@" == "hot-deploy" ]]; then
         exit
     fi
 
+    if [[ $HAS_OVERWRITTEN_TARGET -eq 1 ]]; then
+        active_branch=$TARGET_SERVER_NAME
+    fi
+
     if [ ! -d $SERVERS_HOME/$active_branch/plugins ]; then
         echo "Could not find target directory $SERVERS_HOME/$active_branch/plugins!"
         exit
-    fi
-
-    if [[ $HAS_OVERWRITTEN_TARGET -eq 1 ]]; then
-        active_branch=$TARGET_SERVER_NAME
     fi
 
     # locate old bundle
@@ -270,6 +273,21 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	if [ $gwtcompile -eq 1 ]; then
 	    echo "INFO: Compiling GWT (rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*)"
 	    rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*
+	    if [ $onegwtpermutationonly -eq 1 ]; then
+		echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
+		for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
+		    cp $i $i.bak
+		    cat $i | sed -e 's/^[	 ]*<extend-property name="locale" values="de"\/>[	 ]*$/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="safari" \/>/' >$i.sed
+		    mv $i.sed $i
+		done
+	    else
+		echo "INFO: Patching .gwt.xml files such that all GWT permutations are compiled"
+		for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
+		    cp $i $i.bak
+		    cat $i | sed -e 's/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="safari" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
+		    mv $i.sed $i
+		done
+	    fi
 	else
 	    echo "INFO: GWT Compilation disabled"
 	    extra="-Pdebug.no-gwt-compile"
@@ -297,6 +315,14 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
 	echo "Using following command: mvn $extra -fae -s $MAVEN_SETTINGS $clean install"
 	mvn $extra -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
+
+	if [ $gwtcompile -eq 1 ]; then
+	    # Now move back the backup .gwt.xml files before they were (maybe) patched
+	    for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
+		echo "INFO: restoring backup copy of $i after it was patched before"
+		mv -v $i.bak $i
+	    done
+        fi
 
 	echo "Build complete. Do not forget to install product..."
 fi
@@ -344,11 +370,14 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     rm -rf $ACDIR/org.eclipse.*
     rm -rf $ACDIR/configuration/org.eclipse.*
 
+    # always overwrite start and stop scripts as they
+    # should never contain any custom logic
+    cp -v $PROJECT_HOME/java/target/start $ACDIR/
+    cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+    cp -v $PROJECT_HOME/java/target/status $ACDIR/
+
     if [ ! -f "$ACDIR/env.sh" ]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
-        cp -v $PROJECT_HOME/java/target/start $ACDIR/
-        cp -v $PROJECT_HOME/java/target/stop $ACDIR/
-        cp -v $PROJECT_HOME/java/target/status $ACDIR/
     fi
 
     if [ ! -f $ACDIR/no-overwrite ]; then
@@ -363,9 +392,6 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
 
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
-        cp -v $PROJECT_HOME/java/target/start $ACDIR/
-        cp -v $PROJECT_HOME/java/target/stop $ACDIR/
-        cp -v $PROJECT_HOME/java/target/status $ACDIR/
         cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
 
         cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR

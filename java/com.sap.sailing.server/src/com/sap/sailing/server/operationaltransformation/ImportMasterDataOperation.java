@@ -170,7 +170,7 @@ public class ImportMasterDataOperation extends
                 List<RaceLogEvent> logEvents = fleetEntry.getValue();
                 RaceLog raceLog = raceColumn.getRaceLog(fleet);
                 for (RaceLogEvent singleEvent : logEvents) {
-                    raceLog.add(singleEvent);
+                    raceLog.load(singleEvent);
                 }
             }
         }

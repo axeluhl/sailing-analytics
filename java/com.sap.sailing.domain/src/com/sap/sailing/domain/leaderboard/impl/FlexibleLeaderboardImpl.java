@@ -18,7 +18,6 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -47,14 +46,14 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private transient RaceLogStore raceLogStore;
     private CourseArea courseArea;
 
-    public FlexibleLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoringScheme, CourseArea courseArea) {
-        this(EmptyRaceLogStore.INSTANCE, name, scoreCorrection, resultDiscardingRule, scoringScheme, courseArea);
+    public FlexibleLeaderboardImpl(String name, ThresholdBasedResultDiscardingRule resultDiscardingRule,
+            ScoringScheme scoringScheme, CourseArea courseArea) {
+        this(EmptyRaceLogStore.INSTANCE, name, resultDiscardingRule, scoringScheme, courseArea);
     }
 
-    public FlexibleLeaderboardImpl(RaceLogStore raceLogStore, String name, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoringScheme, CourseArea courseArea) {
-        super(scoreCorrection, resultDiscardingRule);
+    public FlexibleLeaderboardImpl(RaceLogStore raceLogStore, String name, ThresholdBasedResultDiscardingRule resultDiscardingRule,
+            ScoringScheme scoringScheme, CourseArea courseArea) {
+        super(resultDiscardingRule);
         this.scoringScheme = scoringScheme;
         if (name == null) {
             throw new IllegalArgumentException("A leaderboard's name must not be null");

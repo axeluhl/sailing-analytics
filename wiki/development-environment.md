@@ -25,7 +25,7 @@ After the Eclipse installation and importing all projects under java/ from Git, 
 
 Major parts of our target platform are hosted on sapsailing.com as a p2 repository which makes it possible to have only one central target platform configuration used by everyone. The target platform can be re-built, e.g., after adding another bundle to it, using the script in com.sap.sailing.targetplatform/scripts. 
 
-It then needs to be installed again (by using a tool like scp for instance) to the /home/trac/p2-repositories directory from where it is exposed as http://sapcoe-app01.pironet-ndh.com/p2/sailing/ by the Apache web server. After such a change, all developers need to reload the target platform into their Eclipse environment.
+It then needs to be installed again (by using a tool like scp for instance) to the /home/trac/p2-repositories directory from where it is exposed as http://p2.sapsailing.com/p2/sailing/ by the Apache web server. After such a change, all developers need to reload the target platform into their Eclipse environment.
 
 ## Maven Build and Tests
 We use Maven to build our software and run our JUnit tests. The global setting.xml file to install in everyone's ~/.m2 directory is checked into the top-level Git folder. The checked-in copy assumes the developer is using Maven inside the SAP corporate network. If not, uncomment the <proxy> tag in the settings.xml file. See also section Git and Our Branches for details on which branch is configured to work in which network setup.
@@ -36,20 +36,28 @@ Test plugins automatically have their tests executed during a Maven build unless
 
 The Maven plug-in for the GWT compilation doesn't reliably perform a dependency check. It is therefore recommended to remove all contents of the java/com.sap.sailing.gwt.ui/com.sap.sailing.* folders (basically, all GWT compiler output) before launching the Maven build. A good command line for the Maven build from the java/ subdirectory in your local environment when outside the SAP VPN is this:
 
+    buildAndUpdateProduct.sh build
+
+which basically does something like
+
     `rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*; mvn -fae -P debug.without-proxy clean install 2>&1 | tee log`
 
 Inside the SAP VPN you may want to use a different profile which accounts for the proxies that have to be used:
 
-    `rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*; mvn -fae -P debug.with-proxy clean install 2>&1 | tee log`
+    buildAndUpdateProduct.sh -p build
 
-When building on sapsailing.com you have to explicitly specify the settings.xml file from the git workspace. You also have to make sure the DISPLAY environment variable is set to ":2.0" to send test browsers to a VNC display. Should the GWT build fail because it cannot open enough files, ensure the "ulimit -n" output is at least 4096 to enable the GWT compiler to assemble the resource sets which consist of many files that all need to be opened concurrently. Currently, the maximum value for "ulimit -n" is configured in /etc/security/limits.conf and is set to 16384. This specified the maximum amount to which a user's shell can set this value. The ~trac/.bash_profile contains a "ulimit -n 4096" command, but when running "screen" the shells usually are no login shells. You need to make sure you run ~trac/.bash_profile in the build shell to set the limit of open files to at least 4096. Then issue `rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*; mvn -fae -s /home/trac/git/settings.xml -P debug.without-proxy clean install 2>&1 | tee log`
+The buildAndUpdateProduct.sh script can be found in the top-level configuration/ directory in git. It has been used successfully in Linux and Cygwin environments.
+
+When building on sapsailing.com you should stick with the buildAndUpdateProduct.sh script. It makes a lot of settings that are necessary, such as specifying the settings.xml file to use for the Maven build. For the Selenium tests to succeed you have to make sure the DISPLAY environment variable is set to ":2.0" to send test browsers to a VNC display. Should the GWT build fail because it cannot open enough files, ensure the "ulimit -n" output is at least 4096 to enable the GWT compiler to assemble the resource sets which consist of many files that all need to be opened concurrently. Currently, the maximum value for "ulimit -n" is configured in /etc/security/limits.conf and is set to 16384. This specified the maximum amount to which a user's shell can set this value. The ~trac/.bash_profile contains a "ulimit -n 4096" command, but when running "screen" the shells usually are no login shells. You need to make sure you run ~trac/.bash_profile in the build shell to set the limit of open files to at least 4096. Then issue the respective buildAndUpdateProduct.sh command line.
 
 All these build lines also creates a log file with all error messages, just in case the screen buffer is not sufficient to hold all scrolling error messages.
 
-## Product and Features
-The result of the build process is a p2 repository with a product consisting of a number of features. The product configuration is provided by the file raceanalysis.product in the com.sap.sailing.feature.p2build project. In its dependencies it defines the features of which it is built, which currently are com.sap.sailing.feature and com.sap.sailing.feature.runtime, each described in an equal-named bundle.
+## Product, Features and Target Platform
+The result of the build process is a p2 repository with a product consisting of a number of features. The product configuration is provided by the file raceanalysis.product in the com.sap.sailing.feature.p2build project. In its dependencies it defines the features of which it is built, which currently are com.sap.sailing.feature and com.sap.sailing.feature.runtime, each described in an equal-named bundle. The feature specified by com.sap.sailing.feature lists the bundles we develop ourselves as part of the project. The com.sap.sailing.feature.runtime feature lists those 3rd-party bundles from the target platform which are required by the product.
 
-The feature specified by com.sap.sailing.feature lists the bundles we develop ourselves as part of the project. The com.sap.sailing.feature.runtime feature lists those 3rd-party bundles from the target platform which are required by the product.
+The [target platform](#Target-Platform) is defined in the various flavors for local and central environments in com.sap.sailing.targetplatform/definitions/*.target. It mainly uses Eclipse p2 repositories and our own p2 repository at http://p2.sapsailing.com/p2/sailing/ where we store those bundles required by our runtime which cannot be found as OSGi bundles in any other public p2 repository of which we are aware.
+
+This p2 repository at sapsailing.com can be re-built and correspondingly extended by the process explained [here](wiki/typical-development-scenarios#Adding-a-Bundle-to-the-Target-Platform).
 
 ## External Libraries
 

@@ -56,7 +56,7 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
                     newNetPoints = correctedScore;
                 }
                 newTotalPoints = leaderboard.getEntry(competitor, raceColumn, timePoint).getTotalPoints();
-                isScoreCorrected = leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn);
+                isScoreCorrected = leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn, timePoint);
             } else {
                 throw new IllegalArgumentException("Didn't find competitor with ID "+competitorIdAsString+" in leaderboard "+getLeaderboardName());
             }
