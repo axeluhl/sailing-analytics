@@ -485,6 +485,17 @@ public interface StringMessages extends Messages {
     String sideToWhichMarkAtLegStartWasRoundedTooltip();
     String generatePolarSheet();
     String polarSheetChart();
+    String polarSheetMinimumDataSizePerGraph();
+    String polarSheetMinimumDataSizePerAngle();
+    String polarSheetMinimumWindConfidence();
+    String polarSheetMinimumConfidenceMeasure();
+    String polarSheetUseOnlyWindGaugeData();
+    String polarSheetUseOnlyEstimationData();
+    String polarSheetRemoveOutliers();
+    String polarSheetOutlierDetectionRadius();
+    String polarSheetOutlierDetectionMinimumPerc();
+    String polarSheetNumberOfHistogramColumns();
+    String polarSheetWindSteppingInKnots();
     String numberOfManeuversInRaceTooltip();
     String competitorColumnTooltip();
     String sailIdColumnTooltip();

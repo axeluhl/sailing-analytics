@@ -47,40 +47,40 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
     }
 
     private void setupGrid(Grid grid, DataEntryDialog<?> dialog) {
-        grid.setWidget(0, 0, new Label("Minimum data size per Graph:"));
+        grid.setWidget(0, 0, new Label(stringMessages.polarSheetMinimumDataSizePerGraph() + ":"));
         minimumGraphDataSizeBox = dialog.createIntegerBox(settings.getMinimumDataCountPerGraph(), 6);
         grid.setWidget(0, 1, minimumGraphDataSizeBox);
-        grid.setWidget(1, 0, new Label("Minimum Data Count Per Angle:"));
+        grid.setWidget(1, 0, new Label(stringMessages.polarSheetMinimumDataSizePerAngle() + ":"));
         minimumDataCountPerAngleBox = dialog.createIntegerBox(settings.getMinimumDataCountPerAngle(), 6);
         grid.setWidget(1, 1, minimumDataCountPerAngleBox);
-        grid.setWidget(2, 0, new Label("Minimum Wind Confidence:"));
+        grid.setWidget(2, 0, new Label(stringMessages.polarSheetMinimumWindConfidence() + ":"));
         minimumWindConfidenceBox = dialog.createDoubleBox(settings.getMinimumWindConfidence(), 6);
         grid.setWidget(2, 1, minimumWindConfidenceBox);
-        grid.setWidget(3, 0, new Label("Minimum Confidence Measure:"));
+        grid.setWidget(3, 0, new Label(stringMessages.polarSheetMinimumConfidenceMeasure() + ":"));
         minimumConfidenceMeasureBox = dialog.createDoubleBox(settings.getMinimumConfidenceMeasure(), 6);
         grid.setWidget(3, 1, minimumConfidenceMeasureBox);
-        grid.setWidget(4, 0, new Label("Use only wind gauge data for wind speed:"));
+        grid.setWidget(4, 0, new Label(stringMessages.polarSheetUseOnlyWindGaugeData() + ":"));
         useOnlyWindGaugesForWindSpeedBox = dialog.createCheckbox("");
         useOnlyWindGaugesForWindSpeedBox.setValue(settings.useOnlyWindGaugesForWindSpeed());
         grid.setWidget(4, 1, useOnlyWindGaugesForWindSpeedBox);
-        grid.setWidget(5, 0, new Label("Use only wind estimation data for wind direction:"));
+        grid.setWidget(5, 0, new Label(stringMessages.polarSheetUseOnlyEstimationData() + ":"));
         useOnlyEstimationForWindSpeedBox = dialog.createCheckbox("");
         useOnlyEstimationForWindSpeedBox.setValue(settings.useOnlyEstimatedForWindDirection());
         grid.setWidget(5, 1, useOnlyEstimationForWindSpeedBox);
-        grid.setWidget(6, 0, new Label("Remove outliers (Distance Based):"));
+        grid.setWidget(6, 0, new Label(stringMessages.polarSheetRemoveOutliers() + ":"));
         shouldRemoveOutliersBox = dialog.createCheckbox("");
         shouldRemoveOutliersBox.setValue(settings.shouldRemoveOutliers());
         grid.setWidget(6, 1, shouldRemoveOutliersBox);
-        grid.setWidget(7, 0, new Label("Outlier Detection Neighborhood Radius:"));
+        grid.setWidget(7, 0, new Label(stringMessages.polarSheetOutlierDetectionRadius() + ":"));
         outlierRadiusBox = dialog.createDoubleBox(settings.getOutlierDetectionNeighborhoodRadius(), 6);
         grid.setWidget(7, 1, outlierRadiusBox);
-        grid.setWidget(8, 0, new Label("Outlier Detection Minimum Neighboorhood Percentage"));
+        grid.setWidget(8, 0, new Label(stringMessages.polarSheetOutlierDetectionMinimumPerc() + ":"));
         outlierNeighborhoodPctBox = dialog.createDoubleBox(settings.getOutlierMinimumNeighborhoodPct(), 6);
         grid.setWidget(8, 1, outlierNeighborhoodPctBox);
-        grid.setWidget(9, 0, new Label("Number of histogram columns:"));
+        grid.setWidget(9, 0, new Label(stringMessages.polarSheetNumberOfHistogramColumns() + ":"));
         numberOfHistogramColumnsBox = dialog.createIntegerBox(settings.getNumberOfHistogramColumns(), 3);
         grid.setWidget(9, 1, numberOfHistogramColumnsBox);
-        grid.setWidget(10, 0, new Label("Wind stepping in knots:"));
+        grid.setWidget(10, 0, new Label(stringMessages.polarSheetWindSteppingInKnots() + ":"));
         windSteppingBox = new WindSteppingConfiguratorPanel(settings.getWindStepping());
         grid.setWidget(10, 1, windSteppingBox);
     }
