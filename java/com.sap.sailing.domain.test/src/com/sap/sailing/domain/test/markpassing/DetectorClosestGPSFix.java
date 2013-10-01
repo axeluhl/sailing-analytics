@@ -18,74 +18,91 @@ public class DetectorClosestGPSFix implements DetectorMarkPassing {
             ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> markTracks, TimePoint lastWayPoint) {
 
         TimePoint t = null;
-        // int fixesInZone = 0;
-        // int fixesOutOfZone = 0;
-        // int totalFixes = 0;
+    //    for(int i=0; i<200; i++){
+       // System.out.println("Fix " + i + ": " + gpsFixes.get(i).getTimePoint() + ": " + distanceToWayPoint(markTracks,
+       //              gpsFixes.get(i)).getMeters());}
+   //     int fixesInZone = 0;
 
-        ArrayList<GPSFixMoving> allFixes = gpsFixes;
+    //    int totalFixes = 0;
+        try {
+       //     System.out.println(lastWayPoint.asDate());
 
-        // Remove GPSFixes before last MarkPassing
-        Iterator<GPSFixMoving> it = allFixes.iterator();
-        while (it.hasNext()) {
-            // totalFixes++;
-            if (it.next().getTimePoint().before(lastWayPoint)) {
-                it.remove();
-            }
-        }
+            ArrayList<GPSFixMoving> allFixes = gpsFixes;
 
-        // Create "Hotspot"
-        int startOfHotspot = 0;
-        int endOfHotspot = 0;
+            // Remove GPSFixes before last MarkPassing
 
-        for (int i = 0; i < allFixes.size(); i++) {
+            Iterator<GPSFixMoving> it = allFixes.iterator();
+            while (it.hasNext()) {
 
-            if (distanceToSingleWayPoint(markTracks, allFixes.get(i)).getMeters() < 200) {
-                startOfHotspot = i;
-        //        System.out.println(i + " Start: " + distanceToSingleWayPoint(markTracks, allFixes.get(i)).getMeters());
-                break;
+         //       totalFixes++;
+                if (it.next().getTimePoint().before(lastWayPoint)) {
+                    it.remove();
+                }
             }
 
-        }
+            // Create "Hotspot"
+            int startOfHotspot = 0;
+            int endOfHotspot = allFixes.size() - 1;
 
-        for (int i = startOfHotspot; i < allFixes.size(); i++) {
-            endOfHotspot = i;
-            if (distanceToSingleWayPoint(markTracks, allFixes.get(i)).getMeters() > 200) {
+            for (int i = 0; i < allFixes.size(); i++) {
+              //  System.out.println(i + ": "+ allFixes.get(i).getTimePoint() + ": " + distanceToWayPoint(markTracks,
+              //      allFixes.get(i)).getMeters());
 
-        //        System.out.println(i + " End: " + distanceToSingleWayPoint(markTracks, allFixes.get(i)).getMeters());
-                break;
-            }
-        }
-        List<GPSFixMoving> hotspot = allFixes.subList(startOfHotspot, endOfHotspot);
-
-    //    System.out.println("Hotspot: " + hotspot.size());
-        if (hotspot.size() > 0) {
-            Distance smallestDistance = distanceToSingleWayPoint(markTracks, hotspot.get(0));
-
-            for (GPSFixMoving gpsFix : hotspot) {
-                // TODO recognize passing instructions
-
-                Distance distance = distanceToSingleWayPoint(markTracks, gpsFix);
-
-                if (distance.getMeters() <= smallestDistance.getMeters()) {
-
-                    smallestDistance = distance;
-                    t = gpsFix.getTimePoint();
-
+                if (distanceToWayPoint(markTracks, allFixes.get(i)).getMeters() < 250) {
+                    startOfHotspot = i;
+        //            System.out.println(i + " Start: " + distanceToWayPoint(markTracks,
+         //           allFixes.get(i)).getMeters());
+                    break;
                 }
 
             }
-        } else
-            System.out.println("No Fixes in Hotzone");
 
-        // System.out.println("Total Fixes: " + totalFixes);
-        // System.out.println("Fixes in Zone: " + fixesInZone);
+            for (int i = startOfHotspot; i < allFixes.size(); i++) {
+                endOfHotspot = i;
+                if (distanceToWayPoint(markTracks, allFixes.get(i)).getMeters() > 250) {
 
-        return t;
+              //      System.out.println(i + " End: " + distanceToWayPoint(markTracks,
+              //      allFixes.get(i)).getMeters());
+                    break;
+                }
+            }
+            List<GPSFixMoving> hotspot = allFixes.subList(startOfHotspot, endOfHotspot);
+
+    //        System.out.println("Hotspot: " + hotspot.size());
+            if (hotspot.size() > 0) {
+                Distance smallestDistance = distanceToWayPoint(markTracks, hotspot.get(0));
+
+                for (GPSFixMoving gpsFix : hotspot) {
+                    // TODO recognize passing instructions
+
+                    Distance distance = distanceToWayPoint(markTracks, gpsFix);
+
+                    if (distance.getMeters() <= smallestDistance.getMeters()) {
+
+                        smallestDistance = distance;
+                        t = gpsFix.getTimePoint();
+
+                    }
+
+                }
+            } else
+                System.out.println("No Fixes in Hotzone");
+
+        //    System.out.println("Total Fixes: " + totalFixes);
+         //   System.out.println("Fixes in Zone: " + fixesInZone);
+
+        }catch(NullPointerException e){
+            System.out.println("No previous Markpass");
+            
+        }
+               
+            return t;
+        
     }
 
     // Distance from a Competitor to a Waypoint
 
-    private Distance distanceToSingleWayPoint(ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> markTracks, GPSFixMoving gps) {
+    private Distance distanceToWayPoint(ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> markTracks, GPSFixMoving gps) {
         if (markTracks.size() == 2) {
 
             if (gps.getPosition().getDistance(markTracks.get(0).getEstimatedPosition(gps.getTimePoint(), true))

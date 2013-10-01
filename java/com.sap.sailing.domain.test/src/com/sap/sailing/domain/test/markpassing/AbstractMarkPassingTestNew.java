@@ -206,12 +206,13 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
 
         // For each competitor:
         for (Competitor c : getRace().getCompetitors()) {
+           
 
-            System.out.println(c.getName());
+           System.out.println("\n" + c.getName() + ":\n");
 
             LinkedHashMap<Waypoint, MarkPassing> givenPasses = new LinkedHashMap<Waypoint, MarkPassing>();
             LinkedHashMap<Waypoint, MarkPassing> computedPasses = new LinkedHashMap<Waypoint, MarkPassing>();
-            TimePoint lastWayPoint = getTrackedRace().getStartOfRace().minus(20000);
+            TimePoint lastWayPoint = getTrackedRace().getStartOfRace().minus(150000);
 
             // Get GPSFixes
 
@@ -230,59 +231,71 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
             } finally {
                 getTrackedRace().getTrack(c).unlockAfterRead();
             }
-
-            // Get given MarkPasses
-
+            // Get given Markpasses
             for (Waypoint w : waypoints) {
+
                 MarkPassing markPassing = getTrackedRace().getMarkPassing(c, w);
 
                 givenPasses.put(w, markPassing);
+                try {
+                    givenPasses.get(w).getTimePoint();
+                } catch (NullPointerException e) {
+                    missingGivenMarkPassings++;
+                }
+            }
 
-                // Actually compute MarkPassings
-                if (!(gpsFixes.size() == 0)) {
+            // Compute MarkPassings
+
+            if (!(gpsFixes.size() == 0)) {
+                for (Waypoint w : waypoints) {
+
+                    // System.out.println("LastWaypoint: " + lastWayPoint);
+
+                    TimePoint markPass = detector.computeMarkpass(gpsFixes, waypointTracks.get(w), lastWayPoint);
+                    detections++;
+
+                    // Set lastWayPoint to new lastWayPoint
                     try {
-
-                        TimePoint markPass = detector.computeMarkpass(gpsFixes, waypointTracks.get(w), lastWayPoint);
-                        detections++;
-
-                        // Set lastWayPoint to new lastWayPoint
-                        lastWayPoint = markPass;
-                        // ///
-
+                        lastWayPoint.before(markPass);
                         MarkPassing m = new MarkPassingImpl(markPass, w, c);
                         computedPasses.put(w, m);
 
                     } catch (NullPointerException e) {
 
+                        System.out.println("NullPointerException");
                         missingCalculatedMarkPassings++;
 
                     } finally {
+                        
+                            
+                   
+                   //         System.out.println("Calculated: " + computedPasses.get(w));
+                  //          System.out.println("Given: " + givenPasses.get(w) + "\n");
+                        
+                        lastWayPoint = markPass;
 
-                        System.out.println("Calculated: " + computedPasses.get(w));
                     }
+                }
 
-                    // Compare computed and calculated MarkPassings
+                // Compare computed and calculated MarkPassings
+
+                for (Waypoint w : computedPasses.keySet())
 
                     try {
                         givenPasses.get(w).getTimePoint();
 
-                        try {
-                            computedPasses.get(w).getTimePoint();
+                        long timedelta = givenPasses.get(w).getTimePoint().asMillis()
+                                - computedPasses.get(w).getTimePoint().asMillis();
 
-                            long timedelta = givenPasses.get(w).getTimePoint().asMillis()
-                                    - computedPasses.get(w).getTimePoint().asMillis();
+                        if ((Math.abs(timedelta) < tolerance)) {
 
-                            if ((Math.abs(timedelta) < tolerance)) {
+                            correctPasses++;
 
-                                correctPasses++;
-
-                            } else {
-                                incorrectPasses++;
-                            }
-
-                        } catch (NullPointerException e) {
-                            // missingCalculatedMarkPassings++;
-                        } finally {
+                        } else {
+                            System.out.println("Calculated: " + computedPasses.get(w));
+                            System.out.println("Given: " + givenPasses.get(w) + "\n");
+                        
+                            incorrectPasses++;
                         }
 
                     } catch (NullPointerException e) {
@@ -292,17 +305,13 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
 
                     finally {
                     }
+            }
 
-                } else {
-                    System.out.println("Competitor has no GPSFixes");
-                    try {
-                        givenPasses.get(w).getTimePoint();
-                    } catch (NullPointerException e) {
-                        missingGivenMarkPassings++;
-                    }
-                }
+            else {
+                System.out.println("Competitor has no GPSFixes");
             }
         }
+
         System.out.println("Missing Given MarkPass: " + missingGivenMarkPassings);
         double givenMarkPasses = 240 - missingGivenMarkPassings;
         System.out.println("Failed Calculation: " + missingCalculatedMarkPassings);
