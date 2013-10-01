@@ -52,7 +52,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
         multiCompetitorChart.getElement().getStyle().setMarginBottom(10, Unit.PX);
         
         multiLeaderboardPanel = new MultiLeaderboardPanel(sailingService, metaLeaderboardName, asyncActionsExecutor, timer,
-                leaderboardSettings, preselectedLeaderboardName, preselectedRace, errorReporter, stringMessages,
+                preselectedLeaderboardName, preselectedRace, errorReporter, stringMessages,
                 userAgent, showRaceDetails, autoExpandLastRaceColumn);
         multiLeaderboardPanel.setVisible(false);
         
@@ -60,8 +60,8 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
         mainPanel.add(multiCompetitorChart);
         mainPanel.add(multiLeaderboardPanel);
 
-        addComponentToNavigationMenu(metaLeaderboardPanel, false, stringMessages.seriesLeaderboard());
-        addComponentToNavigationMenu(multiCompetitorChart, true, null);
-        addComponentToNavigationMenu(multiLeaderboardPanel, true, stringMessages.regattaLeaderboards());
+        addComponentToNavigationMenu(metaLeaderboardPanel, false, stringMessages.seriesLeaderboard(),  /* hasSettingsWhenComponentIsInvisible*/ true);
+        addComponentToNavigationMenu(multiCompetitorChart, true, null,  /* hasSettingsWhenComponentIsInvisible*/ true);
+        addComponentToNavigationMenu(multiLeaderboardPanel, true , stringMessages.regattaLeaderboards(),  /* hasSettingsWhenComponentIsInvisible*/ false);
     }
 }

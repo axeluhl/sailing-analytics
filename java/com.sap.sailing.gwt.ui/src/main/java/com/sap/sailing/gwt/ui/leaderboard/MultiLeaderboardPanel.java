@@ -2,7 +2,9 @@ package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
@@ -28,19 +30,19 @@ import com.sap.sailing.gwt.ui.client.shared.components.AbstractLazyComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 
 /**
- * A panel managing multiple {@link LeaderboardPanel}s (e.g. from a series leaderboard) so that the user can switch between them. 
+ * A panel managing multiple {@link LeaderboardPanel}s (e.g. from a meta leaderboard) so that the user can switch between them. 
  * @author Frank
  */
 public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSettings> implements TimeListener {
 
-    private LeaderboardPanel selectedRegattaLeaderboardPanel;
-    private FlowPanel selectedRegattaLeaderboardFlowPanel;
+    private LeaderboardPanel selectedLeaderboardPanel;
+    private FlowPanel selectedLeaderboardFlowPanel;
 
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final SailingServiceAsync sailingService;
 
-    private String selectedRegattaLeaderboardName;
+    private String selectedLeaderboardName;
     
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final UserAgentDetails userAgent;
@@ -48,16 +50,15 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     private final Timer timer;
 
     private VerticalPanel mainPanel;
-    private final List<Pair<String, String>> regattaLeaderboardNamesAndDisplayNames;
+    private final List<Pair<String, String>> leaderboardNamesAndDisplayNames;
+    private final Map<String, LeaderboardSettings> leaderboardNamesAndSettings;
 
-    private LeaderboardSettings selectedRegattaLeaderboardSettings; 
-    
-    private TabPanel regattaLeaderboardsTabPanel;
-    private Label regattaLeaderboardsLabel;
+    private TabPanel leaderboardsTabPanel;
+    private Label leaderboardsLabel;
     private final String metaLeaderboardName;
     
     public MultiLeaderboardPanel(SailingServiceAsync sailingService, String metaLeaderboardName, AsyncActionsExecutor asyncActionsExecutor, Timer timer,
-            LeaderboardSettings leaderboardSettings, String preselectedActLeaderboardName, RaceIdentifier preselectedRace, 
+            String preselectedLeaderboardName, RaceIdentifier preselectedRace, 
             ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
         this.stringMessages = stringMessages;
@@ -68,41 +69,51 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         this.userAgent = userAgent;
         this.showRaceDetails = showRaceDetails;
         this.timer = timer;
-        this.selectedRegattaLeaderboardName = preselectedActLeaderboardName;
+        this.selectedLeaderboardName = preselectedLeaderboardName;
         
-        selectedRegattaLeaderboardFlowPanel = null;
-        selectedRegattaLeaderboardPanel = null;
-        regattaLeaderboardNamesAndDisplayNames = new ArrayList<Pair<String, String>>();
-        selectedRegattaLeaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, false);
+        selectedLeaderboardFlowPanel = null;
+        selectedLeaderboardPanel = null;
+        leaderboardNamesAndDisplayNames = new ArrayList<Pair<String, String>>();
+        leaderboardNamesAndSettings = new HashMap<String, LeaderboardSettings>();
     }
 
+    private LeaderboardSettings getOrCreateLeaderboardSettings(String leaderboardName) {
+        LeaderboardSettings result = leaderboardNamesAndSettings.get(leaderboardName);
+        if(result == null) {
+            result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, false);
+            leaderboardNamesAndSettings.put(leaderboardName, result);
+        }
+            
+        return result;
+    }
+    
     @Override
     public Widget createWidget() {
         mainPanel = new VerticalPanel();
         
-        regattaLeaderboardsLabel = new Label(stringMessages.regattaLeaderboards());
-        regattaLeaderboardsLabel.setVisible(false);
-        regattaLeaderboardsLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-        regattaLeaderboardsLabel.getElement().getStyle().setMargin(5, Unit.PX);
-        mainPanel.add(regattaLeaderboardsLabel);
+        leaderboardsLabel = new Label(stringMessages.regattaLeaderboards());
+        leaderboardsLabel.setVisible(false);
+        leaderboardsLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        leaderboardsLabel.getElement().getStyle().setMargin(5, Unit.PX);
+        mainPanel.add(leaderboardsLabel);
 
-        regattaLeaderboardsTabPanel = new TabPanel();
-        regattaLeaderboardsTabPanel.setVisible(false);
-        regattaLeaderboardsTabPanel.setAnimationEnabled(false);
-        regattaLeaderboardsTabPanel.setWidth("100%");
-        regattaLeaderboardsTabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+        leaderboardsTabPanel = new TabPanel();
+        leaderboardsTabPanel.setVisible(false);
+        leaderboardsTabPanel.setAnimationEnabled(false);
+        leaderboardsTabPanel.setWidth("100%");
+        leaderboardsTabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
             public void onSelection(SelectionEvent<Integer> event) {
                 Integer tabIndex = event.getSelectedItem();
                 if(tabIndex >= 0) {
-                    updateSelectedLeaderboard(regattaLeaderboardNamesAndDisplayNames.get(tabIndex).getA(), tabIndex);
+                    updateSelectedLeaderboard(leaderboardNamesAndDisplayNames.get(tabIndex).getA(), tabIndex);
                 }
             }
         });
         
-        mainPanel.add(regattaLeaderboardsTabPanel);
+        mainPanel.add(leaderboardsTabPanel);
         
-        updateRegattaLeaderboardSelection();
+        updateLeaderboardSelection();
 
         return mainPanel;
     }
@@ -119,19 +130,20 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
 
     @Override
     public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
-        return selectedRegattaLeaderboardPanel.getSettingsDialogComponent();
+        return selectedLeaderboardPanel.getSettingsDialogComponent();
     }
 
     @Override
     public void updateSettings(LeaderboardSettings newSettings) {
-        selectedRegattaLeaderboardPanel.updateSettings(newSettings);
+        leaderboardNamesAndSettings.put(selectedLeaderboardName, newSettings);
+        selectedLeaderboardPanel.updateSettings(newSettings);
     }
 
-    public void setRegattaLeaderboardNames(List<Pair<String, String>> newLeaderboardNamesAndDisplayNames) {
-        regattaLeaderboardNamesAndDisplayNames.clear();
-        regattaLeaderboardNamesAndDisplayNames.addAll(newLeaderboardNamesAndDisplayNames);
+    public void setLeaderboardNames(List<Pair<String, String>> newLeaderboardNamesAndDisplayNames) {
+        leaderboardNamesAndDisplayNames.clear();
+        leaderboardNamesAndDisplayNames.addAll(newLeaderboardNamesAndDisplayNames);
         
-        updateRegattaLeaderboardSelection();
+        updateLeaderboardSelection();
     }
 
     private void readAndUpdateLeaderboardsOfMetaleaderboard() {
@@ -139,7 +151,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
             
             @Override
             public void onSuccess(List<Pair<String, String>> leaderboardNamesAndDisplayNames) {
-                setRegattaLeaderboardNames(leaderboardNamesAndDisplayNames);
+                setLeaderboardNames(leaderboardNamesAndDisplayNames);
             }
             
             @Override
@@ -148,52 +160,53 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         });
     }
     
-    private void updateRegattaLeaderboardSelection() {
-        if(regattaLeaderboardsTabPanel != null) {
-            regattaLeaderboardsTabPanel.clear();
+    private void updateLeaderboardSelection() {
+        if(leaderboardsTabPanel != null) {
+            leaderboardsTabPanel.clear();
             
             int index = 0;
-            int leaderboardCount = regattaLeaderboardNamesAndDisplayNames.size();
-            for (Pair<String, String> leaderboardNameAndDisplayName : regattaLeaderboardNamesAndDisplayNames) {
+            int leaderboardCount = leaderboardNamesAndDisplayNames.size();
+            for (Pair<String, String> leaderboardNameAndDisplayName : leaderboardNamesAndDisplayNames) {
                 FlowPanel tabFlowPanel = new FlowPanel();
-                regattaLeaderboardsTabPanel.add(tabFlowPanel, leaderboardNameAndDisplayName.getB(), false);
+                leaderboardsTabPanel.add(tabFlowPanel, leaderboardNameAndDisplayName.getB(), false);
 
-                if(selectedRegattaLeaderboardName != null && selectedRegattaLeaderboardName.equals(leaderboardNameAndDisplayName.getA())) {
-                    regattaLeaderboardsTabPanel.selectTab(index);
+                if(selectedLeaderboardName != null && selectedLeaderboardName.equals(leaderboardNameAndDisplayName.getA())) {
+                    leaderboardsTabPanel.selectTab(index);
                 }
                 index++;
             }
             // show the last leaderboard when no leaderboard is selected yet 
-            if(selectedRegattaLeaderboardName == null && leaderboardCount > 0) {
-                regattaLeaderboardsTabPanel.selectTab(leaderboardCount-1);
+            if(selectedLeaderboardName == null && leaderboardCount > 0) {
+                leaderboardsTabPanel.selectTab(leaderboardCount-1);
             }
             
-            regattaLeaderboardsTabPanel.setVisible(leaderboardCount > 0);
-            regattaLeaderboardsLabel.setVisible(leaderboardCount > 0);
+            leaderboardsTabPanel.setVisible(leaderboardCount > 0);
+            leaderboardsLabel.setVisible(leaderboardCount > 0);
         }
     }
 
-    private void updateSelectedLeaderboard(String selectedLeaderboardName, int newTabIndex) {
+    private void updateSelectedLeaderboard(String newSelectedLeaderboardName, int newTabIndex) {
+        this.selectedLeaderboardName = newSelectedLeaderboardName;
         if(selectedLeaderboardName != null) {
-            if(selectedRegattaLeaderboardPanel != null && selectedRegattaLeaderboardFlowPanel != null) {
-                timer.removeTimeListener(selectedRegattaLeaderboardPanel);
-                selectedRegattaLeaderboardFlowPanel.remove(selectedRegattaLeaderboardPanel);
-                selectedRegattaLeaderboardPanel = null;
-                selectedRegattaLeaderboardFlowPanel = null;
+            if(selectedLeaderboardPanel != null && selectedLeaderboardFlowPanel != null) {
+                timer.removeTimeListener(selectedLeaderboardPanel);
+                selectedLeaderboardFlowPanel.remove(selectedLeaderboardPanel);
+                selectedLeaderboardPanel = null;
+                selectedLeaderboardFlowPanel = null;
             }
             
-            selectedRegattaLeaderboardFlowPanel = (FlowPanel) regattaLeaderboardsTabPanel.getWidget(newTabIndex);
-            selectedRegattaLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                    selectedRegattaLeaderboardSettings, /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
+            selectedLeaderboardFlowPanel = (FlowPanel) leaderboardsTabPanel.getWidget(newTabIndex);
+            selectedLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
+                    getOrCreateLeaderboardSettings(selectedLeaderboardName), /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
                     null, selectedLeaderboardName, errorReporter, stringMessages, userAgent,
                     showRaceDetails, /* raceTimesInfoProvider */null, false,  /* adjustTimerDelay */ true);
-            selectedRegattaLeaderboardFlowPanel.add(selectedRegattaLeaderboardPanel);
+            selectedLeaderboardFlowPanel.add(selectedLeaderboardPanel);
         } else {
-            if(selectedRegattaLeaderboardPanel != null && selectedRegattaLeaderboardFlowPanel != null) {
-                timer.removeTimeListener(selectedRegattaLeaderboardPanel);
-                selectedRegattaLeaderboardFlowPanel.remove(selectedRegattaLeaderboardPanel);
-                selectedRegattaLeaderboardPanel = null;
-                selectedRegattaLeaderboardFlowPanel = null;
+            if(selectedLeaderboardPanel != null && selectedLeaderboardFlowPanel != null) {
+                timer.removeTimeListener(selectedLeaderboardPanel);
+                selectedLeaderboardFlowPanel.remove(selectedLeaderboardPanel);
+                selectedLeaderboardPanel = null;
+                selectedLeaderboardFlowPanel = null;
             }
         }
     }
@@ -211,8 +224,8 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
 
     @Override
     public void timeChanged(Date date) {
-        if(selectedRegattaLeaderboardPanel != null) {
-            selectedRegattaLeaderboardPanel.timeChanged(date);
+        if(selectedLeaderboardPanel != null) {
+            selectedLeaderboardPanel.timeChanged(date);
         }
     }
 

@@ -59,9 +59,11 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
     }
     
     protected <SettingsType> void addComponentToNavigationMenu(final Component<SettingsType> component, boolean isCheckboxEnabled, 
-            String componentDisplayName) {
+            String componentDisplayName, final boolean hasSettingsWhenComponentIsInvisible) {
         final String componentName = componentDisplayName != null ? componentDisplayName : component.getLocalizedShortName(); 
         final CheckBox checkBox= new CheckBox(componentName);
+        final Button settingsButton = new Button("");
+        
         checkBox.getElement().getStyle().setFloat(Style.Float.LEFT);
         
         checkBox.setEnabled(isCheckboxEnabled);
@@ -79,23 +81,24 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
                     // trigger the component to update its data
                     ((TimeListener) component).timeChanged(timer.getTime());
                 }
+                if(component.hasSettings() && !hasSettingsWhenComponentIsInvisible) {
+                    settingsButton.setEnabled(visible);
+                }
             }
         });
 
         componentsNavigationPanel.add(checkBox);
 
-        Button settingsButton = new Button("");
-        
         if(component.hasSettings()) {
             settingsButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     new SettingsDialog<SettingsType>(component, stringMessages).show();
-                }
+                } 
             });
-        } else {
-           settingsButton.setEnabled(false);
-        }
+        } 
+        
+        settingsButton.setEnabled(component.hasSettings() && hasSettingsWhenComponentIsInvisible);
         settingsButton.addStyleName(STYLE_VIEWER_TOOLBAR_SETTINGS_BUTTON);
         settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
         settingsButton.setTitle(stringMessages.settingsForComponent(componentName));

@@ -49,8 +49,8 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
         mainPanel.add(leaderboardPanel);
         mainPanel.add(multiCompetitorChart);
 
-        addComponentToNavigationMenu(leaderboardPanel, false, null);
-        addComponentToNavigationMenu(multiCompetitorChart, true, null);
+        addComponentToNavigationMenu(leaderboardPanel, false, null, /* hasSettingsWhenComponentIsInvisible*/ true);
+        addComponentToNavigationMenu(multiCompetitorChart, true, null,  /* hasSettingsWhenComponentIsInvisible*/ true);
         
         if(showCharts) {
             multiCompetitorChart.timeChanged(timer.getTime());

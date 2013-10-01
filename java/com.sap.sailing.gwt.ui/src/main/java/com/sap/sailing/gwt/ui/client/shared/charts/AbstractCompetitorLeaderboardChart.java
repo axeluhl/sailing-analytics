@@ -26,7 +26,6 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker.Symbol;
 
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -138,18 +137,28 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
     }
     
     protected void setSelectedDetailType(DetailType newSelectedDetailType) {
-        boolean oldReversedYAxis = hasReversedYAxis(this.selectedDetailType);
         this.selectedDetailType = newSelectedDetailType;
-        // TODO There is a bug in the highcharts library which prevents to change the reverse property of the YAxis
-        // Because we need this functionality we need to recreate the chart each time the YAxis changes
-        if (oldReversedYAxis != hasReversedYAxis(selectedDetailType)) {
-            chart = createChart();
+        
+        // TODO: There are some problems with the highcharts library to change all values of a chart dynamically.
+        // Therefore we need to recreate the chart each time the detail type changes
+        chart = createChart();
+      
+        switch(selectedDetailType) {
+            case REGATTA_RANK:
+                chart.getYAxis().setReversed(true);
+                chart.getYAxis().setTickInterval(1.0);
+                break;
+            case RACE_TOTAL_POINTS:
+                chart.getYAxis().setTickInterval(5.0);
+                chart.getYAxis().setReversed(false);
+                break;
+            default:
+                break;
         }
         chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType)), null);
         final String unit = DetailTypeFormatter.getUnit(getSelectedDetailType());
         final String label = unit.isEmpty() ? "" : "[" + unit + "]";
         chart.getYAxis().setAxisTitleText(label);
-        chart.getYAxis().setReversed(isYAxisReversed());
 
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
             @Override
@@ -164,14 +173,6 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                     stringMessages.competitorRegattaDataAfterRaceN(numberFormat.format(yValue), raceColumnName);
             }
         }));
-    }
-
-    private boolean hasReversedYAxis(DetailType detailType) {
-        return detailType == DetailType.REGATTA_RANK;
-    }
-    
-    private boolean isYAxisReversed() {
-        return hasReversedYAxis(selectedDetailType);
     }
 
     protected void clearChart() {
@@ -289,19 +290,9 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
             }
         }
         chart.getYAxis().setMaxPadding(0.5 / maxCompetitorCount).setMinPadding(0.5 / maxCompetitorCount);
-        setAxisTickInterval(chart.getYAxis().getNativeAxis(), 1.0);
         chart.setHeight(maxCompetitorCount * 30 + 100 + "px");
     }
 
-    /**
-     * To set tick interval of an axis dynamically we need to access the native javascript object
-     * @param axis the axis 
-     * @param newTickInterval the new value of the tick interval 
-     */
-    private static native void setAxisTickInterval(JavaScriptObject axis, double newTickInterval) /*-{
-        return axis.options.tickInterval = value;
-    }-*/;
-    
     private void fillTotalPointsSeries(List<Triple<String, List<CompetitorDTO>, List<Double>>> result, List<Series> chartSeries) {
         Double maxTotalPoints = 0.0;
         Set<Series> unusedSeries = new HashSet<Series>(competitorSeries.values());
@@ -348,7 +339,6 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
             }
         }
         chart.getYAxis().setMaxPadding(0.5/maxCompetitorCount).setMinPadding(0.5/maxCompetitorCount);
-        setAxisTickInterval(chart.getYAxis().getNativeAxis(), 5.0);
         chart.setHeight(maxCompetitorCount * 30 + 100 + "px");
     }
     
