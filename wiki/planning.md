@@ -1,6 +1,16 @@
-# Planning 2013
+# Planning 2013 / 2014
 
-##Project Candidates
+During our workshop of 2013-09-30, three major areas of development were identified as candidates for focus topics for the next few months. These are:
+
+* [[General quality improvement, including major UI renovation and a mobile version of the SAP Sailing Analytics|wiki/planning/businesscases/QualityImprovements]]
+
+* [[ORC / IRC support|wiki/planning/businesscases/ORC]]
+
+* [[Smartphone Tracking|wiki/planning/businesscases/SmartphoneTracking]]
+
+The links above lead to short write-ups of the respective business case behind the topic, listing the pros and cons and discussing the risks.
+
+## Project Candidates
 
 [[Trim Database|wiki/planning/TrimDatabase]]
 
