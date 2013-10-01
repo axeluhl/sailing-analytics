@@ -1,8 +1,9 @@
-# Purpose
+# Smart Phone Tracking
+##  Purpose
 
 Providing casual sailors with a mobile solution for arranging an amateur regatta supported by SAP's Sailing Analytics.
 
-# Features
+## Features
 * (Low-profile) regatta management on mobile device 
     * Race format & schedule
     * Competitor management
