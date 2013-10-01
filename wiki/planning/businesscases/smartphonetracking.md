@@ -6,7 +6,7 @@ There are several million active sailors around the world (TODO: get the numbers
 
 ## Purpose
 
-Providing casual sailors with a mobile solution for arranging an amateur regatta supported by SAP's Sailing Analytics.
+Providing casual sailors with a mobile solution for arranging an amateur regatta featuring SAP Sailing Analytics.
 
 ## Features
 
