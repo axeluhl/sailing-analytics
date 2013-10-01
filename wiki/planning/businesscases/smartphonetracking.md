@@ -1,7 +1,9 @@
 # Smartphone Tracking
 
 ## Rationale
-There are several million active sailors around the world (TODO: get the numbers, grouped by boat class and nation). In comparison, only a small share of them is actively participating in large regattas that are sufficiently prestigious to be supported by professionally-managed tracking infrastructure. Therefore, this large share of sailing events is not currently able to use the SAP Sailing Analytics to understand, analyze and also promote their hobby.
+There are several million active sailors around the world. STG claims there are 8,000,000 people in Germany who are interested in sailing, with some 2,000,000 active sailors. For the Optimist boat class alone (see http://www.goldener-opti.de/der-optimist) claims there to be some 150,000 active Opti sailors in 110 nations, 1200 of them in Germany.
+
+In comparison, only a small share of them is actively participating in large regattas that are sufficiently prestigious to be supported by professionally-managed tracking infrastructure. Therefore, this large share of sailing events is not currently able to use the SAP Sailing Analytics to understand, analyze and also promote their hobby.
 
 
 ## Purpose
