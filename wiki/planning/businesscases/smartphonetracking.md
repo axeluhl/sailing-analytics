@@ -51,3 +51,7 @@ In order to support smartphones as tracking devices, we need to provide our own 
 We cannot judge exactly how much interest there will be in the sailing community for such a solution. In the worst case, after some significant development effort many clubs would reject the solution because of a conservative, technology-averse attitude.
 
 If the approach is generally successful, we'll end up in some substantial support effort. While we could see active and widespread use as a sign of success, we still need to provide the capacity necessary to carry the support load. Much usage could also increase our hosting cost.
+
+## Prototype
+
+Some prototypical work has already been launched to investigate the technical challenges closer. See [[here|wiki/smartphone-tracking]] for the status of this work.
