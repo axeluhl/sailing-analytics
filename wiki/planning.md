@@ -6,6 +6,10 @@
 
 [[Smartphone Tracking|wiki/smartphone-tracking]]
 
+[[Sailing Community|wiki/planning/sailing-community]]
+
+[[Monitoring and Improving Data Quality|wiki/data-quality]]
+
 [[ORC|wiki/planning/ORC]]
 
 [[Support Specific Analysis Scenarios|wiki/planning/AnalysisScenarios]]
@@ -20,9 +24,14 @@
 
 [[Advanced Wind Field Analysis|wiki/planning/AdvancedWindFieldAnalysis]]
 
+[[Simulator Integration|wiki/planning/SimulatorIntegration]]
+
+[[ISAF SWC Engagement|wiki/planning/ISAFSWCEngagement]]
+
 [[AirMAX vs. MikroTik|/wiki/planning/AirMAXvsMikroTik]]
 
 [[Scaling by Server Replication|wiki/planning/scalebyreplication]]
 
 [[ISAF-Internal Projects|wiki/planning/ISAFInternalProjects]]
 
+[[Microcopter Integration|wiki/planning/Microcopter]]
