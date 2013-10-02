@@ -1247,7 +1247,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         TimePoint middle = new MillisecondsTimePoint((toTimePointExcluding.asMillis()+fromTimePoint.asMillis())/2);
                         Position estimatedPosition = track.getEstimatedPosition(middle, extrapolate);
                         SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(middle);
-                        if(estimatedPosition != null && estimatedSpeed != null) {
+                        if (estimatedPosition != null && estimatedSpeed != null) {
                             fixes.add(new GPSFixMovingImpl(estimatedPosition, middle, estimatedSpeed));
                         }
                     }
