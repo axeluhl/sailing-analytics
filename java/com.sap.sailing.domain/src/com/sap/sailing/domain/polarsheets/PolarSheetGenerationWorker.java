@@ -7,7 +7,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -28,7 +32,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author D054528 Frederik Petersen
  * 
  */
-public class PolarSheetGenerationWorker {
+public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
 
     private final Set<PerRaceAndCompetitorPolarSheetGenerationWorker> workers;
 
@@ -311,6 +315,44 @@ public class PolarSheetGenerationWorker {
 
     public WindSteppingWithMaxDistance getStepping() {
         return stepping;
+    }
+
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        return false;
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return false;
+    }
+
+    @Override
+    public boolean isDone() {
+        return allWorkersDone();
+    }
+
+    @Override
+    public PolarSheetsData get() throws InterruptedException, ExecutionException {
+        while (!isDone()) {
+            Thread.sleep(100);
+        }
+        return getPolarData();
+    }
+
+    @Override
+    public PolarSheetsData get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
+            TimeoutException {
+        long timeRun = 0;
+        long timeoutInMillis = unit.toMillis(timeout);
+        while (!isDone() && timeRun < timeoutInMillis) {
+            Thread.sleep(100);
+            timeRun = timeRun + 100;
+        }
+        if (timeRun >= timeoutInMillis) {
+            throw new TimeoutException();
+        }
+        return getPolarData();
     }
 
 }

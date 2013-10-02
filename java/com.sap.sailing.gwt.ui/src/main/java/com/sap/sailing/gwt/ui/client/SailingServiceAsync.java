@@ -12,9 +12,8 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
-import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
-import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -422,9 +421,7 @@ public interface SailingServiceAsync {
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
 
     void generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
-            PolarSheetGenerationSettings settings, AsyncCallback<PolarSheetGenerationTriggerResponse> asyncCallback);
-
-    void getPolarSheetsGenerationResults(String id, AsyncCallback<PolarSheetsData> asyncCallback);
+            PolarSheetGenerationSettings settings, AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
     
     void getEventByIdAsString(String eventIdAsString, AsyncCallback<EventDTO> asyncCallback);
 

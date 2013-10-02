@@ -25,8 +25,8 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
-import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -254,16 +254,21 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         final List<RegattaAndRaceIdentifier> selectedRacesInArrayList = new ArrayList<RegattaAndRaceIdentifier>();
         selectedRacesInArrayList.addAll(selectedRaces);
         polarSheetsTrackedRacesList.changeGenerationButtonState(false);
+        setCompletionLabel("Generating...");
+        chartPanel.showLoadingInfo();
         sailingService.generatePolarSheetForRaces(selectedRacesInArrayList, settings,
-                new AsyncCallback<PolarSheetGenerationTriggerResponse>() {
+                new AsyncCallback<PolarSheetGenerationResponse>() {
 
             @Override
-            public void onSuccess(PolarSheetGenerationTriggerResponse result) {
-                // TODO string messages
-                setCompletionLabel("Generating...");
-                chartPanel.showLoadingInfo();
-                startPullingResults(result.getId());
+            public void onSuccess(PolarSheetGenerationResponse result) {
                 addNameForPolarSheet(result);
+                dataCountLabel.setText("DataCount: " + result.getData().getDataCount());
+                polarSheetsData.put(result.getId(), result.getData());
+                chartPanel.setData(idNameMapping.get(result.getId()), result.getData());
+                // TODO string messages
+                setCompletionLabel("Generation finished!");
+                chartPanel.hideLoadingInfo();
+                polarSheetsTrackedRacesList.changeGenerationButtonState(true);
             }
 
             @Override
@@ -273,7 +278,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         });
     }
 
-    protected void addNameForPolarSheet(PolarSheetGenerationTriggerResponse result) {
+    protected void addNameForPolarSheet(PolarSheetGenerationResponse result) {
         String boatClassName = result.getBoatClassName();
         int index = 0;
         String name = "";
@@ -284,45 +289,6 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         nameListBox.addItem(name);
         idNameMapping.put(result.getId(), name);
         nameIdMapping.put(name, result.getId());
-    }
-
-    protected void startPullingResults(final String id) {
-
-        sailingService.getPolarSheetsGenerationResults(id, new AsyncCallback<PolarSheetsData>() {
-
-            @Override
-            public void onSuccess(PolarSheetsData result) {
-                // TODO string messages
-                setCompletionLabel("Generating...");
-                dataCountLabel.setText("DataCount: " + result.getDataCount());
-                polarSheetsData.put(id, result);
-                chartPanel.setData(idNameMapping.get(id), result);
-                if (!result.isComplete()) {
-                    Timer timer = new Timer() {
-
-                        @Override
-                        public void run() {
-                            startPullingResults(id);
-                        }
-                    };
-
-                    timer.schedule(1500);
-
-                } else {
-                    // TODO string messages
-                    setCompletionLabel("Generation finished!");
-                    chartPanel.hideLoadingInfo();
-                    polarSheetsTrackedRacesList.changeGenerationButtonState(true);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(caught.getLocalizedMessage());
-            }
-
-        });
-
     }
 
     protected void setCompletionLabel(String string) {

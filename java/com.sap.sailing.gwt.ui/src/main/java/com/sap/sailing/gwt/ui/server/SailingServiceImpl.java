@@ -42,8 +42,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -82,8 +80,8 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
-import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
@@ -122,7 +120,7 @@ import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.PolarSheetGenerationTriggerResponseImpl;
+import com.sap.sailing.domain.common.impl.PolarSheetGenerationResponseImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -2945,8 +2943,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public PolarSheetGenerationTriggerResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
-            PolarSheetGenerationSettings settings) {
+    public PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
+            PolarSheetGenerationSettings settings) throws Exception {
         String id = UUID.randomUUID().toString();
         RacingEventService service = getService();
         Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
@@ -2954,12 +2952,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             trackedRaces.add(service.getTrackedRace(race));
         }
         PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(trackedRaces, settings, executor);
-        HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
-        HttpSession session = httpServletRequest.getSession();
-        session.setAttribute("polarworker" + id, genWorker);
         genWorker.startPolarSheetGeneration();
         String name = getCommonBoatClass(trackedRaces);
-        return new PolarSheetGenerationTriggerResponseImpl(id, name);
+        PolarSheetsData result = genWorker.get();
+        return new PolarSheetGenerationResponseImpl(id, name, result);
     }
 
     private String getCommonBoatClass(Set<TrackedRace> trackedRaces) {
@@ -2974,27 +2970,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
 
         return boatClass.getName();
-    }
-
-    @Override
-    public PolarSheetsData getPolarSheetsGenerationResults(String id) {
-        HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
-        HttpSession session = httpServletRequest.getSession();
-        PolarSheetsData data = null;
-        PolarSheetGenerationWorker cachedWorker = (PolarSheetGenerationWorker) session.getAttribute("polarworker" + id);
-        if (cachedWorker != null) {
-            data = cachedWorker.getPolarData();
-            if (data.isComplete()) {
-                session.removeAttribute("polarworker" + id);
-                session.setAttribute("completedata" + id, cachedWorker.getCompleteData());
-                session.setAttribute("resultdata" + id, data);
-                session.setAttribute("stepping" + id, cachedWorker.getStepping());       
-            }
-        } else {
-            //TODO Exception handling
-        }
-
-        return data;      
     }
 
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
