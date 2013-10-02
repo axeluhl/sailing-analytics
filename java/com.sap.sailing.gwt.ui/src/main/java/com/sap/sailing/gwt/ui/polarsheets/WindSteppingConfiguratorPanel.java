@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.impl.PolarSheetsWindStepping;
+import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 
 public class WindSteppingConfiguratorPanel extends HorizontalPanel {
     
@@ -18,7 +18,7 @@ public class WindSteppingConfiguratorPanel extends HorizontalPanel {
     private Button minusButton;
     private Button plusButton;
 
-    public WindSteppingConfiguratorPanel(PolarSheetsWindStepping windStepping) {
+    public WindSteppingConfiguratorPanel(WindSteppingWithMaxDistance windStepping) {
         setupPlusAndMinusButtons();
         Integer[] levels = windStepping.getRawStepping();
         for (int i = 0; i < levels.length; i++) {
@@ -61,14 +61,14 @@ public class WindSteppingConfiguratorPanel extends HorizontalPanel {
         this.add(plusButton);
     }
 
-    public PolarSheetsWindStepping getStepping() {
+    public WindSteppingWithMaxDistance getStepping(double maxDistance) {
         List<Integer> levelList = new ArrayList<Integer>(); 
         for (TextBox box : textBoxes) {
             levelList.add(Integer.parseInt(box.getValue()));
         }
         Collections.sort(levelList);
         Integer[] levels = levelList.toArray(new Integer[levelList.size()]);
-        return new PolarSheetsWindStepping(levels);
+        return new WindSteppingWithMaxDistance(levels, maxDistance);
     }
     
     private TextBox createSingleBox(int level) {

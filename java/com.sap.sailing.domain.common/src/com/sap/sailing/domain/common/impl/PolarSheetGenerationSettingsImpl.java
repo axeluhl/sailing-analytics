@@ -6,7 +6,7 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
     
     public static PolarSheetGenerationSettings createStandardPolarSettings() {
         Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
-        PolarSheetsWindStepping windStepping = new PolarSheetsWindStepping(levels);
+        WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels,2.0);
         return new PolarSheetGenerationSettingsImpl(200, 0.1, 10, 20, 0.1, true, true, 2, 0.05, true, windStepping);
     }
 
@@ -21,7 +21,7 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
     private double outlierDetectionNeighboorhoodRadius;
     private double outlierMinimumNeighboorhoodPct;
     private boolean useOnlyEstimationForWindDirection;
-    private PolarSheetsWindStepping windStepping;
+    private WindSteppingWithMaxDistance windStepping;
     
     //GWT
     PolarSheetGenerationSettingsImpl() {};
@@ -30,7 +30,7 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
             Integer minimumDataCountPerAngle, Integer numberOfHistogramColumns, double minimumConfidenceMeasure,
             boolean useOnlyWindGaugesForWindSpeed, boolean shouldRemoveOutliers,
             double outlierDetectionNeighboorhoodRadius, double outlierMinimumNeighboorhoodPct,
-            boolean useOnlyEstimationForWindDirection, PolarSheetsWindStepping windStepping) {
+            boolean useOnlyEstimationForWindDirection, WindSteppingWithMaxDistance windStepping) {
         this.minimumDataCountPerGraph = minimumDataCountPerGraph;
         this.minimumWindConfidence = minimumWindConfidence;
         this.minimumDataCountPerAngle = minimumDataCountPerAngle;
@@ -95,9 +95,8 @@ public class PolarSheetGenerationSettingsImpl implements PolarSheetGenerationSet
     }
 
     @Override
-    public PolarSheetsWindStepping getWindStepping() {
+    public WindSteppingWithMaxDistance getWindStepping() {
         return windStepping;
     }
-
 
 }

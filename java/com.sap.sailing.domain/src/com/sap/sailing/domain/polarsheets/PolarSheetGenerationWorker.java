@@ -17,7 +17,7 @@ import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
-import com.sap.sailing.domain.common.impl.PolarSheetsWindStepping;
+import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -36,7 +36,7 @@ public class PolarSheetGenerationWorker {
 
     private final Executor executor;
 
-    private PolarSheetsWindStepping stepping;
+    private WindSteppingWithMaxDistance stepping;
 
     private PolarSheetGenerationSettings settings;
 
@@ -309,7 +309,7 @@ public class PolarSheetGenerationWorker {
         return polarData;
     }
 
-    public PolarSheetsWindStepping getStepping() {
+    public WindSteppingWithMaxDistance getStepping() {
         return stepping;
     }
 

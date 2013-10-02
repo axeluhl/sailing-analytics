@@ -40,10 +40,10 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
-import com.sap.sailing.domain.common.impl.PolarSheetsWindStepping;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 import com.sap.sailing.domain.polarsheets.PerRaceAndCompetitorPolarSheetGenerationWorker;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.polarsheets.PolarSheetHistogramBuilder;
@@ -73,7 +73,7 @@ public class PolarSheetGenerationTest {
         MockTrackedRaceForPolarSheetGeneration race = new MockTrackedRaceForPolarSheetGeneration();
         
         Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
-        PolarSheetsWindStepping windStepping = new PolarSheetsWindStepping(levels);
+        WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 2.0);
         PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 20, 0, false, true, 5,
                 0.05, false, windStepping);
         
@@ -111,7 +111,7 @@ public class PolarSheetGenerationTest {
     @Test
     public void testHistogramBuilder() {
         Integer[] levels = { 4, 6, 8, 10, 12, 14, 16, 20, 25, 30 };
-        PolarSheetsWindStepping windStepping = new PolarSheetsWindStepping(levels);
+        WindSteppingWithMaxDistance windStepping = new WindSteppingWithMaxDistance(levels, 2.0);
         PolarSheetGenerationSettings settings = new PolarSheetGenerationSettingsImpl(1, 0, 1, 10, 0, false, true, 5,
                 0.05, false, windStepping);
         PolarSheetHistogramBuilder builder = new PolarSheetHistogramBuilder(settings);
