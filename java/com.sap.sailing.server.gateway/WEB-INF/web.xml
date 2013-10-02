@@ -24,6 +24,15 @@
 	</servlet-mapping>
 	
 	<servlet>
+		<servlet-name>RCConfiguration</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.rc.ConfigurationJsonGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RCConfiguration</servlet-name>
+		<url-pattern>/rc/configuration</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>RCAddToRaceLog</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.rc.AddEntryToRaceLogJsonPostServlet</servlet-class>
 	</servlet>
