@@ -43,6 +43,7 @@ import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -1453,12 +1454,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         leaderboardTable = new SortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */10000, tableResources);
         getLeaderboardTable().setWidth("100%");
-        this.userAgent = userAgent;
-        if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
-            leaderboardSelectionModel = new ToggleSelectionModel<LeaderboardRowDTO>();
-        } else {
-            leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
-        }
+        leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
         leaderboardSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -1470,7 +1466,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 updateLeaderboard(getLeaderboard());
             }
         });
-        leaderboardTable.setSelectionModel(leaderboardSelectionModel);
+        this.userAgent = userAgent;
+        if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
+            //Setting up the toggle selection
+            leaderboardTable.addCellPreviewHandler(new ToggleSelectionCellPreviewHandler<LeaderboardRowDTO>());
+            DefaultSelectionEventManager<LeaderboardRowDTO> selectionEventManager = DefaultSelectionEventManager.createCheckboxManager();
+            leaderboardTable.setSelectionModel(leaderboardSelectionModel, selectionEventManager);
+        } else {
+            leaderboardTable.setSelectionModel(leaderboardSelectionModel);
+        }
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
 
         if (this.preSelectedRace == null) {
