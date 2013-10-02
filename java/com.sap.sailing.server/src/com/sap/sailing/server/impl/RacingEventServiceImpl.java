@@ -1864,18 +1864,17 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Event addEvent(String eventName, String venue, String publicationUrl, boolean isPublic, Serializable id,
-            List<String> courseAreaNames) {
-        Event result = new EventImpl(eventName, venue, publicationUrl, isPublic, id);
+    public Event addEvent(String eventName, String venue, String publicationUrl, boolean isPublic, Serializable id) {
         synchronized (eventsById) {
-            createEventWithoutReplication(result);
-            replicate(new CreateEvent(eventName, venue, publicationUrl, isPublic, id, courseAreaNames));
+            Event result = createEventWithoutReplication(eventName, venue, publicationUrl, isPublic, id);
+            replicate(new CreateEvent(eventName, venue, publicationUrl, isPublic, id));
+            return result;
         }
-        return result;
     }
 
     @Override
-    public void createEventWithoutReplication(Event result) {
+    public Event createEventWithoutReplication(String eventName, String venue, String publicationUrl, boolean isPublic, Serializable id) {
+        Event result = new EventImpl(eventName, venue, publicationUrl, isPublic, id);
         synchronized (eventsById) {
             if (eventsById.containsKey(result.getId())) {
                 throw new IllegalArgumentException("Event with ID " + result.getId()
@@ -1884,6 +1883,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             eventsById.put(result.getId(), result);
         }
         mongoObjectFactory.storeEvent(result);
+        return result;
     }
 
     @Override

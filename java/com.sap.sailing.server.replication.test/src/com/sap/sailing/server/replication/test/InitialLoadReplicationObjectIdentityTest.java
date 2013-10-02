@@ -71,7 +71,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         String venue = "Default Venue";
         List<String> courseAreaNames = new ArrayList<String>();
         courseAreaNames.add("Default");
-        master.addEvent(eventName, venue, "", false, "monsterevent", courseAreaNames);
+        master.addEvent(eventName, venue, "", false, "monsterevent");
         assertNotNull(master.getEvent("monsterevent"));
         assertNull(replica.getEvent("monsterevent"));
         

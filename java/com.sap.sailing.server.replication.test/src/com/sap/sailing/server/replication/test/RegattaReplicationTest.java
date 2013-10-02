@@ -52,7 +52,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final UUID alphaCourseAreaId = UUID.randomUUID();
         final UUID tvCourseAreaId = UUID.randomUUID();
         
-        Event event = master.addEvent("Event", "Venue", ".", true, UUID.randomUUID(), Collections.<String>emptyList());
+        Event event = master.addEvent("Event", "Venue", ".", true, UUID.randomUUID());
         master.addCourseArea(event.getId(), "Alpha", alphaCourseAreaId);
         master.addCourseArea(event.getId(), "TV", tvCourseAreaId);
         
@@ -155,7 +155,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
 
         final String courseArea = "Alpha";
 
-        Event masterEvent = master.addEvent(eventName, venueName, publicationUrl, isPublic, UUID.randomUUID(), regattas);
+        Event masterEvent = master.addEvent(eventName, venueName, publicationUrl, isPublic, UUID.randomUUID());
         CourseArea masterCourseArea = master.addCourseArea(masterEvent.getId(), courseArea, UUID.randomUUID());
         
         Regatta masterRegatta = master.createRegatta(eventName, boatClassName, UUID.randomUUID(), series,

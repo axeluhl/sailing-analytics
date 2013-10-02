@@ -24,7 +24,7 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
         List<String> regattas = new ArrayList<String>();
         regattas.add("Day1");
         regattas.add("Day2");
-        Event masterEvent = master.addEvent(eventName, venueName, publicationUrl, isPublic, UUID.randomUUID(), regattas);
+        Event masterEvent = master.addEvent(eventName, venueName, publicationUrl, isPublic, UUID.randomUUID());
 
         Thread.sleep(1000);
         Event replicatedEvent = replica.getEvent(masterEvent.getId());
@@ -44,7 +44,7 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
 
         final String courseArea = "Alpha";
 
-        Event masterEvent = master.addEvent(eventName, venueName, publicationUrl, isPublic, UUID.randomUUID(), regattas);
+        Event masterEvent = master.addEvent(eventName, venueName, publicationUrl, isPublic, UUID.randomUUID());
         CourseArea masterCourseArea = master.addCourseArea(masterEvent.getId(), courseArea, UUID.randomUUID());
 
         Thread.sleep(1000);

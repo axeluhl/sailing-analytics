@@ -456,19 +456,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @param eventName
      *            The name of the new event
-     * @param venue
-     *            The name of the venue of the new event
      * @param publicationUrl
      *            The publication URL of the new event
      * @param isPublic
      *            Indicates whether the event is public accessible via the publication URL or not
      * @param id
      *            The id of the new event
-     * @param regattaNames
-     *            The names of the regattas contained in the new event.<br />
+     * @param venue
+     *            The name of the venue of the new event
      * @return The new event
      */
-    Event addEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, Serializable id, List<String> regattaNames);
+    Event addEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, Serializable id);
 
     /**
      * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the
@@ -536,8 +534,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId);
 
-    void createEventWithoutReplication(Event result);
-
     Event addCourseAreaWithoutReplication(Serializable eventId, CourseArea courseArea);
 
     /**
@@ -551,5 +547,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param override If set to true, the mthod will override any existing connection
      */
     void setPersistentRegattaForRaceIDs(Regatta regatta, Iterable<String> raceIdStrings, boolean override);
+
+    Event createEventWithoutReplication(String eventName, String venue, String publicationUrl, boolean isPublic,
+            Serializable id);
 
 }

@@ -3,9 +3,17 @@ package com.sap.sailing.server.operationaltransformation;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
+/**
+ * Adds a course area to an {@link Event}'s {@link Venue}.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class AddCourseArea extends AbstractRacingEventServiceOperation<CourseArea> {
 
     private static final long serialVersionUID = -3650109848260363949L;
