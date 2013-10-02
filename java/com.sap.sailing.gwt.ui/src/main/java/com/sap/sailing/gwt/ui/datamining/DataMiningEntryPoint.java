@@ -4,6 +4,8 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.raceboard.GlobalNavigationPanel;
 
 public class DataMiningEntryPoint extends AbstractEntryPoint {
     
@@ -13,19 +15,26 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         RootPanel rootPanel = RootPanel.get();
-        FlowPanel dataMiningElementsPanel = new FlowPanel();
-        rootPanel.add(dataMiningElementsPanel);
+
+        String benchmarkParameter = Window.Location.getParameter(PARAM_BENCHMARK);
+        boolean showBenchmark = benchmarkParameter != null && benchmarkParameter.equals("true");
+        
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel("Data Mining", stringMessages, this);
+        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+        FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, null);
+        logoAndTitlePanel.add(globalNavigationPanel);
+
+        rootPanel.add(logoAndTitlePanel);
         
         GPSFixSelectionPanel selectionPanel = new GPSFixSelectionPanel(stringMessages, sailingService, this);
-        dataMiningElementsPanel.add(selectionPanel);
+        rootPanel.add(selectionPanel);
         
         GPSFixQueryPanel queryPanel = new GPSFixQueryPanel(stringMessages, sailingService, this, selectionPanel);
-        dataMiningElementsPanel.add(queryPanel);
+        rootPanel.add(queryPanel);
         
-        String benchmarkParameter = Window.Location.getParameter(PARAM_BENCHMARK);
-        if (benchmarkParameter != null && benchmarkParameter.equals("true")) {
+        if (showBenchmark) {
             GPSFixQueryBenchmarkPanel benchmarkPanel = new GPSFixQueryBenchmarkPanel(stringMessages, sailingService, this, selectionPanel);
-            dataMiningElementsPanel.add(benchmarkPanel);
+            rootPanel.add(benchmarkPanel);
         }
     }
 

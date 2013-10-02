@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.5.0//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.5.0/distro-source/core/src/gwt-module.dtd">
 <module>
-	<stylesheet src="../DataMining.css" />
+ 	<stylesheet src="../reset.css" />
 	<inherits name="com.google.gwt.user.User" />
+  	<inherits name='com.google.gwt.user.theme.clean.Clean'/>
+	<stylesheet src="../DataMining.css" />
 
 	<!-- Google Maps API -->
 	<inherits name='com.google.gwt.maps.GoogleMaps' />
@@ -24,4 +26,5 @@
 	<source path='shared' />
 	<source path='common' />
 	<source path='actions' />
+	<source path='raceboard' />
 </module>

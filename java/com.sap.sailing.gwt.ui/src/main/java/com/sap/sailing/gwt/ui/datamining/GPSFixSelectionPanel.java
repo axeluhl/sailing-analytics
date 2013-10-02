@@ -407,7 +407,7 @@ public class GPSFixSelectionPanel extends FlowPanel implements QueryComponentsPr
         };
         tablesPanel.add(nationalityTable);
         tablesMappedByDimension.put(nationalityTable.getDimension(), nationalityTable);
-        
+
         return tablesScrollPanel;
     }
 

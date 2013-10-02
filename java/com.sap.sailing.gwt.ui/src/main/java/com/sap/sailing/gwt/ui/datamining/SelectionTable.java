@@ -19,6 +19,7 @@ public abstract class SelectionTable<DimensionType, ContentType, ValueType> exte
     
     public SelectionTable(String title, DimensionType dimension) {
         this.dimension = dimension;
+        
         table = new CellTable<ContentType>(500);
         table.addColumn(new TextColumn<ContentType>() {
             @Override
@@ -28,8 +29,10 @@ public abstract class SelectionTable<DimensionType, ContentType, ValueType> exte
         }, title);
         selectionModel = new MultiSelectionModel<ContentType>();
         table.setSelectionModel(selectionModel);
+        
         dataProvider = new ListDataProvider<ContentType>();
         dataProvider.addDataDisplay(table);
+        
         setWidget(table);
     }
 
