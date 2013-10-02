@@ -5,6 +5,7 @@ There are several million active sailors around the world. STG claims there are 
 
 In comparison, only a small share of them is actively participating in large regattas that are sufficiently prestigious to be supported by professionally-managed tracking infrastructure. Therefore, this large share of sailing events is not currently able to use the SAP Sailing Analytics to understand, analyze and also promote their hobby.
 
+For a good introduction to the topic of smartphone tracking see [[Jan Bross' Bachelor thesis|doc/theses/20130913_Bross_Tracking_Sailing_Races_with_Mobile_Devices.pdf]].
 
 ## Purpose
 
