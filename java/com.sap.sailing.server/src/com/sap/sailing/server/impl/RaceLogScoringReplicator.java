@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -111,12 +110,14 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     }
     
     /**
-     * Retrieves the last RaceLogFinishPositioningListChangedEvent from the racelog and compares the ranks and disqualifications 
-     * entered by the race committee with the tracked ranks. When a tracked rank for a competitor is not the same as the rank of the race committee,
-     * a score correction is issued.
-     * The positioning list contains a list of competitors sorted by the positioning order when finishing. Additionally a MaxPointsReason might be entered by the 
-     * Race Committee.
-     * @param timePoint the TimePoint at which the race committee confirmed their last rank list entered in the app.
+     * Retrieves the last RaceLogFinishPositioningListChangedEvent from the racelog and compares the ranks and
+     * disqualifications entered by the race committee with the tracked ranks. When a tracked rank for a competitor is
+     * not the same as the rank of the race committee, a score correction is issued. The positioning list contains a
+     * list of competitors sorted by the positioning order when finishing. Additionally a MaxPointsReason might be
+     * entered by the Race Committee.
+     * 
+     * @param timePoint
+     *            the TimePoint at which the race committee confirmed their last rank list entered in the app.
      */
     private void checkNeedForScoreCorrectionByResultsOfRaceCommittee(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, RaceLog raceLog, TimePoint timePoint) {
         
@@ -138,7 +139,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         
         if (positioningList != null) {
             for (Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positioningList) {
-                Competitor competitor = DomainFactory.INSTANCE.getExistingCompetitorById(positionedCompetitor.getA());
+                Competitor competitor = service.getBaseDomainFactory().getExistingCompetitorById(positionedCompetitor.getA());
 
                 if (positionedCompetitor.getC().equals(MaxPointsReason.NONE)) {
                     try {

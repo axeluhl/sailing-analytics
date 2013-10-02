@@ -59,6 +59,9 @@ public class NOAAImporter {
         URL url = new URL(QUERY_URL+"?lon1="+position.getLngDeg()+"&lat1="+position.getLatDeg()+"&startYear=" + calendar.get(Calendar.YEAR) + "&startMonth="
                 + (calendar.get(Calendar.MONTH) + 1) + "&startDay=" + calendar.get(Calendar.DAY_OF_MONTH)+"&resultFormat=xml");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        conn.setRequestProperty("Accept-Language", "en-US,en;q=0.8");
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.66 Safari/537.36");
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         final InputStream inputStream = conn.getInputStream();
         Document doc = builder.parse(inputStream);

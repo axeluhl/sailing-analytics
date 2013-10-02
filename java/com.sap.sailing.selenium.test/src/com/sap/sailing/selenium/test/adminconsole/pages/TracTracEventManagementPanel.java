@@ -24,6 +24,12 @@ import com.sap.sailing.selenium.test.PageArea;
 public class TracTracEventManagementPanel extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "JSONURL")
     private WebElement jsonURLField;
+
+    @FindBy(how = BySeleniumId.class, using = "LiveURI")
+    private WebElement liveURIField;
+
+    @FindBy(how = BySeleniumId.class, using = "StoredURI")
+    private WebElement storedURIField;
     
     @FindBy(how = BySeleniumId.class, using = "ListRaces")
     private WebElement listRacesButton;
@@ -55,9 +61,11 @@ public class TracTracEventManagementPanel extends PageArea {
      *   The URL for which the races are to list.
      */
     public void listRaces(String url) {
-        this.jsonURLField.clear();
-        this.jsonURLField.sendKeys(url);
-        this.listRacesButton.click();
+        liveURIField.clear();
+        storedURIField.clear();
+        jsonURLField.clear();
+        jsonURLField.sendKeys(url);
+        listRacesButton.click();
         
         waitForAjaxRequests();
     }

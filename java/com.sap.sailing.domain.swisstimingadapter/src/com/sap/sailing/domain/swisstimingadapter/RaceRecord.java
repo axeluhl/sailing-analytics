@@ -7,11 +7,15 @@ public class RaceRecord {
     private String raceID;
     private String description;
     private Date startTime;
+    private boolean hasCourse;
+    private boolean hasStartlist;
 
-    public RaceRecord(String raceID, String description, Date startTime) {
+    public RaceRecord(String raceID, String description, Date startTime, boolean hasCourse, boolean hasStartlist) {
         this.raceID = raceID;
         this.description = description;
         this.startTime = startTime;
+        this.hasCourse = hasCourse;
+        this.hasStartlist = hasStartlist;
     }
 
     public String getRaceID() {
@@ -26,4 +30,11 @@ public class RaceRecord {
         return startTime;
     }
 
+    public boolean hasCourse() {
+        return hasCourse;
+    }
+
+    public boolean hasStartlist() {
+        return hasStartlist;
+    }
 }

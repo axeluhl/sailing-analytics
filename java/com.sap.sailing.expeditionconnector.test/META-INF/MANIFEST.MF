@@ -8,7 +8,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Fragment-Host: com.sap.sailing.expeditionconnector
 Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain.test,
- com.sap.sailing.udpconnector
-Import-Package: junit.framework;version="4.8.1",
- org.junit;version="4.8.1",
- org.osgi.framework;version="1.6.0"
+ com.sap.sailing.udpconnector,
+ org.junit4;bundle-version="4.8.2"
