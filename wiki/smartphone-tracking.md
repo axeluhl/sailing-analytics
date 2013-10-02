@@ -3,7 +3,7 @@
 [[_TOC_]]
 
 ## Introduction
-On this page the decisions, architecture and API's for using smartphones as an additional input channel for Sailing Analytics are documented. Meanwhile, the architecture of this solution is designed to be flexible enough to support other types of input devices in the future, e.g. [Igtimi](http://www.igtimi.com/) trackers.
+On this page the decisions, architecture and API's for using smartphones as an additional input channel for Sailing Analytics are documented. Meanwhile, the architecture of this solution is designed to be flexible enough to support other types of input devices in the future, e.g. [Igtimi](http://www.igtimi.com/) trackers. A good overview of the topic is also provided by [[Jan Bross' thesis|doc/theses/20130913_Bross_Tracking_Sailing_Races_with_Mobile_Devices.pdf]].
 
 ## Branches
 * `race-board-admin`: manual UI based entry of mark passings for the time being, while we do not have a detection algorithm
