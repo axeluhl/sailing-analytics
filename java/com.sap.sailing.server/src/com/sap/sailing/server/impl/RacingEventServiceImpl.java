@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -1864,7 +1865,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Event addEvent(String eventName, String venue, String publicationUrl, boolean isPublic, Serializable id) {
+    public Event addEvent(String eventName, String venue, String publicationUrl, boolean isPublic, UUID id) {
         synchronized (eventsById) {
             Event result = createEventWithoutReplication(eventName, venue, publicationUrl, isPublic, id);
             replicate(new CreateEvent(eventName, venue, publicationUrl, isPublic, id));
@@ -1873,7 +1874,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Event createEventWithoutReplication(String eventName, String venue, String publicationUrl, boolean isPublic, Serializable id) {
+    public Event createEventWithoutReplication(String eventName, String venue, String publicationUrl, boolean isPublic, UUID id) {
         Event result = new EventImpl(eventName, venue, publicationUrl, isPublic, id);
         synchronized (eventsById) {
             if (eventsById.containsKey(result.getId())) {
@@ -1887,7 +1888,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public void updateEvent(Serializable id, String eventName, String venueName, String publicationUrl,
+    public void updateEvent(UUID id, String eventName, String venueName, String publicationUrl,
             boolean isPublic, List<String> regattaNames) {
         synchronized (eventsById) {
             if (!eventsById.containsKey(id)) {
@@ -1907,7 +1908,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public void renameEvent(Serializable id, String newName) {
+    public void renameEvent(UUID id, String newName) {
         synchronized (eventsById) {
             if (!eventsById.containsKey(id)) {
                 throw new IllegalArgumentException("No sailing event with ID " + id + " found.");
@@ -1921,7 +1922,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public void removeEvent(Serializable id) {
+    public void removeEvent(UUID id) {
         removeEventFromEventsById(id);
         mongoObjectFactory.removeEvent(id);
         replicate(new RemoveEvent(id));
@@ -1950,17 +1951,18 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public CourseArea addCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId) {
+    public CourseArea addCourseArea(UUID eventId, String courseAreaName, UUID courseAreaId) {
         CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaId, courseAreaName);
         synchronized (eventsById) {
-            addCourseAreaWithoutReplication(eventId, courseArea);
+            addCourseAreaWithoutReplication(eventId, courseAreaId, courseAreaName);
             replicate(new AddCourseArea(eventId, courseAreaName, courseAreaId));
         }
         return courseArea;
     }
 
     @Override
-    public Event addCourseAreaWithoutReplication(Serializable eventId, CourseArea courseArea) {
+    public CourseArea addCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId, String courseAreaName) {
+        final CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaId, courseAreaName);
         synchronized (eventsById) {
             if (!eventsById.containsKey(eventId)) {
                 throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
@@ -1968,7 +1970,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             Event event = eventsById.get(eventId);
             event.getVenue().addCourseArea(courseArea);
             mongoObjectFactory.storeEvent(event);
-            return event;
+            return courseArea;
         }
     }
 

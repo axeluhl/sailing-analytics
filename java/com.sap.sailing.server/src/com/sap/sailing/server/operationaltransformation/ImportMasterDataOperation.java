@@ -383,9 +383,7 @@ public class ImportMasterDataOperation extends
                     alreadyExists = true;
                 }
                 if (!alreadyExists) {
-                    CourseArea courseArea = domainFactory.getOrCreateCourseArea(
-                            UUID.fromString(courseAreaEntry.getA()), courseAreaEntry.getB());
-                    toState.addCourseAreaWithoutReplication(UUID.fromString(id), courseArea);
+                    toState.addCourseAreaWithoutReplication(UUID.fromString(id), UUID.fromString(courseAreaEntry.getA()), courseAreaEntry.getB());
                 } else {
                     logger.info(String
                             .format("Course area with id %1$s for event with id %2$s already exists and hasn't been overridden.",

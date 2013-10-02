@@ -1,6 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import java.io.Serializable;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.server.RacingEventService;
@@ -20,7 +20,7 @@ public class CreateEvent extends AbstractEventOperation<Event> {
     private final boolean isPublic;
     private final String eventName;
     
-    public CreateEvent(String eventName, String venue, String publicationUrl, boolean isPublic, Serializable id) {
+    public CreateEvent(String eventName, String venue, String publicationUrl, boolean isPublic, UUID id) {
         super(id);
         this.eventName = eventName;
         this.venue = venue;
