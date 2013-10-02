@@ -111,7 +111,7 @@ git config --unset branch.&lt;branch&gt;.merge
 Assume you want to forward UDP packets from machine A (port 2014) to machine B (port 2014) over an SSH tunnel. This is not that easy because an SSH tunnel only works for TCP packets. So let's use socat for this purpose:
 
 - Open a tunnel from machine A to machine B: <pre>A$ ssh -L 6667:localhost:6667 user@B</pre>
-- Once opened activate a TCP to UDP forwarding on machine B: <pre>socat tcp4-listen:6667,reuseaddr,fork UDP:localhost:2014</pre>
-- Activate UDP to TCP forwarding on machine A: <pre>socat -T15 udp4-recvfrom:2014,reuseaddr,fork tcp:localhost:6667</pre>
+- Once opened activate a TCP to UDP forwarding on machine B: <pre>B$ socat tcp4-listen:6667,reuseaddr,fork UDP:localhost:2014</pre>
+- Activate UDP to TCP forwarding on machine A: <pre>A$ socat -T15 udp4-recvfrom:2014,reuseaddr,fork tcp:localhost:6667</pre>
 
 Now also UDP packets get transmitted through.
