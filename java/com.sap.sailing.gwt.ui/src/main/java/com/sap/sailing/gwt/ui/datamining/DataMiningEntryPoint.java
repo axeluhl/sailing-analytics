@@ -25,17 +25,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         logoAndTitlePanel.add(globalNavigationPanel);
 
         rootPanel.add(logoAndTitlePanel);
-        
-        GPSFixSelectionPanel selectionPanel = new GPSFixSelectionPanel(stringMessages, sailingService, this);
-        rootPanel.add(selectionPanel);
-        
-        GPSFixQueryPanel queryPanel = new GPSFixQueryPanel(stringMessages, sailingService, this, selectionPanel);
-        rootPanel.add(queryPanel);
-        
-        if (showBenchmark) {
-            GPSFixQueryBenchmarkPanel benchmarkPanel = new GPSFixQueryBenchmarkPanel(stringMessages, sailingService, this, selectionPanel);
-            rootPanel.add(benchmarkPanel);
-        }
+        rootPanel.add(new DataMiningPanel(stringMessages, sailingService, this, showBenchmark));
     }
 
 }
