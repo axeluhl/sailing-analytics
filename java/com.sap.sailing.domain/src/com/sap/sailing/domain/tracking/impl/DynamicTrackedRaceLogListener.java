@@ -52,6 +52,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         trackedRace.invalidateEndTime();
         courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
         statusAnalyzer = new RaceStatusAnalyzer(raceLog);
+        startTimeFinder = new StartTimeFinder(raceLog);
         initializeWindTrack(raceLog);
         analyze();
     }
