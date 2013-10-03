@@ -117,11 +117,15 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         }
     }
     
-    private void analyzeStartTime() {
+    private void analyzeStartTime(TimePoint startTimeProvidedByEvent) {
         /* start time will be set by StartTimeAnalyzer in TrackedRace.getStartTime() */
         trackedRace.invalidateStartTime();
         
         TimePoint startTime = startTimeFinder.analyze();
+        if (startTime == null) {
+            startTime = startTimeProvidedByEvent;
+        }
+        
         if (startTime != null) {
             /* invoke listeners with received start time, this will also trigger tractrac update */
             trackedRace.onStartTimeChangedByRaceCommittee(startTime);
@@ -139,7 +143,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogStartTimeEvent event) {
-        analyzeStartTime();
+        analyzeStartTime(event.getStartTime());
     }
 
     @Override
