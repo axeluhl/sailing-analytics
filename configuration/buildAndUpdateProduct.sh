@@ -436,12 +436,12 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     # using system properties. This works because
     # context.getProperty() searches for system properties
     # if it can't find them in config.ini (framework config)
-    sed -i "" "/mongo.host/d" "$ACDIR/configuration/config.ini"
-    sed -i "" "/mongo.port/d" "$ACDIR/configuration/config.ini"
-    sed -i "" "/expedition.udp.port/d" "$ACDIR/configuration/config.ini"
-    sed -i "" "/replication.exchangeName/d" "$ACDIR/configuration/config.ini"
-    sed -i "" "/replication.exchangeHost/d" "$ACDIR/configuration/config.ini"
-    sed -i "" "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" "$ACDIR/configuration/jetty/etc/jetty-selector.xml"
+    sed -i "/mongo.host/d" "$ACDIR/configuration/config.ini"
+    sed -i "/mongo.port/d" "$ACDIR/configuration/config.ini"
+    sed -i "/expedition.udp.port/d" "$ACDIR/configuration/config.ini"
+    sed -i "/replication.exchangeName/d" "$ACDIR/configuration/config.ini"
+    sed -i "/replication.exchangeHost/d" "$ACDIR/configuration/config.ini"
+    sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" "$ACDIR/configuration/jetty/etc/jetty-selector.xml"
 
     echo "I have read the following configuration from $ACDIR/env.sh:"
     echo "SERVER_NAME: $SERVER_NAME"
