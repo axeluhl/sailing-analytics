@@ -95,7 +95,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     private void analyze() {
         analyzeStatus();
-        analyzeCourseDesign();
+        analyzeCourseDesign(null);
     }
 
     private void analyzeStatus() {
@@ -104,8 +104,11 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         // TODO: What can we do with the status? Should we use DynamicTrackedRace.setStatus?
     }
 
-    private void analyzeCourseDesign() {
+    private void analyzeCourseDesign(CourseBase courseBaseProvidedByEvent) {
         CourseBase courseDesign = courseDesignFinder.analyze();
+        if (courseDesign == null) {
+            courseDesign = courseBaseProvidedByEvent;
+        }
 
         // On the initial analyze step after attaching the RaceLog there might be no course design.
         if (courseDesign != null) {
@@ -153,7 +156,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogCourseDesignChangedEvent event) {
-        analyzeCourseDesign();
+        analyzeCourseDesign(event.getCourseDesign());
     }
 
     @Override
