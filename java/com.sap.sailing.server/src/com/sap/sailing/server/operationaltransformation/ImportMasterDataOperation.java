@@ -20,7 +20,6 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -370,8 +369,7 @@ public class ImportMasterDataOperation extends
                 String pubString = event.getPubUrl();
                 String venueName = event.getVenueName();
                 boolean isPublic = event.isPublic();
-                Event newEvent = new EventImpl(name, venueName, pubString, isPublic, UUID.fromString(id));
-                toState.createEventWithoutReplication(newEvent);
+                Event newEvent = toState.createEventWithoutReplication(name, venueName, pubString, isPublic, UUID.fromString(id));
                 creationCount.addOneEvent(newEvent.getId().toString());
             } else {
                 logger.info(String.format("Event with name %1$s already exists and hasn't been overridden.",
@@ -385,9 +383,7 @@ public class ImportMasterDataOperation extends
                     alreadyExists = true;
                 }
                 if (!alreadyExists) {
-                    CourseArea courseArea = domainFactory.getOrCreateCourseArea(
-                            UUID.fromString(courseAreaEntry.getA()), courseAreaEntry.getB());
-                    toState.addCourseAreaWithoutReplication(UUID.fromString(id), courseArea);
+                    toState.addCourseAreaWithoutReplication(UUID.fromString(id), UUID.fromString(courseAreaEntry.getA()), courseAreaEntry.getB());
                 } else {
                     logger.info(String
                             .format("Course area with id %1$s for event with id %2$s already exists and hasn't been overridden.",

@@ -153,6 +153,7 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
             public void onClick(ClickEvent event) {
                 addCourseAreaWidget("", true);
                 updateCourseAreasGrid(panel);
+                courseAreaNameEntryFields.get(courseAreaNameEntryFields.size()-1).setFocus(true);
             }
         });
         panel.add(addCourseAreaButton);

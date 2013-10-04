@@ -10,7 +10,12 @@ find_project_home ()
 
     if [ ! -d "$1/.git" ]; then
         PARENT_DIR=`cd $1/..;pwd`
-        echo $(find_project_home $PARENT_DIR)
+        OUTPUT=$(find_project_home $PARENT_DIR)
+
+        if [ "$OUTPUT" = "" ] && [ -d "$PARENT_DIR/code" ] && [ -d "$PARENT_DIR/code/.git" ]; then
+            OUTPUT="$PARENT_DIR/code"
+        fi
+        echo $OUTPUT
         return 0
     fi
 
@@ -66,10 +71,11 @@ testing=1
 clean="clean"
 offline=0
 proxy=0
+suppress_confirmation=0
 extra=''
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-b -g -t -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy]"
+    echo "buildAndUpdateProduct [-b -u -g -t -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-b Build GWT permutation only for one browser and English language."
@@ -83,10 +89,11 @@ if [ $# -eq 0 ]; then
     echo "-l <telnet port>  Telnet port the OSGi server is running. Optional but enables fully automatic hot-deploy."
     echo "-s <target server> Name of server you want to use as target for install, hot-deploy or remote-reploy. This overrides default behaviour."
     echo "-w <ssh target> Target for remote-deploy. Must comply with the following format: user@server."
+    echo "-u Run without confirmation messages. Use with extreme care."
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo "install: installs product and configuration to $SERVERS_HOME/$active_branch. Overwrites any configuration by using config from branch."
-    echo "all: calls build and then install"
+    echo "all: invokes build and then install"
     echo ""
     echo "hot-deploy: performs hot deployment of named bundle into OSGi server"
     echo "Example: $0 -n com.sap.sailing.www -l 14888 hot-deploy"
@@ -106,13 +113,13 @@ echo PROJECT_HOME is $PROJECT_HOME
 echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 
-options=':bgtocpm:n:l:s:w:'
+options=':bgtocpm:n:l:s:w:u'
 while getopts $options option
 do
     case $option in
         g) gwtcompile=0;;
         t) testing=0;;
-	b) onegwtpermutationonly=1;;
+	    b) onegwtpermutationonly=1;;
         o) offline=1;;
         c) clean="";;
         p) proxy=1;;
@@ -122,6 +129,7 @@ do
         s) TARGET_SERVER_NAME=$OPTARG
            HAS_OVERWRITTEN_TARGET=1;;
         w) REMOTE_SERVER_LOGIN=$OPTARG;;
+        u) suppress_confirmation=1;;
         \?) echo "Invalid option"
             exit 4;;
     esac
@@ -182,12 +190,14 @@ if [[ "$@" == "hot-deploy" ]]; then
         echo "WARNING: Bundle versions do not differ. Update not needed."
     fi
 
-    read -s -n1 -p "Do you really want to hot-deploy bundle $OSGI_BUNDLE_NAME to $SERVERS_HOME/$active_branch? (y/N): " answer
-    case $answer in
-    "Y" | "y") echo "Continuing";;
-    *) echo "Aborting..."
-       exit;;
-    esac
+	if [ $suppress_confirmation -eq 0 ]; then
+        read -s -n1 -p "Do you really want to hot-deploy bundle $OSGI_BUNDLE_NAME to $SERVERS_HOME/$active_branch? (y/N): " answer
+        case $answer in
+        "Y" | "y") echo "Continuing";;
+        *) echo "Aborting..."
+           exit;;
+        esac
+    fi
 
     # deploy new bundle physically
     mkdir -p $SERVERS_HOME/$active_branch/plugins/deploy
@@ -226,12 +236,15 @@ if [[ "$@" == "hot-deploy" ]]; then
     BUNDLE_ID=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 1`
     OLD_ACTIVATED_NAME=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 3`
     echo "Could identify bundle-id $BUNDLE_ID for $OLD_ACTIVATED_NAME"
-    read -s -n1 -p "I will now stop and reinstall the bundle mentioned in the line above. Is this right? (y/N): " answer
-    case $answer in
-    "Y" | "y") echo "Continuing";;
-    *) echo "Aborting..."
-       exit;;
-    esac
+
+	if [ $suppress_confirmation -eq 0 ]; then
+        read -s -n1 -p "I will now stop and reinstall the bundle mentioned in the line above. Is this right? (y/N): " answer
+        case $answer in
+        "Y" | "y") echo "Continuing";;
+        *) echo "Aborting..."
+           exit;;
+        esac
+    fi
 
     # stop and uninstall
     echo -n stop $BUNDLE_ID | $NC_CMD > /dev/null
@@ -273,21 +286,24 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	if [ $gwtcompile -eq 1 ]; then
 	    echo "INFO: Compiling GWT (rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*)"
 	    rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*
-	    if [ $onegwtpermutationonly -eq 1 ]; then
-		echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
-		for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
-		    cp $i $i.bak
-		    cat $i | sed -e 's/^[	 ]*<extend-property name="locale" values="de"\/>[	 ]*$/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="safari" \/>/' >$i.sed
-		    mv $i.sed $i
-		done
-	    else
-		echo "INFO: Patching .gwt.xml files such that all GWT permutations are compiled"
-		for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
-		    cp $i $i.bak
-		    cat $i | sed -e 's/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="safari" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
-		    mv $i.sed $i
-		done
-	    fi
+        if [ $onegwtpermutationonly -eq 1 ]; then
+            echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
+            for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
+                echo "INFO: Patching $i files such that only one GWT permutation needs to be compiled"
+                cp $i $i.bak
+                cat $i | sed -e 's/^[	 ]*<extend-property  *name="locale"  *values="de" *\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="safari" \/>/' >$i.sed
+                mv $i.sed $i
+            done
+        else
+            echo "INFO: Patching .gwt.xml files such that all GWT permutations are compiled"
+            for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
+                echo "INFO: Patching $i files such that all GWT permutations are compiled"
+                cp $i $i.bak
+                cat $i | sed -e 's/<!-- <extend-property  *name="locale"  *values="de" *\/> --> <set-property name="user.agent" value="safari" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
+                mv $i.sed $i
+            done
+        fi
+
 	else
 	    echo "INFO: GWT Compilation disabled"
 	    extra="-Pdebug.no-gwt-compile"
@@ -318,23 +334,25 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
 	if [ $gwtcompile -eq 1 ]; then
 	    # Now move back the backup .gwt.xml files before they were (maybe) patched
+		echo "INFO: restoring backup copies of .gwt.xml files after they has been patched before"
 	    for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
-		echo "INFO: restoring backup copy of $i after it was patched before"
-		mv -v $i.bak $i
+		    mv -v $i.bak $i
 	    done
-        fi
+    fi
 
 	echo "Build complete. Do not forget to install product..."
 fi
 
 if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 
-    read -s -n1 -p "Currently branch $active_branch is active and I will deploy to $ACDIR. Do you want to proceed with $@ (y/N): " answer
-    case $answer in
-    "Y" | "y") echo "Continuing";;
-    *) echo "Aborting..."
-       exit;;
-    esac
+	if [ $suppress_confirmation -eq 0 ]; then
+        read -s -n1 -p "Currently branch $active_branch is active and I will deploy to $ACDIR. Do you want to proceed with $@ (y/N): " answer
+        case $answer in
+        "Y" | "y") echo "Continuing";;
+        *) echo "Aborting..."
+           exit;;
+        esac
+    fi
 
     if [ ! -d $ACDIR ]; then
         echo "Could not find directory $ACDIR - perhaps you are on a wrong branch?"
@@ -418,12 +436,12 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     # using system properties. This works because
     # context.getProperty() searches for system properties
     # if it can't find them in config.ini (framework config)
-    sed -i "/mongo.host/d" $ACDIR/configuration/config.ini
-    sed -i "/mongo.port/d" $ACDIR/configuration/config.ini
-    sed -i "/expedition.udp.port/d" $ACDIR/configuration/config.ini
-    sed -i "/replication.exchangeName/d" $ACDIR/configuration/config.ini
-    sed -i "/replication.exchangeHost/d" $ACDIR/configuration/config.ini
-    sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" $ACDIR/configuration/jetty/etc/jetty.xml
+    sed -i "/mongo.host/d" "$ACDIR/configuration/config.ini"
+    sed -i "/mongo.port/d" "$ACDIR/configuration/config.ini"
+    sed -i "/expedition.udp.port/d" "$ACDIR/configuration/config.ini"
+    sed -i "/replication.exchangeName/d" "$ACDIR/configuration/config.ini"
+    sed -i "/replication.exchangeHost/d" "$ACDIR/configuration/config.ini"
+    sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" "$ACDIR/configuration/jetty/etc/jetty-selector.xml"
 
     echo "I have read the following configuration from $ACDIR/env.sh:"
     echo "SERVER_NAME: $SERVER_NAME"
@@ -453,12 +471,14 @@ if [[ "$@" == "remote-deploy" ]]; then
     REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/servers'`
     REMOTE_SERVER="$REMOTE_HOME/$SERVER"
 
-    read -s -n1 -p "I will deploy the current GIT branch to $REMOTE_SERVER_LOGIN:$REMOTE_SERVER. Is this correct (y/n)? " answer
-    case $answer in
-    "Y" | "y") OK=1;;
-    *) echo "Aborting... nothing has been changed on remote server!"
-    exit;;
-    esac
+	if [ $suppress_confirmation -eq 0 ]; then
+        read -s -n1 -p "I will deploy the current GIT branch to $REMOTE_SERVER_LOGIN:$REMOTE_SERVER. Is this correct (y/n)? " answer
+        case $answer in
+        "Y" | "y") OK=1;;
+        *) echo "Aborting... nothing has been changed on remote server!"
+        exit;;
+        esac
+    fi
 
     $SSH_CMD "test -d $REMOTE_SERVER/plugins"
     if [[ $? -eq 1 ]]; then
@@ -500,18 +520,20 @@ if [[ "$@" == "remote-deploy" ]]; then
 
     echo "Deployed successfully. I did NOT change any configuration (no env.sh or config.ini or jetty.xml adaption), only code!"
 
-    read -s -n1 -p "Do you want me to restart the remote server (y/n)? " answer
-    case $answer in
-    "Y" | "y") OK=1;;
-    *) echo "Aborting... deployment should be ready by now!"
-    exit;;
-    esac
+	if [ $suppress_confirmation -eq 0 ]; then
+        read -s -n1 -p "Do you want me to restart the remote server (y/n)? " answer
+        case $answer in
+        "Y" | "y") OK=1;;
+        *) echo "Aborting... deployment should be ready by now!"
+        exit;;
+        esac
 
-    echo ""
-    $SSH_CMD "cd $REMOTE_SERVER && bash -l -c $REMOTE_SERVER/stop"
-    $SSH_CMD "cd $REMOTE_SERVER && bash -l -c $REMOTE_SERVER/start"
+        echo ""
+        $SSH_CMD "cd $REMOTE_SERVER && bash -l -c $REMOTE_SERVER/stop"
+        $SSH_CMD "cd $REMOTE_SERVER && bash -l -c $REMOTE_SERVER/start"
 
-    echo "Restarted remote server. Please check."
+        echo "Restarted remote server. Please check."
+    fi
 fi
 
 if [[ "$@" == "deploy-startpage" ]]; then
