@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,6 +33,13 @@ public class FixesAndTails {
      * Fixes of each competitors tail. If a list is contained for a competitor, the list contains a timely "contiguous"
      * list of fixes for the competitor. This means the server has no more data for the time interval covered, unless
      * the last fix was {@link GPSFixDTO#extrapolated obtained by extrapolation}.
+     * <p>
+     * 
+     * If the fixes for a competitor contain an {@link GPSFixDTO#extrapolated extrapolated} fix, that fix is always
+     * guaranteed to be the last element of the list when outside the execution of a method on this class. This in
+     * particular means that when more fixes are added, and there is now one fix later than the extrapolated fix, the
+     * extrapolated fix will be removed, re-establishing the invariant of an extrapolated fix always being the last
+     * in the list.
      */
     private final Map<CompetitorDTO, List<GPSFixDTO>> fixes;
     
@@ -62,8 +70,13 @@ public class FixesAndTails {
         lastShownFix = new HashMap<CompetitorDTO, Integer>();
     }
 
+    /**
+     * @return the list of fixes cached for the competitor; if a fix is {@link GPSFixDTO#extrapolated extrapolated}, it
+     *         must be the last fix in the list. <code>null</code> may be returned in no fixes are cached for
+     *         <code>competitor</code>. The list returned is unmodifiable for the caller.
+     */
     public List<GPSFixDTO> getFixes(CompetitorDTO competitor) {
-        return fixes.get(competitor);
+        return Collections.unmodifiableList(fixes.get(competitor));
     }
     
     public Polyline getTail(CompetitorDTO competitor) {
@@ -90,7 +103,7 @@ public class FixesAndTails {
      */
     protected Polyline createTailAndUpdateIndices(final CompetitorDTO competitorDTO, Date from, Date to, TailFactory tailFactory) {
         List<LatLng> points = new ArrayList<LatLng>();
-        List<GPSFixDTO> fixesForCompetitor = fixes.get(competitorDTO);
+        List<GPSFixDTO> fixesForCompetitor = getFixes(competitorDTO);
         int indexOfFirst = -1;
         int indexOfLast = -1;
         int i = 0;
@@ -131,6 +144,10 @@ public class FixesAndTails {
      * competitor. If <code>overlapsWithKnownFixes</code> indicates that the fixes received in <code>result</code>
      * overlap with those already known, the fixes are merged into the list of already known fixes for the competitor.
      * Otherwise, the fixes received in <code>result</code> replace those known so far for the respective competitor.
+     * 
+     * @param result
+     *            For each list the invariant must hold that an {@link GPSFixDTO#extrapolated extrapolated} fix must be
+     *            the last one in the list
      */
     protected void updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> result,
             Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory) {
@@ -142,6 +159,7 @@ public class FixesAndTails {
                     fixes.put(e.getKey(), fixesForCompetitor);
                 }
                 if (!overlapsWithKnownFixes.get(e.getKey())) {
+                    // clearing and then re-populating establishes the invariant that an extrapolated fix must be the last
                     fixesForCompetitor.clear();
                     // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove
                     // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
@@ -165,22 +183,46 @@ public class FixesAndTails {
      * {@link #firstShownFix}/{@link #lastShownFix} records for <code>competitorDTO</code> are incremented if they are
      * greater or equal to the insertion index and we have a tail in {@link #tails} for <code>competitorDTO</code>.
      * Additionally, if the fix is in between the fixes shown in the competitor's tail, the tail is adjusted by
-     * inserting the corresponding fix.
+     * inserting the corresponding fix.<p>
+     * 
+     * Precondition: {@link #hasFixesFor(CompetitorDTO) hasFixesFor(competitorDTO)}<code>==true</code>
+     * 
+     * @param mergeThis
+     *            If this list contains an {@link GPSFixDTO#extrapolated extrapolated} fix, that fix must be the last in
+     *            the list
      */
-    protected void mergeFixes(CompetitorDTO competitorDTO, List<GPSFixDTO> mergeThis) {
+    private void mergeFixes(CompetitorDTO competitorDTO, List<GPSFixDTO> mergeThis) {
         List<GPSFixDTO> intoThis = fixes.get(competitorDTO);
         int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix.get(competitorDTO);
         int indexOfLastShownFix = lastShownFix.get(competitorDTO) == null ? -1 : lastShownFix.get(competitorDTO);
-        Polyline tail = tails.get(competitorDTO);
+        Polyline tail = getTail(competitorDTO);
         int intoThisIndex = 0;
         for (GPSFixDTO mergeThisFix : mergeThis) {
             while (intoThisIndex < intoThis.size()
                     && intoThis.get(intoThisIndex).timepoint.before(mergeThisFix.timepoint)) {
+                // TODO how about using Collections.binarySearch
                 intoThisIndex++;
             }
             if (intoThisIndex < intoThis.size() && intoThis.get(intoThisIndex).timepoint.equals(mergeThisFix.timepoint)) {
-                // exactly same time point; replace with fix from mergeThis
-                intoThis.set(intoThisIndex, mergeThisFix);
+                // exactly same time point; replace with fix from mergeThis unless the new fix is extrapolated and there is a later fix in intoThis;
+                // in the (unlikely) case the existing non-extrapolated fix is replaced by an extrapolated one, the indices of the shown fixes
+                // need according adjustments
+                if (!mergeThisFix.extrapolated || intoThis.size() == intoThisIndex+1) {
+                    intoThis.set(intoThisIndex, mergeThisFix);
+                } else {
+                    // extrapolated fix would be added one or more positions before the last fix in intoThis; instead,
+                    // remove the fix at the respective index with the same time point and adjust indices:
+                    intoThis.remove(intoThisIndex);
+                    if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
+                        tail.getPath().removeAt(intoThisIndex - indexOfFirstShownFix);
+                    }
+                    if (indexOfFirstShownFix > intoThisIndex) {
+                        indexOfFirstShownFix--;
+                    }
+                    if (indexOfLastShownFix >= intoThisIndex) {
+                        indexOfLastShownFix--;
+                    }
+                }
             } else {
                 intoThis.add(intoThisIndex, mergeThisFix);
                 if (indexOfFirstShownFix >= intoThisIndex) {
@@ -192,6 +234,20 @@ public class FixesAndTails {
                 if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
                     tail.getPath().insertAt(intoThisIndex - indexOfFirstShownFix,
                             LatLng.newInstance(mergeThisFix.position.latDeg, mergeThisFix.position.lngDeg));
+                }
+                // If there is a fix prior to the one added and that prior fix was obtained by extrapolation, remove it now because
+                // extrapolated fixes can only be the last in the list
+                if (intoThisIndex > 0 && intoThis.get(intoThisIndex-1).extrapolated) {
+                    intoThis.remove(intoThisIndex);
+                    if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
+                        tail.getPath().removeAt(intoThisIndex - indexOfFirstShownFix);
+                    }
+                    if (indexOfFirstShownFix > intoThisIndex) {
+                        indexOfFirstShownFix--;
+                    }
+                    if (indexOfLastShownFix >= intoThisIndex) {
+                        indexOfLastShownFix--;
+                    }
                 }
             }
             intoThisIndex++;
@@ -226,7 +282,7 @@ public class FixesAndTails {
      */
     protected void updateTail(Polyline tail, CompetitorDTO competitorDTO, Date from, Date to) {
         int vertexCount = tail.getPath().getLength();
-        final List<GPSFixDTO> fixesForCompetitor = fixes.get(competitorDTO);
+        final List<GPSFixDTO> fixesForCompetitor = getFixes(competitorDTO);
         int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix.get(competitorDTO);
         while (indexOfFirstShownFix != -1 && vertexCount > 0
                 && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
@@ -298,10 +354,9 @@ public class FixesAndTails {
         Map<CompetitorDTO, Boolean> overlapWithKnownFixes = new HashMap<CompetitorDTO, Boolean>();
         
         for (CompetitorDTO competitor : competitorsToShow) {
-            List<GPSFixDTO> fixesForCompetitor = fixes.get(competitor);
+            List<GPSFixDTO> fixesForCompetitor = getFixes(competitor);
             Date fromDate;
             Date toDate;
-            Date timepointOfFirstExtrapolated = fixesForCompetitor == null ? null : getTimepointOfFirstExtrapolated(fixesForCompetitor);
             Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
             Date timepointOfFirstKnownFix = fixesForCompetitor == null ? null : getTimepointOfFirstNonExtrapolated(fixesForCompetitor);
             boolean overlap = false;
@@ -356,17 +411,4 @@ public class FixesAndTails {
         }
         return null;
     }
-
-    private Date getTimepointOfFirstExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
-        // TODO this needs to be cached; we would usually run through the entire collection to find no or a very late extrapolated fix...
-        Date result = null;
-        for (GPSFixDTO fix : fixesForCompetitor) {
-            if (fix.extrapolated) {
-                result = fix.timepoint;
-                break;
-            }
-        }
-        return result;
-    }
-
 }
