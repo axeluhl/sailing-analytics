@@ -102,17 +102,14 @@ public abstract class CanvasOverlayV3 {
         return map;
     }
 
-    protected void setMap(MapWidget map) {
-        this.map = map;
-        customOverlayView.setMap(map);
-    }
+    protected abstract void draw(OverlayViewMethods methods);
 
     protected OverlayViewOnAddHandler getOnAddHandler() {
         OverlayViewOnAddHandler result = new OverlayViewOnAddHandler() {
             @Override
             public void onAdd(OverlayViewMethods methods) {
                 methods.getPanes().getMapPane().appendChild(canvas.getElement());
-                methods.getPanes().getMapPane().getStyle().setZIndex(zIndex);
+                methods.getPanes().getOverlayLayer().getStyle().setZIndex(zIndex);
             }
         };
         return result;
@@ -127,8 +124,6 @@ public abstract class CanvasOverlayV3 {
         };
     }
     
-    protected abstract void draw(OverlayViewMethods methods);
-
     protected OverlayViewOnRemoveHandler getOnRemoveHandler() {
         OverlayViewOnRemoveHandler result = new OverlayViewOnRemoveHandler() {
             @Override
@@ -172,22 +167,4 @@ public abstract class CanvasOverlayV3 {
             getCanvas().setCoordinateSpaceHeight(newHeightInPx);
         }
     }
-//    
-//    private void drawOverlay_Generic_OverlayView() {
-//        OverlayViewOnDrawHandler onDrawHandler = new OverlayViewOnDrawHandler() {
-//          @Override
-//          public void onDraw(OverlayViewMethods methods) {
-//            MapCanvasProjection projection = methods.getProjection();
-//            LatLng sw = LatLng.newInstance(40.710216, -74.213393);
-//            Point p = projection.fromLatLngToDivPixel(sw);
-//            htmlOverlayMessage.getElement().getStyle().setPosition(Position.ABSOLUTE);
-//            htmlOverlayMessage.getElement().getStyle().setLeft(p.getX(), Unit.PX);
-//            htmlOverlayMessage.getElement().getStyle().setTop(p.getY(), Unit.PX);
-//
-//            String message = "OverlayView draw() called... the projection world width is " + projection.getWorldWidth();
-//            htmlOverlayMessage.clear();
-//            htmlOverlayMessage.add(new HTML(message));
-//            System.out.println(message);
-//          }
-//        };
 }
