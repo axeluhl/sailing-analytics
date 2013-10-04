@@ -1,24 +1,23 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import com.google.gwt.maps.client.geom.LatLng;
-import com.google.gwt.maps.client.geom.LatLngBounds;
-import com.google.gwt.maps.client.geom.Point;
-import com.google.gwt.maps.client.geom.Size;
-import com.google.gwt.maps.client.overlay.Overlay;
+import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.base.LatLngBounds;
+import com.google.gwt.maps.client.base.Point;
+import com.google.gwt.maps.client.base.Size;
+import com.google.gwt.maps.client.geometrylib.SphericalUtils;
+import com.google.gwt.maps.client.overlays.MapCanvasProjection;
+import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewMethods;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 
 /**
  * A google map overlay based on a HTML5 canvas for drawing boats (images)
  * The boats will be zoomed/scaled according to the current map state and rotated according to the bearing of the boat.
  */
-public class BoatOverlay extends CanvasOverlay {
-
-    /**
-     * The competitor the boat belongs too.
-     */
-    private final CompetitorDTO competitorDTO;
+public class BoatOverlay extends CanvasOverlayV3 {
 
     /** 
      * The boat class
@@ -37,23 +36,17 @@ public class BoatOverlay extends CanvasOverlay {
 
     private final BoatClassImageData boatClassImageData;    
 
-    public BoatOverlay(CompetitorDTO competitorDTO) {
-        super();
-        this.competitorDTO = competitorDTO;
+    public BoatOverlay(MapWidget map, int zIndex, CompetitorDTO competitorDTO) {
+        super(map, zIndex);
         this.boatClass = competitorDTO.getBoatClass();
         this.boatClassImageData = BoatClassImageDataResolver.resolveBoatClassImages(boatClass.getName());
     }
 
     @Override
-    protected Overlay copy() {
-        return new BoatOverlay(competitorDTO);
-    }
-
-    @Override
-    protected void redraw(boolean force) {
+    protected void draw(OverlayViewMethods methods) {
+        MapCanvasProjection projection = methods.getProjection();
+        
         if (boatFix != null) {
-            getCanvas().setTitle(getTitle());
-
             ImageTransformer boatImageTransformer;
             if (boatFix.legType != null) {
                 boatImageTransformer = boatClassImageData.getBoatImageTransformerByLegTypeAndTack(boatFix.legType,
@@ -68,15 +61,10 @@ public class BoatOverlay extends CanvasOverlay {
             }
             boatImageTransformer.drawToCanvas(getCanvas(), boatDrawingAngle, realBoatSizeScaleFactor);
             LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
-            Point boatPositionInPx = getMap().convertLatLngToDivPixel(latLngPosition);
-            getPane().setWidgetPosition(getCanvas(),
-                    boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2,
+            Point boatPositionInPx = projection.fromLatLngToDivPixel(latLngPosition);
+            setCanvasPosition(boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2,
                     boatPositionInPx.getY() - getCanvas().getCoordinateSpaceHeight() / 2);
         }
-    }
-
-    private String getTitle() {
-        return competitorDTO.getSailID() + ", " + competitorDTO.getName();
     }
     
     public GPSFixDTO getBoatFix() {
@@ -89,7 +77,7 @@ public class BoatOverlay extends CanvasOverlay {
     
     public double getRealBoatSizeScaleFactor(Size imageSize) {
         // the possible zoom level range is 0 to 21 (zoom level 0 would show the whole world)
-        int zoomLevel = map == null ? 1 : map.getZoomLevel();
+        int zoomLevel = map == null ? 1 : map.getZoom();
         int boatLengthInPixel = boatClassImageData.getBoatClassImageLengthInPx();
         double minScaleFactor = 0.45;
         double maxScaleFactor = 2.0;
@@ -109,8 +97,8 @@ public class BoatOverlay extends CanvasOverlay {
                 LatLng upperRight = bounds.getNorthEast();
                 LatLng bottomLeft = bounds.getSouthWest();
                 LatLng upperLeft = LatLng.newInstance(upperRight.getLatitude(), bottomLeft.getLongitude());
-                double distXInMeters = upperLeft.distanceFrom(upperRight);
-                int widthInPixel = map.getSize().getWidth();
+                double distXInMeters = SphericalUtils.computeDistanceBetween(upperLeft, upperRight);
+                int widthInPixel = map.getElement().getClientWidth(); // check... 
                 double realBoatSizeInPixel  = (widthInPixel * hullLengthInMeters) / distXInMeters;
                 realBoatSizeScaleFactor = realBoatSizeInPixel / (double) boatLengthInPixel;
                 if (realBoatSizeScaleFactor < minScaleFactor) {
@@ -121,6 +109,7 @@ public class BoatOverlay extends CanvasOverlay {
                 }
             }
         }
+        
         return realBoatSizeScaleFactor;
     }
 }

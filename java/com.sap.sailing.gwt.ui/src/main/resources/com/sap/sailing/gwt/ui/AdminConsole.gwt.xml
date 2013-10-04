@@ -15,8 +15,6 @@
   <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
   <stylesheet src="../AdminConsole.css" />
-  <!-- Google Maps API -->
-  <inherits name='com.google.gwt.maps.GoogleMaps' />
   
   <!-- Highcharts API -->
   <inherits name="org.moxieapps.gwt.highcharts.Highcharts" />

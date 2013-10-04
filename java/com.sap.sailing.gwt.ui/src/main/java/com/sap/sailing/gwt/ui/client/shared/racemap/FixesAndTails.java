@@ -7,8 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.maps.client.geom.LatLng;
-import com.google.gwt.maps.client.overlay.Polyline;
+import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.overlays.Polyline;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 
