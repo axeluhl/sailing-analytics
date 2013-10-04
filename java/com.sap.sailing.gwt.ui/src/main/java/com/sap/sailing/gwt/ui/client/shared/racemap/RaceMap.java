@@ -35,6 +35,9 @@ import com.google.gwt.maps.client.event.PolygonMouseOverHandler;
 import com.google.gwt.maps.client.event.PolylineClickHandler;
 import com.google.gwt.maps.client.event.PolylineMouseOutHandler;
 import com.google.gwt.maps.client.event.PolylineMouseOverHandler;
+import com.google.gwt.maps.client.event.PolylineClickHandler.PolylineClickEvent;
+import com.google.gwt.maps.client.event.PolylineMouseOutHandler.PolylineMouseOutEvent;
+import com.google.gwt.maps.client.event.PolylineMouseOverHandler.PolylineMouseOverEvent;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.overlay.Marker;
@@ -97,7 +100,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
-        RaceTimesInfoProviderListener, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {
+        RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {
     private MapWidget map;
 
     private final SailingServiceAsync sailingService;
@@ -525,6 +528,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             List<GPSFixDTO> fixesForCompetitor = fixes.get(competitor);
             Date fromDate;
             Date toDate;
+            Date timepointOfFirstExtrapolated = fixesForCompetitor == null ? null : getTimepointOfFirstExtrapolated(fixesForCompetitor);
             Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
             Date timepointOfFirstKnownFix = fixesForCompetitor == null ? null : getTimepointOfFirstNonExtrapolated(fixesForCompetitor);
             boolean overlap = false;
@@ -1384,7 +1388,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
-    protected Date getTimepointOfFirstNonExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
+    private Date getTimepointOfFirstNonExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
         for (GPSFixDTO fix : fixesForCompetitor) {
             if (!fix.extrapolated) {
                 return fix.timepoint;
@@ -1393,7 +1397,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return null;
     }
 
-    protected Date getTimepointOfLastNonExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
+    private Date getTimepointOfLastNonExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
         if (!fixesForCompetitor.isEmpty()) {
             for (ListIterator<GPSFixDTO> fixIter = fixesForCompetitor.listIterator(fixesForCompetitor.size() - 1); fixIter
                     .hasPrevious();) {
@@ -1404,6 +1408,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         }
         return null;
+    }
+
+    private Date getTimepointOfFirstExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
+        // TODO this needs to be cached; we would usually run through the entire collection to find no or a very late extrapolated fix...
+        Date result = null;
+        for (GPSFixDTO fix : fixesForCompetitor) {
+            if (fix.extrapolated) {
+                result = fix.timepoint;
+                break;
+            }
+        }
+        return result;
     }
 
     /**
@@ -1876,4 +1892,33 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
         timeChanged(timer.getTime());
     }
+
+    @Override
+    public Polyline createTail(final CompetitorDTO competitor, List<LatLng> points) {
+        PolylineOptions options = PolylineOptions.newInstance(
+        /* clickable */true, /* geodesic */true);
+        Polyline result = new Polyline(points.toArray(new LatLng[0]), competitorSelection.getColor(competitor), /* width */ 1,
+        /* opacity */0.5, options);
+        result.addPolylineClickHandler(new PolylineClickHandler() {
+            @Override
+            public void onClick(PolylineClickEvent event) {
+                showCompetitorInfoWindow(competitor, lastMousePosition);
+            }
+        });
+        result.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
+            @Override
+            public void onMouseOver(PolylineMouseOverEvent event) {
+                map.setTitle(competitor.getSailID() + ", " + competitor.getName());
+            }
+        });
+        result.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
+            @Override
+            public void onMouseOut(PolylineMouseOutEvent event) {
+                map.setTitle("");
+            }
+        });
+        return result;
+    }
+
+    
 }
