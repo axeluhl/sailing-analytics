@@ -117,4 +117,16 @@ public interface ReadonlyDataManager {
      */
     public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createCompetitorsLoader(ManagedRace managedRace,
             LoadClient<Collection<Competitor>> callback);
+    
+    /**
+     * Creates a new {@link LoaderCallbacks} object for loading a client's configuration.
+     * 
+     * @param callback
+     *            {@link LoadClient} implementing your data handling code.
+     * @return {@link LoaderCallbacks} to be used in
+     *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
+     *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
+     */
+    public LoaderCallbacks<DataLoaderResult<String>> createConfigurationLoader(String clientId,
+            LoadClient<String> callback);
 }

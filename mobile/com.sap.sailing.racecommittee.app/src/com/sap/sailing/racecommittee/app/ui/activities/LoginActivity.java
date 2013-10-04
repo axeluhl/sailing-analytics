@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Window;
@@ -14,6 +15,9 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
@@ -82,16 +86,50 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
         transaction.replace(R.id.login_view_right_container, fragment, CourseAreaListFragmentTag);
-        transaction.commit();
+        transaction.commitAllowingStateLoss();
         ExLog.i("LoginActivity", "CourseFragment created.");
     }
 
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
         public void itemSelected(Fragment sender, EventBase event) {
-            Serializable eventId = event.getId();
+            final Serializable eventId = event.getId();
             ExLog.i(ExLog.EVENT_SELECTED, eventId.toString(), getBaseContext());
-            showCourseAreaListFragment(eventId);
+            
+            setProgressBarIndeterminateVisibility(true);
+            final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
+            progressDialog.setMessage(getString(R.string.loading_configuration));
+            progressDialog.setCancelable(false);
+            progressDialog.setIndeterminate(true);
+            progressDialog.show();
+            
+            String identifier = AppPreferences.getAndroidIdentifier(getApplicationContext());
+            ReadonlyDataManager dataManager = OnlineDataManager.create(LoginActivity.this);
+            getLoaderManager().restartLoader(
+                    0, 
+                    null, 
+                    dataManager.createConfigurationLoader(identifier, new LoadClient<String>() {
+                        
+                        @Override
+                        public void onLoadSucceded(String data, boolean isCached) {
+                            setProgressBarIndeterminateVisibility(false);
+                            progressDialog.dismiss();
+                            
+                            Toast.makeText(getApplicationContext(), data, Toast.LENGTH_SHORT).show();
+                            showCourseAreaListFragment(eventId);
+                        }
+                        
+                        @Override
+                        public void onLoadFailed(Exception reason) {
+                            setProgressBarIndeterminateVisibility(false);
+                            progressDialog.dismiss();
+                            
+                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
+                            ExLog.ex(TAG, reason);
+                            
+                            showCourseAreaListFragment(eventId);
+                        }
+                    })).forceLoad();
         }
     };
 

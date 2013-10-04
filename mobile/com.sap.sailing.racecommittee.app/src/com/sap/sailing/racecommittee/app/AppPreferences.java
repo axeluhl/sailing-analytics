@@ -6,6 +6,7 @@ import java.util.List;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.provider.Settings.Secure;
 import android.util.Log;
 
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
@@ -185,4 +186,9 @@ public class AppPreferences {
         StartProcedureType type = StartProcedureType.valueOf(defaultStartProcedureType);
         return type;
     }
+    
+    public static String getAndroidIdentifier(Context context) {
+        return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+    }
+    
 }

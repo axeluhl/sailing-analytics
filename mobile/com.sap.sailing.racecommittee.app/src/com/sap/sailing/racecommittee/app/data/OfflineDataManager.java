@@ -191,4 +191,15 @@ public class OfflineDataManager extends DataManager {
                 });
     }
 
+    @Override
+    public LoaderCallbacks<DataLoaderResult<String>> createConfigurationLoader(String clientId,
+            LoadClient<String> callback) {
+        return new ImmediateDataLoaderCallbacks<String>(context, callback, new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                return "";
+            }
+        });
+    }
+
 }

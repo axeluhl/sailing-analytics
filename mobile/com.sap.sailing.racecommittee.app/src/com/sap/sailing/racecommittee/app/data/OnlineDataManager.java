@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.data;
 
+import java.io.BufferedReader;
+import java.io.Reader;
 import java.io.Serializable;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -26,6 +28,7 @@ import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.ManagedRacesDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.MarksDataHandler;
+import com.sap.sailing.racecommittee.app.data.handlers.NullDataHandler;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderCallbacks;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderCallbacks.LoaderCreator;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
@@ -225,6 +228,38 @@ public class OnlineDataManager extends DataManager {
                         + "/sailingserver/rc/competitors?leaderboard="
                         + raceGroupName
                         + "&raceColumn=" + raceColumnName + "&fleet=" + fleetName), parser, handler);
+            }
+        });
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<String>> createConfigurationLoader(final String clientId,
+            LoadClient<String> callback) {
+        return new DataLoaderCallbacks<String>(callback, new LoaderCreator<String>() {
+            @Override
+            public Loader<DataLoaderResult<String>> create(int id, Bundle args) throws Exception {
+                ExLog.i(TAG, String.format("Creating Configuration-OnlineDataLoader %d", id));
+                
+                DataHandler<String> handler = new NullDataHandler<String>();
+                DataParser<String> parser = new DataParser<String>() {
+                    @Override
+                    public String parse(Reader reader) throws Exception {
+                        BufferedReader in = null;
+                        try {
+                            in = new BufferedReader(reader);
+                            return in.readLine();
+                        } finally {
+                            if (in != null) {
+                                in.close();
+                            }
+                        }
+                    }
+                };
+                
+                return new OnlineDataLoader<String>(
+                        context, 
+                        new URL(AppPreferences.getServerBaseURL(context) + "/sailingserver/rc/configuration?client="+ clientId), 
+                        parser, handler);
             }
         });
     }
