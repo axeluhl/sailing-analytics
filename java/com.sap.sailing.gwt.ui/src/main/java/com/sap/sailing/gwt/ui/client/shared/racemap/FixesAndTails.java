@@ -5,11 +5,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.overlays.Polyline;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 
 /**
@@ -57,8 +62,24 @@ public class FixesAndTails {
         lastShownFix = new HashMap<CompetitorDTO, Integer>();
     }
 
-    public List<GPSFixDTO> get(CompetitorDTO competitor) {
+    public List<GPSFixDTO> getFixes(CompetitorDTO competitor) {
         return fixes.get(competitor);
+    }
+    
+    public Polyline getTail(CompetitorDTO competitor) {
+        return tails.get(competitor);
+    }
+
+    public int getFirstShownFix(CompetitorDTO competitor) {
+        return firstShownFix.get(competitor);
+    }
+    
+    public Set<CompetitorDTO> getCompetitorsWithTails() {
+        return tails.keySet();
+    }
+
+    public boolean hasFixesFor(CompetitorDTO competitor) {
+        return fixes.containsKey(competitor);
     }
 
     /**
@@ -240,6 +261,112 @@ public class FixesAndTails {
         }
         firstShownFix.put(competitorDTO, indexOfFirstShownFix);
         lastShownFix.put(competitorDTO, indexOfLastShownFix);
+    }
+
+    /**
+     * Consistently removes the <code>competitor</code>'s tail from {@link #tails} and from the map, and the corresponding position
+     * data from {@link #firstShownFix} and {@link #lastShownFix}.
+     */
+    protected void removeTail(CompetitorDTO competitor) {
+        Polyline removedTail = tails.remove(competitor);
+        if (removedTail != null) {
+            removedTail.setMap(null);
+        }
+        firstShownFix.remove(competitor);
+        lastShownFix.remove(competitor);
+    }
+
+    /**
+     * From {@link #fixes} as well as the selection of {@link #getCompetitorsToShow competitors to show}, computes the
+     * from/to times for which to request GPS fixes from the server. No update is performed here to {@link #fixes}. The
+     * result guarantees that, when used in
+     * {@link SailingServiceAsync#getBoatPositions(String, String, Map, Map, boolean, AsyncCallback)}, for each
+     * competitor from {@link #competitorsToShow} there are all fixes known by the server for that competitor starting
+     * at <code>upTo-{@link #tailLengthInMilliSeconds}</code> and ending at <code>upTo</code> (exclusive).
+     * @param effectiveTailLengthInMilliseconds 
+     * 
+     * @return a triple whose {@link Triple#getA() first} component contains the "from", and whose {@link Triple#getB()
+     *         second} component contains the "to" times for the competitors whose trails / positions to show; the
+     *         {@link Triple#getC() third} component tells whether the existing fixes can remain and be augmented by
+     *         those requested or need to be replaced
+     */
+    protected Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> computeFromAndTo(
+            Date upTo, Iterable<CompetitorDTO> competitorsToShow, long effectiveTailLengthInMilliseconds) {
+        Date tailstart = new Date(upTo.getTime() - effectiveTailLengthInMilliseconds);
+        Map<CompetitorDTO, Date> from = new HashMap<CompetitorDTO, Date>();
+        Map<CompetitorDTO, Date> to = new HashMap<CompetitorDTO, Date>();
+        Map<CompetitorDTO, Boolean> overlapWithKnownFixes = new HashMap<CompetitorDTO, Boolean>();
+        
+        for (CompetitorDTO competitor : competitorsToShow) {
+            List<GPSFixDTO> fixesForCompetitor = fixes.get(competitor);
+            Date fromDate;
+            Date toDate;
+            Date timepointOfFirstExtrapolated = fixesForCompetitor == null ? null : getTimepointOfFirstExtrapolated(fixesForCompetitor);
+            Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
+            Date timepointOfFirstKnownFix = fixesForCompetitor == null ? null : getTimepointOfFirstNonExtrapolated(fixesForCompetitor);
+            boolean overlap = false;
+            if (fixesForCompetitor != null && timepointOfFirstKnownFix != null
+                    && !tailstart.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
+                    && !tailstart.after(timepointOfLastKnownFix)) {
+                // the beginning of what we need is contained in the interval we already have; skip what we already have
+                // FIXME requests the lastKnownFix again because "from" is *inclusive*; could lead to bug 319
+                fromDate = timepointOfLastKnownFix;
+                overlap = true;
+            } else {
+                fromDate = tailstart;
+            }
+            if (fixesForCompetitor != null && timepointOfFirstKnownFix != null
+                    && !upTo.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
+                    && !upTo.after(timepointOfLastKnownFix)) {
+                // the end of what we need is contained in the interval we already have; skip what we already have
+                toDate = timepointOfFirstKnownFix;
+                overlap = true;
+            } else {
+                toDate = upTo;
+            }
+            // only request something for the competitor if we're missing information at all
+            if (fromDate.before(toDate) || fromDate.equals(toDate)) {
+                from.put(competitor, fromDate);
+                to.put(competitor, toDate);
+                overlapWithKnownFixes.put(competitor, overlap);
+            }
+        }
+        return new Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>>(from, to,
+                overlapWithKnownFixes);
+    }
+
+    private Date getTimepointOfFirstNonExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
+        for (GPSFixDTO fix : fixesForCompetitor) {
+            if (!fix.extrapolated) {
+                return fix.timepoint;
+            }
+        }
+        return null;
+    }
+
+    private Date getTimepointOfLastNonExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
+        if (!fixesForCompetitor.isEmpty()) {
+            for (ListIterator<GPSFixDTO> fixIter = fixesForCompetitor.listIterator(fixesForCompetitor.size() - 1); fixIter
+                    .hasPrevious();) {
+                GPSFixDTO fix = fixIter.previous();
+                if (!fix.extrapolated) {
+                    return fix.timepoint;
+                }
+            }
+        }
+        return null;
+    }
+
+    private Date getTimepointOfFirstExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
+        // TODO this needs to be cached; we would usually run through the entire collection to find no or a very late extrapolated fix...
+        Date result = null;
+        for (GPSFixDTO fix : fixesForCompetitor) {
+            if (fix.extrapolated) {
+                result = fix.timepoint;
+                break;
+            }
+        }
+        return result;
     }
 
 }

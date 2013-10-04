@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -109,11 +108,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private final ErrorReporter errorReporter;
 
     /**
-     * Tails of competitors currently displayed as overlays on the map.
-     */
-    private final Map<CompetitorDTO, Polyline> tails;
-
-    /**
      * Polyline for the start line (connecting two marks representing the start gate).
      */
     private Polyline startLine;
@@ -164,23 +158,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private WindTrackInfoDTO lastCombinedWindTrackInfoDTO;
     
     /**
-     * Key set is equal to that of {@link #tails} and tells what the index in in {@link #fixes} of the first fix shown
-     * in {@link #tails} is. If a key is contained in this map, it is also contained in {@link #lastShownFix} and vice versa.
+     * Manages the cached set of {@link GPSFixDTO}s for the boat positions as well as their graphical counterpart in the
+     * form of {@link Polyline}s.
      */
-    private final Map<CompetitorDTO, Integer> firstShownFix;
-
-    /**
-     * Key set is equal to that of {@link #tails} and tells what the index in in {@link #fixes} of the last fix shown in
-     * {@link #tails} is. If a key is contained in this map, it is also contained in {@link #firstShownFix} and vice versa.
-     */
-    private final Map<CompetitorDTO, Integer> lastShownFix;
-
-    /**
-     * Fixes of each competitors tail. If a list is contained for a competitor, the list contains a timely "contiguous"
-     * list of fixes for the competitor. This means the server has no more data for the time interval covered, unless
-     * the last fix was {@link GPSFixDTO#extrapolated obtained by extrapolation}.
-     */
-    private final Map<CompetitorDTO, List<GPSFixDTO>> fixes;
+    private final FixesAndTails fixesAndTails;
 
     /**
      * html5 canvases used as boat display on the map
@@ -284,16 +265,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         this.timer = timer;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager();
-        tails = new HashMap<CompetitorDTO, Polyline>();
-        firstShownFix = new HashMap<CompetitorDTO, Integer>();
-        lastShownFix = new HashMap<CompetitorDTO, Integer>();
+        fixesAndTails = new FixesAndTails();
         markDTOs = new HashMap<String, MarkDTO>();
         courseSidelines = new HashMap<SidelineDTO, Polygon>();
         boatOverlays = new HashMap<CompetitorDTO, BoatOverlay>();
         competitorInfoOverlays = new HashMap<CompetitorDTO, CompetitorInfoOverlay>();
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
         courseMarkOverlays = new HashMap<String, CourseMarkOverlay>();
-        fixes = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
         this.competitorSelection = competitorSelection;
         competitorSelection.addCompetitorSelectionChangeListener(this);
         settings = new RaceMapSettings();
@@ -479,7 +457,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 
                 if (race != null) {
                     final Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
-                            computeFromAndTo(date, competitorsToShow);
+                            fixesAndTails.computeFromAndTo(date, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
                     final int requestID = ++boatPositionRequestIDCounter;
 
                     GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(), race,
@@ -498,7 +476,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             startedProcessingRequestID = requestID;
                             // Do boat specific actions
                             Map<CompetitorDTO, List<GPSFixDTO>> boatData = raceMapDataDTO.boatPositions;
-                            updateFixes(boatData, fromAndToAndOverlap.getC());
+                            fixesAndTails.updateFixes(boatData, fromAndToAndOverlap.getC(), RaceMap.this);
                             showBoatsOnMap(date, getCompetitorsToShow());
                             showCompetitorInfoOnMap(date, competitorSelection.getSelectedCompetitors());
                             if (douglasMarkers != null) {
@@ -584,98 +562,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             });
                     
                     asyncActionsExecutor.execute(getWindInfoAction);
-                }
-            }
-        }
-    }
-
-    /**
-     * From {@link #fixes} as well as the selection of {@link #getCompetitorsToShow competitors to show}, computes the
-     * from/to times for which to request GPS fixes from the server. No update is performed here to {@link #fixes}. The
-     * result guarantees that, when used in
-     * {@link SailingServiceAsync#getBoatPositions(String, String, Map, Map, boolean, AsyncCallback)}, for each
-     * competitor from {@link #competitorsToShow} there are all fixes known by the server for that competitor starting
-     * at <code>upTo-{@link #tailLengthInMilliSeconds}</code> and ending at <code>upTo</code> (exclusive).
-     * 
-     * @return a triple whose {@link Triple#getA() first} component contains the "from", and whose {@link Triple#getB()
-     *         second} component contains the "to" times for the competitors whose trails / positions to show; the
-     *         {@link Triple#getC() third} component tells whether the existing fixes can remain and be augmented by
-     *         those requested or need to be replaced
-     */
-    protected Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> computeFromAndTo(
-            Date upTo, Iterable<CompetitorDTO> competitorsToShow) {
-        Date tailstart = new Date(upTo.getTime() - settings.getEffectiveTailLengthInMilliseconds());
-        Map<CompetitorDTO, Date> from = new HashMap<CompetitorDTO, Date>();
-        Map<CompetitorDTO, Date> to = new HashMap<CompetitorDTO, Date>();
-        Map<CompetitorDTO, Boolean> overlapWithKnownFixes = new HashMap<CompetitorDTO, Boolean>();
-        
-        for (CompetitorDTO competitor : competitorsToShow) {
-            List<GPSFixDTO> fixesForCompetitor = fixes.get(competitor);
-            Date fromDate;
-            Date toDate;
-            Date timepointOfFirstExtrapolated = fixesForCompetitor == null ? null : getTimepointOfFirstExtrapolated(fixesForCompetitor);
-            Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
-            Date timepointOfFirstKnownFix = fixesForCompetitor == null ? null : getTimepointOfFirstNonExtrapolated(fixesForCompetitor);
-            boolean overlap = false;
-            if (fixesForCompetitor != null && timepointOfFirstKnownFix != null
-                    && !tailstart.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
-                    && !tailstart.after(timepointOfLastKnownFix)) {
-                // the beginning of what we need is contained in the interval we already have; skip what we already have
-                // FIXME requests the lastKnownFix again because "from" is *inclusive*; could lead to bug 319
-                fromDate = timepointOfLastKnownFix;
-                overlap = true;
-            } else {
-                fromDate = tailstart;
-            }
-            if (fixesForCompetitor != null && timepointOfFirstKnownFix != null
-                    && !upTo.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
-                    && !upTo.after(timepointOfLastKnownFix)) {
-                // the end of what we need is contained in the interval we already have; skip what we already have
-                toDate = timepointOfFirstKnownFix;
-                overlap = true;
-            } else {
-                toDate = upTo;
-            }
-            // only request something for the competitor if we're missing information at all
-            if (fromDate.before(toDate) || fromDate.equals(toDate)) {
-                from.put(competitor, fromDate);
-                to.put(competitor, toDate);
-                overlapWithKnownFixes.put(competitor, overlap);
-            }
-        }
-        return new Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>>(from, to,
-                overlapWithKnownFixes);
-    }
-
-
-    /**
-     * Adds the fixes received in <code>result</code> to {@link #fixes} and ensures they are still contiguous for each
-     * competitor. If <code>overlapsWithKnownFixes</code> indicates that the fixes received in <code>result</code>
-     * overlap with those already known, the fixes are merged into the list of already known fixes for the competitor.
-     * Otherwise, the fixes received in <code>result</code> replace those known so far for the respective competitor.
-     */
-    protected void updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> result,
-            Map<CompetitorDTO, Boolean> overlapsWithKnownFixes) {
-        for (Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : result.entrySet()) {
-            if (e.getValue() != null && !e.getValue().isEmpty()) {
-                List<GPSFixDTO> fixesForCompetitor = fixes.get(e.getKey());
-                if (fixesForCompetitor == null) {
-                    fixesForCompetitor = new ArrayList<GPSFixDTO>();
-                    fixes.put(e.getKey(), fixesForCompetitor);
-                }
-                if (!overlapsWithKnownFixes.get(e.getKey())) {
-                    fixesForCompetitor.clear();
-                    // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove
-                    // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
-                    if (map != null && tails.containsKey(e.getKey())) {
-                        Polyline removedTail = tails.remove(e.getKey());
-                        removedTail.setMap(null);
-                    }
-                    firstShownFix.remove(e.getKey());
-                    lastShownFix.remove(e.getKey());
-                    fixesForCompetitor.addAll(e.getValue());
-                } else {
-                    mergeFixes(e.getKey(), e.getValue());
                 }
             }
         }
@@ -807,7 +693,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 Set<CompetitorDTO> toRemoveCompetorInfoOverlays = new HashSet<CompetitorDTO>(
                         competitorInfoOverlays.keySet());
                 for (CompetitorDTO competitorDTO : competitorsToShow) {
-                    if (fixes.containsKey(competitorDTO)) {
+                    if (fixesAndTails.hasFixesFor(competitorDTO)) {
                         GPSFixDTO lastBoatFix = getBoatFix(competitorDTO, date);
                         if (lastBoatFix != null) {
                             CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorDTO);
@@ -844,16 +730,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (map != null) {
             Date tailsFromTime = new Date(date.getTime() - settings.getEffectiveTailLengthInMilliseconds());
             Date tailsToTime = date;
-            Set<CompetitorDTO> competitorDTOsOfUnusedTails = new HashSet<CompetitorDTO>(tails.keySet());
+            Set<CompetitorDTO> competitorDTOsOfUnusedTails = fixesAndTails.getCompetitorsWithTails();
             Set<CompetitorDTO> competitorDTOsOfUnusedBoatCanvases = new HashSet<CompetitorDTO>(boatOverlays.keySet());
             for (CompetitorDTO competitorDTO : competitorsToShow) {
-                if (fixes.containsKey(competitorDTO)) {
-                    Polyline tail = tails.get(competitorDTO);
+                if (fixesAndTails.hasFixesFor(competitorDTO)) {
+                    Polyline tail = fixesAndTails.getTail(competitorDTO);
                     if (tail == null) {
-                        tail = createTailAndUpdateIndices(competitorDTO, tailsFromTime, tailsToTime);
+                        tail = fixesAndTails.createTailAndUpdateIndices(competitorDTO, tailsFromTime, tailsToTime, this);
                         tail.setMap(map);
                     } else {
-                        updateTail(tail, competitorDTO, tailsFromTime, tailsToTime);
+                        fixesAndTails.updateTail(tail, competitorDTO, tailsFromTime, tailsToTime);
                         competitorDTOsOfUnusedTails.remove(competitorDTO);
                     }
                     boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, date);
@@ -868,10 +754,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 boatOverlays.remove(unusedBoatCanvasCompetitorDTO);
             }
             for (CompetitorDTO unusedTailCompetitorDTO : competitorDTOsOfUnusedTails) {
-                Polyline removedTail = tails.remove(unusedTailCompetitorDTO);
-                if(removedTail != null) {
-                    removedTail.setMap(map);
-                }
+                fixesAndTails.removeTail(unusedTailCompetitorDTO);
             }
         }
     }
@@ -1352,7 +1235,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             RegattaAndRaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
             if (race != null) {
                 Map<CompetitorDTO, Date> from = new HashMap<CompetitorDTO, Date>();
-                from.put(competitorDTO, fixes.get(competitorDTO).get(firstShownFix.get(competitorDTO)).timepoint);
+                from.put(competitorDTO, fixesAndTails.getFixes(competitorDTO).get(fixesAndTails.getFirstShownFix(competitorDTO)).timepoint);
                 Map<CompetitorDTO, Date> to = new HashMap<CompetitorDTO, Date>();
                 to.put(competitorDTO, getBoatFix(competitorDTO, timer.getTime()).timepoint);
                 sailingService.getDouglasPoints(race, from, to, 3,
@@ -1410,78 +1293,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return result;
     }
     
-    /**
-     * Creates a polyline for the competitor represented by <code>competitorDTO</code>, taking the fixes from
-     * {@link #fixes fixes.get(competitorDTO)} and using the fixes starting at time point <code>from</code> (inclusive)
-     * up to the last fix with time point before <code>to</code>. The polyline is returned. Updates are applied to
-     * {@link #lastShownFix}, {@link #firstShownFix} and {@link #tails}.
-     */
-    protected Polyline createTailAndUpdateIndices(final CompetitorDTO competitorDTO, Date from, Date to) {
-        List<LatLng> points = new ArrayList<LatLng>();
-        List<GPSFixDTO> fixesForCompetitor = fixes.get(competitorDTO);
-        int indexOfFirst = -1;
-        int indexOfLast = -1;
-        int i = 0;
-        for (Iterator<GPSFixDTO> fixIter = fixesForCompetitor.iterator(); fixIter.hasNext() && indexOfLast == -1;) {
-            GPSFixDTO fix = fixIter.next();
-            if (!fix.timepoint.before(to)) {
-                indexOfLast = i-1;
-            } else {
-                LatLng point = null;
-                if (indexOfFirst == -1) {
-                    if (!fix.timepoint.before(from)) {
-                        indexOfFirst = i;
-                        point = LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg);
-                    }
-                } else {
-                    point = LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg);
-                }
-                if (point != null) {
-                    points.add(point);
-                }
-            }
-            i++;
-        }
-        if (indexOfLast == -1) {
-            indexOfLast = i - 1;
-        }
-        if (indexOfFirst != -1 && indexOfLast != -1) {
-            firstShownFix.put(competitorDTO, indexOfFirst);
-            lastShownFix.put(competitorDTO, indexOfLast);
-        }
-        PolylineOptions options = PolylineOptions.newInstance();
-        options.setClickable(true);
-        options.setGeodesic(true);
-        options.setStrokeWeight(1);
-        options.setStrokeOpacity(0.5);
-        options.setStrokeColor(competitorSelection.getColor(competitorDTO));
-        Polyline result = Polyline.newInstance(options);
-
-        MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));
-        result.setPath(pointsAsArray);
-        
-        result.addClickHandler(new ClickMapHandler() {
-            @Override
-            public void onEvent(ClickMapEvent event) {
-                showCompetitorInfoWindow(competitorDTO, lastMousePosition);
-            }
-        });
-        result.addMouseOverHandler(new MouseOverMapHandler() {
-            @Override
-            public void onEvent(MouseOverMapEvent event) {
-                map.setTitle(competitorDTO.getSailID() + ", " + competitorDTO.getName());
-            }
-        });
-        result.addMouseOutMoveHandler(new MouseOutMapHandler() {
-            @Override
-            public void onEvent(MouseOutMapEvent event) {
-                map.setTitle("");
-            }
-        });
-        tails.put(competitorDTO, result);
-        return result;
-    }
-
     protected void removeAllMarkDouglasPeuckerpoints() {
         if (douglasMarkers != null) {
             for (Marker marker : douglasMarkers) {
@@ -1547,87 +1358,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
-    private Date getTimepointOfFirstNonExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
-        for (GPSFixDTO fix : fixesForCompetitor) {
-            if (!fix.extrapolated) {
-                return fix.timepoint;
-            }
-        }
-        return null;
-    }
-
-    private Date getTimepointOfLastNonExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
-        if (!fixesForCompetitor.isEmpty()) {
-            for (ListIterator<GPSFixDTO> fixIter = fixesForCompetitor.listIterator(fixesForCompetitor.size() - 1); fixIter
-                    .hasPrevious();) {
-                GPSFixDTO fix = fixIter.previous();
-                if (!fix.extrapolated) {
-                    return fix.timepoint;
-                }
-            }
-        }
-        return null;
-    }
-
-    private Date getTimepointOfFirstExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
-        // TODO this needs to be cached; we would usually run through the entire collection to find no or a very late extrapolated fix...
-        Date result = null;
-        for (GPSFixDTO fix : fixesForCompetitor) {
-            if (fix.extrapolated) {
-                result = fix.timepoint;
-                break;
-            }
-        }
-        return result;
-    }
-
-    /**
-     * While updating the {@link #fixes} for <code>competitorDTO</code>, the invariants for {@link #tails} and
-     * {@link #firstShownFix} and {@link #lastShownFix} are maintained: each time a fix is inserted, the
-     * {@link #firstShownFix}/{@link #lastShownFix} records for <code>competitorDTO</code> are incremented if they are
-     * greater or equal to the insertion index and we have a tail in {@link #tails} for <code>competitorDTO</code>.
-     * Additionally, if the fix is in between the fixes shown in the competitor's tail, the tail is adjusted by
-     * inserting the corresponding fix.
-     */
-    protected void mergeFixes(CompetitorDTO competitorDTO, List<GPSFixDTO> mergeThis) {
-        List<GPSFixDTO> intoThis = fixes.get(competitorDTO);
-        int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix.get(competitorDTO);
-        int indexOfLastShownFix = lastShownFix.get(competitorDTO) == null ? -1 : lastShownFix.get(competitorDTO);
-        Polyline tail = tails.get(competitorDTO);
-        int intoThisIndex = 0;
-        for (GPSFixDTO mergeThisFix : mergeThis) {
-            while (intoThisIndex < intoThis.size()
-                    && intoThis.get(intoThisIndex).timepoint.before(mergeThisFix.timepoint)) {
-                intoThisIndex++;
-            }
-            if (intoThisIndex < intoThis.size() && intoThis.get(intoThisIndex).timepoint.equals(mergeThisFix.timepoint)) {
-                // exactly same time point; replace with fix from mergeThis
-                intoThis.set(intoThisIndex, mergeThisFix);
-            } else {
-                intoThis.add(intoThisIndex, mergeThisFix);
-                if (indexOfFirstShownFix >= intoThisIndex) {
-                    indexOfFirstShownFix++;
-                }
-                if (indexOfLastShownFix >= intoThisIndex) {
-                    indexOfLastShownFix++;
-                }
-                if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
-                    tail.getPath().insertAt(intoThisIndex - indexOfFirstShownFix,
-                            LatLng.newInstance(mergeThisFix.position.latDeg, mergeThisFix.position.lngDeg));
-                }
-            }
-            intoThisIndex++;
-        }
-        // invariant: for one CompetitorDTO, either both of firstShownFix and lastShownFix have an entry for that key,
-        // or both don't
-        if (indexOfFirstShownFix != -1) {
-            firstShownFix.put(competitorDTO, indexOfFirstShownFix);
-        }
-        if (indexOfLastShownFix != -1) {
-            lastShownFix.put(competitorDTO, indexOfLastShownFix);
-        }
-    }
-
     /**
      * @param date
      *            the point in time for which to determine the competitor's boat position; approximated by using the fix
@@ -1638,7 +1368,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     private GPSFixDTO getBoatFix(CompetitorDTO competitorDTO, Date date) {
         GPSFixDTO result = null;
-        List<GPSFixDTO> competitorFixes = fixes.get(competitorDTO);
+        List<GPSFixDTO> competitorFixes = fixesAndTails.getFixes(competitorDTO);
         if (competitorFixes != null && !competitorFixes.isEmpty()) {
             int i = Collections.binarySearch(competitorFixes, new GPSFixDTO(date, null, null, (WindDTO) null, null, null, false),
                     new Comparator<GPSFixDTO>() {
@@ -1687,63 +1417,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return result;
     }
 
-    /**
-     * If the tail starts before <code>from</code>, removes leading vertices from <code>tail</code> that are before
-     * <code>from</code>. This is determined by using the {@link #firstShownFix} index which tells us where in
-     * {@link #fixes} we find the sequence of fixes currently represented in the tail.
-     * <p>
-     * 
-     * If the tail starts after <code>from</code>, vertices for those {@link #fixes} for <code>competitorDTO</code> at
-     * or after time point <code>from</code> and before the time point of the first fix displayed so far in the tail and
-     * before <code>to</code> are prepended to the tail.
-     * <p>
-     * 
-     * Now to the end of the tail: if the existing tail's end exceeds <code>to</code>, the vertices in excess are
-     * removed (aided by {@link #lastShownFix}). Otherwise, for the competitor's fixes starting at the tail's end up to
-     * <code>to</code> are appended to the tail.
-     * <p>
-     * 
-     * When this method returns, {@link #firstShownFix} and {@link #lastShownFix} have been updated accordingly.
-     */
-    protected void updateTail(Polyline tail, CompetitorDTO competitorDTO, Date from, Date to) {
-        int vertexCount = tail.getPath().getLength();
-        final List<GPSFixDTO> fixesForCompetitor = fixes.get(competitorDTO);
-        int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix.get(competitorDTO);
-        while (indexOfFirstShownFix != -1 && vertexCount > 0
-                && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
-            tail.getPath().removeAt(0);
-            vertexCount--;
-            indexOfFirstShownFix++;
-        }
-        // now the polyline contains no more vertices representing fixes before "from";
-        // go back in time starting at indexOfFirstShownFix while the fixes are still at or after "from"
-        // and insert corresponding vertices into the polyline
-        while (indexOfFirstShownFix > 0 && !fixesForCompetitor.get(indexOfFirstShownFix - 1).timepoint.before(from)) {
-            indexOfFirstShownFix--;
-            GPSFixDTO fix = fixesForCompetitor.get(indexOfFirstShownFix);
-            tail.getPath().insertAt(0, LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
-            vertexCount++;
-        }
-        // now adjust the polylines tail: remove excess vertices that are after "to"
-        int indexOfLastShownFix = lastShownFix.get(competitorDTO) == null ? -1 : lastShownFix.get(competitorDTO);
-        while (indexOfLastShownFix != -1 && vertexCount > 0
-                && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
-            tail.getPath().removeAt(--vertexCount);
-            indexOfLastShownFix--;
-        }
-        // now the polyline contains no more vertices representing fixes after "to";
-        // go forward in time starting at indexOfLastShownFix while the fixes are still at or before "to"
-        // and insert corresponding vertices into the polyline
-        while (indexOfLastShownFix < fixesForCompetitor.size() - 1
-                && !fixesForCompetitor.get(indexOfLastShownFix + 1).timepoint.after(to)) {
-            indexOfLastShownFix++;
-            GPSFixDTO fix = fixesForCompetitor.get(indexOfLastShownFix);
-            tail.getPath().insertAt(vertexCount++, LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
-        }
-        firstShownFix.put(competitorDTO, indexOfFirstShownFix);
-        lastShownFix.put(competitorDTO, indexOfLastShownFix);
-    }
-
     public RaceMapSettings getSettings() {
         return settings;
     }
@@ -1759,7 +1432,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     if (!next.getKey().equals(competitor)) {
                         BoatOverlay boatOverlay = next.getValue();
                         boatOverlay.removeFromMap();
-                        removeTail(next.getKey());
+                        fixesAndTails.removeTail(next.getKey());
                         i.remove(); // only this way a ConcurrentModificationException while looping can be avoided
                     }
                 }
@@ -1789,19 +1462,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
     
-    /**
-     * Consistently removes the <code>competitor</code>'s tail from {@link #tails} and from the map, and the corresponding position
-     * data from {@link #firstShownFix} and {@link #lastShownFix}.
-     */
-    private void removeTail(CompetitorDTO competitor) {
-        Polyline removedTail = tails.remove(competitor);
-        if (removedTail != null) {
-            removedTail.setMap(null);
-        }
-        firstShownFix.remove(competitor);
-        lastShownFix.remove(competitor);
-    }
-
     @Override
     public void removedFromSelection(CompetitorDTO competitor) {
         if (isShowAnyHelperLines()) {
@@ -1820,7 +1480,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     if (removedBoatOverlay != null) {
                         removedBoatOverlay.removeFromMap();
                     }
-                    removeTail(competitor);
+                    fixesAndTails.removeTail(competitor);
                     showCompetitorInfoOnMap(timer.getTime(), competitorSelection.getSelectedCompetitors());
                 }
             } else {
@@ -1966,7 +1626,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             LatLngBounds newBounds = null;
             Iterable<CompetitorDTO> competitors = isZoomOnlyToSelectedCompetitors(forMap) ? forMap.competitorSelection.getSelectedCompetitors() : forMap.getCompetitorsToShow();
             for (CompetitorDTO competitor : competitors) {
-                Polyline tail = forMap.tails.get(competitor);
+                Polyline tail = forMap.fixesAndTails.getTail(competitor);
                 LatLngBounds bounds = null;
                 // TODO: Find a replacement for missing Polyline function getBounds() from v2
                 // see also http://stackoverflow.com/questions/3284808/getting-the-bounds-of-a-polyine-in-google-maps-api-v3; optionally, consider providing a bounds cache with two sorted sets that organize the LatLng objects for O(1) bounds calculation and logarithmic add, ideally O(1) remove
