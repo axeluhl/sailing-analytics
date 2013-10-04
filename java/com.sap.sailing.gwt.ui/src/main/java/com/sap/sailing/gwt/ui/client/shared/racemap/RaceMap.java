@@ -869,7 +869,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             for (CompetitorDTO unusedTailCompetitorDTO : competitorDTOsOfUnusedTails) {
                 Polyline removedTail = tails.remove(unusedTailCompetitorDTO);
                 if(removedTail != null) {
-                    removedTail.setMap(map);
+                    removedTail.setMap(null);
                 }
             }
         }
