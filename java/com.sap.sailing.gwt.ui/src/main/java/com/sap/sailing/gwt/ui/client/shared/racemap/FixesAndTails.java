@@ -76,7 +76,8 @@ public class FixesAndTails {
      *         <code>competitor</code>. The list returned is unmodifiable for the caller.
      */
     public List<GPSFixDTO> getFixes(CompetitorDTO competitor) {
-        return Collections.unmodifiableList(fixes.get(competitor));
+        final List<GPSFixDTO> competitorFixes = fixes.get(competitor);
+        return competitorFixes == null ? null : Collections.unmodifiableList(competitorFixes);
     }
     
     public Polyline getTail(CompetitorDTO competitor) {
@@ -87,8 +88,11 @@ public class FixesAndTails {
         return firstShownFix.get(competitor);
     }
     
+    /**
+     * The set of all competitors for which this object maintains tails. The collection is unmodifiable for the caller.
+     */
     public Set<CompetitorDTO> getCompetitorsWithTails() {
-        return tails.keySet();
+        return Collections.unmodifiableSet(tails.keySet());
     }
 
     public boolean hasFixesFor(CompetitorDTO competitor) {

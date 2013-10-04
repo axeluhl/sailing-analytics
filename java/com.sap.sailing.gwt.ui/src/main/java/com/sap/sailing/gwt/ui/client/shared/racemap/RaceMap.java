@@ -730,7 +730,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (map != null) {
             Date tailsFromTime = new Date(date.getTime() - settings.getEffectiveTailLengthInMilliseconds());
             Date tailsToTime = date;
-            Set<CompetitorDTO> competitorDTOsOfUnusedTails = fixesAndTails.getCompetitorsWithTails();
+            Set<CompetitorDTO> competitorDTOsOfUnusedTails = new HashSet<CompetitorDTO>(fixesAndTails.getCompetitorsWithTails());
             Set<CompetitorDTO> competitorDTOsOfUnusedBoatCanvases = new HashSet<CompetitorDTO>(boatOverlays.keySet());
             for (CompetitorDTO competitorDTO : competitorsToShow) {
                 if (fixesAndTails.hasFixesFor(competitorDTO)) {
