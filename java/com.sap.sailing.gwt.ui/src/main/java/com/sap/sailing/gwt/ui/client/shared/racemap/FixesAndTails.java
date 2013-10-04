@@ -105,5 +105,141 @@ public class FixesAndTails {
         return result;
     }
 
+    /**
+     * Adds the fixes received in <code>result</code> to {@link #fixes} and ensures they are still contiguous for each
+     * competitor. If <code>overlapsWithKnownFixes</code> indicates that the fixes received in <code>result</code>
+     * overlap with those already known, the fixes are merged into the list of already known fixes for the competitor.
+     * Otherwise, the fixes received in <code>result</code> replace those known so far for the respective competitor.
+     */
+    protected void updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> result,
+            Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory) {
+        for (Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : result.entrySet()) {
+            if (e.getValue() != null && !e.getValue().isEmpty()) {
+                List<GPSFixDTO> fixesForCompetitor = fixes.get(e.getKey());
+                if (fixesForCompetitor == null) {
+                    fixesForCompetitor = new ArrayList<GPSFixDTO>();
+                    fixes.put(e.getKey(), fixesForCompetitor);
+                }
+                if (!overlapsWithKnownFixes.get(e.getKey())) {
+                    fixesForCompetitor.clear();
+                    // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove
+                    // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
+                    if (tails.containsKey(e.getKey())) {
+                        Polyline removedTail = tails.remove(e.getKey());
+                        removedTail.setMap(null);
+                    }
+                    firstShownFix.remove(e.getKey());
+                    lastShownFix.remove(e.getKey());
+                    fixesForCompetitor.addAll(e.getValue());
+                } else {
+                    mergeFixes(e.getKey(), e.getValue());
+                }
+            }
+        }
+    }
+
+    /**
+     * While updating the {@link #fixes} for <code>competitorDTO</code>, the invariants for {@link #tails} and
+     * {@link #firstShownFix} and {@link #lastShownFix} are maintained: each time a fix is inserted, the
+     * {@link #firstShownFix}/{@link #lastShownFix} records for <code>competitorDTO</code> are incremented if they are
+     * greater or equal to the insertion index and we have a tail in {@link #tails} for <code>competitorDTO</code>.
+     * Additionally, if the fix is in between the fixes shown in the competitor's tail, the tail is adjusted by
+     * inserting the corresponding fix.
+     */
+    protected void mergeFixes(CompetitorDTO competitorDTO, List<GPSFixDTO> mergeThis) {
+        List<GPSFixDTO> intoThis = fixes.get(competitorDTO);
+        int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix.get(competitorDTO);
+        int indexOfLastShownFix = lastShownFix.get(competitorDTO) == null ? -1 : lastShownFix.get(competitorDTO);
+        Polyline tail = tails.get(competitorDTO);
+        int intoThisIndex = 0;
+        for (GPSFixDTO mergeThisFix : mergeThis) {
+            while (intoThisIndex < intoThis.size()
+                    && intoThis.get(intoThisIndex).timepoint.before(mergeThisFix.timepoint)) {
+                intoThisIndex++;
+            }
+            if (intoThisIndex < intoThis.size() && intoThis.get(intoThisIndex).timepoint.equals(mergeThisFix.timepoint)) {
+                // exactly same time point; replace with fix from mergeThis
+                intoThis.set(intoThisIndex, mergeThisFix);
+            } else {
+                intoThis.add(intoThisIndex, mergeThisFix);
+                if (indexOfFirstShownFix >= intoThisIndex) {
+                    indexOfFirstShownFix++;
+                }
+                if (indexOfLastShownFix >= intoThisIndex) {
+                    indexOfLastShownFix++;
+                }
+                if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
+                    tail.getPath().insertAt(intoThisIndex - indexOfFirstShownFix,
+                            LatLng.newInstance(mergeThisFix.position.latDeg, mergeThisFix.position.lngDeg));
+                }
+            }
+            intoThisIndex++;
+        }
+        // invariant: for one CompetitorDTO, either both of firstShownFix and lastShownFix have an entry for that key,
+        // or both don't
+        if (indexOfFirstShownFix != -1) {
+            firstShownFix.put(competitorDTO, indexOfFirstShownFix);
+        }
+        if (indexOfLastShownFix != -1) {
+            lastShownFix.put(competitorDTO, indexOfLastShownFix);
+        }
+    }
+
+    /**
+     * If the tail starts before <code>from</code>, removes leading vertices from <code>tail</code> that are before
+     * <code>from</code>. This is determined by using the {@link #firstShownFix} index which tells us where in
+     * {@link #fixes} we find the sequence of fixes currently represented in the tail.
+     * <p>
+     * 
+     * If the tail starts after <code>from</code>, vertices for those {@link #fixes} for <code>competitorDTO</code> at
+     * or after time point <code>from</code> and before the time point of the first fix displayed so far in the tail and
+     * before <code>to</code> are prepended to the tail.
+     * <p>
+     * 
+     * Now to the end of the tail: if the existing tail's end exceeds <code>to</code>, the vertices in excess are
+     * removed (aided by {@link #lastShownFix}). Otherwise, for the competitor's fixes starting at the tail's end up to
+     * <code>to</code> are appended to the tail.
+     * <p>
+     * 
+     * When this method returns, {@link #firstShownFix} and {@link #lastShownFix} have been updated accordingly.
+     */
+    protected void updateTail(Polyline tail, CompetitorDTO competitorDTO, Date from, Date to) {
+        int vertexCount = tail.getPath().getLength();
+        final List<GPSFixDTO> fixesForCompetitor = fixes.get(competitorDTO);
+        int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix.get(competitorDTO);
+        while (indexOfFirstShownFix != -1 && vertexCount > 0
+                && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
+            tail.getPath().removeAt(0);
+            vertexCount--;
+            indexOfFirstShownFix++;
+        }
+        // now the polyline contains no more vertices representing fixes before "from";
+        // go back in time starting at indexOfFirstShownFix while the fixes are still at or after "from"
+        // and insert corresponding vertices into the polyline
+        while (indexOfFirstShownFix > 0 && !fixesForCompetitor.get(indexOfFirstShownFix - 1).timepoint.before(from)) {
+            indexOfFirstShownFix--;
+            GPSFixDTO fix = fixesForCompetitor.get(indexOfFirstShownFix);
+            tail.getPath().insertAt(0, LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
+            vertexCount++;
+        }
+        // now adjust the polylines tail: remove excess vertices that are after "to"
+        int indexOfLastShownFix = lastShownFix.get(competitorDTO) == null ? -1 : lastShownFix.get(competitorDTO);
+        while (indexOfLastShownFix != -1 && vertexCount > 0
+                && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
+            tail.getPath().removeAt(--vertexCount);
+            indexOfLastShownFix--;
+        }
+        // now the polyline contains no more vertices representing fixes after "to";
+        // go forward in time starting at indexOfLastShownFix while the fixes are still at or before "to"
+        // and insert corresponding vertices into the polyline
+        while (indexOfLastShownFix < fixesForCompetitor.size() - 1
+                && !fixesForCompetitor.get(indexOfLastShownFix + 1).timepoint.after(to)) {
+            indexOfLastShownFix++;
+            GPSFixDTO fix = fixesForCompetitor.get(indexOfLastShownFix);
+            tail.getPath().insertAt(vertexCount++, LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
+        }
+        firstShownFix.put(competitorDTO, indexOfFirstShownFix);
+        lastShownFix.put(competitorDTO, indexOfLastShownFix);
+    }
 
 }

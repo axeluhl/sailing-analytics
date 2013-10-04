@@ -1969,7 +1969,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 Polyline tail = forMap.tails.get(competitor);
                 LatLngBounds bounds = null;
                 // TODO: Find a replacement for missing Polyline function getBounds() from v2
-                // see also http://stackoverflow.com/questions/3284808/getting-the-bounds-of-a-polyine-in-google-maps-api-v3
+                // see also http://stackoverflow.com/questions/3284808/getting-the-bounds-of-a-polyine-in-google-maps-api-v3; optionally, consider providing a bounds cache with two sorted sets that organize the LatLng objects for O(1) bounds calculation and logarithmic add, ideally O(1) remove
 //                LatLngBounds bounds = tail != null ? tail.getBounds() : null;
                 if (bounds != null) {
                     if (newBounds == null) {
@@ -2088,6 +2088,4 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         });
         return result;
     }
-
-    
 }
