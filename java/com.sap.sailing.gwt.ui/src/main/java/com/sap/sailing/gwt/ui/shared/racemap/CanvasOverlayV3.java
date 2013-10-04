@@ -90,8 +90,8 @@ public abstract class CanvasOverlayV3 {
         customOverlayView.setMap(null);
     }
     
-    public void redraw(boolean forceRedraw) {
-        // TODO: to implement
+    public void redraw() {
+        customOverlayView.setMap(map);
     }
     
     protected void setLatLngPosition(LatLng latLngPosition) {
