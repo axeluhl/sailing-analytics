@@ -639,7 +639,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         courseMarkOverlay.setMarkPosition(markDTO.position);
                         courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
                         courseMarkOverlay.setBuoyZoneRadiusInMeter(settings.getBuoyZoneRadiusInMeters());
-                        courseMarkOverlay.redraw(true);
+                        courseMarkOverlay.redraw();
                         toRemoveCourseMarks.remove(markDTO.getName());
                     }
                 }
@@ -674,7 +674,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     windSensorOverlay.addToMap();
                 } else {
                     windSensorOverlay.setWindInfo(windTrackInfoDTO, windSource);
-                    windSensorOverlay.redraw(true);
+                    windSensorOverlay.redraw();
                     toRemoveWindSources.remove(windSource);
                 }
             }
@@ -702,10 +702,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                 competitorInfoOverlays.put(competitorDTO, competitorInfoOverlay);
                                 competitorInfoOverlay.addToMap();
                                 competitorInfoOverlay.setBoatFix(lastBoatFix);
-                                competitorInfoOverlay.redraw(true);
+                                competitorInfoOverlay.redraw();
                             } else {
                                 competitorInfoOverlay.setBoatFix(lastBoatFix);
-                                competitorInfoOverlay.redraw(true);
+                                competitorInfoOverlay.redraw();
                             }
                             toRemoveCompetorInfoOverlays.remove(competitorDTO);
                         }
@@ -1072,12 +1072,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 boatOverlays.put(competitorDTO, boatOverlay);
                 boatOverlay.setSelected(displayHighlighted(competitorDTO));
                 boatOverlay.setBoatFix(lastBoatFix);
-                boatOverlay.redraw(true);
+                boatOverlay.redraw();
             } else {
                 usedExistingCanvas = true;
                 boatOverlay.setSelected(displayHighlighted(competitorDTO));
                 boatOverlay.setBoatFix(lastBoatFix);
-                boatOverlay.redraw(true);
+                boatOverlay.redraw();
             }
         }
         return usedExistingCanvas;
@@ -1446,7 +1446,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             BoatOverlay boatCanvas = boatOverlays.get(competitor);
             if (boatCanvas != null) {
                 boatCanvas.setSelected(displayHighlighted(competitor));
-                boatCanvas.redraw(true);
+                boatCanvas.redraw();
                 showCompetitorInfoOnMap(timer.getTime(), competitorSelection.getSelectedCompetitors());
             } else {
                 // seems like an internal error not to find the lowlighted marker; but maybe the
@@ -1488,7 +1488,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 BoatOverlay boatCanvas = boatOverlays.get(competitor);
                 if (boatCanvas != null) {
                     boatCanvas.setSelected(displayHighlighted(competitor));
-                    boatCanvas.redraw(true);
+                    boatCanvas.redraw();
                 }
                 showCompetitorInfoOnMap(timer.getTime(), competitorSelection.getSelectedCompetitors());
             }
