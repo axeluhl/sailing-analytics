@@ -60,7 +60,7 @@ public class PolarSheetHistogramBuilder {
         
 
         PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angleIndex, xValues, yValues,
-                dataPointsWithOriginInfo.size(), coefficiantOfVariation);
+                yValuesByGaugeIds, dataPointsWithOriginInfo.size(), coefficiantOfVariation);
         return histogramData;
     }
 

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public interface PolarSheetsHistogramData extends Serializable{
     
@@ -17,6 +18,8 @@ public interface PolarSheetsHistogramData extends Serializable{
     public double getConfidenceMeasure();
 
     public void setConfidenceMeasure(double polarSheetPointConfidenceMeasure);
+    
+    public Map<String, Integer[]> getYValuesByGaugeIds();
     
 
 }

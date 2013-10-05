@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common.impl;
 
+import java.util.Map;
+
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 
 public class PolarSheetsHistogramDataImpl implements PolarSheetsHistogramData {
@@ -17,15 +19,19 @@ public class PolarSheetsHistogramDataImpl implements PolarSheetsHistogramData {
     private double coefficiantOfVariation;
 
     private double confidenceMeasure = 0;
+
+    private Map<String, Integer[]> yValuesByGaugeIds;
     
     //For GWT serialization
     PolarSheetsHistogramDataImpl() {}
 
-    public PolarSheetsHistogramDataImpl(int angle, Number[] xValues, Number[] yValues, int dataCount, double coefficiantOfVariation) {
+    public PolarSheetsHistogramDataImpl(int angle, Number[] xValues, Number[] yValues,
+            Map<String, Integer[]> yValuesByGaugeIds, int dataCount, double coefficiantOfVariation) {
         super();
         this.angle = angle;
         this.yValues = yValues;
         this.xValues = xValues;
+        this.yValuesByGaugeIds = yValuesByGaugeIds;
         this.dataCount = dataCount;
         this.coefficiantOfVariation = coefficiantOfVariation;
     }
@@ -63,6 +69,11 @@ public class PolarSheetsHistogramDataImpl implements PolarSheetsHistogramData {
     @Override
     public void setConfidenceMeasure(double polarSheetPointConfidenceMeasure) {
         confidenceMeasure = polarSheetPointConfidenceMeasure;      
+    }
+
+    @Override
+    public Map<String, Integer[]> getYValuesByGaugeIds() {
+        return yValuesByGaugeIds;
     }
 
 }
