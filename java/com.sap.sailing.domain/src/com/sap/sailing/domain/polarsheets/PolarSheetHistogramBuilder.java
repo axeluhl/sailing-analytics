@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.polarsheets;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
@@ -15,9 +17,13 @@ public class PolarSheetHistogramBuilder {
         this.settings = settings;
     }
 
-    public PolarSheetsHistogramData build(List<Double> rawData, int angleIndex, double coefficiantOfVariation) {
-        Double min = Collections.min(rawData);
-        Double max = Collections.max(rawData);
+    public PolarSheetsHistogramData build(List<DataPointWithOriginInfo> dataPointsWithOriginInfo, int angleIndex,
+            double coefficiantOfVariation) {
+        DataPointWithOriginInfo minPoint = Collections.min(dataPointsWithOriginInfo);
+        DataPointWithOriginInfo maxPoint = Collections.max(dataPointsWithOriginInfo);
+
+        Double min = minPoint.getRawData();
+        Double max = maxPoint.getRawData();
 
         int numberOfColumns = settings.getNumberOfHistogramColumns();
         double range = (max - min) / numberOfColumns;
@@ -26,9 +32,10 @@ public class PolarSheetHistogramBuilder {
             xValues[u] = min + u * range + (0.5 * range);
         }
 
+        Map<String, Integer[]> yValuesByGaugeIds = new HashMap<String, Integer[]>();
         Integer[] yValues = new Integer[numberOfColumns];
-        for (Double dataPoint : rawData) {
-            double notRoundedYet = (dataPoint - min) / range;
+        for (DataPointWithOriginInfo dataPoint : dataPointsWithOriginInfo) {
+            double notRoundedYet = (dataPoint.getRawData() - min) / range;
             int u = (int) notRoundedYet;
             if (u == numberOfColumns) {
                 // For max value
@@ -38,10 +45,22 @@ public class PolarSheetHistogramBuilder {
                 yValues[u] = 0;
             }
             yValues[u]++;
+
+            String gaugeIdsString = dataPoint.getWindGaugeIdString();
+            if (!yValuesByGaugeIds.containsKey(gaugeIdsString)) {
+                yValuesByGaugeIds.put(gaugeIdsString, new Integer[numberOfColumns]);
+            }
+            Integer[] yValuesForThatGaugeIdsString = yValuesByGaugeIds.get(gaugeIdsString);
+            if (yValuesForThatGaugeIdsString[u] == null) {
+                yValuesForThatGaugeIdsString[u] = 0;
+            }
+            yValuesForThatGaugeIdsString[u]++;
+
         }
+        
 
         PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angleIndex, xValues, yValues,
-                rawData.size(), coefficiantOfVariation);
+                dataPointsWithOriginInfo.size(), coefficiantOfVariation);
         return histogramData;
     }
 

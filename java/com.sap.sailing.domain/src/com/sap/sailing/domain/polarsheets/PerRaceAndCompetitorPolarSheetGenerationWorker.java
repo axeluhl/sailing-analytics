@@ -152,8 +152,7 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable{
                         //continue;
                     }
 
-                    polarSheetGenerationWorker.addPolarData(Math.round(polarFix.getAngleToWind()),
-                            polarFix.getBoatSpeed(), polarFix.getWindSpeed());
+                    polarSheetGenerationWorker.addPolarData(polarFix);
                 }
             }
 

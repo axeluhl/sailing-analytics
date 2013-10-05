@@ -36,7 +36,7 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
 
     private final Set<PerRaceAndCompetitorPolarSheetGenerationWorker> workers;
 
-    private final List<List<BoatAndWindSpeed>> polarData;
+    private final List<List<BoatAndWindSpeedWithOriginInfo>> polarData;
 
     private final Executor executor;
 
@@ -80,10 +80,10 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
         }
     }
 
-    private List<List<BoatAndWindSpeed>> initializePolarDataContainer() {
-        List<List<BoatAndWindSpeed>> container = new ArrayList<List<BoatAndWindSpeed>>();
+    private List<List<BoatAndWindSpeedWithOriginInfo>> initializePolarDataContainer() {
+        List<List<BoatAndWindSpeedWithOriginInfo>> container = new ArrayList<List<BoatAndWindSpeedWithOriginInfo>>();
         for (int i = 0; i < 360; i++) {
-            container.add(new ArrayList<BoatAndWindSpeed>());
+            container.add(new ArrayList<BoatAndWindSpeedWithOriginInfo>());
         }
         return container;
     }
@@ -108,12 +108,16 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
      * @param windSpeed
      *            wind's speed in knots
      */
-    protected void addPolarData(long roundedAngle, Speed boatSpeed, Speed windSpeed) {
+    protected void addPolarData(PolarFix polarFix) {
+        long roundedAngle = Math.round(polarFix.getAngleToWind());
+        Speed boatSpeed = polarFix.getBoatSpeed();
+        Speed windSpeed = polarFix.getWindSpeed();
         int angle = (int) roundedAngle;
         if (angle < 0) {
             angle = (360 + angle);
         }
-        BoatAndWindSpeed speeds = new BoatAndWindSpeedImpl(boatSpeed, windSpeed);
+        BoatAndWindSpeedWithOriginInfo speeds = new BoatAndWindSpeedWithOriginInfoImpl(boatSpeed, windSpeed,
+                polarFix.getGaugeIdString());
         polarData.get(angle).add(speeds);
     }
 
@@ -145,14 +149,14 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
         }
         for (int angleIndex = 0; angleIndex < 360; angleIndex++) {
             // Avoid Concurrent modification of lists, so get current state as an array; lock would slow things down
-            BoatAndWindSpeed[] values = polarData.get(angleIndex).toArray(
-                    new BoatAndWindSpeed[polarData.get(angleIndex).size()]);
+            BoatAndWindSpeedWithOriginInfo[] values = polarData.get(angleIndex).toArray(
+                    new BoatAndWindSpeedWithOriginInfo[polarData.get(angleIndex).size()]);
             dataCount = dataCount + values.length;
             dataCountPerAngle[angleIndex] = values.length;
             double[] sumsPerWindSpeed = new double[levelCount];
             int[] dataCountPerWindSpeed = new int[levelCount];
-            Map<Integer, List<Double>> dataSetForWindLevel = new HashMap<Integer, List<Double>>();
-            for (BoatAndWindSpeed singleDataPoint : values) {
+            Map<Integer, List<DataPointWithOriginInfo>> dataSetForWindLevel = new HashMap<Integer, List<DataPointWithOriginInfo>>();
+            for (BoatAndWindSpeedWithOriginInfo singleDataPoint : values) {
                 if (singleDataPoint != null) {
                     double windSpeed = singleDataPoint.getWindSpeed().getKnots();
                     int level = stepping.getLevelIndexForValue(windSpeed);
@@ -160,10 +164,11 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
                         continue;
                     }
                     double speed = singleDataPoint.getBoatSpeed().getKnots();
+                    String windGaugesIdString = singleDataPoint.getWindGaugesIdString();
                     if (!dataSetForWindLevel.containsKey(level)) {
-                        dataSetForWindLevel.put(level, new ArrayList<Double>());
+                        dataSetForWindLevel.put(level, new ArrayList<DataPointWithOriginInfo>());
                     }
-                    dataSetForWindLevel.get(level).add(speed);
+                    dataSetForWindLevel.get(level).add(new DataPointWithOriginInfo(speed, windGaugesIdString));
                     sumsPerWindSpeed[level] = sumsPerWindSpeed[level] + speed;
                     dataCountPerWindSpeed[level]++;
                 }
@@ -171,17 +176,17 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
 
             for (int levelIndex = 0; levelIndex < levelCount; levelIndex++) {
                 if (settings.shouldRemoveOutliers() && dataSetForWindLevel.get(levelIndex) != null) {
-                    List<Double> withoutOutliers = new ArrayList<Double>();
+                    List<DataPointWithOriginInfo> withoutOutliers = new ArrayList<DataPointWithOriginInfo>();
                     Collections.sort(dataSetForWindLevel.get(levelIndex));
                     if (dataCountPerWindSpeed[levelIndex] > /* Minimum data count for outlier detection */10) {
                         for (int dataIndex = 0; dataIndex < dataSetForWindLevel.get(levelIndex).size(); dataIndex++) {
-                            Double dataPoint = dataSetForWindLevel.get(levelIndex).get(dataIndex);
+                            DataPointWithOriginInfo dataPoint = dataSetForWindLevel.get(levelIndex).get(dataIndex);
                             double pct = getNeighboorhoodSizePercentage(dataCountPerWindSpeed, dataSetForWindLevel,
                                     levelIndex, dataIndex, dataPoint, settings);
                             if (pct >= settings.getOutlierMinimumNeighborhoodPct()) {
                                 withoutOutliers.add(dataPoint);
                             } else {
-                                sumsPerWindSpeed[levelIndex] = sumsPerWindSpeed[levelIndex] - dataPoint;
+                                sumsPerWindSpeed[levelIndex] = sumsPerWindSpeed[levelIndex] - dataPoint.getRawData();
                                 dataCountPerWindSpeed[levelIndex]--;
                             }
                         }
@@ -191,7 +196,7 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
                 }
                 
                 if (dataCountPerWindSpeed[levelIndex] < settings.getMinimumDataCountPerAngle()) {
-                    dataSetForWindLevel.put(levelIndex, new ArrayList<Double>());
+                    dataSetForWindLevel.put(levelIndex, new ArrayList<DataPointWithOriginInfo>());
                     sumsPerWindSpeed[levelIndex] = 0;
                     dataCountPerWindSpeed[levelIndex] = 0;
                 }
@@ -209,7 +214,7 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
                     Double standardDeviation = Math.sqrt(variance);
                     coefficiantOfVariation = standardDeviation / average;
                 }
-                List<Double> rawData = dataSetForWindLevel.get(levelIndex);
+                List<DataPointWithOriginInfo> rawData = dataSetForWindLevel.get(levelIndex);
                 if (rawData == null || rawData.size() <= 0) {
                     continue;
                 }
@@ -239,8 +244,8 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
      * to the complete dataset.
      */
     public static double getNeighboorhoodSizePercentage(int[] dataCountPerWindSpeed,
-            Map<Integer, List<Double>> dataSetForWindLevel, int levelIndex, int dataIndex, Double dataPoint,
-            PolarSheetGenerationSettings settings) {
+            Map<Integer, List<DataPointWithOriginInfo>> dataSetForWindLevel, int levelIndex, int dataIndex,
+            DataPointWithOriginInfo dataPoint, PolarSheetGenerationSettings settings) {
       int neighborCount = 0;
         double pct = .0;
 
@@ -253,8 +258,8 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
                 done = true;
             } else {
                 Double dataPointToCheckForNeighborStatus = dataSetForWindLevel.get(levelIndex).get(
-                        index);
-                if (dataPoint - dataPointToCheckForNeighborStatus <= settings
+                        index).getRawData();
+                if (dataPoint.getRawData() - dataPointToCheckForNeighborStatus <= settings
                         .getOutlierDetectionNeighborhoodRadius()) {
                     neighborCount++;
                 } else {
@@ -275,8 +280,8 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
                 done = true;
             } else {
                 Double dataPointToCheckForNeighborStatus = dataSetForWindLevel.get(levelIndex).get(
-                        index);
-                if (dataPointToCheckForNeighborStatus - dataPoint <= settings
+                        index).getRawData();
+                if (dataPointToCheckForNeighborStatus - dataPoint.getRawData() <= settings
                         .getOutlierDetectionNeighborhoodRadius()) {
                     neighborCount++;
                 } else {
@@ -309,7 +314,7 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
      * @return The complete set of datapoints that have been added. Can be quite big, depending on the amount of races
      *         and competitors.
      */
-    public List<List<BoatAndWindSpeed>> getCompleteData() {
+    public List<List<BoatAndWindSpeedWithOriginInfo>> getCompleteData() {
         return polarData;
     }
 

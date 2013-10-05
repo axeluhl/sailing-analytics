@@ -21,6 +21,7 @@ public class PolarFix {
     private SpeedWithBearing boatSpeed;
     private Speed windSpeed;
     private double angleToWind;
+    private String gaugeIdString;
 
     public PolarFix(GPSFixMoving fix, TrackedRace race, GPSFixTrack<Competitor, GPSFixMoving> track, Wind windSpeed,
             PolarSheetGenerationSettings settings) {
@@ -28,6 +29,7 @@ public class PolarFix {
         Bearing bearing = boatSpeed.getBearing();
         
         Position position = fix.getPosition();
+        gaugeIdString = createWindGaugesString(race);
         this.windSpeed = windSpeed;
         Set<WindSource> windSourcesToExclude;
         if (settings.useOnlyEstimatedForWindDirection()) {
@@ -43,6 +45,15 @@ public class PolarFix {
         }
         Bearing windBearing = windEstimated.getFrom();
         angleToWind = bearing.getDifferenceTo(windBearing).getDegrees();
+    }
+
+    private String createWindGaugesString(TrackedRace race) {
+        Iterable<WindSource> gaugeWindSources = race.getWindSources(WindSourceType.EXPEDITION);
+        String gaugeIdString = "";
+        for (WindSource source : gaugeWindSources) {
+            gaugeIdString = gaugeIdString + "+" +  source.getId();
+        }
+        return gaugeIdString;
     }
 
     public Set<WindSource> collectWindSourcesToIgnoreForBearing(TrackedRace race, boolean excludeCourseBased) {
@@ -83,7 +94,9 @@ public class PolarFix {
     public double getAngleToWind() {
         return angleToWind;
     }
-    
-    
+
+    public String getGaugeIdString() {
+        return gaugeIdString;
+    }  
 
 }

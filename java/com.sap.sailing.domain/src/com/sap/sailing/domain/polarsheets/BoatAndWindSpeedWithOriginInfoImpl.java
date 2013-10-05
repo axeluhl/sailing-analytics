@@ -2,16 +2,16 @@ package com.sap.sailing.domain.polarsheets;
 
 import com.sap.sailing.domain.common.Speed;
 
-public class BoatAndWindSpeedImpl implements BoatAndWindSpeed{
+public class BoatAndWindSpeedWithOriginInfoImpl implements BoatAndWindSpeedWithOriginInfo {
 
     private Speed boatSpeed;
     private Speed windSpeed;
-    
-    
+    private String windGaugesIdString;
 
-    public BoatAndWindSpeedImpl(Speed boatSpeed, Speed windSpeed) {
+    public BoatAndWindSpeedWithOriginInfoImpl(Speed boatSpeed, Speed windSpeed, String windGaugesIdString) {
         this.boatSpeed = boatSpeed;
         this.windSpeed = windSpeed;
+        this.windGaugesIdString = windGaugesIdString;
     }
 
     @Override
@@ -23,6 +23,10 @@ public class BoatAndWindSpeedImpl implements BoatAndWindSpeed{
     public Speed getWindSpeed() {
         return windSpeed;
     }
-    
+
+    @Override
+    public String getWindGaugesIdString() {
+        return windGaugesIdString;
+    }
 
 }
