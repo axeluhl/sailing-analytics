@@ -10,6 +10,8 @@ public interface QueryComponentsProvider<DimensionType> {
     
     public enum GrouperType { Dimensions, Custom }
 
+    public boolean areComponentsValid();
+
     public Map<DimensionType, Collection<?>> getSelection();
 
     public GrouperType getGrouperType();
@@ -17,7 +19,9 @@ public interface QueryComponentsProvider<DimensionType> {
     public String getCustomGrouperScriptText();
 
     public StatisticType getStatisticToCalculate();
-
     public AggregatorType getAggregatorType();
+
+    public void addListener(QueryComponentsChangedListener<DimensionType> listener);
+    public void removeListener(QueryComponentsChangedListener<DimensionType> listener);
 
 }

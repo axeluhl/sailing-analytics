@@ -8,6 +8,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.SelectionChangeEvent;
 
 public abstract class SelectionTable<DimensionType, ContentType, ValueType> extends SimplePanel {
     
@@ -61,6 +62,10 @@ public abstract class SelectionTable<DimensionType, ContentType, ValueType> exte
     
     public String getValueAsString(ContentType content) {
         return getValue(content).toString();
+    }
+    
+    public void addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
+        selectionModel.addSelectionChangeHandler(handler);
     }
 
 }

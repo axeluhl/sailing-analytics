@@ -29,13 +29,13 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public class QueryResultsChart extends SimplePanel {
 
     private StringMessages stringMessages;
-    
+
     private Chart chart;
     private Map<GroupKey, Series> series;
-    
+
     private Map<GroupKey, Integer> mainKeyToValueMap;
     private Map<Integer, GroupKey> valueToGroupKeyMap;
-    
+
     private Label noQuerySelectedLabel;
 
     public QueryResultsChart(StringMessages stringMessages) {
@@ -44,22 +44,22 @@ public class QueryResultsChart extends SimplePanel {
         series = new HashMap<GroupKey, Series>();
         noQuerySelectedLabel = new Label(this.stringMessages.noQuerySelected() + ".");
         noQuerySelectedLabel.setStyleName("chart-importantMessage");
-        
+
         createChart();
         setWidget(noQuerySelectedLabel);
     }
 
     public void showResult(QueryResult<? extends Number> result) {
         reset();
-        
+
         updateYAxisLabels(result);
         updateChartSubtitleAndSetChartAsWidget(result);
-        
+
         List<GroupKey> sortedKeys = getSortedKeysFrom(result);
         buildGroupKeyValueMaps(sortedKeys);
-        
+
         if (resultHasComplexKeys(result)) {
-            displayComplexResult(result, sortedKeys);            
+            displayComplexResult(result, sortedKeys);
         } else {
             displaySimpleResult(result, sortedKeys);
         }
@@ -67,10 +67,11 @@ public class QueryResultsChart extends SimplePanel {
         chart.redraw();
     }
 
-	private void updateYAxisLabels(QueryResult<? extends Number> result) {
-		chart.getYAxis().setAxisTitleText(result.getResultSignifier());
-		chart.setToolTip(new ToolTip().setValueDecimals(result.getValueDecimals()).setValueSuffix(UnitFormatter.format(result.getUnit())));
-	}
+    private void updateYAxisLabels(QueryResult<? extends Number> result) {
+        chart.getYAxis().setAxisTitleText(result.getResultSignifier());
+        chart.setToolTip(new ToolTip().setValueDecimals(result.getValueDecimals()).setValueSuffix(
+                UnitFormatter.format(result.getUnit())));
+    }
 
     private boolean resultHasComplexKeys(QueryResult<? extends Number> result) {
         for (GroupKey key : result.getResults().keySet()) {
@@ -103,13 +104,14 @@ public class QueryResultsChart extends SimplePanel {
         }
         chart.addSeries(series, false, false);
     }
-    
+
     private void updateChartSubtitleAndSetChartAsWidget(QueryResult<? extends Number> result) {
-        chart.setChartSubtitle(new ChartSubtitle().setText(stringMessages.queryResultsChartSubtitle(result.getRetrievedDataAmount(), result.getFilteredDataAmount(), result.getCalculationTimeInSeconds())));
-        //This is needed, so that the subtitle is updated. Otherwise the text would stay empty
+        chart.setChartSubtitle(new ChartSubtitle().setText(stringMessages.queryResultsChartSubtitle(
+                result.getRetrievedDataAmount(), result.getFilteredDataAmount(), result.getCalculationTimeInSeconds())));
+        // This is needed, so that the subtitle is updated. Otherwise the text would stay empty
         this.setWidget(null);
         this.setWidget(chart);
-        
+
     }
 
     public List<GroupKey> getSortedKeysFrom(QueryResult<? extends Number> result) {
@@ -135,29 +137,26 @@ public class QueryResultsChart extends SimplePanel {
             }
         }
     }
-    
+
     private Series getOrCreateSeries(GroupKey groupKey) {
         GroupKey key = groupKey.hasSubKey() ? groupKey.getSubKey() : groupKey;
-        
+
         if (!series.containsKey(key)) {
             series.put(key, chart.createSeries().setName(key.asString()));
         }
         return series.get(key);
     }
-    
+
     private void reset() {
         chart.removeAllSeries(false);
         series = new HashMap<GroupKey, Series>();
     }
 
     private void createChart() {
-        chart = new Chart().setType(Series.Type.COLUMN)
-                .setMarginLeft(100)
-                .setMarginRight(45)
-                .setWidth100()
+        chart = new Chart().setType(Series.Type.COLUMN).setMarginLeft(100).setMarginRight(45).setWidth100()
                 .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText(stringMessages.dataMiningResult()));
-        
+
         chart.getXAxis().setAllowDecimals(false).setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
             @Override
             public String format(AxisLabelsData axisLabelsData) {
@@ -170,20 +169,19 @@ public class QueryResultsChart extends SimplePanel {
             }
         }));
 
-        chart.getYAxis().setAxisTitleText("Result")
-                .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
-                    @Override
-                    public String format(AxisLabelsData axisLabelsData) {
-                        try {
-                            return axisLabelsData.getValueAsDouble() + "";
-                        } catch (Exception e) {
-                            return "";
-                        }
-                    }
-                }));
+        chart.getYAxis().setAxisTitleText("Result").setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
+            @Override
+            public String format(AxisLabelsData axisLabelsData) {
+                try {
+                    return axisLabelsData.getValueAsDouble() + "";
+                } catch (Exception e) {
+                    return "";
+                }
+            }
+        }));
 
-//        chart.setToolTip(new ToolTip()
-//                .setPointFormat("<span style=\"color:{series.color}\">{series.name}</span>: <b>{point.y}s</b><br/>"));
+        // chart.setToolTip(new ToolTip()
+        // .setPointFormat("<span style=\"color:{series.color}\">{series.name}</span>: <b>{point.y}s</b><br/>"));
     }
 
 }

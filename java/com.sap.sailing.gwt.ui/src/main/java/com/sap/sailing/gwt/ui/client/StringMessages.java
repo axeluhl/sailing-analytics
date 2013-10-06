@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.i18n.client.Messages;
+import com.google.gwt.safehtml.shared.SafeHtml;
 
 public interface StringMessages extends Messages {
     String helloWorld();
@@ -768,4 +769,5 @@ public interface StringMessages extends Messages {
     String statisticToCalculate();
     String queryResultsChartSubtitle(int retrievedDataAmount, int filteredDataAmount, double calculationTime);
 	String noQuerySelected();
+	String runAutomatic();
 }
