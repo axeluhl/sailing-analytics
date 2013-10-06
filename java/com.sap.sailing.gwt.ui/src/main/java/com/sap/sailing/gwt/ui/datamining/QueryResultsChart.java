@@ -19,6 +19,7 @@ import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.datamining.shared.GroupKey;
 import com.sap.sailing.datamining.shared.QueryResult;
@@ -33,21 +34,25 @@ public class QueryResultsChart extends SimplePanel {
     
     private Map<GroupKey, Integer> mainKeyToValueMap;
     private Map<Integer, GroupKey> valueToGroupKeyMap;
+    
+    private Label noQuerySelectedLabel;
 
     public QueryResultsChart(StringMessages stringMessages) {
         super();
         this.stringMessages = stringMessages;
         series = new HashMap<GroupKey, Series>();
+        noQuerySelectedLabel = new Label(this.stringMessages.noQuerySelected() + ".");
+        noQuerySelectedLabel.setStyleName("chart-importantMessage");
         
         createChart();
-        setWidget(chart);
+        setWidget(noQuerySelectedLabel);
     }
 
     public void showResult(QueryResult<? extends Number> result) {
         reset();
         
         chart.getYAxis().setAxisTitleText(result.getResultSignifier());
-        updateChartSubtitle(result);
+        updateChartSubtitleAndSetChartAsWidget(result);
         
         List<GroupKey> sortedKeys = getSortedKeysFrom(result);
         buildGroupKeyValueMaps(sortedKeys);
@@ -93,7 +98,7 @@ public class QueryResultsChart extends SimplePanel {
         chart.addSeries(series, false, false);
     }
     
-    private void updateChartSubtitle(QueryResult<? extends Number> result) {
+    private void updateChartSubtitleAndSetChartAsWidget(QueryResult<? extends Number> result) {
         chart.setChartSubtitle(new ChartSubtitle().setText(stringMessages.queryResultsChartSubtitle(result.getRetrievedDataAmount(), result.getFilteredDataAmount(), result.getCalculationTimeInSeconds())));
         //This is needed, so that the subtitle is updated. Otherwise the text would stay empty
         this.setWidget(null);

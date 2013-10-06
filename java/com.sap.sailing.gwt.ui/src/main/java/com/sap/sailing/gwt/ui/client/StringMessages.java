@@ -767,4 +767,5 @@ public interface StringMessages extends Messages {
     String groupBy();
     String statisticToCalculate();
     String queryResultsChartSubtitle(int retrievedDataAmount, int filteredDataAmount, double calculationTime);
+	String noQuerySelected();
 }
