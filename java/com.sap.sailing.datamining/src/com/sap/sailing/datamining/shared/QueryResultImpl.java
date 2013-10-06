@@ -11,6 +11,9 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     private long calculationTimeInNanos;
 
     private String resultSignifier;
+	private Unit unit;
+	private int valueDecimals;
+	
     private Map<GroupKey, AggregatedType> results;
     
     /**
@@ -19,11 +22,13 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     @Deprecated
     QueryResultImpl() { }
     
-    public QueryResultImpl(int retrievedDataAmount, int filteredDataAmount, String resultSiginifier) {
+    public QueryResultImpl(int retrievedDataAmount, int filteredDataAmount, String resultSiginifier, Unit unit, int valueDecimals) {
         this.retrievedDataAmount = retrievedDataAmount;
         this.filteredDataAmount = filteredDataAmount;
         results = new HashMap<GroupKey, AggregatedType>();
         this.resultSignifier = resultSiginifier;
+        this.unit = unit;
+        this.valueDecimals = valueDecimals;
     }
 
     @Override
@@ -49,6 +54,16 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     public String getResultSignifier() {
         return resultSignifier;
     }
+    
+    @Override
+    public Unit getUnit() {
+    	return unit;
+    }
+
+	@Override
+	public int getValueDecimals() {
+		return valueDecimals;
+	}
 
     @Override
     public Map<GroupKey, AggregatedType> getResults() {

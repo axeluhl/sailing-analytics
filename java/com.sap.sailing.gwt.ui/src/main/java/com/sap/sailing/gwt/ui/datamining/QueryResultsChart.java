@@ -14,6 +14,7 @@ import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
@@ -51,7 +52,7 @@ public class QueryResultsChart extends SimplePanel {
     public void showResult(QueryResult<? extends Number> result) {
         reset();
         
-        chart.getYAxis().setAxisTitleText(result.getResultSignifier());
+        updateYAxisLabels(result);
         updateChartSubtitleAndSetChartAsWidget(result);
         
         List<GroupKey> sortedKeys = getSortedKeysFrom(result);
@@ -65,6 +66,11 @@ public class QueryResultsChart extends SimplePanel {
 
         chart.redraw();
     }
+
+	private void updateYAxisLabels(QueryResult<? extends Number> result) {
+		chart.getYAxis().setAxisTitleText(result.getResultSignifier());
+		chart.setToolTip(new ToolTip().setValueDecimals(result.getValueDecimals()).setValueSuffix(UnitFormatter.format(result.getUnit())));
+	}
 
     private boolean resultHasComplexKeys(QueryResult<? extends Number> result) {
         for (GroupKey key : result.getResults().keySet()) {

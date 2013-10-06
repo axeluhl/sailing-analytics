@@ -38,7 +38,7 @@ public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query
         
         Collection<DataType> retrievedData = retriever.retrieveData(racingEventService);
         Collection<DataType> filteredData = filter.filter(retrievedData);
-        QueryResultImpl<AggregatedType> result = new QueryResultImpl<AggregatedType>(retrievedData.size(), filteredData.size(), createResultSignifier());
+        QueryResultImpl<AggregatedType> result = new QueryResultImpl<AggregatedType>(retrievedData.size(), filteredData.size(), createResultSignifier(), extractor.getUnit(), extractor.getValueDecimals());
         Map<GroupKey, Collection<DataType>> groupedFixes = grouper.group(filteredData);
         for (Entry<GroupKey, Collection<DataType>> groupEntry : groupedFixes.entrySet()) {
             Collection<ExtractedType> extractedData = extractor.extract(groupEntry.getValue());
