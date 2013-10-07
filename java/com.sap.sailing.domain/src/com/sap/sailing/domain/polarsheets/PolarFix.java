@@ -51,7 +51,11 @@ public class PolarFix {
         Iterable<WindSource> gaugeWindSources = race.getWindSources(WindSourceType.EXPEDITION);
         String gaugeIdString = "";
         for (WindSource source : gaugeWindSources) {
-            gaugeIdString = gaugeIdString + "+" +  source.getId();
+            if (gaugeIdString.isEmpty()) {
+                gaugeIdString = "" + source.getId();
+            } else {
+                gaugeIdString = gaugeIdString + "+" +  source.getId();
+            }
         }
         return gaugeIdString;
     }

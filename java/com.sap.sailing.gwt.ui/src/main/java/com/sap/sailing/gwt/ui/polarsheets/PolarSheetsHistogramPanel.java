@@ -15,13 +15,8 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.PlotOptions.Stacking;
 
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -30,36 +25,22 @@ public class PolarSheetsHistogramPanel extends DockLayoutPanel {
     private final Chart chart;
     private final StringMessages stringMessages;
     private PolarSheetsHistogramData currentData;
+    private final PolarSheetsHistogramDataArrangeButtonBar dataArrangeBar;
 
     public PolarSheetsHistogramPanel(StringMessages stringMessages) {
-        super(Unit.PCT);
+        super(Unit.PX);
         this.stringMessages = stringMessages;
         setSize("100%", "100%");
-        addSouth(createDataArrangeButtons(), 10);
+        dataArrangeBar = createDataArrangeButtons();
+        addSouth(dataArrangeBar, 20);
         
         chart = createHistogramChart();
         chart.getElement().setAttribute("align", "top");
         add(chart);
     }
 
-    private Widget createDataArrangeButtons() {
-        HorizontalPanel buttonPanel = new HorizontalPanel();
-        Button arrangeByGaugesIdsButton = new Button("Arrange By Wind Gauge Ids");
-        arrangeByGaugesIdsButton.addClickHandler(new ClickHandler() {
-            
-            @Override
-            public void onClick(ClickEvent event) {
-                chart.removeAllSeries();
-                for (Entry<String, Integer[]> entry : currentData.getYValuesByGaugeIds().entrySet()) {
-                    Series series = chart.createSeries();
-                    series.setName(entry.getKey());
-                    series.setPoints(toPoints(currentData.getxValues(), entry.getValue()));
-                    chart.addSeries(series);
-                }
-            }
-        });
-        buttonPanel.add(arrangeByGaugesIdsButton);
-        return buttonPanel;
+    private PolarSheetsHistogramDataArrangeButtonBar createDataArrangeButtons() {
+        return new PolarSheetsHistogramDataArrangeButtonBar(this);
     }
 
     private Chart createHistogramChart() {
@@ -74,15 +55,12 @@ public class PolarSheetsHistogramPanel extends DockLayoutPanel {
     }
 
     public void setData(PolarSheetsHistogramData data) {
-        chart.removeAllSeries();
+        dataArrangeBar.reset();
+        currentData = data;
         chart.setTitle(new ChartTitle().setText(stringMessages.histogram()), new ChartSubtitle().setText(stringMessages
                 .angleAndTotalNumberOfDataPointsAndCovAndCm(data.getAngle(), data.getDataCount(),
                         data.getCoefficiantOfVariation(), data.getConfidenceMeasure())));
-        Point[] points = toPoints(data);
-        Series series = chart.createSeries();
-        series.setPoints(points);
-        currentData = data;
-        chart.addSeries(series);
+        arrangeByNothing();
     }
 
     private Point[] toPoints(PolarSheetsHistogramData data) {
@@ -116,6 +94,24 @@ public class PolarSheetsHistogramPanel extends DockLayoutPanel {
     public void onResize() {
         chart.setSizeToMatchContainer();
         super.onResize();
+    }
+
+    public void arrangeByWindGaugeIds() {
+        chart.removeAllSeries();
+        for (Entry<String, Integer[]> entry : currentData.getYValuesByGaugeIds().entrySet()) {
+            Series series = chart.createSeries();
+            series.setName(entry.getKey());
+            series.setPoints(toPoints(currentData.getxValues(), entry.getValue()));
+            chart.addSeries(series);
+        }
+    }
+    
+    public void arrangeByNothing() {
+        chart.removeAllSeries();
+        Point[] points = toPoints(currentData);
+        Series series = chart.createSeries();
+        series.setPoints(points);  
+        chart.addSeries(series);
     }
     
 

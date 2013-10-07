@@ -34,6 +34,9 @@ public class PolarSheetHistogramBuilder {
 
         Map<String, Integer[]> yValuesByGaugeIds = new HashMap<String, Integer[]>();
         Integer[] yValues = new Integer[numberOfColumns];
+        for (int i = 0; i < yValues.length; i++) {
+            yValues[i] = 0;
+        }
         for (DataPointWithOriginInfo dataPoint : dataPointsWithOriginInfo) {
             double notRoundedYet = (dataPoint.getRawData() - min) / range;
             int u = (int) notRoundedYet;
@@ -41,19 +44,17 @@ public class PolarSheetHistogramBuilder {
                 // For max value
                 u = numberOfColumns - 1;
             }
-            if (yValues[u] == null) {
-                yValues[u] = 0;
-            }
             yValues[u]++;
 
             String gaugeIdsString = dataPoint.getWindGaugeIdString();
             if (!yValuesByGaugeIds.containsKey(gaugeIdsString)) {
-                yValuesByGaugeIds.put(gaugeIdsString, new Integer[numberOfColumns]);
+                Integer[] yValuesForOneGaugeIdsString = new Integer[numberOfColumns];
+                for (int i = 0; i < yValuesForOneGaugeIdsString.length; i++) {
+                    yValuesForOneGaugeIdsString[i] = 0;
+                }
+                yValuesByGaugeIds.put(gaugeIdsString, yValuesForOneGaugeIdsString);
             }
             Integer[] yValuesForThatGaugeIdsString = yValuesByGaugeIds.get(gaugeIdsString);
-            if (yValuesForThatGaugeIdsString[u] == null) {
-                yValuesForThatGaugeIdsString[u] = 0;
-            }
             yValuesForThatGaugeIdsString[u]++;
 
         }
