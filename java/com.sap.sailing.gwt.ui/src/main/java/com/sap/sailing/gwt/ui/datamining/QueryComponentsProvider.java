@@ -10,7 +10,7 @@ public interface QueryComponentsProvider<DimensionType> {
     
     public enum GrouperType { Dimensions, Custom }
 
-    public boolean areComponentsValid();
+    public Iterable<String> validateComponents();
 
     public Map<DimensionType, Collection<?>> getSelection();
 

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,25 +27,34 @@ public abstract class AbstractQueryComponentsProvider<DimensionType> extends Flo
 
         listeners = new HashSet<QueryComponentsChangedListener<DimensionType>>();
     }
-
+    
     @Override
-    public boolean areComponentsValid() {
-        return isGrouperValid() && isStatisticToCalculateValid() && isAggregatorValid();
+    public Iterable<String> validateComponents() {
+        Collection<String> errorMessages = new ArrayList<String>();
+        
+        String grouperError = validateGrouper();
+        if (grouperError != null && !grouperError.isEmpty()) {
+            errorMessages.add(grouperError);
+        }
+        
+        String statisticError = validateStatisticAndAggregator();
+        if (statisticError != null && !statisticError.isEmpty()) {
+            errorMessages.add(statisticError);
+        }
+        
+        return errorMessages;
     }
 
-    private boolean isAggregatorValid() {
-        return getAggregatorType() != null;
-    }
-
-    private boolean isStatisticToCalculateValid() {
-        return getStatisticToCalculate() != null;
-    }
-
-    private boolean isGrouperValid() {
-        ValidateGrouper: switch (getGrouperType()) {
+    private String validateGrouper() {
+        GrouperType grouper = getGrouperType();
+        if (grouper == null) {
+            return stringMessages.noGrouperSelectedError();
+        }
+        
+        ValidateGrouper: switch (grouper) {
         case Custom:
             if (getCustomGrouperScriptText().isEmpty()) {
-                return false;
+                return stringMessages.noCustomGrouperScriptTextError();
             }
             break;
         case Dimensions:
@@ -52,13 +63,19 @@ public abstract class AbstractQueryComponentsProvider<DimensionType> extends Flo
                     break ValidateGrouper;
                 }
             }
-            return false;
+            return stringMessages.noDimensionToGroupBySelectedError();
         default:
-            return false;
+            return stringMessages.noGrouperSelectedError();
         }
 
-        return true;
+        return null;
     }
+
+    private String validateStatisticAndAggregator() {
+        return getStatisticAndAggregatorType() == null ? stringMessages.noStatisticSelectedError() : null;
+    }
+
+    protected abstract StatisticAndAggregatorType getStatisticAndAggregatorType();
 
     @Override
     public void addListener(QueryComponentsChangedListener<DimensionType> listener) {

@@ -769,4 +769,9 @@ public interface StringMessages extends Messages {
     String queryResultsChartSubtitle(int retrievedDataAmount, int filteredDataAmount, double calculationTime);
     String noQuerySelected();
     String runAutomatically();
+    String noStatisticSelectedError();
+    String noCustomGrouperScriptTextError();
+    String noDimensionToGroupBySelectedError();
+    String noGrouperSelectedError();
+    String queryNotValidBecause();
 }

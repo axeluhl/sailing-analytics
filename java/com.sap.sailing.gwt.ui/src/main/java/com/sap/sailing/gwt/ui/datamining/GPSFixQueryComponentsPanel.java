@@ -113,6 +113,11 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
     }
 
     @Override
+    protected StatisticAndAggregatorType getStatisticAndAggregatorType() {
+        return statisticsListBox.getValue();
+    }
+
+    @Override
     public StatisticType getStatisticToCalculate() {
         return statisticsListBox.getValue().getStatisticType();
     }
@@ -266,13 +271,15 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
         grouperTypeListBox.addValueChangeHandler(new ValueChangeHandler<GrouperType>() {
             @Override
             public void onValueChange(ValueChangeEvent<GrouperType> event) {
-                switch (event.getValue()) {
-                case Custom:
-                    groupByOptionsPanel.showWidget(1);
-                    break;
-                case Dimensions:
-                    groupByOptionsPanel.showWidget(0);
-                    break;
+                if (event.getValue() != null) {
+                    switch (event.getValue()) {
+                    case Custom:
+                        groupByOptionsPanel.showWidget(1);
+                        break;
+                    case Dimensions:
+                        groupByOptionsPanel.showWidget(0);
+                        break;
+                    }
                 }
                 notifyQueryComponentsChanged();
             }

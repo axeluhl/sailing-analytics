@@ -23,45 +23,48 @@ public abstract class AbstractResultsPanel<DimensionType, ResultType> extends Fl
     private QueryComponentsProvider<DimensionType> queryComponentsProvider;
 
     private Label queryStatusLabel;
-    private ResultsPresentator<ResultType> presentator;
+    private ResultsPresenter<ResultType> presenter;
 
     private Button runQueryButton;
 
     public AbstractResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, QueryComponentsProvider<DimensionType> queryComponentsProvider, ResultsPresentator<ResultType> presentator) {
+            ErrorReporter errorReporter, QueryComponentsProvider<DimensionType> queryComponentsProvider, ResultsPresenter<ResultType> presenter) {
         super();
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.queryComponentsProvider = queryComponentsProvider;
+        this.presenter = presenter;
         
         add(createFunctionsPanel());
-        this.presentator = presentator;
-        add(this.presentator.getWidget());
+        add(this.presenter.getWidget());
+        runQuery();
     }
-    
+
     @Override
     public void queryComponentsChanged(QueryComponentsProvider<DimensionType> componentsProvider) {
-    	if (componentsProvider.areComponentsValid()) {
-            runQuery();
-        } else {
-            //TODO Display error message
-        }
+        runQuery();
     }
 
     private void runQuery() {
-        queryStatusLabel.setText(" | " + stringMessages.running());
-        sendServerRequest(new AsyncCallback<QueryResult<ResultType>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error running the query: " + caught.getMessage());
-            }
-            @Override
-            public void onSuccess(QueryResult<ResultType> result) {
-                queryStatusLabel.setText(" | " + stringMessages.done());
-                presentator.showResult(result);
-            }
-        });
+        Iterable<String> errorMessages = queryComponentsProvider.validateComponents();
+        if (errorMessages == null || !errorMessages.iterator().hasNext()) {
+            queryStatusLabel.setText(" | " + stringMessages.running());
+            sendServerRequest(new AsyncCallback<QueryResult<ResultType>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error running the query: " + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(QueryResult<ResultType> result) {
+                    queryStatusLabel.setText(" | " + stringMessages.done());
+                    presenter.showResult(result);
+                }
+            });
+        } else {
+            presenter.showError(stringMessages.queryNotValidBecause(), errorMessages);
+        }
     }
 
     protected abstract void sendServerRequest(AsyncCallback<QueryResult<ResultType>> asyncCallback);

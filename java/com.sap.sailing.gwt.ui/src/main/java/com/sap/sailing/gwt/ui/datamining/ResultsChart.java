@@ -20,7 +20,7 @@ import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -28,7 +28,7 @@ import com.sap.sailing.datamining.shared.GroupKey;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class ResultsChart implements ResultsPresentator<Number>, RequiresResize {
+public class ResultsChart implements ResultsPresenter<Number>, RequiresResize {
 
     private StringMessages stringMessages;
     private SimplePanel mainPanel;
@@ -39,37 +39,56 @@ public class ResultsChart implements ResultsPresentator<Number>, RequiresResize 
     private Map<GroupKey, Integer> mainKeyToValueMap;
     private Map<Integer, GroupKey> valueToGroupKeyMap;
 
-    private Label noQuerySelectedLabel;
+    private HTML errorLabel;
 
     public ResultsChart(StringMessages stringMessages) {
         super();
         this.stringMessages = stringMessages;
         mainPanel = new SimplePanel();
         series = new HashMap<GroupKey, Series>();
-        noQuerySelectedLabel = new Label(this.stringMessages.noQuerySelected() + ".");
-        noQuerySelectedLabel.setStyleName("chart-importantMessage");
+        errorLabel = new HTML();
+        errorLabel.setStyleName("chart-importantMessage");
 
         createChart();
-        mainPanel.setWidget(noQuerySelectedLabel);
+        mainPanel.setWidget(chart);
+    }
+    
+    @Override
+    public void showError(String error) {
+        errorLabel.setHTML(error);
+        mainPanel.setWidget(errorLabel);
+    }
+    
+    @Override
+    public void showError(String mainError, Iterable<String> detailedErrors) {
+        StringBuilder errorBuilder = new StringBuilder(mainError + ":<br /><ul>");
+        for (String detailedError : detailedErrors) {
+            errorBuilder.append("<li>" + detailedError + "</li>");
+        }
+        errorBuilder.append("</ul>");
+        showError(errorBuilder.toString());
     }
 
     @Override
     public void showResult(QueryResult<Number> result) {
-        reset();
-
-        updateYAxisLabels(result);
-        updateChartSubtitleAndSetChartAsWidget(result);
-
-        List<GroupKey> sortedKeys = getSortedKeysFrom(result);
-        buildGroupKeyValueMaps(sortedKeys);
-
-        if (resultHasComplexKeys(result)) {
-            displayComplexResult(result, sortedKeys);
+        if (!result.isEmpty()) {
+            resetChart();
+            
+            updateYAxisLabels(result);
+            updateChartSubtitleAndSetChartAsWidget(result);
+            
+            List<GroupKey> sortedKeys = getSortedKeysFrom(result);
+            buildGroupKeyValueMaps(sortedKeys);
+            if (resultHasComplexKeys(result)) {
+                displayComplexResult(result, sortedKeys);
+            } else {
+                displaySimpleResult(result, sortedKeys);
+            }
+            
+            chart.redraw();
         } else {
-            displaySimpleResult(result, sortedKeys);
+            showError(stringMessages.noDataFound() + ".");
         }
-
-        chart.redraw();
     }
 
     private void updateYAxisLabels(QueryResult<? extends Number> result) {
@@ -152,7 +171,7 @@ public class ResultsChart implements ResultsPresentator<Number>, RequiresResize 
         return series.get(key);
     }
 
-    private void reset() {
+    private void resetChart() {
         chart.removeAllSeries(false);
         series = new HashMap<GroupKey, Series>();
     }

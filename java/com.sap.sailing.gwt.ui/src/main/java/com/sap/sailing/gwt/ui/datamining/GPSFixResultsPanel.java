@@ -17,8 +17,8 @@ import com.sap.sailing.gwt.ui.datamining.QueryComponentsProvider.GrouperType;
 public class GPSFixResultsPanel extends AbstractResultsPanel<SharedDimensions.GPSFix, Number> {
 
     public GPSFixResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, QueryComponentsProvider<SharedDimensions.GPSFix> queryComponentsProvider, ResultsPresentator<Number> presentator) {
-        super(stringMessages, sailingService, errorReporter, queryComponentsProvider, presentator);
+            ErrorReporter errorReporter, QueryComponentsProvider<SharedDimensions.GPSFix> queryComponentsProvider, ResultsPresenter<Number> presenter) {
+        super(stringMessages, sailingService, errorReporter, queryComponentsProvider, presenter);
     }
 
     @Override

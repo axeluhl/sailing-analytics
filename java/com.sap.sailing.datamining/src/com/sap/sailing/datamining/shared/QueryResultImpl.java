@@ -11,8 +11,8 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     private long calculationTimeInNanos;
 
     private String resultSignifier;
-	private Unit unit;
-	private int valueDecimals;
+    private Unit unit;
+    private int valueDecimals;
 	
     private Map<GroupKey, AggregatedType> results;
     
@@ -48,6 +48,11 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     
     public void setCalculationTimeInNanos(long calculationTimeInNanos) {
         this.calculationTimeInNanos = calculationTimeInNanos;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return results.isEmpty();
     }
 
     @Override
