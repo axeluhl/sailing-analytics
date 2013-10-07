@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public abstract class AbstractResultsPanel<DimensionType> extends FlowPanel implements QueryComponentsChangedListener<DimensionType> {
+public abstract class AbstractResultsPanel<DimensionType, ResultType> extends FlowPanel implements QueryComponentsChangedListener<DimensionType> {
 
     private StringMessages stringMessages;
     private SailingServiceAsync sailingService;
@@ -23,12 +23,12 @@ public abstract class AbstractResultsPanel<DimensionType> extends FlowPanel impl
     private QueryComponentsProvider<DimensionType> queryComponentsProvider;
 
     private Label queryStatusLabel;
-    private ResultsChart resultChart;
-    
-	private Button runQueryButton;
+    private ResultsPresentator<ResultType> presentator;
+
+    private Button runQueryButton;
 
     public AbstractResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, QueryComponentsProvider<DimensionType> queryComponentsProvider) {
+            ErrorReporter errorReporter, QueryComponentsProvider<DimensionType> queryComponentsProvider, ResultsPresentator<ResultType> presentator) {
         super();
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
@@ -36,8 +36,8 @@ public abstract class AbstractResultsPanel<DimensionType> extends FlowPanel impl
         this.queryComponentsProvider = queryComponentsProvider;
         
         add(createFunctionsPanel());
-        resultChart = new ResultsChart(this.stringMessages);
-        add(resultChart);
+        this.presentator = presentator;
+        add(this.presentator.getWidget());
     }
     
     @Override
@@ -51,20 +51,20 @@ public abstract class AbstractResultsPanel<DimensionType> extends FlowPanel impl
 
     private void runQuery() {
         queryStatusLabel.setText(" | " + stringMessages.running());
-        sendServerRequest(new AsyncCallback<QueryResult<Number>>() {
+        sendServerRequest(new AsyncCallback<QueryResult<ResultType>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running the query: " + caught.getMessage());
             }
             @Override
-            public void onSuccess(QueryResult<Number> result) {
+            public void onSuccess(QueryResult<ResultType> result) {
                 queryStatusLabel.setText(" | " + stringMessages.done());
-                resultChart.showResult(result);
+                presentator.showResult(result);
             }
         });
     }
 
-    protected abstract void sendServerRequest(AsyncCallback<QueryResult<Number>> asyncCallback);
+    protected abstract void sendServerRequest(AsyncCallback<QueryResult<ResultType>> asyncCallback);
     
     protected QueryComponentsProvider<DimensionType> getQueryComponentsProvider() {
         return queryComponentsProvider;

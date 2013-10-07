@@ -14,11 +14,11 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.QueryComponentsProvider.GrouperType;
 
-public class GPSFixResultsPanel extends AbstractResultsPanel<SharedDimensions.GPSFix> {
+public class GPSFixResultsPanel extends AbstractResultsPanel<SharedDimensions.GPSFix, Number> {
 
     public GPSFixResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, QueryComponentsProvider<SharedDimensions.GPSFix> queryComponentsProvider) {
-        super(stringMessages, sailingService, errorReporter, queryComponentsProvider);
+            ErrorReporter errorReporter, QueryComponentsProvider<SharedDimensions.GPSFix> queryComponentsProvider, ResultsPresentator<Number> presentator) {
+        super(stringMessages, sailingService, errorReporter, queryComponentsProvider, presentator);
     }
 
     @Override

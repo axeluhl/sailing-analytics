@@ -23,13 +23,15 @@ import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.GroupKey;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class ResultsChart extends SimplePanel implements RequiresResize {
+public class ResultsChart implements ResultsPresentator<Number>, RequiresResize {
 
     private StringMessages stringMessages;
+    private SimplePanel mainPanel;
 
     private Chart chart;
     private Map<GroupKey, Series> series;
@@ -42,15 +44,17 @@ public class ResultsChart extends SimplePanel implements RequiresResize {
     public ResultsChart(StringMessages stringMessages) {
         super();
         this.stringMessages = stringMessages;
+        mainPanel = new SimplePanel();
         series = new HashMap<GroupKey, Series>();
         noQuerySelectedLabel = new Label(this.stringMessages.noQuerySelected() + ".");
         noQuerySelectedLabel.setStyleName("chart-importantMessage");
 
         createChart();
-        setWidget(noQuerySelectedLabel);
+        mainPanel.setWidget(noQuerySelectedLabel);
     }
 
-    public void showResult(QueryResult<? extends Number> result) {
+    @Override
+    public void showResult(QueryResult<Number> result) {
         reset();
 
         updateYAxisLabels(result);
@@ -110,8 +114,8 @@ public class ResultsChart extends SimplePanel implements RequiresResize {
         chart.setChartSubtitle(new ChartSubtitle().setText(stringMessages.queryResultsChartSubtitle(
                 result.getRetrievedDataAmount(), result.getFilteredDataAmount(), result.getCalculationTimeInSeconds())));
         // This is needed, so that the subtitle is updated. Otherwise the text would stay empty
-        this.setWidget(null);
-        this.setWidget(chart);
+        mainPanel.setWidget(null);
+        mainPanel.setWidget(chart);
 
     }
 
@@ -180,15 +184,17 @@ public class ResultsChart extends SimplePanel implements RequiresResize {
                 }
             }
         }));
-
-        // chart.setToolTip(new ToolTip()
-        // .setPointFormat("<span style=\"color:{series.color}\">{series.name}</span>: <b>{point.y}s</b><br/>"));
     }
     
     @Override
     public void onResize() {
         chart.setSizeToMatchContainer();
         chart.redraw();
+    }
+    
+    @Override
+    public Widget getWidget() {
+        return mainPanel;
     }
 
 }
