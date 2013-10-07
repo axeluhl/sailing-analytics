@@ -25,6 +25,7 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.controls.ControlPosition;
+import com.google.gwt.maps.client.controls.MapTypeStyle;
 import com.google.gwt.maps.client.controls.PanControlOptions;
 import com.google.gwt.maps.client.controls.ScaleControlOptions;
 import com.google.gwt.maps.client.controls.ZoomControlOptions;
@@ -260,7 +261,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private final StringMessages stringMessages;
     
-    private boolean dataInitialized;
+    private boolean isMapInitialized;
 
     private Date lastTimeChangeBeforeInitialization;
 
@@ -298,7 +299,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         competitorSelection.addCompetitorSelectionChangeListener(this);
         settings = new RaceMapSettings();
         lastTimeChangeBeforeInitialization = null;
-        dataInitialized = false;
+        isMapInitialized = false;
         initializeData();
         
         combinedWindPanel = new CombinedWindPanel(raceMapImageManager, stringMessages);
@@ -311,6 +312,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         // load all the libs for use in the maps
         ArrayList<LoadLibrary> loadLibraries = new ArrayList<LoadApi.LoadLibrary>();
         loadLibraries.add(LoadLibrary.DRAWING);
+        loadLibraries.add(LoadLibrary.GEOMETRY);
 
         Runnable onLoad = new Runnable() {
           @Override
@@ -320,6 +322,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               mapOptions.setMapTypeControl(true);
               mapOptions.setPanControl(true);
               mapOptions.setScaleControl(true);
+              
+              MapTypeStyle[] mapTypeStyles = new MapTypeStyle[1];
+              MapTypeStyle hideFerryLinesStyle = MapTypeStyle.newInstance();
+              mapTypeStyles[0] = hideFerryLinesStyle;
+              mapOptions.setMapTypeStyles(mapTypeStyles);
               
               ScaleControlOptions scaleControlOptions = ScaleControlOptions.newInstance();
               scaleControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);
@@ -382,77 +389,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   lastTimeChangeBeforeInitialization = null;
               }
               //Data has been initialized
-              RaceMap.this.dataInitialized = true;
+              RaceMap.this.isMapInitialized = true;
               RaceMap.this.redraw();
           }
         };
 
         LoadApi.go(onLoad, loadLibraries, sensor); 
     }
-    
-//    private void loadMapsAPI() {
-//        Maps.loadMapsApi(mapsAPIKey, "2", false, new Runnable() {
-//            public void run() {
-//                map = new MapWidget();
-//                map.addControl(new MenuMapTypeControl());
-//                map.addControl(new ScaleControl(), new ControlPosition(ControlAnchor.BOTTOM_RIGHT, /* offsetX */ 10, /* offsetY */ 20));
-//                map.addControl(new LargeMapControl3D(), new ControlPosition(ControlAnchor.TOP_RIGHT, /* offsetX */ 0, /* offsetY */ 30));
-//                // Add the map to the HTML host page
-//                map.setScrollWheelZoomEnabled(true);
-//                map.setContinuousZoom(true);
-//                RaceMap.this.add(map, 0, 0);
-//                RaceMap.this.add(combinedWindPanel, 10, 10);
-//                RaceMap.this.raceMapImageManager.loadMapIcons(map);
-//                map.setSize("100%", "100%");
-//                map.getPane(MapPaneType.FLOAT_PANE).getElement().getStyle().setZIndex(RaceMapOverlaysZIndexes.INFO_WINDOW_ZINDEX);
-//                map.addZoomEndHandler(new MapZoomEndHandler() {
-//                    @Override
-//                    public void onZoomEnd(MapZoomEndEvent event) {
-//                        map.checkResizeAndCenter();
-//                        final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-//                        settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
-//                        Set<CompetitorDTO> competitorDTOsOfUnusedMarkers = new HashSet<CompetitorDTO>(boatOverlays.keySet());
-//                        for (CompetitorDTO competitorDTO : getCompetitorsToShow()) {
-//                                boolean usedExistingMarker = updateBoatCanvasForCompetitor(competitorDTO, timer.getTime());
-//                                if (usedExistingMarker) {
-//                                    competitorDTOsOfUnusedMarkers.remove(competitorDTO);
-//                                }
-//                        }
-//                        for (CompetitorDTO unusedMarkerCompetitorDTO : competitorDTOsOfUnusedMarkers) {
-//                            BoatOverlay boatOverlay = boatOverlays.get(unusedMarkerCompetitorDTO);
-//                            boatOverlay.removeFromMap();
-//                            boatOverlays.remove(unusedMarkerCompetitorDTO);
-//                        }
-//                    }
-//                });
-//                
-//                map.addDragEndHandler(new DragEndMapHandler() {
-//                    @Override
-//                    public void onEvent(DragEndMapEvent event) {
-//                        final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-//                        settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
-//                    }
-//                });
-//                map.addMouseMoveHandler(new MouseMoveMapHandler() {
-//                    @Override
-//                    public void onEvent(MouseMoveMapEvent event) {
-//                        lastMousePosition = event.getMouseEvent().getLatLng();
-//                    }
-//                });
-//                
-//                //If there was a time change before the API was loaded, reset the time
-//                if (lastTimeChangeBeforeInitialization != null) {
-//                    timeChanged(lastTimeChangeBeforeInitialization);
-//                    lastTimeChangeBeforeInitialization = null;
-//                }
-//                //Data has been initialized
-//                RaceMap.this.dataInitialized = true;
-//                RaceMap.this.redraw();
-//            }
-//        });
-//    }
-//  
-    
+        
     public void redraw() {
         timeChanged(timer.getTime());
     }
@@ -472,7 +416,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     @Override
     public void timeChanged(final Date date) {
-        if (date != null) {
+        if (date != null && isMapInitialized) {
             if (selectedRaces != null && !selectedRaces.isEmpty()) {
                 RegattaAndRaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
                 final Iterable<CompetitorDTO> competitorsToShow = getCompetitorsToShow();
@@ -813,9 +757,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             if (competitorInfoOverlay == null) {
                                 competitorInfoOverlay = createCompetitorInfoOverlay(RaceMapOverlaysZIndexes.COMPETITOR_INFO_ZINDEX, competitorDTO);
                                 competitorInfoOverlays.put(competitorDTO, competitorInfoOverlay);
-                                competitorInfoOverlay.addToMap();
                                 competitorInfoOverlay.setBoatFix(lastBoatFix);
-                                competitorInfoOverlay.redraw();
+                                competitorInfoOverlay.addToMap();
                             } else {
                                 competitorInfoOverlay.setBoatFix(lastBoatFix);
                                 competitorInfoOverlay.redraw();
@@ -1184,11 +1127,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             BoatOverlay boatOverlay = boatOverlays.get(competitorDTO);
             if (boatOverlay == null) {
                 boatOverlay = createBoatOverlay(RaceMapOverlaysZIndexes.BOATS_ZINDEX, competitorDTO, displayHighlighted(competitorDTO));
-                boatOverlay.addToMap();
                 boatOverlays.put(competitorDTO, boatOverlay);
                 boatOverlay.setSelected(displayHighlighted(competitorDTO));
                 boatOverlay.setBoatFix(lastBoatFix);
-                boatOverlay.redraw();
+                boatOverlay.addToMap();
             } else {
                 usedExistingCanvas = true;
                 boatOverlay.setSelected(displayHighlighted(competitorDTO));
@@ -2021,7 +1963,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     @Override
     public boolean isDataInitialized() {
-        return dataInitialized;
+        return isMapInitialized;
     }
 
     @Override
