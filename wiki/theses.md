@@ -13,3 +13,5 @@ Now push your changes to the remote Git repository. It will take some time befor
 ## List of Theses
 
 * [Server-side Integration of Mobile Devices](/doc/theses/20130210_Teschke_Server-side_Integration_Mobile_Devices.pdf) (Bachelor Thesis, Feb 2013, Fredrik Teschke)
+
+* [Tracking Sailing Races with mobile Devices](/doc/theses/20130913_Bross_Tracking_Sailing_Races_with_Mobile_Devices.pdf) (T2000_2 Project Thesis, Sep 2013, Jan Broß)
