@@ -148,6 +148,10 @@ public class FixesAndTails {
      * competitor. If <code>overlapsWithKnownFixes</code> indicates that the fixes received in <code>result</code>
      * overlap with those already known, the fixes are merged into the list of already known fixes for the competitor.
      * Otherwise, the fixes received in <code>result</code> replace those known so far for the respective competitor.
+     * The {@link #tails} affected by these fixes are updated accordingly when modifications fall inside the interval
+     * shown by the tail, as defined by {@link #firstShownFix} and {@link #lastShownFix}. The tails are, however,
+     * not trimmed according to the specification for the tail length. This has to happen elsewhere (see also
+     * {@link #updateTail}).
      * 
      * @param result
      *            For each list the invariant must hold that an {@link GPSFixDTO#extrapolated extrapolated} fix must be
@@ -183,11 +187,17 @@ public class FixesAndTails {
 
     /**
      * While updating the {@link #fixes} for <code>competitorDTO</code>, the invariants for {@link #tails} and
-     * {@link #firstShownFix} and {@link #lastShownFix} are maintained: each time a fix is inserted, the
-     * {@link #firstShownFix}/{@link #lastShownFix} records for <code>competitorDTO</code> are incremented if they are
-     * greater or equal to the insertion index and we have a tail in {@link #tails} for <code>competitorDTO</code>.
-     * Additionally, if the fix is in between the fixes shown in the competitor's tail, the tail is adjusted by
-     * inserting the corresponding fix.<p>
+     * {@link #firstShownFix} and {@link #lastShownFix} are maintained: each time a fix is inserted and we have a tail
+     * in {@link #tails} for <code>competitorDTO</code>, the {@link #firstShownFix} record for
+     * <code>competitorDTO</code> is incremented if it is greater than the insertion index, and the
+     * {@link #lastShownFix} records for <code>competitorDTO</code> is incremented if is is greater than or equal to the
+     * insertion index. This means, in particular, that when a fix is inserted exactly at the index that points to the
+     * first fix shown so far, the fix inserted will become the new first fix shown. When inserting a fix exactly at
+     * index {@link #lastShownFix}, the fix that so far was the last one shown remains the last one shown because in
+     * this case, {@link #lastShownFix} will be incremented by one. If {@link #firstShownFix} &lt;=
+     * <code>insertindex</code> &lt;= {@link #lastShownFix}, meaning that the fix is in the range of fixes shown in the
+     * competitor's tail, the tail is adjusted by inserting the corresponding fix.
+     * <p>
      * 
      * Precondition: {@link #hasFixesFor(CompetitorDTO) hasFixesFor(competitorDTO)}<code>==true</code>
      * 
@@ -223,25 +233,25 @@ public class FixesAndTails {
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
                         tail.getPath().removeAt(intoThisIndex - indexOfFirstShownFix);
                     }
-                    if (indexOfFirstShownFix > intoThisIndex) {
+                    if (intoThisIndex < indexOfFirstShownFix) {
                         indexOfFirstShownFix--;
                     }
-                    if (indexOfLastShownFix >= intoThisIndex) {
+                    if (intoThisIndex <= indexOfLastShownFix) {
                         indexOfLastShownFix--;
                     }
                     intoThisIndex--;
                 }
             } else {
                 intoThis.add(intoThisIndex, mergeThisFix);
-                if (indexOfFirstShownFix >= intoThisIndex) {
-                    indexOfFirstShownFix++;
-                }
-                if (indexOfLastShownFix >= intoThisIndex) {
-                    indexOfLastShownFix++;
-                }
                 if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
                     tail.getPath().insertAt(intoThisIndex - indexOfFirstShownFix,
                             LatLng.newInstance(mergeThisFix.position.latDeg, mergeThisFix.position.lngDeg));
+                }
+                if (intoThisIndex < indexOfFirstShownFix) {
+                    indexOfFirstShownFix++;
+                }
+                if (intoThisIndex <= indexOfLastShownFix) {
+                    indexOfLastShownFix++;
                 }
                 // If there is a fix prior to the one added and that prior fix was obtained by extrapolation, remove it now because
                 // extrapolated fixes can only be the last in the list
@@ -250,10 +260,10 @@ public class FixesAndTails {
                     if (tail != null && intoThisIndex-1 >= indexOfFirstShownFix && intoThisIndex-1 <= indexOfLastShownFix) {
                         tail.getPath().removeAt(intoThisIndex-1 - indexOfFirstShownFix);
                     }
-                    if (indexOfFirstShownFix > intoThisIndex-1) {
+                    if (intoThisIndex-1 < indexOfFirstShownFix) {
                         indexOfFirstShownFix--;
                     }
-                    if (indexOfLastShownFix >= intoThisIndex-1) {
+                    if (intoThisIndex-1 <= indexOfLastShownFix) {
                         indexOfLastShownFix--;
                     }
                     intoThisIndex--;
