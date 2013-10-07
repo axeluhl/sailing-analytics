@@ -7,8 +7,8 @@ import java.util.Map;
 
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
-import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEvent;
-import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.PointSelectEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointSelectEventHandler;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -194,24 +194,24 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
     }
     
     private void setEventListenersForPolarSheetChart() {
-        PointMouseOverEventHandler pointMouseOverHandler = new PointMouseOverEventHandler() {
-
+        PointSelectEventHandler pointSelectEventHandler = new PointSelectEventHandler() {
             @Override
-            public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
-                int angle = (int) pointMouseOverEvent.getXAsLong();
-                String polarSheetNameWithWind = pointMouseOverEvent.getSeriesName();
+            public boolean onSelect(PointSelectEvent pointSelectEvent) {
+                int angle = (int) pointSelectEvent.getXAsLong();
+                String polarSheetNameWithWind = pointSelectEvent.getSeriesName();
                 String[] split = polarSheetNameWithWind.split("-");
                 String polarSheetName = split[0] + "-" + split[1];
                 String polarSheetId = nameIdMapping.get(polarSheetName);
                 int windSpeed = Integer.parseInt(split[2]); 
                 PolarSheetsData polarData = polarSheetsData.get(polarSheetId);
                 WindStepping stepping = polarData.getStepping();
-                PolarSheetsHistogramData histogramData = polarSheetsData.get(polarSheetId).getHistogramDataMap().get(stepping.getLevelIndexForValue(windSpeed)).get(angle);
+                PolarSheetsHistogramData histogramData = polarSheetsData.get(polarSheetId).getHistogramDataMap()
+                        .get(stepping.getLevelIndexForValue(windSpeed)).get(angle);
                 histogramPanel.setData(histogramData);
                 return true;
             }
         };
-        chartPanel.setSeriesPointMouseOverHandler(pointMouseOverHandler);
+        chartPanel.setPointSelectHandler(pointSelectEventHandler);
     }
 
     private Label createPolarSheetGenerationStatusLabel() {

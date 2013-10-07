@@ -10,7 +10,7 @@ import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
-import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.PointSelectEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
@@ -171,8 +171,9 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         chart.redraw();
     }
 
-    public void setSeriesPointMouseOverHandler(PointMouseOverEventHandler pointMouseOverHandler) {
-        chart.setSeriesPlotOptions(new SeriesPlotOptions().setPointMouseOverEventHandler(pointMouseOverHandler));
+    public void setPointSelectHandler(PointSelectEventHandler pointSelectEventHandler) {
+        chart.setSeriesPlotOptions(new SeriesPlotOptions().setAllowPointSelect(true).setPointSelectEventHandler(
+                pointSelectEventHandler));
     }
 
     public Series[] getSeriesPerWindspeedForName(String name) {
