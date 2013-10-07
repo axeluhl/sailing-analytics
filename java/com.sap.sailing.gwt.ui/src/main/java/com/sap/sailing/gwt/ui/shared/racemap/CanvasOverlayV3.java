@@ -17,7 +17,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 
 /**
- * Sample from https://github.com/branflake2267/GWT-Maps-V3-Api/blob/master/gwt-maps-showcase/src/main/java/com/google/gwt/maps/testing/client/maps/OverlayViewMapWidget.java
+ * The abstract base class for all canvas overlays.
  * @author Frank
  */
 public abstract class CanvasOverlayV3 {
@@ -27,7 +27,7 @@ public abstract class CanvasOverlayV3 {
     /**
      * The HTML5 canvas which can be used to draw arbitrary shapes on a google map.
      */
-    protected final Canvas canvas;
+    protected Canvas canvas;
 
     /**
      * Indicates whether the canvas has been selected or not.
@@ -91,6 +91,7 @@ public abstract class CanvasOverlayV3 {
     }
     
     public void redraw() {
+        // customOverlayView.setMap(null);
         customOverlayView.setMap(map);
     }
     
@@ -128,8 +129,8 @@ public abstract class CanvasOverlayV3 {
         OverlayViewOnRemoveHandler result = new OverlayViewOnRemoveHandler() {
             @Override
             public void onRemove(OverlayViewMethods methods) {
-                // remove the canvas
-                getCanvas().removeFromParent();
+                // remove the canvas from the parent widget
+                canvas.getElement().removeFromParent();
             }
         };
         return result;
