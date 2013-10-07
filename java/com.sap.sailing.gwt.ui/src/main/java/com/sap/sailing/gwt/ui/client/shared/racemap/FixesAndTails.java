@@ -213,6 +213,9 @@ public class FixesAndTails {
                 // need according adjustments
                 if (!mergeThisFix.extrapolated || intoThis.size() == intoThisIndex+1) {
                     intoThis.set(intoThisIndex, mergeThisFix);
+                    if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
+                        tail.getPath().setAt(intoThisIndex - indexOfFirstShownFix, LatLng.newInstance(mergeThisFix.position.latDeg, mergeThisFix.position.lngDeg));
+                    }
                 } else {
                     // extrapolated fix would be added one or more positions before the last fix in intoThis; instead,
                     // remove the fix at the respective index with the same time point and adjust indices:
@@ -244,7 +247,7 @@ public class FixesAndTails {
                 // extrapolated fixes can only be the last in the list
                 if (intoThisIndex > 0 && intoThis.get(intoThisIndex-1).extrapolated) {
                     intoThis.remove(intoThisIndex-1);
-                    if (tail != null && intoThisIndex-1 >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
+                    if (tail != null && intoThisIndex-1 >= indexOfFirstShownFix && intoThisIndex-1 <= indexOfLastShownFix) {
                         tail.getPath().removeAt(intoThisIndex-1 - indexOfFirstShownFix);
                     }
                     if (indexOfFirstShownFix > intoThisIndex-1) {
