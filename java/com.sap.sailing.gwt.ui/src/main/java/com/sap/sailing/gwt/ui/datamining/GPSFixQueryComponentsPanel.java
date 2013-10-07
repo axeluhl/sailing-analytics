@@ -235,8 +235,8 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
         List<StatisticAndAggregatorType> statistics = Arrays.asList(
                 new StatisticAndAggregatorType(StatisticType.DataAmount, AggregatorType.Average),
                 new StatisticAndAggregatorType(StatisticType.Speed, AggregatorType.Average));
-        statisticsListBox.setAcceptableValues(statistics);
         statisticsListBox.setValue(statistics.get(0), false);
+        statisticsListBox.setAcceptableValues(statistics);
         functionsPanel.add(statisticsListBox);
 
         return functionsPanel;
@@ -264,8 +264,8 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
                 appendable.append(render(grouperType));
             }
         });
-        grouperTypeListBox.setAcceptableValues(Arrays.asList(GrouperType.values()));
         grouperTypeListBox.setValue(GrouperType.Dimensions, false);
+        grouperTypeListBox.setAcceptableValues(Arrays.asList(GrouperType.values()));
         selectGroupByPanel.add(grouperTypeListBox);
 
         final DeckPanel groupByOptionsPanel = new DeckPanel();
@@ -289,10 +289,17 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
 
         dimensionsToGroupByPanel = new HorizontalPanel();
         dimensionsToGroupByPanel.setSpacing(5);
+        groupByOptionsPanel.add(dimensionsToGroupByPanel);
+        
+        //Adding two dimension boxes, with regatta as first selected dimension
         ValueListBox<SharedDimensions.GPSFix> dimensionToGroupByBox = createDimensionToGroupByBox();
+        dimensionToGroupByBox.setValue(SharedDimensions.GPSFix.RegattaName, false);
         dimensionsToGroupByPanel.add(dimensionToGroupByBox);
         dimensionsToGroupByBoxes.add(dimensionToGroupByBox);
-        groupByOptionsPanel.add(dimensionsToGroupByPanel);
+        
+        dimensionToGroupByBox = createDimensionToGroupByBox();
+        dimensionsToGroupByPanel.add(dimensionToGroupByBox);
+        dimensionsToGroupByBoxes.add(dimensionToGroupByBox);
 
         FlowPanel dynamicGroupByPanel = new FlowPanel();
         groupByOptionsPanel.add(dynamicGroupByPanel);
