@@ -52,6 +52,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         trackedRace.invalidateEndTime();
         courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
         statusAnalyzer = new RaceStatusAnalyzer(raceLog);
+        startTimeFinder = new StartTimeFinder(raceLog);
         initializeWindTrack(raceLog);
         analyze();
     }
@@ -94,7 +95,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     private void analyze() {
         analyzeStatus();
-        analyzeCourseDesign();
+        analyzeCourseDesign(null);
     }
 
     private void analyzeStatus() {
@@ -103,8 +104,11 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         // TODO: What can we do with the status? Should we use DynamicTrackedRace.setStatus?
     }
 
-    private void analyzeCourseDesign() {
+    private void analyzeCourseDesign(CourseBase courseBaseProvidedByEvent) {
         CourseBase courseDesign = courseDesignFinder.analyze();
+        if (courseDesign == null) {
+            courseDesign = courseBaseProvidedByEvent;
+        }
 
         // On the initial analyze step after attaching the RaceLog there might be no course design.
         if (courseDesign != null) {
@@ -116,11 +120,15 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         }
     }
     
-    private void analyzeStartTime() {
+    private void analyzeStartTime(TimePoint startTimeProvidedByEvent) {
         /* start time will be set by StartTimeAnalyzer in TrackedRace.getStartTime() */
         trackedRace.invalidateStartTime();
         
         TimePoint startTime = startTimeFinder.analyze();
+        if (startTime == null) {
+            startTime = startTimeProvidedByEvent;
+        }
+        
         if (startTime != null) {
             /* invoke listeners with received start time, this will also trigger tractrac update */
             trackedRace.onStartTimeChangedByRaceCommittee(startTime);
@@ -138,7 +146,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogStartTimeEvent event) {
-        analyzeStartTime();
+        analyzeStartTime(event.getStartTime());
     }
 
     @Override
@@ -148,7 +156,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogCourseDesignChangedEvent event) {
-        analyzeCourseDesign();
+        analyzeCourseDesign(event.getCourseDesign());
     }
 
     @Override

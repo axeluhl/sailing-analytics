@@ -29,9 +29,9 @@ public class ConfirmedFinishPositioningListFinderTest extends
     @Override
     protected List<Triple<Serializable, String, MaxPointsReason>> setupTargetEventsForPassAwareTests(int passId) {
         RaceLogFinishPositioningConfirmedEvent event = createEvent(RaceLogFinishPositioningConfirmedEvent.class, 1, passId);
-        when(event.getPositionedCompetitors()).thenReturn(mock(List.class));
+        when(event.getPositionedCompetitorsIDsNamesMaxPointsReasons()).thenReturn(mock(List.class));
         raceLog.add(event);
-        return event.getPositionedCompetitors();
+        return event.getPositionedCompetitorsIDsNamesMaxPointsReasons();
     }
 
     @Test
@@ -45,11 +45,11 @@ public class ConfirmedFinishPositioningListFinderTest extends
     public void testMostRecent() {
         RaceLogFinishPositioningConfirmedEvent event1 = createEvent(RaceLogFinishPositioningConfirmedEvent.class, 1);
         RaceLogFinishPositioningConfirmedEvent event2 = createEvent(RaceLogFinishPositioningConfirmedEvent.class, 2);
-        when(event2.getPositionedCompetitors()).thenReturn(mock(List.class));
+        when(event2.getPositionedCompetitorsIDsNamesMaxPointsReasons()).thenReturn(mock(List.class));
 
         raceLog.add(event1);
         raceLog.add(event2);
 
-        assertEquals(event2.getPositionedCompetitors(), analyzer.analyze());
+        assertEquals(event2.getPositionedCompetitorsIDsNamesMaxPointsReasons(), analyzer.analyze());
     }
 }

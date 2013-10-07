@@ -10,7 +10,6 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
-import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 
 public class RegattaLeaderboardMasterData extends LeaderboardMasterData {
@@ -40,7 +39,7 @@ public class RegattaLeaderboardMasterData extends LeaderboardMasterData {
         if (regatta == null) {
             return null;
         }
-        return new RegattaLeaderboardImpl(regatta, new ScoreCorrectionImpl(), getResultDiscardingRule());
+        return new RegattaLeaderboardImpl(regatta, getResultDiscardingRule());
     }
 
 }

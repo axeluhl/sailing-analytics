@@ -32,7 +32,6 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -77,8 +76,8 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
 
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory);
 
-        leaderboard = new FlexibleLeaderboardImpl(raceLogStore, leaderboardName, new ScoreCorrectionImpl(),
-                new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
+        leaderboard = new FlexibleLeaderboardImpl(raceLogStore, leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
+                new LowPoint(), null);
 
         Fleet defaultFleet = leaderboard.getFleet(null);
         leaderboard.addRaceColumn(raceColumnName, /* medalRace */ false, defaultFleet);
@@ -248,8 +247,8 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
             assertEquals(now, loadedConfirmedEvent.getTimePoint());
             assertEquals(0, loadedConfirmedEvent.getPassId());
             assertEquals(0, loadedConfirmedEvent.getInvolvedBoats().size());
-            assertNull(event.getPositionedCompetitors()); 
-            assertNull(loadedConfirmedEvent.getPositionedCompetitors());
+            assertNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons()); 
+            assertNull(loadedConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
             loadedRaceLog.unlockAfterRead();
@@ -297,10 +296,10 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
             assertEquals(event.getPassId(), loadedPositioningEvent.getPassId());
             assertEquals(event.getId(), loadedPositioningEvent.getId());
             assertEquals(event.getInvolvedBoats().size(), loadedPositioningEvent.getInvolvedBoats().size());
-            assertEquals(event.getPositionedCompetitors().size(), loadedPositioningEvent.getPositionedCompetitors().size());
-            assertEquals(event.getPositionedCompetitors().get(0).getA(), loadedPositioningEvent.getPositionedCompetitors().get(0).getA());
-            assertEquals(event.getPositionedCompetitors().get(0).getB(), loadedPositioningEvent.getPositionedCompetitors().get(0).getB());
-            assertEquals(event.getPositionedCompetitors().get(0).getC().name(), loadedPositioningEvent.getPositionedCompetitors().get(0).getC().name());
+            assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().size(), loadedPositioningEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().size());
+            assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getA(), loadedPositioningEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getA());
+            assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getB(), loadedPositioningEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getB());
+            assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getC().name(), loadedPositioningEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getC().name());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
             loadedRaceLog.unlockAfterRead();

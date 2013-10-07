@@ -40,7 +40,6 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
-import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCompetitors;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -102,7 +101,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
 
     @Test
     public void ensureMedalRaceParamIsIgnoredIfRaceColumnAlreadyExists() {
-        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ScoreCorrectionImpl(), new ThresholdBasedResultDiscardingRuleImpl(
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { 5, 8 }), new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
         final String columnName = "abc";
@@ -115,7 +114,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
     
     @Test
     public void testRepeatedLeaderboardDTOCacheInvalidation() throws NoWindException, InterruptedException, ExecutionException {
-        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ScoreCorrectionImpl(), new ThresholdBasedResultDiscardingRuleImpl(
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { 5, 8 }), new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
         final String columnName = "abc";
@@ -174,8 +173,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             r.addCompetitor(c3); // this makes maxPoints==4
             testRaces.add(r); // hash set should take care of more or less randomly permuting the races
         }
-        ScoreCorrectionImpl scoreCorrection = new ScoreCorrectionImpl();
-        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ThresholdBasedResultDiscardingRuleImpl(
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { 1 }), new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
         int i=0;
@@ -190,7 +188,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                 bestScoringRaceColumn = raceColumn;
             }
         }
-        scoreCorrection.setMaxPointsReason(competitor, bestScoringRaceColumn, MaxPointsReason.DSQ);
+        leaderboard.getScoreCorrection().setMaxPointsReason(competitor, bestScoringRaceColumn, MaxPointsReason.DSQ);
         // assert that best scoring but now disqualified race gets max net points because of disqualification:
         assertEquals(Util.size(bestScoringRaceColumn.getTrackedRace(defaultFleet).getRace().getCompetitors())+1,
                 leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getNetPoints(), 0.000000001);
@@ -208,8 +206,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                 competitor, /* rank */ 1, /* started */true);
         testRace.addCompetitor(c2);
         testRace.addCompetitor(c3); // this makes maxPoints==4
-        ScoreCorrectionImpl scoreCorrection = new ScoreCorrectionImpl();
-        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ThresholdBasedResultDiscardingRuleImpl(
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { 2 }), new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
         leaderboard.addRace(testRace, "R1", /* medalRace */ false, defaultFleet);
@@ -237,14 +234,13 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                 competitor, /* rank */ 1, /* started */true);
         testRace.addCompetitor(c2);
         testRace.addCompetitor(c3); // this makes maxPoints==4
-        ScoreCorrectionImpl scoreCorrection = new ScoreCorrectionImpl();
-        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ThresholdBasedResultDiscardingRuleImpl(
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { 2 }), new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
         RaceColumn r1 = leaderboard.addRace(testRace, "R1", /* medalRace */ false, defaultFleet);
         raceColumnsInLeaderboard.put(testRace, r1);
         RaceColumn r2 = leaderboard.addRaceColumn("R2", /* medalRace */ false, defaultFleet);
-        scoreCorrection.setMaxPointsReason(competitor, r2, MaxPointsReason.DND); // non-discardable disqualification
+        leaderboard.getScoreCorrection().setMaxPointsReason(competitor, r2, MaxPointsReason.DND); // non-discardable disqualification
         // assert that max points were given before discarding...
         assertEquals(4.0, leaderboard.getEntry(competitor, r2, MillisecondsTimePoint.now()).getNetPoints(), 0.000000001);
         // ...and after...
@@ -265,8 +261,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             r.addCompetitor(c3); // this makes maxPoints==4
             testRaces.add(r); // hash set should take care of more or less randomly permuting the races
         }
-        ScoreCorrectionImpl scoreCorrection = new ScoreCorrectionImpl();
-        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ThresholdBasedResultDiscardingRuleImpl(
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { 1 }), new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
         int i=0;
@@ -281,7 +276,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                 bestScoringRaceColumn = raceColumn;
             }
         }
-        scoreCorrection.setMaxPointsReason(competitor, bestScoringRaceColumn, MaxPointsReason.DND);
+        leaderboard.getScoreCorrection().setMaxPointsReason(competitor, bestScoringRaceColumn, MaxPointsReason.DND);
         // assert that best scoring but now disqualified race gets max net points because of disqualification:
         assertEquals(Util.size(bestScoringRaceColumn.getTrackedRace(defaultFleet).getRace().getCompetitors())+1,
                 leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getNetPoints(), 0.000000001);
@@ -293,7 +288,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
     protected void testLeaderboard(int numberOfStartedRaces, int numberOfNotStartedRaces, int firstDiscardingThreshold,
             int secondDiscardingThreshold, Integer carry, boolean addOneMedalRace, int numberOfUntrackedRaces) throws NoWindException {
         setupRaces(numberOfStartedRaces, numberOfNotStartedRaces);
-        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ScoreCorrectionImpl(), new ThresholdBasedResultDiscardingRuleImpl(
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(
                 new int[] { firstDiscardingThreshold, secondDiscardingThreshold }), new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
         int i=0;
