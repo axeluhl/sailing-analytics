@@ -6,8 +6,6 @@ import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
 import com.google.gwt.maps.client.geometrylib.SphericalUtils;
-import com.google.gwt.maps.client.overlays.MapCanvasProjection;
-import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewMethods;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -43,10 +41,8 @@ public class BoatOverlay extends CanvasOverlayV3 {
     }
 
     @Override
-    protected void draw(OverlayViewMethods methods) {
-        MapCanvasProjection projection = methods.getProjection();
-        
-        if (boatFix != null) {
+    protected void draw() {
+        if (mapProjection != null && boatFix != null) {
             ImageTransformer boatImageTransformer;
             if (boatFix.legType != null) {
                 boatImageTransformer = boatClassImageData.getBoatImageTransformerByLegTypeAndTack(boatFix.legType,
@@ -61,7 +57,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
             }
             boatImageTransformer.drawToCanvas(getCanvas(), boatDrawingAngle, realBoatSizeScaleFactor);
             LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
-            Point boatPositionInPx = projection.fromLatLngToDivPixel(latLngPosition);
+            Point boatPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
             setCanvasPosition(boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2,
                     boatPositionInPx.getY() - getCanvas().getCoordinateSpaceHeight() / 2);
         }

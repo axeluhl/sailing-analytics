@@ -4,8 +4,6 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
-import com.google.gwt.maps.client.overlays.MapCanvasProjection;
-import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewMethods;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -52,11 +50,11 @@ public class WindSensorOverlay extends CanvasOverlayV3 {
         transformer = raceMapImageManager.getWindSensorIconTransformer();
     }
     
-    protected void draw(OverlayViewMethods methods) {
-        MapCanvasProjection projection = methods.getProjection();
+    @Override
+    protected void draw() {
         boolean hasValidWind = false;
         
-        if (windTrackInfoDTO != null && windTrackInfoDTO.windFixes.size() > 0) {
+        if (mapProjection != null && windTrackInfoDTO != null && windTrackInfoDTO.windFixes.size() > 0) {
             WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
             PositionDTO position = windDTO.position;
             // Attention: sometimes there is no valid position for the wind source available -> ignore the wind in this case
@@ -64,7 +62,7 @@ public class WindSensorOverlay extends CanvasOverlayV3 {
                 double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
                 transformer.drawToCanvas(getCanvas(), rotationDegOfWindSymbol, 1.0);
                 setLatLngPosition(LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg));
-                Point sensorPositionInPx = projection.fromLatLngToDivPixel(getLatLngPosition());
+                Point sensorPositionInPx = mapProjection.fromLatLngToDivPixel(getLatLngPosition());
                 setCanvasPosition(sensorPositionInPx.getX() - canvasWidth / 2, sensorPositionInPx.getY() - canvasHeight / 2);
                 String title = stringMessages.wind() + " ("+ WindSourceTypeFormatter.format(windSource, stringMessages) + "): "; 
                 title += Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()+ ",  ";

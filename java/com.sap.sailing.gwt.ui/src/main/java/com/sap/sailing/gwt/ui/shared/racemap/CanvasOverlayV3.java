@@ -49,8 +49,11 @@ public abstract class CanvasOverlayV3 {
      */
     protected int zIndex;
 
+    protected MapCanvasProjection mapProjection;
+
     public CanvasOverlayV3(MapWidget map, int zIndex) {
         this.map = map;
+        this.mapProjection = null;
         
         canvas = Canvas.createIfSupported();
         customOverlayView = OverlayView.newInstance(map, getOnDrawHandler(), getOnAddHandler(), getOnRemoveHandler());
@@ -90,11 +93,6 @@ public abstract class CanvasOverlayV3 {
         customOverlayView.setMap(null);
     }
     
-    public void redraw() {
-        // customOverlayView.setMap(null);
-        customOverlayView.setMap(map);
-    }
-    
     protected void setLatLngPosition(LatLng latLngPosition) {
         this.latLngPosition = latLngPosition;
     }
@@ -103,7 +101,7 @@ public abstract class CanvasOverlayV3 {
         return map;
     }
 
-    protected abstract void draw(OverlayViewMethods methods);
+    protected abstract void draw();
 
     protected OverlayViewOnAddHandler getOnAddHandler() {
         OverlayViewOnAddHandler result = new OverlayViewOnAddHandler() {
@@ -120,7 +118,8 @@ public abstract class CanvasOverlayV3 {
         return new OverlayViewOnDrawHandler() {
             @Override
             public void onDraw(OverlayViewMethods methods) {
-                draw(methods);
+                mapProjection = methods.getProjection();
+                draw();
             }
         };
     }
