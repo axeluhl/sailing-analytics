@@ -142,8 +142,7 @@ public class MasterDataImportTest {
     public void testMasterDataImportWithoutHttpStack() throws MalformedURLException, IOException, InterruptedException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID,
-                new ArrayList<String>());
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
         event.getVenue().addCourseArea(courseArea);
@@ -311,8 +310,7 @@ public class MasterDataImportTest {
             InterruptedException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID,
-                new ArrayList<String>());
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
         event.getVenue().addCourseArea(courseArea);
@@ -469,8 +467,7 @@ public class MasterDataImportTest {
                 SwissTimingFactory.INSTANCE, new com.sap.sailing.domain.swisstimingadapter.impl.DomainFactoryImpl(
                         sourceDomainFactory), new com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl(
                         sourceDomainFactory), MediaDBFactory.INSTANCE.getDefaultMediaDB());
-        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID,
-                new ArrayList<String>());
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
         event.getVenue().addCourseArea(courseArea);
@@ -601,8 +598,7 @@ public class MasterDataImportTest {
     public void testMasterDataImportWithoutOverrideWithoutHttpStack() throws MalformedURLException, IOException, InterruptedException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID,
-                new ArrayList<String>());
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
         event.getVenue().addCourseArea(courseArea);
@@ -703,8 +699,7 @@ public class MasterDataImportTest {
         // Create existing data on target
         RacingEventService destService = new RacingEventServiceImplMock();
         String venueNameNotToOverride = "doNotOverride";
-        Event eventNotToOverride = destService.addEvent(TEST_EVENT_NAME, venueNameNotToOverride, "", false, eventUUID,
-                new ArrayList<String>());
+        Event eventNotToOverride = destService.addEvent(TEST_EVENT_NAME, venueNameNotToOverride, "", false, eventUUID);
         CourseArea courseAreaNotToOverride = new CourseAreaImpl("testAreaNotToOverride", courseAreaUUID);
         eventNotToOverride.getVenue().addCourseArea(courseAreaNotToOverride);
         
@@ -779,8 +774,7 @@ public class MasterDataImportTest {
     public void testMasterDataImportWithOverrideWithoutHttpStack() throws MalformedURLException, IOException, InterruptedException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID,
-                new ArrayList<String>());
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
         event.getVenue().addCourseArea(courseArea);
@@ -881,8 +875,7 @@ public class MasterDataImportTest {
         // Create existing data on target
         RacingEventService destService = new RacingEventServiceImplMock();
         String venueNameToOverride = "Override";
-        Event eventToOverride = destService.addEvent(TEST_EVENT_NAME, venueNameToOverride, "", false, eventUUID,
-                new ArrayList<String>());
+        Event eventToOverride = destService.addEvent(TEST_EVENT_NAME, venueNameToOverride, "", false, eventUUID);
         CourseArea courseAreaToOverride = new CourseAreaImpl("testAreaToOverride", courseAreaUUID);
         eventToOverride.getVenue().addCourseArea(courseAreaToOverride);
         
@@ -1076,8 +1069,7 @@ public class MasterDataImportTest {
             IOException, InterruptedException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID,
-                new ArrayList<String>());
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
         event.getVenue().addCourseArea(courseArea);
@@ -1251,8 +1243,7 @@ public class MasterDataImportTest {
     public void testMasterDataImportWithTwoLgsWithSameLeaderboard() throws MalformedURLException, IOException, InterruptedException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID,
-                new ArrayList<String>());
+        Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
         event.getVenue().addCourseArea(courseArea);

@@ -1,19 +1,27 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import java.io.Serializable;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
+/**
+ * Adds a course area to an {@link Event}'s {@link Venue}.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class AddCourseArea extends AbstractRacingEventServiceOperation<CourseArea> {
 
     private static final long serialVersionUID = -3650109848260363949L;
     private final String courseAreaName;
-    private final Serializable courseAreaId;
-    private final Serializable eventId;
+    private final UUID courseAreaId;
+    private final UUID eventId;
 
-    public AddCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId) {
+    public AddCourseArea(UUID eventId, String courseAreaName, UUID courseAreaId) {
         super();
         this.eventId = eventId;
         this.courseAreaId = courseAreaId;
@@ -22,7 +30,7 @@ public class AddCourseArea extends AbstractRacingEventServiceOperation<CourseAre
 
     @Override
     public CourseArea internalApplyTo(RacingEventService toState) throws Exception {
-        return toState.addCourseArea(eventId, courseAreaName, courseAreaId);
+        return toState.addCourseAreaWithoutReplication(eventId, courseAreaId, courseAreaName);
     }
 
     @Override
