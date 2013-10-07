@@ -1205,9 +1205,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      *            keys in the <code>from</code> parameter, requests the GPS fixes up to but excluding the date provided
      *            as value
      * @param extrapolate
-     *            if <code>true</code> and no position is known for <code>date</code>, the last entry returned in the
-     *            list of GPS fixes will be obtained by extrapolating from the competitors last known position before
-     *            <code>date</code> and the estimated speed.
+     *            if <code>true</code> and no (exact or interpolated) position is known for <code>date</code>, the last
+     *            entry returned in the list of GPS fixes will be obtained by extrapolating from the competitors last
+     *            known position before <code>date</code> and the estimated speed.
      * @return a map where for each competitor participating in the race the list of GPS fixes in increasing
      *         chronological order is provided. The last one is the last position at or before <code>date</code>.
      */
@@ -1247,7 +1247,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         TimePoint middle = new MillisecondsTimePoint((toTimePointExcluding.asMillis()+fromTimePoint.asMillis())/2);
                         Position estimatedPosition = track.getEstimatedPosition(middle, extrapolate);
                         SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(middle);
-                        if(estimatedPosition != null && estimatedSpeed != null) {
+                        if (estimatedPosition != null && estimatedSpeed != null) {
                             fixes.add(new GPSFixMovingImpl(estimatedPosition, middle, estimatedSpeed));
                         }
                     }
