@@ -31,6 +31,7 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
     private CheckBox useOnlyEstimationForWindDirectionBox;
     private WindSteppingConfiguratorPanel windSteppingBox;
     private DoubleBox windSteppingMaxDistanceBox;
+    private CheckBox splitByWindGaugesBox;
 
     public PolarSheetGenerationSettingsDialogComponent(PolarSheetGenerationSettings settings, StringMessages stringMessages) {
         this.settings = settings;
@@ -40,7 +41,7 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
-        Grid grid = new Grid(13,2);
+        Grid grid = new Grid(14,2);
         grid.setCellPadding(5);
         vp.add(grid);
         setupGrid(grid, dialog);
@@ -107,7 +108,13 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
         grid.setWidget(11, 0, windSteppingMaxDistanceLabel);
         windSteppingMaxDistanceBox = dialog.createDoubleBox(settings.getWindStepping().getMaxDistance(), 6);
         grid.setWidget(11, 1, windSteppingMaxDistanceBox);
-        grid.setWidget(12, 0, new Label(stringMessages.pleaseSeeToolTips()));
+        Label splitByWindGaugesLabel = new Label(stringMessages.polarSheetSplitByWindGauges() + ":");
+        splitByWindGaugesLabel.setTitle(stringMessages.polarSheetSplitByWindGaugesTooltip());
+        grid.setWidget(12, 0, splitByWindGaugesLabel);
+        splitByWindGaugesBox = dialog.createCheckbox("");
+        splitByWindGaugesBox.setValue(settings.splitByWindgauges());
+        grid.setWidget(12, 1, splitByWindGaugesBox);
+        grid.setWidget(13, 0, new Label(stringMessages.pleaseSeeToolTips()));
     }
 
     @Override
@@ -118,7 +125,7 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
                 useOnlyWindGaugesForWindSpeedBox.getValue(), shouldRemoveOutliersBox.getValue(),
                 outlierRadiusBox.getValue(), outlierNeighborhoodPctBox.getValue(),
                 useOnlyEstimationForWindDirectionBox.getValue(), windSteppingBox.getStepping(windSteppingMaxDistanceBox
-                        .getValue()));
+                        .getValue()), splitByWindGaugesBox.getValue());
     }
 
     @Override

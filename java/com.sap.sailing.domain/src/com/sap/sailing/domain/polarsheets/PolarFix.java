@@ -26,12 +26,12 @@ public class PolarFix {
     private String dayString;
 
     public PolarFix(GPSFixMoving fix, TrackedRace race, GPSFixTrack<Competitor, GPSFixMoving> track, Wind windSpeed,
-            PolarSheetGenerationSettings settings) {
+            PolarSheetGenerationSettings settings, String gaugeIdString) {
         boatSpeed = track.getEstimatedSpeed(fix.getTimePoint());
         Bearing bearing = boatSpeed.getBearing();
         
         Position position = fix.getPosition();
-        gaugeIdString = createWindGaugesString(race);
+        this.gaugeIdString = gaugeIdString;
         dayString = createDayString(race);
         this.windSpeed = windSpeed;
         Set<WindSource> windSourcesToExclude;
@@ -53,19 +53,6 @@ public class PolarFix {
     private String createDayString(TrackedRace race) {
         SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
         return fmt.format(race.getStartOfRace().asDate());
-    }
-
-    private String createWindGaugesString(TrackedRace race) {
-        Iterable<WindSource> gaugeWindSources = race.getWindSources(WindSourceType.EXPEDITION);
-        String gaugeIdString = "";
-        for (WindSource source : gaugeWindSources) {
-            if (gaugeIdString.isEmpty()) {
-                gaugeIdString = "" + source.getId();
-            } else {
-                gaugeIdString = gaugeIdString + "+" +  source.getId();
-            }
-        }
-        return gaugeIdString;
     }
 
     public Set<WindSource> collectWindSourcesToIgnoreForBearing(TrackedRace race, boolean excludeCourseBased) {

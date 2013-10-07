@@ -1,7 +1,10 @@
 package com.sap.sailing.domain.polarsheets;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -130,29 +133,43 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable{
                     continue;
                 }
 
-                WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence;
+                List<Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>> windWithConfidenceList 
+                                = new ArrayList<Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>>();
                 if (settings.useOnlyWindGaugesForWindSpeed()) {
-                    windWithConfidence = race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint(),
-                            collectWindSourcesToIgnoreForSpeed(race));
+                    if (settings.splitByWindgauges()) {
+                        windWithConfidenceList.addAll(addAllWindsOfWindGaugesSplitOneByOne(fix));
+                    } else {
+                        windWithConfidenceList.add(new Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>(
+                                createWindGaugesString(race), race.getWindWithConfidence(fix.getPosition(),
+                                        fix.getTimePoint(), collectWindSourcesToIgnoreForSpeed())));
+                    }
                 } else {
-                    windWithConfidence = race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint());
+                    windWithConfidenceList.add(new Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>(
+                            "Combined", race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint())));
                 }
-                
-                if (windWithConfidence == null) {
-                    continue;
-                }
-                
-                if (windWithConfidence.useSpeed() && windWithConfidence.getConfidence() >= settings.getMinimumWindConfidence()) {
-                    PolarFix polarFix = new PolarFix(fix, race, track, windWithConfidence.getObject(), settings);
 
-                    if (oddFixClassifier.classifiesAsOdd(polarFix)) {
-                        logger.log(Level.INFO, String.format(
-                                "Odd point was found for: %1$s, in Race %2$s, at %3$tk:%3$tM:%3$tS",
-                                competitor.getName(), race.getRace().getName(), fix.getTimePoint().asDate()));
-                        //continue;
+                for (Pair<String, WindWithConfidence<Pair<Position, TimePoint>>> windWithSourceIdStringPair : windWithConfidenceList) {
+                    WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = windWithSourceIdStringPair
+                            .getB();
+                    if (windWithConfidence == null) {
+                        continue;
                     }
 
-                    polarSheetGenerationWorker.addPolarData(polarFix);
+                    if (windWithConfidence.useSpeed()
+                            && windWithConfidence.getConfidence() >= settings.getMinimumWindConfidence()) {
+                        PolarFix polarFix = new PolarFix(fix, race, track, windWithConfidence.getObject(), settings,
+                                windWithSourceIdStringPair.getA());
+
+                        if (oddFixClassifier.classifiesAsOdd(polarFix)) {
+                            logger.log(Level.INFO, String.format(
+                                    "Odd point was found for: %1$s, in Race %2$s, at %3$tk:%3$tM:%3$tS",
+                                    competitor.getName(), race.getRace().getName(), fix.getTimePoint().asDate()));
+                            // continue;
+                        }
+
+                        polarSheetGenerationWorker.addPolarData(polarFix);
+                    }
+
                 }
             }
 
@@ -161,11 +178,44 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable{
         }
     }
     
+    private Collection<? extends Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>> addAllWindsOfWindGaugesSplitOneByOne(
+            GPSFixMoving fix) {
+        Iterable<WindSource> windGaugeSources = race.getWindSources(WindSourceType.EXPEDITION);
+        List<Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>> windWithConfidenceList 
+                            = new ArrayList<Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>>();
+        for (WindSource windGaugeSource : windGaugeSources) {
+            Iterable<WindSource> allSources = race.getWindSources();
+            List<WindSource> allSourcesButTheSingleWindGaugeSource = new ArrayList<WindSource>();
+            for (WindSource windSource : allSources) {
+                if (windSource != windGaugeSource) {
+                    allSourcesButTheSingleWindGaugeSource.add(windSource);
+                }
+            }
+            windWithConfidenceList.add(new Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>(
+                    windGaugeSource.getId().toString(), race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint(),
+                            allSourcesButTheSingleWindGaugeSource)));
+        }
+        return windWithConfidenceList;
+    }
+    
+    private String createWindGaugesString(TrackedRace race) {
+        Iterable<WindSource> gaugeWindSources = race.getWindSources(WindSourceType.EXPEDITION);
+        String gaugeIdString = "";
+        for (WindSource source : gaugeWindSources) {
+            if (gaugeIdString.isEmpty()) {
+                gaugeIdString = "" + source.getId();
+            } else {
+                gaugeIdString = gaugeIdString + "+" +  source.getId();
+            }
+        }
+        return gaugeIdString;
+    }
+
     public boolean isDone() {
         return done;
     }
     
-    private Iterable<WindSource> collectWindSourcesToIgnoreForSpeed(TrackedRace race) {
+    private Iterable<WindSource> collectWindSourcesToIgnoreForSpeed() {
         Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
         Iterable<WindSource> combinedSources = race.getWindSources(WindSourceType.COMBINED);
         for (WindSource combinedSource : combinedSources) {

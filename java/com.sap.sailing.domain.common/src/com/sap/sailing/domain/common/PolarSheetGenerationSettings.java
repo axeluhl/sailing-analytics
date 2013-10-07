@@ -28,4 +28,6 @@ public interface PolarSheetGenerationSettings extends Serializable{
 
     WindSteppingWithMaxDistance getWindStepping();
 
+    boolean splitByWindgauges();
+
 }

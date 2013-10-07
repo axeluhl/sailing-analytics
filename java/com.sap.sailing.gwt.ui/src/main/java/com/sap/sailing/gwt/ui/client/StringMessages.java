@@ -507,6 +507,8 @@ public interface StringMessages extends Messages {
     String polarSheetWindSteppingInKnots();
     String polarSheetWindSteppingMaxDistance();
     String polarSheetWindSteppingMaxDistanceTooltip();
+    String polarSheetSplitByWindGauges();
+    String polarSheetSplitByWindGaugesTooltip();
     String pleaseSeeToolTips();
     String numberOfManeuversInRaceTooltip();
     String competitorColumnTooltip();
