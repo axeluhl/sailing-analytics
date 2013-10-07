@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.datamining;
 import java.util.Collection;
 import java.util.Map;
 
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.StatisticType;
 
@@ -23,5 +24,7 @@ public interface QueryComponentsProvider<DimensionType> {
 
     public void addListener(QueryComponentsChangedListener<DimensionType> listener);
     public void removeListener(QueryComponentsChangedListener<DimensionType> listener);
+
+    public Widget getWidget();
 
 }

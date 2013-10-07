@@ -45,6 +45,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<SharedDimensions.GPSFix> {
 
+    private FlowPanel mainPanel;
     private ValueListBox<GrouperType> grouperTypeListBox;
     private TextArea customGrouperScriptTextBox;
     private HorizontalPanel dimensionsToGroupByPanel;
@@ -64,10 +65,11 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
     public GPSFixQueryComponentsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
             ErrorReporter errorReporter) {
         super(stringMessages, sailingService, errorReporter);
+        mainPanel = new FlowPanel();
         dimensionsToGroupByBoxes = new ArrayList<ValueListBox<GPSFix>>();
 
-        add(createSelectionTables());
-        add(createFunctionsPanel());
+        mainPanel.add(createSelectionTables());
+        mainPanel.add(createFunctionsPanel());
         fillSelectionTables();
     }
 
@@ -441,6 +443,11 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
         }
 
         return tablesScrollPanel;
+    }
+
+    @Override
+    public Widget getWidget() {
+        return mainPanel;
     }
 
 }

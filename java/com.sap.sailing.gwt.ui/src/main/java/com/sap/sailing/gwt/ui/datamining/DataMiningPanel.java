@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining;
 
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.sap.sailing.datamining.shared.SharedDimensions;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -11,8 +12,8 @@ public class DataMiningPanel extends FlowPanel {
             ErrorReporter errorReporter, boolean showBenchmark) {
         this.addStyleName("dataMiningPanel");
         
-        GPSFixQueryComponentsPanel selectionPanel = new GPSFixQueryComponentsPanel(stringMessages, sailingService, errorReporter);
-        this.add(selectionPanel);
+        QueryComponentsProvider<SharedDimensions.GPSFix> selectionPanel = new GPSFixQueryComponentsPanel(stringMessages, sailingService, errorReporter);
+        this.add(selectionPanel.getWidget());
         
         ResultsPresenter<Number> resultsChart = new ResultsChart(stringMessages);
         GPSFixResultsPanel queryPanel = new GPSFixResultsPanel(stringMessages, sailingService, errorReporter, selectionPanel, resultsChart);

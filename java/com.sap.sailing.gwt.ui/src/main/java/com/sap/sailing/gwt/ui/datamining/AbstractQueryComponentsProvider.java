@@ -5,12 +5,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public abstract class AbstractQueryComponentsProvider<DimensionType> extends FlowPanel implements
+public abstract class AbstractQueryComponentsProvider<DimensionType> implements
         QueryComponentsProvider<DimensionType> {
 
     private final StringMessages stringMessages;
