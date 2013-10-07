@@ -9,6 +9,8 @@ public class DataMiningPanel extends FlowPanel {
 
     public DataMiningPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
             ErrorReporter errorReporter, boolean showBenchmark) {
+        this.addStyleName("dataMiningPanel");
+        
         GPSFixQueryComponentsPanel selectionPanel = new GPSFixQueryComponentsPanel(stringMessages, sailingService, errorReporter);
         this.add(selectionPanel);
         

@@ -11,6 +11,7 @@ import java.util.Map;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
@@ -177,7 +178,14 @@ public class ResultsChart implements ResultsPresenter<Number>, RequiresResize {
     }
 
     private void createChart() {
-        chart = new Chart().setType(Series.Type.COLUMN).setMarginLeft(100).setMarginRight(45).setWidth100()
+        chart = new Chart()
+                .setType(Series.Type.COLUMN)
+                .setMarginLeft(100)
+                .setMarginRight(45)
+                .setWidth100()
+                .setHeight100()
+                .setBorderColor(new Color("#F0AB00"))
+                .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText(stringMessages.dataMiningResult()));
 

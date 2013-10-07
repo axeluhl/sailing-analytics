@@ -10,6 +10,7 @@ import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.PlotLine;
 import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
@@ -180,6 +181,9 @@ public class BenchmarkResultsChart extends SimplePanel implements RequiresResize
                       .setMarginLeft(100)
                       .setMarginRight(45)
                       .setWidth100()
+                      .setHeight100()
+                      .setBorderColor(new Color("#F0AB00"))
+                      .setPlotBorderWidth(0)
                       .setCredits(new Credits().setEnabled(false))
                       .setChartTitle(new ChartTitle().setText(stringMessages.dataMiningBenchmarkResults()));
         

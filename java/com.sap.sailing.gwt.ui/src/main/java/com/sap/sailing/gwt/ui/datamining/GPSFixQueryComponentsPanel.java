@@ -348,7 +348,7 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
         HorizontalPanel tablesPanel = new HorizontalPanel();
         tablesPanel.setSpacing(5);
         ScrollPanel tablesScrollPanel = new ScrollPanel(tablesPanel);
-        tablesScrollPanel.setHeight("30em");
+        tablesScrollPanel.setHeight("21em");
         tablesMappedByDimension = new HashMap<SharedDimensions.GPSFix, SelectionTable<SharedDimensions.GPSFix, ?, ?>>();
 
         regattaNameTable = new SelectionTable<SharedDimensions.GPSFix, RegattaDTO, String>(getStringMessages()
