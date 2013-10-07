@@ -226,6 +226,7 @@ public class FixesAndTails {
                     if (indexOfLastShownFix >= intoThisIndex) {
                         indexOfLastShownFix--;
                     }
+                    intoThisIndex--;
                 }
             } else {
                 intoThis.add(intoThisIndex, mergeThisFix);
@@ -242,16 +243,17 @@ public class FixesAndTails {
                 // If there is a fix prior to the one added and that prior fix was obtained by extrapolation, remove it now because
                 // extrapolated fixes can only be the last in the list
                 if (intoThisIndex > 0 && intoThis.get(intoThisIndex-1).extrapolated) {
-                    intoThis.remove(intoThisIndex);
-                    if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
-                        tail.getPath().removeAt(intoThisIndex - indexOfFirstShownFix);
+                    intoThis.remove(intoThisIndex-1);
+                    if (tail != null && intoThisIndex-1 >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
+                        tail.getPath().removeAt(intoThisIndex-1 - indexOfFirstShownFix);
                     }
-                    if (indexOfFirstShownFix > intoThisIndex) {
+                    if (indexOfFirstShownFix > intoThisIndex-1) {
                         indexOfFirstShownFix--;
                     }
-                    if (indexOfLastShownFix >= intoThisIndex) {
+                    if (indexOfLastShownFix >= intoThisIndex-1) {
                         indexOfLastShownFix--;
                     }
+                    intoThisIndex--;
                 }
             }
             intoThisIndex++;
