@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
@@ -14,14 +14,14 @@ public class EventImpl extends EventBaseImpl implements Event {
     
     private final Set<Regatta> regattas;
 
-    public EventImpl(String name, String venueName, String publicationUrl, boolean isPublic, Serializable id) {
+    public EventImpl(String name, String venueName, String publicationUrl, boolean isPublic, UUID id) {
         this(name, new VenueImpl(venueName), publicationUrl, isPublic, id);
     }
     
     /**
      * @param venue must not be <code>null</code>
      */
-    public EventImpl(String name, Venue venue, String publicationUrl, boolean isPublic, Serializable id) {
+    public EventImpl(String name, Venue venue, String publicationUrl, boolean isPublic, UUID id) {
         super(name, venue, publicationUrl, isPublic, id);
         this.regattas = new HashSet<Regatta>();
     }
