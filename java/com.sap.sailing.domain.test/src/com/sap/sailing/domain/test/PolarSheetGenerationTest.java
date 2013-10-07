@@ -119,15 +119,15 @@ public class PolarSheetGenerationTest {
         
         
         List<DataPointWithOriginInfo> rawData = new ArrayList<DataPointWithOriginInfo>();
-        rawData.add(new DataPointWithOriginInfo(1.09, ""));
-        rawData.add(new DataPointWithOriginInfo(1.0, ""));
-        rawData.add(new DataPointWithOriginInfo(1.11, ""));
-        rawData.add(new DataPointWithOriginInfo(1.46, ""));
-        rawData.add(new DataPointWithOriginInfo(1.56, ""));
-        rawData.add(new DataPointWithOriginInfo(2.05, ""));
-        rawData.add(new DataPointWithOriginInfo(2.09, ""));
-        rawData.add(new DataPointWithOriginInfo(3.0, ""));
-        rawData.add(new DataPointWithOriginInfo(2.999, ""));
+        rawData.add(new DataPointWithOriginInfo(1.09, "", ""));
+        rawData.add(new DataPointWithOriginInfo(1.0, "", ""));
+        rawData.add(new DataPointWithOriginInfo(1.11, "", ""));
+        rawData.add(new DataPointWithOriginInfo(1.46, "", ""));
+        rawData.add(new DataPointWithOriginInfo(1.56, "", ""));
+        rawData.add(new DataPointWithOriginInfo(2.05, "", ""));
+        rawData.add(new DataPointWithOriginInfo(2.09, "", ""));
+        rawData.add(new DataPointWithOriginInfo(3.0, "", ""));
+        rawData.add(new DataPointWithOriginInfo(2.999, "", ""));
         PolarSheetsHistogramData result = builder.build(rawData, 0, 0);
         Number[] xValues = result.getxValues();
         Assert.assertEquals(10, xValues.length);
@@ -144,49 +144,49 @@ public class PolarSheetGenerationTest {
     public void testOutlierNeighborhoodAlgorithm() {
         PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createStandardPolarSettings();
         List<DataPointWithOriginInfo> values = new ArrayList<DataPointWithOriginInfo>();
-        values.add(new DataPointWithOriginInfo(0., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
-        values.add(new DataPointWithOriginInfo(20., ""));
+        values.add(new DataPointWithOriginInfo(0., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
+        values.add(new DataPointWithOriginInfo(20., "", ""));
         int[] count = new int[1];
         count[0] = values.size();
         Map<Integer, List<DataPointWithOriginInfo>> valuesInMap = new HashMap<Integer, List<DataPointWithOriginInfo>>();
         valuesInMap.put(0, values);
         double pct = PolarSheetGenerationWorker.getNeighboorhoodSizePercentage(count, valuesInMap, 0, 0,
-                new DataPointWithOriginInfo(0.0, ""), settings);
+                new DataPointWithOriginInfo(0.0, "", ""), settings);
 
         Assert.assertTrue(pct < 0.05);
 
         pct = PolarSheetGenerationWorker.getNeighboorhoodSizePercentage(count, valuesInMap, 0, 2,
-                new DataPointWithOriginInfo(20.0, ""), settings);
+                new DataPointWithOriginInfo(20.0, "", ""), settings);
   
         Assert.assertTrue(pct > 0.05);
         

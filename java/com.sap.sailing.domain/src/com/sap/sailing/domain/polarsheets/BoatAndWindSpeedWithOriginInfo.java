@@ -9,5 +9,7 @@ public interface BoatAndWindSpeedWithOriginInfo {
     public Speed getWindSpeed();
     
     public String getWindGaugesIdString();
+    
+    public String getDayString();
 
 }

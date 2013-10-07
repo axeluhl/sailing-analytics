@@ -7,11 +7,14 @@ public class BoatAndWindSpeedWithOriginInfoImpl implements BoatAndWindSpeedWithO
     private Speed boatSpeed;
     private Speed windSpeed;
     private String windGaugesIdString;
+    private String dayString;
 
-    public BoatAndWindSpeedWithOriginInfoImpl(Speed boatSpeed, Speed windSpeed, String windGaugesIdString) {
+    public BoatAndWindSpeedWithOriginInfoImpl(Speed boatSpeed, Speed windSpeed, String windGaugesIdString,
+            String dayString) {
         this.boatSpeed = boatSpeed;
         this.windSpeed = windSpeed;
         this.windGaugesIdString = windGaugesIdString;
+        this.dayString = dayString;
     }
 
     @Override
@@ -27,6 +30,11 @@ public class BoatAndWindSpeedWithOriginInfoImpl implements BoatAndWindSpeedWithO
     @Override
     public String getWindGaugesIdString() {
         return windGaugesIdString;
+    }
+
+    @Override
+    public String getDayString() {
+        return dayString;
     }
 
 }

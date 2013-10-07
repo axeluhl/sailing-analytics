@@ -21,17 +21,20 @@ public class PolarSheetsHistogramDataImpl implements PolarSheetsHistogramData {
     private double confidenceMeasure = 0;
 
     private Map<String, Integer[]> yValuesByGaugeIds;
+
+    private Map<String, Integer[]> yValuesByDay;
     
     //For GWT serialization
     PolarSheetsHistogramDataImpl() {}
 
     public PolarSheetsHistogramDataImpl(int angle, Number[] xValues, Number[] yValues,
-            Map<String, Integer[]> yValuesByGaugeIds, int dataCount, double coefficiantOfVariation) {
+            Map<String, Integer[]> yValuesByGaugeIds, Map<String, Integer[]> yValuesByDay, int dataCount, double coefficiantOfVariation) {
         super();
         this.angle = angle;
         this.yValues = yValues;
         this.xValues = xValues;
         this.yValuesByGaugeIds = yValuesByGaugeIds;
+        this.yValuesByDay = yValuesByDay;
         this.dataCount = dataCount;
         this.coefficiantOfVariation = coefficiantOfVariation;
     }
@@ -74,6 +77,10 @@ public class PolarSheetsHistogramDataImpl implements PolarSheetsHistogramData {
     @Override
     public Map<String, Integer[]> getYValuesByGaugeIds() {
         return yValuesByGaugeIds;
+    }
+
+    public Map<String, Integer[]> getYValuesByDay() {
+        return yValuesByDay;
     }
 
 }

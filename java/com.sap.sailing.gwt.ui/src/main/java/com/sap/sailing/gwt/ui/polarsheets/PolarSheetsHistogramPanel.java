@@ -113,6 +113,16 @@ public class PolarSheetsHistogramPanel extends DockLayoutPanel {
         series.setPoints(points);  
         chart.addSeries(series);
     }
+
+    public void arrangeByDay() {
+        chart.removeAllSeries();
+        for (Entry<String, Integer[]> entry : currentData.getYValuesByDay().entrySet()) {
+            Series series = chart.createSeries();
+            series.setName(entry.getKey());
+            series.setPoints(toPoints(currentData.getxValues(), entry.getValue()));
+            chart.addSeries(series);
+        }
+    }
     
 
 }

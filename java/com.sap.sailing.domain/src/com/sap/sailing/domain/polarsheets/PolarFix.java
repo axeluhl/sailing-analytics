@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.polarsheets;
 
+import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,6 +23,7 @@ public class PolarFix {
     private Speed windSpeed;
     private double angleToWind;
     private String gaugeIdString;
+    private String dayString;
 
     public PolarFix(GPSFixMoving fix, TrackedRace race, GPSFixTrack<Competitor, GPSFixMoving> track, Wind windSpeed,
             PolarSheetGenerationSettings settings) {
@@ -30,6 +32,7 @@ public class PolarFix {
         
         Position position = fix.getPosition();
         gaugeIdString = createWindGaugesString(race);
+        dayString = createDayString(race);
         this.windSpeed = windSpeed;
         Set<WindSource> windSourcesToExclude;
         if (settings.useOnlyEstimatedForWindDirection()) {
@@ -45,6 +48,11 @@ public class PolarFix {
         }
         Bearing windBearing = windEstimated.getFrom();
         angleToWind = bearing.getDifferenceTo(windBearing).getDegrees();
+    }
+
+    private String createDayString(TrackedRace race) {
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+        return fmt.format(race.getStartOfRace().asDate());
     }
 
     private String createWindGaugesString(TrackedRace race) {
@@ -102,5 +110,9 @@ public class PolarFix {
     public String getGaugeIdString() {
         return gaugeIdString;
     }  
+    
+    public String getDayString() {
+        return dayString;
+    }
 
 }

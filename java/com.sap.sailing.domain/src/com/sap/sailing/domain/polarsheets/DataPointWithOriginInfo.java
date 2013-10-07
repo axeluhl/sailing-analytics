@@ -6,9 +6,12 @@ public class DataPointWithOriginInfo implements Comparable<DataPointWithOriginIn
     
     private String windGaugeIdString;
 
-    public DataPointWithOriginInfo(Double rawData, String windGaugeIdString) {
+    private String dayString;
+
+    public DataPointWithOriginInfo(Double rawData, String windGaugeIdString, String dayString) {
         this.rawData = rawData;
         this.windGaugeIdString = windGaugeIdString;
+        this.dayString = dayString;
     }
 
     public Double getRawData() {
@@ -17,6 +20,10 @@ public class DataPointWithOriginInfo implements Comparable<DataPointWithOriginIn
 
     public String getWindGaugeIdString() {
         return windGaugeIdString;
+    }
+    
+    public String getDayString() {
+        return dayString;
     }
 
     @Override

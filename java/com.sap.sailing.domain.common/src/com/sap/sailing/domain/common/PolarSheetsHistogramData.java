@@ -21,5 +21,6 @@ public interface PolarSheetsHistogramData extends Serializable{
     
     public Map<String, Integer[]> getYValuesByGaugeIds();
     
+    public Map<String, Integer[]> getYValuesByDay();
 
 }

@@ -17,6 +17,8 @@ public class PolarSheetsHistogramDataArrangeButtonBar extends HorizontalPanel{
         this.add(arrangeByNothingButton);
         RadioButton arrangeByGaugesIdsButton = createArrangeByGaugesIdButton(parentPanel);
         this.add(arrangeByGaugesIdsButton);
+        RadioButton arrangeByDayButton = createArrangeByDayButton(parentPanel);
+        this.add(arrangeByDayButton);
     }
 
     private RadioButton createArrangeByNothingButton(final PolarSheetsHistogramPanel parentPanel) {
@@ -42,6 +44,18 @@ public class PolarSheetsHistogramDataArrangeButtonBar extends HorizontalPanel{
             }
         });
         return arrangeByGaugesIdsButton;
+    }
+    
+    private RadioButton createArrangeByDayButton(final PolarSheetsHistogramPanel parentPanel) {
+        RadioButton arrangeByDayButton = new RadioButton("Arrange","... Day");
+        arrangeByDayButton.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                parentPanel.arrangeByDay();
+            }
+        });
+        return arrangeByDayButton;
     }
     
     public void reset() {

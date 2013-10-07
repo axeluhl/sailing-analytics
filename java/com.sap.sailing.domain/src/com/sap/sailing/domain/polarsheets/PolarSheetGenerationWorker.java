@@ -117,7 +117,7 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
             angle = (360 + angle);
         }
         BoatAndWindSpeedWithOriginInfo speeds = new BoatAndWindSpeedWithOriginInfoImpl(boatSpeed, windSpeed,
-                polarFix.getGaugeIdString());
+                polarFix.getGaugeIdString(), polarFix.getDayString());
         polarData.get(angle).add(speeds);
     }
 
@@ -132,7 +132,7 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
         // Do this before working through data, since it's possible that remaining data is processed by the workers
         // during the process of filling the result data.
         boolean complete = allWorkersDone();
-        
+
         PolarSheetHistogramBuilder histogramBuilder = new PolarSheetHistogramBuilder(settings);
 
         int levelCount = stepping.getNumberOfLevels();
@@ -165,10 +165,12 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
                     }
                     double speed = singleDataPoint.getBoatSpeed().getKnots();
                     String windGaugesIdString = singleDataPoint.getWindGaugesIdString();
+                    String dayString = singleDataPoint.getDayString();
                     if (!dataSetForWindLevel.containsKey(level)) {
                         dataSetForWindLevel.put(level, new ArrayList<DataPointWithOriginInfo>());
                     }
-                    dataSetForWindLevel.get(level).add(new DataPointWithOriginInfo(speed, windGaugesIdString));
+                    dataSetForWindLevel.get(level).add(
+                            new DataPointWithOriginInfo(speed, windGaugesIdString, dayString));
                     sumsPerWindSpeed[level] = sumsPerWindSpeed[level] + speed;
                     dataCountPerWindSpeed[level]++;
                 }
@@ -194,7 +196,7 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
                     }
 
                 }
-                
+
                 if (dataCountPerWindSpeed[levelIndex] < settings.getMinimumDataCountPerAngle()) {
                     dataSetForWindLevel.put(levelIndex, new ArrayList<DataPointWithOriginInfo>());
                     sumsPerWindSpeed[levelIndex] = 0;
@@ -218,17 +220,18 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
                 if (rawData == null || rawData.size() <= 0) {
                     continue;
                 }
-                PolarSheetsHistogramData histogramData = histogramBuilder.build(rawData, angleIndex, coefficiantOfVariation);
+                PolarSheetsHistogramData histogramData = histogramBuilder.build(rawData, angleIndex,
+                        coefficiantOfVariation);
                 histogramDataMap.get(levelIndex).put(angleIndex, histogramData);
-                
+
             }
 
         }
-        
+
         for (int j = 0; j < levelCount; j++) {
             for (PolarSheetsHistogramData histogramData : histogramDataMap.get(j).values()) {
-                Double polarSheetPointConfidenceMeasure = Math.min(1, histogramData.getCoefficiantOfVariation() * 
-                        (histogramData.getDataCount() / (double) totalDataCountPerWindSpeed.get(j)) * 80);
+                Double polarSheetPointConfidenceMeasure = Math.min(1, histogramData.getCoefficiantOfVariation()
+                        * (histogramData.getDataCount() / (double) totalDataCountPerWindSpeed.get(j)) * 80);
                 histogramData.setConfidenceMeasure(polarSheetPointConfidenceMeasure);
             }
         }
