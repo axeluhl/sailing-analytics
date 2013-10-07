@@ -9,14 +9,14 @@ public class DataMiningPanel extends FlowPanel {
 
     public DataMiningPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
             ErrorReporter errorReporter, boolean showBenchmark) {
-        GPSFixSelectionPanel selectionPanel = new GPSFixSelectionPanel(stringMessages, sailingService, errorReporter);
+        GPSFixQueryComponentsPanel selectionPanel = new GPSFixQueryComponentsPanel(stringMessages, sailingService, errorReporter);
         this.add(selectionPanel);
         
-        GPSFixQueryPanel queryPanel = new GPSFixQueryPanel(stringMessages, sailingService, errorReporter, selectionPanel);
+        GPSFixResultsPanel queryPanel = new GPSFixResultsPanel(stringMessages, sailingService, errorReporter, selectionPanel);
         this.add(queryPanel);
         
         if (showBenchmark) {
-            GPSFixQueryBenchmarkPanel benchmarkPanel = new GPSFixQueryBenchmarkPanel(stringMessages, sailingService, errorReporter, selectionPanel);
+            GPSFixBenchmarkResultsPanel benchmarkPanel = new GPSFixBenchmarkResultsPanel(stringMessages, sailingService, errorReporter, selectionPanel);
             this.add(benchmarkPanel);
         }
     }

@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public abstract class AbstractQueryBenchmarkPanel<DimensionType> extends FlowPanel {
+public abstract class AbstractBenchmarkResultsPanel<DimensionType> extends FlowPanel {
     
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
@@ -25,9 +25,9 @@ public abstract class AbstractQueryBenchmarkPanel<DimensionType> extends FlowPan
 
     private IntegerBox numberOfQueriesBox;
     private Label benchmarkStatusLabel;
-    private QueryBenchmarkResultsChart resultsChart;
+    private BenchmarkResultsChart resultsChart;
 
-    public AbstractQueryBenchmarkPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
+    public AbstractBenchmarkResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
             ErrorReporter errorReporter, QueryComponentsProvider<DimensionType> queryComponentsProvider) {
         super();
         this.sailingService = sailingService;
@@ -36,7 +36,7 @@ public abstract class AbstractQueryBenchmarkPanel<DimensionType> extends FlowPan
         this.queryComponentsProvider = queryComponentsProvider;
         
         add(createFunctionsPanel());
-        resultsChart = new QueryBenchmarkResultsChart(this.stringMessages);
+        resultsChart = new BenchmarkResultsChart(this.stringMessages);
         add(resultsChart);
     }
 
@@ -83,7 +83,7 @@ public abstract class AbstractQueryBenchmarkPanel<DimensionType> extends FlowPan
     }
 
     private void updateResults(final ClientBenchmarkData<DimensionType> benchmarkData, double overallTimeInSeconds, QueryResult<? extends Number> result) {
-        resultsChart.addResult(new QueryBenchmarkResult(stringMessages.runAsSubstantive() + " " + benchmarkData.getCurrentRun(),
+        resultsChart.addResult(new BenchmarkResult(stringMessages.runAsSubstantive() + " " + benchmarkData.getCurrentRun(),
                                                         result.getFilteredDataAmount(), result.getCalculationTimeInSeconds(), overallTimeInSeconds));
         
         if (benchmarkData.isFinished()) {

@@ -21,12 +21,13 @@ import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.datamining.shared.GroupKey;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class QueryResultsChart extends SimplePanel {
+public class ResultsChart extends SimplePanel implements RequiresResize {
 
     private StringMessages stringMessages;
 
@@ -38,7 +39,7 @@ public class QueryResultsChart extends SimplePanel {
 
     private Label noQuerySelectedLabel;
 
-    public QueryResultsChart(StringMessages stringMessages) {
+    public ResultsChart(StringMessages stringMessages) {
         super();
         this.stringMessages = stringMessages;
         series = new HashMap<GroupKey, Series>();
@@ -182,6 +183,12 @@ public class QueryResultsChart extends SimplePanel {
 
         // chart.setToolTip(new ToolTip()
         // .setPointFormat("<span style=\"color:{series.color}\">{series.name}</span>: <b>{point.y}s</b><br/>"));
+    }
+    
+    @Override
+    public void onResize() {
+        chart.setSizeToMatchContainer();
+        chart.redraw();
     }
 
 }

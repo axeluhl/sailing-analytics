@@ -26,10 +26,10 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class QueryBenchmarkResultsChart extends SimplePanel implements RequiresResize {
+public class BenchmarkResultsChart extends SimplePanel implements RequiresResize {
 
     private StringMessages stringMessages;
-    private List<QueryBenchmarkResult> results;
+    private List<BenchmarkResult> results;
     private double thresholdFactor;
     private Chart chart;
     
@@ -41,17 +41,17 @@ public class QueryBenchmarkResultsChart extends SimplePanel implements RequiresR
     private Series cleanedOverallTimeSeries;
     private PlotLine averageOverallTimePlotLine;
     
-    public QueryBenchmarkResultsChart(StringMessages stringMessages) {
+    public BenchmarkResultsChart(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         
-        results = new ArrayList<QueryBenchmarkResult>();
+        results = new ArrayList<BenchmarkResult>();
         thresholdFactor = 5;
         
         createChart();
         setWidget(chart);
     }
     
-    public void addResult(QueryBenchmarkResult newResult) {
+    public void addResult(BenchmarkResult newResult) {
         results.add(newResult);
     }
     
@@ -59,7 +59,7 @@ public class QueryBenchmarkResultsChart extends SimplePanel implements RequiresR
         int x = 1;
         List<Point> serverTimePoints = new ArrayList<Point>();
         List<Point> overallTimePoints = new ArrayList<Point>();
-        for (QueryBenchmarkResult result : results) {
+        for (BenchmarkResult result : results) {
             serverTimePoints.add(new Point(x, result.getServerTime()).setName(result.getIdentifier()));
             overallTimePoints.add(new Point(x, result.getOverallTime()).setName(result.getIdentifier()));
             x++;

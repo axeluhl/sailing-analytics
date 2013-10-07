@@ -14,16 +14,16 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.QueryComponentsProvider.GrouperType;
 
-public class GPSFixQueryPanel extends AbstractQueryPanel<SharedDimensions.GPSFix> {
+public class GPSFixBenchmarkResultsPanel extends AbstractBenchmarkResultsPanel<SharedDimensions.GPSFix> {
 
-    public GPSFixQueryPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
+    public GPSFixBenchmarkResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
             ErrorReporter errorReporter, QueryComponentsProvider<SharedDimensions.GPSFix> queryComponentsProvider) {
         super(stringMessages, sailingService, errorReporter, queryComponentsProvider);
     }
 
     @Override
-    protected void sendServerRequest(AsyncCallback<QueryResult<Number>> asyncCallback) {
-        Map<SharedDimensions.GPSFix, Collection<?>> selection = getQueryComponentsProvider().getSelection();
+    protected void sendServerRequest(ClientBenchmarkData<SharedDimensions.GPSFix> benchmarkData, AsyncCallback<QueryResult<Number>> asyncCallback) {
+        Map<GPSFix, Collection<?>> selection = benchmarkData.getSelection();
         StatisticType statisticToCalculate = getQueryComponentsProvider().getStatisticToCalculate();
         AggregatorType aggregatedAs = getQueryComponentsProvider().getAggregatorType();
         

@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public abstract class AbstractQueryPanel<DimensionType> extends FlowPanel implements QueryComponentsChangedListener<DimensionType> {
+public abstract class AbstractResultsPanel<DimensionType> extends FlowPanel implements QueryComponentsChangedListener<DimensionType> {
 
     private StringMessages stringMessages;
     private SailingServiceAsync sailingService;
@@ -23,11 +23,11 @@ public abstract class AbstractQueryPanel<DimensionType> extends FlowPanel implem
     private QueryComponentsProvider<DimensionType> queryComponentsProvider;
 
     private Label queryStatusLabel;
-    private QueryResultsChart resultChart;
+    private ResultsChart resultChart;
     
 	private Button runQueryButton;
 
-    public AbstractQueryPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
+    public AbstractResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
             ErrorReporter errorReporter, QueryComponentsProvider<DimensionType> queryComponentsProvider) {
         super();
         this.stringMessages = stringMessages;
@@ -36,7 +36,7 @@ public abstract class AbstractQueryPanel<DimensionType> extends FlowPanel implem
         this.queryComponentsProvider = queryComponentsProvider;
         
         add(createFunctionsPanel());
-        resultChart = new QueryResultsChart(this.stringMessages);
+        resultChart = new ResultsChart(this.stringMessages);
         add(resultChart);
     }
     
@@ -78,16 +78,16 @@ public abstract class AbstractQueryPanel<DimensionType> extends FlowPanel implem
         HorizontalPanel functionsPanel = new HorizontalPanel();
         functionsPanel.setSpacing(5);
         
-        CheckBox runAutomaticBox = new CheckBox(stringMessages.runAutomatic());
+        CheckBox runAutomaticBox = new CheckBox(stringMessages.runAutomatically());
         runAutomaticBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 Boolean runAutomatic = event.getValue();
                 runQueryButton.setVisible(!runAutomatic);
                 if (runAutomatic) {
-                    queryComponentsProvider.addListener(AbstractQueryPanel.this);
+                    queryComponentsProvider.addListener(AbstractResultsPanel.this);
                 } else {
-                    queryComponentsProvider.removeListener(AbstractQueryPanel.this);
+                    queryComponentsProvider.removeListener(AbstractResultsPanel.this);
                 }
             }
         });

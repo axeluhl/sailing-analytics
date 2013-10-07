@@ -43,7 +43,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class GPSFixSelectionPanel extends AbstractQueryComponentsProvider<SharedDimensions.GPSFix> {
+public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<SharedDimensions.GPSFix> {
 
     private ValueListBox<GrouperType> grouperTypeListBox;
     private TextArea customGrouperScriptTextBox;
@@ -61,7 +61,7 @@ public class GPSFixSelectionPanel extends AbstractQueryComponentsProvider<Shared
     private SelectionTable<SharedDimensions.GPSFix, CompetitorDTO, String> competitorSailIDTable;
     private SelectionTable<SharedDimensions.GPSFix, String, String> nationalityTable;
 
-    public GPSFixSelectionPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
+    public GPSFixQueryComponentsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
             ErrorReporter errorReporter) {
         super(stringMessages, sailingService, errorReporter);
         dimensionsToGroupByBoxes = new ArrayList<ValueListBox<GPSFix>>();
