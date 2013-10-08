@@ -43,7 +43,7 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
         
         // header option is set to allow communication between two sapsailing servers, especially for 
         // the master data import functionality
-        return Response.ok(json).header("Access-Control-Allow-Origin", "*").build();
+        return Response.ok(json).build();
     }
     
     @GET
