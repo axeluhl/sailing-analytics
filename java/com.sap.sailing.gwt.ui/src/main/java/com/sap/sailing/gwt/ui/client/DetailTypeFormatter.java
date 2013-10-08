@@ -104,7 +104,7 @@ public class DetailTypeFormatter {
         case RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START:
             return stringMessages.distanceToLineFiveSecondsBeforeStart();
         case RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START:
-            return stringMessages.speedOverGroundFiveSecondsBeforStart();
+            return stringMessages.speedOverGroundFiveSecondsBeforeStart();
         }
         return null;
     }
@@ -283,7 +283,7 @@ public class DetailTypeFormatter {
         case RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START:
             return stringMessages.distanceToLineFiveSecondsBeforeStartTooltip();
         case RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START:
-            return stringMessages.speedOverGroundFiveSecondsBeforStartTooltip();
+            return stringMessages.speedOverGroundFiveSecondsBeforeStartTooltip();
         }
         
         return "";

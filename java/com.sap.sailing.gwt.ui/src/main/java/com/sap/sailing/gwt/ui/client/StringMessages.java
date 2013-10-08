@@ -747,7 +747,7 @@ public interface StringMessages extends Messages {
     String timeSinceLastPositionFixTooltip();
     String trackingQuality();
     String distanceToLineFiveSecondsBeforeStart();
-    String speedOverGroundFiveSecondsBeforStart();
+    String speedOverGroundFiveSecondsBeforeStart();
     String distanceToLineFiveSecondsBeforeStartTooltip();
-    String speedOverGroundFiveSecondsBeforStartTooltip();
+    String speedOverGroundFiveSecondsBeforeStartTooltip();
 }
