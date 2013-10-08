@@ -98,6 +98,26 @@ public class FixesAndTails {
     public boolean hasFixesFor(CompetitorDTO competitor) {
         return fixes.containsKey(competitor);
     }
+    
+    /**
+     * When for a competitor the last fix obtained from the server is {@link GPSFixDTO#extrapolated extrapolated}, the quality
+     * of this fix depends on the time difference between the extrapolated fix's time point and the last non-extrapolated
+     * fix's time point. This time difference in milliseconds is returned by this method, or <code>0</code> in case
+     * the last fix for <code>competitor</code> is not extrapolated.
+     */
+    protected long getMillisecondsBetweenExtrapolatedAndLastNonExtrapolatedFix(CompetitorDTO competitor) {
+        List<GPSFixDTO> competitorFixes = getFixes(competitor);
+        final long result;
+        if (competitorFixes == null || competitorFixes.size() < 2 || !competitorFixes.get(competitorFixes.size()-1).extrapolated) {
+            result = 0;
+        } else {
+            // last fix is extrapolated and another fix present; check time difference
+            GPSFixDTO extrapolatedFix = competitorFixes.get(competitorFixes.size()-1);
+            GPSFixDTO fixBeforeExtrapolated = competitorFixes.get(competitorFixes.size()-2);
+            result = extrapolatedFix.timepoint.getTime() - fixBeforeExtrapolated.timepoint.getTime();
+        }
+        return result;
+    }
 
     /**
      * Creates a polyline for the competitor represented by <code>competitorDTO</code>, taking the fixes from
