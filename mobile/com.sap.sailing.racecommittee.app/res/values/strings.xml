@@ -272,5 +272,6 @@
 	
 	<string name="loading_configuration">Loading configuration...</string>
 	<string name="loading_configuration_failed">There was an error loading the configuration.</string>
+	<string name="loading_configuration_succeded">Remote configuration applied.</string>
 	
 </resources>
