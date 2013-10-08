@@ -41,7 +41,8 @@ public class MasterDataResource extends AbstractSailingServerResource {
                 getService().getAllEvents(), getService().getPersistentRegattasForRaceIDs(), getService().getAllMediaTracks());
 
         JSONObject masterData = masterSerializer.serialize(requestedLeaderboardGroupNames);
-        ResponseBuilder resp = Response.ok(masterData.toJSONString().getBytes(), "application/json;charset=UTF-8");
+        ResponseBuilder resp = Response.ok(masterData.toJSONString().getBytes(), "application/json;charset=UTF-8")
+                .header("Access-Control-Allow-Origin", "*");
         return resp.build();
     }
 
