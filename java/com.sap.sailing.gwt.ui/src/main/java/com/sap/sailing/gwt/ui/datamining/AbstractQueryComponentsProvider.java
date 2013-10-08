@@ -8,6 +8,8 @@ import java.util.Set;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.datamining.shared.Components.GrouperType;
+import com.sap.sailing.datamining.shared.QueryDefinition;
 
 public abstract class AbstractQueryComponentsProvider<DimensionType> implements
         QueryComponentsProvider<DimensionType> {
@@ -28,15 +30,15 @@ public abstract class AbstractQueryComponentsProvider<DimensionType> implements
     }
     
     @Override
-    public Iterable<String> validateComponents() {
+    public Iterable<String> validateQueryDefinition(QueryDefinition<DimensionType> queryDefinition) {
         Collection<String> errorMessages = new ArrayList<String>();
         
-        String grouperError = validateGrouper();
+        String grouperError = validateGrouper(queryDefinition);
         if (grouperError != null && !grouperError.isEmpty()) {
             errorMessages.add(grouperError);
         }
         
-        String statisticError = validateStatisticAndAggregator();
+        String statisticError = validateStatisticAndAggregator(queryDefinition);
         if (statisticError != null && !statisticError.isEmpty()) {
             errorMessages.add(statisticError);
         }
@@ -44,20 +46,20 @@ public abstract class AbstractQueryComponentsProvider<DimensionType> implements
         return errorMessages;
     }
 
-    private String validateGrouper() {
-        GrouperType grouper = getGrouperType();
+    private String validateGrouper(QueryDefinition<DimensionType> queryDTO) {
+        GrouperType grouper = queryDTO.getGrouperType();
         if (grouper == null) {
             return stringMessages.noGrouperSelectedError();
         }
         
         ValidateGrouper: switch (grouper) {
         case Custom:
-            if (getCustomGrouperScriptText().isEmpty()) {
+            if (queryDTO.getCustomGrouperScriptText().isEmpty()) {
                 return stringMessages.noCustomGrouperScriptTextError();
             }
             break;
         case Dimensions:
-            for (DimensionType dimension : getDimensionsToGroupBy()) {
+            for (DimensionType dimension : queryDTO.getDimensionsToGroupBy()) {
                 if (dimension != null) {
                     break ValidateGrouper;
                 }
@@ -70,11 +72,9 @@ public abstract class AbstractQueryComponentsProvider<DimensionType> implements
         return null;
     }
 
-    private String validateStatisticAndAggregator() {
-        return getStatisticAndAggregatorType() == null ? stringMessages.noStatisticSelectedError() : null;
+    private String validateStatisticAndAggregator(QueryDefinition<DimensionType> queryDTO) {
+        return queryDTO.getStatisticType() == null || queryDTO.getAggregatorType() == null ? stringMessages.noStatisticSelectedError() : null;
     }
-
-    protected abstract StatisticAndAggregatorType getStatisticAndAggregatorType();
 
     @Override
     public void addListener(QueryComponentsChangedListener<DimensionType> listener) {

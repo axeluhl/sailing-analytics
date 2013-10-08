@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -30,8 +31,10 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.datamining.shared.AggregatorType;
-import com.sap.sailing.datamining.shared.SharedDimensions;
+import com.sap.sailing.datamining.shared.Components.GrouperType;
+import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.SharedDimensions.GPSFix;
+import com.sap.sailing.datamining.shared.SharedDimensions;
 import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -66,15 +69,34 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
             ErrorReporter errorReporter) {
         super(stringMessages, sailingService, errorReporter);
         mainPanel = new FlowPanel();
-        dimensionsToGroupByBoxes = new ArrayList<ValueListBox<GPSFix>>();
+        dimensionsToGroupByBoxes = new ArrayList<ValueListBox<SharedDimensions.GPSFix>>();
 
         mainPanel.add(createSelectionTables());
         mainPanel.add(createFunctionsPanel());
         fillSelectionTables();
     }
-
+    
     @Override
-    public Map<SharedDimensions.GPSFix, Collection<?>> getSelection() {
+    public QueryDefinition<GPSFix> getQueryDefinition() {
+        ModifiableQueryDefinition<SharedDimensions.GPSFix> queryDTO = new ModifiableQueryDefinition<SharedDimensions.GPSFix>(getGrouperType(), getStatisticType(), getAggregatorType());
+        switch (queryDTO.getGrouperType()) {
+        case Custom:
+            queryDTO.setCustomGrouperScriptText(getCustomGrouperScriptText());
+            break;
+        case Dimensions:
+        default:
+            for (SharedDimensions.GPSFix dimension : getDimensionsToGroupBy()) {
+                queryDTO.appendDimensionToGroupBy(dimension);
+            }
+            break;
+        }
+        for (Entry<SharedDimensions.GPSFix, Collection<?>> selectionEntry : getSelection().entrySet()) {
+            queryDTO.setSelectionFor(selectionEntry.getKey(), selectionEntry.getValue());
+        }
+        return queryDTO;
+    }
+
+    private Map<SharedDimensions.GPSFix, Collection<?>> getSelection() {
         Map<SharedDimensions.GPSFix, Collection<?>> selection = new HashMap<SharedDimensions.GPSFix, Collection<?>>();
         for (SelectionTable<SharedDimensions.GPSFix, ?, ?> table : tablesMappedByDimension.values()) {
             Collection<?> specificSelection = table.getSelection();
@@ -91,21 +113,18 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
         }
     }
 
-    @Override
-    public GrouperType getGrouperType() {
+    private GrouperType getGrouperType() {
         return grouperTypeListBox.getValue();
     }
 
-    @Override
-    public String getCustomGrouperScriptText() {
+    private String getCustomGrouperScriptText() {
         return getGrouperType() == GrouperType.Custom ? customGrouperScriptTextBox.getText() : "";
     }
 
-    @Override
-    public Collection<SharedDimensions.GPSFix> getDimensionsToGroupBy() {
+    private Collection<SharedDimensions.GPSFix> getDimensionsToGroupBy() {
         Collection<SharedDimensions.GPSFix> dimensionsToGroupBy = new ArrayList<SharedDimensions.GPSFix>();
         if (getGrouperType() == GrouperType.Dimensions) {
-            for (ValueListBox<GPSFix> dimensionToGroupByBox : dimensionsToGroupByBoxes) {
+            for (ValueListBox<SharedDimensions.GPSFix> dimensionToGroupByBox : dimensionsToGroupByBoxes) {
                 if (dimensionToGroupByBox.getValue() != null) {
                     dimensionsToGroupBy.add(dimensionToGroupByBox.getValue());
                 }
@@ -114,18 +133,11 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
         return dimensionsToGroupBy;
     }
 
-    @Override
-    protected StatisticAndAggregatorType getStatisticAndAggregatorType() {
-        return statisticsListBox.getValue();
-    }
-
-    @Override
-    public StatisticType getStatisticToCalculate() {
+    private StatisticType getStatisticType() {
         return statisticsListBox.getValue().getStatisticType();
     }
 
-    @Override
-    public AggregatorType getAggregatorType() {
+    private AggregatorType getAggregatorType() {
         return statisticsListBox.getValue().getAggregatorType();
     }
 
@@ -336,9 +348,9 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
             private boolean firstChange = true;
 
             @Override
-            public void onValueChange(ValueChangeEvent<GPSFix> event) {
+            public void onValueChange(ValueChangeEvent<SharedDimensions.GPSFix> event) {
                 if (firstChange && event.getValue() != null) {
-                    ValueListBox<GPSFix> newBox = createDimensionToGroupByBox();
+                    ValueListBox<SharedDimensions.GPSFix> newBox = createDimensionToGroupByBox();
                     dimensionsToGroupByPanel.add(newBox);
                     dimensionsToGroupByBoxes.add(newBox);
                     firstChange = false;

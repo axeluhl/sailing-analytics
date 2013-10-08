@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -47,10 +48,11 @@ public abstract class AbstractResultsPanel<DimensionType, ResultType> extends Fl
     }
 
     private void runQuery() {
-        Iterable<String> errorMessages = queryComponentsProvider.validateComponents();
+        QueryDefinition<DimensionType> queryDefinition = queryComponentsProvider.getQueryDefinition();
+        Iterable<String> errorMessages = queryComponentsProvider.validateQueryDefinition(queryDefinition);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             queryStatusLabel.setText(" | " + stringMessages.running());
-            sendServerRequest(new AsyncCallback<QueryResult<ResultType>>() {
+            sendServerRequest(queryDefinition, new AsyncCallback<QueryResult<ResultType>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error running the query: " + caught.getMessage());
@@ -67,11 +69,7 @@ public abstract class AbstractResultsPanel<DimensionType, ResultType> extends Fl
         }
     }
 
-    protected abstract void sendServerRequest(AsyncCallback<QueryResult<ResultType>> asyncCallback);
-    
-    protected QueryComponentsProvider<DimensionType> getQueryComponentsProvider() {
-        return queryComponentsProvider;
-    }
+    protected abstract void sendServerRequest(QueryDefinition<DimensionType> queryDefinition, AsyncCallback<QueryResult<ResultType>> asyncCallback);
     
     protected SailingServiceAsync getSailingService() {
         return sailingService;

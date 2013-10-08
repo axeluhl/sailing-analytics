@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -51,14 +52,14 @@ public abstract class AbstractBenchmarkResultsPanel<DimensionType> extends FlowP
             @Override
             public void onSuccess(List<RegattaDTO> regattas) {
                 final int times = numberOfQueriesBox.getValue() == null ? 1 : numberOfQueriesBox.getValue();
-                runQuery(new ClientBenchmarkData<DimensionType>(queryComponentsProvider.getSelection(), times, 1));
+                runQuery(new ClientBenchmarkData<DimensionType>(times, 1));
             }
         });
     }
 
     private void runQuery(final ClientBenchmarkData<DimensionType> benchmarkData) {
         final long startTime = System.currentTimeMillis();
-        sendServerRequest(benchmarkData, new AsyncCallback<QueryResult<Number>>() {
+        sendServerRequest(queryComponentsProvider.getQueryDefinition(), new AsyncCallback<QueryResult<Number>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running a query: " + caught.getMessage());
@@ -72,7 +73,7 @@ public abstract class AbstractBenchmarkResultsPanel<DimensionType> extends FlowP
         });
     }
 
-    protected abstract void sendServerRequest(ClientBenchmarkData<DimensionType> benchmarkData, AsyncCallback<QueryResult<Number>> asyncCallback);
+    protected abstract void sendServerRequest(QueryDefinition<DimensionType> queryDefinition, AsyncCallback<QueryResult<Number>> asyncCallback);
     
     protected SailingServiceAsync getSailingService() {
         return sailingService;

@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
+import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.datamining.shared.SharedDimensions.GPSFix;
-import com.sap.sailing.datamining.shared.StatisticType;
+import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -456,19 +456,23 @@ public interface SailingServiceAsync {
     
     void importMasterData(String host, String[] names, boolean override, AsyncCallback<MasterDataImportObjectCreationCount> asyncCallback);
 
-    <ResultType extends Number> void runGPSFixQuery(Map<GPSFix, Collection<?>> selection, Collection<GPSFix> dimensionsToGroupBy,
-            StatisticType statisticToCalculate, AggregatorType aggregatedAs,
-            AsyncCallback<QueryResult<ResultType>> asyncCallback);
+//    <ResultType extends Number> void runGPSFixQuery(Map<GPSFix, Collection<?>> selection, Collection<GPSFix> dimensionsToGroupBy,
+//            StatisticType statisticToCalculate, AggregatorType aggregatedAs,
+//            AsyncCallback<QueryResult<ResultType>> asyncCallback);
+//
+//    <ResultType extends Number> void runGPSFixQuery(Map<GPSFix, Collection<?>> selection, String grouperScriptText,
+//            StatisticType statisticToCalculate, AggregatorType aggregatedAs,
+//            AsyncCallback<QueryResult<ResultType>> asyncCallback);
 
-    <ResultType extends Number> void runGPSFixQuery(Map<GPSFix, Collection<?>> selection, String grouperScriptText,
-            StatisticType statisticToCalculate, AggregatorType aggregatedAs,
-            AsyncCallback<QueryResult<ResultType>> asyncCallback);
+    <ResultType extends Number> void runGPSFixQuery(QueryDefinition<GPSFix> queryDefinition, AsyncCallback<QueryResult<ResultType>> asyncCallback);
     
     /**
      * This method does nothing, but is needed to ensure, that GenericGroupKey&ltString&gt in the GWT serialization policy.<br />
      * This is necessary, because the type is somehow covered from GWT. For Further information look at bug 1503.<br />
      */
     void pseudoMethodSoThatGenericGroupKeyIsAddedToTheGWTSerializationPolicy(AsyncCallback<GenericGroupKey<String>> asyncCallback);
+
+    void pseudoMethodSoThatSimpleQueryDefinitionIsAddedToTheGWTSerializationPolicy(AsyncCallback<SimpleQueryDefinition<String>> callback);
     
 }
 
