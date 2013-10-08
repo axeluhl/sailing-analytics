@@ -750,6 +750,10 @@ public interface StringMessages extends Messages {
     String sailID();
     String clearSelection();
     String running();
+    String distanceToLineFiveSecondsBeforeStart();
+    String speedOverGroundFiveSecondsBeforeStart();
+    String distanceToLineFiveSecondsBeforeStartTooltip();
+    String speedOverGroundFiveSecondsBeforeStartTooltip();
     String runAsSubstantive();
     String done();
     String lastFinished();
