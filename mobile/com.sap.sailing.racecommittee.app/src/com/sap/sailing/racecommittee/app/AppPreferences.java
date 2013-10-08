@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -108,6 +109,16 @@ public class AppPreferences {
             managedCourseAreas[i] = managedCourseAreas[i].trim();
         }
         return Arrays.asList(managedCourseAreas);
+    }
+    
+    public static void setManagedCourseAreaNames(Context context, Set<String> courseAreaNames) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        StringBuilder builder = new StringBuilder();
+        for (String name : courseAreaNames) {
+            builder.append(name);
+            builder.append(",");
+        }
+        sp.edit().putString(PREFERENCE_MANAGED_COURSE_AREAS, builder.substring(0, builder.length() - 1)).commit();
     }
     
     public static double getWindBearingFromDirection(Context context) {

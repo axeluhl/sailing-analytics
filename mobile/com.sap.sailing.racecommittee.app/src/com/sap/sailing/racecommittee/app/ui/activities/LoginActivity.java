@@ -12,6 +12,9 @@ import android.widget.Toast;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.TabletConfiguration;
+import com.sap.sailing.domain.base.TabletConfigurationIdentifier;
+import com.sap.sailing.domain.base.impl.TabletConfigurationIdentifierImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
@@ -27,11 +30,12 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
+import com.sap.sailing.racecommittee.app.utils.TabletConfigurationHelper;
 
-public class LoginActivity extends BaseActivity implements EventSelectedListenerHost,
-        CourseAreaSelectedListenerHost, DialogListenerHost {
+public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
+        DialogListenerHost {
     private final static String TAG = LoginActivity.class.getName();
-    
+
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
 
     private LoginDialog loginDialog;
@@ -41,7 +45,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         this.loginDialog = new LoginDialog();
         this.selectedCourseArea = null;
     }
-    
+
     @Override
     protected boolean onReset() {
         Fragment courseAreaFragment = getFragmentManager().findFragmentByTag(CourseAreaListFragmentTag);
@@ -57,9 +61,9 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     public void onCreate(Bundle savedInstanceState) {
         // features must be requested before anything else
         getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        
+
         super.onCreate(savedInstanceState);
-        
+
         setContentView(R.layout.login_view);
         setProgressBarIndeterminateVisibility(false);
 
@@ -95,38 +99,40 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         public void itemSelected(Fragment sender, EventBase event) {
             final Serializable eventId = event.getId();
             ExLog.i(ExLog.EVENT_SELECTED, eventId.toString(), getBaseContext());
-            
+
             setProgressBarIndeterminateVisibility(true);
             final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
             progressDialog.setMessage(getString(R.string.loading_configuration));
             progressDialog.setCancelable(false);
             progressDialog.setIndeterminate(true);
             progressDialog.show();
-            
-            String identifier = AppPreferences.getAndroidIdentifier(getApplicationContext());
+
             ReadonlyDataManager dataManager = OnlineDataManager.create(LoginActivity.this);
-            getLoaderManager().restartLoader(
-                    0, 
-                    null, 
-                    dataManager.createConfigurationLoader(identifier, new LoadClient<String>() {
-                        
+            TabletConfigurationIdentifier identifier = new TabletConfigurationIdentifierImpl(
+                    AppPreferences.getAndroidIdentifier(getApplicationContext()));
+            getLoaderManager().restartLoader(0, null,
+                    dataManager.createConfigurationLoader(identifier, new LoadClient<TabletConfiguration>() {
+
                         @Override
-                        public void onLoadSucceded(String data, boolean isCached) {
+                        public void onLoadSucceded(TabletConfiguration configuration, boolean isCached) {
                             setProgressBarIndeterminateVisibility(false);
                             progressDialog.dismiss();
-                            
-                            Toast.makeText(getApplicationContext(), data, Toast.LENGTH_SHORT).show();
+
+                            TabletConfigurationHelper.apply(getApplicationContext(), configuration);
+                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_succeded),
+                                    Toast.LENGTH_LONG).show();
                             showCourseAreaListFragment(eventId);
                         }
-                        
+
                         @Override
                         public void onLoadFailed(Exception reason) {
                             setProgressBarIndeterminateVisibility(false);
                             progressDialog.dismiss();
-                            
-                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
+
+                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed),
+                                    Toast.LENGTH_LONG).show();
                             ExLog.ex(TAG, reason);
-                            
+
                             showCourseAreaListFragment(eventId);
                         }
                     })).forceLoad();
@@ -162,7 +168,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     @Override
     public DialogResultListener getListener() {
         return new DialogResultListener() {
-            
+
             @Override
             public void onDialogPositiveButton(AttachedDialogFragment dialog) {
                 switch (loginDialog.getSelectedLoginType()) {
@@ -176,7 +182,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                     break;
                 default:
                     ExLog.i(TAG, "An invalid log type, e.g. NONE, was selected");
-                    Toast.makeText(LoginActivity.this, getString(R.string.please_select_a_login_type), Toast.LENGTH_LONG).show();
+                    Toast.makeText(LoginActivity.this, getString(R.string.please_select_a_login_type),
+                            Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -190,7 +197,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                 message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, selectedCourseArea.getId());
                 fadeActivity(message);
             }
-            
+
             @Override
             public void onDialogNegativeButton(AttachedDialogFragment dialog) {
                 /* nothing here... */

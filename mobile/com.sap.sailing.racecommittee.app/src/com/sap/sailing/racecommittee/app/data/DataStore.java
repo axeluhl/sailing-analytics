@@ -7,7 +7,9 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.TabletConfiguration;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.server.gateway.deserialization.impl.TabletConfigurationJsonDeserializer;
 
 public interface DataStore {
     
@@ -35,4 +37,7 @@ public interface DataStore {
     
     public CourseBase getLastPublishedCourseDesign();
     public void setLastPublishedCourseDesign(CourseBase courseData);
+    
+    public TabletConfiguration getTabletConfiguration();
+    public void setTabletConfiguration(TabletConfiguration configuration);
 }

@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.data;
 
-import java.io.BufferedReader;
-import java.io.Reader;
 import java.io.Serializable;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -20,6 +18,8 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.TabletConfiguration;
+import com.sap.sailing.domain.base.TabletConfigurationIdentifier;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
@@ -28,7 +28,7 @@ import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.ManagedRacesDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.MarksDataHandler;
-import com.sap.sailing.racecommittee.app.data.handlers.NullDataHandler;
+import com.sap.sailing.racecommittee.app.data.handlers.TabletConfigurationDataHandler;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderCallbacks;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderCallbacks.LoaderCreator;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
@@ -40,6 +40,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
+import com.sap.sailing.racecommittee.app.data.parsers.TabletConfigurationParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
@@ -56,6 +57,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserialize
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.FleetDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.TabletConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceCellDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
@@ -233,32 +235,19 @@ public class OnlineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<String>> createConfigurationLoader(final String clientId,
-            LoadClient<String> callback) {
-        return new DataLoaderCallbacks<String>(callback, new LoaderCreator<String>() {
+    public LoaderCallbacks<DataLoaderResult<TabletConfiguration>> createConfigurationLoader(final TabletConfigurationIdentifier identifier,
+            LoadClient<TabletConfiguration> callback) {
+        return new DataLoaderCallbacks<TabletConfiguration>(callback, new LoaderCreator<TabletConfiguration>() {
             @Override
-            public Loader<DataLoaderResult<String>> create(int id, Bundle args) throws Exception {
+            public Loader<DataLoaderResult<TabletConfiguration>> create(int id, Bundle args) throws Exception {
                 ExLog.i(TAG, String.format("Creating Configuration-OnlineDataLoader %d", id));
                 
-                DataHandler<String> handler = new NullDataHandler<String>();
-                DataParser<String> parser = new DataParser<String>() {
-                    @Override
-                    public String parse(Reader reader) throws Exception {
-                        BufferedReader in = null;
-                        try {
-                            in = new BufferedReader(reader);
-                            return in.readLine();
-                        } finally {
-                            if (in != null) {
-                                in.close();
-                            }
-                        }
-                    }
-                };
+                DataHandler<TabletConfiguration> handler = new TabletConfigurationDataHandler(OnlineDataManager.this);
+                DataParser<TabletConfiguration> parser = new TabletConfigurationParser(new TabletConfigurationJsonDeserializer());
                 
-                return new OnlineDataLoader<String>(
+                return new OnlineDataLoader<TabletConfiguration>(
                         context, 
-                        new URL(AppPreferences.getServerBaseURL(context) + "/sailingserver/rc/configuration?client="+ clientId), 
+                        new URL(AppPreferences.getServerBaseURL(context) + "/sailingserver/rc/configuration?client="+ identifier.getClientIdentifier()), 
                         parser, handler);
             }
         });

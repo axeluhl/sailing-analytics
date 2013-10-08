@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.TabletConfiguration;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.CollectionUtils;
 
@@ -18,6 +19,7 @@ public enum InMemoryDataStore implements DataStore {
     private HashMap<Serializable, ManagedRace> managedRaceById;
     private HashMap<Serializable, Mark> marksById;
     private CourseBase courseData;
+    private TabletConfiguration configuration;
 
     private InMemoryDataStore() {
         reset();
@@ -28,7 +30,6 @@ public enum InMemoryDataStore implements DataStore {
         this.eventsById = new HashMap<Serializable, EventBase>();
         this.managedRaceById = new HashMap<Serializable, ManagedRace>();
         this.marksById = new HashMap<Serializable, Mark>();
-        this.courseData = null;
     }
 
     /*
@@ -161,5 +162,15 @@ public enum InMemoryDataStore implements DataStore {
     @Override
     public void setLastPublishedCourseDesign(CourseBase courseData) {
         this.courseData = courseData;
+    }
+
+    @Override
+    public TabletConfiguration getTabletConfiguration() {
+        return configuration;
+    }
+
+    @Override
+    public void setTabletConfiguration(TabletConfiguration configuration) {
+        this.configuration = configuration;
     }
 }

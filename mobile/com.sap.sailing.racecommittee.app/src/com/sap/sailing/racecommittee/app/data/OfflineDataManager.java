@@ -17,6 +17,8 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.TabletConfiguration;
+import com.sap.sailing.domain.base.TabletConfigurationIdentifier;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
@@ -192,12 +194,12 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<String>> createConfigurationLoader(String clientId,
-            LoadClient<String> callback) {
-        return new ImmediateDataLoaderCallbacks<String>(context, callback, new Callable<String>() {
+    public LoaderCallbacks<DataLoaderResult<TabletConfiguration>> createConfigurationLoader(TabletConfigurationIdentifier identifier,
+            LoadClient<TabletConfiguration> callback) {
+        return new ImmediateDataLoaderCallbacks<TabletConfiguration>(context, callback, new Callable<TabletConfiguration>() {
             @Override
-            public String call() throws Exception {
-                return "";
+            public TabletConfiguration call() throws Exception {
+                throw new IllegalStateException("No remote configuration in offline mode.");
             }
         });
     }
