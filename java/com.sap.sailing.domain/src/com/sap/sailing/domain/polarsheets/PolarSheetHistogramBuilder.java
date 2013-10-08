@@ -34,6 +34,7 @@ public class PolarSheetHistogramBuilder {
 
         Map<String, Integer[]> yValuesByGaugeIds = new HashMap<String, Integer[]>();
         Map<String, Integer[]> yValuesByDay = new HashMap<String, Integer[]>();
+        Map<String, Integer[]> yValuesByDayAndGaugeId = new HashMap<String, Integer[]>();
         Integer[] yValues = new Integer[numberOfColumns];
         for (int i = 0; i < yValues.length; i++) {
             yValues[i] = 0;
@@ -49,15 +50,18 @@ public class PolarSheetHistogramBuilder {
 
             String gaugeIdsString = dataPoint.getWindGaugeIdString();
             createHistogramDataForArrangeOption(numberOfColumns, yValuesByGaugeIds, u, gaugeIdsString);
-            
+
             String dayString = dataPoint.getDayString();
             createHistogramDataForArrangeOption(numberOfColumns, yValuesByDay, u, dayString);
+
+            String dayAndGaugeIdString = dayString + "-" + gaugeIdsString;
+            createHistogramDataForArrangeOption(numberOfColumns, yValuesByDayAndGaugeId, u, dayAndGaugeIdString);
 
         }
         
 
         PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angleIndex, xValues, yValues,
-                yValuesByGaugeIds, yValuesByDay, dataPointsWithOriginInfo.size(), coefficiantOfVariation);
+                yValuesByGaugeIds, yValuesByDay, yValuesByDayAndGaugeId, dataPointsWithOriginInfo.size(), coefficiantOfVariation);
         return histogramData;
     }
 

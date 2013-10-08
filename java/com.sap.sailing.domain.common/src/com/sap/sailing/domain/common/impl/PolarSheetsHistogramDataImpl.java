@@ -23,18 +23,22 @@ public class PolarSheetsHistogramDataImpl implements PolarSheetsHistogramData {
     private Map<String, Integer[]> yValuesByGaugeIds;
 
     private Map<String, Integer[]> yValuesByDay;
+
+    private Map<String, Integer[]> yValuesByDayAndGaugeId;
     
     //For GWT serialization
     PolarSheetsHistogramDataImpl() {}
 
     public PolarSheetsHistogramDataImpl(int angle, Number[] xValues, Number[] yValues,
-            Map<String, Integer[]> yValuesByGaugeIds, Map<String, Integer[]> yValuesByDay, int dataCount, double coefficiantOfVariation) {
+            Map<String, Integer[]> yValuesByGaugeIds, Map<String, Integer[]> yValuesByDay,
+            Map<String, Integer[]> yValuesByDayAndGaugeId, int dataCount, double coefficiantOfVariation) {
         super();
         this.angle = angle;
         this.yValues = yValues;
         this.xValues = xValues;
         this.yValuesByGaugeIds = yValuesByGaugeIds;
         this.yValuesByDay = yValuesByDay;
+        this.yValuesByDayAndGaugeId = yValuesByDayAndGaugeId;
         this.dataCount = dataCount;
         this.coefficiantOfVariation = coefficiantOfVariation;
     }
@@ -81,6 +85,11 @@ public class PolarSheetsHistogramDataImpl implements PolarSheetsHistogramData {
 
     public Map<String, Integer[]> getYValuesByDay() {
         return yValuesByDay;
+    }
+
+    @Override
+    public Map<String, Integer[]> getYValuesByDayAndGaugeId() {
+        return yValuesByDayAndGaugeId;
     }
 
 }

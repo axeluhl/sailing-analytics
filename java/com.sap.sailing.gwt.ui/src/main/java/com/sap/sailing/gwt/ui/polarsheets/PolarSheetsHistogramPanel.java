@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.polarsheets;
 
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
@@ -95,16 +96,6 @@ public class PolarSheetsHistogramPanel extends DockLayoutPanel {
         chart.setSizeToMatchContainer();
         super.onResize();
     }
-
-    public void arrangeByWindGaugeIds() {
-        chart.removeAllSeries();
-        for (Entry<String, Integer[]> entry : currentData.getYValuesByGaugeIds().entrySet()) {
-            Series series = chart.createSeries();
-            series.setName(entry.getKey());
-            series.setPoints(toPoints(currentData.getxValues(), entry.getValue()));
-            chart.addSeries(series);
-        }
-    }
     
     public void arrangeByNothing() {
         chart.removeAllSeries();
@@ -114,15 +105,32 @@ public class PolarSheetsHistogramPanel extends DockLayoutPanel {
         chart.addSeries(series);
     }
 
+    public void arrangeByWindGaugeIds() {
+        Map<String, Integer[]> yValueMap = currentData.getYValuesByGaugeIds();
+        arrangeByYValueMap(yValueMap);
+    }
+
     public void arrangeByDay() {
-        chart.removeAllSeries();
-        for (Entry<String, Integer[]> entry : currentData.getYValuesByDay().entrySet()) {
+        Map<String, Integer[]> yValueMap = currentData.getYValuesByDay();
+        arrangeByYValueMap(yValueMap);
+    }
+
+    public void arrangeByDayAndGaugeIds() {
+        Map<String, Integer[]> yValueMap = currentData.getYValuesByDayAndGaugeId();
+        arrangeByYValueMap(yValueMap);
+    }
+    
+    private void arrangeByYValueMap(Map<String, Integer[]> yValueMap) {
+        chart.removeAllSeries();   
+        for (Entry<String, Integer[]> entry : yValueMap.entrySet()) {
             Series series = chart.createSeries();
             series.setName(entry.getKey());
             series.setPoints(toPoints(currentData.getxValues(), entry.getValue()));
             chart.addSeries(series);
         }
     }
+    
+    
     
 
 }

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.polarsheets;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -75,46 +77,77 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
         useOnlyWindGaugesForWindSpeedBox = dialog.createCheckbox("");
         useOnlyWindGaugesForWindSpeedBox.setValue(settings.useOnlyWindGaugesForWindSpeed());
         grid.setWidget(4, 1, useOnlyWindGaugesForWindSpeedBox);
-        Label useOnlyEstimationForWindDirectionLabel = new Label(stringMessages.polarSheetUseOnlyEstimationData() + ":");
-        useOnlyEstimationForWindDirectionLabel.setTitle(stringMessages.polarSheetUseOnlyEstimationDataTooltip());
-        grid.setWidget(5, 0, useOnlyEstimationForWindDirectionLabel);
-        useOnlyEstimationForWindDirectionBox = dialog.createCheckbox("");
-        useOnlyEstimationForWindDirectionBox.setValue(settings.useOnlyEstimatedForWindDirection());
-        grid.setWidget(5, 1, useOnlyEstimationForWindDirectionBox);
-        Label shouldRemoveOutliersLabel = new Label(stringMessages.polarSheetRemoveOutliers() + ":");
-        shouldRemoveOutliersLabel.setTitle(stringMessages.polarSheetRemoveOutliersTooltip());
-        grid.setWidget(6, 0, shouldRemoveOutliersLabel);
-        shouldRemoveOutliersBox = dialog.createCheckbox("");
-        shouldRemoveOutliersBox.setValue(settings.shouldRemoveOutliers());
-        grid.setWidget(6, 1, shouldRemoveOutliersBox);
-        Label outlierRadiusLabel = new Label(stringMessages.polarSheetOutlierDetectionRadius() + ":");
-        outlierRadiusLabel.setTitle(stringMessages.polarSheetOutlierDetectionRadiusTooltip());
-        grid.setWidget(7, 0, outlierRadiusLabel);
-        outlierRadiusBox = dialog.createDoubleBox(settings.getOutlierDetectionNeighborhoodRadius(), 6);
-        grid.setWidget(7, 1, outlierRadiusBox);
-        Label outlierNeighborhoodPctLabel = new Label(stringMessages.polarSheetOutlierDetectionMinimumPerc() + ":");
-        outlierNeighborhoodPctLabel.setTitle(stringMessages.polarSheetOutlierDetectionMinimumPercTooltip());
-        grid.setWidget(8, 0, outlierNeighborhoodPctLabel);
-        outlierNeighborhoodPctBox = dialog.createDoubleBox(settings.getOutlierMinimumNeighborhoodPct(), 6);
-        grid.setWidget(8, 1, outlierNeighborhoodPctBox);
-        grid.setWidget(9, 0, new Label(stringMessages.polarSheetNumberOfHistogramColumns() + ":"));
-        numberOfHistogramColumnsBox = dialog.createIntegerBox(settings.getNumberOfHistogramColumns(), 3);
-        grid.setWidget(9, 1, numberOfHistogramColumnsBox);
-        grid.setWidget(10, 0, new Label(stringMessages.polarSheetWindSteppingInKnots() + ":"));
-        windSteppingBox = new WindSteppingConfiguratorPanel(settings.getWindStepping());
-        grid.setWidget(10, 1, windSteppingBox);
-        Label windSteppingMaxDistanceLabel = new Label(stringMessages.polarSheetWindSteppingMaxDistance() + ":");
-        windSteppingMaxDistanceLabel.setTitle(stringMessages.polarSheetWindSteppingMaxDistanceTooltip());
-        grid.setWidget(11, 0, windSteppingMaxDistanceLabel);
-        windSteppingMaxDistanceBox = dialog.createDoubleBox(settings.getWindStepping().getMaxDistance(), 6);
-        grid.setWidget(11, 1, windSteppingMaxDistanceBox);
         Label splitByWindGaugesLabel = new Label(stringMessages.polarSheetSplitByWindGauges() + ":");
         splitByWindGaugesLabel.setTitle(stringMessages.polarSheetSplitByWindGaugesTooltip());
-        grid.setWidget(12, 0, splitByWindGaugesLabel);
+        grid.setWidget(5, 0, splitByWindGaugesLabel);
         splitByWindGaugesBox = dialog.createCheckbox("");
         splitByWindGaugesBox.setValue(settings.splitByWindgauges());
-        grid.setWidget(12, 1, splitByWindGaugesBox);
+        grid.setWidget(5, 1, splitByWindGaugesBox);
+        Label useOnlyEstimationForWindDirectionLabel = new Label(stringMessages.polarSheetUseOnlyEstimationData() + ":");
+        useOnlyEstimationForWindDirectionLabel.setTitle(stringMessages.polarSheetUseOnlyEstimationDataTooltip());
+        grid.setWidget(6, 0, useOnlyEstimationForWindDirectionLabel);
+        useOnlyEstimationForWindDirectionBox = dialog.createCheckbox("");
+        useOnlyEstimationForWindDirectionBox.setValue(settings.useOnlyEstimatedForWindDirection());
+        grid.setWidget(6, 1, useOnlyEstimationForWindDirectionBox);
+        Label shouldRemoveOutliersLabel = new Label(stringMessages.polarSheetRemoveOutliers() + ":");
+        shouldRemoveOutliersLabel.setTitle(stringMessages.polarSheetRemoveOutliersTooltip());
+        grid.setWidget(7, 0, shouldRemoveOutliersLabel);
+        shouldRemoveOutliersBox = dialog.createCheckbox("");
+        shouldRemoveOutliersBox.setValue(settings.shouldRemoveOutliers());
+        grid.setWidget(7, 1, shouldRemoveOutliersBox);
+        Label outlierRadiusLabel = new Label(stringMessages.polarSheetOutlierDetectionRadius() + ":");
+        outlierRadiusLabel.setTitle(stringMessages.polarSheetOutlierDetectionRadiusTooltip());
+        grid.setWidget(8, 0, outlierRadiusLabel);
+        outlierRadiusBox = dialog.createDoubleBox(settings.getOutlierDetectionNeighborhoodRadius(), 6);
+        grid.setWidget(8, 1, outlierRadiusBox);
+        Label outlierNeighborhoodPctLabel = new Label(stringMessages.polarSheetOutlierDetectionMinimumPerc() + ":");
+        outlierNeighborhoodPctLabel.setTitle(stringMessages.polarSheetOutlierDetectionMinimumPercTooltip());
+        grid.setWidget(9, 0, outlierNeighborhoodPctLabel);
+        outlierNeighborhoodPctBox = dialog.createDoubleBox(settings.getOutlierMinimumNeighborhoodPct(), 6);
+        grid.setWidget(9, 1, outlierNeighborhoodPctBox);
+        grid.setWidget(10, 0, new Label(stringMessages.polarSheetNumberOfHistogramColumns() + ":"));
+        numberOfHistogramColumnsBox = dialog.createIntegerBox(settings.getNumberOfHistogramColumns(), 3);
+        grid.setWidget(10, 1, numberOfHistogramColumnsBox);
+        grid.setWidget(11, 0, new Label(stringMessages.polarSheetWindSteppingInKnots() + ":"));
+        windSteppingBox = new WindSteppingConfiguratorPanel(settings.getWindStepping());
+        grid.setWidget(11, 1, windSteppingBox);
+        Label windSteppingMaxDistanceLabel = new Label(stringMessages.polarSheetWindSteppingMaxDistance() + ":");
+        windSteppingMaxDistanceLabel.setTitle(stringMessages.polarSheetWindSteppingMaxDistanceTooltip());
+        grid.setWidget(12, 0, windSteppingMaxDistanceLabel);
+        windSteppingMaxDistanceBox = dialog.createDoubleBox(settings.getWindStepping().getMaxDistance(), 6);
+        grid.setWidget(12, 1, windSteppingMaxDistanceBox);
         grid.setWidget(13, 0, new Label(stringMessages.pleaseSeeToolTips()));
+        
+        setValueChangeListenerForOnlyWindGaugesForSpeed();
+        setValueChangeListenerForOutlierRemoval();
+    }
+
+    private void setValueChangeListenerForOutlierRemoval() {
+        shouldRemoveOutliersBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                boolean isChecked = event.getValue();
+                outlierRadiusBox.setEnabled(isChecked);
+                outlierNeighborhoodPctBox.setEnabled(isChecked);
+            }
+        });
+
+    }
+
+    private void setValueChangeListenerForOnlyWindGaugesForSpeed() {
+        useOnlyWindGaugesForWindSpeedBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                if (event.getValue()) {
+                    splitByWindGaugesBox.setEnabled(true);
+                } else {
+                    splitByWindGaugesBox.setEnabled(false);
+                    splitByWindGaugesBox.setValue(false);
+                }
+            }
+        });
     }
 
     @Override
