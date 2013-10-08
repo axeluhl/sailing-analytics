@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -821,6 +822,17 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public Distance getDistanceToStartLine(Competitor competitor, double secondsBeforeRaceStart) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Speed getSpeed(Competitor competitor, double secondsBeforeRaceStart) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
     public void onStartTimeChangedByRaceCommittee(TimePoint newStartTime) {
         // TODO Auto-generated method stub
         
