@@ -88,6 +88,24 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         }
         return isAdded;
     }
+    
+    @Override
+    public boolean load(RaceLogEvent event) {
+        boolean isAdded = false;
+        lockForWrite();
+        try {
+            isAdded = getInternalRawFixes().add(event);
+        } finally {
+            unlockAfterWrite();
+        }
+        if (isAdded) {
+            logger.finer(String.format("%s (%s) was loaded into log.", event, event.getClass().getName()));
+            setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
+        } else {
+            logger.warning(String.format("%s (%s) was not loaded into log. Ignoring", event, event.getClass().getName()));
+        }
+        return isAdded;
+    }
 
     protected void notifyListenersAboutReceive(RaceLogEvent event) {
         synchronized (listeners) {
@@ -97,6 +115,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
                 } catch (Throwable t) {
                     logger.log(Level.SEVERE, "RaceLogEventVisitor " + listener + " threw exception " + t.getMessage());
                     logger.throwing(RaceLogImpl.class.getName(), "notifyListenersAboutReceive(RaceLogEvent)", t);
+                    t.printStackTrace();
                 }
             }
         }

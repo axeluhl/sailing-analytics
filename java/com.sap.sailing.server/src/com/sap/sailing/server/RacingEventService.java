@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.base.CourseArea;
@@ -456,19 +457,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @param eventName
      *            The name of the new event
-     * @param venue
-     *            The name of the venue of the new event
      * @param publicationUrl
      *            The publication URL of the new event
      * @param isPublic
      *            Indicates whether the event is public accessible via the publication URL or not
      * @param id
      *            The id of the new event
-     * @param regattaNames
-     *            The names of the regattas contained in the new event.<br />
+     * @param venue
+     *            The name of the venue of the new event
      * @return The new event
      */
-    Event addEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, Serializable id, List<String> regattaNames);
+    Event addEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, UUID id);
 
     /**
      * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the
@@ -487,7 +486,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @return The new event
      */
-    void updateEvent(Serializable id, String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames);
+    void updateEvent(UUID id, String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames);
 
     /**
      * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},
@@ -496,11 +495,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * {@link #getEventByName(String) getEventByName(oldName)} can now be obtained by calling
      * {@link #getEventByName(String) getEventByName(newName)}.
      */
-    void renameEvent(Serializable id, String newEventName);
+    void renameEvent(UUID id, String newEventName);
 
-    void removeEvent(Serializable id);
+    void removeEvent(UUID id);
 
-    CourseArea addCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId);
+    CourseArea addCourseArea(UUID eventId, String courseAreaName, UUID courseAreaId);
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
@@ -536,10 +535,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId);
 
-    void createEventWithoutReplication(Event result);
-
-    Event addCourseAreaWithoutReplication(Serializable eventId, CourseArea courseArea);
-
     /**
      * @return map where keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to
      * {@link #setRegattaForRace(Regatta, RaceDefinition)}. It helps remember the connection between races and regattas.
@@ -551,5 +546,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param override If set to true, the mthod will override any existing connection
      */
     void setPersistentRegattaForRaceIDs(Regatta regatta, Iterable<String> raceIdStrings, boolean override);
+
+    Event createEventWithoutReplication(String eventName, String venue, String publicationUrl, boolean isPublic,
+            UUID id);
+
+    CourseArea addCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId, String courseAreaName);
 
 }

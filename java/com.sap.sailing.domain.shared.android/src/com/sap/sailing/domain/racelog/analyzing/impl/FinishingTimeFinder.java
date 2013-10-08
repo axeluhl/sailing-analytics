@@ -13,7 +13,7 @@ public class FinishingTimeFinder extends RaceLogAnalyzer<TimePoint> {
     }
 
     @Override
-    protected TimePoint performAnalyzation() {
+    protected TimePoint performAnalysis() {
         for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogRaceStatusEvent) {
                 RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;

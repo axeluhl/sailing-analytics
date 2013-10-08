@@ -342,9 +342,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
     }
 
-    public AbstractSimpleLeaderboardImpl(SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+    public AbstractSimpleLeaderboardImpl(ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         this.carriedPoints = new HashMap<Competitor, Double>();
-        this.scoreCorrection = scoreCorrection;
+        this.scoreCorrection = createScoreCorrection();
         this.displayNames = new HashMap<Competitor, String>();
         this.crossLeaderboardResultDiscardingRule = resultDiscardingRule;
         this.suppressedCompetitors = new HashSet<Competitor>();
@@ -352,6 +352,15 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         this.raceColumnListeners = new RaceColumnListeners();
         this.raceDetailsAtEndOfTrackingCache = new HashMap<Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>>();
         initTransientFields();
+    }
+    
+    /**
+     * Produces the score correction object to use in this leaderboard. Used by the constructor. Subclasses may override
+     * this method to create a more specific type of score correction. This implementation produces an object of type
+     * {@link ScoreCorrectionImpl}.
+     */
+    protected SettableScoreCorrection createScoreCorrection() {
+        return new ScoreCorrectionImpl(this);
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
@@ -459,7 +468,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
-        return getScoreCorrection().getMaxPointsReason(competitor, raceColumn);
+        return getScoreCorrection().getMaxPointsReason(competitor, raceColumn, timePoint);
     }
 
     @Override
@@ -615,7 +624,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         TrackedRace trackedRaceForCompetitorInColumn;
         return getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint) && 
-               (getScoreCorrection().isScoreCorrected(competitor, raceColumn) ||
+               (getScoreCorrection().isScoreCorrected(competitor, raceColumn, timePoint) ||
                        ((trackedRaceForCompetitorInColumn=raceColumn.getTrackedRace(competitor)) != null &&
                         trackedRaceForCompetitorInColumn.hasStarted(timePoint)));
     }

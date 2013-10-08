@@ -1256,13 +1256,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         GPSFixMoving fix = fixIter.next();
                         while (fix != null && (fix.getTimePoint().compareTo(toTimePointExcluding) < 0 ||
                                 (fix.getTimePoint().equals(toTimePointExcluding) && toTimePointExcluding.equals(fromTimePoint)))) {
-                            Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                            Tack tack;
+                            try {
+                                tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                            } catch (NoWindException nwe) {
+                                tack = null;
+                            }
                             TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor,
                                     fix.getTimePoint());
                             LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
                                     trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
                             Wind wind = trackedRace.getWind(fix.getPosition(),toTimePointExcluding);
-                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, toTimePointExcluding);
+                            WindDTO windDTO = wind == null ? null : createWindDTOFromAlreadyAveraged(wind, toTimePointExcluding);
                             GPSFixDTO fixDTO = createGPSFixDTO(fix, fix.getSpeed(), windDTO, tack, legType, /* extrapolate */
                                     false);
                             fixesForCompetitor.add(fixDTO);
@@ -1272,13 +1277,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 // check if fix was at date and if extrapolation is requested
                                 if (!fix.getTimePoint().equals(toTimePointExcluding) && extrapolate) {
                                     Position position = track.getEstimatedPosition(toTimePointExcluding, extrapolate);
-                                    Tack tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
+                                    Tack tack2;
+                                    try {
+                                        tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
+                                    } catch (NoWindException nwe) {
+                                        tack2 = null;
+                                    }
                                     LegType legType2 = trackedLegOfCompetitor == null ? null : trackedRace
                                             .getTrackedLeg(trackedLegOfCompetitor.getLeg()).getLegType(
                                                     fix.getTimePoint());
                                     SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(toTimePointExcluding);
                                     Wind wind2 = trackedRace.getWind(position, toTimePointExcluding);
-                                    WindDTO windDTO2 = createWindDTOFromAlreadyAveraged(wind2, toTimePointExcluding);
+                                    WindDTO windDTO2 = wind2 == null ? null : createWindDTOFromAlreadyAveraged(wind2, toTimePointExcluding);
                                     GPSFixDTO extrapolated = new GPSFixDTO(
                                             toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()),
                                             position==null?null:new PositionDTO(position.getLatDeg(), position.getLngDeg()),
@@ -2028,6 +2038,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             BoatClass boatClass = com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE.getRaceTypeFromRaceID(rr.getRaceID()).getBoatClass();
             swissTimingRaceRecordDTO.boatClass = boatClass != null ? boatClass.getName() : null;
             swissTimingRaceRecordDTO.discipline = rr.getRaceID().length() >= 3 ? rr.getRaceID().substring(2, 3) : null;
+            swissTimingRaceRecordDTO.hasCourse = rr.hasCourse();
+            swissTimingRaceRecordDTO.hasStartlist = rr.hasStartlist();
             result.add(swissTimingRaceRecordDTO);
         }
         return result;
@@ -2553,12 +2565,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public EventDTO createEvent(String eventName, String venue, String publicationUrl, boolean isPublic, List<String> courseAreaNames) {
         UUID eventUuid = UUID.randomUUID();
-        getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, eventUuid, courseAreaNames));
-
+        getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, eventUuid));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid.toString(), courseAreaName);
         }
-
         return getEventById(eventUuid);
     }
 

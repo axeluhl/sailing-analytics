@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -52,7 +51,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final UUID alphaCourseAreaId = UUID.randomUUID();
         final UUID tvCourseAreaId = UUID.randomUUID();
         
-        Event event = master.addEvent("Event", "Venue", ".", true, UUID.randomUUID(), Collections.<String>emptyList());
+        Event event = master.addEvent("Event", "Venue", ".", true, UUID.randomUUID());
         master.addCourseArea(event.getId(), "Alpha", alphaCourseAreaId);
         master.addCourseArea(event.getId(), "TV", tvCourseAreaId);
         
@@ -151,11 +150,8 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final boolean isPublic = false;
         final String boatClassName = "X40";
         final Iterable<Series> series = Collections.emptyList();
-        List<String> regattas = new ArrayList<String>();
-
         final String courseArea = "Alpha";
-
-        Event masterEvent = master.addEvent(eventName, venueName, publicationUrl, isPublic, UUID.randomUUID(), regattas);
+        Event masterEvent = master.addEvent(eventName, venueName, publicationUrl, isPublic, UUID.randomUUID());
         CourseArea masterCourseArea = master.addCourseArea(masterEvent.getId(), courseArea, UUID.randomUUID());
         
         Regatta masterRegatta = master.createRegatta(eventName, boatClassName, UUID.randomUUID(), series,

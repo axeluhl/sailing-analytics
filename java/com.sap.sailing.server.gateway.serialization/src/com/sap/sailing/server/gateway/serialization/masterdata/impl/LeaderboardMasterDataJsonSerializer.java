@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -272,12 +273,14 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
             RaceColumn raceColumn, Leaderboard leaderboard) {
         JSONArray scoreCorrectionsForCompetitors = new JSONArray();
         for (Competitor competitor : leaderboard.getAllCompetitors()) {
-            if (correction.isScoreCorrected(competitor, raceColumn)) {
+            // TODO bug 655: score corrections shall be time dependent
+            final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+            if (correction.isScoreCorrected(competitor, raceColumn, now)) {
                 JSONObject scoreCorrectionForCompetitor = new JSONObject();
                 scoreCorrectionForCompetitor.put(FIELD_EXPLICIT_SCORE_CORRECTION,
                         correction.getExplicitScoreCorrection(competitor, raceColumn));
                 scoreCorrectionForCompetitor.put(FIELD_MAX_POINTS_REASON,
-                        correction.getMaxPointsReason(competitor, raceColumn).toString());
+                        correction.getMaxPointsReason(competitor, raceColumn, now).toString());
                 scoreCorrectionForCompetitor.put(FIELD_COMPETITOR_ID, competitor.getId().toString());
                 scoreCorrectionsForCompetitors.add(scoreCorrectionForCompetitor);
             }
