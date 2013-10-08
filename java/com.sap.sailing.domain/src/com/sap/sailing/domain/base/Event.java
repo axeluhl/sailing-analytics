@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base;
 
+import java.util.UUID;
+
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.WithID;
@@ -18,4 +20,9 @@ public interface Event extends Named, Renamable, WithID, EventBase {
     void addRegatta(Regatta regatta);
     
     void removeRegatta(Regatta regatta);
+    
+    /**
+     * For events, the ID is always a UUID.
+     */
+    UUID getId();
 }

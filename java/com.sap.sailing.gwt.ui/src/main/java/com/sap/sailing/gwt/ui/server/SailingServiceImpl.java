@@ -46,7 +46,6 @@ import javax.servlet.ServletContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.google.gwt.regexp.shared.RegExp;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -2557,12 +2556,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public EventDTO createEvent(String eventName, String venue, String publicationUrl, boolean isPublic, List<String> courseAreaNames) {
         UUID eventUuid = UUID.randomUUID();
-        getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, eventUuid, courseAreaNames));
-
+        getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, eventUuid));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid.toString(), courseAreaName);
         }
-
         return getEventById(eventUuid);
     }
 
@@ -3139,10 +3136,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override) {
-        String getMasterDataUrl = createGetMasterDataForLgsUrl(host);
-        if (!isValidUrl(getMasterDataUrl, false)) {
-            throw new RuntimeException("Not a valid URL for fetching leaderboardgroups masterdata: " + getMasterDataUrl);
-        }
+        host = host.split("://")[1];
         String query = createLeaderboardQuery(groupNames);
         HttpURLConnection connection = null;
         BufferedReader rd  = null;
@@ -3152,7 +3146,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         URL serverAddress = null;
       
         try {
-            serverAddress = parseUrl(getMasterDataUrl + query);
+            serverAddress = createUrl(host, query);
             //set up out communications stuff
             connection = null;
           
@@ -3185,16 +3179,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
     
-    private URL parseUrl(String s) throws Exception {
-        URL u = new URL(s);
-        return new URI(
-               u.getProtocol(), 
-               u.getAuthority(), 
-               u.getPath(),
-               u.getQuery(), 
-               u.getRef()).
-               toURL();
-   }
+    private URL createUrl(String host, String query) throws Exception {
+        return new URI("http", host, "/sailingserver/api/v1/masterdata/leaderboardgroups", query, null).toURL();
+    }
     
     protected MasterDataImportObjectCreationCount importFromHttpResponse(String response, boolean override) {
         MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());       
@@ -3202,7 +3189,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private String createLeaderboardQuery(String[] groupNames) {
-        StringBuffer queryStringBuffer = new StringBuffer("?");
+        StringBuffer queryStringBuffer = new StringBuffer("");
         for (int i = 0; i < groupNames.length; i++) {
             queryStringBuffer.append("names[]=" + groupNames[i] + "&");
         }
@@ -3213,28 +3200,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             queryStringBuffer.deleteCharAt(queryStringBuffer.length() - 1);
         }
         return queryStringBuffer.toString();
-    }
-    
-    private boolean isValidUrl(String url, boolean topLevelDomainRequired) {
-            RegExp urlValidator = RegExp
-                    .compile("^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
-        return urlValidator.exec(url) != null;
-    }
-    
-    private String createGetMasterDataForLgsUrl(String host) {
-        StringBuffer urlBuffer = new StringBuffer(host);
-        appendHttpAndSlashIfNeeded(host, urlBuffer);
-        urlBuffer.append("sailingserver/masterdata/leaderboardgroups");
-        return urlBuffer.toString();
-    }
-    
-    private void appendHttpAndSlashIfNeeded(String host, StringBuffer urlBuffer) {
-        if (!host.endsWith("/")) {
-            urlBuffer.append("/");
-        }
-        if (!host.startsWith("http://")) {
-            urlBuffer.insert(0, "http://");
-        }
     }
 
 }

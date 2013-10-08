@@ -803,7 +803,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      */
     private Event loadEvent(DBObject eventDBObject) {
         String name = (String) eventDBObject.get(FieldNames.EVENT_NAME.name());
-        Serializable id = (Serializable) eventDBObject.get(FieldNames.EVENT_ID.name());
+        UUID id = (UUID) eventDBObject.get(FieldNames.EVENT_ID.name());
         String publicationUrl = (String) eventDBObject.get(FieldNames.EVENT_PUBLICATION_URL.name());
         boolean isPublic = eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) != null ? (Boolean) eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) : false;
         Venue venue = loadVenue((DBObject) eventDBObject.get(FieldNames.VENUE.name()));
