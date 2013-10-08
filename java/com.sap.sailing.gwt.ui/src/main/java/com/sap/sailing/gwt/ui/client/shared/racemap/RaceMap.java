@@ -303,6 +303,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               mapOptions.setMapTypeControl(true);
               mapOptions.setPanControl(true);
               mapOptions.setScaleControl(true);
+              mapOptions.setRotateControl(true);
               
               MapTypeStyle[] mapTypeStyles = new MapTypeStyle[4];
               
@@ -383,7 +384,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
           }
         };
 
-        LoadApi.go(onLoad, loadLibraries, sensor); 
+        LoadApi.go(onLoad, loadLibraries, sensor, "key="+mapsAPIKey); 
     }
         
     public void redraw() {
