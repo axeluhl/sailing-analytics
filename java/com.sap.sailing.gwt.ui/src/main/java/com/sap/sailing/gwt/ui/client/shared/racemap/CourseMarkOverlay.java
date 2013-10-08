@@ -7,8 +7,6 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
-import com.google.gwt.maps.client.overlays.MapCanvasProjection;
-import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewMethods;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
@@ -49,9 +47,8 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
 
 
     @Override
-    protected void draw(OverlayViewMethods methods) {
-        MapCanvasProjection projection = methods.getProjection();
-        if (mark != null && position != null && markImageCanvas.isImageLoaded()) {
+    protected void draw() {
+        if (mapProjection != null && mark != null && position != null && markImageCanvas.isImageLoaded()) {
             getCanvas().setTitle(getTitle());
             
             LatLng latLngPosition = LatLng.newInstance(position.latDeg, position.lngDeg);
@@ -62,7 +59,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
             double canvasHeight = imageSize.getHeight();
             double buoyZoneRadiusInPixel = -1;
             if(showBuoyZone && mark.type == MarkType.BUOY) {
-                buoyZoneRadiusInPixel = calculateRadiusOfBoundingBox(projection, latLngPosition, buoyZoneRadiusInMeter);
+                buoyZoneRadiusInPixel = calculateRadiusOfBoundingBox(mapProjection, latLngPosition, buoyZoneRadiusInMeter);
                 if(buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
                     canvasWidth = buoyZoneRadiusInPixel * 2;
                     canvasHeight = buoyZoneRadiusInPixel * 2;
@@ -77,7 +74,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
             markImageCanvas.drawImage();
             ImageData imageData = markImageCanvas.getImageData();
 
-            Point buoyPositionInPx = projection.fromLatLngToDivPixel(latLngPosition);
+            Point buoyPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
             Point markAnchorPoint = markImageDescriptor.getAnchorPoint();
 
             // draw the buoy zone 
