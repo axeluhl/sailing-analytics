@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimingConstants;
@@ -553,6 +554,21 @@ public interface TrackedRace extends Serializable {
     Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace);
 
     /**
+     * Tells how far the given <code>competitor</code> was from the start line at the time point of the given seconds before the start.
+     * <p>
+     * 
+     * The distance to the line is calculated by projecting the competitor's position onto the line orthogonally and
+     * computing the distance of the projected position and the competitor's position.
+     * <p
+     * .
+     * 
+     * Should the course be empty, <code>null</code> is returned. If the course's first waypoint is not a line or gate,
+     * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
+     * returned. If the competitor's position cannot be determined, <code>null</code> is returned.
+     */
+    Distance getDistanceToStartLine(Competitor competitor, double secondsBeforeRaceStart);
+
+    /**
      * Tells how far the given <code>competitor</code> was from the start line at the given <code>timePoint</code>.
      * Using the {@link #getStartOfRace() race start time} for <code>timePoint</code>, this tells the competitor's
      * distance to the line when the race was started.
@@ -575,6 +591,11 @@ public interface TrackedRace extends Serializable {
      * If the competitor hasn't started yet, <code>null</code> is returned.
      */
     Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor);
+    
+    /**
+     * The estimated speed of the competitor at the time point of the given seconds before the start of race. 
+     */
+    Speed getSpeed(Competitor competitor, double secondsBeforeRaceStart);
 
     /**
      * Start time received by the tracking infrastructure. To determine real start time use {@link #getStartOfRace()}.

@@ -797,6 +797,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                 DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
                 DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
+                DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START, DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START,
                 DetailType.DISTANCE_TO_START_AT_RACE_START, DetailType.SPEED_OVER_GROUND_AT_RACE_START,
                 DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
                 DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS,
@@ -887,6 +888,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS, new RaceAverageCrossTrackErrorInMeters(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START, new DistanceToStartFiveSecondsBeforeStartInMeters(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START, new SpeedFiveSecondsBeforeStartInKnots(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.DISTANCE_TO_START_AT_RACE_START,
                     new FormattedDoubleDetailTypeColumn(DetailType.DISTANCE_TO_START_AT_RACE_START, new DistanceToStartAtRaceStartInMeters(),
@@ -1061,6 +1068,36 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null) {
                     result = fieldsForRace.speedOverGroundAtStartOfRaceInKnots;
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Fetches the competitor's distance to the start mark five seconds before the race started
+         */
+        private class DistanceToStartFiveSecondsBeforeStartInMeters implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.distanceToStartLineFiveSecondsBeforeStartInMeters;
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Fetches the competitor's speed over ground five seconds before the race started
+         */
+        private class SpeedFiveSecondsBeforeStartInKnots implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.speedOverGroundFiveSecondsBeforeStartInKnots;
                 }
                 return result;
             }
