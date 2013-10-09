@@ -1,10 +1,36 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
+import com.google.gwt.maps.client.events.click.ClickEventFormatter;
+import com.google.gwt.maps.client.events.click.ClickMapHandler;
+import com.google.gwt.maps.client.events.dblclick.DblClickEventFormatter;
+import com.google.gwt.maps.client.events.dblclick.DblClickMapHandler;
+import com.google.gwt.maps.client.events.mousedown.MouseDownEventFormatter;
+import com.google.gwt.maps.client.events.mousedown.MouseDownMapHandler;
+import com.google.gwt.maps.client.events.mousemove.MouseMoveEventFormatter;
+import com.google.gwt.maps.client.events.mousemove.MouseMoveMapHandler;
+import com.google.gwt.maps.client.events.mouseout.MouseOutEventFormatter;
+import com.google.gwt.maps.client.events.mouseout.MouseOutMapHandler;
+import com.google.gwt.maps.client.events.mouseover.MouseOverEventFormatter;
+import com.google.gwt.maps.client.events.mouseover.MouseOverMapHandler;
+import com.google.gwt.maps.client.events.mouseup.MouseUpEventFormatter;
+import com.google.gwt.maps.client.events.mouseup.MouseUpMapHandler;
+import com.google.gwt.maps.client.events.rightclick.RightClickEventFormatter;
+import com.google.gwt.maps.client.events.rightclick.RightClickMapHandler;
 import com.google.gwt.maps.client.overlays.MapCanvasProjection;
 import com.google.gwt.maps.client.overlays.OverlayView;
 import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewMethods;
@@ -51,12 +77,21 @@ public abstract class CanvasOverlayV3 {
 
     protected MapCanvasProjection mapProjection;
 
-    public CanvasOverlayV3(MapWidget map, int zIndex) {
+    public CanvasOverlayV3(MapWidget map, int zIndex, String canvasId) {
         this.map = map;
         this.mapProjection = null;
         
         canvas = Canvas.createIfSupported();
+        canvas.getElement().getStyle().setZIndex(zIndex);
+        canvas.getElement().getStyle().setCursor(Cursor.POINTER);
+        if(canvasId != null) {
+            canvas.getElement().setId(canvasId);
+        }
         customOverlayView = OverlayView.newInstance(map, getOnDrawHandler(), getOnAddHandler(), getOnRemoveHandler());
+    }
+
+    public CanvasOverlayV3(MapWidget map, int zIndex) {
+        this(map, zIndex, null);
     }
 
     public Canvas getCanvas() {
@@ -92,6 +127,86 @@ public abstract class CanvasOverlayV3 {
     public void removeFromMap() {
         customOverlayView.setMap(null);
     }
+
+    /**
+     * This event is fired when the DOM click event is fired on the Canvas.
+     * 
+     * @param handler
+     */
+    public final HandlerRegistration addClickHandler(ClickMapHandler handler) {
+        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), ClickEvent.getType(), 
+                handler, new ClickEventFormatter(), true);
+    }
+
+    /**
+     * This event is fired when the DOM dblclick event is fired on the Canvas.
+     * 
+     * @param handler
+     */
+    public final HandlerRegistration addDblClickHandler(DblClickMapHandler handler) {
+        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), DoubleClickEvent.getType(), 
+                handler, new DblClickEventFormatter(), true);
+    }
+
+    /**
+     * This event is fired when the DOM mousedown event is fired on the Canvas.
+     * 
+     * @param handler
+     */
+    public final HandlerRegistration addMouseDownHandler(MouseDownMapHandler handler) {
+        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseDownEvent.getType(), 
+                handler, new MouseDownEventFormatter(), true);
+    }
+
+    /**
+     * This event is fired when the DOM mousemove event is fired on the Canvas.
+     * 
+     * @param handler
+     */
+    public final HandlerRegistration addMouseMoveHandler(MouseMoveMapHandler handler) {
+        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseMoveEvent.getType(), 
+                handler, new MouseMoveEventFormatter(), true);
+    }
+
+    /**
+     * This event is fired on Canvas mouseout.
+     * 
+     * @param handler
+     */
+    public final HandlerRegistration addMouseOutMoveHandler(MouseOutMapHandler handler) {
+        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseOutEvent.getType(), 
+                handler, new MouseOutEventFormatter(), true);
+    }
+
+    /**
+     * This event is fired on Canvas mouseover.
+     * 
+     * @param handler
+     */
+    public final HandlerRegistration addMouseOverHandler(MouseOverMapHandler handler) {
+        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseOverEvent.getType(), 
+                handler, new MouseOverEventFormatter(), true);
+    }
+
+    /**
+     * This event is fired when the DOM mouseup event is fired on the Canvas.
+     * 
+     * @param handler
+     */
+    public final HandlerRegistration addMouseUpHandler(MouseUpMapHandler handler) {
+        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseUpEvent.getType(), 
+                handler, new MouseUpEventFormatter(), true);
+    }
+
+    /**
+     * This event is fired when the Canvas is right-clicked on.
+     * 
+     * @param handler
+     */
+    public final HandlerRegistration addRightClickHandler(RightClickMapHandler handler) {
+        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), ContextMenuEvent.getType(), 
+                handler, new RightClickEventFormatter(), true);
+    }
     
     protected void setLatLngPosition(LatLng latLngPosition) {
         this.latLngPosition = latLngPosition;
@@ -102,13 +217,12 @@ public abstract class CanvasOverlayV3 {
     }
 
     protected abstract void draw();
-
+    
     protected OverlayViewOnAddHandler getOnAddHandler() {
         OverlayViewOnAddHandler result = new OverlayViewOnAddHandler() {
             @Override
             public void onAdd(OverlayViewMethods methods) {
-                methods.getPanes().getMapPane().appendChild(canvas.getElement());
-                methods.getPanes().getOverlayLayer().getStyle().setZIndex(zIndex);
+                methods.getPanes().getOverlayMouseTarget().appendChild(canvas.getElement());
             }
         };
         return result;

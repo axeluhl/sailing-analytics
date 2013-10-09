@@ -34,12 +34,12 @@ public class BoatOverlay extends CanvasOverlayV3 {
 
     private final BoatClassImageData boatClassImageData;    
 
-    public BoatOverlay(MapWidget map, int zIndex, CompetitorDTO competitorDTO) {
+    public BoatOverlay(MapWidget map, int zIndex, final CompetitorDTO competitorDTO) {
         super(map, zIndex);
         this.boatClass = competitorDTO.getBoatClass();
         this.boatClassImageData = BoatClassImageDataResolver.resolveBoatClassImages(boatClass.getName());
     }
-
+  
     @Override
     protected void draw() {
         if (mapProjection != null && boatFix != null) {

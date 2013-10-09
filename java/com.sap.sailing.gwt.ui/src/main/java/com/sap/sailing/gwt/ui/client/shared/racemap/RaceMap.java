@@ -14,8 +14,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.LoadApi;
 import com.google.gwt.maps.client.LoadApi.LoadLibrary;
@@ -1042,9 +1040,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected CourseMarkOverlay createCourseMarkOverlay(int zIndex, final MarkDTO markDTO) {
         final CourseMarkOverlay courseMarkOverlay = new CourseMarkOverlay(map, zIndex, raceMapImageManager, markDTO);
-        courseMarkOverlay.getCanvas().addClickHandler(new ClickHandler() {
+        courseMarkOverlay.addClickHandler(new ClickMapHandler() {
             @Override
-            public void onClick(ClickEvent event) {
+            public void onEvent(ClickMapEvent event) {
                 LatLng latlng = courseMarkOverlay.getMarkPosition();
                 showMarkInfoWindow(markDTO, latlng);
             }
@@ -1059,9 +1057,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, boolean highlighted) {
         final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO);
         boatCanvas.setSelected(highlighted);
-        boatCanvas.getCanvas().addClickHandler(new ClickHandler() {
+        boatCanvas.addClickHandler(new ClickMapHandler() {
             @Override
-            public void onClick(ClickEvent event) {
+            public void onEvent(ClickMapEvent event) {
                 GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
                 LatLng where = LatLng.newInstance(latestFixForCompetitor.position.latDeg, latestFixForCompetitor.position.lngDeg);
                 InfoWindowOptions options = InfoWindowOptions.newInstance();
@@ -1071,15 +1069,29 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 infoWindow.open(map);
             }
         });
+
+        boatCanvas.addMouseOverHandler(new MouseOverMapHandler() {
+            @Override
+            public void onEvent(MouseOverMapEvent event) {
+                map.setTitle(competitorDTO.getSailID());
+            }
+        });
+        boatCanvas.addMouseOutMoveHandler(new MouseOutMapHandler() {
+            @Override
+            public void onEvent(MouseOutMapEvent event) {
+                map.setTitle("");
+            }
+        });
+
         return boatCanvas;
     }
 
     protected WindSensorOverlay createWindSensorOverlay(int zIndex, final WindSource windSource, final WindTrackInfoDTO windTrackInfoDTO) {
         final WindSensorOverlay windSensorOverlay = new WindSensorOverlay(map, zIndex, raceMapImageManager, stringMessages);
         windSensorOverlay.setWindInfo(windTrackInfoDTO, windSource);
-        windSensorOverlay.getCanvas().addClickHandler(new ClickHandler() {
+        windSensorOverlay.addClickHandler(new ClickMapHandler() {
             @Override
-            public void onClick(ClickEvent event) {
+            public void onEvent(ClickMapEvent event) {
                 showWindSensorInfoWindow(windSensorOverlay);
             }
         });
@@ -1676,6 +1688,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         options.setStrokeWeight(1);
         options.setStrokeOpacity(0.5);
         options.setStrokeColor(competitorSelection.getColor(competitor));
+        options.setZindex(RaceMapOverlaysZIndexes.BOATTAILS_ZINDEX);
         Polyline result = Polyline.newInstance(options);
 
         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));
