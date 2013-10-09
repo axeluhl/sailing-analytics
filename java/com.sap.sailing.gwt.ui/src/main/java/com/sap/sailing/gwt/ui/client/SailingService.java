@@ -13,7 +13,6 @@ import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.datamining.shared.SharedDimensions;
-import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -334,13 +333,7 @@ public interface SailingService extends RemoteService {
 
     MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override);
     
-//    <ResultType extends Number> QueryResult<ResultType> runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, Collection<SharedDimensions.GPSFix> dimensionsToGroupBy, StatisticType statisticToCalculate, AggregatorType aggregatedAs);
-//
-//    <ResultType extends Number> QueryResult<ResultType> runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, String grouperScriptText, StatisticType statisticToCalculate, AggregatorType aggregatedAs);
-
     <ResultType extends Number> QueryResult<ResultType> runGPSFixQuery(QueryDefinition<SharedDimensions.GPSFix> queryDefinition);
 
     GenericGroupKey<String> pseudoMethodSoThatGenericGroupKeyIsAddedToTheGWTSerializationPolicy();
-
-    SimpleQueryDefinition<String> pseudoMethodSoThatSimpleQueryDefinitionIsAddedToTheGWTSerializationPolicy();
 }

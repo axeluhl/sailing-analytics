@@ -56,7 +56,6 @@ import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.datamining.shared.SharedDimensions;
-import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -3333,28 +3332,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
     
-//    @Override
-//    public <ResultType extends Number> QueryResult<ResultType> runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, Collection<SharedDimensions.GPSFix> dimensionsToGroupBy, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
-//        DataRetriever<GPSFixWithContext> retriever = DataMiningFactory.createGPSFixRetriever();
-//        Filter<GPSFixWithContext> filter = DataMiningFactory.createGPSFixDimensionFilter(selection);
-//        Grouper<GPSFixWithContext> grouper = DataMiningFactory.createGPSFixByDimensionGrouper(dimensionsToGroupBy);
-//        Extractor<GPSFixWithContext, ResultType> extractor = DataMiningFactory.createExtractor(statisticToCalculate);
-//        Aggregator<ResultType, ResultType> aggregator = DataMiningFactory.createAggregator(statisticToCalculate, aggregatedAs);
-//        Query<GPSFixWithContext, ResultType> query = DataMiningFactory.createQuery(retriever, filter, grouper, extractor, aggregator);
-//        return query.run(getService());
-//    }
-
-//    @Override
-//    public <ResultType extends Number> QueryResult<ResultType> runGPSFixQuery(Map<SharedDimensions.GPSFix, Collection<?>> selection, String grouperScriptText, StatisticType statisticToCalculate, AggregatorType aggregatedAs) {
-//        DataRetriever<GPSFixWithContext> retriever = DataMiningFactory.createGPSFixRetriever();
-//        Filter<GPSFixWithContext> filter = DataMiningFactory.createGPSFixDimensionFilter(selection);
-//        Grouper<GPSFixWithContext> grouper = DataMiningFactory.createDynamicGrouper(grouperScriptText, DataTypes.GPSFix);
-//        Extractor<GPSFixWithContext, ResultType> extractor = DataMiningFactory.createExtractor(statisticToCalculate);
-//        Aggregator<ResultType, ResultType> aggregator = DataMiningFactory.createAggregator(statisticToCalculate, aggregatedAs);
-//        Query<GPSFixWithContext, ResultType> query = DataMiningFactory.createQuery(retriever, filter, grouper, extractor, aggregator);
-//        return query.run(getService());
-//    }
-    
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runGPSFixQuery(QueryDefinition<SharedDimensions.GPSFix> queryDefinition) {
         Query<GPSFixWithContext, ResultType> query = DataMiningFactory.createQuery(queryDefinition); 
@@ -3366,9 +3343,4 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return null;
     }
     
-    @Override
-    public SimpleQueryDefinition<String> pseudoMethodSoThatSimpleQueryDefinitionIsAddedToTheGWTSerializationPolicy() {
-        return null;
-    }
-
 }
