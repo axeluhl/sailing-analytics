@@ -22,19 +22,19 @@ public abstract class AbstractBenchmarkResultsPanel<DimensionType> extends FlowP
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
     private StringMessages stringMessages;
-    private QueryComponentsProvider<DimensionType> queryComponentsProvider;
+    private QueryDefinitionProvider<DimensionType> queryDefinitionProvider;
 
     private IntegerBox numberOfQueriesBox;
     private Label benchmarkStatusLabel;
     private BenchmarkResultsChart resultsChart;
 
     public AbstractBenchmarkResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, QueryComponentsProvider<DimensionType> queryComponentsProvider) {
+            ErrorReporter errorReporter, QueryDefinitionProvider<DimensionType> queryDefinitionProvider) {
         super();
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        this.queryComponentsProvider = queryComponentsProvider;
+        this.queryDefinitionProvider = queryDefinitionProvider;
         
         add(createFunctionsPanel());
         resultsChart = new BenchmarkResultsChart(this.stringMessages);
@@ -59,7 +59,7 @@ public abstract class AbstractBenchmarkResultsPanel<DimensionType> extends FlowP
 
     private void runQuery(final ClientBenchmarkData<DimensionType> benchmarkData) {
         final long startTime = System.currentTimeMillis();
-        sendServerRequest(queryComponentsProvider.getQueryDefinition(), new AsyncCallback<QueryResult<Number>>() {
+        sendServerRequest(queryDefinitionProvider.getQueryDefinition(), new AsyncCallback<QueryResult<Number>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running a query: " + caught.getMessage());
@@ -79,8 +79,8 @@ public abstract class AbstractBenchmarkResultsPanel<DimensionType> extends FlowP
         return sailingService;
     }
     
-    protected QueryComponentsProvider<DimensionType> getQueryComponentsProvider() {
-        return queryComponentsProvider;
+    protected QueryDefinitionProvider<DimensionType> getQueryDefinitionProvider() {
+        return queryDefinitionProvider;
     }
 
     private void updateResults(final ClientBenchmarkData<DimensionType> benchmarkData, double overallTimeInSeconds, QueryResult<? extends Number> result) {

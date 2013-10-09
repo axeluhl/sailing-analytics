@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public class GPSFixResultsPanel extends AbstractResultsPanel<SharedDimensions.GPSFix, Number> {
 
     public GPSFixResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, QueryComponentsProvider<SharedDimensions.GPSFix> queryComponentsProvider, ResultsPresenter<Number> presenter) {
+            ErrorReporter errorReporter, QueryDefinitionProvider<SharedDimensions.GPSFix> queryComponentsProvider, ResultsPresenter<Number> presenter) {
         super(stringMessages, sailingService, errorReporter, queryComponentsProvider, presenter);
     }
 

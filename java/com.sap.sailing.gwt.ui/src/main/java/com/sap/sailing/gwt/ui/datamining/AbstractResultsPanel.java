@@ -16,12 +16,12 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public abstract class AbstractResultsPanel<DimensionType, ResultType> extends FlowPanel implements QueryComponentsChangedListener<DimensionType> {
+public abstract class AbstractResultsPanel<DimensionType, ResultType> extends FlowPanel implements QueryDefinitionChangedListener<DimensionType> {
 
     private StringMessages stringMessages;
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
-    private QueryComponentsProvider<DimensionType> queryComponentsProvider;
+    private QueryDefinitionProvider<DimensionType> queryDefinitionProvider;
 
     private Label queryStatusLabel;
     private ResultsPresenter<ResultType> presenter;
@@ -29,27 +29,26 @@ public abstract class AbstractResultsPanel<DimensionType, ResultType> extends Fl
     private Button runQueryButton;
 
     public AbstractResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, QueryComponentsProvider<DimensionType> queryComponentsProvider, ResultsPresenter<ResultType> presenter) {
+            ErrorReporter errorReporter, QueryDefinitionProvider<DimensionType> queryDefinitionProvider, ResultsPresenter<ResultType> presenter) {
         super();
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        this.queryComponentsProvider = queryComponentsProvider;
+        this.queryDefinitionProvider = queryDefinitionProvider;
         this.presenter = presenter;
         
         add(createFunctionsPanel());
         add(this.presenter.getWidget());
-        runQuery();
+        runQuery(this.queryDefinitionProvider.getQueryDefinition());
     }
 
     @Override
-    public void queryComponentsChanged(QueryComponentsProvider<DimensionType> componentsProvider) {
-        runQuery();
+    public void queryDefinitionChanged(QueryDefinition<DimensionType> newQueryDefinition) {
+        runQuery(newQueryDefinition);
     }
 
-    private void runQuery() {
-        QueryDefinition<DimensionType> queryDefinition = queryComponentsProvider.getQueryDefinition();
-        Iterable<String> errorMessages = queryComponentsProvider.validateQueryDefinition(queryDefinition);
+    private void runQuery(QueryDefinition<DimensionType> queryDefinition) {
+        Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             queryStatusLabel.setText(" | " + stringMessages.running());
             sendServerRequest(queryDefinition, new AsyncCallback<QueryResult<ResultType>>() {
@@ -86,9 +85,9 @@ public abstract class AbstractResultsPanel<DimensionType, ResultType> extends Fl
                 Boolean runAutomatic = event.getValue();
                 runQueryButton.setVisible(!runAutomatic);
                 if (runAutomatic) {
-                    queryComponentsProvider.addListener(AbstractResultsPanel.this);
+                    queryDefinitionProvider.addListener(AbstractResultsPanel.this);
                 } else {
-                    queryComponentsProvider.removeListener(AbstractResultsPanel.this);
+                    queryDefinitionProvider.removeListener(AbstractResultsPanel.this);
                 }
             }
         });
@@ -98,7 +97,7 @@ public abstract class AbstractResultsPanel<DimensionType, ResultType> extends Fl
         runQueryButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                runQuery();
+                runQuery(null);
             }
         });
         functionsPanel.add(runQueryButton);

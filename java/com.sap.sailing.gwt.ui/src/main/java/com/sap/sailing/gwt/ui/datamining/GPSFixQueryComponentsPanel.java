@@ -47,7 +47,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<SharedDimensions.GPSFix> {
+public class GPSFixQueryComponentsPanel extends AbstractQueryDefinitionProvider<SharedDimensions.GPSFix> {
 
     private FlowPanel mainPanel;
     private ValueListBox<GrouperType> grouperTypeListBox;
@@ -242,7 +242,7 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
         statisticsListBox.addValueChangeHandler(new ValueChangeHandler<StatisticAndAggregatorType>() {
             @Override
             public void onValueChange(ValueChangeEvent<StatisticAndAggregatorType> event) {
-                notifyQueryComponentsChanged();
+                notifyQueryDefinitionChanged();
             }
         });
         List<StatisticAndAggregatorType> statistics = Arrays.asList(
@@ -296,7 +296,7 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
                         break;
                     }
                 }
-                notifyQueryComponentsChanged();
+                notifyQueryDefinitionChanged();
             }
         });
 
@@ -359,7 +359,7 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
                     dimensionsToGroupByPanel.remove((Widget) event.getSource());
                     dimensionsToGroupByBoxes.remove(event.getSource());
                 }
-                notifyQueryComponentsChanged();
+                notifyQueryDefinitionChanged();
             }
         });
         dimensionToGroupByBox.setAcceptableValues(Arrays.asList(SharedDimensions.GPSFix.values()));
@@ -457,7 +457,7 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
             table.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
                 @Override
                 public void onSelectionChange(SelectionChangeEvent event) {
-                    notifyQueryComponentsChanged();
+                    notifyQueryDefinitionChanged();
                 }
             });
         }

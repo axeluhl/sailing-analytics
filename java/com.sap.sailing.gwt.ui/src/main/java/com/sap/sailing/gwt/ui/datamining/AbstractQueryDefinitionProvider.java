@@ -11,22 +11,22 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 
-public abstract class AbstractQueryComponentsProvider<DimensionType> implements
-        QueryComponentsProvider<DimensionType> {
+public abstract class AbstractQueryDefinitionProvider<DimensionType> implements
+        QueryDefinitionProvider<DimensionType> {
 
     private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
 
-    private final Set<QueryComponentsChangedListener<DimensionType>> listeners;
+    private final Set<QueryDefinitionChangedListener<DimensionType>> listeners;
 
-    public AbstractQueryComponentsProvider(StringMessages stringMessages, SailingServiceAsync sailingService,
+    public AbstractQueryDefinitionProvider(StringMessages stringMessages, SailingServiceAsync sailingService,
             ErrorReporter errorReporter) {
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
 
-        listeners = new HashSet<QueryComponentsChangedListener<DimensionType>>();
+        listeners = new HashSet<QueryDefinitionChangedListener<DimensionType>>();
     }
     
     @Override
@@ -77,18 +77,18 @@ public abstract class AbstractQueryComponentsProvider<DimensionType> implements
     }
 
     @Override
-    public void addListener(QueryComponentsChangedListener<DimensionType> listener) {
+    public void addListener(QueryDefinitionChangedListener<DimensionType> listener) {
         listeners.add(listener);
     }
 
     @Override
-    public void removeListener(QueryComponentsChangedListener<DimensionType> listener) {
+    public void removeListener(QueryDefinitionChangedListener<DimensionType> listener) {
         listeners.remove(listener);
     }
 
-    protected void notifyQueryComponentsChanged() {
-        for (QueryComponentsChangedListener<DimensionType> listener : listeners) {
-            listener.queryComponentsChanged(this);
+    protected void notifyQueryDefinitionChanged() {
+        for (QueryDefinitionChangedListener<DimensionType> listener : listeners) {
+            listener.queryDefinitionChanged(getQueryDefinition());
         }
     }
 

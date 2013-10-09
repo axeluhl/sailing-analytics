@@ -12,7 +12,7 @@ public class DataMiningPanel extends FlowPanel {
             ErrorReporter errorReporter, boolean showBenchmark) {
         this.addStyleName("dataMiningPanel");
         
-        QueryComponentsProvider<SharedDimensions.GPSFix> selectionPanel = new GPSFixQueryComponentsPanel(stringMessages, sailingService, errorReporter);
+        QueryDefinitionProvider<SharedDimensions.GPSFix> selectionPanel = new GPSFixQueryComponentsPanel(stringMessages, sailingService, errorReporter);
         this.add(selectionPanel.getWidget());
         
         ResultsPresenter<Number> resultsChart = new ResultsChart(stringMessages);
