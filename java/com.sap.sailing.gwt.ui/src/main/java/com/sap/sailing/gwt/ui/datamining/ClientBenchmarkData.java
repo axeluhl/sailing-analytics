@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining;
 
 
-public class ClientBenchmarkData<DimensionType> {
+public class ClientBenchmarkData {
     
     private int times;
     private int currentRun;

@@ -9,16 +9,17 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.sap.sailing.datamining.shared.SharedDimensions;
 
-public abstract class SelectionTable<DimensionType, ContentType, ValueType> extends SimplePanel {
+public abstract class SelectionTable<ContentType, ValueType> extends SimplePanel {
     
-    private DimensionType dimension;
+    private SharedDimensions dimension;
     
     private CellTable<ContentType> table;
     private MultiSelectionModel<ContentType> selectionModel;
     private ListDataProvider<ContentType> dataProvider;
     
-    public SelectionTable(String title, DimensionType dimension) {
+    public SelectionTable(String title, SharedDimensions dimension) {
         this.dimension = dimension;
         
         table = new CellTable<ContentType>(500);
@@ -37,7 +38,7 @@ public abstract class SelectionTable<DimensionType, ContentType, ValueType> exte
         setWidget(table);
     }
 
-    public DimensionType getDimension() {
+    public SharedDimensions getDimension() {
         return dimension;
     }
     

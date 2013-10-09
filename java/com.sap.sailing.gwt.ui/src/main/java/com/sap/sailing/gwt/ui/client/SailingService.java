@@ -12,7 +12,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
-import com.sap.sailing.datamining.shared.SharedDimensions;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -333,7 +332,7 @@ public interface SailingService extends RemoteService {
 
     MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override);
     
-    <ResultType extends Number> QueryResult<ResultType> runGPSFixQuery(QueryDefinition<SharedDimensions.GPSFix> queryDefinition);
+    <ResultType extends Number> QueryResult<ResultType> runGPSFixQuery(QueryDefinition queryDefinition);
 
     GenericGroupKey<String> pseudoMethodSoThatGenericGroupKeyIsAddedToTheGWTSerializationPolicy();
 }

@@ -8,7 +8,7 @@ import java.util.Map;
 
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 
-public class SimpleQueryDefinition<DimensionType> implements QueryDefinition<DimensionType> {
+public class SimpleQueryDefinition implements QueryDefinition {
     private static final long serialVersionUID = 3476324726640558091L;
     
     private GrouperType grouperType;
@@ -16,8 +16,8 @@ public class SimpleQueryDefinition<DimensionType> implements QueryDefinition<Dim
     private AggregatorType aggregatorType;
 
     private String customGrouperScriptText;
-    private List<DimensionType> dimensionsToGroupBy;
-    private Map<DimensionType, Iterable<?>> selectionMappedByDimension;
+    private List<SharedDimensions> dimensionsToGroupBy;
+    private Map<SharedDimensions, Iterable<?>> selectionMappedByDimension;
     
     /**
      * Constructor for the GWT-Serialization. Don't use this!
@@ -31,8 +31,8 @@ public class SimpleQueryDefinition<DimensionType> implements QueryDefinition<Dim
         this.aggregatorType = aggregatorType;
 
         customGrouperScriptText = "";
-        dimensionsToGroupBy = new ArrayList<DimensionType>();
-        selectionMappedByDimension = new HashMap<DimensionType, Iterable<?>>();
+        dimensionsToGroupBy = new ArrayList<SharedDimensions>();
+        selectionMappedByDimension = new HashMap<SharedDimensions, Iterable<?>>();
     }
 
     @Override
@@ -56,20 +56,20 @@ public class SimpleQueryDefinition<DimensionType> implements QueryDefinition<Dim
     }
 
     @Override
-    public List<DimensionType> getDimensionsToGroupBy() {
+    public List<SharedDimensions> getDimensionsToGroupBy() {
         return dimensionsToGroupBy;
     }
 
     @Override
-    public Map<DimensionType, Iterable<?>> getSelection() {
+    public Map<SharedDimensions, Iterable<?>> getSelection() {
         return selectionMappedByDimension;
     }
 
-    public void appendDimensionToGroupBy(DimensionType dimension) {
+    public void appendDimensionToGroupBy(SharedDimensions dimension) {
         dimensionsToGroupBy.add(dimension);
     }
 
-    public void setSelectionFor(DimensionType dimension, Collection<?> selection) {
+    public void setSelectionFor(SharedDimensions dimension, Collection<?> selection) {
         selectionMappedByDimension.put(dimension, selection);
     }
 

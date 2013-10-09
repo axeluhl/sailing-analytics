@@ -3,13 +3,13 @@ package com.sap.sailing.gwt.ui.datamining;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 
-public interface QueryDefinitionProvider<DimensionType> {
+public interface QueryDefinitionProvider {
 
-    public Iterable<String> validateQueryDefinition(QueryDefinition<DimensionType> queryDefinition);
-    public QueryDefinition<DimensionType> getQueryDefinition();
+    public Iterable<String> validateQueryDefinition(QueryDefinition queryDefinition);
+    public QueryDefinition getQueryDefinition();
 
-    public void addListener(QueryDefinitionChangedListener<DimensionType> listener);
-    public void removeListener(QueryDefinitionChangedListener<DimensionType> listener);
+    public void addListener(QueryDefinitionChangedListener listener);
+    public void removeListener(QueryDefinitionChangedListener listener);
 
     public Widget getWidget();
 

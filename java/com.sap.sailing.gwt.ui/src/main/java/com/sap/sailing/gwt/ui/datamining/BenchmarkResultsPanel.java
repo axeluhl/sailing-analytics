@@ -10,26 +10,25 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
-import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public abstract class AbstractBenchmarkResultsPanel<DimensionType> extends FlowPanel {
+public class BenchmarkResultsPanel extends FlowPanel {
     
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
     private StringMessages stringMessages;
-    private QueryDefinitionProvider<DimensionType> queryDefinitionProvider;
+    private QueryDefinitionProvider queryDefinitionProvider;
 
     private IntegerBox numberOfQueriesBox;
     private Label benchmarkStatusLabel;
     private BenchmarkResultsChart resultsChart;
 
-    public AbstractBenchmarkResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, QueryDefinitionProvider<DimensionType> queryDefinitionProvider) {
+    public BenchmarkResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
+            ErrorReporter errorReporter, QueryDefinitionProvider queryDefinitionProvider) {
         super();
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -52,14 +51,14 @@ public abstract class AbstractBenchmarkResultsPanel<DimensionType> extends FlowP
             @Override
             public void onSuccess(List<RegattaDTO> regattas) {
                 final int times = numberOfQueriesBox.getValue() == null ? 1 : numberOfQueriesBox.getValue();
-                runQuery(new ClientBenchmarkData<DimensionType>(times, 1));
+                runQuery(new ClientBenchmarkData(times, 1));
             }
         });
     }
 
-    private void runQuery(final ClientBenchmarkData<DimensionType> benchmarkData) {
+    private void runQuery(final ClientBenchmarkData benchmarkData) {
         final long startTime = System.currentTimeMillis();
-        sendServerRequest(queryDefinitionProvider.getQueryDefinition(), new AsyncCallback<QueryResult<Number>>() {
+        getSailingService().runGPSFixQuery(queryDefinitionProvider.getQueryDefinition(), new AsyncCallback<QueryResult<Number>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running a query: " + caught.getMessage());
@@ -73,17 +72,15 @@ public abstract class AbstractBenchmarkResultsPanel<DimensionType> extends FlowP
         });
     }
 
-    protected abstract void sendServerRequest(QueryDefinition<DimensionType> queryDefinition, AsyncCallback<QueryResult<Number>> asyncCallback);
-    
     protected SailingServiceAsync getSailingService() {
         return sailingService;
     }
     
-    protected QueryDefinitionProvider<DimensionType> getQueryDefinitionProvider() {
+    protected QueryDefinitionProvider getQueryDefinitionProvider() {
         return queryDefinitionProvider;
     }
 
-    private void updateResults(final ClientBenchmarkData<DimensionType> benchmarkData, double overallTimeInSeconds, QueryResult<? extends Number> result) {
+    private void updateResults(final ClientBenchmarkData benchmarkData, double overallTimeInSeconds, QueryResult<? extends Number> result) {
         resultsChart.addResult(new BenchmarkResult(stringMessages.runAsSubstantive() + " " + benchmarkData.getCurrentRun(),
                                                         result.getFilteredDataAmount(), result.getCalculationTimeInSeconds(), overallTimeInSeconds));
         

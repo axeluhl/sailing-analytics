@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining;
+package com.sap.sailing.datamining.impl;
 
 import java.util.List;
 import java.util.Map;
@@ -7,14 +7,15 @@ import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.SharedDimensions;
 import com.sap.sailing.datamining.shared.StatisticType;
 
-public class SmartQueryDefinition<DimensionType> implements QueryDefinition<DimensionType> {
+public class SmartQueryDefinition implements QueryDefinition {
     private static final long serialVersionUID = -4195720362233906108L;
     
-    private QueryDefinition<DimensionType> queryDefinition;
+    private QueryDefinition queryDefinition;
 
-    public SmartQueryDefinition(QueryDefinition<DimensionType> queryDefinition) {
+    public SmartQueryDefinition(QueryDefinition queryDefinition) {
         this.queryDefinition = queryDefinition;
     }
 
@@ -39,12 +40,12 @@ public class SmartQueryDefinition<DimensionType> implements QueryDefinition<Dime
     }
 
     @Override
-    public List<DimensionType> getDimensionsToGroupBy() {
+    public List<SharedDimensions> getDimensionsToGroupBy() {
         return queryDefinition.getDimensionsToGroupBy();
     }
 
     @Override
-    public Map<DimensionType, Iterable<?>> getSelection() {
+    public Map<SharedDimensions, Iterable<?>> getSelection() {
         return queryDefinition.getSelection();
     }
 

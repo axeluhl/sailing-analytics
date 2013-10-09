@@ -6,7 +6,7 @@ import java.util.Map;
 
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 
-public interface QueryDefinition<DimensionType> extends Serializable {
+public interface QueryDefinition extends Serializable {
 
     public GrouperType getGrouperType();
 
@@ -16,8 +16,8 @@ public interface QueryDefinition<DimensionType> extends Serializable {
 
     public String getCustomGrouperScriptText();
 
-    public List<DimensionType> getDimensionsToGroupBy();
+    public List<SharedDimensions> getDimensionsToGroupBy();
 
-    public Map<DimensionType, Iterable<?>> getSelection();
+    public Map<SharedDimensions, Iterable<?>> getSelection();
 
 }

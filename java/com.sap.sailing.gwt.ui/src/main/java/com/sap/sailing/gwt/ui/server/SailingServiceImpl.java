@@ -55,7 +55,6 @@ import com.sap.sailing.datamining.Query;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
-import com.sap.sailing.datamining.shared.SharedDimensions;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -3333,7 +3332,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public <ResultType extends Number> QueryResult<ResultType> runGPSFixQuery(QueryDefinition<SharedDimensions.GPSFix> queryDefinition) {
+    public <ResultType extends Number> QueryResult<ResultType> runGPSFixQuery(QueryDefinition queryDefinition) {
         Query<GPSFixWithContext, ResultType> query = DataMiningFactory.createQuery(queryDefinition); 
         return query.run(getService());
     }

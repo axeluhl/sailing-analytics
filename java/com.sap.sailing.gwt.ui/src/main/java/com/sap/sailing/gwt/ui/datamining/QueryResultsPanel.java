@@ -16,20 +16,20 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public abstract class AbstractResultsPanel<DimensionType, ResultType> extends FlowPanel implements QueryDefinitionChangedListener<DimensionType> {
+public class QueryResultsPanel extends FlowPanel implements QueryDefinitionChangedListener {
 
     private StringMessages stringMessages;
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
-    private QueryDefinitionProvider<DimensionType> queryDefinitionProvider;
+    private QueryDefinitionProvider queryDefinitionProvider;
 
     private Label queryStatusLabel;
-    private ResultsPresenter<ResultType> presenter;
+    private ResultsPresenter<Number> presenter;
 
     private Button runQueryButton;
 
-    public AbstractResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, QueryDefinitionProvider<DimensionType> queryDefinitionProvider, ResultsPresenter<ResultType> presenter) {
+    public QueryResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
+            ErrorReporter errorReporter, QueryDefinitionProvider queryDefinitionProvider, ResultsPresenter<Number> presenter) {
         super();
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
@@ -43,22 +43,22 @@ public abstract class AbstractResultsPanel<DimensionType, ResultType> extends Fl
     }
 
     @Override
-    public void queryDefinitionChanged(QueryDefinition<DimensionType> newQueryDefinition) {
+    public void queryDefinitionChanged(QueryDefinition newQueryDefinition) {
         runQuery(newQueryDefinition);
     }
 
-    private void runQuery(QueryDefinition<DimensionType> queryDefinition) {
+    private void runQuery(QueryDefinition queryDefinition) {
         Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             queryStatusLabel.setText(" | " + stringMessages.running());
-            sendServerRequest(queryDefinition, new AsyncCallback<QueryResult<ResultType>>() {
+            getSailingService().runGPSFixQuery(queryDefinition, new AsyncCallback<QueryResult<Number>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error running the query: " + caught.getMessage());
                 }
-
+            
                 @Override
-                public void onSuccess(QueryResult<ResultType> result) {
+                public void onSuccess(QueryResult<Number> result) {
                     queryStatusLabel.setText(" | " + stringMessages.done());
                     presenter.showResult(result);
                 }
@@ -68,8 +68,6 @@ public abstract class AbstractResultsPanel<DimensionType, ResultType> extends Fl
         }
     }
 
-    protected abstract void sendServerRequest(QueryDefinition<DimensionType> queryDefinition, AsyncCallback<QueryResult<ResultType>> asyncCallback);
-    
     protected SailingServiceAsync getSailingService() {
         return sailingService;
     }
@@ -85,9 +83,9 @@ public abstract class AbstractResultsPanel<DimensionType, ResultType> extends Fl
                 Boolean runAutomatic = event.getValue();
                 runQueryButton.setVisible(!runAutomatic);
                 if (runAutomatic) {
-                    queryDefinitionProvider.addListener(AbstractResultsPanel.this);
+                    queryDefinitionProvider.addListener(QueryResultsPanel.this);
                 } else {
-                    queryDefinitionProvider.removeListener(AbstractResultsPanel.this);
+                    queryDefinitionProvider.removeListener(QueryResultsPanel.this);
                 }
             }
         });

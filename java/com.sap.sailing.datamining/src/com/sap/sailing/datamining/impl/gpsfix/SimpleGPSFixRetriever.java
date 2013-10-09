@@ -23,7 +23,6 @@ import com.sap.sailing.server.RacingEventService;
 
 public class SimpleGPSFixRetriever implements DataRetriever<GPSFixWithContext> {
     
-    
     @Override
     public Collection<GPSFixWithContext> retrieveData(RacingEventService racingEventService) {
         Collection<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();

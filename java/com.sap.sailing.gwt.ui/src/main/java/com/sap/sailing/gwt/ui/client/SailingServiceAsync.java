@@ -11,7 +11,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
-import com.sap.sailing.datamining.shared.SharedDimensions.GPSFix;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -455,7 +454,7 @@ public interface SailingServiceAsync {
     
     void importMasterData(String host, String[] names, boolean override, AsyncCallback<MasterDataImportObjectCreationCount> asyncCallback);
 
-    <ResultType extends Number> void runGPSFixQuery(QueryDefinition<GPSFix> queryDefinition, AsyncCallback<QueryResult<ResultType>> asyncCallback);
+    <ResultType extends Number> void runGPSFixQuery(QueryDefinition queryDefinition, AsyncCallback<QueryResult<ResultType>> asyncCallback);
     
     /**
      * This method does nothing, but is needed to ensure, that GenericGroupKey&ltString&gt in the GWT serialization policy.<br />

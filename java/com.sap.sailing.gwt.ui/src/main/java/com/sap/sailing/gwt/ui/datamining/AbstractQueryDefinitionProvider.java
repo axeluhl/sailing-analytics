@@ -10,15 +10,15 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.SharedDimensions;
 
-public abstract class AbstractQueryDefinitionProvider<DimensionType> implements
-        QueryDefinitionProvider<DimensionType> {
+public abstract class AbstractQueryDefinitionProvider implements QueryDefinitionProvider {
 
     private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
 
-    private final Set<QueryDefinitionChangedListener<DimensionType>> listeners;
+    private final Set<QueryDefinitionChangedListener> listeners;
 
     public AbstractQueryDefinitionProvider(StringMessages stringMessages, SailingServiceAsync sailingService,
             ErrorReporter errorReporter) {
@@ -26,11 +26,11 @@ public abstract class AbstractQueryDefinitionProvider<DimensionType> implements
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
 
-        listeners = new HashSet<QueryDefinitionChangedListener<DimensionType>>();
+        listeners = new HashSet<QueryDefinitionChangedListener>();
     }
     
     @Override
-    public Iterable<String> validateQueryDefinition(QueryDefinition<DimensionType> queryDefinition) {
+    public Iterable<String> validateQueryDefinition(QueryDefinition queryDefinition) {
         Collection<String> errorMessages = new ArrayList<String>();
         
         String grouperError = validateGrouper(queryDefinition);
@@ -46,20 +46,20 @@ public abstract class AbstractQueryDefinitionProvider<DimensionType> implements
         return errorMessages;
     }
 
-    private String validateGrouper(QueryDefinition<DimensionType> queryDTO) {
-        GrouperType grouper = queryDTO.getGrouperType();
+    private String validateGrouper(QueryDefinition queryDefinition) {
+        GrouperType grouper = queryDefinition.getGrouperType();
         if (grouper == null) {
             return stringMessages.noGrouperSelectedError();
         }
         
         ValidateGrouper: switch (grouper) {
         case Custom:
-            if (queryDTO.getCustomGrouperScriptText().isEmpty()) {
+            if (queryDefinition.getCustomGrouperScriptText().isEmpty()) {
                 return stringMessages.noCustomGrouperScriptTextError();
             }
             break;
         case Dimensions:
-            for (DimensionType dimension : queryDTO.getDimensionsToGroupBy()) {
+            for (SharedDimensions dimension : queryDefinition.getDimensionsToGroupBy()) {
                 if (dimension != null) {
                     break ValidateGrouper;
                 }
@@ -72,22 +72,22 @@ public abstract class AbstractQueryDefinitionProvider<DimensionType> implements
         return null;
     }
 
-    private String validateStatisticAndAggregator(QueryDefinition<DimensionType> queryDTO) {
-        return queryDTO.getStatisticType() == null || queryDTO.getAggregatorType() == null ? stringMessages.noStatisticSelectedError() : null;
+    private String validateStatisticAndAggregator(QueryDefinition queryDefinition) {
+        return queryDefinition.getStatisticType() == null || queryDefinition.getAggregatorType() == null ? stringMessages.noStatisticSelectedError() : null;
     }
 
     @Override
-    public void addListener(QueryDefinitionChangedListener<DimensionType> listener) {
+    public void addListener(QueryDefinitionChangedListener listener) {
         listeners.add(listener);
     }
 
     @Override
-    public void removeListener(QueryDefinitionChangedListener<DimensionType> listener) {
+    public void removeListener(QueryDefinitionChangedListener listener) {
         listeners.remove(listener);
     }
 
     protected void notifyQueryDefinitionChanged() {
-        for (QueryDefinitionChangedListener<DimensionType> listener : listeners) {
+        for (QueryDefinitionChangedListener listener : listeners) {
             listener.queryDefinitionChanged(getQueryDefinition());
         }
     }
