@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -51,8 +52,14 @@ public class PolarFix {
     }
 
     private String createDayString(TrackedRace race) {
-        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
-        return fmt.format(race.getStartOfRace().asDate());
+        TimePoint startTimePoint = race.getStartOfRace();
+        String resultDateString = "NoDate";
+        if (startTimePoint != null) {
+            SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+            resultDateString = fmt.format(startTimePoint.asDate());
+        }
+        
+        return resultDateString;
     }
 
     public Set<WindSource> collectWindSourcesToIgnoreForBearing(TrackedRace race, boolean excludeCourseBased) {

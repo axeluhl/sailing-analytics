@@ -135,7 +135,7 @@ public class PolarSheetGenerationTest {
         Number[] yValues = result.getyValues();
         Assert.assertEquals(10, yValues.length);
         Assert.assertEquals(3, yValues[0]);
-        Assert.assertEquals(null, yValues[1]);
+        Assert.assertEquals(0, yValues[1]);
         Assert.assertEquals(2, yValues[2]);
         Assert.assertEquals(2, yValues[9]);
     }
