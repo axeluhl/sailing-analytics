@@ -2,10 +2,10 @@ package com.sap.sailing.datamining.shared;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.dev.util.collect.HashMap;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 
 public class SimpleQueryDefinition<DimensionType> implements QueryDefinition<DimensionType> {
@@ -35,39 +35,45 @@ public class SimpleQueryDefinition<DimensionType> implements QueryDefinition<Dim
         selectionMappedByDimension = new HashMap<DimensionType, Iterable<?>>();
     }
 
+    @Override
     public GrouperType getGrouperType() {
         return grouperType;
     }
 
+    @Override
     public StatisticType getStatisticType() {
         return statisticType;
     }
 
+    @Override
     public AggregatorType getAggregatorType() {
         return aggregatorType;
     }
 
+    @Override
     public String getCustomGrouperScriptText() {
         return customGrouperScriptText;
     }
 
+    @Override
     public List<DimensionType> getDimensionsToGroupBy() {
         return dimensionsToGroupBy;
     }
 
+    @Override
     public Map<DimensionType, Iterable<?>> getSelection() {
         return selectionMappedByDimension;
     }
 
-    protected void appendDimensionToGroupBy(DimensionType dimension) {
+    public void appendDimensionToGroupBy(DimensionType dimension) {
         dimensionsToGroupBy.add(dimension);
     }
 
-    protected void setSelectionFor(DimensionType dimension, Collection<?> selection) {
+    public void setSelectionFor(DimensionType dimension, Collection<?> selection) {
         selectionMappedByDimension.put(dimension, selection);
     }
 
-    protected void setCustomGrouperScriptText(String scriptText) {
+    public void setCustomGrouperScriptText(String scriptText) {
         customGrouperScriptText = scriptText;
     }
 

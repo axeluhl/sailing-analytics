@@ -33,8 +33,9 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.SharedDimensions.GPSFix;
 import com.sap.sailing.datamining.shared.SharedDimensions;
+import com.sap.sailing.datamining.shared.SharedDimensions.GPSFix;
+import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
 import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -78,7 +79,7 @@ public class GPSFixQueryComponentsPanel extends AbstractQueryComponentsProvider<
     
     @Override
     public QueryDefinition<GPSFix> getQueryDefinition() {
-        ModifiableQueryDefinition<SharedDimensions.GPSFix> queryDTO = new ModifiableQueryDefinition<SharedDimensions.GPSFix>(getGrouperType(), getStatisticType(), getAggregatorType());
+        SimpleQueryDefinition<SharedDimensions.GPSFix> queryDTO = new SimpleQueryDefinition<SharedDimensions.GPSFix>(getGrouperType(), getStatisticType(), getAggregatorType());
         switch (queryDTO.getGrouperType()) {
         case Custom:
             queryDTO.setCustomGrouperScriptText(getCustomGrouperScriptText());
