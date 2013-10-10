@@ -2,7 +2,6 @@ package com.sap.sailing.server.gateway.expeditionimport;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -21,7 +20,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
@@ -31,8 +30,11 @@ public class WindImportServlet extends SailingServerHttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static final WindSource EXPEDITION_WIND_SOURCE = new WindSourceImpl(WindSourceType.EXPEDITION);
-
+	static class Upload {
+		public String boatId;
+		public final List<FileItem> files = new ArrayList<FileItem>();
+	}
+	
 	static class WindImportResult {
 		
 		private final RegattaIdentifier regattaIdentifier;
@@ -88,12 +90,14 @@ public class WindImportServlet extends SailingServerHttpServlet {
         
 		try {
 			
+			Upload upload = readInput(req);
+			WindSource windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, upload.boatId);
+			
 			List<WindImportResult> windImportResults = new ArrayList<WindImportResult>();
 			
 			Iterable<Regatta> allRegattas = getService().getAllRegattas();
 
-			Collection<FileItem> files = readInput(req);
-			for (FileItem file : files) {
+			for (FileItem file : upload.files) {
 				List<Wind> windFixes = WindLogParser.importWind(file.getInputStream());
 				for (Regatta regatta : allRegattas) {
 					DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
@@ -103,29 +107,39 @@ public class WindImportServlet extends SailingServerHttpServlet {
 						WindImportResult windImportResult = new WindImportResult(regatta.getRegattaIdentifier(), trackedRace.getRaceIdentifier());
 						windImportResults.add(windImportResult);
 						for (Wind wind : windFixes) {
-							if (trackedRace.recordWind(wind, EXPEDITION_WIND_SOURCE)) {
+							if (trackedRace.recordWind(wind, windSource)) {
 								windImportResult.update(wind);
 							}
 						}
 					}
 				}
 			}
+			
+			// Use text/html to prevent browsers from wrapping the response body,
+			// see "Handling File Upload Responses in GWT" at http://www.artofsolving.com/node/50
+			resp.setContentType("text/html;charset=UTF-8"); 
+			resp.getWriter().append(windImportResults.toString());
 		} catch (FileUploadException e) {
 			throw new IOException(e);
 		}
     }
 
-    private Collection<FileItem> readInput(HttpServletRequest req) throws FileUploadException {
-    	Collection<FileItem> files = new ArrayList<FileItem>();
+    private Upload readInput(HttpServletRequest req) throws FileUploadException {
+    	Upload result = new Upload();
         // http://commons.apache.org/fileupload/using.html
             FileItemFactory factory = new DiskFileItemFactory();
             ServletFileUpload upload = new ServletFileUpload(factory);
             @SuppressWarnings("unchecked")
             List<FileItem> items = upload.parseRequest(req);
             for (FileItem item : items) {
-                if (!item.isFormField())
-                    files.add(item);
+                if (item.isFormField()) {
+                	if ("boatId".equals(item.getFieldName())) {
+                		result.boatId = item.getString();
+                	}
+                } else {
+                	result.files.add(item);
+                } 
             }
-            return files;
+            return result;
     }
 }

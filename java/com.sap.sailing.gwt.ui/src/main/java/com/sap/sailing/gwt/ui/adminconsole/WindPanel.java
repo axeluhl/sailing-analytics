@@ -11,11 +11,15 @@ import java.util.Set;
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.ActionCell.Delegate;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -25,10 +29,14 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -93,9 +101,11 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         this.setWidget(mainPanel);
 
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
-                raceSelectionProvider, stringMessages, false);
+                raceSelectionProvider, stringMessages, /*multiselection*/ false);
         mainPanel.add(trackedRacesListComposite);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
+
+        createWindImportPanel(mainPanel, stringMessages);
 
         windCaptionPanel = new CaptionPanel(stringMessages.wind());
         windCaptionPanel.setVisible(false);
@@ -221,6 +231,84 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         rawWindFixesTable.getColumnSortList().push(timeColumn);
         windFixesDisplayPanel.add(rawWindFixesTable);
     }
+
+	private void createWindImportPanel(Panel mainPanel, final StringMessages stringMessages) {
+		CaptionPanel importPanel = new CaptionPanel("Import Wind from Expedition");
+		Panel importPanelContent = new VerticalPanel();
+		importPanel.add(importPanelContent);
+		
+		final FormPanel form = new FormPanel();
+		form.setMethod(FormPanel.METHOD_POST);
+		form.setEncoding(FormPanel.ENCODING_MULTIPART);
+		form.setAction(GWT.getHostPageBaseURL()+"/../../sailingserver/expedition-import");
+		
+		VerticalPanel formContentPanel = new VerticalPanel();
+		
+		final TextBox boatIdTextBox = new TextBox();
+		boatIdTextBox.setName("boatId");
+		
+		final FileUpload fileUpload = new FileUpload();
+		fileUpload.setName("upload");
+		fileUpload.addChangeHandler(new ChangeHandler() {
+			
+			@Override
+			public void onChange(ChangeEvent event) {
+				String fileName = fileUpload.getFilename();
+
+		         RegExp EXPEDITION_EXPORT_FILE_PATTERN = RegExp.compile("^.*_([0-9]+)\\.csv"); //matches file names like "2013Jun26_0.csv" where 0 indicates the boat id. 
+		         MatchResult match = EXPEDITION_EXPORT_FILE_PATTERN.exec(fileName);
+		         String boatId;
+		         if (match.getGroupCount() > 0) {
+		        	 boatId = match.getGroup(1);
+		         } else {
+		        	 boatId = "";
+		         }
+	        	 boatIdTextBox.setText(boatId);
+			}
+		});
+		
+		formContentPanel.add(fileUpload);
+		
+		HorizontalPanel boatIdPanel = new HorizontalPanel();
+		boatIdPanel.add(new Label("Boat Id"));
+		boatIdPanel.add(boatIdTextBox);
+		
+		formContentPanel.add(boatIdPanel);
+		
+		Button submitButton = new Button("Upload", new ClickHandler()
+		{
+			@Override
+			public void onClick(ClickEvent event) {
+				 form.submit();
+			}
+		});
+		formContentPanel.add(submitButton);
+		
+		final Panel importResultPanel = new VerticalPanel();
+		
+	    form.addSubmitHandler(new FormPanel.SubmitHandler() {
+	        public void onSubmit(SubmitEvent event) {
+	          // This event is fired just before the form is submitted. We can take
+	          // this opportunity to perform validation.
+//	          if (condition isn't met) {
+//	            event.cancel();
+//	          }
+	        }
+	      });
+	      form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
+	        public void onSubmitComplete(SubmitCompleteEvent event) {
+	        	importResultPanel.clear();
+	        	TextBox importResult = new TextBox();
+	        	importResult.setText(event.getResults());
+	        	importResultPanel.add(importResult);
+	        }
+	      });		
+		form.add(formContentPanel);
+		importPanelContent.add(form);
+		importPanelContent.add(importResultPanel);
+		
+        mainPanel.add(importPanel);
+	}
 
     private void showWindSettingDialog(RaceDTO race, CoursePositionsDTO course) {
         AddWindFixDialog windSettingDialog = new AddWindFixDialog(race, course, stringMessages, 
@@ -362,8 +450,9 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 
     private RegattaAndRaceIdentifier getSelectedRace() {
         List<RegattaAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
-        if(selectedRaces.isEmpty()) 
+        if(selectedRaces.isEmpty() || selectedRaces.size() > 1) { 
             return null;
+        }
         
         return selectedRaces.get(0);
     }
