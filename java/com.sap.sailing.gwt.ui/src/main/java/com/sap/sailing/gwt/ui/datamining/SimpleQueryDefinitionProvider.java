@@ -49,10 +49,13 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvider {
 
     private FlowPanel mainPanel;
+    
     private ValueListBox<GrouperType> grouperTypeListBox;
     private TextArea customGrouperScriptTextBox;
     private HorizontalPanel dimensionsToGroupByPanel;
     private List<ValueListBox<SharedDimension>> dimensionsToGroupByBoxes;
+    
+    private StatisticsProvider statisticsProvider;
     private ValueListBox<StatisticAndAggregatorType> statisticsListBox;
 
     private Map<SharedDimension, SelectionTable<?, ?>> tablesMappedByDimension;
@@ -70,6 +73,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         super(stringMessages, sailingService, errorReporter);
         mainPanel = new FlowPanel();
         dimensionsToGroupByBoxes = new ArrayList<ValueListBox<SharedDimension>>();
+        statisticsProvider = new SimpleStatisticsProvider();
 
         mainPanel.add(createSelectionTables());
         mainPanel.add(createFunctionsPanel());
@@ -138,7 +142,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
     }
 
     private void applyStatistic(QueryDefinition queryDefinition) {
-        statisticsListBox.setValue(new StatisticAndAggregatorType(queryDefinition.getStatisticType(), queryDefinition.getAggregatorType()), false);
+        statisticsListBox.setValue(statisticsProvider.getStatistic(queryDefinition.getStatisticType(), queryDefinition.getAggregatorType()), false);
     }
 
     private Map<SharedDimension, Collection<?>> getSelection() {
@@ -289,11 +293,10 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
                 notifyQueryDefinitionChanged();
             }
         });
-        List<StatisticAndAggregatorType> statistics = Arrays.asList(
-                new StatisticAndAggregatorType(StatisticType.DataAmount, AggregatorType.Average),
-                new StatisticAndAggregatorType(StatisticType.Speed, AggregatorType.Average));
-        statisticsListBox.setValue(statistics.get(0), false);
-        statisticsListBox.setAcceptableValues(statistics);
+        statisticsProvider.addStatistic(StatisticType.DataAmount, AggregatorType.Sum);
+        statisticsProvider.addStatistic(StatisticType.Speed, AggregatorType.Average);
+        statisticsListBox.setValue(statisticsProvider.getStatistic(StatisticType.DataAmount, AggregatorType.Sum), false);
+        statisticsListBox.setAcceptableValues(statisticsProvider.getAllStatistics());
         functionsPanel.add(statisticsListBox);
 
         return functionsPanel;

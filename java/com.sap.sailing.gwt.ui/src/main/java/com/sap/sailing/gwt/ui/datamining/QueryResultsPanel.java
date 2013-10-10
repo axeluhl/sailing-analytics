@@ -35,7 +35,6 @@ public class QueryResultsPanel extends FlowPanel implements QueryDefinitionChang
     private DataMiningSettings settings;
     private QueryDefinitionProvider queryDefinitionProvider;
 
-    private Button runQueryButton;
     private Label queryStatusLabel;
     private ResultsPresenter<Number> presenter;
 
@@ -92,7 +91,7 @@ public class QueryResultsPanel extends FlowPanel implements QueryDefinitionChang
         HorizontalPanel functionsPanel = new HorizontalPanel();
         functionsPanel.setSpacing(5);
         
-        runQueryButton = new Button(stringMessages.run());
+        Button runQueryButton = new Button(stringMessages.run());
         runQueryButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
