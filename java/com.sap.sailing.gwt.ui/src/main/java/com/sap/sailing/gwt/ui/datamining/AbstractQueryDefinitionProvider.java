@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.SharedDimensions;
+import com.sap.sailing.datamining.shared.SharedDimension;
 
 public abstract class AbstractQueryDefinitionProvider implements QueryDefinitionProvider {
 
@@ -18,6 +18,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
 
+    private boolean blockChangeNotification;
     private final Set<QueryDefinitionChangedListener> listeners;
 
     public AbstractQueryDefinitionProvider(StringMessages stringMessages, SailingServiceAsync sailingService,
@@ -26,6 +27,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
 
+        blockChangeNotification = false;
         listeners = new HashSet<QueryDefinitionChangedListener>();
     }
     
@@ -60,7 +62,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
             }
             break;
         case Dimensions:
-            for (SharedDimensions dimension : queryDefinition.getDimensionsToGroupBy()) {
+            for (SharedDimension dimension : queryDefinition.getDimensionsToGroupBy()) {
                 if (dimension != null) {
                     break ValidateGrouper;
                 }
@@ -87,9 +89,16 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         listeners.remove(listener);
     }
 
+    protected void setBlockChangeNotification(boolean block) {
+        blockChangeNotification = block;
+    }
+
     protected void notifyQueryDefinitionChanged() {
-        for (QueryDefinitionChangedListener listener : listeners) {
-            listener.queryDefinitionChanged(getQueryDefinition());
+        if (!blockChangeNotification) {
+            QueryDefinition queryDefinition = getQueryDefinition();
+            for (QueryDefinitionChangedListener listener : listeners) {
+                listener.queryDefinitionChanged(queryDefinition);
+            }
         }
     }
 

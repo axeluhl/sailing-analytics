@@ -24,7 +24,7 @@ import com.sap.sailing.datamining.impl.gpsfix.SimpleGPSFixRetriever;
 import com.sap.sailing.datamining.impl.gpsfix.GroupGPSFixesByDimension;
 import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.DataTypes;
-import com.sap.sailing.datamining.shared.SharedDimensions;
+import com.sap.sailing.datamining.shared.SharedDimension;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.domain.base.Moving;
@@ -87,13 +87,13 @@ public class DataMiningFactory {
     private static <DataType> Filter<DataType> createDimensionFilter(DataTypes dataType, Map<?, Iterable<?>> selection) {
         switch (dataType) {
         case GPSFix:
-            return (Filter<DataType>) createGPSFixDimensionFilter((Map<SharedDimensions, Iterable<?>>) selection);
+            return (Filter<DataType>) createGPSFixDimensionFilter((Map<SharedDimension, Iterable<?>>) selection);
         }
         throw new IllegalArgumentException("Not yet implemented for the given data type: "
                 + dataType.toString());
     }
     
-    public static Filter<GPSFixWithContext> createGPSFixDimensionFilter(Map<SharedDimensions, Iterable<?>> selection) {
+    public static Filter<GPSFixWithContext> createGPSFixDimensionFilter(Map<SharedDimension, Iterable<?>> selection) {
         if (selection.isEmpty()) {
             return createNoFilter();
         }
@@ -101,16 +101,16 @@ public class DataMiningFactory {
         return createCriteriaFilter(createGPSFixDimensionFilterCriteria(selection));
     }
 
-    public static FilterCriteria<GPSFixWithContext> createGPSFixDimensionFilterCriteria(Map<SharedDimensions, Iterable<?>> selection) {
+    public static FilterCriteria<GPSFixWithContext> createGPSFixDimensionFilterCriteria(Map<SharedDimension, Iterable<?>> selection) {
         CompoundFilterCriteria<GPSFixWithContext> compoundFilterCriteria = new AndCompoundFilterCriteria<GPSFixWithContext>();
-        for (Entry<SharedDimensions, Iterable<?>> selectionEntry : selection.entrySet()) {
+        for (Entry<SharedDimension, Iterable<?>> selectionEntry : selection.entrySet()) {
             FilterCriteria<GPSFixWithContext> criteria = createGPSFixDimensionFilterCriteria(selectionEntry.getKey(), selectionEntry.getValue());
             compoundFilterCriteria.addCriteria(criteria);
         }
         return compoundFilterCriteria;
     }
     
-    public static <ValueType> FilterCriteria<GPSFixWithContext> createGPSFixDimensionFilterCriteria(SharedDimensions gpsFix, Iterable<?> values) {
+    public static <ValueType> FilterCriteria<GPSFixWithContext> createGPSFixDimensionFilterCriteria(SharedDimension gpsFix, Iterable<?> values) {
         Dimension<GPSFixWithContext, ValueType> dimension = Dimensions.GPSFix.getDimensionFor(gpsFix);
         return createDimensionFilterCriteria(dimension, values);
     }
@@ -150,15 +150,15 @@ public class DataMiningFactory {
     private static <DataType> Grouper<DataType> createByDimensionGrouper(DataTypes dataType, List<?> dimensionsToGroupBy) {
         switch (dataType) {
         case GPSFix:
-            return (Grouper<DataType>) createGPSFixByDimensionGrouper((Collection<SharedDimensions>) dimensionsToGroupBy);
+            return (Grouper<DataType>) createGPSFixByDimensionGrouper((Collection<SharedDimension>) dimensionsToGroupBy);
         }
         throw new IllegalArgumentException("Not yet implemented for the given data type: "
                 + dataType.toString());
     }
 
-    public static <ValueType> Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(Collection<SharedDimensions> dimensionsToGroupBy) {
+    public static <ValueType> Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(Collection<SharedDimension> dimensionsToGroupBy) {
         Collection<Dimension<GPSFixWithContext, ValueType>> dimensions = new LinkedHashSet<Dimension<GPSFixWithContext, ValueType>>();
-        for (SharedDimensions dimensionType : dimensionsToGroupBy) {
+        for (SharedDimension dimensionType : dimensionsToGroupBy) {
             Dimension<GPSFixWithContext, ValueType> dimension = Dimensions.GPSFix.getDimensionFor(dimensionType);
             dimensions.add(dimension);
         }

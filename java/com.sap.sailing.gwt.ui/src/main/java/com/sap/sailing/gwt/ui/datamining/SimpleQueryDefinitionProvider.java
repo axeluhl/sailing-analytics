@@ -32,7 +32,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
-import com.sap.sailing.datamining.shared.SharedDimensions;
+import com.sap.sailing.datamining.shared.SharedDimension;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
 import com.sap.sailing.datamining.shared.StatisticType;
@@ -52,10 +52,10 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
     private ValueListBox<GrouperType> grouperTypeListBox;
     private TextArea customGrouperScriptTextBox;
     private HorizontalPanel dimensionsToGroupByPanel;
-    private List<ValueListBox<SharedDimensions>> dimensionsToGroupByBoxes;
+    private List<ValueListBox<SharedDimension>> dimensionsToGroupByBoxes;
     private ValueListBox<StatisticAndAggregatorType> statisticsListBox;
 
-    private Map<SharedDimensions, SelectionTable<?, ?>> tablesMappedByDimension;
+    private Map<SharedDimension, SelectionTable<?, ?>> tablesMappedByDimension;
     private SelectionTable<RegattaDTO, String> regattaNameTable;
     private SelectionTable<BoatClassDTO, String> boatClassTable;
     private SelectionTable<RaceDTO, String> raceNameTable;
@@ -69,7 +69,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
             ErrorReporter errorReporter) {
         super(stringMessages, sailingService, errorReporter);
         mainPanel = new FlowPanel();
-        dimensionsToGroupByBoxes = new ArrayList<ValueListBox<SharedDimensions>>();
+        dimensionsToGroupByBoxes = new ArrayList<ValueListBox<SharedDimension>>();
 
         mainPanel.add(createSelectionTables());
         mainPanel.add(createFunctionsPanel());
@@ -85,19 +85,64 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
             break;
         case Dimensions:
         default:
-            for (SharedDimensions dimension : getDimensionsToGroupBy()) {
+            for (SharedDimension dimension : getDimensionsToGroupBy()) {
                 queryDTO.appendDimensionToGroupBy(dimension);
             }
             break;
         }
-        for (Entry<SharedDimensions, Collection<?>> selectionEntry : getSelection().entrySet()) {
+        for (Entry<SharedDimension, Collection<?>> selectionEntry : getSelection().entrySet()) {
             queryDTO.setSelectionFor(selectionEntry.getKey(), selectionEntry.getValue());
         }
         return queryDTO;
     }
+    
+    @Override
+    public void applyQueryDefinition(QueryDefinition queryDefinition) {
+        setBlockChangeNotification(true);
+        applySelection(queryDefinition);
+        applyGrouping(queryDefinition);
+        applyStatistic(queryDefinition);
+        setBlockChangeNotification(false);
+        
+        notifyQueryDefinitionChanged();
+    }
 
-    private Map<SharedDimensions, Collection<?>> getSelection() {
-        Map<SharedDimensions, Collection<?>> selection = new HashMap<SharedDimensions, Collection<?>>();
+    private void applySelection(QueryDefinition queryDefinition) {
+        for (Entry<SharedDimension, Iterable<?>> selectionEntry : queryDefinition.getSelection().entrySet()) {
+            SelectionTable<?, ?> selectionTable = tablesMappedByDimension.get(selectionEntry.getKey());
+            selectionTable.setSelection((Iterable<?>) selectionEntry.getValue());
+        }
+    }
+
+    private void applyGrouping(QueryDefinition queryDefinition) {
+        grouperTypeListBox.setValue(queryDefinition.getGrouperType(), true);
+        
+        switch (queryDefinition.getGrouperType()) {
+        case Custom:
+            customGrouperScriptTextBox.setText(queryDefinition.getCustomGrouperScriptText());
+            break;
+        case Dimensions:
+            applyDimensionsToGroupBy(queryDefinition);
+            break;
+        default:
+            throw new IllegalArgumentException("Not yet implemented for the given data type: " + queryDefinition.getGrouperType().toString());
+        }
+    }
+
+    private void applyDimensionsToGroupBy(QueryDefinition queryDefinition) {
+        int index = 0;
+        for (SharedDimension dimension : queryDefinition.getDimensionsToGroupBy()) {
+            dimensionsToGroupByBoxes.get(index).setValue(dimension, true);
+            index++;
+        }
+    }
+
+    private void applyStatistic(QueryDefinition queryDefinition) {
+        statisticsListBox.setValue(new StatisticAndAggregatorType(queryDefinition.getStatisticType(), queryDefinition.getAggregatorType()), false);
+    }
+
+    private Map<SharedDimension, Collection<?>> getSelection() {
+        Map<SharedDimension, Collection<?>> selection = new HashMap<SharedDimension, Collection<?>>();
         for (SelectionTable<?, ?> table : tablesMappedByDimension.values()) {
             Collection<?> specificSelection = table.getSelection();
             if (!specificSelection.isEmpty()) {
@@ -121,10 +166,10 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         return getGrouperType() == GrouperType.Custom ? customGrouperScriptTextBox.getText() : "";
     }
 
-    private Collection<SharedDimensions> getDimensionsToGroupBy() {
-        Collection<SharedDimensions> dimensionsToGroupBy = new ArrayList<SharedDimensions>();
+    private Collection<SharedDimension> getDimensionsToGroupBy() {
+        Collection<SharedDimension> dimensionsToGroupBy = new ArrayList<SharedDimension>();
         if (getGrouperType() == GrouperType.Dimensions) {
-            for (ValueListBox<SharedDimensions> dimensionToGroupByBox : dimensionsToGroupByBoxes) {
+            for (ValueListBox<SharedDimension> dimensionToGroupByBox : dimensionsToGroupByBoxes) {
                 if (dimensionToGroupByBox.getValue() != null) {
                     dimensionsToGroupBy.add(dimensionToGroupByBox.getValue());
                 }
@@ -303,13 +348,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         dimensionsToGroupByPanel.setSpacing(5);
         groupByOptionsPanel.add(dimensionsToGroupByPanel);
         
-        //Adding two dimension boxes, with regatta as first selected dimension
-        ValueListBox<SharedDimensions> dimensionToGroupByBox = createDimensionToGroupByBox();
-        dimensionToGroupByBox.setValue(SharedDimensions.RegattaName, false);
-        dimensionsToGroupByPanel.add(dimensionToGroupByBox);
-        dimensionsToGroupByBoxes.add(dimensionToGroupByBox);
-        
-        dimensionToGroupByBox = createDimensionToGroupByBox();
+        ValueListBox<SharedDimension> dimensionToGroupByBox = createDimensionToGroupByBox();
         dimensionsToGroupByPanel.add(dimensionToGroupByBox);
         dimensionsToGroupByBoxes.add(dimensionToGroupByBox);
 
@@ -326,11 +365,11 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         return groupByPanel;
     }
 
-    private ValueListBox<SharedDimensions> createDimensionToGroupByBox() {
-        ValueListBox<SharedDimensions> dimensionToGroupByBox = new ValueListBox<SharedDimensions>(
-                new Renderer<SharedDimensions>() {
+    private ValueListBox<SharedDimension> createDimensionToGroupByBox() {
+        ValueListBox<SharedDimension> dimensionToGroupByBox = new ValueListBox<SharedDimension>(
+                new Renderer<SharedDimension>() {
                     @Override
-                    public String render(SharedDimensions gpsFixDimension) {
+                    public String render(SharedDimension gpsFixDimension) {
                         if (gpsFixDimension == null) {
                             return "";
                         }
@@ -338,19 +377,19 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
                     }
 
                     @Override
-                    public void render(SharedDimensions gpsFixDimension, Appendable appendable)
+                    public void render(SharedDimension gpsFixDimension, Appendable appendable)
                             throws IOException {
                         appendable.append(render(gpsFixDimension));
 
                     }
                 });
-        dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<SharedDimensions>() {
+        dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<SharedDimension>() {
             private boolean firstChange = true;
 
             @Override
-            public void onValueChange(ValueChangeEvent<SharedDimensions> event) {
+            public void onValueChange(ValueChangeEvent<SharedDimension> event) {
                 if (firstChange && event.getValue() != null) {
-                    ValueListBox<SharedDimensions> newBox = createDimensionToGroupByBox();
+                    ValueListBox<SharedDimension> newBox = createDimensionToGroupByBox();
                     dimensionsToGroupByPanel.add(newBox);
                     dimensionsToGroupByBoxes.add(newBox);
                     firstChange = false;
@@ -361,7 +400,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
                 notifyQueryDefinitionChanged();
             }
         });
-        dimensionToGroupByBox.setAcceptableValues(Arrays.asList(SharedDimensions.values()));
+        dimensionToGroupByBox.setAcceptableValues(Arrays.asList(SharedDimension.values()));
         return dimensionToGroupByBox;
     }
 
@@ -370,10 +409,10 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         tablesPanel.setSpacing(5);
         ScrollPanel tablesScrollPanel = new ScrollPanel(tablesPanel);
         tablesScrollPanel.setHeight("21em");
-        tablesMappedByDimension = new HashMap<SharedDimensions, SelectionTable<?, ?>>();
+        tablesMappedByDimension = new HashMap<SharedDimension, SelectionTable<?, ?>>();
 
         regattaNameTable = new SelectionTable<RegattaDTO, String>(getStringMessages()
-                .regatta(), SharedDimensions.RegattaName) {
+                .regatta(), SharedDimension.RegattaName) {
             @Override
             public String getValue(RegattaDTO regatta) {
                 return regatta.getName();
@@ -383,7 +422,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         tablesMappedByDimension.put(regattaNameTable.getDimension(), regattaNameTable);
 
         boatClassTable = new SelectionTable<BoatClassDTO, String>(getStringMessages()
-                .boatClass(), SharedDimensions.BoatClassName) {
+                .boatClass(), SharedDimension.BoatClassName) {
             @Override
             public String getValue(BoatClassDTO boatClass) {
                 return boatClass.getName();
@@ -393,7 +432,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         tablesMappedByDimension.put(boatClassTable.getDimension(), boatClassTable);
 
         raceNameTable = new SelectionTable<RaceDTO, String>(getStringMessages().race(),
-                SharedDimensions.RaceName) {
+                SharedDimension.RaceName) {
             @Override
             public String getValue(RaceDTO race) {
                 return race.getName();
@@ -403,7 +442,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         tablesMappedByDimension.put(raceNameTable.getDimension(), raceNameTable);
 
         legNumberTable = new SelectionTable<Integer, Integer>(getStringMessages().legLabel(),
-                SharedDimensions.LegNumber) {
+                SharedDimension.LegNumber) {
             @Override
             public Integer getValue(Integer legNumber) {
                 return legNumber;
@@ -413,7 +452,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         tablesMappedByDimension.put(legNumberTable.getDimension(), legNumberTable);
 
         legTypeTable = new SelectionTable<LegType, LegType>(getStringMessages().legType(),
-                SharedDimensions.LegType) {
+                SharedDimension.LegType) {
             @Override
             public LegType getValue(LegType legType) {
                 return legType;
@@ -423,7 +462,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         tablesMappedByDimension.put(legTypeTable.getDimension(), legTypeTable);
 
         competitorNameTable = new SelectionTable<CompetitorDTO, String>(getStringMessages()
-                .competitor(), SharedDimensions.CompetitorName) {
+                .competitor(), SharedDimension.CompetitorName) {
             @Override
             public String getValue(CompetitorDTO competitor) {
                 return competitor.getName();
@@ -433,7 +472,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         tablesMappedByDimension.put(competitorNameTable.getDimension(), competitorNameTable);
 
         competitorSailIDTable = new SelectionTable<CompetitorDTO, String>(getStringMessages()
-                .sailID(), SharedDimensions.SailID) {
+                .sailID(), SharedDimension.SailID) {
             @Override
             public String getValue(CompetitorDTO competitor) {
                 return competitor.getSailID();
@@ -443,7 +482,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         tablesMappedByDimension.put(competitorSailIDTable.getDimension(), competitorSailIDTable);
 
         nationalityTable = new SelectionTable<String, String>(getStringMessages()
-                .nationality(), SharedDimensions.Nationality) {
+                .nationality(), SharedDimension.Nationality) {
             @Override
             public String getValue(String nationality) {
                 return nationality;

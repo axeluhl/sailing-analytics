@@ -779,4 +779,5 @@ public interface StringMessages extends Messages {
     String noGrouperSelectedError();
     String queryNotValidBecause();
     String dataMining();
+    String errorRunningDataMiningQuery();
 }

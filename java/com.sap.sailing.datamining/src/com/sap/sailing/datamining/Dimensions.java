@@ -1,7 +1,7 @@
 package com.sap.sailing.datamining;
 
 import com.sap.sailing.datamining.impl.AbstractDimension;
-import com.sap.sailing.datamining.shared.SharedDimensions;
+import com.sap.sailing.datamining.shared.SharedDimension;
 import com.sap.sailing.domain.common.LegType;
 
 public class Dimensions {
@@ -101,7 +101,7 @@ public class Dimensions {
          * @return The dimension for the given dimension type. Throws an exception, if the used <code>ValueType</code> doesn't match the <code>ValueType</code> of the returning dimension.
          */
         @SuppressWarnings("unchecked")
-        public static <ValueType> Dimension<GPSFixWithContext, ValueType> getDimensionFor(SharedDimensions dimension) {
+        public static <ValueType> Dimension<GPSFixWithContext, ValueType> getDimensionFor(SharedDimension dimension) {
             switch (dimension) {
             case BoatClassName:
                 return (Dimension<GPSFixWithContext, ValueType>) BoatClassName;

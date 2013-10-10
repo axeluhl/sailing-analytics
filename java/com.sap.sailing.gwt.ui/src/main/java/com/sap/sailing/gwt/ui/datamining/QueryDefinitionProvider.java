@@ -7,6 +7,7 @@ public interface QueryDefinitionProvider {
 
     public Iterable<String> validateQueryDefinition(QueryDefinition queryDefinition);
     public QueryDefinition getQueryDefinition();
+    public void applyQueryDefinition(QueryDefinition queryDefinition);
 
     public void addListener(QueryDefinitionChangedListener listener);
     public void removeListener(QueryDefinitionChangedListener listener);

@@ -7,7 +7,7 @@ import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.SharedDimensions;
+import com.sap.sailing.datamining.shared.SharedDimension;
 import com.sap.sailing.datamining.shared.StatisticType;
 
 public class SmartQueryDefinition implements QueryDefinition {
@@ -40,12 +40,12 @@ public class SmartQueryDefinition implements QueryDefinition {
     }
 
     @Override
-    public List<SharedDimensions> getDimensionsToGroupBy() {
+    public List<SharedDimension> getDimensionsToGroupBy() {
         return queryDefinition.getDimensionsToGroupBy();
     }
 
     @Override
-    public Map<SharedDimensions, Iterable<?>> getSelection() {
+    public Map<SharedDimension, Iterable<?>> getSelection() {
         return queryDefinition.getSelection();
     }
 

@@ -11,8 +11,13 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.datamining.shared.AggregatorType;
+import com.sap.sailing.datamining.shared.Components.GrouperType;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
+import com.sap.sailing.datamining.shared.SharedDimension;
+import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
+import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -44,9 +49,11 @@ public class QueryResultsPanel extends FlowPanel implements QueryDefinitionChang
         this.queryDefinitionProvider = queryDefinitionProvider;
         this.presenter = presenter;
         
-        updateSettings(settings);
         add(createFunctionsPanel());
         add(this.presenter.getWidget());
+        
+        updateSettings(settings);
+        this.queryDefinitionProvider.applyQueryDefinition(getStandardQueryDefinition());
         runQuery(this.queryDefinitionProvider.getQueryDefinition());
     }
 
@@ -63,6 +70,7 @@ public class QueryResultsPanel extends FlowPanel implements QueryDefinitionChang
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error running the query: " + caught.getMessage());
+                    presenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
                 }
             
                 @Override
@@ -140,6 +148,13 @@ public class QueryResultsPanel extends FlowPanel implements QueryDefinitionChang
     @Override
     public Widget getEntryWidget() {
         return this;
+    }
+
+    private static QueryDefinition getStandardQueryDefinition() {
+        SimpleQueryDefinition standardDefinition = new SimpleQueryDefinition(GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average);
+        standardDefinition.appendDimensionToGroupBy(SharedDimension.RegattaName);
+        standardDefinition.appendDimensionToGroupBy(SharedDimension.RaceName);
+        return standardDefinition;
     }
 
 }
