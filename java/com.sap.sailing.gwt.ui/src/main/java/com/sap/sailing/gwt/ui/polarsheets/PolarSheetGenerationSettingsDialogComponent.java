@@ -163,8 +163,7 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
 
     @Override
     public Validator<PolarSheetGenerationSettings> getValidator() {
-        // TODO Auto-generated method stub
-        return null;
+        return new PolarSheetGenerationSettingsValidator(stringMessages);
     }
 
     @Override

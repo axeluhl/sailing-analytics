@@ -777,4 +777,10 @@ public interface StringMessages extends Messages {
     String speedOverGroundFiveSecondsBeforeStart();
     String distanceToLineFiveSecondsBeforeStartTooltip();
     String speedOverGroundFiveSecondsBeforeStartTooltip();
+    String confidenceShouldBeBetween();
+    String minDataValuesNeedToBeAtLeastZero();
+    String numberOfColumnsAtLeast2();
+    String outlierRadiusNeedsToBePositiveString();
+    String outlierMinimumNeighborhoodPctString();
+    String oneOrMoreParametersAreEmpty();
 }

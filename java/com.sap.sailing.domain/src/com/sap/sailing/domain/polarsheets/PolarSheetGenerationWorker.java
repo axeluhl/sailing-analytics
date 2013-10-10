@@ -65,7 +65,6 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
             TimePoint startTime = race.getStartOfRace();
             TimePoint endTime = race.getEndOfRace();
             if (endTime == null) {
-                // TODO Figure out if there is an alternative:
                 endTime = race.getTimePointOfNewestEvent();
             }
             RaceDefinition raceDefinition = race.getRace();
