@@ -33,14 +33,15 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
     public Iterable<String> validateQueryDefinition(QueryDefinition queryDefinition) {
         Collection<String> errorMessages = new ArrayList<String>();
         
-        String grouperError = validateGrouper(queryDefinition);
-        if (grouperError != null && !grouperError.isEmpty()) {
-            errorMessages.add(grouperError);
-        }
-        
-        String statisticError = validateStatisticAndAggregator(queryDefinition);
-        if (statisticError != null && !statisticError.isEmpty()) {
-            errorMessages.add(statisticError);
+        if (queryDefinition != null) {
+            String grouperError = validateGrouper(queryDefinition);
+            if (grouperError != null && !grouperError.isEmpty()) {
+                errorMessages.add(grouperError);
+            }
+            String statisticError = validateStatisticAndAggregator(queryDefinition);
+            if (statisticError != null && !statisticError.isEmpty()) {
+                errorMessages.add(statisticError);
+            }
         }
         
         return errorMessages;

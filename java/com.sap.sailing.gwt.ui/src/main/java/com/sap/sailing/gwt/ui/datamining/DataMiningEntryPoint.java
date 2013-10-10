@@ -19,7 +19,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         String benchmarkParameter = Window.Location.getParameter(PARAM_BENCHMARK);
         boolean showBenchmark = benchmarkParameter != null && benchmarkParameter.equals("true");
         
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel("Data Mining", stringMessages, this);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.dataMining(), stringMessages, this);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, null);
         logoAndTitlePanel.add(globalNavigationPanel);

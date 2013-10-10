@@ -1,32 +1,38 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 
-public class QueryResultsPanel extends FlowPanel implements QueryDefinitionChangedListener {
+public class QueryResultsPanel extends FlowPanel implements QueryDefinitionChangedListener, Component<DataMiningSettings> {
+
+    private static DataMiningResources resources = GWT.create(DataMiningResources.class);
 
     private StringMessages stringMessages;
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
+    private DataMiningSettings settings;
     private QueryDefinitionProvider queryDefinitionProvider;
 
+    private Button runQueryButton;
     private Label queryStatusLabel;
     private ResultsPresenter<Number> presenter;
-
-    private Button runQueryButton;
 
     public QueryResultsPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
             ErrorReporter errorReporter, QueryDefinitionProvider queryDefinitionProvider, ResultsPresenter<Number> presenter) {
@@ -34,9 +40,11 @@ public class QueryResultsPanel extends FlowPanel implements QueryDefinitionChang
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
+        this.settings = new DataMiningSettings();
         this.queryDefinitionProvider = queryDefinitionProvider;
         this.presenter = presenter;
         
+        updateSettings(settings);
         add(createFunctionsPanel());
         add(this.presenter.getWidget());
         runQuery(this.queryDefinitionProvider.getQueryDefinition());
@@ -76,33 +84,62 @@ public class QueryResultsPanel extends FlowPanel implements QueryDefinitionChang
         HorizontalPanel functionsPanel = new HorizontalPanel();
         functionsPanel.setSpacing(5);
         
-        CheckBox runAutomaticBox = new CheckBox(stringMessages.runAutomatically());
-        runAutomaticBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                Boolean runAutomatic = event.getValue();
-                runQueryButton.setVisible(!runAutomatic);
-                if (runAutomatic) {
-                    queryDefinitionProvider.addListener(QueryResultsPanel.this);
-                } else {
-                    queryDefinitionProvider.removeListener(QueryResultsPanel.this);
-                }
-            }
-        });
-        functionsPanel.add(runAutomaticBox);
-        
         runQueryButton = new Button(stringMessages.run());
         runQueryButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                runQuery(null);
+                runQuery(queryDefinitionProvider.getQueryDefinition());
             }
         });
         functionsPanel.add(runQueryButton);
         
         queryStatusLabel = new Label();
         functionsPanel.add(queryStatusLabel);
+        
+
+        Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(resources.settingsIcon()).getSafeHtml());
+        settingsAnchor.setTitle(stringMessages.settings());
+        settingsAnchor.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new SettingsDialog<DataMiningSettings>(QueryResultsPanel.this, stringMessages).show();
+            }
+        });
+        functionsPanel.add(settingsAnchor);
+        
         return functionsPanel;
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return true;
+    }
+
+    @Override
+    public SettingsDialogComponent<DataMiningSettings> getSettingsDialogComponent() {
+        DataMiningSettings dataMiningSettings = new DataMiningSettings(settings);
+        return new DataMiningSettingsDialogComponent(dataMiningSettings, stringMessages);
+    }
+
+    @Override
+    public void updateSettings(DataMiningSettings newSettings) {
+        settings.setRunAutomatically(newSettings.isRunAutomatically());
+        
+        if (settings.isRunAutomatically()) {
+            queryDefinitionProvider.addListener(QueryResultsPanel.this);
+        } else {
+            queryDefinitionProvider.removeListener(QueryResultsPanel.this);
+        }
+    }
+
+    @Override
+    public String getLocalizedShortName() {
+        return stringMessages.dataMining();
+    }
+
+    @Override
+    public Widget getEntryWidget() {
+        return this;
     }
 
 }
