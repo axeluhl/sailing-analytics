@@ -5,17 +5,24 @@ import java.net.URISyntaxException;
 
 import org.junit.Test;
 
-public class MarkPassingTestHermite extends AbstractMarkPassingTestNew {
 
-    public MarkPassingTestHermite() throws MalformedURLException, URISyntaxException {
-        super(new DetectorHermiteBased());
+public class MarkPassingTest extends AbstractMarkPassingTestNew {
+
+    public MarkPassingTest() throws MalformedURLException, URISyntaxException {
+
+        super(new CandidateFinder());
 
     }
 
+  
+    
     @Test
     public void compareMarkpasses() {
 
+
         super.compareMarkpasses();
+        
+
 
     }
 

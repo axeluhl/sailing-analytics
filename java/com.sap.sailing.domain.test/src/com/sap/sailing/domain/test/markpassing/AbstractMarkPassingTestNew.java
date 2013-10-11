@@ -14,12 +14,10 @@ import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 
 import org.junit.Before;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
@@ -42,25 +40,27 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
 public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest {
 
-    private final DetectorMarkPassing detector;
+    private final AbstractCandidateFinder candidateFinder;
 
     private static final int tolerance = 10000;
 
     // ///!!!!!!!!!!!!!!!!!!!!
     private boolean forceReload = false;
 
-    public AbstractMarkPassingTestNew(/* Mine */DetectorMarkPassing detector) throws MalformedURLException,
+    public AbstractMarkPassingTestNew(/* Mine */AbstractCandidateFinder candidateFinder) throws MalformedURLException,
             URISyntaxException {
         super();
-        /**/this.detector = detector;
+        /**/this.candidateFinder = candidateFinder;
     }
 
     @Before
     public void setUp() throws IOException, InterruptedException, URISyntaxException {
         super.setUp();
         /*
-         * 505 Race 2: 357c700a-9d9a-11e0-85be-406186cbf87c 505 Race 7: cb043bb4-9e92-11e0-85be-406186cbf87c 505 Race
-         * 10: 829bd366-9f53-11e0-85be-406186cbf87c
+         * 505 Race 2:  357c700a-9d9a-11e0-85be-406186cbf87c 
+         * 505 Race 7:  cb043bb4-9e92-11e0-85be-406186cbf87c 
+         * 505 Race 10: 829bd366-9f53-11e0-85be-406186cbf87c
+         * 
          */
         String raceID = "357c700a-9d9a-11e0-85be-406186cbf87c";
         if (!loadData(raceID) && !forceReload) {
@@ -186,7 +186,7 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
 
         ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
         ArrayList<Waypoint> waypointsWithPassingInstructions = new ArrayList<Waypoint>();
-        LinkedHashMap<ControlPoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> controlPointTracks = new LinkedHashMap<ControlPoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>>();
+        LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> controlPointTracks = new LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>>();
 
         // ///// Get Waypoints (Iterable of all Waypoints) /////
 
@@ -241,20 +241,15 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
 
         // /// Fill controlPointTracks (HashMap of ControlPoints and their Tracks) //////
 
-        LinkedHashSet<ControlPoint> controlPoints = new LinkedHashSet<ControlPoint>();
+        
+        for (Waypoint w : waypointsWithPassingInstructions) {
 
-        for (Waypoint w : waypoints) {
-
-            controlPoints.add(w.getControlPoint());
-        }
-
-        for (ControlPoint cp : controlPoints) {
             ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> marks = new ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>();
-            for (Mark mark : cp.getMarks()) {
+            for (Mark mark : w.getControlPoint().getMarks()) {
                 DynamicGPSFixTrack<Mark, GPSFix> markTrack = getTrackedRace().getOrCreateTrack(mark);
                 marks.add(markTrack);
             }
-            controlPointTracks.put(cp, marks);
+            controlPointTracks.put(w, marks);
         }
 
         // For each competitor:
@@ -300,23 +295,10 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
                 // Get Candidates for each ControlPoint
                 if (!(gpsFixes.size() == 0)) {
 
-                    LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<GPSFixMoving, Double>>> allCandidates = detector
+                    LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> waypointCandidates = candidateFinder
                             .findCandidates(gpsFixes, controlPointTracks);
 
-                    // Give Candidates to each Waypoint
-                    LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> waypointCandidates = new LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>>();
-
-                    for (Waypoint w : waypointsWithPassingInstructions) {
-
-                        if (w.getPassingInstructions().equals(PassingInstructions.LINE)) {
-
-                            waypointCandidates.put(w, allCandidates.get(w.getControlPoint()).get(1));
-                        } else {
-
-                            waypointCandidates.put(w, allCandidates.get(w.getControlPoint()).get(0));
-                        }
-
-                    }
+                   
 
                     // Create "Candidates" and all legal Edges
                     ArrayList<Candidate> candidates = new ArrayList<Candidate>();
@@ -326,7 +308,6 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
                     candidates.add(start);
                     Candidate end = new Candidate(waypoints.size() + 1, getTrackedRace().getEndOfRace().plus(1800000),
                             0);
-
 
                     for (Waypoint w : waypointCandidates.keySet()) {
 
@@ -371,25 +352,23 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
                                     - computedPasses.get(w).getTimePoint().asMillis();
 
                             if ((Math.abs(timedelta) < tolerance)) {
-                                
-System.out.println("Wow! Its right!!");
+
                                 correctPasses++;
 
                             } else {
-                             //   System.out.println("Calculated: " + computedPasses.get(w));
-                             //   System.out.println("Given: " + givenPasses.get(w) + "\n");
+                                System.out.println("Calculated: " + computedPasses.get(w));
+                                System.out.println("Given: " + givenPasses.get(w) + "\n");
 
                                 incorrectPasses++;
                             }
 
                         } catch (NullPointerException e) {
-                            // missingGivenMarkPassings++;
 
                         }
 
                         finally {
-                            System.out.println("Calculated: " + computedPasses.get(w));
-                            System.out.println("Given: " + givenPasses.get(w) + "\n");
+                            // System.out.println("Calculated: " + computedPasses.get(w));
+                            // System.out.println("Given: " + givenPasses.get(w) + "\n");
                         }
                 }
 

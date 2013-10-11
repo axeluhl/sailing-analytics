@@ -2,84 +2,74 @@ package com.sap.sailing.domain.test.markpassing;
 
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 
-import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
-public class DetectorClosestGPSFix implements DetectorMarkPassing {
+public class CandidateFinder implements AbstractCandidateFinder {
 
     @Override
-    public LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<GPSFixMoving, Double>>> findCandidates(
+    public LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> findCandidates(
             ArrayList<GPSFixMoving> gpsFixes,
-            LinkedHashMap<ControlPoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> controlPointTracks) {
+            LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> wayPointTracks) {
 
-        LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<GPSFixMoving, Double>>> examineFixes = new LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<GPSFixMoving, Double>>>();
+        LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> examineFixes = new LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>>();
 
-        for (ControlPoint cp : controlPointTracks.keySet()) {
+        for (Waypoint wp : wayPointTracks.keySet()) {
 
-            ArrayList<LinkedHashMap<GPSFixMoving, Double>> ar = new ArrayList<LinkedHashMap<GPSFixMoving, Double>>();
+            LinkedHashMap<GPSFixMoving, Double> candidates = new LinkedHashMap<GPSFixMoving, Double>();
 
-            int numberofMarks = 0;
-            Iterator<Mark> it = cp.getMarks().iterator();
-            while (it.hasNext()) {
-                it.next();
-                numberofMarks++;
-            }
-            if (numberofMarks == 1) {
-
-                LinkedHashMap<GPSFixMoving, Double> lhs = new LinkedHashMap<GPSFixMoving, Double>();
+            if (wp.getPassingInstructions().equals(PassingInstructions.PORT)) {
 
                 for (int i = 1; i < gpsFixes.size() - 1; i++)
 
-                    if (distanceToWayPoint(controlPointTracks.get(cp), gpsFixes.get(i)) < distanceToWayPoint(
-                            controlPointTracks.get(cp), gpsFixes.get(i - 1))
-                            && distanceToWayPoint(controlPointTracks.get(cp), gpsFixes.get(i)) < distanceToWayPoint(
-                                    controlPointTracks.get(cp), gpsFixes.get(i + 1))) {
+                    if (distanceToWayPoint(wayPointTracks.get(wp), gpsFixes.get(i)) < distanceToWayPoint(
+                            wayPointTracks.get(wp), gpsFixes.get(i - 1))
+                            && distanceToWayPoint(wayPointTracks.get(wp), gpsFixes.get(i)) < distanceToWayPoint(
+                                    wayPointTracks.get(wp), gpsFixes.get(i + 1))) {
 
-                        lhs.put(gpsFixes.get(i), distanceToWayPoint(controlPointTracks.get(cp), gpsFixes.get(i)));
+                        candidates.put(gpsFixes.get(i), distanceToWayPoint(wayPointTracks.get(wp), gpsFixes.get(i)));
 
                     }
 
-                ar.add(lhs);
-
             }
 
-            if (numberofMarks == 2) {
-                LinkedHashMap<GPSFixMoving, Double> lhsGate = new LinkedHashMap<GPSFixMoving, Double>();
-                LinkedHashMap<GPSFixMoving, Double> lhsLine = new LinkedHashMap<GPSFixMoving, Double>();
+            if (wp.getPassingInstructions().equals(PassingInstructions.GATE)) {
+                
 
                 for (int i = 1; i < gpsFixes.size() - 1; i++) {
 
-                    if (distanceToWayPoint(controlPointTracks.get(cp), gpsFixes.get(i)) < distanceToWayPoint(
-                            controlPointTracks.get(cp), gpsFixes.get(i - 1))
-                            && distanceToWayPoint(controlPointTracks.get(cp), gpsFixes.get(i)) < distanceToWayPoint(
-                                    controlPointTracks.get(cp), gpsFixes.get(i + 1))) {
+                    if (distanceToWayPoint(wayPointTracks.get(wp), gpsFixes.get(i)) < distanceToWayPoint(
+                            wayPointTracks.get(wp), gpsFixes.get(i - 1))
+                            && distanceToWayPoint(wayPointTracks.get(wp), gpsFixes.get(i)) < distanceToWayPoint(
+                                    wayPointTracks.get(wp), gpsFixes.get(i + 1))) {
 
-                        lhsGate.put(gpsFixes.get(i), distanceToWayPoint(controlPointTracks.get(cp), gpsFixes.get(i)));
+                        candidates.put(gpsFixes.get(i), distanceToWayPoint(wayPointTracks.get(wp), gpsFixes.get(i)));
 
                     }
                 }
+            }
+            if(wp.getPassingInstructions().equals(PassingInstructions.LINE)){
                 for (int i = 1; i < gpsFixes.size() - 1; i++)
 
-                    if (distanceToLine(controlPointTracks.get(cp), gpsFixes.get(i)) < distanceToLine(
-                            controlPointTracks.get(cp), gpsFixes.get(i - 1))
-                            && distanceToLine(controlPointTracks.get(cp), gpsFixes.get(i)) < distanceToLine(
-                                    controlPointTracks.get(cp), gpsFixes.get(i + 1))) {
+                    if (distanceToLine(wayPointTracks.get(wp), gpsFixes.get(i)) < distanceToLine(
+                            wayPointTracks.get(wp), gpsFixes.get(i - 1))
+                            && distanceToLine(wayPointTracks.get(wp), gpsFixes.get(i)) < distanceToLine(
+                                    wayPointTracks.get(wp), gpsFixes.get(i + 1))) {
 
-                        lhsLine.put(gpsFixes.get(i), distanceToLine(controlPointTracks.get(cp), gpsFixes.get(i)));
+                        candidates.put(gpsFixes.get(i), distanceToLine(wayPointTracks.get(wp), gpsFixes.get(i)));
                     }
 
-                ar.add(lhsGate);
-                ar.add(lhsLine);
+
 
             }
-            examineFixes.put(cp, ar);
+            examineFixes.put(wp, candidates);
 
         }
 
