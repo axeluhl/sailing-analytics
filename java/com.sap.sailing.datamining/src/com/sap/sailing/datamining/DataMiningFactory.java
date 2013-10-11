@@ -20,13 +20,13 @@ import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.DimensionValuesFilterCriteria;
 import com.sap.sailing.datamining.impl.gpsfix.GPSFixBaseBindingProvider;
-import com.sap.sailing.datamining.impl.gpsfix.SimpleGPSFixRetriever;
+import com.sap.sailing.datamining.impl.gpsfix.GPSFixRetriever;
 import com.sap.sailing.datamining.impl.gpsfix.GroupGPSFixesByDimension;
-import com.sap.sailing.datamining.shared.AggregatorType;
+import com.sap.sailing.datamining.shared.Components.AggregatorType;
+import com.sap.sailing.datamining.shared.Components.StatisticType;
 import com.sap.sailing.datamining.shared.DataTypes;
-import com.sap.sailing.datamining.shared.SharedDimension;
 import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.StatisticType;
+import com.sap.sailing.datamining.shared.SharedDimension;
 import com.sap.sailing.domain.base.Moving;
 
 public class DataMiningFactory {
@@ -64,7 +64,7 @@ public class DataMiningFactory {
     }
 
     public static DataRetriever<GPSFixWithContext> createGPSFixRetriever() {
-        return new SimpleGPSFixRetriever();
+        return new GPSFixRetriever();
     }
     
     /**

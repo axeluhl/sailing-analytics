@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
-import com.sap.sailing.datamining.shared.AggregatorType;
-import com.sap.sailing.datamining.shared.StatisticType;
+import com.sap.sailing.datamining.shared.Components.AggregatorType;
+import com.sap.sailing.datamining.shared.Components.StatisticType;
 
 public class StatisticAndAggregatorType {
     

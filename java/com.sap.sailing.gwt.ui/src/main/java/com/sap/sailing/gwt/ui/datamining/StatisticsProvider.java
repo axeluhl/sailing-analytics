@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.ui.datamining;
 
 import java.util.Collection;
 
-import com.sap.sailing.datamining.shared.AggregatorType;
-import com.sap.sailing.datamining.shared.StatisticType;
+import com.sap.sailing.datamining.shared.Components.AggregatorType;
+import com.sap.sailing.datamining.shared.Components.StatisticType;
 import com.sap.sailing.gwt.ui.datamining.selection.StatisticAndAggregatorType;
 
 public interface StatisticsProvider {

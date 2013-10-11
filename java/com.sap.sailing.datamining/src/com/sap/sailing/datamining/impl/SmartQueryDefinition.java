@@ -3,12 +3,12 @@ package com.sap.sailing.datamining.impl;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sailing.datamining.shared.AggregatorType;
+import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
+import com.sap.sailing.datamining.shared.Components.StatisticType;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.SharedDimension;
-import com.sap.sailing.datamining.shared.StatisticType;
 
 public class SmartQueryDefinition implements QueryDefinition {
     private static final long serialVersionUID = -4195720362233906108L;

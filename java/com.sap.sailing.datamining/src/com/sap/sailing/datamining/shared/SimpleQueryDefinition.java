@@ -6,7 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
+import com.sap.sailing.datamining.shared.Components.StatisticType;
 
 public class SimpleQueryDefinition implements QueryDefinition {
     private static final long serialVersionUID = 3476324726640558091L;

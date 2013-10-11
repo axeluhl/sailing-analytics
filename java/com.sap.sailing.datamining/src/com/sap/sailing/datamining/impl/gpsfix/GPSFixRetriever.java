@@ -21,7 +21,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
-public class SimpleGPSFixRetriever implements DataRetriever<GPSFixWithContext> {
+public class GPSFixRetriever implements DataRetriever<GPSFixWithContext> {
     
     @Override
     public Collection<GPSFixWithContext> retrieveData(RacingEventService racingEventService) {

@@ -1,9 +1,36 @@
 package com.sap.sailing.datamining.shared;
 
 public final class Components {
-    
-    public enum GrouperType { Dimensions, Custom }
-    
-    private Components() { }
+
+    public enum GrouperType {
+        Dimensions, Custom
+    }
+
+    public enum AggregatorType {
+        Sum, Average
+    }
+
+    public enum StatisticType {
+
+        DataAmount(ValueType.Integer), Speed(ValueType.Double);
+
+        public static enum ValueType {
+            Integer, Double
+        }
+
+        private ValueType valueType;
+
+        private StatisticType(ValueType valueType) {
+            this.valueType = valueType;
+        }
+
+        public ValueType getValueType() {
+            return valueType;
+        }
+
+    }
+
+    private Components() {
+    }
 
 }
