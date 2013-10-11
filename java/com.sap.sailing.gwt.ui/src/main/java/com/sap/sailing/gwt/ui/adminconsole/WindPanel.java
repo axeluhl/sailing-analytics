@@ -33,6 +33,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
@@ -237,16 +238,30 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 	}
 
 	private void createWindImportPanel(Panel mainPanel, final StringMessages stringMessages) {
-		CaptionPanel importPanel = new CaptionPanel("Import Wind from Expedition");
-		Panel importPanelContent = new VerticalPanel();
-		importPanel.add(importPanelContent);
-
+		
+		/*
+		 * To style the "browse" button of the file upload widget
+		 * see http://www.shauninman.com/archive/2007/09/10/styling_file_inputs_with_css_and_the_dom  
+		 */
+		
+		CaptionPanel windImportRootPanel = new CaptionPanel("Import Wind from Expedition");
+		mainPanel.add(windImportRootPanel);
+		VerticalPanel windImportContentPanel = new VerticalPanel();
+		windImportRootPanel.add(windImportContentPanel);
 		final FormPanel form = new FormPanel();
+		windImportContentPanel.add(form);
+		VerticalPanel formContentPanel = new VerticalPanel();
+		form.add(formContentPanel);
+		HorizontalPanel inputPanel = new HorizontalPanel();
+		formContentPanel.add(inputPanel);
+		final Panel importResultPanel = new VerticalPanel();
+		windImportContentPanel.add(importResultPanel);
+
+		
 		form.setMethod(FormPanel.METHOD_POST);
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
 		form.setAction(GWT.getHostPageBaseURL() + URL_SAILINGSERVER_EXPEDITION_IMPORT);
 
-		VerticalPanel formContentPanel = new VerticalPanel();
 
 		final TextBox boatIdTextBox = new TextBox();
 		boatIdTextBox.setName(EXPEDITON_IMPORT_PARAMETER_BOAT_ID);
@@ -271,13 +286,16 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 			}
 		});
 
-		formContentPanel.add(fileUpload);
+		inputPanel.add(fileUpload);
 
-		HorizontalPanel boatIdPanel = new HorizontalPanel();
-		boatIdPanel.add(new Label("Boat Id"));
-		boatIdPanel.add(boatIdTextBox);
-
-		formContentPanel.add(boatIdPanel);
+		Label boatIdLabel = new Label("Boat Id:");
+		inputPanel.add(boatIdLabel);
+		inputPanel.add(boatIdTextBox);
+		boatIdLabel.setWordWrap(false);
+		inputPanel.setSpacing(5);
+		inputPanel.setCellVerticalAlignment(fileUpload, HasVerticalAlignment.ALIGN_MIDDLE);
+		inputPanel.setCellVerticalAlignment(boatIdLabel, HasVerticalAlignment.ALIGN_MIDDLE);
+		inputPanel.setCellVerticalAlignment(boatIdTextBox, HasVerticalAlignment.ALIGN_MIDDLE);
 
 		Button submitButton = new Button("Upload", new ClickHandler() {
 			@Override
@@ -286,8 +304,6 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 			}
 		});
 		formContentPanel.add(submitButton);
-
-		final Panel importResultPanel = new VerticalPanel();
 
 		form.addSubmitHandler(new FormPanel.SubmitHandler() {
 			public void onSubmit(SubmitEvent event) {
@@ -319,11 +335,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 				}
 			}
 		});
-		form.add(formContentPanel);
-		importPanelContent.add(form);
-		importPanelContent.add(importResultPanel);
 
-		mainPanel.add(importPanel);
 	}
 
 	private void showWindSettingDialog(RaceDTO race, CoursePositionsDTO course) {
