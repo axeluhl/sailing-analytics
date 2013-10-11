@@ -4,52 +4,38 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.Renderer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
-import com.sap.sailing.datamining.shared.SharedDimension;
 import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.SharedDimension;
 import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
 import com.sap.sailing.datamining.shared.StatisticType;
-import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.dto.BoatClassDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvider {
 
     private FlowPanel mainPanel;
-    
+
+    private SelectionTablesPanel selectionTablesPanel;
     private ValueListBox<GrouperType> grouperTypeListBox;
     private TextArea customGrouperScriptTextBox;
     private HorizontalPanel dimensionsToGroupByPanel;
@@ -58,16 +44,6 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
     private StatisticsProvider statisticsProvider;
     private ValueListBox<StatisticAndAggregatorType> statisticsListBox;
 
-    private Map<SharedDimension, SelectionTable<?, ?>> tablesMappedByDimension;
-    private SelectionTable<RegattaDTO, String> regattaNameTable;
-    private SelectionTable<BoatClassDTO, String> boatClassTable;
-    private SelectionTable<RaceDTO, String> raceNameTable;
-    private SelectionTable<Integer, Integer> legNumberTable;
-    private SelectionTable<LegType, LegType> legTypeTable;
-    private SelectionTable<CompetitorDTO, String> competitorNameTable;
-    private SelectionTable<CompetitorDTO, String> competitorSailIDTable;
-    private SelectionTable<String, String> nationalityTable;
-
     public SimpleQueryDefinitionProvider(StringMessages stringMessages, SailingServiceAsync sailingService,
             ErrorReporter errorReporter) {
         super(stringMessages, sailingService, errorReporter);
@@ -75,9 +51,15 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         dimensionsToGroupByBoxes = new ArrayList<ValueListBox<SharedDimension>>();
         statisticsProvider = new SimpleStatisticsProvider();
 
-        mainPanel.add(createSelectionTables());
+        selectionTablesPanel = new SelectionTablesPanel(stringMessages, sailingService, errorReporter);
+        selectionTablesPanel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                notifyQueryDefinitionChanged();
+            }
+        });
+        mainPanel.add(selectionTablesPanel);
         mainPanel.add(createFunctionsPanel());
-        fillSelectionTables();
     }
     
     @Override
@@ -94,7 +76,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
             }
             break;
         }
-        for (Entry<SharedDimension, Collection<?>> selectionEntry : getSelection().entrySet()) {
+        for (Entry<SharedDimension, Collection<?>> selectionEntry : selectionTablesPanel.getSelection().entrySet()) {
             queryDTO.setSelectionFor(selectionEntry.getKey(), selectionEntry.getValue());
         }
         return queryDTO;
@@ -112,10 +94,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
     }
 
     private void applySelection(QueryDefinition queryDefinition) {
-        for (Entry<SharedDimension, Iterable<?>> selectionEntry : queryDefinition.getSelection().entrySet()) {
-            SelectionTable<?, ?> selectionTable = tablesMappedByDimension.get(selectionEntry.getKey());
-            selectionTable.setSelection((Iterable<?>) selectionEntry.getValue());
-        }
+        selectionTablesPanel.applySelection(queryDefinition);
     }
 
     private void applyGrouping(QueryDefinition queryDefinition) {
@@ -143,23 +122,6 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
 
     private void applyStatistic(QueryDefinition queryDefinition) {
         statisticsListBox.setValue(statisticsProvider.getStatistic(queryDefinition.getStatisticType(), queryDefinition.getAggregatorType()), false);
-    }
-
-    private Map<SharedDimension, Collection<?>> getSelection() {
-        Map<SharedDimension, Collection<?>> selection = new HashMap<SharedDimension, Collection<?>>();
-        for (SelectionTable<?, ?> table : tablesMappedByDimension.values()) {
-            Collection<?> specificSelection = table.getSelection();
-            if (!specificSelection.isEmpty()) {
-                selection.put(table.getDimension(), specificSelection);
-            }
-        }
-        return selection;
-    }
-
-    private void clearSelection() {
-        for (SelectionTable<?, ?> table : tablesMappedByDimension.values()) {
-            table.clearSelection();
-        }
     }
 
     private GrouperType getGrouperType() {
@@ -190,72 +152,6 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         return statisticsListBox.getValue().getAggregatorType();
     }
 
-    private void fillSelectionTables() {
-        getSailingService().getRegattas(new AsyncCallback<List<RegattaDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                getErrorReporter().reportError("Error fetching the regattas from the server: " + caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(List<RegattaDTO> regattas) {
-                Set<BoatClassDTO> boatClasses = new HashSet<BoatClassDTO>();
-                Set<RaceDTO> races = new HashSet<RaceDTO>();
-                Set<CompetitorDTO> competitors = new HashSet<CompetitorDTO>();
-                Set<String> nationalities = new HashSet<String>();
-                for (RegattaDTO regatta : regattas) {
-                    if (regatta != null) {
-                        boatClasses.add(regatta.boatClass);
-                        for (RaceWithCompetitorsDTO race : regatta.races) {
-                            if (race != null) {
-                                races.add(race);
-                                for (CompetitorDTO competitor : race.competitors) {
-                                    if (competitor != null) {
-                                        competitors.add(competitor);
-                                        nationalities.add(competitor.getThreeLetterIocCountryCode());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                List<RegattaDTO> sortedRegattas = new ArrayList<RegattaDTO>(regattas);
-                Collections.sort(sortedRegattas, new Comparator<RegattaDTO>() {
-                    @Override
-                    public int compare(RegattaDTO o1, RegattaDTO o2) {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                });
-
-                List<BoatClassDTO> sortedBoatClasses = new ArrayList<BoatClassDTO>(boatClasses);
-                Collections.sort(sortedBoatClasses, new Comparator<BoatClassDTO>() {
-                    @Override
-                    public int compare(BoatClassDTO o1, BoatClassDTO o2) {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                });
-
-                List<RaceDTO> sortedRaces = new ArrayList<RaceDTO>(races);
-                Collections.sort(sortedRaces, new Comparator<RaceDTO>() {
-                    @Override
-                    public int compare(RaceDTO o1, RaceDTO o2) {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                });
-
-                regattaNameTable.setContent(sortedRegattas);
-                boatClassTable.setContent(sortedBoatClasses);
-                raceNameTable.setContent(sortedRaces);
-                legNumberTable.setContent(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-                legTypeTable.setContent(Arrays.asList(LegType.values()));
-                competitorNameTable.setContent(competitors);
-                competitorSailIDTable.setContent(competitors);
-                nationalityTable.setContent(nationalities);
-            }
-        });
-    }
-
     private HorizontalPanel createFunctionsPanel() {
         HorizontalPanel functionsPanel = new HorizontalPanel();
         functionsPanel.setSpacing(5);
@@ -264,7 +160,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         clearSelectionButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                clearSelection();
+                selectionTablesPanel.clearSelection();
             }
         });
         functionsPanel.add(clearSelectionButton);
@@ -405,105 +301,6 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         });
         dimensionToGroupByBox.setAcceptableValues(Arrays.asList(SharedDimension.values()));
         return dimensionToGroupByBox;
-    }
-
-    private Panel createSelectionTables() {
-        HorizontalPanel tablesPanel = new HorizontalPanel();
-        tablesPanel.setSpacing(5);
-        ScrollPanel tablesScrollPanel = new ScrollPanel(tablesPanel);
-        tablesScrollPanel.setHeight("21em");
-        tablesMappedByDimension = new HashMap<SharedDimension, SelectionTable<?, ?>>();
-
-        regattaNameTable = new SelectionTable<RegattaDTO, String>(getStringMessages()
-                .regatta(), SharedDimension.RegattaName) {
-            @Override
-            public String getValue(RegattaDTO regatta) {
-                return regatta.getName();
-            }
-        };
-        tablesPanel.add(regattaNameTable);
-        tablesMappedByDimension.put(regattaNameTable.getDimension(), regattaNameTable);
-
-        boatClassTable = new SelectionTable<BoatClassDTO, String>(getStringMessages()
-                .boatClass(), SharedDimension.BoatClassName) {
-            @Override
-            public String getValue(BoatClassDTO boatClass) {
-                return boatClass.getName();
-            }
-        };
-        tablesPanel.add(boatClassTable);
-        tablesMappedByDimension.put(boatClassTable.getDimension(), boatClassTable);
-
-        raceNameTable = new SelectionTable<RaceDTO, String>(getStringMessages().race(),
-                SharedDimension.RaceName) {
-            @Override
-            public String getValue(RaceDTO race) {
-                return race.getName();
-            }
-        };
-        tablesPanel.add(raceNameTable);
-        tablesMappedByDimension.put(raceNameTable.getDimension(), raceNameTable);
-
-        legNumberTable = new SelectionTable<Integer, Integer>(getStringMessages().legLabel(),
-                SharedDimension.LegNumber) {
-            @Override
-            public Integer getValue(Integer legNumber) {
-                return legNumber;
-            }
-        };
-        tablesPanel.add(legNumberTable);
-        tablesMappedByDimension.put(legNumberTable.getDimension(), legNumberTable);
-
-        legTypeTable = new SelectionTable<LegType, LegType>(getStringMessages().legType(),
-                SharedDimension.LegType) {
-            @Override
-            public LegType getValue(LegType legType) {
-                return legType;
-            }
-        };
-        tablesPanel.add(legTypeTable);
-        tablesMappedByDimension.put(legTypeTable.getDimension(), legTypeTable);
-
-        competitorNameTable = new SelectionTable<CompetitorDTO, String>(getStringMessages()
-                .competitor(), SharedDimension.CompetitorName) {
-            @Override
-            public String getValue(CompetitorDTO competitor) {
-                return competitor.getName();
-            }
-        };
-        tablesPanel.add(competitorNameTable);
-        tablesMappedByDimension.put(competitorNameTable.getDimension(), competitorNameTable);
-
-        competitorSailIDTable = new SelectionTable<CompetitorDTO, String>(getStringMessages()
-                .sailID(), SharedDimension.SailID) {
-            @Override
-            public String getValue(CompetitorDTO competitor) {
-                return competitor.getSailID();
-            }
-        };
-        tablesPanel.add(competitorSailIDTable);
-        tablesMappedByDimension.put(competitorSailIDTable.getDimension(), competitorSailIDTable);
-
-        nationalityTable = new SelectionTable<String, String>(getStringMessages()
-                .nationality(), SharedDimension.Nationality) {
-            @Override
-            public String getValue(String nationality) {
-                return nationality;
-            }
-        };
-        tablesPanel.add(nationalityTable);
-        tablesMappedByDimension.put(nationalityTable.getDimension(), nationalityTable);
-
-        for (SelectionTable<?, ?> table : tablesMappedByDimension.values()) {
-            table.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-                @Override
-                public void onSelectionChange(SelectionChangeEvent event) {
-                    notifyQueryDefinitionChanged();
-                }
-            });
-        }
-
-        return tablesScrollPanel;
     }
 
     @Override
