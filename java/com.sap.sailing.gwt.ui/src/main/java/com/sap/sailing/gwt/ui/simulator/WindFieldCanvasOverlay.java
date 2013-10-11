@@ -12,8 +12,8 @@ import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapWidget;
-import com.google.gwt.maps.client.overlay.Overlay;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
@@ -32,63 +32,57 @@ import com.sap.sailing.gwt.ui.simulator.util.WindFieldMapMouseMoveHandler;
  */
 public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeListenerWithStoppingCriteria {
 
-    /* The wind field that is to be displayed in the overlay */
-    protected WindFieldDTO wl;
-    /*
+    /** The wind field that is to be displayed in the overlay */
+    protected WindFieldDTO windFieldDTO;
+    
+    /**
      * Map containing the windfield for easy retrieval with key as time point.
      */
     protected SortedMap<Long, List<SimulatorWindDTO>> timePointWindDTOMap;
 
-    /* The points where ToolTip is to be displayed */
+    /** The points where ToolTip is to be displayed */
     protected Map<ToolTip, SimulatorWindDTO> windFieldPoints;
     protected String arrowColor = "Blue";
     protected String arrowHeadColor = "Blue";
+
     protected WindFieldMapMouseMoveHandler mmHandler;
+    
     protected double arrowLength = 15;
     protected WindFieldGenParamsDTO windParams = null;
 
+    private HandlerRegistration mouseMoveHandlerRegistration;
+    
     private Timer timer;
 
     private static Logger logger = Logger.getLogger(WindFieldCanvasOverlay.class.getName());
 
-    public WindFieldCanvasOverlay(final Timer timer, final WindFieldGenParamsDTO windParams) {
-        super();
+    public WindFieldCanvasOverlay(MapWidget map, int zIndex, final Timer timer, final WindFieldGenParamsDTO windParams) {
+        super(map, zIndex);
         this.timer = timer;
         this.windParams = windParams;
-        init();
-    }
-
-    public WindFieldCanvasOverlay() {
-        super();
-        this.timer = null;
-        init();
-    }
-
-    private void init() {
-        wl = null;
+        
+        windFieldDTO = null;
         windFieldPoints = new HashMap<ToolTip, SimulatorWindDTO>();
 
-        mmHandler = new WindFieldMapMouseMoveHandler(this);
-
-        mmHandler.setWindFieldPoints(windFieldPoints);
-
         timePointWindDTOMap = new TreeMap<Long, List<SimulatorWindDTO>>();
-
     }
 
-    public void setWindField(final WindFieldDTO wl) {
-        this.wl = wl;
+    public WindFieldCanvasOverlay(MapWidget map, int zIndex) {
+        this(map, zIndex, null, null);
+    }
+
+    public void setWindField(final WindFieldDTO windFieldDTO) {
+        this.windFieldDTO = windFieldDTO;
 
         timePointWindDTOMap.clear();
-        if (wl != null) {
-            for(final SimulatorWindDTO w : wl.getMatrix()) {
+        if (windFieldDTO != null) {
+            for(final SimulatorWindDTO w : windFieldDTO.getMatrix()) {
                 if (!timePointWindDTOMap.containsKey(w.timepoint)) {
                     timePointWindDTOMap.put(w.timepoint, new LinkedList<SimulatorWindDTO>());
                 }
                 timePointWindDTOMap.get(w.timepoint).add(w);
             }
         }
-
     }
 
     public void setArrowColor(final String arrowColor, final String arrowHeadColor) {
@@ -97,39 +91,36 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     }
 
     @Override
-    protected void initialize(final MapWidget map) {
-        super.initialize(map);
-        map.addMapMouseMoveHandler(mmHandler);
-        if (timer != null) {
-            this.timer.addTimeListener(this);
+    public void addToMap() {
+        super.addToMap();
+        if(mmHandler == null) {
+            mmHandler = new WindFieldMapMouseMoveHandler(this);
         }
-        setVisible(true);
-    }
-
-    @Override
-    protected void remove() {
-        setVisible(false);
-        getMap().removeMapMouseMoveHandler(mmHandler);
+        mmHandler.setWindFieldPoints(windFieldPoints);
+        mouseMoveHandlerRegistration = addMouseMoveHandler(mmHandler);
         if (timer != null) {
-            this.timer.removeTimeListener(this);
+            timer.addTimeListener(this);
         }
-        super.remove();
     }
 
     @Override
-    protected Overlay copy() {
-        return new WindFieldCanvasOverlay(this.timer, this.windParams);
+    public void removeFromMap() {
+        super.removeFromMap();
+        if(mouseMoveHandlerRegistration != null) {
+            mouseMoveHandlerRegistration.removeHandler();
+        }
+        if (timer != null) {
+            timer.removeTimeListener(this);
+        }
     }
 
     @Override
-    protected void redraw(final boolean force) {
-        super.redraw(force);
-        if (wl != null) {
+    protected void draw() {
+        super.draw();
+        if (mapProjection != null && windFieldDTO != null) {
             clear();
-            //drawCanvas();
             drawWindField();
         }
-
     }
 
     private void clear() {
@@ -140,23 +131,18 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     }
 
     protected void drawWindField() {
-
         if (timer != null) {
             timeChanged(timer.getTime());
-
         } else {
-            drawWindField(wl.getMatrix());
+            drawWindField(windFieldDTO.getMatrix());
         }
-
     }
 
     protected void drawScaledArrow(final SimulatorWindDTO windDTO, final double angle, final int index, final boolean drawHead) {
-
         final double aWidth = Math.max(1., (PathPolyline.knotsToMetersPerSecond(windDTO.trueWindSpeedInKnots) / 2.));
         final double aLength = Math.max(10., (4. * PathPolyline.knotsToMetersPerSecond(windDTO.trueWindSpeedInKnots)));
         //System.out.println("arrow speed: "+windDTO.trueWindSpeedInMetersPerSecond+" angle:"+angle+" aWidth: "+aWidth+" aLength: "+aLength);
         drawArrow(windDTO, angle, aLength, aWidth, arrowColor, index, drawHead);
-
     }
 
     protected void drawWindField(final List<SimulatorWindDTO> windDTOList) {

@@ -217,7 +217,7 @@ public abstract class CanvasOverlayV3 {
     }
 
     protected abstract void draw();
-    
+
     protected OverlayViewOnAddHandler getOnAddHandler() {
         OverlayViewOnAddHandler result = new OverlayViewOnAddHandler() {
             @Override
@@ -280,5 +280,9 @@ public abstract class CanvasOverlayV3 {
             getCanvas().setCoordinateSpaceWidth(newWidthInPx);
             getCanvas().setCoordinateSpaceHeight(newHeightInPx);
         }
+    }
+
+    public MapCanvasProjection getMapProjection() {
+        return mapProjection;
     }
 }

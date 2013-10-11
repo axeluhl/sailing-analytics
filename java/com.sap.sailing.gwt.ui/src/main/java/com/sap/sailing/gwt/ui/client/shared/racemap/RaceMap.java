@@ -100,6 +100,7 @@ import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
@@ -213,9 +214,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * Used to check if the first initial zoom to the mark markers was already done.
      */
     private boolean mapFirstZoomDone = false;
-
-    // key for domains web4sap.com: This is the old Google Maps v2 key -> Most probably we will need a new key for v3
-    private final String mapsAPIKey = "AIzaSyD1Se4tIkt-wglccbco3S7twaHiG20hR9E";
 
     private final Timer timer;
 
@@ -382,7 +380,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
           }
         };
 
-        LoadApi.go(onLoad, loadLibraries, sensor, "key="+mapsAPIKey); 
+        LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V2_APIKey); 
     }
         
     public void redraw() {
