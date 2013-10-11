@@ -16,17 +16,31 @@ public class TabletConfigurationJsonDeserializer implements JsonDeserializer<Tab
     @Override
     public TabletConfiguration deserialize(JSONObject object) throws JsonDeserializationException {
         TabletConfigurationImpl configuration = new TabletConfigurationImpl();
-        
-        JSONArray courseAreaNames = Helpers.getNestedArraySafe(
-                object, 
-                "courseAreaNames");
-        Set<String> allowedCourseAreaNames = new HashSet<String>();
-        for (Object name : courseAreaNames) {
-            allowedCourseAreaNames.add(name.toString());
+
+        if (object.containsKey("courseAreaNames")) {
+            JSONArray courseAreaNames = Helpers.getNestedArraySafe(object, "courseAreaNames");
+            Set<String> allowedCourseAreaNames = new HashSet<String>();
+            for (Object name : courseAreaNames) {
+                allowedCourseAreaNames.add(name.toString());
+            }
+            configuration.setAllowedCourseAreaNames(allowedCourseAreaNames);
         }
-        configuration.setAllowedCourseAreaNames(allowedCourseAreaNames);
-        
-        
+
+        if (object.containsKey("minRounds")) {
+            Number minRounds = (Number) object.get("minRounds");
+            configuration.setMinimumRoundsForCourse(minRounds.intValue());
+        }
+
+        if (object.containsKey("maxRounds")) {
+            Number maxRounds = (Number) object.get("maxRounds");
+            configuration.setMaximumRoundsForCourse(maxRounds.intValue());
+        }
+
+        if (object.containsKey("resultsRecipent")) {
+            String resultsMailRecipent = (String) object.get("resultsRecipent");
+            configuration.setResultsMailRecipent(resultsMailRecipent);
+        }
+
         return configuration;
     }
 

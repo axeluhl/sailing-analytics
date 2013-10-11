@@ -167,6 +167,11 @@ public class AppPreferences {
         return sp.getString(PREFERENCE_MAIL_RECIPIENT, context.getString(R.string.settings_advanced_mail_default));
     }
     
+    public static void setMailRecipient(Context context, String mail) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putString(PREFERENCE_MAIL_RECIPIENT, mail).commit();
+    }
+    
     public static int getMaxRounds(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String maxRoundsStr = sp.getString(PREFERENCE_MAX_ROUNDS, "3");
@@ -179,6 +184,11 @@ public class AppPreferences {
         return maxRounds; 
     }
     
+    public static void setMaxRounds(Context context, int maxRounds) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putString(PREFERENCE_MAX_ROUNDS, String.valueOf(maxRounds)).commit();
+    }
+    
     public static int getMinRounds(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String minRoundsStr = sp.getString(PREFERENCE_MIN_ROUNDS, "2");
@@ -189,6 +199,11 @@ public class AppPreferences {
             Log.e(TAG, "Unable to parse minimum rounds setting to integer");
         }
         return minRounds; 
+    }
+    
+    public static void setMinRounds(Context context, int minRounds) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putString(PREFERENCE_MIN_ROUNDS, String.valueOf(minRounds)).commit();
     }
     
     public static StartProcedureType getDefaultStartProcedureType(Context context) {

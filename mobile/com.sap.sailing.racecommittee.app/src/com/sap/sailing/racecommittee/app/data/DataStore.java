@@ -9,7 +9,6 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.TabletConfiguration;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.server.gateway.deserialization.impl.TabletConfigurationJsonDeserializer;
 
 public interface DataStore {
     

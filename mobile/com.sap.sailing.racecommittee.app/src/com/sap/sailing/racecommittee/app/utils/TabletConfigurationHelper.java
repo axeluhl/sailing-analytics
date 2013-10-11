@@ -8,7 +8,18 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 public class TabletConfigurationHelper {
     
     public static void apply(Context context, TabletConfiguration configuration) {
-        AppPreferences.setManagedCourseAreaNames(context, configuration.getAllowedCourseAreaNames());
+        if (configuration.getAllowedCourseAreaNames() != null) {
+            AppPreferences.setManagedCourseAreaNames(context, configuration.getAllowedCourseAreaNames());
+        }
+        if (configuration.getMinimumRoundsForCourse() != null) {
+            AppPreferences.setMinRounds(context, configuration.getMinimumRoundsForCourse());
+        }
+        if (configuration.getMaximumRoundsForCourse() != null) {
+            AppPreferences.setMaxRounds(context, configuration.getMaximumRoundsForCourse());
+        }
+        if (configuration.getResultsMailRecipent() != null) {
+            AppPreferences.setMailRecipient(context, configuration.getResultsMailRecipent());
+        }
     }
 
 }
