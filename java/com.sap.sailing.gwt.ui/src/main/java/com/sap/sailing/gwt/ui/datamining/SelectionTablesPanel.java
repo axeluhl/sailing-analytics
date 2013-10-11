@@ -21,6 +21,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.SharedDimension;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -98,12 +99,14 @@ public class SelectionTablesPanel extends SimplePanel {
 
             @Override
             public void onSuccess(List<RegattaDTO> regattas) {
+                Set<RegattaDTO> regattasWithData = new HashSet<RegattaDTO>();
                 Set<BoatClassDTO> boatClasses = new HashSet<BoatClassDTO>();
                 Set<RaceDTO> races = new HashSet<RaceDTO>();
                 Set<CompetitorDTO> competitors = new HashSet<CompetitorDTO>();
                 Set<String> nationalities = new HashSet<String>();
                 for (RegattaDTO regatta : regattas) {
-                    if (regatta != null) {
+                    if (regattaContainsData(regatta)) {
+                        regattasWithData.add(regatta);
                         boatClasses.add(regatta.boatClass);
                         for (RaceWithCompetitorsDTO race : regatta.races) {
                             if (race != null) {
@@ -119,7 +122,7 @@ public class SelectionTablesPanel extends SimplePanel {
                     }
                 }
 
-                List<RegattaDTO> sortedRegattas = new ArrayList<RegattaDTO>(regattas);
+                List<RegattaDTO> sortedRegattas = new ArrayList<RegattaDTO>(regattasWithData);
                 Collections.sort(sortedRegattas, new Comparator<RegattaDTO>() {
                     @Override
                     public int compare(RegattaDTO o1, RegattaDTO o2) {
@@ -168,6 +171,17 @@ public class SelectionTablesPanel extends SimplePanel {
                 nationalityTable.setContent(nationalities);
             }
         });
+    }
+
+    private boolean regattaContainsData(RegattaDTO regatta) {
+        if (regatta != null) {
+            for (RaceDTO race : regatta.races) {
+                if (race.isTracked || race.status.status == TrackedRaceStatusEnum.FINISHED) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private Widget createTables() {
