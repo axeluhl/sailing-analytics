@@ -219,6 +219,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private RaceTimesInfoDTO lastRaceTimesInfo;
     
+    private InfoWindow lastInfoWindow = null;
+    
     /**
      * RPC calls may receive responses out of order if there are multiple calls in-flight at the same time. If the time
      * slider is moved quickly it generates many requests for boat positions quickly after each other. Sometimes,
@@ -1059,12 +1061,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         boatCanvas.addClickHandler(new ClickMapHandler() {
             @Override
             public void onEvent(ClickMapEvent event) {
+                if(lastInfoWindow != null) {
+                    lastInfoWindow.close();
+                }
                 GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
                 LatLng where = LatLng.newInstance(latestFixForCompetitor.position.latDeg, latestFixForCompetitor.position.lngDeg);
                 InfoWindowOptions options = InfoWindowOptions.newInstance();
                 InfoWindow infoWindow = InfoWindow.newInstance(options);
                 infoWindow.setContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor));
                 infoWindow.setPosition(where);
+                lastInfoWindow = infoWindow;
                 infoWindow.open(map);
             }
         });
@@ -1098,20 +1104,28 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     private void showMarkInfoWindow(MarkDTO markDTO, LatLng position) {
+        if(lastInfoWindow != null) {
+            lastInfoWindow.close();
+        }
         InfoWindowOptions options = InfoWindowOptions.newInstance();
         InfoWindow infoWindow = InfoWindow.newInstance(options);
         infoWindow.setContent(getInfoWindowContent(markDTO));
         infoWindow.setPosition(position);
+        lastInfoWindow = infoWindow;
         infoWindow.open(map);
     }
 
     private void showCompetitorInfoWindow(final CompetitorDTO competitorDTO, LatLng where) {
+        if(lastInfoWindow != null) {
+            lastInfoWindow.close();
+        }
         GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime()); 
         // TODO find close fix where the mouse was; see BUG 470
         InfoWindowOptions options = InfoWindowOptions.newInstance();
         InfoWindow infoWindow = InfoWindow.newInstance(options);
         infoWindow.setContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor));
         infoWindow.setPosition(where);
+        lastInfoWindow = infoWindow;
         infoWindow.open(map);
     }
 
@@ -1126,11 +1140,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     	WindTrackInfoDTO windTrackInfoDTO = windSensorOverlay.getWindTrackInfoDTO();
         WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
         if(windDTO != null && windDTO.position != null) {
+            if(lastInfoWindow != null) {
+                lastInfoWindow.close();
+            }
             LatLng where = LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg);
             InfoWindowOptions options = InfoWindowOptions.newInstance();
             InfoWindow infoWindow = InfoWindow.newInstance(options);
             infoWindow.setContent(getInfoWindowContent(windSource, windTrackInfoDTO));
             infoWindow.setPosition(where);
+            lastInfoWindow = infoWindow;
             infoWindow.open(map);
         }
     }
