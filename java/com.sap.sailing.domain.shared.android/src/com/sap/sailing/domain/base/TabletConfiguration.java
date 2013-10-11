@@ -9,5 +9,5 @@ public interface TabletConfiguration {
     Set<String> getAllowedCourseAreaNames();
     Integer getMinimumRoundsForCourse();
     Integer getMaximumRoundsForCourse();
-    String getResultsMailRecipent();
+    String getResultsMailRecipient();
 }

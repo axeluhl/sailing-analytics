@@ -17,8 +17,8 @@ public class TabletConfigurationHelper {
         if (configuration.getMaximumRoundsForCourse() != null) {
             AppPreferences.setMaxRounds(context, configuration.getMaximumRoundsForCourse());
         }
-        if (configuration.getResultsMailRecipent() != null) {
-            AppPreferences.setMailRecipient(context, configuration.getResultsMailRecipent());
+        if (configuration.getResultsMailRecipient() != null) {
+            AppPreferences.setMailRecipient(context, configuration.getResultsMailRecipient());
         }
     }
 

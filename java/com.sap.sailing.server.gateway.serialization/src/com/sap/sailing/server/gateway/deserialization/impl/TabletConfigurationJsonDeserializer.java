@@ -36,9 +36,9 @@ public class TabletConfigurationJsonDeserializer implements JsonDeserializer<Tab
             configuration.setMaximumRoundsForCourse(maxRounds.intValue());
         }
 
-        if (object.containsKey("resultsRecipent")) {
-            String resultsMailRecipent = (String) object.get("resultsRecipent");
-            configuration.setResultsMailRecipent(resultsMailRecipent);
+        if (object.containsKey("resultsRecipient")) {
+            String resultsRecipient = (String) object.get("resultsRecipient");
+            configuration.setResultsMailRecipient(resultsRecipient);
         }
 
         return configuration;

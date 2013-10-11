@@ -10,7 +10,7 @@ public class TabletConfigurationImpl implements TabletConfiguration {
     private Set<String> allowedCourseAreaNames;
     private Integer minRounds;
     private Integer maxRounds;
-    private String resultsMailRecipent;
+    private String resultsMailRecipient;
     
     public TabletConfigurationImpl() {
         this.allowedCourseAreaNames = new HashSet<String>();
@@ -44,12 +44,12 @@ public class TabletConfigurationImpl implements TabletConfiguration {
     }
 
     @Override
-    public String getResultsMailRecipent() {
-        return resultsMailRecipent;
+    public String getResultsMailRecipient() {
+        return resultsMailRecipient;
     }
 
-    public void setResultsMailRecipent(String ResultsMailRecipent) {
-        this.resultsMailRecipent = ResultsMailRecipent;
+    public void setResultsMailRecipient(String resultsMailRecipient) {
+        this.resultsMailRecipient = resultsMailRecipient;
     }
 
 }
