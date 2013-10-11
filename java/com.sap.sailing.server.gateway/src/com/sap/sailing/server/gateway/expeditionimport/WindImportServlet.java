@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.expeditionimport;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -13,11 +14,11 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
@@ -25,121 +26,178 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
+import com.sap.sailing.server.gateway.expeditionimport.WindImportServlet.WindImportResult.RaceEntry;
 
 public class WindImportServlet extends SailingServerHttpServlet {
-	
+
 	private static final long serialVersionUID = 1L;
-	
+
 	static class Upload {
 		public String boatId;
 		public final List<FileItem> files = new ArrayList<FileItem>();
 	}
-	
+
 	static class WindImportResult {
 		
-		private final RegattaIdentifier regattaIdentifier;
-		private final RegattaAndRaceIdentifier raceIdentifier;
+		private Date first;
+		private Date last;
+		public String error;
+		
+		public final List<RaceEntry> raceEntries = new ArrayList<RaceEntry>();
+		
+		public Date getFirst() {
+			return first;
+		}
+
+		public Date getLast() {
+			return last;
+		}
+		
+		public void update(Wind newWind) {
+			Date newDate = newWind.getTimePoint().asDate();
+			if (this.first == null || newDate.before(this.first)) {
+				this.first = newDate;
+			}
+			if (this.last == null || newDate.after(this.last)) {
+				this.last = newDate;
+			}
+		}
+
+		RaceEntry addRaceEntry(String regattaName, String raceName) {
+			RaceEntry raceEntry = new RaceEntry(regattaName, raceName);
+			raceEntries.add(raceEntry);
+			return raceEntry;
+		}
+		
+		static class RaceEntry {
+
+		public final String regattaName;
+		public final String raceName;
 		private int count;
-		private Wind firstWind;
-		private Wind lastWind;
+		private Date first;
+		private Date last;
+		
+		private RaceEntry(String regattaName, String raceName) {
+			this.regattaName = regattaName;
+			this.raceName = raceName;
+		}
 
 		public void update(Wind newWind) {
 			count++;
-			if (firstWind == null || newWind.getTimePoint().before(firstWind.getTimePoint())) {
-				firstWind = newWind;
+			Date newDate = newWind.getTimePoint().asDate();
+			if (this.first == null || newDate.before(this.first)) {
+				this.first = newDate;
 			}
-			if (lastWind == null || newWind.getTimePoint().after(lastWind.getTimePoint())) {
-				lastWind = newWind;
+			if (this.last == null || newDate.after(this.last)) {
+				this.last = newDate;
 			}
-		}
-
-		public RegattaIdentifier getRegattaIdentifier() {
-			return regattaIdentifier;
-		}
-
-		public RegattaAndRaceIdentifier getRaceIdentifier() {
-			return raceIdentifier;
-		}
-
-		public WindImportResult(RegattaIdentifier regattaIdentifier, RegattaAndRaceIdentifier raceIdentifier) {
-			this.regattaIdentifier = regattaIdentifier;
-			this.raceIdentifier = raceIdentifier;
 		}
 
 		public int getCount() {
 			return count;
 		}
 
-		public Wind getFirstWind() {
-			return firstWind;
+		public Date getFirst() {
+			return first;
 		}
 
-		public Wind getLastWind() {
-			return lastWind;
+		public Date getLast() {
+			return last;
 		}
-		
+
+		private JSONObject json() {
+	        JSONObject result = new JSONObject();
+	        result.put("regattaName", regattaName);
+	        result.put("raceName", raceName);
+	        result.put("count", getCount());
+	        result.put("first", getFirst().getTime());
+	        result.put("last", getLast().getTime());
+			return result;
+		}
+		}
+
+		public JSONObject json() {
+	        JSONObject result = new JSONObject();
+
+	        result.put("first", getFirst().getTime());
+	        result.put("last", getLast().getTime());
+	        result.put("error", error);
+	        
+	        JSONArray raceEntriesJson = new JSONArray();
+	        for (RaceEntry raceEntry : raceEntries) {
+				raceEntriesJson.add(raceEntry.json());
+			}
+	        result.put("raceEntries", raceEntriesJson);
+	        
+	        
+	        return result;
+	        
+		}
+
 	}
-	
-	@Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (!ServletFileUpload.isMultipartContent(req)) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
 
-        
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		if (!ServletFileUpload.isMultipartContent(req)) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
+
+		WindImportResult windImportResult = new WindImportResult();
+		
 		try {
-			
+
 			Upload upload = readInput(req);
 			WindSource windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, upload.boatId);
-			
-			List<WindImportResult> windImportResults = new ArrayList<WindImportResult>();
-			
+
 			Iterable<Regatta> allRegattas = getService().getAllRegattas();
 
 			for (FileItem file : upload.files) {
 				List<Wind> windFixes = WindLogParser.importWind(file.getInputStream());
-				for (Regatta regatta : allRegattas) {
-					DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
-					Iterable<RaceDefinition> allRaceDefinitions = regatta.getAllRaces();
-					for (RaceDefinition raceDefinition : allRaceDefinitions) {
-						DynamicTrackedRace trackedRace = trackedRegatta.getTrackedRace(raceDefinition);
-						WindImportResult windImportResult = new WindImportResult(regatta.getRegattaIdentifier(), trackedRace.getRaceIdentifier());
-						windImportResults.add(windImportResult);
-						for (Wind wind : windFixes) {
-							if (trackedRace.recordWind(wind, windSource)) {
-								windImportResult.update(wind);
+				if (windFixes.size() > 0) {
+					windImportResult.update(windFixes.get(0));
+					windImportResult.update(windFixes.get(windFixes.size() - 1));
+					for (Regatta regatta : allRegattas) {
+						DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
+						Iterable<RaceDefinition> allRaceDefinitions = regatta.getAllRaces();
+						for (RaceDefinition raceDefinition : allRaceDefinitions) {
+							DynamicTrackedRace trackedRace = trackedRegatta.getTrackedRace(raceDefinition);
+							RaceEntry raceEntry = windImportResult.addRaceEntry(regatta.getName(), trackedRace.getRace().getName());
+							for (Wind wind : windFixes) {
+								if (trackedRace.recordWind(wind, windSource)) {
+									raceEntry.update(wind);
+								}
 							}
 						}
 					}
 				}
 			}
-			
+
 			// Use text/html to prevent browsers from wrapping the response body,
 			// see "Handling File Upload Responses in GWT" at http://www.artofsolving.com/node/50
-			resp.setContentType("text/html;charset=UTF-8"); 
-			resp.getWriter().append(windImportResults.toString());
-		} catch (FileUploadException e) {
-			throw new IOException(e);
+			resp.setContentType("text/html;charset=UTF-8");
+			resp.getWriter().append(windImportResult.json().toJSONString());
+		} catch (Exception e) {
+			windImportResult.error = e.toString();
 		}
-    }
+	}
 
-    private Upload readInput(HttpServletRequest req) throws FileUploadException {
-    	Upload result = new Upload();
-        // http://commons.apache.org/fileupload/using.html
-            FileItemFactory factory = new DiskFileItemFactory();
-            ServletFileUpload upload = new ServletFileUpload(factory);
-            @SuppressWarnings("unchecked")
-            List<FileItem> items = upload.parseRequest(req);
-            for (FileItem item : items) {
-                if (item.isFormField()) {
-                	if ("boatId".equals(item.getFieldName())) {
-                		result.boatId = item.getString();
-                	}
-                } else {
-                	result.files.add(item);
-                } 
-            }
-            return result;
-    }
+	private Upload readInput(HttpServletRequest req) throws FileUploadException {
+		Upload result = new Upload();
+		// http://commons.apache.org/fileupload/using.html
+		FileItemFactory factory = new DiskFileItemFactory();
+		ServletFileUpload upload = new ServletFileUpload(factory);
+		@SuppressWarnings("unchecked")
+		List<FileItem> items = upload.parseRequest(req);
+		for (FileItem item : items) {
+			if (item.isFormField()) {
+				if ("boatId".equals(item.getFieldName())) {
+					result.boatId = item.getString();
+				}
+			} else {
+				result.files.add(item);
+			}
+		}
+		return result;
+	}
 }
