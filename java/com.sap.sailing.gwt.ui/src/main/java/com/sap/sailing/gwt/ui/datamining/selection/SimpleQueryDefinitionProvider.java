@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.datamining;
+package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -24,6 +24,7 @@ import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.datamining.StatisticsProvider;
 
 public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvider {
 

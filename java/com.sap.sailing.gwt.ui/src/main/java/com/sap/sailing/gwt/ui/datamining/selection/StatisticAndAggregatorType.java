@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.datamining;
+package com.sap.sailing.gwt.ui.datamining.selection;
 
 import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.StatisticType;

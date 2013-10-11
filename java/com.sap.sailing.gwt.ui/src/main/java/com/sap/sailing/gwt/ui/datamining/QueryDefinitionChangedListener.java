@@ -4,6 +4,6 @@ import com.sap.sailing.datamining.shared.QueryDefinition;
 
 public interface QueryDefinitionChangedListener {
 
-	void queryDefinitionChanged(QueryDefinition newQueryDefinition);
+    void queryDefinitionChanged(QueryDefinition newQueryDefinition);
 
 }

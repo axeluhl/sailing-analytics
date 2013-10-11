@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.datamining;
+package com.sap.sailing.gwt.ui.datamining.presentation;
 
 import java.util.ArrayList;
 import java.util.Collections;

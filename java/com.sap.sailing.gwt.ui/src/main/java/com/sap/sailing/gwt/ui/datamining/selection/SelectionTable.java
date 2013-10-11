@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.datamining;
+package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.util.Collection;
 import java.util.HashSet;

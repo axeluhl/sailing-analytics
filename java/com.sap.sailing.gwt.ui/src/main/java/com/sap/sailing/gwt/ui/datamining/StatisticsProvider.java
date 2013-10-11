@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.sap.sailing.datamining.shared.AggregatorType;
 import com.sap.sailing.datamining.shared.StatisticType;
+import com.sap.sailing.gwt.ui.datamining.selection.StatisticAndAggregatorType;
 
 public interface StatisticsProvider {
 

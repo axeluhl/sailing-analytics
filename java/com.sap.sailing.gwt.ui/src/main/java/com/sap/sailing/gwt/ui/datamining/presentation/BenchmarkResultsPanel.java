@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.datamining;
+package com.sap.sailing.gwt.ui.datamining.presentation;
 
 import java.util.List;
 
@@ -14,6 +14,7 @@ import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class BenchmarkResultsPanel extends FlowPanel {

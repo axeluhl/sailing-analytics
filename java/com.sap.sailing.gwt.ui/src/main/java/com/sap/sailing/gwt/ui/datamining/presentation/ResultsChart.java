@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.datamining;
+package com.sap.sailing.gwt.ui.datamining.presentation;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,6 +28,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.GroupKey;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
+import com.sap.sailing.gwt.ui.datamining.UnitFormatter;
 
 public class ResultsChart implements ResultsPresenter<Number>, RequiresResize {
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.datamining;
+package com.sap.sailing.gwt.ui.datamining.presentation;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -24,6 +24,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.datamining.DataMiningSettings;
+import com.sap.sailing.gwt.ui.datamining.DataMiningSettingsDialogComponent;
+import com.sap.sailing.gwt.ui.datamining.QueryDefinitionChangedListener;
+import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
+import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 
 public class QueryResultsPanel extends FlowPanel implements QueryDefinitionChangedListener, Component<DataMiningSettings> {
 
