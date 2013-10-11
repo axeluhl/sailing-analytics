@@ -7,7 +7,7 @@ public final class Components {
     }
 
     public enum AggregatorType {
-        Sum, Average
+        Sum, Average, Median
     }
 
     public enum StatisticType {

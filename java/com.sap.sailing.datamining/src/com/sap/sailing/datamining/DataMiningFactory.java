@@ -13,8 +13,10 @@ import com.sap.sailing.datamining.impl.QueryImpl;
 import com.sap.sailing.datamining.impl.SmartQueryDefinition;
 import com.sap.sailing.datamining.impl.SpeedInKnotsExtractor;
 import com.sap.sailing.datamining.impl.aggregators.SimpleDoubleArithmeticAverageAggregator;
+import com.sap.sailing.datamining.impl.aggregators.SimpleDoubleMedianAggregator;
 import com.sap.sailing.datamining.impl.aggregators.SimpleDoubleSumAggregator;
 import com.sap.sailing.datamining.impl.aggregators.SimpleIntegerArithmeticAverageAggregator;
+import com.sap.sailing.datamining.impl.aggregators.SimpleIntegerMedianAggregator;
 import com.sap.sailing.datamining.impl.aggregators.SimpleIntegerSumAggregator;
 import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
@@ -204,6 +206,8 @@ public class DataMiningFactory {
             return new SimpleIntegerArithmeticAverageAggregator();
         case Sum:
             return new SimpleIntegerSumAggregator();
+        case Median:
+            return new SimpleIntegerMedianAggregator();
         }
         throw new IllegalArgumentException("Not yet implemented for the given aggregator type: "
                 + aggregatorType.toString());
@@ -215,6 +219,8 @@ public class DataMiningFactory {
             return new SimpleDoubleArithmeticAverageAggregator();
         case Sum:
             return new SimpleDoubleSumAggregator();
+        case Median:
+            return new SimpleDoubleMedianAggregator();
         }
         throw new IllegalArgumentException("Not yet implemented for the given aggregator type: "
                 + aggregatorType.toString());
