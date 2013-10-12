@@ -13,9 +13,9 @@
   <dependencies>
     <dependency>
         <!-- This dependency is required because the GWT Maven Plugin searches other GWT modules only in Maven dependencies -->
-    	<groupId>com.google.code</groupId>
-    	<artifactId>gwt-maps</artifactId>
-    	<version>1.1.0</version>
+		<groupId>com.github.branflake2267</groupId>
+		<artifactId>gwt-maps-api</artifactId>
+		<version>3.10.0-alpha-6</version>
     	<scope>provided</scope>
     </dependency>
 	<dependency>
