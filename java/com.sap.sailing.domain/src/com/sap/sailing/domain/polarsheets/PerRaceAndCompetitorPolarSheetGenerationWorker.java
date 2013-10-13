@@ -30,7 +30,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
  * @author D054528 Frederik Petersen
  * 
  */
-public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable{
+public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable {
     
     private static final Logger logger = Logger.getLogger(PerRaceAndCompetitorPolarSheetGenerationWorker.class.getName());
 

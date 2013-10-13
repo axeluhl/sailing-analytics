@@ -155,75 +155,11 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
             double[] sumsPerWindSpeed = new double[levelCount];
             int[] dataCountPerWindSpeed = new int[levelCount];
             Map<Integer, List<DataPointWithOriginInfo>> dataSetForWindLevel = new HashMap<Integer, List<DataPointWithOriginInfo>>();
-            for (BoatAndWindSpeedWithOriginInfo singleDataPoint : values) {
-                if (singleDataPoint != null) {
-                    double windSpeed = singleDataPoint.getWindSpeed().getKnots();
-                    int level = stepping.getLevelIndexForValue(windSpeed);
-                    if (level < 0) {
-                        continue;
-                    }
-                    double speed = singleDataPoint.getBoatSpeed().getKnots();
-                    String windGaugesIdString = singleDataPoint.getWindGaugesIdString();
-                    String dayString = singleDataPoint.getDayString();
-                    if (!dataSetForWindLevel.containsKey(level)) {
-                        dataSetForWindLevel.put(level, new ArrayList<DataPointWithOriginInfo>());
-                    }
-                    dataSetForWindLevel.get(level).add(
-                            new DataPointWithOriginInfo(speed, windGaugesIdString, dayString));
-                    sumsPerWindSpeed[level] = sumsPerWindSpeed[level] + speed;
-                    dataCountPerWindSpeed[level]++;
-                }
-            }
+            gatherPolarData(values, sumsPerWindSpeed, dataCountPerWindSpeed, dataSetForWindLevel);
 
-            for (int levelIndex = 0; levelIndex < levelCount; levelIndex++) {
-                if (settings.shouldRemoveOutliers() && dataSetForWindLevel.get(levelIndex) != null) {
-                    List<DataPointWithOriginInfo> withoutOutliers = new ArrayList<DataPointWithOriginInfo>();
-                    Collections.sort(dataSetForWindLevel.get(levelIndex));
-                    if (dataCountPerWindSpeed[levelIndex] > /* Minimum data count for outlier detection */10) {
-                        for (int dataIndex = 0; dataIndex < dataSetForWindLevel.get(levelIndex).size(); dataIndex++) {
-                            DataPointWithOriginInfo dataPoint = dataSetForWindLevel.get(levelIndex).get(dataIndex);
-                            double pct = getNeighboorhoodSizePercentage(dataCountPerWindSpeed, dataSetForWindLevel,
-                                    levelIndex, dataIndex, dataPoint, settings);
-                            if (pct >= settings.getOutlierMinimumNeighborhoodPct()) {
-                                withoutOutliers.add(dataPoint);
-                            } else {
-                                sumsPerWindSpeed[levelIndex] = sumsPerWindSpeed[levelIndex] - dataPoint.getRawData();
-                                dataCountPerWindSpeed[levelIndex]--;
-                            }
-                        }
-                        dataSetForWindLevel.put(levelIndex, withoutOutliers);
-                    }
-
-                }
-
-                if (dataCountPerWindSpeed[levelIndex] < settings.getMinimumDataCountPerAngle()) {
-                    dataSetForWindLevel.put(levelIndex, new ArrayList<DataPointWithOriginInfo>());
-                    sumsPerWindSpeed[levelIndex] = 0;
-                    dataCountPerWindSpeed[levelIndex] = 0;
-                }
-                totalDataCountPerWindSpeed.put(levelIndex, totalDataCountPerWindSpeed.get(levelIndex)
-                        + dataCountPerWindSpeed[levelIndex]);
-                Double average = sumsPerWindSpeed[levelIndex] / dataCountPerWindSpeed[levelIndex];
-                if (average.isNaN()) {
-                    average = new Double(0);
-                }
-                averagedPolarDataByWindSpeed[levelIndex][angleIndex] = average;
-                dataCountPerAngleForWindspeed.get(levelIndex)[angleIndex] = dataCountPerWindSpeed[levelIndex];
-                double coefficiantOfVariation = 0;
-                if (dataCountPerWindSpeed[levelIndex] > 0 && average > 0) {
-                    Double variance = sumsPerWindSpeed[levelIndex] / dataCountPerWindSpeed[levelIndex];
-                    Double standardDeviation = Math.sqrt(variance);
-                    coefficiantOfVariation = standardDeviation / average;
-                }
-                List<DataPointWithOriginInfo> rawData = dataSetForWindLevel.get(levelIndex);
-                if (rawData == null || rawData.size() <= 0) {
-                    continue;
-                }
-                PolarSheetsHistogramData histogramData = histogramBuilder.build(rawData, angleIndex,
-                        coefficiantOfVariation);
-                histogramDataMap.get(levelIndex).put(angleIndex, histogramData);
-
-            }
+            calculateStatisticalMeasuresAndHistogramData(histogramBuilder, levelCount, averagedPolarDataByWindSpeed,
+                    dataCountPerAngleForWindspeed, histogramDataMap, totalDataCountPerWindSpeed, angleIndex,
+                    sumsPerWindSpeed, dataCountPerWindSpeed, dataSetForWindLevel);
 
         }
 
@@ -241,8 +177,94 @@ public class PolarSheetGenerationWorker implements Future<PolarSheetsData>{
         return data;
     }
 
-    /*
-     * This algorithm calculates the pct of their neighborhood based on a distance (in the settings) compared
+    private void gatherPolarData(BoatAndWindSpeedWithOriginInfo[] values, double[] sumsPerWindSpeed,
+            int[] dataCountPerWindSpeed, Map<Integer, List<DataPointWithOriginInfo>> dataSetForWindLevel) {
+        for (BoatAndWindSpeedWithOriginInfo singleDataPoint : values) {
+            if (singleDataPoint != null) {
+                double windSpeed = singleDataPoint.getWindSpeed().getKnots();
+                int level = stepping.getLevelIndexForValue(windSpeed);
+                if (level >= 0) {
+                    double speed = singleDataPoint.getBoatSpeed().getKnots();
+                    String windGaugesIdString = singleDataPoint.getWindGaugesIdString();
+                    String dayString = singleDataPoint.getDayString();
+                    if (!dataSetForWindLevel.containsKey(level)) {
+                        dataSetForWindLevel.put(level, new ArrayList<DataPointWithOriginInfo>());
+                    }
+                    dataSetForWindLevel.get(level).add(
+                            new DataPointWithOriginInfo(speed, windGaugesIdString, dayString));
+                    sumsPerWindSpeed[level] = sumsPerWindSpeed[level] + speed;
+                    dataCountPerWindSpeed[level]++;
+                }
+            }
+        }
+    }
+
+    private void calculateStatisticalMeasuresAndHistogramData(PolarSheetHistogramBuilder histogramBuilder,
+            int levelCount, Number[][] averagedPolarDataByWindSpeed,
+            Map<Integer, Integer[]> dataCountPerAngleForWindspeed,
+            Map<Integer, Map<Integer, PolarSheetsHistogramData>> histogramDataMap,
+            Map<Integer, Integer> totalDataCountPerWindSpeed, int angleIndex, double[] sumsPerWindSpeed,
+            int[] dataCountPerWindSpeed, Map<Integer, List<DataPointWithOriginInfo>> dataSetForWindLevel) {
+        for (int levelIndex = 0; levelIndex < levelCount; levelIndex++) {
+            if (settings.shouldRemoveOutliers() && dataSetForWindLevel.get(levelIndex) != null) {
+                List<DataPointWithOriginInfo> withoutOutliers = new ArrayList<DataPointWithOriginInfo>();
+                Collections.sort(dataSetForWindLevel.get(levelIndex));
+                if (dataCountPerWindSpeed[levelIndex] > /* Minimum data count for outlier detection */10) {
+                    performOutlierExclusion(sumsPerWindSpeed, dataCountPerWindSpeed, dataSetForWindLevel,
+                            levelIndex, withoutOutliers);
+                }
+
+            }
+
+            if (dataCountPerWindSpeed[levelIndex] < settings.getMinimumDataCountPerAngle()) {
+                dataSetForWindLevel.put(levelIndex, new ArrayList<DataPointWithOriginInfo>());
+                sumsPerWindSpeed[levelIndex] = 0;
+                dataCountPerWindSpeed[levelIndex] = 0;
+            }
+            totalDataCountPerWindSpeed.put(levelIndex, totalDataCountPerWindSpeed.get(levelIndex)
+                    + dataCountPerWindSpeed[levelIndex]);
+            Double average = sumsPerWindSpeed[levelIndex] / dataCountPerWindSpeed[levelIndex];
+            if (average.isNaN()) {
+                average = new Double(0);
+            }
+            averagedPolarDataByWindSpeed[levelIndex][angleIndex] = average;
+            dataCountPerAngleForWindspeed.get(levelIndex)[angleIndex] = dataCountPerWindSpeed[levelIndex];
+            double coefficiantOfVariation = 0;
+            if (dataCountPerWindSpeed[levelIndex] > 0 && average > 0) {
+                Double variance = sumsPerWindSpeed[levelIndex] / dataCountPerWindSpeed[levelIndex];
+                Double standardDeviation = Math.sqrt(variance);
+                coefficiantOfVariation = standardDeviation / average;
+            }
+            List<DataPointWithOriginInfo> rawData = dataSetForWindLevel.get(levelIndex);
+            if (rawData == null || rawData.size() <= 0) {
+                continue;
+            }
+            PolarSheetsHistogramData histogramData = histogramBuilder.build(rawData, angleIndex,
+                    coefficiantOfVariation);
+            histogramDataMap.get(levelIndex).put(angleIndex, histogramData);
+
+        }
+    }
+
+    private void performOutlierExclusion(double[] sumsPerWindSpeed, int[] dataCountPerWindSpeed,
+            Map<Integer, List<DataPointWithOriginInfo>> dataSetForWindLevel, int levelIndex,
+            List<DataPointWithOriginInfo> withoutOutliers) {
+        for (int dataIndex = 0; dataIndex < dataSetForWindLevel.get(levelIndex).size(); dataIndex++) {
+            DataPointWithOriginInfo dataPoint = dataSetForWindLevel.get(levelIndex).get(dataIndex);
+            double pct = getNeighboorhoodSizePercentage(dataCountPerWindSpeed, dataSetForWindLevel,
+                    levelIndex, dataIndex, dataPoint, settings);
+            if (pct >= settings.getOutlierMinimumNeighborhoodPct()) {
+                withoutOutliers.add(dataPoint);
+            } else {
+                sumsPerWindSpeed[levelIndex] = sumsPerWindSpeed[levelIndex] - dataPoint.getRawData();
+                dataCountPerWindSpeed[levelIndex]--;
+            }
+        }
+        dataSetForWindLevel.put(levelIndex, withoutOutliers);
+    }
+
+    /**
+     * This method calculates the pct of the points neighborhoods based on a distance (in the settings) compared
      * to the complete dataset.
      */
     public static double getNeighboorhoodSizePercentage(int[] dataCountPerWindSpeed,
