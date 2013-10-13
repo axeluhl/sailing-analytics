@@ -6,6 +6,12 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
 
+/**
+ * Shows radio buttons allowing the user to arrange the data displayed in the histogram chart of the polar sheets panel
+ * 
+ * @author d054528 Frederik Petersen
+ * 
+ */
 public class PolarSheetsHistogramDataArrangeButtonBar extends HorizontalPanel{
 
     private final RadioButton arrangeByNothingButton;
@@ -72,6 +78,9 @@ public class PolarSheetsHistogramDataArrangeButtonBar extends HorizontalPanel{
         return arrangeByDayAndWindGaugeButton;
     }
     
+    /**
+     * Resets the histogram chart to the default (no filter)
+     */
     public void reset() {
         arrangeByNothingButton.setValue(true);
     }

@@ -21,6 +21,13 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
+/**
+ * Shows the underlying distribution for any point in the polar diagrams
+ * of the {@link PolarSheetsChartPanel}.
+ * 
+ * @author d054528 Frederik Petersen
+ *
+ */
 public class PolarSheetsHistogramPanel extends DockLayoutPanel {
     
     private final Chart chart;

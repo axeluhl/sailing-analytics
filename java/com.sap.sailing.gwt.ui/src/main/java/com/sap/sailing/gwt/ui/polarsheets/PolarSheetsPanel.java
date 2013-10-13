@@ -42,6 +42,14 @@ import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
+/**
+ * A panel containing a list of tracked races (not the ones without gps or wind data), a polar chart and a histogram chart. 
+ * Plus some buttons and settings to allow the user generate polar diagrams for the selected races and view
+ * histograms about the underlying data distribution of the points in the polar diagrams.
+ * 
+ * @author d054528 Frederik Petersen
+ *
+ */
 public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionChangeListener, RegattaDisplayer, Component<PolarSheetGenerationSettings> {
 
     public static final String POLARSHEETS_STYLE = "polarSheets";

@@ -10,8 +10,15 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.WindStepping;
 import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 
+/**
+ * A Panel which allows the user to configure a {@link WindStepping}.
+ * 
+ * @author d054528 Frederik Petersen
+ *
+ */
 public class WindSteppingConfiguratorPanel extends HorizontalPanel {
     
     private List<TextBox> textBoxes = new ArrayList<TextBox>();
