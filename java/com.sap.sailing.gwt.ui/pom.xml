@@ -9,6 +9,9 @@
   </parent>
   <artifactId>com.sap.sailing.gwt.ui</artifactId>
   <packaging>eclipse-plugin</packaging>
+  <properties>
+      <gwt.version>2.5.1</gwt.version>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -86,7 +89,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>gwt-maven-plugin</artifactId>
-                        <version>2.5.1</version>
+                        <version>${gwt.version}</version>
                         <executions>
                           <execution>
                               <configuration combine.self="override">
