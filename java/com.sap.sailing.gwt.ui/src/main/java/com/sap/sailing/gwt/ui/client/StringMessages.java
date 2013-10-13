@@ -783,4 +783,6 @@ public interface StringMessages extends Messages {
     String outlierRadiusNeedsToBePositiveString();
     String outlierMinimumNeighborhoodPctString();
     String oneOrMoreParametersAreEmpty();
+    String errorWhileAddingSeriesToChart();
+    String generatingPolarSheet();
 }

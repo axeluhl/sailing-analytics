@@ -17,11 +17,18 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
+/**
+ * Highcharts-driven chart for displaying polar sheets.
+ * 
+ * @author d054528 Frederik Petersen
+ *
+ */
 public class PolarSheetsChartPanel extends DockLayoutPanel {
 
     private StringMessages stringMessages;
@@ -40,6 +47,9 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         add(chart);
     }
 
+    /**
+     * Creates a polar diagram chart of the Line type.
+     */
     private Chart createPolarSheetChart() {
         Chart polarSheetChart = new Chart().setType(Series.Type.LINE)
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(1)).setZoomType(Chart.ZoomType.X_AND_Y)
@@ -49,15 +59,31 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         return polarSheetChart;
     }
 
+    /**
+     * Adds a new Array of series to the map. Each Array represents one set of generated polar diagrams The array is
+     * empty and needs to be filled.
+     * 
+     * @param name
+     *            Unique name of the set of diagrams.
+     * @param steppingCount
+     *            Number of different wind speeds, the polar sheets are generated for.
+     */
     private void newSeriesArray(String name, int steppingCount) {
         if (!seriesMap.containsKey(name)) {
             Series[] seriesPerWindSpeed = new Series[steppingCount];
             seriesMap.put(name, seriesPerWindSpeed);
         } else {
-            // TODO exception handling
+            Window.alert(stringMessages.errorWhileAddingSeriesToChart());
         }
     }
 
+    /**
+     * Creates a series for a specific windspeed and also creates the unique name needed to identify the series.
+     * 
+     * @param name Unique name of the set of diagrams.
+     * @param windSpeedLevel The id of the windspeed level in the windspeed steppings
+     * @param windSpeed The actual windspeed
+     */
     private void createSeriesForWindspeed(String name, int windSpeedLevel, int windSpeed) {
         Series[] seriesPerWindSpeed = seriesMap.get(name);
         Number[] forEachDeg = initializeDataForNewSeries();
@@ -68,11 +94,18 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         chart.addSeries(seriesPerWindSpeed[windSpeedLevel]);
     }
 
+    /**
+     * @return An array of 360 numbers. One for each angle.
+     */
     private Number[] initializeDataForNewSeries() {
         Number[] forEachDeg = new Number[360];
         return forEachDeg;
     }
 
+    /**
+     * Adds the actual data to the series for each windspeed index. Series array needs to be initialized before calling
+     * this method.
+     */
     private void addValuesToSeries(String seriesId, PolarSheetsData result) {
         int stepCount = result.getStepping().getRawStepping().length;
         if (seriesMap.containsKey(seriesId)) {
@@ -92,6 +125,10 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         }
     }
 
+    /**
+     * @return true if the minimum amount of datapoints is reached as defined in the settings.
+     * (for the complete graph)
+     */
     private boolean hasSufficientDataForWindspeed(Integer[] dataCountPerAngleForWindspeed) {
         int sum = 0;
         for (int count : dataCountPerAngleForWindspeed) {
@@ -103,6 +140,10 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         return false;
     }
 
+    /**
+     * Points are created using the polar sheets generation results. Points color and alpha in the graph is calculated
+     * using statistical measures.
+     */
     private Point[] createPointsWithMarkerAlphaAccordingToDataCount(PolarSheetsData result, int windspeed) {
         Point[] points = new Point[360];
         List<Integer> dataCountList = Arrays.asList(result.getDataCountPerAngleForWindspeed(windspeed));
@@ -136,14 +177,17 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
 
             // Don't let the markers be invisible
             alpha = 0.5 + 0.5 * alpha;
-            // TODO maybe set to series color. Not sure if this (highcharts-generated color) can be queried before
-            // rendering
             points[i].setMarker(new Marker().setFillColor(new Color(red, 0, blue, alpha)).setRadius(radius));
         }
 
         return points;
     }
 
+    /**
+     * Removes the set of series from the chart and the id-series[] map
+     * 
+     * @param seriesId Identifier for the set of series for one polar sheet generation result.
+     */
     public void removeSeries(String seriesId) {
         if (seriesMap.containsKey(seriesId)) {
             Series[] seriesPerWindSpeed = seriesMap.get(seriesId);
@@ -154,23 +198,37 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
         }
     }
 
+    /**
+     * Remove every series from the chart and the id-series[] map.
+     */
     public void removeAllSeries() {
         chart.removeAllSeries();
         seriesMap.clear();
     }
 
+    /**
+     * Adds a the results of a polar sheet generation to the chart panel. Performs all necessary steps including adding
+     * the set of series to the map and redrawing the chart.
+     * 
+     * @param id Set of series identifier. 
+     * @param result Generation results.
+     */
     public void setData(String id, PolarSheetsData result) {
         if (id == null) {
-            // TODO Exception handling
+            stringMessages.errorWhileAddingSeriesToChart();
             return;
+        } else {
+            if (!seriesMap.containsKey(id)) {
+                newSeriesArray(id, result.getStepping().getRawStepping().length);
+            }
+            addValuesToSeries(id, result);
+            chart.redraw();
         }
-        if (!seriesMap.containsKey(id)) {
-            newSeriesArray(id, result.getStepping().getRawStepping().length);
-        }
-        addValuesToSeries(id, result);
-        chart.redraw();
     }
 
+    /**
+     * Allows setting the point select handler for the chart.
+     */
     public void setPointSelectHandler(PointSelectEventHandler pointSelectEventHandler) {
         chart.setSeriesPlotOptions(new SeriesPlotOptions().setAllowPointSelect(true).setPointSelectEventHandler(
                 pointSelectEventHandler));
@@ -204,8 +262,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
     }
 
     public void showLoadingInfo() {
-        // TODO string messages
-        chart.showLoading("Generating Polar Sheets");
+        chart.showLoading(stringMessages.generatingPolarSheet());
         
     }
 
