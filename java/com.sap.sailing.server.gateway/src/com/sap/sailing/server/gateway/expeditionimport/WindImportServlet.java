@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -148,7 +149,12 @@ public class WindImportServlet extends SailingServerHttpServlet {
 		try {
 
 			Upload upload = readInput(req);
-			WindSource windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, upload.boatId);
+			WindSource windSource;
+			if ((upload.boatId != null) && (upload.boatId.trim().length() > 0)) {
+				windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, upload.boatId.trim());
+			} else {
+				windSource = new WindSourceImpl(WindSourceType.EXPEDITION);
+			}
 
 			Iterable<Regatta> allRegattas = getService().getAllRegattas();
 
