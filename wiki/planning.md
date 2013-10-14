@@ -16,6 +16,8 @@ The links above lead to short write-ups of the respective business case behind t
 
 [[Smartphone Tracking|wiki/smartphone-tracking]]
 
+[[GPS Import|wiki/planning/gps-import]]
+
 [[Sailing Community|wiki/planning/sailing-community]]
 
 [[Monitoring and Improving Data Quality|wiki/data-quality]]
