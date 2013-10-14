@@ -1404,7 +1404,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 updateLeaderboard(getLeaderboard());
             }
         });
-        this.userAgent = userAgent;
         if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
             //Setting up the toggle selection
             leaderboardTable.addCellPreviewHandler(new ToggleSelectionCellPreviewHandler<LeaderboardRowDTO>());
