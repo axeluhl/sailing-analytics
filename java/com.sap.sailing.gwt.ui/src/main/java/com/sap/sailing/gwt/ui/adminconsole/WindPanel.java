@@ -107,7 +107,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 		mainPanel.setSize("100%", "100%");
 		this.setWidget(mainPanel);
 
-		trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher, raceSelectionProvider, stringMessages, /*multiselection*/false);
+		trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher, raceSelectionProvider, stringMessages, /*multiselection*/true);
 		mainPanel.add(trackedRacesListComposite);
 		raceSelectionProvider.addRaceSelectionChangeListener(this);
 
@@ -297,6 +297,27 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 		inputPanel.setCellVerticalAlignment(boatIdLabel, HasVerticalAlignment.ALIGN_MIDDLE);
 		inputPanel.setCellVerticalAlignment(boatIdTextBox, HasVerticalAlignment.ALIGN_MIDDLE);
 
+		
+		final TextBox raceIdTextBox = new TextBox();
+		raceIdTextBox.setName("races");
+		inputPanel.add(raceIdTextBox);
+		raceSelectionProvider.addRaceSelectionChangeListener(new RaceSelectionChangeListener() {
+			
+			@Override
+			public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
+				StringBuilder races = new StringBuilder();
+				for (RegattaAndRaceIdentifier raceIdentifier : selectedRaces) {
+					races.append(raceIdentifier.toString());
+					races.append('|');
+				}
+				raceIdTextBox.setText(races.toString());
+			}
+		});
+		
+
+
+		
+		
 		Button submitButton = new Button("Upload", new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
