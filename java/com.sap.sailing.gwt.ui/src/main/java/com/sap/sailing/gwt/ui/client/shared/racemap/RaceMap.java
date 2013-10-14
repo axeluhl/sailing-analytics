@@ -58,6 +58,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -1325,11 +1326,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 for (ManeuverDTO maneuver : maneuversForCompetitor) {
                     if (settings.isShowManeuverType(maneuver.type)) {
                         LatLng latLng = LatLng.newInstance(maneuver.position.latDeg, maneuver.position.lngDeg);
+                        Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndTargetTack.get(new Util.Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack));
                         MarkerOptions options = MarkerOptions.newInstance();
                         options.setTitle(maneuver.toString(stringMessages));
-                        // TODO: replace with v3 version of set Icon
-//                        options.setIcon(raceMapImageManager.maneuverIconsForTypeAndTargetTack
-//                                .get(new Util.Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack)));
+                        options.setIcon(maneuverMarker.getIcon_MarkerImage());
                         Marker marker = Marker.newInstance(options);
                         marker.setPosition(latLng);
                         maneuverMarkers.add(marker);
@@ -1604,15 +1604,21 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public static class TailsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
 
         @Override
-        public LatLngBounds calculateNewBounds(RaceMap forMap) {
+        public LatLngBounds calculateNewBounds(RaceMap racemap) {
             LatLngBounds newBounds = null;
-            Iterable<CompetitorDTO> competitors = isZoomOnlyToSelectedCompetitors(forMap) ? forMap.competitorSelection.getSelectedCompetitors() : forMap.getCompetitorsToShow();
+            Iterable<CompetitorDTO> competitors = isZoomOnlyToSelectedCompetitors(racemap) ? racemap.competitorSelection.getSelectedCompetitors() : racemap.getCompetitorsToShow();
             for (CompetitorDTO competitor : competitors) {
-                Polyline tail = forMap.fixesAndTails.getTail(competitor);
+                Polyline tail = racemap.fixesAndTails.getTail(competitor);
                 LatLngBounds bounds = null;
                 // TODO: Find a replacement for missing Polyline function getBounds() from v2
-                // see also http://stackoverflow.com/questions/3284808/getting-the-bounds-of-a-polyine-in-google-maps-api-v3; optionally, consider providing a bounds cache with two sorted sets that organize the LatLng objects for O(1) bounds calculation and logarithmic add, ideally O(1) remove
-//                LatLngBounds bounds = tail != null ? tail.getBounds() : null;
+                // see also http://stackoverflow.com/questions/3284808/getting-the-bounds-of-a-polyine-in-google-maps-api-v3; 
+                // optionally, consider providing a bounds cache with two sorted sets that organize the LatLng objects for O(1) bounds calculation and logarithmic add, ideally O(1) remove
+                if(tail != null && tail.getPath().getLength() >= 2) {
+                    bounds = LatLngBounds.newInstance(tail.getPath().get(0), tail.getPath().get(1));
+                    for(int i = 2; i < tail.getPath().getLength(); i++) {
+                        bounds.extend(tail.getPath().get(i));
+                    }
+                }
                 if (bounds != null) {
                     if (newBounds == null) {
                         newBounds = bounds;
