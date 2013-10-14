@@ -750,4 +750,8 @@ public interface StringMessages extends Messages {
     String trackingQuality();
     String seriesLeaderboard();
     String regattaLeaderboards();
+    String distanceToLineFiveSecondsBeforeStart();
+    String speedOverGroundFiveSecondsBeforeStart();
+    String distanceToLineFiveSecondsBeforeStartTooltip();
+    String speedOverGroundFiveSecondsBeforeStartTooltip();
 }

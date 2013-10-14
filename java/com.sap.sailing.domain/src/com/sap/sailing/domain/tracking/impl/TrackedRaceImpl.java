@@ -54,6 +54,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
@@ -1036,12 +1037,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             result = getTrackedLegStartingAt(lastWaypointPassed);
         }
         return result;
-    }
-
-    @Override
-    public Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
@@ -2412,6 +2407,22 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public RaceLog getRaceLog(Serializable identifier) {
         return attachedRaceLogs.get(identifier);
     }
+    
+    @Override
+    public Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Distance getDistanceToStartLine(Competitor competitor, double secondsBeforeRaceStart) {
+        if (getStartOfRace() == null) {
+            return null;
+        }
+
+        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - (long) (secondsBeforeRaceStart * 1000));
+        return getDistanceToStartLine(competitor, beforeStart);
+    }
 
     @Override
     public Distance getDistanceToStartLine(Competitor competitor, TimePoint timePoint) {
@@ -2451,6 +2462,16 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
         }
         return result;
+    }
+    
+    @Override
+    public Speed getSpeed(Competitor competitor, double secondsBeforeRaceStart) {
+        if (getStartOfRace() == null) {
+            return null;
+        }
+
+        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - (long) (secondsBeforeRaceStart * 1000));
+        return getTrack(competitor).getEstimatedSpeed(beforeStart);
     }
 
     @Override

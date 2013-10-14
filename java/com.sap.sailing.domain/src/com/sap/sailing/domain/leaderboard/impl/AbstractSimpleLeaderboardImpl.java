@@ -1230,6 +1230,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         if (!competitorMarkPassings.isEmpty()) {
                             final MarkPassing firstMarkPassing = competitorMarkPassings.iterator().next();
                             if (firstMarkPassing.getWaypoint() == startWaypoint) {
+                                Distance distanceToStartLineFiveSecondsBeforeStartOfRace = trackedRace.getDistanceToStartLine(competitor, 5);
+                                entryDTO.distanceToStartLineFiveSecondsBeforeStartInMeters = distanceToStartLineFiveSecondsBeforeStartOfRace == null ? null
+                                        : distanceToStartLineFiveSecondsBeforeStartOfRace.getMeters();
+                                Speed speedFiveSecondsBeforeStartOfRace = trackedRace.getSpeed(competitor, 5);
+                                entryDTO.speedOverGroundFiveSecondsBeforeStartInKnots = speedFiveSecondsBeforeStartOfRace == null ? null
+                                        : speedFiveSecondsBeforeStartOfRace.getKnots();
                                 Distance distanceToStartLineAtStartOfRace = trackedRace.getDistanceToStartLine(
                                         competitor, startOfRace);
                                 entryDTO.distanceToStartLineAtStartOfRaceInMeters = distanceToStartLineAtStartOfRace == null ? null

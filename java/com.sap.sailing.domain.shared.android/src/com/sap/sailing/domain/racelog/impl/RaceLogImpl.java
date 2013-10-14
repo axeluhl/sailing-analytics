@@ -115,6 +115,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
                 } catch (Throwable t) {
                     logger.log(Level.SEVERE, "RaceLogEventVisitor " + listener + " threw exception " + t.getMessage());
                     logger.throwing(RaceLogImpl.class.getName(), "notifyListenersAboutReceive(RaceLogEvent)", t);
+                    t.printStackTrace();
                 }
             }
         }
