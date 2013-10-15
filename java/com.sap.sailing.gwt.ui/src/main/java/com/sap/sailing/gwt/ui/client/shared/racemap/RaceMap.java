@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.LoadApi;
@@ -695,7 +696,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     } else {
                         fixesAndTails.updateTail(tail, competitorDTO, tailsFromTime, tailsToTime);
                         competitorDTOsOfUnusedTails.remove(competitorDTO);
+                        PolylineOptions newOptions = createTailStyle(competitorDTO, displayHighlighted(competitorDTO));
+                        tail.setOptions(newOptions);
                     }
+                    
                     boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, date);
                     if (usedExistingBoatCanvas) {
                         competitorDTOsOfUnusedBoatCanvases.remove(competitorDTO);
@@ -1704,14 +1708,25 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     @Override
-    public Polyline createTail(final CompetitorDTO competitor, List<LatLng> points) {
+    public PolylineOptions createTailStyle(CompetitorDTO competitor, boolean isHighlighted) {
         PolylineOptions options = PolylineOptions.newInstance();
         options.setClickable(true);
         options.setGeodesic(true);
-        options.setStrokeWeight(1);
-        options.setStrokeOpacity(0.5);
-        options.setStrokeColor(competitorSelection.getColor(competitor));
+        options.setStrokeOpacity(1.0);
+        if(isHighlighted) {
+            options.setStrokeWeight(2);
+            options.setStrokeColor(competitorSelection.getColor(competitor));
+        } else {
+            options.setStrokeWeight(1);
+            options.setStrokeColor(CssColor.make(200, 200,  200).toString());
+        }
         options.setZindex(RaceMapOverlaysZIndexes.BOATTAILS_ZINDEX);
+        return options;
+    }
+    
+    @Override
+    public Polyline createTail(final CompetitorDTO competitor, List<LatLng> points) {
+        PolylineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
         Polyline result = Polyline.newInstance(options);
 
         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));
