@@ -75,6 +75,8 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
  */
 public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower, RaceSelectionChangeListener {
 	
+	private static final String EXPEDITON_IMPORT_PARAMETER_RACES = "races";
+
 	private static final String EXPEDITON_IMPORT_PARAMETER_BOAT_ID = "boatId";
 
 	private static final String URL_SAILINGSERVER_EXPEDITION_IMPORT = "/../../sailingserver/expedition-import";
@@ -246,7 +248,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 		 * see http://www.shauninman.com/archive/2007/09/10/styling_file_inputs_with_css_and_the_dom  
 		 */
 		
-		CaptionPanel windImportRootPanel = new CaptionPanel("Import Wind from Expedition");
+		CaptionPanel windImportRootPanel = new CaptionPanel(stringMessages.windImport_Title());
 		mainPanel.add(windImportRootPanel);
 		VerticalPanel windImportContentPanel = new VerticalPanel();
 		windImportRootPanel.add(windImportContentPanel);
@@ -267,7 +269,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 
 		final TextBox boatIdTextBox = new TextBox();
 		boatIdTextBox.setName(EXPEDITON_IMPORT_PARAMETER_BOAT_ID);
-		final Button submitButton = new Button("Upload", new ClickHandler() {
+		final Button submitButton = new Button(stringMessages.windImport_Upload(), new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				importResultPanel.clear();
@@ -282,16 +284,18 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 
 			@Override
 			public void onChange(ChangeEvent event) {
+				importResultPanel.clear();
 				String fileName = fileUpload.getFilename();
-				submitButton.setEnabled((fileName != null) && (fileUpload.getFilename().trim().length() > 0));
+				boolean isValidFileName = (fileName != null) && (fileUpload.getFilename().trim().length() > 0);
+				submitButton.setEnabled(isValidFileName);
 
-				RegExp EXPEDITION_EXPORT_FILE_PATTERN = RegExp.compile("^.*_([0-9]+)\\.csv"); //matches file names like "2013Jun26_0.csv" where 0 indicates the boat id. 
-				MatchResult match = EXPEDITION_EXPORT_FILE_PATTERN.exec(fileName);
-				String boatId;
-				if (match.getGroupCount() > 0) {
-					boatId = match.getGroup(1);
-				} else {
-					boatId = "";
+				String boatId = "";
+				if (isValidFileName) {
+					RegExp EXPEDITION_EXPORT_FILE_PATTERN = RegExp.compile("^.*_([0-9]+)\\.csv"); //matches typical expedition log file names like "2013Jun26_0.csv" where 0 as group[1] indicates the boat id. 
+					MatchResult match = EXPEDITION_EXPORT_FILE_PATTERN.exec(fileName);
+					if (match.getGroupCount() > 0) {
+						boatId = match.getGroup(1);
+					}
 				}
 				boatIdTextBox.setText(boatId);
 				
@@ -300,7 +304,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 
 		inputPanel.add(fileUpload);
 
-		Label boatIdLabel = new Label("Boat Id:");
+		Label boatIdLabel = new Label(stringMessages.windImport_BoatId());
 		inputPanel.add(boatIdLabel);
 		inputPanel.add(boatIdTextBox);
 		boatIdLabel.setWordWrap(false);
@@ -309,7 +313,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 		inputPanel.setCellVerticalAlignment(boatIdLabel, HasVerticalAlignment.ALIGN_MIDDLE);
 		inputPanel.setCellVerticalAlignment(boatIdTextBox, HasVerticalAlignment.ALIGN_MIDDLE);
 
-		final Hidden hiddenRacesField = new Hidden("races"); 
+		final Hidden hiddenRacesField = new Hidden(EXPEDITON_IMPORT_PARAMETER_RACES); 
 		inputPanel.add(hiddenRacesField);
 		
 		formContentPanel.add(submitButton);
@@ -320,7 +324,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 					List<RegattaAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
 					String warningMessage;
 					if (selectedRaces.size() > 0) {
-						warningMessage = "Do you really want to import wind into the selected " + selectedRaces.size() + " races?"; 
+						warningMessage = stringMessages.windImport_SelectedRacesWarning(selectedRaces.size()); 
 						RaceSelection raceSelection = RaceSelection.create();
 						for (int i = 0; i < selectedRaces.size(); i++) {
 							RegattaAndRaceIdentifier raceIdentifier  = selectedRaces.get(i);
@@ -331,7 +335,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 						}
 						hiddenRacesField.setValue(raceSelection.toJson());
 					} else {
-						warningMessage = "Do you really want to import wind into all races?";
+						warningMessage = stringMessages.windImport_AllRacesWarning();
 						hiddenRacesField.setValue(null);
 					}
 	                if (!Window.confirm(warningMessage)) {
@@ -349,16 +353,15 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 
 				WindImportResult windImportResult = WindImportResult.fromJson(windImportResultJson);
 				JsArray<RaceEntry> raceEntries = windImportResult.getRaceEntries();
-				Label resultHeader = new Label("Imported wind from: " + windImportResult.getFirst() + " to: " + windImportResult.getLast() + " into " + raceEntries.length() + " races.");
+				Label resultHeader = new Label(stringMessages.windImport_ResultHeader(String.valueOf(windImportResult.getFirst()), String.valueOf(windImportResult.getLast()), raceEntries.length()));
 				importResultPanel.add(resultHeader);
 				if (windImportResult.getError() != null) {
-					Label errorText = new Label("Error: " + windImportResult.getError());
+					Label errorText = new Label(stringMessages.windImport_ResultError(windImportResult.getError()));
 					importResultPanel.add(errorText);
 				}
 				for (int i = 0; i < raceEntries.length(); i++) {
 					RaceEntry raceEntry = raceEntries.get(i);
-					Label entryText = new Label("Race: " + raceEntry.getRaceName() + " (" + raceEntry.getRegattaName() 
-							+ ") - " + raceEntry.getCount() + " fixes from: " + raceEntry.getFirst() + " to:" + raceEntry.getLast());
+					Label entryText = new Label(stringMessages.windImport_ResultEntry(raceEntry.getRaceName(), raceEntry.getRegattaName(), raceEntry.getCount(), String.valueOf(raceEntry.getFirst()), String.valueOf(raceEntry.getLast())));
 					importResultPanel.add(entryText);
 				}
 			}

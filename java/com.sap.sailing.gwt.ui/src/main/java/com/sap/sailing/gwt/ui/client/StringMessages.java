@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.i18n.client.Messages;
+import com.google.gwt.safehtml.shared.SafeHtml;
 
 public interface StringMessages extends Messages {
     String helloWorld();
@@ -750,4 +751,12 @@ public interface StringMessages extends Messages {
     String speedOverGroundFiveSecondsBeforeStart();
     String distanceToLineFiveSecondsBeforeStartTooltip();
     String speedOverGroundFiveSecondsBeforeStartTooltip();
+	SafeHtml windImport_Upload();
+	SafeHtml windImport_Title();
+	String windImport_BoatId();
+	String windImport_SelectedRacesWarning(int selectedRacesCount);
+	String windImport_AllRacesWarning();
+	String windImport_ResultHeader(String firstWindDate, String lastWindDate, int affectedRacesCount);
+	String windImport_ResultError(String errorMessage);
+	String windImport_ResultEntry(String raceName, String regattaName, int windFixesCount, String firstWindDate, String lastWindDate);
 }
