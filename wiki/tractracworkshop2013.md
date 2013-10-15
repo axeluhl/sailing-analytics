@@ -20,11 +20,14 @@ The trackers need to perform some intelligent battery management. Highest priori
 
 Operators during an event have major trouble understanding and fixing tracker issues. The battery status display is not trustworthy and in some modes known to be flawed. The tracker modes (aggressive, slow, slumber) isn't visible to the operator.
 
+### Standardization of procedures
+
+Currently there is no documentation in place that describes the different aspects of running an event with TracTrac software. This for example holds for pre-race procedures: Before a race or event starts there is no checklist that contains all points needed to ensure that all tracking, the software and architecture is setup correctly. SAP and TracTrac should work together to get such checklists. Areas could be: (SAP|TracTrac) Pre-Event, (SAP|TracTrac) Pre-Race, Race-Officer Pre-Race, Race Committee Pre-Race and others.
+
 ## Feature requests
 
 High-quality trackers with short latency, high reliability, reliable energy management, transparent battery life cycle condition, high GPS accuracy with high sampling frequency, acceleration and heel sensors.
 
 ## Ideas
-
 
 
