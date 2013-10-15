@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.BoatClass;
+
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
