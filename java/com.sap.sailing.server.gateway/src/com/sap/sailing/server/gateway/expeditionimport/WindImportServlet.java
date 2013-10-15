@@ -16,15 +16,18 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.server.gateway.expeditionimport.WindImportServlet.WindImportResult.RaceEntry;
@@ -33,11 +36,12 @@ public class WindImportServlet extends SailingServerHttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	static class Upload {
+	static class UploadRequest {
 		public String boatId;
 		public final List<FileItem> files = new ArrayList<FileItem>();
+		public List<RegattaAndRaceIdentifier> races = new ArrayList<RegattaAndRaceIdentifier>();;
 	}
-
+	
 	static class WindImportResult {
 		
 		private Date first;
@@ -111,8 +115,12 @@ public class WindImportServlet extends SailingServerHttpServlet {
 	        result.put("regattaName", regattaName);
 	        result.put("raceName", raceName);
 	        result.put("count", getCount());
-	        result.put("first", getFirst().getTime());
-	        result.put("last", getLast().getTime());
+	        if (getFirst() != null) {
+	        	result.put("first", getFirst().getTime());
+	        }
+	        if (getLast() != null) {
+	        	result.put("last", getLast().getTime());
+	        }
 			return result;
 		}
 		}
@@ -120,13 +128,19 @@ public class WindImportServlet extends SailingServerHttpServlet {
 		public JSONObject json() {
 	        JSONObject result = new JSONObject();
 
-	        result.put("first", getFirst().getTime());
-	        result.put("last", getLast().getTime());
+	        if (getFirst() != null) {
+	        	result.put("first", getFirst().getTime());
+	        }
+	        if (getLast() != null) {
+	        	result.put("last", getLast().getTime());
+	        }
 	        result.put("error", error);
 	        
 	        JSONArray raceEntriesJson = new JSONArray();
 	        for (RaceEntry raceEntry : raceEntries) {
-				raceEntriesJson.add(raceEntry.json());
+	        	if (raceEntry.count > 0) {
+	        		raceEntriesJson.add(raceEntry.json());
+	        	}
 			}
 	        result.put("raceEntries", raceEntriesJson);
 	        
@@ -138,9 +152,9 @@ public class WindImportServlet extends SailingServerHttpServlet {
 	}
 
 	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		if (!ServletFileUpload.isMultipartContent(req)) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		if (!ServletFileUpload.isMultipartContent(request)) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
 
@@ -148,31 +162,41 @@ public class WindImportServlet extends SailingServerHttpServlet {
 		
 		try {
 
-			Upload upload = readInput(req);
+			UploadRequest uploadRequest = readRequest(request);
 			WindSource windSource;
-			if ((upload.boatId != null) && (upload.boatId.trim().length() > 0)) {
-				windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, upload.boatId.trim());
-			} else {
+			if (uploadRequest.boatId == null) {
 				windSource = new WindSourceImpl(WindSourceType.EXPEDITION);
+			} else {
+				windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, uploadRequest.boatId);
+			}
+			
+			List<DynamicTrackedRace> trackedRaces = new ArrayList<DynamicTrackedRace>();  
+			if (uploadRequest.races.size() > 0) {
+				for (RegattaAndRaceIdentifier raceEntry : uploadRequest.races) {
+					DynamicTrackedRace trackedRace = getService().getTrackedRace(raceEntry);
+					if (trackedRace != null) {
+						trackedRaces.add(trackedRace);
+					}
+				}
+			} else {
+				for (Regatta regatta : getService().getAllRegattas()) {
+					for (RaceDefinition raceDefinition : regatta.getAllRaces()) {
+						trackedRaces.add(getService().getTrackedRegatta(regatta).getTrackedRace(raceDefinition));
+					}
+				}
 			}
 
-			Iterable<Regatta> allRegattas = getService().getAllRegattas();
-
-			for (FileItem file : upload.files) {
+			for (FileItem file : uploadRequest.files) {
 				List<Wind> windFixes = WindLogParser.importWind(file.getInputStream());
 				if (windFixes.size() > 0) {
 					windImportResult.update(windFixes.get(0));
 					windImportResult.update(windFixes.get(windFixes.size() - 1));
-					for (Regatta regatta : allRegattas) {
-						DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
-						Iterable<RaceDefinition> allRaceDefinitions = regatta.getAllRaces();
-						for (RaceDefinition raceDefinition : allRaceDefinitions) {
-							DynamicTrackedRace trackedRace = trackedRegatta.getTrackedRace(raceDefinition);
-							RaceEntry raceEntry = windImportResult.addRaceEntry(regatta.getName(), trackedRace.getRace().getName());
-							for (Wind wind : windFixes) {
-								if (trackedRace.recordWind(wind, windSource)) {
-									raceEntry.update(wind);
-								}
+					for (DynamicTrackedRace trackedRace : trackedRaces) {
+						RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+						RaceEntry raceEntry = windImportResult.addRaceEntry(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
+						for (Wind wind : windFixes) {
+							if (trackedRace.recordWind(wind, windSource)) {
+								raceEntry.update(wind);
 							}
 						}
 					}
@@ -181,26 +205,31 @@ public class WindImportServlet extends SailingServerHttpServlet {
 
 			// Use text/html to prevent browsers from wrapping the response body,
 			// see "Handling File Upload Responses in GWT" at http://www.artofsolving.com/node/50
-			resp.setContentType("text/html;charset=UTF-8");
-			resp.getWriter().append(windImportResult.json().toJSONString());
 		} catch (Exception e) {
 			windImportResult.error = e.toString();
 		}
+		response.setContentType("text/html;charset=UTF-8");
+		response.getWriter().append(windImportResult.json().toJSONString());
 	}
 
-	private Upload readInput(HttpServletRequest req) throws FileUploadException {
-		Upload result = new Upload();
+	private UploadRequest readRequest(HttpServletRequest req) throws FileUploadException, ParseException {
+		UploadRequest result = new UploadRequest();
 		// http://commons.apache.org/fileupload/using.html
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
 		@SuppressWarnings("unchecked")
 		List<FileItem> items = upload.parseRequest(req);
 		for (FileItem item : items) {
-			if (item.isFormField()) {
+			if (item.isFormField() && (item.getString() != null) && (item.getString().trim().length() > 0)) {
 				if ("boatId".equals(item.getFieldName())) {
-					result.boatId = item.getString();
+					result.boatId = item.getString().trim();
+				} else if ("races".equals(item.getFieldName())) {
+					JSONArray races = (JSONArray) new JSONParser().parse(item.getString().trim());
+					for (Object raceEntry : races) {
+						result.races.add(new RegattaNameAndRaceName((String) ((JSONObject) raceEntry).get("regatta"), (String) ((JSONObject ) raceEntry).get("race")));
+					}
 				}
-			} else {
+			} else if (item.getSize() > 0) {
 				result.files.add(item);
 			}
 		}

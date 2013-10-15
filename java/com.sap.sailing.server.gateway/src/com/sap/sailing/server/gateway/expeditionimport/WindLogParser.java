@@ -132,6 +132,9 @@ public class WindLogParser {
 	}
 
 	private static void assertHeaderFormat(String headerLine) {
+		if (headerLine == null) {
+			throw new NullPointerException("Empty header line.");
+		}
 		//supposed to be Utc,Bsp,Awa,Aws,Twa,Tws,Twd,Rudder2,Leeway,Set,Drift,Hdg,AirTmp,SeaTmp,Baro,Depth,Heel,Trim,Rudder,Tab,Forestay,Downhaul,MastAng,FrstyLen,MastButt,LoadStbd,LoadPort,Rake,Volts,ROT,GpsQual,GpsPDOP,GpsNum,GpsAge,GpsAltitude,GpsGeoSep,GpsMode,Lat,Lon,Cog,Sog,DiffStn,Error,StbRunner,PrtRunner,Vang,Traveller,MainSheet,KeelAng,KeelHt,CanardH,OilPres,RPM1,RPM2,Dagger Bd,Boom Pos,DistToLn,RchTmToLn,RchDtToLn,GPS Time,Downhaul2,MkLat,MkLon,PortLat,PortLon,StbdLat,StbdLon,GPS HPE,RH,LeadPt,LeadSb,BkStay,User 0,User 1,User 2,User 3,User 4,User 5,User 6,User 7,User 8,User 9,User 10,User 11,User 12,User 13,User 14,User 15,User 16,User 17,User 18,User 19,User 20,User 21,User 22,User 23,User 24,User 25,User 26,User 27,User 28,User 29,User 30,User 31,TmToGun,TmToLn,TmToBurn,BelowLn,GunBlwLn,WvSigHt,WvSigPd,WvMaxHt,WvMaxPd,Slam,Motion
 		String[] columns = LINE_PATTERN.split(headerLine);
 		if ("Utc".equals(columns[CSV_INDEX_TIME_STAMP]) && "Tws".equals(columns[CSV_INDEX_TRUE_WIND_SPEED]) && "Twd".equals(columns[CSV_INDEX_TRUE_WIND_DIRECTION]) && "Lat".equals(columns[CSV_INDEX_LAT]) && "Lon".equals(columns[CSV_INDEX_LONG])) {

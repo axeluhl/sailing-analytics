@@ -26,6 +26,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -34,6 +35,7 @@ import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
@@ -265,6 +267,14 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 
 		final TextBox boatIdTextBox = new TextBox();
 		boatIdTextBox.setName(EXPEDITON_IMPORT_PARAMETER_BOAT_ID);
+		final Button submitButton = new Button("Upload", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				importResultPanel.clear();
+				form.submit();
+			}
+		});
+		submitButton.setEnabled(false);
 
 		final FileUpload fileUpload = new FileUpload();
 		fileUpload.setName("upload");
@@ -273,6 +283,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 			@Override
 			public void onChange(ChangeEvent event) {
 				String fileName = fileUpload.getFilename();
+				submitButton.setEnabled((fileName != null) && (fileUpload.getFilename().trim().length() > 0));
 
 				RegExp EXPEDITION_EXPORT_FILE_PATTERN = RegExp.compile("^.*_([0-9]+)\\.csv"); //matches file names like "2013Jun26_0.csv" where 0 indicates the boat id. 
 				MatchResult match = EXPEDITION_EXPORT_FILE_PATTERN.exec(fileName);
@@ -283,6 +294,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 					boatId = "";
 				}
 				boatIdTextBox.setText(boatId);
+				
 			}
 		});
 
@@ -297,42 +309,37 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 		inputPanel.setCellVerticalAlignment(boatIdLabel, HasVerticalAlignment.ALIGN_MIDDLE);
 		inputPanel.setCellVerticalAlignment(boatIdTextBox, HasVerticalAlignment.ALIGN_MIDDLE);
 
+		final Hidden hiddenRacesField = new Hidden("races"); 
+		inputPanel.add(hiddenRacesField);
 		
-		final TextBox raceIdTextBox = new TextBox();
-		raceIdTextBox.setName("races");
-		inputPanel.add(raceIdTextBox);
-		raceSelectionProvider.addRaceSelectionChangeListener(new RaceSelectionChangeListener() {
-			
-			@Override
-			public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-				StringBuilder races = new StringBuilder();
-				for (RegattaAndRaceIdentifier raceIdentifier : selectedRaces) {
-					races.append(raceIdentifier.toString());
-					races.append('|');
-				}
-				raceIdTextBox.setText(races.toString());
-			}
-		});
-		
-
-
-		
-		
-		Button submitButton = new Button("Upload", new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				form.submit();
-			}
-		});
 		formContentPanel.add(submitButton);
 
 		form.addSubmitHandler(new FormPanel.SubmitHandler() {
 			public void onSubmit(SubmitEvent event) {
-				// This event is fired just before the form is submitted. We can take
-				// this opportunity to perform validation.
-				//	          if (condition isn't met) {
-				//	            event.cancel();
-				//	          }
+				if ((fileUpload.getFilename() != null) && (fileUpload.getFilename().trim().length() > 0)) {
+					List<RegattaAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
+					String warningMessage;
+					if (selectedRaces.size() > 0) {
+						warningMessage = "Do you really want to import wind into the selected " + selectedRaces.size() + " races?"; 
+						RaceSelection raceSelection = RaceSelection.create();
+						for (int i = 0; i < selectedRaces.size(); i++) {
+							RegattaAndRaceIdentifier raceIdentifier  = selectedRaces.get(i);
+							RaceSelection.RaceEntry raceEntry = RaceSelection.RaceEntry.create();
+							raceEntry.setRaceName(raceIdentifier.getRaceName());
+							raceEntry.setRegatteName(raceIdentifier.getRegattaName());
+							raceSelection.addRace(raceEntry);
+						}
+						hiddenRacesField.setValue(raceSelection.toJson());
+					} else {
+						warningMessage = "Do you really want to import wind into all races?";
+						hiddenRacesField.setValue(null);
+					}
+	                if (!Window.confirm(warningMessage)) {
+	                	event.cancel();
+	                }
+				} else {
+					event.cancel();
+				}
 			}
 		});
 		form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
@@ -342,7 +349,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 
 				WindImportResult windImportResult = WindImportResult.fromJson(windImportResultJson);
 				JsArray<RaceEntry> raceEntries = windImportResult.getRaceEntries();
-				Label resultHeader = new Label("Imported wind to " + raceEntries.length() + " races from: " + windImportResult.getFirst() + " to: " + windImportResult.getLast());
+				Label resultHeader = new Label("Imported wind from: " + windImportResult.getFirst() + " to: " + windImportResult.getLast() + " into " + raceEntries.length() + " races.");
 				importResultPanel.add(resultHeader);
 				if (windImportResult.getError() != null) {
 					Label errorText = new Label("Error: " + windImportResult.getError());

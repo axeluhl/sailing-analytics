@@ -9,7 +9,7 @@ public class WindImportResult extends JavaScriptObject {
 	protected WindImportResult() {
 	};
 	
-	static public final native WindImportResult fromJson(String json) /*-{return eval('('+json+')');}-*/;
+	static public final native WindImportResult fromJson(String json) /*-{return JSON.parse(json);}-*/;
 	
 	public final native String getError() /*-{return this.error;}-*/;
 	
