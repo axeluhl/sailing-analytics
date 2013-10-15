@@ -90,6 +90,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -950,7 +951,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
+    public DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         DynamicTrackedRegatta trackedRegatta = getOrCreateTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
@@ -1433,7 +1434,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public TrackedRace getTrackedRace(Regatta regatta, RaceDefinition race) {
+    public DynamicTrackedRace getTrackedRace(Regatta regatta, RaceDefinition race) {
         return getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
     }
 
@@ -1495,8 +1496,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public TrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
-        TrackedRace result = null;
+    public DynamicTrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
+    	DynamicTrackedRace result = null;
         Regatta regatta = regattasByName.get(raceIdentifier.getRegattaName());
         if (regatta != null) {
             DynamicTrackedRegatta trackedRegatta = regattaTrackingCache.get(regatta);
@@ -1511,9 +1512,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public TrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
+    public DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
         Regatta regatta = getRegattaByName(raceIdentifier.getRegattaName());
-        TrackedRace trackedRace = null;
+        DynamicTrackedRace trackedRace = null;
         if (regatta != null) {
             RaceDefinition race = regatta.getRaceByName(raceIdentifier.getRaceName());
             trackedRace = getOrCreateTrackedRegatta(regatta).getExistingTrackedRace(race);
