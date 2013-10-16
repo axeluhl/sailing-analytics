@@ -1302,7 +1302,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         result.addPolylineClickHandler(new PolylineClickHandler() {
             @Override
             public void onClick(PolylineClickEvent event) {
-                showCompetitorInfoWindow(competitorDTO, lastMousePosition);
+                showCompetitorInfoWindow(competitorDTO, event.getLatLng());
             }
         });
         result.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
