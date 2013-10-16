@@ -123,7 +123,20 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
     /**
      * Same as {@link #getEstimatedPosition(TimePoint, boolean)}, but produces an iterator for all {@link Timed} objects
      * in <code>timeds</code> which need to be provided in ascending order of their {@link Timed#getTimePoint() time
-     * points}. This will save lookup effort of the adjacent fixes, each requiring a logarithmic binary search.
+     * points}. This will save lookup effort of the adjacent fixes, each requiring a logarithmic binary search.<p>
+     * 
+     * Callers need to hold the read lock when calling this method until done with the iterator over the iterator returned, as in
+     * <pre>
+     *          track.lockForRead();
+     *          try {
+     *              Iterator<Position> pIter = track.getEstimatedPositions(timeds, true);
+     *              while (pIter.hasNext()) {
+     *                  // ...do something with pIter.next()...
+     *              }
+     *          } finally {
+     *              track.unlockAfterRead();
+     *          }
+     * </pre>
      * 
      * @param timeds
      *            required to be in ascending order

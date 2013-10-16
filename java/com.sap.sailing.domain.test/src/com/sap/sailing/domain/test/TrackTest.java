@@ -138,10 +138,23 @@ public class TrackTest {
             positions1.add(track.getEstimatedPosition(timed.getTimePoint(), extrapolate));
         }
         List<Position> positions2 = new ArrayList<>();
-        for (Iterator<Position> pIter=track.getEstimatedPositions(timeds, extrapolate); pIter.hasNext(); ) {
-            positions2.add(pIter.next());
+        track.lockForRead();
+        try {
+            for (Iterator<Position> pIter = track.getEstimatedPositions(timeds, extrapolate); pIter.hasNext();) {
+                positions2.add(pIter.next());
+            }
+        } finally {
+            track.unlockAfterRead();
         }
-        assertEquals(positions1, positions2);
+        Iterator<Position> p1Iter = positions1.iterator();
+        Iterator<Position> p2Iter = positions2.iterator();
+        while (p1Iter.hasNext()) {
+            assertTrue(p2Iter.hasNext());
+            Position p1 = p1Iter.next();
+            Position p2 = p2Iter.next();
+            assertEquals("Diff between "+p1+" and "+p2, p1.getLatDeg(), p2.getLatDeg(), 0.000000001);
+            assertEquals("Diff between "+p1+" and "+p2, p1.getLngDeg(), p2.getLngDeg(), 0.000000001);
+        }
     }
     
     /**

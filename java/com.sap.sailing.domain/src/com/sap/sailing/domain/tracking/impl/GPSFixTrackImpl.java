@@ -269,10 +269,15 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     private class EstimatedPositionIterator implements Iterator<Position> {
         private final Iterator<Timed> timedsIter;
         private final boolean extrapolate;
+        private final NavigableSet<FixType> fixes;
+        private Iterator<FixType> subSetIterator;
+        private FixType earlierFix;
+        private FixType laterFix; // if this is null, earlierFix is also null
         
         public EstimatedPositionIterator(Iterable<Timed> timeds, boolean extrapolate) {
             this.timedsIter = timeds.iterator();
             this.extrapolate = extrapolate;
+            this.fixes = getFixes();
         }
         
         @Override
@@ -282,9 +287,19 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
         @Override
         public Position next() {
-            Timed nextTimed = timedsIter.next();
-            // TODO trivial implementation for first test:
-            return getEstimatedPosition(nextTimed.getTimePoint(), extrapolate);
+            TimePoint nextTimePoint = timedsIter.next().getTimePoint();
+            if (subSetIterator == null) {
+                earlierFix = getLastFixAtOrBefore(nextTimePoint);
+                subSetIterator = fixes.subSet(createDummyGPSFix(nextTimePoint), /* fromInclusive */true, fixes.last(), /* toInclusive */
+                        true).iterator();
+                laterFix = subSetIterator.hasNext() ? subSetIterator.next() : null;
+            } else {
+                while (laterFix != null && laterFix.getTimePoint().before(nextTimePoint)) {
+                    earlierFix = laterFix;
+                    laterFix = subSetIterator.hasNext() ? subSetIterator.next() : null;
+                }
+            }
+            return getEstimatedPosition(nextTimePoint, extrapolate, earlierFix, laterFix);
         }
 
         @Override
