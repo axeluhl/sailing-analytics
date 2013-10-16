@@ -750,4 +750,12 @@ public interface StringMessages extends Messages {
     String speedOverGroundFiveSecondsBeforeStart();
     String distanceToLineFiveSecondsBeforeStartTooltip();
     String speedOverGroundFiveSecondsBeforeStartTooltip();
+    String showWindSpeedSeriesTooltip();
+    String showWindDirectionSeriesTooltip();
+    String combinedWindSourceTypeTooltip();
+    String courseBasedWindSourceTypeTooltip();
+    String trackBasedEstimationWindSourceTypeTooltip();
+    String expeditionWindSourceTypeTooltip();
+    String webWindSourceTypeTooltip();
+    String raceCommitteeWindSourceTypeTooltip();
 }
