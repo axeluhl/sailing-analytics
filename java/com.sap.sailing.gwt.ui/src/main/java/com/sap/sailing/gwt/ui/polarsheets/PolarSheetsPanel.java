@@ -320,7 +320,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
             
             @Override
             public void run() {
-                setWidgetSize(leftScrollPanel, polarSheetsTrackedRacesList.getOffsetWidth() + 30);
+                setWidgetSize(leftScrollPanel, polarSheetsTrackedRacesList.getOffsetWidth() - 520);
                 Timer timer = new Timer() {
                     
                     @Override
