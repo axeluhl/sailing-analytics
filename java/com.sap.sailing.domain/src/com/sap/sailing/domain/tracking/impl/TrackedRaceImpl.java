@@ -234,11 +234,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private long delayToLiveInMillis;
 
+    private enum WindLoadingState { NOT_STARTED, RUNNING, FINISHED };
     /**
      * The constructor loads wind fixes from the {@link #windStore} asynchronously. When completed, this flag is set to
      * <code>true</code>, and all threads currently waiting on this object are notified.
      */
-    private boolean windLoadingCompleted;
+    private WindLoadingState windLoadingCompleted;
 
     private transient CrossTrackErrorCache crossTrackErrorCache;
 
@@ -335,19 +336,24 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
         windTracks = new ConcurrentHashMap<WindSource, WindTrack>();
+        windLoadingCompleted = WindLoadingState.NOT_STARTED;
         // When this tracked race is to be serialized, wait for the loading of the wind tracks to complete.
-        LockUtil.lockForRead(getSerializationLock());
         new Thread("Wind loader for tracked race " + getRace().getName()) {
             @Override
             public void run() {
+                LockUtil.lockForRead(getSerializationLock());
                 LockUtil.lockForWrite(getWindLoadingLock());
+                synchronized (TrackedRaceImpl.this) {
+                    windLoadingCompleted = WindLoadingState.RUNNING; // indicates that the serialization lock is now safely held
+                    TrackedRaceImpl.this.notifyAll();
+                }
                 try {
                     final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
                             trackedRegatta, TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
                     windTracks.putAll(loadedWindTracks);
                 } finally {
                     synchronized (TrackedRaceImpl.this) {
-                        windLoadingCompleted = true;
+                        windLoadingCompleted = WindLoadingState.FINISHED;
                         TrackedRaceImpl.this.notifyAll();
                     }
                     LockUtil.unlockAfterWrite(getWindLoadingLock());
@@ -367,6 +373,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.trackedRegatta = trackedRegatta;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
         competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
+        // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
+        synchronized (this) {
+            while (windLoadingCompleted == WindLoadingState.RUNNING) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    logger.log(Level.SEVERE, "Waiting for wind loading to start was interrupted", e);
+                }
+            }
+            
+        }
     }
     
     /**
@@ -401,7 +418,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public synchronized void waitUntilWindLoadingComplete() throws InterruptedException {
-        while (!windLoadingCompleted) {
+        while (windLoadingCompleted != WindLoadingState.FINISHED) {
             wait();
         }
     }
