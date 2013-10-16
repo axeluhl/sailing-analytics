@@ -1,6 +1,9 @@
 package com.sap.sailing.domain.tracking;
 
+import java.util.Iterator;
+
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
+import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
@@ -116,5 +119,18 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
      *         component is the end of time (<code>new MillisecondsTimePoint(Long.MAX_VALUE)</code>).
      */
     Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix);
+
+    /**
+     * Same as {@link #getEstimatedPosition(TimePoint, boolean)}, but produces an iterator for all {@link Timed} objects
+     * in <code>timeds</code> which need to be provided in ascending order of their {@link Timed#getTimePoint() time
+     * points}. This will save lookup effort of the adjacent fixes, each requiring a logarithmic binary search.
+     * 
+     * @param timeds
+     *            required to be in ascending order
+     * @param extrapolate
+     *            see {@link #getEstimatedPosition(TimePoint, boolean)}
+     * @return an iterator of the positions, in the same order as the <code>timeds</code> are provided
+     */
+    Iterator<Position> getEstimatedPositions(Iterable<Timed> timeds, boolean extrapolate);
 
 }

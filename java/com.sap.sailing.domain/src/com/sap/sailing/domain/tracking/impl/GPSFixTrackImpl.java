@@ -18,6 +18,7 @@ import java.util.Set;
 import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
+import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
@@ -263,6 +264,38 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         } finally {
             unlockAfterRead();
         }
+    }
+    
+    private class EstimatedPositionIterator implements Iterator<Position> {
+        private final Iterator<Timed> timedsIter;
+        private final boolean extrapolate;
+        
+        public EstimatedPositionIterator(Iterable<Timed> timeds, boolean extrapolate) {
+            this.timedsIter = timeds.iterator();
+            this.extrapolate = extrapolate;
+        }
+        
+        @Override
+        public boolean hasNext() {
+            return timedsIter.hasNext();
+        }
+
+        @Override
+        public Position next() {
+            Timed nextTimed = timedsIter.next();
+            // TODO trivial implementation for first test:
+            return getEstimatedPosition(nextTimed.getTimePoint(), extrapolate);
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+    
+    @Override
+    public Iterator<Position> getEstimatedPositions(Iterable<Timed> timeds, boolean extrapolate) {
+        return new EstimatedPositionIterator(timeds, extrapolate);
     }
     
     @Override
