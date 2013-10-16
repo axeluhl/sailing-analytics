@@ -1418,7 +1418,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         return getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
     }
 
-    private TrackedRace getExistingTrackedRace(Regatta regatta, RaceDefinition race) {
+    private DynamicTrackedRace getExistingTrackedRace(Regatta regatta, RaceDefinition race) {
         return getOrCreateTrackedRegatta(regatta).getExistingTrackedRace(race);
     }
 
