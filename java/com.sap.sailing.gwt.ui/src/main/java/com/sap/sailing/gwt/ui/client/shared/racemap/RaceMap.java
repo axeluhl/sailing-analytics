@@ -297,8 +297,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               mapOptions.setScrollWheel(true);
               mapOptions.setMapTypeControl(true);
               mapOptions.setPanControl(true);
+              mapOptions.setZoomControl(true);
               mapOptions.setScaleControl(true);
-              mapOptions.setRotateControl(true);
               
               MapTypeStyle[] mapTypeStyles = new MapTypeStyle[4];
               
@@ -326,17 +326,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               mapOptions.setPanControlOptions(panControlOptions);
               
               map = new MapWidget(mapOptions);
-//              map.setContinuousZoom(true);
               RaceMap.this.add(map, 0, 0);
               RaceMap.this.add(combinedWindPanel, 10, 10);
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
               map.setSize("100%", "100%");
-//              map.getPane(MapPanes.FLOAT_PANE).getElement().getStyle().setZIndex(RaceMapOverlaysZIndexes.INFO_WINDOW_ZINDEX);
               map.addZoomChangeHandler(new ZoomChangeMapHandler() {
                   @Override
                   public void onEvent(ZoomChangeMapEvent event) {
                       map.triggerResize();
-                      // map.checkResizeAndCenter();
                       final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                       settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
                       Set<CompetitorDTO> competitorDTOsOfUnusedMarkers = new HashSet<CompetitorDTO>(boatOverlays.keySet());
