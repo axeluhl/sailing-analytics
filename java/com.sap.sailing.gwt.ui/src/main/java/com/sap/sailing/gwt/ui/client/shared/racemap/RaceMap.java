@@ -1720,7 +1720,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         result.addClickHandler(new ClickMapHandler() {
             @Override
             public void onEvent(ClickMapEvent event) {
-                showCompetitorInfoWindow(competitor, lastMousePosition);
+                showCompetitorInfoWindow(competitor, event.getMouseEvent().getLatLng());
             }
         });
         result.addMouseOverHandler(new MouseOverMapHandler() {
