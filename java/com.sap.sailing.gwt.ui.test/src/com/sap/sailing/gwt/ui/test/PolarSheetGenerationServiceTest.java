@@ -44,9 +44,9 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
@@ -128,7 +128,7 @@ public class PolarSheetGenerationServiceTest {
     private class MockRacingEventServiceForPolarSheetGeneration extends RacingEventServiceImpl {
         
         @Override
-        public TrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
+        public DynamicTrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
             MockTrackedRaceForPolarSheetGeneration trackedRace = new MockTrackedRaceForPolarSheetGeneration();
             return trackedRace;
         }
