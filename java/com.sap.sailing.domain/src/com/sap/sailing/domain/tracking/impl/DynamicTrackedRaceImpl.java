@@ -236,6 +236,46 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
     }
 
+    /**
+     * If the listener wants to be notified about the wind fixes already loaded, this method will obtain the read lock
+     * of the {@link #getWindLoadingLock() wind loading lock}, locking against the wind loading thread which uses the
+     * corresponding write lock. This ensures that either all wind fixes have been loaded already or that wind loading
+     * hasn't started yet.
+     */
+    @Override
+    public void addListener(RaceChangeListener listener, final boolean notifyAboutWindFixesAlreadyLoaded) {
+        if (notifyAboutWindFixesAlreadyLoaded) {
+            LockUtil.lockForRead(getWindLoadingLock());
+        }
+        try {
+            addListener(listener);
+            if (notifyAboutWindFixesAlreadyLoaded) {
+                // Now notify all wind fixes we can get from the race by now. TrackedRace.getWindSource() delivers all wind
+                // sources known so far. If there is a wind track being loaded, it will be separately notified later by
+                // DynamicTrackedRaceImpl.createWindTrack(...).
+                // Holding the serialization lock 
+                for (WindSource windSource : getWindSources()) {
+                    if (windSource.getType().canBeStored()) {
+                        WindTrack windTrack = getOrCreateWindTrack(windSource);
+                        // replicate all wind fixed that may have been loaded by the wind store
+                        windTrack.lockForRead();
+                        try {
+                            for (Wind wind : windTrack.getRawFixes()) {
+                                listener.windDataReceived(wind, windSource);
+                            }
+                        } finally {
+                            windTrack.unlockAfterRead();
+                        }
+                    }
+                }
+            }
+        } finally {
+            if (notifyAboutWindFixesAlreadyLoaded) {
+                LockUtil.unlockAfterRead(getWindLoadingLock());
+            }
+        }
+    }
+
     @Override
     public void removeListener(RaceChangeListener listener) {
         synchronized (getListeners()) {

@@ -218,6 +218,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
     public void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
         // TODO Auto-generated method stub
 
