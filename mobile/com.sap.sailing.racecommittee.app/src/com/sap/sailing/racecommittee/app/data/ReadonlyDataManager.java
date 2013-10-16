@@ -9,10 +9,10 @@ import android.app.LoaderManager.LoaderCallbacks;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.DeviceConfiguration;
+import com.sap.sailing.domain.base.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.TabletConfiguration;
-import com.sap.sailing.domain.base.TabletConfigurationIdentifier;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -129,6 +129,6 @@ public interface ReadonlyDataManager {
      *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
      *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
      */
-    public LoaderCallbacks<DataLoaderResult<TabletConfiguration>> createConfigurationLoader(TabletConfigurationIdentifier identifier,
-            LoadClient<TabletConfiguration> callback);
+    public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
+            LoadClient<DeviceConfiguration> callback);
 }

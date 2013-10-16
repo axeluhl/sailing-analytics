@@ -15,11 +15,11 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.DeviceConfiguration;
+import com.sap.sailing.domain.base.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.base.TabletConfiguration;
-import com.sap.sailing.domain.base.TabletConfigurationIdentifier;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
@@ -28,7 +28,7 @@ import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.ManagedRacesDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.MarksDataHandler;
-import com.sap.sailing.racecommittee.app.data.handlers.TabletConfigurationDataHandler;
+import com.sap.sailing.racecommittee.app.data.handlers.DeviceConfigurationDataHandler;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderCallbacks;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderCallbacks.LoaderCreator;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
@@ -40,7 +40,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
-import com.sap.sailing.racecommittee.app.data.parsers.TabletConfigurationParser;
+import com.sap.sailing.racecommittee.app.data.parsers.DeviceConfigurationParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
@@ -55,9 +55,9 @@ import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserial
 import com.sap.sailing.server.gateway.deserialization.impl.ColorDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.FleetDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.TabletConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceCellDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
@@ -235,17 +235,17 @@ public class OnlineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<TabletConfiguration>> createConfigurationLoader(final TabletConfigurationIdentifier identifier,
-            LoadClient<TabletConfiguration> callback) {
-        return new DataLoaderCallbacks<TabletConfiguration>(callback, new LoaderCreator<TabletConfiguration>() {
+    public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(final DeviceConfigurationIdentifier identifier,
+            LoadClient<DeviceConfiguration> callback) {
+        return new DataLoaderCallbacks<DeviceConfiguration>(callback, new LoaderCreator<DeviceConfiguration>() {
             @Override
-            public Loader<DataLoaderResult<TabletConfiguration>> create(int id, Bundle args) throws Exception {
+            public Loader<DataLoaderResult<DeviceConfiguration>> create(int id, Bundle args) throws Exception {
                 ExLog.i(TAG, String.format("Creating Configuration-OnlineDataLoader %d", id));
                 
-                DataHandler<TabletConfiguration> handler = new TabletConfigurationDataHandler(OnlineDataManager.this);
-                DataParser<TabletConfiguration> parser = new TabletConfigurationParser(new TabletConfigurationJsonDeserializer());
+                DataHandler<DeviceConfiguration> handler = new DeviceConfigurationDataHandler(OnlineDataManager.this);
+                DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(new DeviceConfigurationJsonDeserializer());
                 
-                return new OnlineDataLoader<TabletConfiguration>(
+                return new OnlineDataLoader<DeviceConfiguration>(
                         context, 
                         new URL(AppPreferences.getServerBaseURL(context) + "/sailingserver/rc/configuration?client="+ identifier.getClientIdentifier()), 
                         parser, handler);

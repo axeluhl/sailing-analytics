@@ -12,6 +12,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -33,6 +34,8 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.DeviceConfiguration;
+import com.sap.sailing.domain.base.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -44,6 +47,7 @@ import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
@@ -2090,6 +2094,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 persistentRegattasForRaceIDs.put(raceIdAsString, regatta);
             }
         }
+    }
+
+    @Override
+    public DeviceConfiguration getDeviceConfiguration(DeviceConfigurationIdentifier identifier) {
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl();
+        configuration.setAllowedCourseAreaNames(Arrays.asList("Alpha", "Beta", "Stadium"));
+        configuration.setMaximumRoundsForCourse(3);
+        configuration.setResultsMailRecipient("lukas.niemeier@sap.com");
+        return configuration;
     }
 
 }

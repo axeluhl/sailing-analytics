@@ -2,15 +2,15 @@ package com.sap.sailing.racecommittee.app.utils;
 
 import android.content.Context;
 
-import com.sap.sailing.domain.base.TabletConfiguration;
+import com.sap.sailing.domain.base.DeviceConfiguration;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
-public class TabletConfigurationHelper {
+public class DeviceConfigurationHelper {
     
-    private static final String TAG = TabletConfigurationHelper.class.getName();
+    private static final String TAG = DeviceConfigurationHelper.class.getName();
 
-    public static void apply(Context context, TabletConfiguration configuration) {
+    public static void apply(Context context, DeviceConfiguration configuration) {
         if (configuration.getAllowedCourseAreaNames() != null) {
             AppPreferences.setManagedCourseAreaNames(context, configuration.getAllowedCourseAreaNames());
             logApply("course areas", configuration.getAllowedCourseAreaNames());

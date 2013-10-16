@@ -26,6 +26,8 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.DeviceConfiguration;
+import com.sap.sailing.domain.base.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
@@ -551,5 +553,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param override If set to true, the mthod will override any existing connection
      */
     void setPersistentRegattaForRaceIDs(Regatta regatta, Iterable<String> raceIdStrings, boolean override);
+
+    /**
+     * Returns a tablet's configuration.
+     * @param identifier of the client (may include event)
+     * @return the {@link DeviceConfiguration}
+     */
+    DeviceConfiguration getDeviceConfiguration(DeviceConfigurationIdentifier identifier);
 
 }

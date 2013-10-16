@@ -1,27 +1,21 @@
 package com.sap.sailing.domain.base.impl;
+import java.util.List;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.sap.sailing.domain.base.DeviceConfiguration;
 
-import com.sap.sailing.domain.base.TabletConfiguration;
-
-public class TabletConfigurationImpl implements TabletConfiguration {
+public class DeviceConfigurationImpl implements DeviceConfiguration {
     
-    private Set<String> allowedCourseAreaNames;
+    private List<String> allowedCourseAreaNames;
     private Integer minRounds;
     private Integer maxRounds;
     private String resultsMailRecipient;
-    
-    public TabletConfigurationImpl() {
-        this.allowedCourseAreaNames = new HashSet<String>();
-    }
 
     @Override
-    public Set<String> getAllowedCourseAreaNames() {
+    public List<String> getAllowedCourseAreaNames() {
         return allowedCourseAreaNames;
     }
 
-    public void setAllowedCourseAreaNames(Set<String> newAllowedCourseAreaNames) {
+    public void setAllowedCourseAreaNames(List<String> newAllowedCourseAreaNames) {
         this.allowedCourseAreaNames = newAllowedCourseAreaNames;
     }
 

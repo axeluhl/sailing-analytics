@@ -11,10 +11,10 @@ import android.view.Window;
 import android.widget.Toast;
 
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.DeviceConfiguration;
+import com.sap.sailing.domain.base.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.TabletConfiguration;
-import com.sap.sailing.domain.base.TabletConfigurationIdentifier;
-import com.sap.sailing.domain.base.impl.TabletConfigurationIdentifierImpl;
+import com.sap.sailing.domain.base.impl.DeviceConfigurationIdentifierImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
@@ -30,7 +30,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
-import com.sap.sailing.racecommittee.app.utils.TabletConfigurationHelper;
+import com.sap.sailing.racecommittee.app.utils.DeviceConfigurationHelper;
 
 public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
         DialogListenerHost {
@@ -108,17 +108,17 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             progressDialog.show();
 
             ReadonlyDataManager dataManager = OnlineDataManager.create(LoginActivity.this);
-            TabletConfigurationIdentifier identifier = new TabletConfigurationIdentifierImpl(
+            DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(
                     AppPreferences.getAndroidIdentifier(getApplicationContext()));
             getLoaderManager().restartLoader(0, null,
-                    dataManager.createConfigurationLoader(identifier, new LoadClient<TabletConfiguration>() {
+                    dataManager.createConfigurationLoader(identifier, new LoadClient<DeviceConfiguration>() {
 
                         @Override
-                        public void onLoadSucceded(TabletConfiguration configuration, boolean isCached) {
+                        public void onLoadSucceded(DeviceConfiguration configuration, boolean isCached) {
                             setProgressBarIndeterminateVisibility(false);
                             progressDialog.dismiss();
 
-                            TabletConfigurationHelper.apply(getApplicationContext(), configuration);
+                            DeviceConfigurationHelper.apply(getApplicationContext(), configuration);
                             Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_succeded),
                                     Toast.LENGTH_LONG).show();
                             showCourseAreaListFragment(eventId);

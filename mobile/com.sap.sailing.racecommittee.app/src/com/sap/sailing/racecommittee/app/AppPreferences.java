@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -111,7 +110,7 @@ public class AppPreferences {
         return Arrays.asList(managedCourseAreas);
     }
     
-    public static void setManagedCourseAreaNames(Context context, Set<String> courseAreaNames) {
+    public static void setManagedCourseAreaNames(Context context, List<String> courseAreaNames) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         StringBuilder builder = new StringBuilder();
         for (String name : courseAreaNames) {

@@ -7,7 +7,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.simple.JSONObject;
+
+import com.sap.sailing.domain.base.DeviceConfiguration;
+import com.sap.sailing.domain.base.DeviceConfigurationIdentifier;
+import com.sap.sailing.domain.base.impl.DeviceConfigurationIdentifierImpl;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
+import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 
 public class ConfigurationJsonGetServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 7704668926551060433L;
@@ -25,9 +32,15 @@ public class ConfigurationJsonGetServlet extends AbstractJsonHttpServlet {
             return;
         }
         
-        logger.fine(String.format("Configuration requested by client %s.", clientId));
-
-        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(clientId);
+        
+        logger.fine(String.format("Configuration requested by client %s.", identifier));
+        
+        DeviceConfiguration configuration = getService().getDeviceConfiguration(identifier);
+        
+        JsonSerializer<DeviceConfiguration> serializer = new DeviceConfigurationJsonSerializer();
+        JSONObject json = serializer.serialize(configuration);
+        json.writeJSONString(response.getWriter());
     }
 
 }
