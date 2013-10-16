@@ -7,8 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
@@ -32,13 +30,11 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
  */
 public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable {
     
-    private static final Logger logger = Logger.getLogger(PerRaceAndCompetitorPolarSheetGenerationWorker.class.getName());
+    // private static final Logger logger = Logger.getLogger(PerRaceAndCompetitorPolarSheetGenerationWorker.class.getName());
 
     private final TrackedRace race;
 
     private final PolarSheetGenerationWorker polarSheetGenerationWorker;
-    
-    private final OddFixClassifier oddFixClassifier;
 
     private TimePoint startTime;
 
@@ -64,7 +60,6 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable 
         this.endTime = endTime;
         this.competitor = competitor;
         this.settings = settings;
-        this.oddFixClassifier = new AngleSpeedOddClassifier();
         optimizeStartTime();
         optimizeEndTime();
         checkIfRaceAborted();
@@ -120,61 +115,50 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable 
                 lastConsideredPassing = markPassings.lower(lastConsideredPassing);
                 lastConsideredTimePoint = lastConsideredPassing.getTimePoint();
             }
-
-            while (fixesIterator.hasNext()) {
+            boolean reachedEnd = false;
+            while (fixesIterator.hasNext() && reachedEnd == false) {
                 GPSFixMoving fix = fixesIterator.next();
                 if (fix.getTimePoint().after(endTime)
                         || (lastConsideredTimePoint != null && fix.getTimePoint().after(lastConsideredTimePoint))) {
-                    break;
-                }
-
-                if (track.hasDirectionChange(fix.getTimePoint(), race.getRace().getBoatClass()
-                        .getManeuverDegreeAngleThreshold())) {
-                    continue;
-                }
-
-                List<Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>> windWithConfidenceList 
-                                = new ArrayList<Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>>();
-                if (settings.useOnlyWindGaugesForWindSpeed()) {
-                    if (settings.splitByWindgauges()) {
-                        windWithConfidenceList.addAll(addAllWindsOfWindGaugesSplitOneByOne(fix));
-                    } else {
-                        windWithConfidenceList.add(new Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>(
-                                createWindGaugesString(race), race.getWindWithConfidence(fix.getPosition(),
-                                        fix.getTimePoint(), collectWindSourcesToIgnoreForSpeed())));
-                    }
+                    reachedEnd = true;
                 } else {
-                    windWithConfidenceList.add(new Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>(
-                            "Combined", race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint())));
-                }
-
-                for (Pair<String, WindWithConfidence<Pair<Position, TimePoint>>> windWithSourceIdStringPair : windWithConfidenceList) {
-                    WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = windWithSourceIdStringPair
-                            .getB();
-                    if (windWithConfidence == null) {
-                        continue;
-                    }
-
-                    if (windWithConfidence.useSpeed()
-                            && windWithConfidence.getConfidence() >= settings.getMinimumWindConfidence()) {
-                        PolarFix polarFix = new PolarFix(fix, race, track, windWithConfidence.getObject(), settings,
-                                windWithSourceIdStringPair.getA());
-
-                        if (oddFixClassifier.classifiesAsOdd(polarFix)) {
-                            logger.log(Level.INFO, String.format(
-                                    "Odd point was found for: %1$s, in Race %2$s, at %3$tk:%3$tM:%3$tS",
-                                    competitor.getName(), race.getRace().getName(), fix.getTimePoint().asDate()));
-                            // continue;
-                        }
-
-                        polarSheetGenerationWorker.addPolarData(polarFix);
-                    }
-
+                    addFixIfValid(track, fix);
                 }
             }
-
             track.unlockAfterRead();
             done = true;
+        }
+    }
+
+    private void addFixIfValid(GPSFixTrack<Competitor, GPSFixMoving> track, GPSFixMoving fix) {
+        if (!track.hasDirectionChange(fix.getTimePoint(), race.getRace().getBoatClass()
+                .getManeuverDegreeAngleThreshold())) {
+            List<Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>> windWithConfidenceList = new ArrayList<Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>>();
+            if (settings.useOnlyWindGaugesForWindSpeed()) {
+                if (settings.splitByWindgauges()) {
+                    windWithConfidenceList.addAll(addAllWindsOfWindGaugesSplitOneByOne(fix));
+                } else {
+                    windWithConfidenceList
+                            .add(new Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>(
+                                    createWindGaugesString(race), race.getWindWithConfidence(
+                                            fix.getPosition(), fix.getTimePoint(),
+                                            collectWindSourcesToIgnoreForSpeed())));
+                }
+            } else {
+                windWithConfidenceList.add(new Pair<String, WindWithConfidence<Pair<Position, TimePoint>>>(
+                        "Combined", race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint())));
+            }
+
+            for (Pair<String, WindWithConfidence<Pair<Position, TimePoint>>> windWithSourceIdStringPair : windWithConfidenceList) {
+                WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = windWithSourceIdStringPair
+                        .getB();
+                if (windWithConfidence != null && windWithConfidence.useSpeed()
+                        && windWithConfidence.getConfidence() >= settings.getMinimumWindConfidence()) {
+                    PolarFix polarFix = new PolarFix(fix, race, track, windWithConfidence.getObject(),
+                            settings, windWithSourceIdStringPair.getA());
+                    polarSheetGenerationWorker.addPolarData(polarFix);
+                }
+            }
         }
     }
     
