@@ -262,7 +262,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         final List<RegattaAndRaceIdentifier> selectedRacesInArrayList = new ArrayList<RegattaAndRaceIdentifier>();
         selectedRacesInArrayList.addAll(selectedRaces);
         polarSheetsTrackedRacesList.changeGenerationButtonState(false);
-        setCompletionLabel("Generating...");
+        setCompletionLabel(stringMessages.generating() + "...");
         chartPanel.showLoadingInfo();
         sailingService.generatePolarSheetForRaces(selectedRacesInArrayList, settings,
                 new AsyncCallback<PolarSheetGenerationResponse>() {
@@ -270,11 +270,10 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
             @Override
             public void onSuccess(PolarSheetGenerationResponse result) {
                 addNameForPolarSheet(result);
-                dataCountLabel.setText("DataCount: " + result.getData().getDataCount());
+                dataCountLabel.setText(stringMessages.dataCount() + ": " + result.getData().getDataCount());
                 polarSheetsData.put(result.getId(), result.getData());
                 chartPanel.setData(idNameMapping.get(result.getId()), result.getData());
-                // TODO string messages
-                setCompletionLabel("Generation finished!");
+                setCompletionLabel(stringMessages.generationFinished());
                 chartPanel.hideLoadingInfo();
                 polarSheetsTrackedRacesList.changeGenerationButtonState(true);
             }

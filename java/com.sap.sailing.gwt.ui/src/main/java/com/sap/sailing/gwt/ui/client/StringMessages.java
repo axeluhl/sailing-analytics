@@ -785,4 +785,7 @@ public interface StringMessages extends Messages {
     String oneOrMoreParametersAreEmpty();
     String errorWhileAddingSeriesToChart();
     String generatingPolarSheet();
+    String dataCount();
+    String generationFinished();
+    String generating();
 }
