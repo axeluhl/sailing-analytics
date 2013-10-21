@@ -98,7 +98,33 @@ public class TrackTest {
         track.addGPSFix(gpsFix4);
         track.addGPSFix(gpsFix5);
     }
-    
+    /**
+     * Tests  for a incorrect method of estimating Positions
+     */
+    @Test
+    public void positionEstimationTest() {
+        track = new DynamicGPSFixMovingTrackImpl<Boat>(
+                new BoatImpl("MyFirstBoat", new BoatClassImpl("505", true), null), 5000, null);
+        DegreePosition p1 = new DegreePosition(0, 0);
+        DegreePosition p2 = new DegreePosition(90, 0);
+        TimePoint t1 = MillisecondsTimePoint.now();
+        TimePoint t2 = t1.plus(30);
+        gpsFix1 = new GPSFixMovingImpl(p1, t1, new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0)));
+        gpsFix2 = new GPSFixMovingImpl(p2, t2, new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0)));
+        track.addGPSFix(gpsFix1);
+        track.addGPSFix(gpsFix2);
+        track.lockForRead();
+        try {
+            assertEquals(0, track.getEstimatedPosition(t1, true).getLatDeg(), 0.00000001);
+            assertEquals(30, track.getEstimatedPosition(t1.plus(10), true).getLatDeg(), 0.00000001);
+            assertEquals(45, track.getEstimatedPosition(t1.plus(15), true).getLatDeg(), 0.00000001);
+            assertEquals(60, track.getEstimatedPosition(t1.plus(20), true).getLatDeg(), 0.00000001);
+            assertEquals(90, track.getEstimatedPosition(t1.plus(30), true).getLatDeg(), 0.00000001);
+
+        } finally {
+            track.unlockAfterRead();
+        }
+    }
     /**
      * Introducing a new feature on {@link GPSFixTrack} that allows clients to find positions to a sequence of
      * {@link Timed} objects in ascending order, this method compares those results to the ordinary explicit calls
