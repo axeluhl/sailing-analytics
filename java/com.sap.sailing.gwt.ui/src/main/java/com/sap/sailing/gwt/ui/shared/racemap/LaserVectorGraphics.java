@@ -45,18 +45,23 @@ public class LaserVectorGraphics extends BoatClassVectorGraphics {
 
     @Override
     protected void drawDownwindPortTackSails(Context2d ctx) {
+        ctx.beginPath();
+        ctx.moveTo(300,71.2);
+        ctx.lineTo(182,312);
+        ctx.bezierCurveTo(182,312,319,188,326,144);
+        ctx.bezierCurveTo(332,99,300,71.2,300,71.2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
     }
 
     @Override
     protected void drawDownwindStarboardTackSails(Context2d ctx) {
-        ctx.setFillStyle(SAIL_FILLCOLOR);
-        ctx.setStrokeStyle(SAIL_STROKECOLOR);
-        ctx.setLineWidth(1.0);
         ctx.beginPath();
-        ctx.moveTo(304,64.3);
-        ctx.lineTo(81.5,274);
-        ctx.bezierCurveTo(81.5,274,273,188,296,143);
-        ctx.bezierCurveTo(319,95.9,304,64.3,304,64.3);
+        ctx.moveTo(300,69.8);
+        ctx.lineTo(182,-171);
+        ctx.bezierCurveTo(182,-171,319,-47.0,326,-3.15);
+        ctx.bezierCurveTo(332,41.6,300,69.8,300,69.8);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
@@ -64,18 +69,50 @@ public class LaserVectorGraphics extends BoatClassVectorGraphics {
 
     @Override
     protected void drawUpwindPortTackSails(Context2d ctx) {
+        ctx.beginPath();
+        ctx.moveTo(301, 71.4);
+        ctx.lineTo(40.3, 134);
+        ctx.bezierCurveTo(40.3, 134, 221, 149, 259, 126);
+        ctx.bezierCurveTo(297, 102, 301, 71.4, 301, 71.4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
     }
 
     @Override
     protected void drawUpwindStarboardTackSails(Context2d ctx) {
+        ctx.beginPath();
+        ctx.moveTo(300, 68.9);
+        ctx.lineTo(39.4, 5.94);
+        ctx.bezierCurveTo(39.4, 5.94, 220, -9.1, 258, 13.9);
+        ctx.bezierCurveTo(296, 37.9, 300, 68.9, 300, 68.9);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
     }
 
     @Override
     protected void drawReachingPortTackSails(Context2d ctx) {
+        ctx.beginPath();
+        ctx.moveTo(301,72.1);
+        ctx.lineTo(92.1,240);
+        ctx.bezierCurveTo(92.1,240,269,186,294,149);
+        ctx.bezierCurveTo(318,111,301,72.1,301,72.1);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
     }
 
     @Override
     protected void drawReachingStarboardTackSails(Context2d ctx) {
+        ctx.beginPath();
+        ctx.moveTo(301, 70);
+        ctx.lineTo(92.2, -97.1);
+        ctx.bezierCurveTo(92.2, -97.1, 269, -43.6, 294, -6.7);
+        ctx.bezierCurveTo(318, 31.1, 301, 70, 301, 70);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
     }
 
     @Override

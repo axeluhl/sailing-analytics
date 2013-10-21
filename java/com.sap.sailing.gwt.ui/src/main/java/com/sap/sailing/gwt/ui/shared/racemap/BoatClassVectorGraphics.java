@@ -58,6 +58,9 @@ public abstract class BoatClassVectorGraphics {
 
     protected void drawSails(Context2d ctx, LegType legType, Tack tack) {
         if(tack != null && legType != null) {
+            ctx.setFillStyle(SAIL_FILLCOLOR);
+            ctx.setStrokeStyle(SAIL_STROKECOLOR);
+
             switch (tack) {
             case PORT:
                 switch (legType) {
@@ -105,7 +108,7 @@ public abstract class BoatClassVectorGraphics {
         ctx.translate(-boatLengthInMeters * 100 / 2.0,- boatBeamInMeters * 100 / 2.0);
 
         drawBoat(ctx, isSelected, color);
-        // drawSails(ctx, legType, tack);
+        drawSails(ctx, legType, tack);
         
         ctx.restore();
     }
