@@ -40,6 +40,9 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
         }
         
         byte[] json = jsonLeaderboardGroups.toJSONString().getBytes();
+        
+        // header option is set to allow communication between two sapsailing servers, especially for 
+        // the master data import functionality
         return Response.ok(json).build();
     }
     

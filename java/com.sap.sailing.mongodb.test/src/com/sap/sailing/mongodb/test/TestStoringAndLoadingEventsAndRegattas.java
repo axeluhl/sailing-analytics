@@ -1,13 +1,5 @@
 package com.sap.sailing.mongodb.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,13 +55,15 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
+
+import static org.junit.Assert.*;
 
 public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest {
     private static final Logger logger = Logger.getLogger(TestStoringAndLoadingEventsAndRegattas.class.getName());
@@ -169,7 +163,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
         final DynamicTrackedRegatta[] trackedRegatta = new DynamicTrackedRegatta[1];
-        final TrackedRace q2YellowTrackedRace = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 1, /* started */ false, boatClass) {
+        final DynamicTrackedRace q2YellowTrackedRace = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 1, /* started */ false, boatClass) {
             private static final long serialVersionUID = 1234L;
             @Override
             public RegattaAndRaceIdentifier getRaceIdentifier() {
@@ -250,10 +244,10 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         logger.info("columns in regatta "+regatta.getName()+" ("+regatta.hashCode()+") : "+rrcNames);
     }
 
-    private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final TrackedRace q2YellowTrackedRace) {
+    private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final DynamicTrackedRace q2YellowTrackedRace) {
         return new RacingEventServiceImpl(getMongoService()) {
             @Override
-            public TrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
+            public DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
                 return q2YellowTrackedRace;
             }
         };

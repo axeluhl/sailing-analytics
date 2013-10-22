@@ -30,8 +30,6 @@ import com.google.gwt.maps.client.events.click.ClickMapEvent;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.dragend.DragEndMapEvent;
 import com.google.gwt.maps.client.events.dragend.DragEndMapHandler;
-import com.google.gwt.maps.client.events.mousemove.MouseMoveMapEvent;
-import com.google.gwt.maps.client.events.mousemove.MouseMoveMapHandler;
 import com.google.gwt.maps.client.events.mouseout.MouseOutMapEvent;
 import com.google.gwt.maps.client.events.mouseout.MouseOutMapHandler;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapEvent;
@@ -205,8 +203,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private Map<CompetitorDTO, List<GPSFixDTO>> lastDouglasPeuckerResult;
     
-    private LatLng lastMousePosition;
-
     private CompetitorSelectionProvider competitorSelection;
 
     private List<RegattaAndRaceIdentifier> selectedRaces;
@@ -301,8 +297,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               mapOptions.setScrollWheel(true);
               mapOptions.setMapTypeControl(true);
               mapOptions.setPanControl(true);
+              mapOptions.setZoomControl(true);
               mapOptions.setScaleControl(true);
-              mapOptions.setRotateControl(true);
               
               MapTypeStyle[] mapTypeStyles = new MapTypeStyle[4];
               
@@ -330,17 +326,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               mapOptions.setPanControlOptions(panControlOptions);
               
               map = new MapWidget(mapOptions);
-//              map.setContinuousZoom(true);
               RaceMap.this.add(map, 0, 0);
               RaceMap.this.add(combinedWindPanel, 10, 10);
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
               map.setSize("100%", "100%");
-//              map.getPane(MapPanes.FLOAT_PANE).getElement().getStyle().setZIndex(RaceMapOverlaysZIndexes.INFO_WINDOW_ZINDEX);
               map.addZoomChangeHandler(new ZoomChangeMapHandler() {
                   @Override
                   public void onEvent(ZoomChangeMapEvent event) {
                       map.triggerResize();
-                      // map.checkResizeAndCenter();
                       final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                       settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
                       Set<CompetitorDTO> competitorDTOsOfUnusedMarkers = new HashSet<CompetitorDTO>(boatOverlays.keySet());
@@ -365,13 +358,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
                   }
               });
-              map.addMouseMoveHandler(new MouseMoveMapHandler() {
-                  @Override
-                  public void onEvent(MouseMoveMapEvent event) {
-                      lastMousePosition = event.getMouseEvent().getLatLng();
-                  }
-              });
-              
               //If there was a time change before the API was loaded, reset the time
               if (lastTimeChangeBeforeInitialization != null) {
                   timeChanged(lastTimeChangeBeforeInitialization);
@@ -1721,7 +1707,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         result.addClickHandler(new ClickMapHandler() {
             @Override
             public void onEvent(ClickMapEvent event) {
-                showCompetitorInfoWindow(competitor, lastMousePosition);
+                showCompetitorInfoWindow(competitor, event.getMouseEvent().getLatLng());
             }
         });
         result.addMouseOverHandler(new MouseOverMapHandler() {
